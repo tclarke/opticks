@@ -31,6 +31,7 @@
 #include "ViewObjectImp.h"
 #include "XercesIncludes.h"
 
+#include <limits>
 #include <math.h>
 
 using namespace std;
@@ -533,6 +534,14 @@ const BitMask* GraphicObjectImp::getPixels()
       double dTemp = llCorner.mY;
       llCorner.mY = urCorner.mY;
       urCorner.mY = dTemp;
+   }
+
+   LocationType minPoint(numeric_limits<double>::min(), numeric_limits<double>::min());
+   LocationType maxPoint(numeric_limits<double>::max(), numeric_limits<double>::max());
+   if (llCorner == minPoint || urCorner == maxPoint)
+   {
+      mPixelMask.clear();
+      return &mPixelMask;
    }
 
    return getPixels(floor(llCorner.mX), floor(llCorner.mY), ceil(urCorner.mX), ceil(urCorner.mY));
