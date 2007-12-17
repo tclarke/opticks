@@ -2315,43 +2315,70 @@ void ApplicationWindow::openSession(const QString& filename)
 {
    if (filename.isEmpty() == false)
    {
-      ProgressAdapter progress;
-      Service<DesktopServices>()->createProgressDialog("Open Session", &progress);
-      SessionSaveType eSave = SessionManager::getSettingQueryForSave();
-      int button = static_cast<int>(eSave);
-      if (eSave == SESSION_QUERY_SAVE)
+      if (filename.toStdString() == mSessionFilename)
       {
-         button = QMessageBox::question(this, "Save Session", 
-            "Do you want to save the current session before closing it?", "Yes", "No", "Cancel", 0, 2);
-      }
-      if (button == 0)
-      {
-         if (!saveSession()) // user pressed Cancel in response to Save As, or save failed
+         QString msg = "You have selected to open the current session file, which "
+            "will lose all changes since the session was last saved.  Do you want to "
+            "open the session file?";
+         if (QMessageBox::question(this, "Re-opening Current Session", msg, 
+            QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
          {
             return;
          }
       }
-      SessionManagerImp::instance()->open(filename.toStdString(), &progress);
+      else
+      {
+         SessionSaveType eSave = SessionManager::getSettingQueryForSave();
+         int buttonVal = static_cast<int>(eSave);
+         if (eSave == SESSION_QUERY_SAVE)
+         {
+            buttonVal = QMessageBox::question(this, "Save Session", 
+               "Do you want to save the current session before closing it?", 
+               QMessageBox::Yes | QMessageBox::Default, QMessageBox::No, 
+               QMessageBox::Cancel | QMessageBox::Escape);
+         }
+         if (buttonVal == QMessageBox::Yes)
+         {
+            if (!saveSession()) // user pressed Cancel in response to Save As, or save failed
+            {
+               return;
+            }
+         }
+         else if (buttonVal == QMessageBox::Cancel)
+         {
+            return;
+         }
+      }
+
+      ProgressAdapter progress;
+      Service<DesktopServices>()->createProgressDialog("Open Session", &progress);
+      mSessionFilename.clear();
+      if (SessionManagerImp::instance()->open(filename.toStdString(), &progress))
+      {
+         mSessionFilename = filename.toStdString();
+      }
    }
 }
 
 bool ApplicationWindow::newSession()
 {
    SessionSaveType eSave = SessionManager::getSettingQueryForSave();
-   int button = static_cast<int>(eSave);
+   int buttonVal = static_cast<int>(eSave);
    if (eSave == SESSION_QUERY_SAVE)
    {
-         button = QMessageBox::question(this, "Close Session", 
-            "Do you want to save the session before closing it?", "Yes", "No", "Cancel", 0, 2);
+         buttonVal = QMessageBox::question(this, "Close Session", 
+            "Do you want to save the session before closing it?", 
+            QMessageBox::Yes | QMessageBox::Default, QMessageBox::No, 
+            QMessageBox::Cancel | QMessageBox::Escape);
    }
-   if (button == 0)
+   if (buttonVal == QMessageBox::Yes)
    {
       if (!saveSession()) // user pressed Cancel in response to Save As, or save failed
       {
          return false;
       }
    }
-   if (button != 2)
+   if (buttonVal != QMessageBox::Cancel)
    {
       QCursor currentCursor = cursor();
       QCursor waitCursor(Qt::WaitCursor);
@@ -2360,6 +2387,7 @@ bool ApplicationWindow::newSession()
       SessionManagerImp *pManagerImp = SessionManagerImp::instance();
       pManagerImp->newSession();
       setCursor(currentCursor);
+      mSessionFilename.clear();
       return true;
    }
    return false;
@@ -2471,12 +2499,14 @@ bool ApplicationWindow::saveSessionAs()
          if (file.get() != NULL)
          {
             int button = QMessageBox::question(this, "Save Session As", 
-               "The file already exists. Do you wish to overwrite it?", "Yes", "No", "Cancel", 0, 2);
-            if (button == 2)
+               "The file already exists. Do you wish to overwrite it?", 
+               QMessageBox::Yes | QMessageBox::Default, QMessageBox::No, 
+               QMessageBox::Cancel| QMessageBox::Escape);
+            if (button == QMessageBox::Cancel)
             {
                return false;
             }
-            if (button == 1) 
+            if (button == QMessageBox::No) 
             {
                initial = filename;
                continue;
@@ -4721,14 +4751,16 @@ void ApplicationWindow::closeEvent(QCloseEvent* e)
    if (eSave == SESSION_QUERY_SAVE)
    {
          button = QMessageBox::question(this, "Close Session", 
-            "Do you want to save the session before closing it?", "Yes", "No", "Cancel", 0, 2);
+            "Do you want to save the session before closing it?", 
+            QMessageBox::Yes | QMessageBox::Default, QMessageBox::No, 
+            QMessageBox::Cancel | QMessageBox::Escape);
    }
-   if (button == 2)
+   if (button == QMessageBox::Cancel)
    {
       e->ignore();
       return;
    }
-   if (button == 0)
+   if (button == QMessageBox::Yes)
    {
       if (!saveSession()) // user pressed Cancel in response to Save As, or save failed
       {
@@ -4885,7 +4917,8 @@ void ApplicationWindow::clearMarkings()
 
    if (pWindow == NULL)
    {
-      QMessageBox::information(this, "No view selected", "There is no view currently selected", QMessageBox::Ok | QMessageBox::Default);
+      QMessageBox::information(this, "No view selected", "There is no view currently selected", 
+         QMessageBox::Ok | QMessageBox::Default);
 
       return;
    }
