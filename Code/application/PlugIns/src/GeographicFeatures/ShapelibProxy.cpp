@@ -199,7 +199,7 @@ bool ShapelibProxy::query(const std::string &handle, std::string &errorMessage,
          QPointF(pShpObject->dfYMax, pShpObject->dfXMax));
       QRectF clipRect(QPointF(minClip.mX, minClip.mY), QPointF(maxClip.mX, maxClip.mY));
 
-      if (objectRect.intersects(clipRect) == true)
+      if (clipRect.isEmpty() == true || objectRect.intersects(clipRect) == true)
       {
          ArcProxyLib::Feature feature;
          feature.setType(featureType);

@@ -190,7 +190,6 @@ void ConnectionParametersWidget::setConnectionParameters(const ArcProxyLib::Conn
       mpShpButton->setChecked(true);
       mpUseArcCheck->setChecked(connection.getConnectionType() == ArcProxyLib::SHP_CONNECTION);
    }
-
 }
 
 bool ConnectionParametersWidget::isModified() const
