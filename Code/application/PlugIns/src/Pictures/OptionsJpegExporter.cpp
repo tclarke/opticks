@@ -7,9 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "OptionsJpegExporter.h"
-
 #include "LabeledSection.h"
+#include "OptionsJpegExporter.h"
 #include "SessionManager.h"
 
 #include <QtGui/QCheckBox>
@@ -73,7 +72,7 @@ OptionsJpegExporter::OptionsJpegExporter() :
    // Initialization
    addSection(pQualitySection);
    addStretch(10);
-   setSizeHint(350, 150);
+   setSizeHint(300, 150);
 
    // Initialize From Settings
    mpQualitySlider->setValue(OptionsJpegExporter::getSettingCompressionQuality());
@@ -82,9 +81,9 @@ OptionsJpegExporter::OptionsJpegExporter() :
    // Connections
    connect(mpQualitySlider, SIGNAL(valueChanged(int)), pCurrentValue, SLOT(setNum(int)));
 }
-   
+
 void OptionsJpegExporter::applyChanges()
-{  
+{
    if (mpSaveSettings->isHidden() || mpSaveSettings->isChecked())
    {
       OptionsJpegExporter::setSettingCompressionQuality(mpQualitySlider->value());
@@ -104,4 +103,3 @@ unsigned int OptionsJpegExporter::getCompressionQuality()
 {
    return mpQualitySlider->value();
 }
-
