@@ -696,29 +696,34 @@ bool GraphicGroupImp::removeObject(GraphicObject* pObject, bool bDelete)
 
 void GraphicGroupImp::removeAllObjects(bool bDelete)
 {
+   View* pView = NULL;
+   UndoGroup* pUndoGroup = NULL;
    GraphicLayerImp* pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
    if (pLayer != NULL)
    {
       pLayer->completeInsertion();
       pLayer->deselectAllObjects();
+
+      if (bDelete == true)
+      {
+         pView = pLayer->getView();
+         if (pView != NULL)
+         {
+            pUndoGroup = new UndoGroup(pView, "Remove All Objects");
+         }
+      }
    }
 
    for_each(mObjects.begin(), mObjects.end(), DisconnectObject(this));
 
-   while (mObjects.empty() == false)
+   for (list<GraphicObject*>::iterator iter = mObjects.begin(); iter != mObjects.end(); ++iter)
    {
-      list<GraphicObject*>::iterator iter = mObjects.begin();
       notify(SIGNAL_NAME(GraphicGroup, ObjectRemoved), boost::any(*iter));
-
       if (bDelete == true)
       {
-         if (pLayer != NULL)
+         if (pView != NULL)
          {
-            View* pView = pLayer->getView();
-            if (pView != NULL)
-            {
-               pView->addUndoAction(new RemoveGraphicObject(dynamic_cast<GraphicGroup*>(this), *iter));
-            }
+            pView->addUndoAction(new RemoveGraphicObject(dynamic_cast<GraphicGroup*>(this), *iter));
          }
 
          GraphicObjectImp* pObject = dynamic_cast<GraphicObjectImp*>(*iter);
@@ -727,9 +732,10 @@ void GraphicGroupImp::removeAllObjects(bool bDelete)
             delete pObject;
          }
       }
-
-      mObjects.erase(iter);
    }
+
+   mObjects.clear();
+   delete pUndoGroup;
 
    updateBoundingBox();
    emit modified();
