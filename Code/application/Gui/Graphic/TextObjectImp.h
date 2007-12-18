@@ -31,6 +31,7 @@ public:
 
    bool setProperty(const GraphicProperty* pProperty);
    bool hit(LocationType pixelCoord) const;
+   bool replicateObject(const GraphicObject* pObject);
 
    bool fromXml(DOMNode* pDocument, unsigned int version);
    const std::string& getObjectType() const;
@@ -61,9 +62,9 @@ private:
    GLuint mTextureId;
    int mTextureWidth, mTextureHeight;
    int mDataWidth, mDataHeight;
-   bool mNeedsUpdated;
+   bool mUpdateTexture;
+   bool mUpdateBoundingBox;
    std::stack<GLuint> mTextureIdStack;
-   bool mLoading;
 };
 
 #define TEXTOBJECTADAPTER_METHODS(impClass) \

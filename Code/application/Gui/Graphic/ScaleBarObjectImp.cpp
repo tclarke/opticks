@@ -194,6 +194,12 @@ ScaleBarObjectImp::~ScaleBarObjectImp()
 {
 }
 
+void ScaleBarObjectImp::setLayer(GraphicLayer* pLayer)
+{
+   FilledObjectImp::setLayer(pLayer);
+   mpGroup->setLayer(pLayer);
+}
+
 void ScaleBarObjectImp::draw(double zoomFactor) const 
 {
    if (mNeedsLayout)

@@ -29,6 +29,7 @@ public:
    ScaleBarObjectImp(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer, LocationType pixelCoord);
    ~ScaleBarObjectImp();
 
+   void setLayer(GraphicLayer* pLayer);
    void draw(double zoomFactor) const;
    bool setProperty(const GraphicProperty* pProp);
    GraphicProperty* getProperty(const std::string& name) const;

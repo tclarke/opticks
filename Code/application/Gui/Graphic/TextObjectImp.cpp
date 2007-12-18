@@ -32,8 +32,8 @@ TextObjectImp::TextObjectImp(const string& id, GraphicObjectType type, GraphicLa
                              LocationType pixelCoord) :
    RectangleObjectImp(id, type, pLayer, pixelCoord),
    mTextureId(0),
-   mNeedsUpdated(true),
-   mLoading(false)
+   mUpdateTexture(true),
+   mUpdateBoundingBox(true)
 {
    addProperty("Font");
    addProperty("TextAlignment");
@@ -65,7 +65,7 @@ TextObjectImp::~TextObjectImp()
 
 void TextObjectImp::draw(double zoomFactor) const
 {
-   if (mNeedsUpdated == true)
+   if (mUpdateTexture == true)
    {
       (const_cast<TextObjectImp*> (this))->updateTexture();
    }
@@ -76,7 +76,7 @@ void TextObjectImp::draw(double zoomFactor) const
 
 void TextObjectImp::drawTexture() const
 {
-   if (mNeedsUpdated == true)
+   if (mUpdateTexture == true)
    {
       (const_cast<TextObjectImp*> (this))->updateTexture();
    }
@@ -201,7 +201,7 @@ void TextObjectImp::drawTexture() const
 
 void TextObjectImp::updateTexture()
 {
-   if (mNeedsUpdated == false)
+   if (mUpdateTexture == false)
    {
       return;
    }
@@ -225,7 +225,7 @@ void TextObjectImp::updateTexture()
       return;
    }
 
-   mNeedsUpdated = false;
+   mUpdateTexture = false;
    QString strMessage = QString::fromStdString(text);
 
    // Get a scaled font for the text image
@@ -306,7 +306,7 @@ void TextObjectImp::updateTexture()
    gluBuild2DMipmaps(GL_TEXTURE_2D, 4, mTextureWidth, mTextureHeight, GL_RGBA, GL_UNSIGNED_BYTE, &texData[0]);
    glDisable(GL_TEXTURE_2D);
 
-   if (mLoading == false)
+   if (mUpdateBoundingBox == true)
    {
       updateBoundingBox();
    }
@@ -317,7 +317,8 @@ bool TextObjectImp::setProperty(const GraphicProperty* pProperty)
    if ((pProperty->getName() == "TextString") || (pProperty->getName() == "Font") ||
       (pProperty->getName() == "TextAlignment"))
    {
-      mNeedsUpdated = true;
+      mUpdateTexture = true;
+      mUpdateBoundingBox = true;
    }
 
    return RectangleObjectImp::setProperty(pProperty);
@@ -344,6 +345,20 @@ bool TextObjectImp::hit(LocationType pixelCoord) const
    return bHit;
 }
 
+bool TextObjectImp::replicateObject(const GraphicObject* pObject)
+{
+   if (pObject == NULL)
+   {
+      return false;
+   }
+
+   bool bSuccess = RectangleObjectImp::replicateObject(pObject);
+   mUpdateTexture = true;
+   mUpdateBoundingBox = false;
+
+   return bSuccess;
+}
+
 bool TextObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
    if (pDocument == NULL)
@@ -351,10 +366,9 @@ bool TextObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
       return false;
    }
 
-   mLoading = true;
    bool bSuccess = RectangleObjectImp::fromXml(pDocument, version);
-   updateTexture();
-   mLoading = false;
+   mUpdateTexture = true;
+   mUpdateBoundingBox = false;
 
    return bSuccess;
 }
@@ -377,27 +391,33 @@ bool TextObjectImp::isKindOf(const string& className) const
 
 void TextObjectImp::updateBoundingBox()
 {
-   // Get the width and height of the bounding box in screen pixels based on the scaled text image size
-   string text = getText();
-   if (text.empty())
+   if (mUpdateBoundingBox == false)
    {
       return;
    }
 
-   QString strMessage = QString::fromStdString(text);
-   QFont scaledFont = getScaledFont();
+   // Get the width and height of the bounding box in screen pixels based on the scaled text image size
+   int iWidth = 0;
+   int iHeight = 0;
 
-   int iMaxSize = 0;
-   glGetIntegerv(GL_MAX_TEXTURE_SIZE, &iMaxSize);
+   string text = getText();
+   if (text.empty() == false)
+   {
+      QString strMessage = QString::fromStdString(text);
+      QFont scaledFont = getScaledFont();
 
-   int iAlignment = getTextAlignment();
+      int iMaxSize = 0;
+      glGetIntegerv(GL_MAX_TEXTURE_SIZE, &iMaxSize);
 
-   QFontMetrics ftMetrics(scaledFont);
-   QRect boundingBox = ftMetrics.boundingRect(0, 0, iMaxSize, iMaxSize,
-      iAlignment | Qt::TextWordWrap, strMessage);
+      int iAlignment = getTextAlignment();
 
-   int iWidth = boundingBox.width();
-   int iHeight = boundingBox.height();
+      QFontMetrics ftMetrics(scaledFont);
+      QRect boundingBox = ftMetrics.boundingRect(0, 0, iMaxSize, iMaxSize,
+         iAlignment | Qt::TextWordWrap, strMessage);
+
+      iWidth = boundingBox.width();
+      iHeight = boundingBox.height();
+   }
 
    // Get the current bounding box
    LocationType llCorner = getLlCorner();
@@ -441,6 +461,8 @@ void TextObjectImp::updateBoundingBox()
    // Update the bounding box and selection handles
    setBoundingBox(llCorner, urCorner);
    updateHandles();
+
+   mUpdateBoundingBox = false;
 }
 
 bool TextObjectImp::processMousePress(LocationType screenCoord, Qt::MouseButton button, Qt::MouseButtons buttons,
@@ -457,6 +479,10 @@ bool TextObjectImp::processMousePress(LocationType screenCoord, Qt::MouseButton 
    }
 
    pLayer->completeInsertion(bValidText);
+
+   mUpdateTexture = true;
+   mUpdateBoundingBox = true;
+
    return bValidText;
 }
 
@@ -484,7 +510,8 @@ bool TextObjectImp::processMouseRelease(LocationType screenCoord, Qt::MouseButto
 
 void TextObjectImp::temporaryGlContextChange()
 {
-   mNeedsUpdated = true;
+   mUpdateTexture = true;
+   mUpdateBoundingBox = true;
    mTextureIdStack.push(mTextureId);
    mTextureId = 0;
 }

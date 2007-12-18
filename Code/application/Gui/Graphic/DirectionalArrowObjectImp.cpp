@@ -60,6 +60,12 @@ DirectionalArrowObjectImp::~DirectionalArrowObjectImp()
    }
 }
 
+void DirectionalArrowObjectImp::setLayer(GraphicLayer* pLayer)
+{
+   GraphicObjectImp::setLayer(pLayer);
+   mpGroup->setLayer(pLayer);
+}
+
 void DirectionalArrowObjectImp::draw(double zoomFactor) const
 {
    const_cast<DirectionalArrowObjectImp*>(this)->updateGeoreferenceAttachment();

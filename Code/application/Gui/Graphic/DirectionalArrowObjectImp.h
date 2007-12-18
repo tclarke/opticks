@@ -29,6 +29,7 @@ public:
       LocationType pixelCoord);
    virtual ~DirectionalArrowObjectImp();
 
+   void setLayer(GraphicLayer* pLayer);
    void draw(double zoomFactor) const;
    bool setProperty(const GraphicProperty* pProperty);
    void moveHandle(int handle, LocationType pixel, bool bMaintainAspect = false);
