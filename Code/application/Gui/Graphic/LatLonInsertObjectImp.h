@@ -32,6 +32,7 @@ public:
    LatLonInsertObjectImp(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer, LocationType pixelCoord);
    ~LatLonInsertObjectImp();
 
+   void setLayer(GraphicLayer* pLayer);
    void draw(double zoomFactor) const;
 
    void updateHandles();

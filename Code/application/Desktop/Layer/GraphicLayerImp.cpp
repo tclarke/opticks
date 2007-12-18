@@ -125,6 +125,7 @@ GraphicLayerImp& GraphicLayerImp::operator= (const GraphicLayerImp& graphicLayer
    if (this != &graphicLayer)
    {
       LayerImp::operator =(graphicLayer);
+      getGroup();    // Sets the layer into the new objects
 
       mHandleSize = graphicLayer.mHandleSize;
       mbHideSelectionBox = graphicLayer.mbHideSelectionBox;
@@ -2037,4 +2038,3 @@ bool GraphicLayerImp::insertingObjectNull() const
 {
    return (mpInsertingObject == NULL);
 }
-

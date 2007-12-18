@@ -129,6 +129,12 @@ LatLonInsertObjectImp::~LatLonInsertObjectImp()
    }
 }
 
+void LatLonInsertObjectImp::setLayer(GraphicLayer* pLayer)
+{
+   GraphicObjectImp::setLayer(pLayer);
+   mpGroup->setLayer(pLayer);
+}
+
 void LatLonInsertObjectImp::draw(double zoomFactor) const
 {
    const_cast<LatLonInsertObjectImp*>(this)->updateGeoreferenceAttachment();
