@@ -3339,6 +3339,7 @@ void RasterLayerImp::setAnimation(Animation* pAnimation)
    }
 
    notify(SIGNAL_NAME(RasterLayer, AnimationChanged), boost::any(mpAnimation));
+   updateFromMovie();
 }
 
 void RasterLayerImp::movieUpdated(Subject &subject, const string &signal, const boost::any &v)
@@ -3346,10 +3347,18 @@ void RasterLayerImp::movieUpdated(Subject &subject, const string &signal, const 
    Animation* pAnimation = dynamic_cast<Animation*> (&subject);
    if (mpAnimation != NULL && pAnimation == mpAnimation)
    {
+      updateFromMovie();
+   }
+}
+
+void RasterLayerImp::updateFromMovie()
+{
+   if (mpAnimation != NULL)
+   {
       UndoLock lock(getView());
       DimensionDescriptor bandDim;
 
-      AnimationFrame* pFrame = boost::any_cast<AnimationFrame*>(v);
+      const AnimationFrame* pFrame = mpAnimation->getCurrentFrame();
       if (pFrame != NULL)
       {
          // Ensure that grayscale mode is the current display mode
