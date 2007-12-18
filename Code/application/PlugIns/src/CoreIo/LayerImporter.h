@@ -43,6 +43,9 @@ public:
    unsigned char getFileAffinity(const std::string& filename);
    bool execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList);
 
+protected:
+   std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename, bool reportErrors);
+
 private:
    bool mInteractive;
 
