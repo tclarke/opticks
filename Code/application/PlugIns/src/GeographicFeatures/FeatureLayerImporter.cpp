@@ -54,7 +54,7 @@ unsigned char FeatureLayerImporter::getFileAffinity(const std::string& filename)
       return Importer::CAN_LOAD;
    }
 
-   XmlReader xml(Service<MessageLogMgr>()->getLog(), false);
+   XmlReader xml(NULL, false);
    XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* pDoc = xml.parse(filename, "GeoFeatureLayer");
    if (pDoc == NULL)
    {

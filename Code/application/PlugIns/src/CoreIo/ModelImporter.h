@@ -48,6 +48,9 @@ public:
    static ImportDescriptor* populateImportDescriptor(XERCES_CPP_NAMESPACE_QUALIFIER DOMElement* pElement,
       const std::string& filename);
 
+protected:
+   std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename, bool reportErrors);
+
 private:
    static std::map<std::string,std::string> sTypeMap;
    static std::string getTypeSubstitution(std::string type);

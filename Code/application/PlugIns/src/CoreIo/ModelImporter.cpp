@@ -109,10 +109,22 @@ bool ModelImporter::getOutputSpecification(PlugInArgList *&pOutArgList)
 
 vector<ImportDescriptor*> ModelImporter::getImportDescriptors(const string& filename)
 {
+   return getImportDescriptors(filename, true);
+}
+
+vector<ImportDescriptor*> ModelImporter::getImportDescriptors(const string& filename, bool reportErrors)
+{
    vector<ImportDescriptor*> descriptors;
    if(!filename.empty())
    {
-      XmlReader xml(Service<MessageLogMgr>()->getLog());
+      MessageLog* pLog = NULL;
+      if (reportErrors == true)
+      {
+         Service<MessageLogMgr> pLogMgr;
+         pLog = pLogMgr->getLog();
+      }
+
+      XmlReader xml(pLog);
       XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *pDoc = xml.parse(filename, "metadata");
       DOMElement *pRootElement = NULL;
       if(pDoc != NULL)
@@ -134,7 +146,7 @@ vector<ImportDescriptor*> ModelImporter::getImportDescriptors(const string& file
 
 unsigned char ModelImporter::getFileAffinity(const std::string& filename)
 {
-   if (getImportDescriptors(filename).empty())
+   if (getImportDescriptors(filename, false).empty())
    {
       return Importer::CAN_NOT_LOAD;
    }
