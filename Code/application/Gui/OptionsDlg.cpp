@@ -36,28 +36,17 @@ OptionsDlg::OptionsDlg(QWidget* parent) :
    mpOptionSelection = new QTreeWidget(mpSplitter);
    mpOptionSelection->setColumnCount(1);
    mpOptionSelection->header()->hide();
-   mpOptionSelection->header()->setResizeMode(0, QHeaderView::ResizeToContents);
-   mpOptionSelection->header()->setStretchLastSection(false);
    mpOptionSelection->setSelectionBehavior(QAbstractItemView::SelectItems);
    mpOptionSelection->setSelectionMode(QAbstractItemView::SingleSelection);
    mpOptionSelection->setMinimumWidth(160);
-   mpOptionSelection->sizePolicy().setHorizontalPolicy(QSizePolicy::Minimum);
 
-   QWidget* pRightSplitterSide = new QWidget(mpSplitter);
-
-   mpOptionStack = new QStackedWidget(pRightSplitterSide);
-
-   QHBoxLayout* pRightSplitterSideLayout = new QHBoxLayout(pRightSplitterSide);
-   pRightSplitterSideLayout->setMargin(0);
-   pRightSplitterSideLayout->setSpacing(0);
-   pRightSplitterSideLayout->addSpacing(10);
-   pRightSplitterSideLayout->addWidget(mpOptionStack);
+   mpOptionStack = new QStackedWidget(mpSplitter);
 
    mpSplitter->insertWidget(0, mpOptionSelection);
-   mpSplitter->insertWidget(1, pRightSplitterSide);
+   mpSplitter->insertWidget(1, mpOptionStack);
    mpSplitter->setStretchFactor(0, 0);
    mpSplitter->setStretchFactor(1, 5);
-   
+
    // Horizontal line
    QFrame* pLine = new QFrame(this);
    pLine->setFrameStyle(QFrame::HLine | QFrame::Sunken);

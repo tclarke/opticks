@@ -7,9 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "OptionsMovieExporter.h"
-
 #include "LabeledSection.h"
+#include "OptionsMovieExporter.h"
 #include "SessionManager.h"
 
 #include <avcodec.h>
@@ -30,7 +29,6 @@
 #include <QtGui/QVBoxLayout>
 
 #include <string>
-
 using namespace std;
 
 namespace
@@ -440,7 +438,7 @@ OptionsMovieExporter::OptionsMovieExporter() :
    addSection(pAdvancedSection);
    addSection(mpSettingsSection);
    addStretch(10);
-   setSizeHint(500, 300);
+   setSizeHint(300, 275);
 }
 
 OptionsMovieExporter::~OptionsMovieExporter()
