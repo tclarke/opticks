@@ -596,23 +596,54 @@ void AnimationControllerImp::updateFrameData()
 
    if ((startFrame != mStartFrame) || (stopFrame != mStopFrame))
    {
+      bool shouldStop = false;
+      bool shouldMoveToBeginning = false;
+      bool shouldMoveToEnd = false;
+
+      // If currentFrame is at the beginning, then keep it at the beginning.
+      const double currentFrame = getCurrentFrame();
+      if (currentFrame == mStartFrame)
+      {
+         shouldMoveToBeginning = true;
+      }
+      // If currentFrame is at the end, then keep it at the end.
+      else if (currentFrame == mStopFrame)
+      {
+         shouldMoveToEnd = true;
+      }
+
+      // Stop the controller if the start frame is invalid.
+      if (startFrame == -1)
+      {
+         shouldStop = true;
+         shouldMoveToBeginning = true;
+      }
+      // If the current frame is before the start frame, update the current frame.
+      else if (currentFrame < startFrame)
+      {
+         shouldMoveToBeginning = true;
+      }
+      // If the current frame is after the stop frame, update the current frame.
+      else if (currentFrame > stopFrame)
+      {
+         shouldMoveToEnd = true;
+      }
+
       // Update the start and stop values
       mStartFrame = startFrame;
       mStopFrame = stopFrame;
 
-      // Stop the controller if the start frame is invalid.
-      if (mStartFrame == -1)
+      if (shouldStop == true)
       {
          stop();
-         moveToBeginning();
       }
-      // If the current frame is before the start frame, update the current frame.
-      else if (getCurrentFrame() < mStartFrame)
+
+      if (shouldMoveToBeginning == true)
       {
          moveToBeginning();
       }
-      // If the current frame is after the stop frame, update the current frame.
-      else if (getCurrentFrame() > mStopFrame)
+
+      if (shouldMoveToEnd == true)
       {
          moveToEnd();
       }
@@ -621,6 +652,10 @@ void AnimationControllerImp::updateFrameData()
       emit frameRangeChanged();
       notify(SIGNAL_NAME(AnimationController, FrameRangeChanged));
    }
+
+   const double currentFrame = getCurrentFrame();
+   mCurrentFrame = -1;
+   setCurrentFrame(currentFrame);
 }
 
 void AnimationControllerImp::runAnimations()

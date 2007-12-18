@@ -167,6 +167,7 @@ signals:
    void colorMapChanged(const ColorMap& colorMap);
 
 protected:
+   void updateFromMovie();
    void setInternalDisplayMode(const DisplayMode& eMode);
 
    Image* getImage();
