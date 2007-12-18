@@ -1118,8 +1118,8 @@ void HistogramPlotImp::mousePressEvent(QMouseEvent* pEvent)
             if (pLocator != NULL && showRegions)
             {
                pLocator->setVisible(true);
-               pLocator->setText(QString::number(locatorValue) + " " + locatorValueUnit, QString());
                pLocator->setLocation(LocationType(dXValue, dYValue), false);
+               pLocator->setText(QString::number(locatorValue) + " " + locatorValueUnit, QString());
                pLocator->setColor(Qt::red);
                pLocator->setLineStyle(SOLID_LINE);
             }
@@ -1238,8 +1238,8 @@ void HistogramPlotImp::mouseMoveEvent(QMouseEvent* pEvent)
             LocatorImp* pLocator = dynamic_cast<LocatorImp*>(getMouseLocator());
             if (pLocator != NULL && showRegions)
             {
-               pLocator->setText(QString::number(locatorValue) + " " + locatorValueUnit, QString());
                pLocator->setLocation(LocationType(dXValue, dYValue), false);
+               pLocator->setText(QString::number(locatorValue) + " " + locatorValueUnit, QString());
             }
 
             if (showRegions) refresh();
@@ -1710,10 +1710,6 @@ void HistogramPlotImp::updateHistogramRegions(double lowerLimit, double upperLim
 
       translateScreenToData(0, 0, dMinX, dMinY);
       translateScreenToData(width(), height(), dMaxX, dMaxY);
-
-      // Increment/decrement the values to be just inside the window
-      dMinY += 1.0;
-      dMaxY -= 1.0;
 
       switch (eArea)
       {
