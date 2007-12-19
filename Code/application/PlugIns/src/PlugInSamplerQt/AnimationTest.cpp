@@ -150,12 +150,14 @@ AnimationTestDlg::AnimationTestDlg(PlugIn* pPlugIn, QWidget* pParent) :
    QPushButton* pClearAnimationButton = new QPushButton("Clear Animation", this);
    QPushButton* pDestroyAnimationButton = new QPushButton("Destroy Animation", this);
    QPushButton* pViewFramesButton = new QPushButton("View Frames", this);
+   QPushButton* pViewAllFramesButton = new QPushButton("View All Frames", this);
 
    QGridLayout* pExistingAnimationsLayout = new QGridLayout;
    pExistingAnimationsLayout->addWidget(mpAnimationList, 0, 0);
    pExistingAnimationsLayout->addWidget(pClearAnimationButton, 0, 1);
    pExistingAnimationsLayout->addWidget(pDestroyAnimationButton, 1, 1);
    pExistingAnimationsLayout->addWidget(pViewFramesButton, 2, 1);
+   pExistingAnimationsLayout->addWidget(pViewAllFramesButton, 3, 1);
 
    QGroupBox* pExistingAnimationsGroup = new QGroupBox("Existing Animations", this);
    pExistingAnimationsGroup->setLayout(pExistingAnimationsLayout);
@@ -189,6 +191,7 @@ AnimationTestDlg::AnimationTestDlg(PlugIn* pPlugIn, QWidget* pParent) :
    VERIFYNRV(connect(pClearAnimationButton, SIGNAL(clicked()), this, SLOT(clearAnimation())));
    VERIFYNRV(connect(pDestroyAnimationButton, SIGNAL(clicked()), this, SLOT(destroyAnimation())));
    VERIFYNRV(connect(pViewFramesButton, SIGNAL(clicked()), this, SLOT(viewFrames())));
+   VERIFYNRV(connect(pViewAllFramesButton, SIGNAL(clicked()), this, SLOT(viewAllFrames())));
    VERIFYNRV(connect(pToggleTimeDisplayButton, SIGNAL(clicked()), this, SLOT(toggleTimeDisplay())));
    VERIFYNRV(connect(pDestroyAnimationsButton, SIGNAL(clicked()), this, SLOT(destroyAnimations())));
    VERIFYNRV(connect(pCloseButton, SIGNAL(clicked()), this, SLOT(close())));
@@ -268,6 +271,7 @@ void AnimationTestDlg::createAnimations()
       return;
    }
 
+   srand(static_cast<unsigned int>(time(NULL)));
    const unsigned int numValues = static_cast<unsigned int>(mpNumFrames->value());
    const unsigned int numAnimations = static_cast<unsigned int>(mpNumAnimations->value());
    for (unsigned int i = 0; i < numAnimations; ++i)
@@ -277,7 +281,6 @@ void AnimationTestDlg::createAnimations()
       VERIFYNRV(pAnimation != NULL);
 
       vector<AnimationFrame> frames;
-      srand(static_cast<unsigned int>(time(NULL)));
       for (unsigned int j = 0; j < numValues; j++)
       {
          QString animationFrameName = QString("AnimationFrame_%1").arg(j, 4, 10, QChar('0'));
@@ -333,33 +336,62 @@ void AnimationTestDlg::viewFrames()
    if (mpController.get() != NULL)
    {
       string animationName = mpAnimationList->currentText().toStdString();
-      Animation* pAnimation = mpController->getAnimation(animationName);
+      vector<Animation*> animations;
+      animations.push_back(mpController->getAnimation(animationName));
+      viewFrames(animations);
+   }
+}
+
+void AnimationTestDlg::viewAllFrames()
+{
+   if (mpController.get() != NULL)
+   {
+      viewFrames(mpController->getAnimations());
+   }
+}
+
+void AnimationTestDlg::viewFrames(const std::vector<Animation*>& animations)
+{
+   vector<AnimationFrame> frames;
+   for (vector<Animation*>::const_iterator animationIter = animations.begin();
+      animationIter != animations.end(); ++animationIter)
+   {
+      const Animation* pAnimation = *animationIter;
       if (pAnimation != NULL)
       {
-         QString frameInfo;
-         const vector<AnimationFrame>& frames = pAnimation->getFrames();
-         for (unsigned int i = 0; i < frames.size(); ++i)
+         const vector<AnimationFrame>& currentFrames = pAnimation->getFrames();
+         for (vector<AnimationFrame>::const_iterator frameIter = currentFrames.begin();
+            frameIter != currentFrames.end(); ++frameIter)
          {
-            frameInfo += QString("Name: %1, FrameTime: %2<br>").arg(
-               QString::fromStdString(frames[i].mName)).arg(frames[i].mTime);
-         }
-
-         if (frameInfo.isEmpty() == false)
-         {
-            QDialog* pDialog = new QDialog(this);
-            QTextEdit* pInfo = new QTextEdit(frameInfo, pDialog);
-            pInfo->setReadOnly(true);
-
-            QVBoxLayout* pLayout = new QVBoxLayout(pDialog);
-            pLayout->addWidget(pInfo);
-
-            pDialog->setWindowTitle("Animation Frames -- Sorted by FrameTime");
-            pDialog->setLayout(pLayout);
-            pDialog->resize(350, 350);
-            pDialog->exec();
-            delete pDialog;
+            frames.push_back(*frameIter);
          }
       }
+   }
+
+   sort(frames.begin(), frames.end());
+
+   QString frameInfo;
+   for (vector<AnimationFrame>::const_iterator frameIter = frames.begin();
+      frameIter != frames.end(); ++frameIter)
+   {
+      frameInfo += QString("Frame Name: %1, Frame Time: %2<br>").arg(
+         QString::fromStdString(frameIter->mName)).arg(frameIter->mTime);
+   }
+
+   if (frameInfo.isEmpty() == false)
+   {
+      QDialog* pDialog = new QDialog(this);
+      QTextEdit* pInfo = new QTextEdit(frameInfo, pDialog);
+      pInfo->setReadOnly(true);
+
+      QVBoxLayout* pLayout = new QVBoxLayout(pDialog);
+      pLayout->addWidget(pInfo);
+
+      pDialog->setWindowTitle("Animation Frames -- Sorted by Frame Time");
+      pDialog->setLayout(pLayout);
+      pDialog->resize(350, 350);
+      pDialog->exec();
+      delete pDialog;
    }
 }
 

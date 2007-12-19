@@ -468,16 +468,46 @@ void AnimationControllerImp::stepForward()
    {
       return;
    }
+
+   const double currentFrame = getCurrentFrame();
    double nextValue = numeric_limits<double>::max();
    for (vector<Animation*>::const_iterator iter = mAnimations.begin();
       iter != mAnimations.end(); ++iter)
    {
       Animation *pAnimation = *iter;
       VERIFYNRV(pAnimation != NULL);
-      double movieNext = pAnimation->getNextFrameValue(PLAY_FORWARD, 1);
-      if (movieNext >= 0)
+
+      const double startValue = pAnimation->getStartValue();
+      const double stopValue = pAnimation->getStopValue();
+      double animationNext;
+      if (currentFrame < startValue)
       {
-         nextValue = min(nextValue, movieNext);
+         // All frames are after currentFrame, so use the start frame
+         animationNext = startValue;
+      }
+      else if (currentFrame > stopValue)
+      {
+         // All frames are before currentFrame
+         animationNext = -1;
+      }
+      else
+      {
+         // If the animation is after currentFrame, use the animation's current frame
+         const double animationCurr = pAnimation->getNextFrameValue(PLAY_FORWARD, 0);
+         if (animationCurr > currentFrame)
+         {
+            animationNext = animationCurr;
+         }
+         else
+         {
+            // Otherwise, use the next frame
+            animationNext = pAnimation->getNextFrameValue(PLAY_FORWARD, 1);
+         }
+      }
+
+      if (animationNext >= 0)
+      {
+         nextValue = min(nextValue, animationNext);
       }
    }
 
@@ -493,25 +523,49 @@ void AnimationControllerImp::stepBackward()
       return;
    }
 
-   vector<double> values;
-   values.reserve(mAnimations.size()*2);
+   const double currentFrame = getCurrentFrame();
+   double prevValue = numeric_limits<double>::min();
    for (vector<Animation*>::const_iterator iter = mAnimations.begin();
       iter != mAnimations.end(); ++iter)
    {
       Animation *pAnimation = *iter;
       VERIFYNRV(pAnimation != NULL);
-      values.push_back(pAnimation->getNextFrameValue(PLAY_FORWARD, 0)); // current frame value
-      values.push_back(pAnimation->getNextFrameValue(PLAY_BACKWARD, 1));
+
+      const double startValue = pAnimation->getStartValue();
+      const double stopValue = pAnimation->getStopValue();
+      double animationPrev;
+      if (currentFrame < startValue)
+      {
+         // All frames are after currentFrame (no frames should be displayed)
+         animationPrev = -1;
+      }
+      else if (currentFrame > stopValue)
+      {
+         // All frames are before currentFrame, so use the stop frame
+         animationPrev = stopValue;
+      }
+      else
+      {
+         // If the animation is before currentFrame, use the animation's current frame
+         const double animationCurr = pAnimation->getNextFrameValue(PLAY_BACKWARD, 0);
+         if (animationCurr < currentFrame)
+         {
+            animationPrev = animationCurr;
+         }
+         else
+         {
+            // Otherwise, use the previous frame
+            animationPrev = pAnimation->getNextFrameValue(PLAY_BACKWARD, 1);
+         }
+      }
+
+      if (animationPrev >= 0)
+      {
+         prevValue = max(prevValue, animationPrev);
+      }
    }
 
-   sort(values.begin(), values.end());
-   vector<double> uniqueValues;
-   uniqueValues.reserve(values.size());
-   std::unique_copy(values.begin(), values.end(), back_inserter(uniqueValues));
-   if (uniqueValues.size() > 1)
-   {
-      setCurrentFrame(uniqueValues[uniqueValues.size()-2]);
-   }
+   setCurrentFrame(prevValue);
 }
 
 void AnimationControllerImp::fastForward(double multiplier)
