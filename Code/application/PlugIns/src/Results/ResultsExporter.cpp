@@ -352,7 +352,10 @@ bool ResultsExporter::writeOutput(ostream &stream)
       return false;
    }
 
+   VERIFY(mpResults != NULL);
    string name = mpResults->getName();
+
+   VERIFY(mpFileDescriptor != NULL);
    const vector<DimensionDescriptor>& rows = mpFileDescriptor->getRows();
    const vector<DimensionDescriptor>& columns = mpFileDescriptor->getColumns();
    unsigned int numRows = pDescriptor->getRowCount();
@@ -741,11 +744,6 @@ bool assertionLogger(ostream &outputer, string code, string file, int line)
    return false;
 }
 
-#define testableAssert(outputer,code) \
-((code)?true:assertionLogger(outputer, #code, __FILE__, __LINE__))
-
-#define issea(x,outputer) if (success) success &= testableAssert(outputer, x)
-
 bool ResultsExporter::runOperationalTests(Progress* pProgress, ostream& failure)
 {
    return runAllTests(pProgress, failure);
@@ -753,54 +751,99 @@ bool ResultsExporter::runOperationalTests(Progress* pProgress, ostream& failure)
 
 bool ResultsExporter::runAllTests(Progress *pProgress, ostream& failure)
 {
-   bool success = false;
-   stringstream stream;
+   bool success = true;
 
-   mpResults = RasterUtilities::createRasterElement(
-      "ResultsExporterTestMatrix", 2, 2, FLT4BYTES, true, NULL);
-
-   issea(mpResults != NULL, failure);
-
-   ModelResource<RasterElement> pResultsResource(mpResults);
-
-   RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>
-      (mpResults->getDataDescriptor());
-
-   if (pDescriptor != NULL)
+   mpProgress = pProgress;
+   mpResults = RasterUtilities::createRasterElement("ResultsExporterTestMatrix", 2, 2, FLT4BYTES, true, NULL);
+   if (mpResults == NULL)
    {
-      // Bad values
-      std::vector<int> badValues;
-      badValues.push_back(2);
-      badValues.push_back(4);
-      pDescriptor->setBadValues(badValues);
+      failure << "Unable to create a Raster Element.";
+      success = false;
+   }
+   else
+   {
+      ModelResource<RasterElement> pResultsResource(mpResults);
+      RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(mpResults->getDataDescriptor());
+      if (pDescriptor == NULL)
+      {
+         failure << "Unable to get the Raster Data Descriptor.";
+         success = false;
+      }
+      else
+      {
+         // Bad values
+         std::vector<int> badValues;
+         badValues.push_back(2);
+         badValues.push_back(4);
+         pDescriptor->setBadValues(badValues);
+
+         // Create the element
+         FactoryResource<DataRequest> pRequest;
+         pRequest->setWritable(true);
+         DataAccessor da = mpResults->getDataAccessor(pRequest.release());
+         if (da.isValid() == false)
+         {
+            failure << "Data Accessor is not valid.";
+            success = false;
+         }
+         else
+         {
+            float *pData = reinterpret_cast<float*>(da->getRow());
+            if (pData == NULL)
+            {
+               failure << "Data is not accessible.";
+               success = false;
+            }
+            else
+            {
+               pData[0] = 1.0;
+               pData[1] = 2.0;
+               pData[2] = 3.0;
+               pData[3] = 4.0;
+
+               mFirstThreshold = 1.5;
+               mSecondThreshold = 4.5;
+               mPassArea = MIDDLE;
+               mGeocoordType = GEOCOORD_LATLON;
+               mbMetadata = false;
+               mbAppendFile = false;
+
+               const Filename* pTempPath = ConfigurationSettings::getSettingTempPath();
+               if (pTempPath == NULL)
+               {
+                  failure << "Unable to get the temporary path from ConfigurationSettings.";
+                  success = false;
+               }
+               else
+               {
+                  const string filename = pTempPath->getFullPathAndName() + "/ResultsExporterTest.rls";
+                  mpFileDescriptor = dynamic_cast<RasterFileDescriptor*>
+                     (RasterUtilities::generateFileDescriptorForExport(pDescriptor, filename));
+                  if (mpFileDescriptor == NULL)
+                  {
+                     failure << "Unable to generate a Raster File Descriptor for export.";
+                     success = false;
+                  }
+                  else
+                  {
+                     FactoryResource<RasterFileDescriptor> pFileDescriptor(mpFileDescriptor);
+                     stringstream stream;
+                     writeOutput(stream);
+
+                     if (stream.str() != "ResultsExporterTestMatrix    Pixel: (1, 2)    3.000000\n\n")
+                     {
+                        failure << "Invalid output stream.";
+                        success = false;
+                     }
+                  }
+               }
+            }
+         }
+      }
    }
 
-   // Create the element
-
-   FactoryResource<DataRequest> pRequest;
-   pRequest->setWritable(true);
-   DataAccessor da = mpResults->getDataAccessor(pRequest.release());
-   VERIFY(da.isValid());
-   float *pData = reinterpret_cast<float*>(da->getRow());
-   VERIFY(pData != NULL);
-   pData[0] = 1.0;
-   pData[1] = 2.0;
-   pData[2] = 3.0;
-   pData[3] = 4.0;
-
-   mFirstThreshold = 1.5;
-   mSecondThreshold = 4.5;
-   mPassArea = MIDDLE;
-   mGeocoordType = GEOCOORD_LATLON;
-   mbMetadata = false;
-   mbAppendFile = false;
-
-   writeOutput(stream);
-
-   string output = stream.str();
-   issea(output == "ResultsExporterTestMatrix    Pixel: (11, 22)    3.000000\n\n", failure);
-
    mpResults = NULL;
-
+   mpProgress = NULL;
+   mpFileDescriptor = NULL;
    return success;
 }
