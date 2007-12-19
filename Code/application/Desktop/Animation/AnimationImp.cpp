@@ -217,6 +217,8 @@ void AnimationImp::setCurrentFrame(double frameValue)
       }
       else
       {
+         // Initializing a reverse iterator from a regular iterator so
+         // the search starts from one frame before the current frame.
          vector<AnimationFrame>::reverse_iterator currentIter(mCurrentFrameIter);
          vector<AnimationFrame>::reverse_iterator foundIter = 
             find_if(currentIter, mFrames.rend(), 
@@ -306,16 +308,14 @@ double AnimationImp::getNextFrameValue(AnimationState direction, size_t offset) 
    }
    else
    {
-      vector<AnimationFrame>::const_reverse_iterator frameRev(mCurrentFrameIter);
-      for (size_t i = 0; frameRev != mFrames.rend() && i < offset; ++i, ++frameRev)
+      frame = mCurrentFrameIter;
+      while (frame != mFrames.begin() && offset > 0)
       {
-         // no body
+         --frame;
+         --offset;
       }
-      if (frameRev != mFrames.rend())
-      {
-         frame = frameRev.base();
-      }
-      else
+
+      if (offset != 0)
       {
          frame = mFrames.end();
       }

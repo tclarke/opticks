@@ -16,6 +16,9 @@
 #include "AttachmentPtr.h"
 #include "ViewerShell.h"
 
+#include <vector>
+
+class Animation;
 class QComboBox;
 class QDoubleSpinBox;
 class QSpinBox;
@@ -55,11 +58,13 @@ protected slots:
    void clearAnimation();
    void destroyAnimation();
    void viewFrames();
+   void viewAllFrames();
    void toggleTimeDisplay();
    void destroyAnimations();
 
 protected:
    void closeEvent(QCloseEvent* pEvent);
+   void viewFrames(const std::vector<Animation*>& animations);
 
 private:
    PlugIn* mpPlugIn;
