@@ -53,6 +53,7 @@
 #include "ContextMenu.h"
 #include "ContextMenuActions.h"
 #include "DataDescriptorAdapter.h"
+#include "DateTimeImp.h"
 #include "DesktopServices.h"
 #include "DimensionDescriptor.h"
 #include "DisplayToolBar.h"
@@ -61,6 +62,8 @@
 #include "ExportDlg.h"
 #include "FileDescriptor.h"
 #include "FileDescriptorImp.h"
+#include "FileFinderImp.h"
+#include "FilenameImp.h"
 #include "FileResource.h"
 #include "GcpEditorDlg.h"
 #include "GcpLayer.h"
@@ -1899,40 +1902,97 @@ void ApplicationWindow::fileMenuActivated(QAction* pAction)
    // Get the MRU file
    MruFile mruFile = mruIter.value();
 
-   // Copy the import descriptors to set into the importer resource since the resource takes ownership of them
-   vector<ImportDescriptor*> resourceDescriptors;
-   Service<ModelServices> pModel;
+   // Create the importer resource
+   ImporterResource importer(mruFile.mImporterName, mruFile.mName, NULL, false);
+   importer->createProgressDialog(true);
+   importer->updateMruFileList(true);
 
-   vector<ImportDescriptor*>::iterator iter;
-   for (iter = mruFile.mDescriptors.begin(); iter != mruFile.mDescriptors.end(); ++iter)
+   // Check if the file to import has been modified since the MRU file was created
+   DateTimeImp modificationTime;
+   if (mruFile.mName.empty() == false)
    {
-      ImportDescriptor* pImportDescriptor = *iter;
-      if (pImportDescriptor != NULL)
+      FilenameImp filename(mruFile.mName);
+      string filePath = filename.getPath();
+      string baseFilename = filename.getFileName();
+
+      FileFinderImp fileFinder;
+      fileFinder.findFile(filePath, baseFilename);
+      if (fileFinder.findNextFile() == true)
       {
-         DataDescriptor* pDescriptor = pImportDescriptor->getDataDescriptor();
-         if (pDescriptor != NULL)
+         fileFinder.getLastModificationTime(modificationTime);
+      }
+   }
+
+   if (modificationTime != mruFile.mModificationTime)
+   {
+      ConfigurationSettingsImp* pSettings = ConfigurationSettingsImp::instance();
+
+      if (modificationTime.isValid() == true)
+      {
+         int button = QMessageBox::question(this, APP_NAME, "The '" + QString::fromStdString(mruFile.mName) +
+            "' file has been modified since it was added to the recent files list.  How do you want to continue?",
+            "Import File", "Remove File", "Cancel");
+         if (button == 1)
          {
-            DataDescriptor* pResourceDescriptor = pDescriptor->copy();
-            if (pResourceDescriptor != NULL)
+            pSettings->removeMruFile(mruFile.mName);
+            return;
+         }
+         else if (button == 2)
+         {
+            return;
+         }
+      }
+      else
+      {
+         QMessageBox::StandardButton button = QMessageBox::question(this, APP_NAME, "The '" +
+            QString::fromStdString(mruFile.mName) + "' file cannot be opened.  Do you want to "
+            "remove the file from the recent files list?", QMessageBox::Yes | QMessageBox::No);
+         if (button == QMessageBox::Yes)
+         {
+            pSettings->removeMruFile(mruFile.mName);
+         }
+
+         return;
+      }
+
+      // Do not set any import descriptors to cause the resource to use the descriptors obtained by the importer
+      importer->setEditType(ImportAgentExt1::ALWAYS_EDIT);
+   }
+   else
+   {
+      // Copy the import descriptors to set into the importer resource since the resource takes ownership of them
+      vector<ImportDescriptor*> resourceDescriptors;
+      Service<ModelServices> pModel;
+
+      vector<ImportDescriptor*>::iterator iter;
+      for (iter = mruFile.mDescriptors.begin(); iter != mruFile.mDescriptors.end(); ++iter)
+      {
+         ImportDescriptor* pImportDescriptor = *iter;
+         if (pImportDescriptor != NULL)
+         {
+            DataDescriptor* pDescriptor = pImportDescriptor->getDataDescriptor();
+            if (pDescriptor != NULL)
             {
-               ImportDescriptor* pResourceImportDescriptor =
-                  pModel->createImportDescriptor(pResourceDescriptor, pImportDescriptor->isImported());
-               if (pResourceImportDescriptor != NULL)
+               DataDescriptor* pResourceDescriptor = pDescriptor->copy();
+               if (pResourceDescriptor != NULL)
                {
-                  resourceDescriptors.push_back(pResourceImportDescriptor);
+                  ImportDescriptor* pResourceImportDescriptor =
+                     pModel->createImportDescriptor(pResourceDescriptor, pImportDescriptor->isImported());
+                  if (pResourceImportDescriptor != NULL)
+                  {
+                     resourceDescriptors.push_back(pResourceImportDescriptor);
+                  }
                }
             }
          }
       }
+
+      importer->setImportDescriptors(resourceDescriptors);
+      importer->setEditType(QApplication::keyboardModifiers() == Qt::ShiftModifier ? ImportAgentExt1::ALWAYS_EDIT :
+         ImportAgentExt1::AS_NEEDED_EDIT);
    }
 
    // Import the MRU file
-   ImporterResource importer(mruFile.mImporterName, mruFile.mName, NULL, false);
-   importer->setImportDescriptors(resourceDescriptors);
-   importer->setEditType(QApplication::keyboardModifiers() == Qt::ShiftModifier ? ImportAgentExt1::ALWAYS_EDIT :
-      ImportAgentExt1::AS_NEEDED_EDIT);
-   importer->createProgressDialog(true);
-   importer->updateMruFileList(true);
    importer->execute();
 }
 

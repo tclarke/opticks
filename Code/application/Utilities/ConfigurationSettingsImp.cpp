@@ -7,33 +7,33 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtCore/QCoreApplication>
+#include <QtCore/QDir>
 #include <QtCore/QFile>
 #include <QtCore/QFileInfo>
-#include <QtCore/QCoreApplication>
 #include <QtCore/QStringList>
-#include <QtCore/QDir>
 
 #include "AppConfig.h"
-#include "ConfigurationSettingsImp.h"
 #include "AppVerify.h"
 #include "AppVersion.h"
+#include "ArgumentList.h"
 #include "BuildRevision.h"
+#include "ConfigurationSettingsImp.h"
 #include "DataDescriptor.h"
 #include "DateTimeImp.h"
 #include "DynamicObjectAdapter.h"
 #include "Filename.h"
 #include "ImportDescriptorImp.h"
+#include "MessageLogMgrImp.h"
+#include "ModelServices.h"
 #include "MruFile.h"
 #include "ObjectResource.h"
 #include "PlugInDescriptor.h"
 #include "PlugInManagerServicesImp.h"
 #include "StringUtilities.h"
 #include "UtilityServicesImp.h"
-#include "MessageLogMgrImp.h"
-#include "ModelServicesImp.h"
 #include "xmlreader.h"
 #include "xmlwriter.h"
-#include "ArgumentList.h"
 
 #if defined(WIN_API)
 #include <windows.h>
@@ -44,8 +44,6 @@
 #include <unistd.h>
 #include <pwd.h>
 #endif
-
-#include "AppVersion.h"
 
 using namespace std;
 
@@ -438,7 +436,6 @@ void ConfigurationSettingsImp::deleteSessionSetting(const std::string& key)
    }
 }
 
-
 bool ConfigurationSettingsImp::setSessionSetting(const string& key, const DataVariant& var)
 {
    bool success = mpSessionSettings->setAttributeByPath(key, var);
@@ -461,6 +458,46 @@ void ConfigurationSettingsImp::copySetting(const string& key, DynamicObject* pOb
 void ConfigurationSettingsImp::setMruFiles(const vector<MruFile>& mruFiles)
 {
    mMruFiles = mruFiles;
+}
+
+void ConfigurationSettingsImp::removeMruFile(const string& filename)
+{
+   if (filename.empty() == true)
+   {
+      return;
+   }
+
+   Service<ModelServices> pModel;
+
+   QString strFilename = QString::fromStdString(filename).toLower();
+   strFilename.replace(QRegExp("\\\\"), "/");
+
+   for (vector<MruFile>::iterator iter = mMruFiles.begin(); iter != mMruFiles.end(); ++iter)
+   {
+      MruFile mruFile = *iter;
+
+      QString strMruFilename = QString::fromStdString(mruFile.mName).toLower();
+      strMruFilename.replace(QRegExp("\\\\"), "/");
+
+      if (strMruFilename == strFilename)
+      {
+         // Destroy the import descriptors in this MRU file
+         vector<ImportDescriptor*>::iterator descriptorIter;
+         for (descriptorIter = mruFile.mDescriptors.begin();
+              descriptorIter != mruFile.mDescriptors.end();
+              ++descriptorIter)
+         {
+            ImportDescriptor* pImportDescriptor = *descriptorIter;
+            if (pImportDescriptor != NULL)
+            {
+               pModel->destroyImportDescriptor(pImportDescriptor);
+            }
+         }
+
+         mMruFiles.erase(iter);
+         break;
+      }
+   }
 }
 
 const vector<MruFile>& ConfigurationSettingsImp::getMruFiles() const
@@ -573,9 +610,11 @@ const vector<MruFile>& ConfigurationSettingsImp::getMruFiles() const
                                                 pMruFileNode)->getAttribute(X("name")));
                string mruImporter = A(static_cast<XERCES_CPP_NAMESPACE_QUALIFIER DOMElement*>(
                                                 pMruFileNode)->getAttribute(X("importer")));
-               if ((mruName.empty() == false) && (mruImporter.empty() == false))
+               string mruModification = A(static_cast<XERCES_CPP_NAMESPACE_QUALIFIER DOMElement*>(
+                                                pMruFileNode)->getAttribute(X("modification_time")));
+               if ((mruName.empty() == false) && (mruImporter.empty() == false) && (mruModification.empty() == false))
                {
-                  MruFile mruFile(mruName, mruImporter, descriptors);
+                  MruFile mruFile(mruName, mruImporter, descriptors, DateTimeImp(mruModification));
                   mMruFiles.push_back(mruFile);
                }
             }
@@ -913,6 +952,10 @@ bool ConfigurationSettingsImp::serializeSettings(const string& filename, const D
                }
             }
          }
+
+         const DateTime* pDateTime = &(mruFile.mModificationTime);
+         string modificationText = StringUtilities::toXmlString(pDateTime);
+         xmlWriter.addAttr("modification_time", modificationText);
 
          xmlWriter.popAddPoint();
       }

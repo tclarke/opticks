@@ -10,6 +10,8 @@
 #ifndef MRUFILE_H
 #define MRUFILE_H
 
+#include "DateTimeImp.h"
+
 #include <string>
 #include <vector>
 
@@ -22,16 +24,18 @@ struct MruFile
    }
 
    MruFile(const std::string& name, const std::string& importerName,
-      const std::vector<ImportDescriptor*>& descriptors) :
+      const std::vector<ImportDescriptor*>& descriptors, const DateTimeImp& modificationTime) :
       mName(name),
       mImporterName(importerName),
-      mDescriptors(descriptors)
+      mDescriptors(descriptors),
+      mModificationTime(modificationTime)
    {
    }
 
    std::string mName;
    std::string mImporterName;
    std::vector<ImportDescriptor*> mDescriptors;
+   DateTimeImp mModificationTime;
 };
 
 #endif
