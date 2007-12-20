@@ -10,6 +10,7 @@
 #include <QtGui/QContextMenuEvent>
 #include <QtGui/QHeaderView>
 #include <QtGui/QMenu>
+#include <QtGui/QMessageBox>
 #include <QtGui/QSortFilterProxyModel>
 #include <QtGui/QTabWidget>
 #include <QtGui/QTreeView>
@@ -118,18 +119,33 @@ SessionExplorerImp::SessionExplorerImp(const string& id, const string& windowNam
 
    mpExpandAction = new QAction("&Expand All", this);
    mpExpandAction->setAutoRepeat(false);
+   mpExpandAction->setShortcutContext(Qt::WidgetShortcut);
    mpExpandAction->setStatusTip("Expands all nodes in the tree");
    pDesktop->initializeAction(mpExpandAction, shortcutContext);
+   mpWindowTree->addAction(mpExpandAction);
+   mpAnimationTree->addAction(mpExpandAction);
+   mpElementTree->addAction(mpExpandAction);
+   mpPlugInTree->addAction(mpExpandAction);
 
    mpCollapseAction = new QAction("&Collapse All", this);
    mpCollapseAction->setAutoRepeat(false);
+   mpCollapseAction->setShortcutContext(Qt::WidgetShortcut);
    mpCollapseAction->setStatusTip("Collapses all nodes in the tree");
    pDesktop->initializeAction(mpCollapseAction, shortcutContext);
+   mpWindowTree->addAction(mpCollapseAction);
+   mpAnimationTree->addAction(mpCollapseAction);
+   mpElementTree->addAction(mpCollapseAction);
+   mpPlugInTree->addAction(mpCollapseAction);
 
    mpRenameAction = new QAction("Re&name...", this);
    mpRenameAction->setAutoRepeat(false);
+   mpRenameAction->setShortcutContext(Qt::WidgetShortcut);
    mpRenameAction->setStatusTip("Rename the selected item");
    pDesktop->initializeAction(mpRenameAction, shortcutContext);
+   mpWindowTree->addAction(mpRenameAction);
+   mpAnimationTree->addAction(mpRenameAction);
+   mpElementTree->addAction(mpRenameAction);
+   mpPlugInTree->addAction(mpRenameAction);
 
    // Initialization
    pTabWidget->addTab(mpWindowTree, "Windows");
@@ -703,8 +719,27 @@ void SessionExplorerImp::treeViewChanged()
 void SessionExplorerImp::renameItem()
 {
    QTreeView *pView = getCurrentTreeView();
-   if (pView != NULL)
+   if (pView == NULL)
    {
-      pView->edit(pView->currentIndex());
+      return;
+   }
+
+   QModelIndex index = pView->currentIndex();
+   if (index.isValid() == false)
+   {
+      return;
+   }
+
+   QItemSelectionModel* pSelectionModel = pView->selectionModel();
+   if ((pSelectionModel != NULL) && (pSelectionModel->isSelected(index) == true))
+   {
+      if (index.flags() & Qt::ItemIsEditable)
+      {
+         pView->edit(index);
+      }
+      else
+      {
+         QMessageBox::critical(pView, windowTitle(), "The selected session item cannot be renamed.");
+      }
    }
 }
