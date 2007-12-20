@@ -974,6 +974,7 @@ void SessionManagerImp::newSession()
    ApplicationWindow *pAppWindow = static_cast<ApplicationWindow*>(Service<DesktopServices>()->getMainWidget());
    VERIFYNRV(pAppWindow != NULL);
    pAppWindow->registerPlugIns();
+   pAppWindow->updateWizardCommands();
    notify(SIGNAL_NAME(SessionManagerImp, NameChanged), mName);
 }
 
@@ -1007,6 +1008,7 @@ bool SessionManagerImp::open(const string &filename, Progress *pProgress)
       if(NN(pAppWindow))
       {
          pAppWindow->registerPlugIns();
+         pAppWindow->updateWizardCommands();
          restoreSessionItem(IndexFileItem(ModelServicesImp::instance()));
          createSessionItems(items, pProgress);
          populateItemMap(items);
