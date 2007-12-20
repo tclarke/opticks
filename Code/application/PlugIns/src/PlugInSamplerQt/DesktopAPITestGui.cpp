@@ -78,9 +78,13 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
    mpMarginEdit = new QLineEdit(pPlotWidget);
    mpMarginEdit->setFixedWidth(75);
 
-   QLabel* pTextColorLabel = new QLabel("Text Color:", pPlotWidget);
+   QLabel* pTextColorLabel = new QLabel("Classification Text Color:", pPlotWidget);
    CustomColorButton* pTextColorButton = new CustomColorButton(pPlotWidget);
    pTextColorButton->usePopupGrid(true);
+
+   QLabel* pTitleColorLabel = new QLabel("Axis Title Color:", pPlotWidget);
+   CustomColorButton* pTitleColorButton = new CustomColorButton(pPlotWidget);
+   pTitleColorButton->usePopupGrid(true);
 
    mpContextMenuCheck = new QCheckBox("Add commands to the context menu", pPlotWidget);
 
@@ -134,7 +138,7 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
    QGridLayout* pPlotWidgetGrid = new QGridLayout(pPlotWidget);
    pPlotWidgetGrid->setMargin(0);
    pPlotWidgetGrid->setSpacing(5);
-   pPlotWidgetGrid->addWidget(mpPlotWidget->getWidget(), 0, 0, 6, 1);
+   pPlotWidgetGrid->addWidget(mpPlotWidget->getWidget(), 0, 0, 7, 1);
    pPlotWidgetGrid->addWidget(pClassificationLabel, 0, 2);
    pPlotWidgetGrid->addWidget(mpClassificationEdit, 0, 3);
    pPlotWidgetGrid->addWidget(pClassificationApplyButton, 0, 4);
@@ -145,8 +149,10 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
    pPlotWidgetGrid->addWidget(mpMarginEdit, 2, 3, 1, 2, Qt::AlignLeft);
    pPlotWidgetGrid->addWidget(pTextColorLabel, 3, 2);
    pPlotWidgetGrid->addWidget(pTextColorButton, 3, 3, 1, 2, Qt::AlignLeft);
-   pPlotWidgetGrid->addWidget(mpContextMenuCheck, 4, 2, 1, 3);
-   pPlotWidgetGrid->setRowStretch(5, 10);
+   pPlotWidgetGrid->addWidget(pTitleColorLabel, 4, 2);
+   pPlotWidgetGrid->addWidget(pTitleColorButton, 4, 3, 1, 2, Qt::AlignLeft);
+   pPlotWidgetGrid->addWidget(mpContextMenuCheck, 5, 2, 1, 3);
+   pPlotWidgetGrid->setRowStretch(6, 10);
    pPlotWidgetGrid->setColumnStretch(0, 10);
    pPlotWidgetGrid->setColumnStretch(3, 5);
    pPlotWidgetGrid->setColumnMinimumWidth(1, 15);
@@ -168,7 +174,7 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
    // Initialization
    setWindowTitle("Desktop API Test");
    setModal(false);
-   resize(700, 500);
+   resize(700, 550);
 
    PlotView* pView = mpPlotWidget->getPlot();
    if (pView != NULL)
@@ -196,6 +202,19 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
       }
    }
 
+   Axis* pLeftAxis = mpPlotWidget->getAxis(AXIS_LEFT);
+   if (pLeftAxis != NULL)
+   {
+      pLeftAxis->setTitle("Y-Axis");
+      pTitleColorButton->setColor(COLORTYPE_TO_QCOLOR(pLeftAxis->getTitleColor()));
+   }
+
+   Axis* pBottomAxis = mpPlotWidget->getAxis(AXIS_BOTTOM);
+   if (pBottomAxis != NULL)
+   {
+      pBottomAxis->setTitle("X-Axis");
+   }
+
    mpPlotWidget->showLegend(false);
    mpClassificationEdit->setText(QString::fromStdString(mpPlotWidget->getClassificationText()));
    pTextColorButton->setColor(mpPlotWidget->getClassificationColor());
@@ -208,6 +227,7 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
    VERIFYNR(connect(pMouseModeApplyButton, SIGNAL(clicked()), this, SLOT(enableMouseMode())));
    VERIFYNR(connect(mpMarginEdit, SIGNAL(editingFinished()), this, SLOT(setPlotMargin())));
    VERIFYNR(connect(pTextColorButton, SIGNAL(colorChanged(const QColor&)), this, SLOT(setTextColor(const QColor&))));
+   VERIFYNR(connect(pTitleColorButton, SIGNAL(colorChanged(const QColor&)), this, SLOT(setTitleColor(const QColor&))));
    VERIFYNR(connect(pPropertiesButton, SIGNAL(clicked()), this, SLOT(displayProperties())));
    VERIFYNR(connect(pButtonBox, SIGNAL(rejected()), this, SLOT(reject())));
    VERIFYNR(mpDockWindow->attach(SIGNAL_NAME(Window, SessionItemDropped),
@@ -487,6 +507,24 @@ void DesktopAPITestGui::setTextColor(const QColor& textColor)
    if ((textColor.isValid() == true) && (mpPlotWidget.get() != NULL))
    {
       mpPlotWidget->setClassificationColor(QCOLOR_TO_COLORTYPE(textColor));
+   }
+}
+
+void DesktopAPITestGui::setTitleColor(const QColor& titleColor)
+{
+   if ((titleColor.isValid() == true) && (mpPlotWidget.get() != NULL))
+   {
+      Axis* pLeftAxis = mpPlotWidget->getAxis(AXIS_LEFT);
+      if (pLeftAxis != NULL)
+      {
+         pLeftAxis->setTitleColor(QCOLOR_TO_COLORTYPE(titleColor));
+      }
+
+      Axis* pBottomAxis = mpPlotWidget->getAxis(AXIS_BOTTOM);
+      if (pBottomAxis != NULL)
+      {
+         pBottomAxis->setTitleColor(QCOLOR_TO_COLORTYPE(titleColor));
+      }
    }
 }
 

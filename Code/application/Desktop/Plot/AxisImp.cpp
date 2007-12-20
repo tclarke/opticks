@@ -390,6 +390,7 @@ void AxisImp::paintEvent(QPaintEvent* e)
    if (mTitle.isEmpty() == false)
    {
       p.setFont(mTitleFont.toQFont());
+      p.setPen(mTitleColor);
       int iTitleHeight = p.fontMetrics().height();
 
       QRect rcText = rcWidget;
@@ -500,21 +501,30 @@ bool AxisImp::toXml(XMLWriter* pXml) const
 
 bool AxisImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   if(pDocument == NULL)
+   DOMElement* pElmnt = dynamic_cast<DOMElement*>(pDocument);
+   if (pElmnt == NULL)
    {
       return false;
    }
-   DOMElement *pElmnt = static_cast<DOMElement*>(pDocument);
+
    mTitle = A(pElmnt->getAttribute(X("title")));
-   ColorType color = StringUtilities::fromXmlString<ColorType>(
-      A(pElmnt->getAttribute(X("titleColor"))));
+   for (DOMNode* pNode = pElmnt->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())
+   {
+      if (XMLString::equals(pNode->getNodeName(), X("titleFont")))
+      {
+         DOMElement* pFontElement = static_cast<DOMElement*>(pNode);
+         if (mTitleFont.fromXml(pFontElement, version) == false)
+         {
+            return false;
+         }
+      }
+   }
+
+   ColorType color = StringUtilities::fromXmlString<ColorType>(A(pElmnt->getAttribute(X("titleColor"))));
    mTitleColor = COLORTYPE_TO_QCOLOR(color);
-   mScaleType = StringUtilities::fromXmlString<ScaleType>(
-      A(pElmnt->getAttribute(X("scaleType"))));
-   mMaxMajorTicks = StringUtilities::fromXmlString<int>(
-      A(pElmnt->getAttribute(X("maxMajorTicks"))));
-   mMaxMinorTicks = StringUtilities::fromXmlString<int>(
-      A(pElmnt->getAttribute(X("maxMinorTicks"))));
+   mScaleType = StringUtilities::fromXmlString<ScaleType>(A(pElmnt->getAttribute(X("scaleType"))));
+   mMaxMajorTicks = StringUtilities::fromXmlString<int>(A(pElmnt->getAttribute(X("maxMajorTicks"))));
+   mMaxMinorTicks = StringUtilities::fromXmlString<int>(A(pElmnt->getAttribute(X("maxMinorTicks"))));
    mScaleDraw.setLabelFormat(A(pElmnt->getAttribute(X("scaleDrawLabelFormat"))));
    return true;
 }

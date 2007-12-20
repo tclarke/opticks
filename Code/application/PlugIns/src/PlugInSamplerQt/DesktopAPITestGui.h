@@ -47,6 +47,7 @@ protected slots:
    void setClassificationText();
    void setPlotMargin();
    void setTextColor(const QColor& textColor);
+   void setTitleColor(const QColor& titleColor);
    void displayProperties();
 
 private:
