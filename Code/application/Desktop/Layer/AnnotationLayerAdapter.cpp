@@ -52,14 +52,7 @@ Layer* AnnotationLayerAdapter::copy(const string& layerName, bool bCopyElement, 
    string name = layerName;
    if (name.empty() == true)
    {
-      if(!bCopyElement && pParent == getDataElement()->getParent())
-      {
-         name = SessionItemImp::generateUniqueId();
-      }
-      else
-      {
-         name = getName();
-      }
+      name = getName();
    }
 
    // Get the annotation
@@ -68,8 +61,14 @@ Layer* AnnotationLayerAdapter::copy(const string& layerName, bool bCopyElement, 
    AnnotationElement* pCurrentAnnotation  = dynamic_cast<AnnotationElement*>(getDataElement());
    if (pCurrentAnnotation != NULL)
    {
+      string elementName = name;
+      if ((layerName.empty() == true) && (bCopyElement == false) && (pParent == pCurrentAnnotation->getParent()))
+      {
+         elementName = SessionItemImp::generateUniqueId();
+      }
+
       // Always create a copy of the element since the graphic group has a pointer to the layer
-      pAnnotation = dynamic_cast<AnnotationElement*>(pCurrentAnnotation->copy(name, pParent));
+      pAnnotation = dynamic_cast<AnnotationElement*>(pCurrentAnnotation->copy(elementName, pParent));
    }
 
    if (pAnnotation == NULL)

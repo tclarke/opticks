@@ -19,8 +19,11 @@
 #include "GraphicLayer.h"
 #include "GraphicLayerImp.h"
 #include "GraphicViewWidget.h"
+#include "LayerList.h"
+#include "ModelServices.h"
 #include "PerspectiveViewImp.h"
 #include "SessionManager.h"
+#include "SpatialDataView.h"
 #include "TextObjectAdapter.h"
 #include "View.h"
 #include "ViewImp.h"
@@ -117,6 +120,46 @@ void ViewObjectImp::setView(View* pView)
       mpView = dynamic_cast<ViewImp*>(pViewImp->copy(pParentContext, pParentView));
       if (mpView != NULL)
       {
+         SpatialDataView* pOriginalView = dynamic_cast<SpatialDataView*>(pView);
+         if (pOriginalView != NULL)
+         {
+            LayerList* pOriginalLayerList = pOriginalView->getLayerList();
+            if (pOriginalLayerList != NULL)
+            {
+               SpatialDataView* pCopyView = dynamic_cast<SpatialDataView*>(mpView);
+               VERIFYNRV(pCopyView != NULL);
+
+               LayerList* pCopyLayerList = pCopyView->getLayerList();
+               VERIFYNRV(pCopyLayerList != NULL);
+
+               Service<ModelServices> pModel;
+
+               vector<Layer*> layers;
+               pOriginalLayerList->getLayers(layers);
+
+               for (vector<Layer*>::iterator iter = layers.begin(); iter != layers.end(); ++iter)
+               {
+                  GraphicLayer* pOriginalLayer = dynamic_cast<GraphicLayer*>(*iter);
+                  if (pOriginalLayer != NULL)
+                  {
+                     LayerType layerType = pOriginalLayer->getLayerType();
+                     string layerName = pOriginalLayer->getName();
+
+                     Layer* pCopyLayer = pCopyLayerList->getLayer(layerType, NULL, layerName);
+                     if (pCopyLayer != NULL)
+                     {
+                        DataElement* pCopyElement = pCopyLayer->getDataElement();
+                        if (pCopyElement != NULL)
+                        {
+                           string newName = layerName + " - " + pParentView->getName();
+                           pModel->setElementName(pCopyElement, newName);
+                        }
+                     }
+                  }
+               }
+            }
+         }
+
          PerspectiveViewImp *pPerspectiveView = dynamic_cast<PerspectiveViewImp*>(mpView);
          if (pPerspectiveView)
          {

@@ -91,13 +91,15 @@ public:
     *  @param   layerType
     *           The layer type.
     *  @param   pElement
-    *           The data element used as the basis for drawing the layer.
+    *           The data element used as the basis for drawing the layer.  If
+    *           \c NULL is passed in, the layer with the given name and type is
+    *           returned.
     *  @param   layerName
     *           The layer name.  If the name is empty, the name of the data
     *           element is used.
     *
     *  @return  A pointer to the existing layer, which can be safely cast to a
-    *           derived layer class according to its layer type.  NULL is
+    *           derived layer class according to its layer type.  \c NULL is
     *           returned if a layer with the given parameters does not exist in
     *           the list.
     *

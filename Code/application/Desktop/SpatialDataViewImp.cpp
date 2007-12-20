@@ -440,30 +440,34 @@ SpatialDataViewImp& SpatialDataViewImp::operator= (const SpatialDataViewImp& spa
 
       clear();
 
-      LayerList* pLayerList = NULL;
-      pLayerList = spatialDataView.getLayerList();
+      LayerList* pLayerList = spatialDataView.getLayerList();
       if (pLayerList != NULL)
       {
          setPrimaryRasterElement(pLayerList->getPrimaryRasterElement());
 
          vector<Layer*> layers;
          pLayerList->getLayers(layers);
-         for (unsigned int i = 0; i < layers.size(); i++)
+         for (vector<Layer*>::size_type i = 0; i < layers.size(); ++i)
          {
-            Layer* pLayer = NULL;
-            pLayer = layers.at(i);
+            Layer* pLayer = layers[i];
             if (pLayer != NULL)
             {
-               bool bDisplayed = spatialDataView.isLayerDisplayed(pLayer);
+               DataElement* pParent = pLayerList->getPrimaryRasterElement();
 
-               Layer* pNewLayer = pLayer->copy(string(), false, pLayerList->getPrimaryRasterElement());
+               DataElement* pElement = pLayer->getDataElement();
+               if (pElement != NULL)
+               {
+                  pParent = pElement->getParent();
+               }
+
+               Layer* pNewLayer = pLayer->copy(string(), false, pParent);
                if (pNewLayer != NULL)
                {
                   addLayer(pNewLayer);
 
                   // Layers are shown by default when they are initialized,
                   // so hide the layer if the original layer is hidden
-                  if (bDisplayed == false)
+                  if (spatialDataView.isLayerDisplayed(pLayer) == false)
                   {
                      hideLayer(pNewLayer);
                   }

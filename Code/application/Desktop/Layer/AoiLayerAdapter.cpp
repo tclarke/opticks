@@ -52,14 +52,7 @@ Layer* AoiLayerAdapter::copy(const string& layerName, bool bCopyElement, DataEle
    string name = layerName;
    if (name.empty() == true)
    {
-      if(!bCopyElement && pParent == getDataElement()->getParent())
-      {
-         name = SessionItemImp::generateUniqueId();
-      }
-      else
-      {
-         name = getName();
-      }
+      name = getName();
    }
 
    // Get the AOI
@@ -68,8 +61,14 @@ Layer* AoiLayerAdapter::copy(const string& layerName, bool bCopyElement, DataEle
    AoiElement* pCurrentAoi = dynamic_cast<AoiElement*>(getDataElement());
    if (pCurrentAoi != NULL)
    {
+      string elementName = name;
+      if ((layerName.empty() == true) && (bCopyElement == false) && (pParent == pCurrentAoi->getParent()))
+      {
+         elementName = SessionItemImp::generateUniqueId();
+      }
+
       // Always create a copy of the element since the graphic group has a pointer to the layer
-      pAoi = dynamic_cast<AoiElement*>(pCurrentAoi->copy(name, pParent));
+      pAoi = dynamic_cast<AoiElement*>(pCurrentAoi->copy(elementName, pParent));
    }
 
    if (pAoi == NULL)
