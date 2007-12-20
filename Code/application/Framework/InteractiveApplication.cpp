@@ -7,6 +7,7 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtCore/QFileInfo>
 #include <QtCore/QTimer>
 #include <QtGui/QApplication>
 #include <QtGui/QMessageBox>
@@ -26,7 +27,9 @@
 #include "ProgressAdapter.h"
 #include "ProgressDlg.h"
 #include "RasterLayer.h"
+#include "SessionManager.h"
 #include "SplashScreen.h"
+#include "WizardUtilities.h"
 
 #include <string>
 using namespace std;
@@ -162,19 +165,94 @@ int InteractiveApplication::run(int argc, char** argv)
    ArgumentList *pArgList(ArgumentList::instance());
    if(pArgList != NULL)
    {
-      ImporterResource importer("Auto Importer", string(), pProgress, false);
+      bool validImport = true;
 
       vector<string> filenames(pArgList->getOptions(""));
-      for(vector<string>::const_iterator filenamesIt = filenames.begin();
-                                         filenamesIt != filenames.end();
-                                         ++filenamesIt)
+      if (filenames.size() > 1)
       {
-         FilenameImp filename(filenamesIt->c_str());
+         bool wizardFiles = false;
+         bool datasetFiles = false;
 
-         // try and import the file
-         string normalizedFilename(filename.getFullPathAndName());
-         importer->setFilename(normalizedFilename);
-         importer->execute();
+         for (vector<string>::size_type i = 0; i < filenames.size(); ++i)
+         {
+            FilenameImp filename(filenames[i]);
+
+            QString strFilename = QString::fromStdString(filename.getFullPathAndName());
+            if (strFilename.isEmpty() == false)
+            {
+               QFileInfo info(strFilename);
+               if ((info.suffix() == "wiz") || (info.suffix() == "batchwiz"))
+               {
+                  if (datasetFiles == true)
+                  {
+                     validImport = false;
+                     break;
+                  }
+
+                  wizardFiles = true;
+               }
+               else if (info.suffix() == "session")
+               {
+                  validImport = false;
+                  break;
+               }
+               else
+               {
+                  if (wizardFiles == true)
+                  {
+                     validImport = false;
+                     break;
+                  }
+
+                  datasetFiles = true;
+               }
+            }
+         }
+      }
+
+      if (validImport == true)
+      {
+         for (vector<string>::size_type i = 0; i < filenames.size(); ++i)
+         {
+            FilenameImp filename(filenames[i]);
+            string normalizedFilename = filename.getFullPathAndName();
+
+            QString strFilename = QString::fromStdString(normalizedFilename);
+            if (strFilename.isEmpty() == false)
+            {
+               QFileInfo info(strFilename);
+               if (info.suffix() == "wiz")
+               {
+                  pAppWindow->runWizard(strFilename);
+               }
+               else if (info.suffix() == "batchwiz")
+               {
+                  vector<string> batchFiles;
+                  batchFiles.push_back(normalizedFilename);
+                  WizardUtilities::runBatchFiles(batchFiles, pProgress);
+               }
+               else if (info.suffix() == "session")
+               {
+                  string saveKey = SessionManager::getSettingQueryForSaveKey();
+                  SessionSaveType saveType = SESSION_DONT_AUTO_SAVE;
+
+                  pConfigSettings->setSessionSetting(saveKey, saveType);
+                  pAppWindow->openSession(strFilename);
+                  pConfigSettings->deleteSessionSetting(saveKey);
+               }
+               else
+               {
+                  ImporterResource importer("Auto Importer", normalizedFilename, pProgress, false);
+                  importer->execute();
+               }
+            }
+         }
+      }
+      else if (pProgress != NULL)
+      {
+         string msg = "Unable to import the files specified on the command line.  " + string(APP_NAME) +
+            " supports loading one session file, one or more wizard files, or one or more data set files.";
+         pProgress->updateProgress(msg, 0, ERRORS);
       }
    }
 

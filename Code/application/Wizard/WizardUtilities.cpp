@@ -231,5 +231,11 @@ bool WizardUtilities::runBatchFiles(const vector<string> &wizardFiles, Progress 
       }
    }
 
+   if (pProgress != NULL)
+   {
+      string message = "Processing batch files completed.";
+      pProgress->updateProgress(message, 100, NORMAL);
+   }
+
    return true;
 }

@@ -141,6 +141,7 @@ public:
 
 public slots:
    // File actions
+   void openSession(const QString& filename);
    bool importFile(const QString& strImporterSubtype = QString(), Progress* pProgress = NULL,
       std::vector<DataElement*>& importedElements = std::vector<DataElement*>());
    bool exportSessionItem(SessionItem *pItem, FileDescriptor *pNewFileDescriptor = NULL, Progress *pProgress = NULL);
@@ -195,7 +196,6 @@ protected slots:
 
    // Session actions
    void openSession();
-   void openSession(const QString& filename);
    bool newSession();
    void autoSaveSession();
    bool saveSession();
