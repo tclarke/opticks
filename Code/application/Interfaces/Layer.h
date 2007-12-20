@@ -152,8 +152,11 @@ public:
     *           is ignored.
     *
     *  @warning When copying Annotation and AOI layers, the data element is
-    *           always copied so either a new layer name or a parent element
-    *           must be passed in.
+    *           always copied so a new layer name or a parent element should be
+    *           passed in.  If the layer name is empty and an Annotation or AOI
+    *           element cannot be created because one already exists, the
+    *           element will be created with a GUID as a name.  The layer name
+    *           will be the name of this layer.
     *
     *  @return  A pointer to the new layer.  \b NULL is returned if an error
     *           occurs.
