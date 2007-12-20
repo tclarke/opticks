@@ -17,7 +17,10 @@
 #include "DataDescriptor.h"
 #include "DataDescriptorImp.h"
 #include "DataElement.h"
+#include "DateTimeImp.h"
 #include "DesktopServices.h"
+#include "FileFinderImp.h"
+#include "FilenameImp.h"
 #include "ImportAgentImp.h"
 #include "ImportDescriptor.h"
 #include "ImportDlg.h"
@@ -552,37 +555,13 @@ void ImportAgentImp::updateMruFileList()
 
    // Remove the current file if it exists in the list
    ConfigurationSettingsImp* pSettings = ConfigurationSettingsImp::instance();
+   pSettings->removeMruFile(strFilename.toStdString());
+
+   // Get the number of MRU files and subtract one to account for the file to add to the list
+   vector<MruFile> mruFiles = pSettings->getMruFiles();
+   unsigned int maxNumFiles = ConfigurationSettings::getSettingNumberOfMruFiles() - 1;
    Service<ModelServices> pModel;
 
-   vector<MruFile> mruFiles = pSettings->getMruFiles();
-   for (vector<MruFile>::iterator iter = mruFiles.begin(); iter != mruFiles.end(); ++iter)
-   {
-      MruFile mruFile = *iter;
-
-      QString strName = QString::fromStdString(mruFile.mName).toLower();
-      QString strCurrentName = strFilename.toLower();
-      if (strName == strCurrentName)
-      {
-         // Destroy the import descriptors in this MRU file
-         vector<ImportDescriptor*>::iterator descriptorIter;
-         for (descriptorIter = mruFile.mDescriptors.begin();
-              descriptorIter != mruFile.mDescriptors.end();
-              ++descriptorIter)
-         {
-            ImportDescriptor* pImportDescriptor = *descriptorIter;
-            if (pImportDescriptor != NULL)
-            {
-               pModel->destroyImportDescriptor(pImportDescriptor);
-            }
-         }
-
-         mruFiles.erase(iter);
-         break;
-      }
-   }
-
-   // Get the number of MRU files from the Options and subtract 1
-   unsigned int maxNumFiles = ConfigurationSettings::getSettingNumberOfMruFiles() - 1;
    while (mruFiles.size() > maxNumFiles)
    {
       // Destroy the existing import descriptors in the MRU file
@@ -640,7 +619,20 @@ void ImportAgentImp::updateMruFileList()
       importer = pPlugIn->getName();
    }
 
-   mruFiles.insert(mruFiles.begin(), MruFile(strFilename.toStdString(), importer, mruDescriptors));
+   FilenameImp filename(strFilename.toStdString());
+   string filePath = filename.getPath();
+   string baseFilename = filename.getFileName();
+
+   DateTimeImp modificationTime;
+
+   FileFinderImp fileFinder;
+   fileFinder.findFile(filePath, baseFilename);
+   if (fileFinder.findNextFile() == true)
+   {
+      fileFinder.getLastModificationTime(modificationTime);
+   }
+
+   mruFiles.insert(mruFiles.begin(), MruFile(strFilename.toStdString(), importer, mruDescriptors, modificationTime));
 
    // Update the MRU file list in the configuration settings
    pSettings->setMruFiles(mruFiles);

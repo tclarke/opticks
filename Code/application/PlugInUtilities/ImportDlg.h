@@ -39,7 +39,6 @@ protected:
    void updateDescriptorsIfNeeded();
    void clearDescriptors();
    ImportDescriptor* getFirstImportedDescriptor() const;
-   QString getSelectedFile() const;
 
 protected slots:
    bool eventFilter(QObject* o, QEvent* e);
@@ -49,6 +48,7 @@ protected slots:
    void updatePreviewDatasets();
 
 private:
+   std::string mFilename;
    bool mFileChanged;
    PlugIn* mpImporter;
    std::vector<ImportDescriptor*> mDescriptors;

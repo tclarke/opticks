@@ -118,6 +118,7 @@ ImportDlg::ImportDlg(const QString& strPlugInSubtype, const QString& strInitialP
    updateFromImporter(getSelectedPlugIn());
 
    // Connections
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Change the currentChanged() signal to filesSelected() and remove the mFilename member when the filesSelected() signal is emitted when the selection changes. (Qt 4.3.1) (dsulgrov)")
    VERIFYNR(connect(this, SIGNAL(currentChanged(const QString&)), this, SLOT(updateFromFile(const QString&))));
    VERIFYNR(connect(this, SIGNAL(plugInSelected(const QString&)), this, SLOT(updateFromImporter(const QString&))));
    VERIFYNR(connect(this, SIGNAL(optionsClicked()), this, SLOT(invokeOptionsDialog())));
@@ -149,12 +150,12 @@ void ImportDlg::accept()
    }
 
    // Get the selected file
-   QString strFilename = getSelectedFile();
-   if (strFilename.isEmpty())
+   if (mFilename.empty())
    {
       return;
    }
 
+   QString strFilename = QString::fromStdString(mFilename);
    QFileInfo fileInfo = QFileInfo(strFilename);
 
    bool bExists = fileInfo.exists();
@@ -229,6 +230,25 @@ void ImportDlg::hideEvent(QHideEvent* pEvent)
 
 bool ImportDlg::updateFromFile(const QString& strFilename)
 {
+   // Update the selected filename
+   QString strFile = strFilename;
+   strFile.replace(QRegExp("\\\\"), "/");
+
+   string filename = strFile.toStdString();
+
+   QFileInfo fileInfo(strFile);
+   if (filename != mFilename)
+   {
+      if (fileInfo.isFile())
+      {
+         mFilename = filename;
+      }
+      else
+      {
+         mFilename.clear();
+      }
+   }
+
    // Clear the import descriptors
    clearDescriptors();
 
@@ -252,13 +272,12 @@ void ImportDlg::updateDescriptorsIfNeeded()
       return;
    }
 
-   QString filename = getSelectedFile();
-   if (filename.isEmpty() == false)
+   if (mFilename.empty() == false)
    {
       Importer* pImporter = dynamic_cast<Importer*>(mpImporter);
       if (pImporter != NULL)
       {
-         mDescriptors = pImporter->getImportDescriptors(filename.toStdString());
+         mDescriptors = pImporter->getImportDescriptors(mFilename);
       }
    }
 
@@ -297,23 +316,6 @@ ImportDescriptor* ImportDlg::getFirstImportedDescriptor() const
    }
 
    return NULL;
-}
-
-QString ImportDlg::getSelectedFile() const
-{
-   QString filename;
-
-   QStringList filenames = selectedFiles();
-   if (filenames.empty() == false)
-   {
-      filename = filenames.front();
-      if (filename.isEmpty() == false)
-      {
-         filename.replace(QRegExp("\\\\"), "/");
-      }
-   }
-
-   return filename;
 }
 
 void ImportDlg::updateFromImporter(const QString& strImporter)
@@ -379,9 +381,10 @@ bool ImportDlg::invokeOptionsDialog()
    }
    else
    {
-      QString filename = getSelectedFile();
-      if (filename.isEmpty() == false)
+      if (mFilename.empty() == false)
       {
+         QString filename = QString::fromStdString(mFilename);
+
          QFileInfo fileInfo(filename);
          if (fileInfo.exists() == false)
          {
@@ -393,10 +396,10 @@ bool ImportDlg::invokeOptionsDialog()
             QString strImporter = getSelectedPlugIn();
             QMessageBox::warning(this, APP_NAME, strImporter + " does not recognize the '" + filename + "' file.");
          }
-         else
-         {
-            QMessageBox::warning(this, APP_NAME, "Please select a file to display its import options.");
-         }
+      }
+      else
+      {
+         QMessageBox::warning(this, APP_NAME, "Please select a file to display its import options.");
       }
    }
 

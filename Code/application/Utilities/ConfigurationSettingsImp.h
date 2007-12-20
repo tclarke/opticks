@@ -79,6 +79,7 @@ public:
    void copySetting(const std::string& key, DynamicObject* pObject) const;
 
    void setMruFiles(const std::vector<MruFile>& mruFiles);
+   void removeMruFile(const std::string& filename);
    const std::vector<MruFile>& getMruFiles() const;
 
    bool serializeAsDefaults(const Filename* pFilename, const DynamicObject* pObject) const;
