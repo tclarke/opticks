@@ -1273,6 +1273,11 @@ ApplicationWindow::~ApplicationWindow()
       Slot(this, &ApplicationWindow::updateContextMenu));
 }
 
+void ApplicationWindow::setSessionFilename(const string& sessionFilename)
+{
+   mSessionFilename = sessionFilename;
+}
+
 const string& ApplicationWindow::getObjectType() const
 {
    static string type("ApplicationWindow");
