@@ -67,7 +67,9 @@ public:
     *
     *  @param   plotSet
     *           The name of the new plot set, which appears in the information bar
-    *           along the top of the window.
+    *           along the top of the window. If this method is called during session restore,
+    *           this parameter will be interpreted as a session id. If the session item does not
+    *           exist, a new plot set will be created.
     *
     *  @return  A pointer to the created plot set.  NULL is returned if a plot set with
     *           the given name already exists.

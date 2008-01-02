@@ -118,39 +118,47 @@ PlotSet* PlotWindowImp::createPlotSet(const QString& strPlotSet)
    }
 
    // Do not create the plot set if one with the same name already exists
-   PlotSetAdapter* pPlotSet = NULL;
-   pPlotSet = (PlotSetAdapter*) getPlotSet(strPlotSet);
-   if (pPlotSet != NULL)
+   if (getPlotSet(strPlotSet) != NULL)
    {
       return NULL;
    }
 
-   // Create the plot set
-   pPlotSet = new PlotSetAdapter(SessionItemImp::generateUniqueId(), strPlotSet.toStdString(),
-      dynamic_cast<PlotWindow*>(this), mpStack);
+   PlotSet* pPlotSet = NULL;
+   Service<SessionManager> pSessionManager;
+   if (pSessionManager->isSessionLoading() == true)
+   {
+      // Retrieve the PlotSet
+      pPlotSet = dynamic_cast<PlotSet*>(pSessionManager->getSessionItem(strPlotSet.toStdString()));
+   }
+
    if (pPlotSet == NULL)
    {
-      return NULL;
+      // Create the PlotSet
+      pPlotSet = new PlotSetAdapter(SessionItemImp::generateUniqueId(),
+         strPlotSet.toStdString(), dynamic_cast<PlotWindow*>(this), mpStack);
    }
 
-   pPlotSet->setTabPosition(QTabWidget::South);
-   pPlotSet->setTabShape(QTabWidget::Triangular);
-   pPlotSet->installEventFilter(this);
-   mPlotSets.push_back((PlotSet*) pPlotSet);
+   PlotSetImp* pPlotSetImp = dynamic_cast<PlotSetImp*>(pPlotSet);
+   VERIFYRV(pPlotSetImp != NULL, NULL);
+
+   pPlotSetImp->setTabPosition(QTabWidget::South);
+   pPlotSetImp->setTabShape(QTabWidget::Triangular);
+   pPlotSetImp->installEventFilter(this);
+   mPlotSets.push_back(pPlotSet);
 
    // Add the plot set to the widget stack
-   mpStack->addWidget(pPlotSet);
+   mpStack->addWidget(pPlotSetImp);
 
    // Add the plot set name to the list box
    QMenu* pMenu = mpInfoBar->getMenu();
    if (pMenu != NULL)
    {
-      pMenu->addAction(strPlotSet);
+      pMenu->addAction(QString::fromStdString(pPlotSet->getName()));
    }
 
    // Notify connected and attached objects
-   emit plotSetAdded((PlotSet*) pPlotSet);
-   notify(SIGNAL_NAME(PlotWindow, PlotSetAdded), boost::any(static_cast<PlotSet*>(pPlotSet)));
+   emit plotSetAdded(pPlotSet);
+   notify(SIGNAL_NAME(PlotWindow, PlotSetAdded), boost::any(pPlotSet));
 
    // Activate the plot set
    setCurrentPlotSet(pPlotSet);
@@ -855,21 +863,9 @@ bool PlotWindowImp::fromXml(DOMNode* pDocument, unsigned int version)
             string name = A(pGChld->getNodeName());
             if(name == "PlotId")
             {
-               string setId = A(pGChld->getFirstChild()->getNodeValue());
-               PlotSetImp* pSet(NULL);
-               SessionItem* pItem = Service<SessionManager>()->getSessionItem(setId);
-               pSet = dynamic_cast<PlotSetImp*>(pItem);
-               if (pSet != NULL)
+               if (createPlotSet(A(pGChld->getFirstChild()->getNodeValue())) == NULL)
                {
-                  pSet->setTabPosition(QTabWidget::South);
-                  pSet->setTabShape(QTabWidget::Triangular);
-                  mPlotSets.push_back(dynamic_cast<PlotSet*>(pSet));
-                  mpStack->addWidget(pSet);
-                  QMenu* pMenu = mpInfoBar->getMenu();
-                  if (pMenu != NULL)
-                  {
-                     pMenu->addAction(pSet->getName().c_str());
-                  }
+                  return false;
                }
             }
          }

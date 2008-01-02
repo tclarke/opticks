@@ -16,6 +16,7 @@
 #include <QtGui/QMenu>
 #include <QtGui/QUndoGroup>
 
+#include "AttachmentPtr.h"
 #include "ConfigurationSettings.h"
 #include "DynamicObject.h"
 #include "GraphicGroupAdapter.h"
@@ -23,6 +24,7 @@
 #include "SettableSessionItemAdapter.h"
 #include "SubjectAdapter.h"
 #include "TypesFile.h"
+#include "View.h"
 
 #include <boost/any.hpp>
 #include <vector>
@@ -59,7 +61,6 @@ class StatusBar;
 class TiePointEditor;
 class TiePointToolBar;
 class ToolBarAdapter;
-class View;
 class Window;
 class Workspace;
 class WorkspaceWindow;
@@ -414,6 +415,7 @@ private:
    Workspace* mpWorkspace;
    std::vector<Window*> mWindows;
    WorkspaceWindowImp* mpCurrentWnd;
+   AttachmentPtr<View> mpCurrentView;
    View* mpCurrentEditView;
 
    // Docking windows
