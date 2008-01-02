@@ -93,6 +93,10 @@ int InteractiveApplication::run(int argc, char** argv)
       }
    }
 
+   // Temporarily Disable AutoSave. Use setSessionSetting so that
+   // the "real" setting is not overwritten in case of a later error
+   pConfigSettings->setSessionSetting(SessionManager::getSettingAutoSaveEnabledKey(), false);
+
    // Create a progress object
    ProgressAdapter* pProgress = new ProgressAdapter();
 
@@ -256,18 +260,30 @@ int InteractiveApplication::run(int argc, char** argv)
       }
    }
 
-   // If there are any execute and exit wizards, run them
+   // If there are any wizards, run them
    //
    executeStartupBatchWizards(pProgress);
-   if(!pArgList->getOptions("exitAfterWizards").empty())
-   {
-      pAppWindow->close();
-   }
 
    // Destroy the progress object and progress dialog
    pProgress->detach(SIGNAL_NAME(Subject, Modified), Slot(pProgressDlg, &ProgressDlg::progressUpdated));
    pProgress->detach(SIGNAL_NAME(Subject, Deleted), Slot(pProgressDlg, &ProgressDlg::progressDeleted));
    delete pProgress;
+
+   vector<string> autoExitOptions = pArgList->getOptions("autoExit");
+   if (autoExitOptions.empty() == false)
+   {
+      SessionSaveType tempSettingQueryForSave = SESSION_DONT_AUTO_SAVE;
+      const string sessionFilename = autoExitOptions.front();
+      if (sessionFilename.empty() == false)
+      {
+         tempSettingQueryForSave = SESSION_AUTO_SAVE;
+         pAppWindow->setSessionFilename(FilenameImp(sessionFilename).getFullPathAndName());
+      }
+
+      pConfigSettings->setSessionSetting(SessionManager::getSettingQueryForSaveKey(), tempSettingQueryForSave);
+      pAppWindow->close();
+      return iReturn;
+   }
 
    // Set the application window to auto-generate textures
    QTimer textureGenerationTimer;
@@ -278,14 +294,9 @@ int InteractiveApplication::run(int argc, char** argv)
       pAppWindow->connect(&textureGenerationTimer, SIGNAL(timeout()), SLOT(pregenerateTexture()));
    }
 
+   // Delete the temporary autoSaveEnabled setting which was created earlier
+   pConfigSettings->deleteSessionSetting(SessionManager::getSettingAutoSaveEnabledKey());
+
    // Initiate the GUI event loop, which returns when the user exits the application
-   iReturn = qApplication.exec();
-
-   if (pAppWindow->isVisible())
-   {
-      pAppWindow->close();
-      qApplication.processEvents();
-   }
-
-   return iReturn;
+   return qApplication.exec();
 }

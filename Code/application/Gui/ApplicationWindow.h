@@ -73,6 +73,7 @@ public:
    ApplicationWindow(QWidget* pSplash = NULL);
    ~ApplicationWindow();
 
+   void setSessionFilename(const std::string& sessionFilename);
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
 
