@@ -4161,14 +4161,6 @@ void ApplicationWindow::updateActiveWindow(QWidget* pWindow)
       }
    }
 
-   View* pWindowView = NULL;
-   if (pWorkspaceWindow != NULL)
-   {
-      pWindowView = pWorkspaceWindow->getView();
-   }
-
-   UndoLock lock(pWindowView);
-
    // Disconnect the previously active window and view
    if (mpCurrentWnd != NULL)
    {
@@ -4188,7 +4180,7 @@ void ApplicationWindow::updateActiveWindow(QWidget* pWindow)
       VERIFYNR(disconnect(m_pScripting, SIGNAL(visibilityChanged(bool)), mpCurrentWnd, SLOT(setFocus())));
 
       // Get the active view in the window
-      View* pView = mpCurrentWnd->getView();
+      View* pView = mpCurrentView.get();
       if (pView != NULL)
       {
          if (pView->isKindOf("ProductView") == true)
@@ -4252,7 +4244,17 @@ void ApplicationWindow::updateActiveWindow(QWidget* pWindow)
 
    // Update the current window
    mpCurrentWnd = pWorkspaceWindow;
+   if (mpCurrentWnd == NULL)
+   {
+      mpCurrentView.reset(NULL);
+   }
+   else
+   {
+      mpCurrentView.reset(mpCurrentWnd->getView());
+   }
+
    mpCurrentEditView = NULL;
+   UndoLock lock(mpCurrentView.get());
 
    double dZoomPercent = -1.0;
    bool bOverview = false;
@@ -4280,7 +4282,7 @@ void ApplicationWindow::updateActiveWindow(QWidget* pWindow)
       VERIFYNR(connect(m_pScripting, SIGNAL(visibilityChanged(bool)), pWorkspaceWindow, SLOT(setFocus())));
 
       // Get the active view in the window
-      View* pView = pWorkspaceWindow->getView();
+      View* pView = mpCurrentView.get();
       if (pView != NULL)
       {
          if (pView->isKindOf("ProductView") == true)
@@ -4411,7 +4413,7 @@ void ApplicationWindow::updateActiveWindow(QWidget* pWindow)
    // Update the current undo stack
    UndoStack* pUndoStack = NULL;
 
-   ViewImp* pWindowViewImp = dynamic_cast<ViewImp*>(pWindowView);
+   ViewImp* pWindowViewImp = dynamic_cast<ViewImp*>(mpCurrentView.get());
    if (pWindowViewImp != NULL)
    {
       pUndoStack = pWindowViewImp->getUndoStack();

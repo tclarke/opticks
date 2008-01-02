@@ -236,30 +236,33 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
    }
 
    // Connections
-   connect(this, SIGNAL(mouseModeChanged(const MouseMode*)), this, SLOT(updateMouseCursor(const MouseMode*)));
-   connect(this, SIGNAL(originChanged(const DataOrigin&)), this, SLOT(updateOriginAction(const DataOrigin&)));
-   connect(pCrossHairAction, SIGNAL(toggled(bool)), this, SLOT(setCrossHair(bool)));
-   connect(this, SIGNAL(crossHairDisplayed(bool)), pCrossHairAction, SLOT(setChecked(bool)));
-   connect(mpSmoothAction, SIGNAL(toggled(bool)), this, SLOT(setSmoothing(bool)));
-   connect(this, SIGNAL(textureModeChanged(const TextureMode&)), this, SLOT(updateSmoothingAction(const TextureMode&)));
-   connect(pColorAction, SIGNAL(triggered()), this, SLOT(changeBkgColor()));
-   connect(pMeasurementsAction, SIGNAL(triggered()), this, SLOT(displayMeasurementProperties()));
+   VERIFYNR(connect(this, SIGNAL(mouseModeChanged(const MouseMode*)),
+      this, SLOT(updateMouseCursor(const MouseMode*))));
+   VERIFYNR(connect(this, SIGNAL(originChanged(const DataOrigin&)), this, SLOT(updateOriginAction(const DataOrigin&))));
+   VERIFYNR(connect(pCrossHairAction, SIGNAL(toggled(bool)), this, SLOT(setCrossHair(bool))));
+   VERIFYNR(connect(this, SIGNAL(crossHairDisplayed(bool)), pCrossHairAction, SLOT(setChecked(bool))));
+   VERIFYNR(connect(mpSmoothAction, SIGNAL(toggled(bool)), this, SLOT(setSmoothing(bool))));
+   VERIFYNR(connect(this, SIGNAL(textureModeChanged(const TextureMode&)),
+      this, SLOT(updateSmoothingAction(const TextureMode&))));
+   VERIFYNR(connect(pColorAction, SIGNAL(triggered()), this, SLOT(changeBkgColor())));
+   VERIFYNR(connect(pMeasurementsAction, SIGNAL(triggered()), this, SLOT(displayMeasurementProperties())));
 
    if (mpLayerList != NULL)
    {
-      connect(mpLayerList, SIGNAL(layerAdded(Layer*)), this, SIGNAL(layerAdded(Layer*)));
-      connect(mpLayerList, SIGNAL(layerDeleted(Layer*)), this, SIGNAL(layerDeleted(Layer*)));
+      VERIFYNR(connect(mpLayerList, SIGNAL(layerAdded(Layer*)), this, SIGNAL(layerAdded(Layer*))));
+      VERIFYNR(connect(mpLayerList, SIGNAL(layerDeleted(Layer*)), this, SIGNAL(layerDeleted(Layer*))));
    }
 
    if (mpMeasurementsLayer != NULL)
    {
-      connect(mpMeasurementsLayer, SIGNAL(modified()), this, SLOT(refresh()));
+      VERIFYNR(connect(mpMeasurementsLayer, SIGNAL(modified()), this, SLOT(refresh())));
    }
 
    ApplicationWindow* pAppWindow = static_cast<ApplicationWindow*>(pDesktop->getMainWidget());
    if (pAppWindow != NULL)
    {
-      connect(this, SIGNAL(mouseModeAdded(const MouseMode*)), pAppWindow, SLOT(addMouseModeToGroup(const MouseMode*)));
+      VERIFYNR(connect(this, SIGNAL(mouseModeAdded(const MouseMode*)),
+         pAppWindow, SLOT(addMouseModeToGroup(const MouseMode*))));
    }
 }
 
