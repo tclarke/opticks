@@ -34,7 +34,6 @@ protected:
    Application(QCoreApplication &app);
 
    bool generateXML(std::string& errorMessage = std::string());
-   bool executeStartupPlugIns(Progress* pProgress);
    bool executeStartupBatchWizards(Progress* pProgress);
 
 private:

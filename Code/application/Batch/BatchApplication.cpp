@@ -148,8 +148,12 @@ int BatchApplication::run(int argc, char** argv)
    }
 
    // Perform the batch processing
-   log("Executing initial plug-ins...", "app", "8FB13CEB-9993-4376-AA93-38AD9D2479C9");
-   executeStartupPlugIns(pProgress);
+   PlugInManagerServicesImp* pManager = PlugInManagerServicesImp::instance();
+   if (pManager != NULL)
+   {
+      log("Executing initial plug-ins...", "app", "8FB13CEB-9993-4376-AA93-38AD9D2479C9");
+      pManager->executeStartupPlugIns(pProgress);
+   }
 
    log("Executing batch wizards...", "app", "1619818C-AC57-4B0E-A1EA-C55C85822818");
    bSuccess =  executeStartupBatchWizards(pProgress);

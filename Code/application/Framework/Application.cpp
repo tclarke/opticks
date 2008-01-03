@@ -30,11 +30,7 @@
 #include "ModelServicesImp.h"
 #include "ModuleManager.h"
 #include "ObjectFactoryImp.h"
-#include "PlugInArg.h"
-#include "PlugInArgList.h"
-#include "PlugInDescriptor.h"
 #include "PlugInManagerServicesImp.h"
-#include "PlugInResource.h"
 #include "SessionManagerImp.h"
 #include "UtilityServicesImp.h"
 #include "WizardUtilities.h"
@@ -226,42 +222,6 @@ bool Application::generateXML(string& errorMessage)
          return false;
       }
       delete pBatchWizard;
-   }
-
-   return true;
-}
-
-bool Application::executeStartupPlugIns(Progress* pProgress)
-{
-   Service<PlugInManagerServices> pManager;
-
-   bool bBatch = true;
-
-   ApplicationServicesImp* pApp = ApplicationServicesImp::instance();
-   if (pApp != NULL)
-   {
-      bBatch = pApp->isBatch();
-   }
-
-   if (pProgress != NULL)
-   {
-      pProgress->updateProgress("Executing the startup plug-ins...", 0, NORMAL);
-   }
-
-   vector<PlugInDescriptor*> plugIns = pManager->getPlugInDescriptors();
-   for (unsigned int i = 0; i < plugIns.size(); ++i)
-   {
-      PlugInDescriptor* pDescriptor = plugIns.at(i);
-      if (pDescriptor == NULL)
-      {
-         continue;
-      }
-      bool bExecute = pDescriptor->isExecutedOnStartup();
-      if (bExecute == true)
-      {               
-         ExecutableResource plugIn(pDescriptor->getName(), string(), pProgress, bBatch);
-         plugIn->execute();
-      }
    }
 
    return true;

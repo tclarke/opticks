@@ -975,6 +975,13 @@ void SessionManagerImp::newSession()
    VERIFYNRV(pAppWindow != NULL);
    pAppWindow->registerPlugIns();
    pAppWindow->updateWizardCommands();
+
+   PlugInManagerServicesImp* pManager = PlugInManagerServicesImp::instance();
+   if (pManager != NULL)
+   {
+      pManager->executeStartupPlugIns(NULL);
+   }
+
    notify(SIGNAL_NAME(SessionManagerImp, NameChanged), mName);
 }
 
