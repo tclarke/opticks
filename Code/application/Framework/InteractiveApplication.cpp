@@ -21,7 +21,7 @@
 #include "ConfigurationSettingsImp.h"
 #include "DataVariant.h"
 #include "FilenameImp.h"
-#include "PlugInManagerServices.h"
+#include "PlugInManagerServicesImp.h"
 #include "PlugInBranding.h"
 #include "PlugInResource.h"
 #include "ProgressAdapter.h"
@@ -144,8 +144,12 @@ int InteractiveApplication::run(int argc, char** argv)
    qApplication.processEvents();
 
    // Execute startup plug-ins
-   executeStartupPlugIns(pProgress);
-   qApplication.processEvents();
+   PlugInManagerServicesImp* pManager = PlugInManagerServicesImp::instance();
+   if (pManager != NULL)
+   {
+      pManager->executeStartupPlugIns(pProgress);
+      qApplication.processEvents();
+   }
 
    // Restore the previous position and visibility state of the toolbars and dock windows
    pAppWindow->restoreConfiguration();

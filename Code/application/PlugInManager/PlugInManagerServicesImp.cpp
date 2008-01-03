@@ -20,6 +20,8 @@
 #include "PlugInArgImp.h"
 #include "PlugInArgListImp.h"
 #include "PlugInDescriptorImp.h"
+#include "PlugInResource.h"
+#include "Progress.h"
 #include "StringUtilities.h"
 
 #include <iostream>
@@ -254,6 +256,36 @@ Progress* PlugInManagerServicesImp::getProgress(PlugIn* pPlugIn)
    }
 
    return NULL;
+}
+
+void PlugInManagerServicesImp::executeStartupPlugIns(Progress* pProgress) const
+{
+   Service<ApplicationServices> pApp;
+   bool bBatch = pApp->isBatch();
+
+   if (pProgress != NULL)
+   {
+      pProgress->updateProgress("Executing the startup plug-ins...", 0, NORMAL);
+   }
+
+   map<string, PlugInDescriptorImp*>::const_iterator iter;
+   for (iter = mPlugIns.begin(); iter != mPlugIns.end(); ++iter)
+   {
+      PlugInDescriptorImp* pDescriptor = iter->second;
+      if (pDescriptor != NULL)
+      {
+         if (pDescriptor->isExecutedOnStartup() == true)
+         {
+            ExecutableResource plugIn(pDescriptor->getName(), string(), pProgress, bBatch);
+            plugIn->execute();
+         }
+      }
+   }
+
+   if (pProgress != NULL)
+   {
+      pProgress->updateProgress("Executing the startup plug-ins is complete", 100, NORMAL);
+   }
 }
 
 void PlugInManagerServicesImp::buildPlugInList(const string& plugInPath)

@@ -62,6 +62,7 @@ public:
    PlugInDescriptor* getPlugInDescriptor(PlugIn* pPlugIn) const;
    void listPlugIns( bool showModules, bool showPlugIns, bool fullDetail );
    Progress* getProgress(PlugIn* pPlugIn);
+   void executeStartupPlugIns(Progress* pProgress) const;
 
    // Plug-in args
    PlugInArgList* getPlugInArgList();
