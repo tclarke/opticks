@@ -864,8 +864,6 @@ void ConfigurationSettingsImp::updateProductionStatus()
    mProductionRelease = APP_IS_PRODUCTION_RELEASE;
 #endif
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Re-enable checking plug-ins production status to determine application production status? (kstreith)")
-   /*
    if(mProductionRelease)
    {
       // search all plugins until we get a false
@@ -883,7 +881,6 @@ void ConfigurationSettingsImp::updateProductionStatus()
          mProductionRelease = pDesc->isProduction();
       }
    }
-   */
 }
 
 bool ConfigurationSettingsImp::serializeSettings(const string& filename, const DynamicObject* pSettings,
