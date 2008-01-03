@@ -16,7 +16,7 @@
 
 MuHttpServer::MuHttpServer(int port, QObject *pParent) : QObject(pParent), mpTimer(NULL), mServerIsRunning(false), mAllowNonLocal(false)
 {
-   if(port != 0)
+   if (port > 0)
    {
       setObjectName("mu HTTP server");
       mParams["port"] = port;
@@ -38,6 +38,11 @@ MuHttpServer::~MuHttpServer()
 
 bool MuHttpServer::start()
 {
+   if(mParams.empty())
+   {
+      warning("Invalid parameters.");
+      return false;
+   }
    if(mServerIsRunning)
    {
       return true;

@@ -305,8 +305,16 @@ OptionsMovieExporter::OptionsMovieExporter() :
    LabeledSection *pRateSection = new LabeledSection(pRateLayoutWidget, "Bitrate and Framerate Options", this);
 
    setBitrate(OptionsMovieExporter::getSettingBitrate());
-   setFramerate(boost::rational<int>(OptionsMovieExporter::getSettingFramerateNum(),
-                                     OptionsMovieExporter::getSettingFramerateDen()));
+
+   try
+   {
+      setFramerate(boost::rational<int>(OptionsMovieExporter::getSettingFramerateNum(),
+                                        OptionsMovieExporter::getSettingFramerateDen()));
+   }
+   catch (const boost::bad_rational&)
+   {
+      setFramerate(boost::rational<int>(1, 1));
+   }
 
    // Advanced Options
    QWidget *pAdvancedLayoutWidget = new QWidget(this);
