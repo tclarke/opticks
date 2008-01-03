@@ -115,7 +115,11 @@ MemoryMappedMatrix::MemoryMappedMatrix(const string &fileName, unsigned int head
    mFileSize = fileStats.st_size;
    mFileSizeLow = mFileSize / numeric_limits<unsigned int>::max();;
    mFileSizeHigh = mFileSize % numeric_limits<unsigned int>::max();;
-   mGranularity = fileStats.st_blksize; //65536;
+   mGranularity = sysconf(_SC_PAGESIZE);
+   if (fileStats.st_blksize > mGranularity && fileStats.st_blksize % mGranularity == 0)
+   {
+      mGranularity = fileStats.st_blksize;
+   }
 #endif
 }
 
