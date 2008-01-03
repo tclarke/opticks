@@ -267,7 +267,14 @@ bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
       if(pInArgList->getPlugInArgValue("Framerate Numerator", framerateNum) &&
          pInArgList->getPlugInArgValue("Framerate Denominator", framerateDen))
       {
-         framerate.assign(framerateNum, framerateDen);
+         try
+         {
+            framerate.assign(framerateNum, framerateDen);
+         }
+         catch (const boost::bad_rational&)
+         {
+            // Do nothing; the code below handles this case
+         }
       }
       if(framerate == 0)
       {
@@ -281,7 +288,15 @@ bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
          }
          if(framerate == 0)
          {
-            framerate.assign(OptionsMovieExporter::getSettingFramerateNum(), OptionsMovieExporter::getSettingFramerateDen());
+            try
+            {
+               framerate.assign(OptionsMovieExporter::getSettingFramerateNum(),
+                  OptionsMovieExporter::getSettingFramerateDen());
+            }
+            catch (const boost::bad_rational&)
+            {
+               // Do nothing; the code below handles this case
+            }
          }
          if(framerate == 0)
          {
@@ -480,7 +495,15 @@ ValidationResultType MovieExporter::validate(const PlugInArgList* pArgList, stri
          }
          if(expectedFrameRate == 0)
          {
-            expectedFrameRate.assign(OptionsMovieExporter::getSettingFramerateNum(), OptionsMovieExporter::getSettingFramerateDen());
+            try
+            {
+               expectedFrameRate.assign(OptionsMovieExporter::getSettingFramerateNum(),
+                  OptionsMovieExporter::getSettingFramerateDen());
+            }
+            catch (const boost::bad_rational&)
+            {
+               // Do nothing; the code below handles this case
+            }
          }
          if(expectedFrameRate == 0)
          {
