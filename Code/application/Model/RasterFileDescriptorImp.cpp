@@ -756,7 +756,7 @@ bool RasterFileDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version)
             {
                bool error;
                FactoryResource<Filename> pTempFilename(StringUtilities::fromXmlString<Filename*>(bandFile, &error));
-               *pFilename = *pTempFilename.get();
+               *pFilename = pTempFilename->getFullPathAndName();
                success = !error;
                if (success == true)
                {
