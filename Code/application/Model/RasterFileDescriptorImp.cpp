@@ -748,20 +748,15 @@ bool RasterFileDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version)
       }
       else if (XMLString::equals(pChild->getNodeName(), X("bandFile")))
       {
-         Filename *pFilename = new FilenameImp;
-         if(pFilename != NULL)
+         string bandFile = A(pChild->getTextContent());
+         if (bandFile.empty() == false)
          {
-            string bandFile = A(pChild->getTextContent());
-            if (bandFile.empty() == false)
+            bool error;
+            FactoryResource<Filename> pTempFilename(StringUtilities::fromXmlString<Filename*>(bandFile, &error));
+            success = !error;
+            if (success)
             {
-               bool error;
-               FactoryResource<Filename> pTempFilename(StringUtilities::fromXmlString<Filename*>(bandFile, &error));
-               *pFilename = pTempFilename->getFullPathAndName();
-               success = !error;
-               if (success == true)
-               {
-                  mBandFiles.push_back(pFilename);
-               }
+               mBandFiles.push_back(pTempFilename.release());
             }
          }
       }
