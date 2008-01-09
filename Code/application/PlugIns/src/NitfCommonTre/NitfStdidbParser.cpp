@@ -419,6 +419,11 @@ bool Nitf::StdidbParser::fromDynamicObject(const DynamicObject& input, ostream& 
       // NOTE: the create DATE and FIELD17 fields are combined into one.
 
       const DateTime *pCreateDTG = dv_cast<DateTime>(&input.getAttribute(STDIDB::FIELD17));
+      if (pCreateDTG == NULL)
+      {
+         return false;
+      }
+
       string mission_FIELD17 = pMissionDTG->getFormattedUtc("%H%M") + "Z";    // FIELD17
       output << sizeString(mission_FIELD17, 5);
 

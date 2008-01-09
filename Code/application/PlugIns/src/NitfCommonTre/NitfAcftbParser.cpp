@@ -592,8 +592,12 @@ bool Nitf::AcftbParser::fromDynamicObject(const DynamicObject& input, ostream& o
       output <<   toString( dv_cast<int>(input.getAttribute(ACFTB::SCNUM)), 6);
 
       // put date in form CCYYMMDD for this TAG
-      const DateTime *pappDTGpdate = dv_cast<DateTime>(&input.getAttribute(ACFTB::PDATE));
-      string CCYYMMDD = pappDTGpdate->getFormattedUtc("%Y%m%d");
+      const DateTime *pAppDtgPDate = dv_cast<DateTime>(&input.getAttribute(ACFTB::PDATE));
+      if (pAppDtgPDate == NULL)
+      {
+         return false;
+      }
+      string CCYYMMDD = pAppDtgPDate->getFormattedUtc("%Y%m%d");
       output << sizeString(CCYYMMDD, 8);
 
       output <<   toString( dv_cast<int>(input.getAttribute(ACFTB::IMHOSTNO)), 6);
@@ -615,8 +619,15 @@ bool Nitf::AcftbParser::fromDynamicObject(const DynamicObject& input, ostream& o
       output << sizeString( dv_cast<string>(input.getAttribute(ACFTB::ABSWVER)), 7);
 
       // put date in form CCYYMMDD for this TAG
-      const DateTime *pappDTGcaldate = dv_cast<DateTime>(&input.getAttribute(ACFTB::CAL_DATE));
-      CCYYMMDD = pappDTGcaldate->getFormattedUtc("%Y%m%d");
+      const DateTime *pAppDtgCalDate = dv_cast<DateTime>(&input.getAttribute(ACFTB::CAL_DATE));
+      if (pAppDtgCalDate == NULL)
+      {
+         CCYYMMDD = "        ";
+      }
+      else
+      {
+         CCYYMMDD = pAppDtgCalDate->getFormattedUtc("%Y%m%d");
+      }
       output << sizeString(CCYYMMDD, 8);
 
       output <<   toString( dv_cast<int>(input.getAttribute(ACFTB::PATCH_TOT)), 4);
