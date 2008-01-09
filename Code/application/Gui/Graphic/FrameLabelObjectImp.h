@@ -43,6 +43,8 @@ public:
    void eraseAnimation(Animation* pAnimation);
    void clearAnimations();
 
+   bool toXml(XMLWriter* pXml) const;
+   bool fromXml(DOMNode* pDocument, unsigned int version);
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
 

@@ -400,7 +400,29 @@ bool AnimationImp::serialize(SessionItemSerializer& serializer) const
    {
       return false;
    }
+
+   VERIFY(mFrameType.isValid());
+
    xml.addAttr("frametype", mFrameType);
+   const AnimationFrame* pFrame = getCurrentFrame();
+   if (pFrame != NULL)
+   {
+      switch (mFrameType)
+      {
+      case FRAME_ID:
+         xml.addAttr("currentFrameID", pFrame->mFrameNumber);
+         break;
+
+      case FRAME_TIME:
+         xml.addAttr("currentFrameTime", pFrame->mTime);
+         break;
+
+      default:
+         VERIFY_MSG(false, "Unsupported frame type - animation will not be saved");
+         break;
+      }
+
+   }
    for(vector<AnimationFrame>::const_iterator frame = mFrames.begin(); frame != mFrames.end(); ++frame)
    {
       xml.pushAddPoint(xml.addElement("frame"));
@@ -423,6 +445,9 @@ bool AnimationImp::deserialize(SessionItemDeserializer &deserializer)
    }
    mFrameType = StringUtilities::fromXmlString<FrameType>(
       A(pRoot->getAttribute(X("frametype"))));
+
+   VERIFY(mFrameType.isValid());
+
    for(DOMNode *pNode = pRoot->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())
    {
       if (XMLString::equals(pNode->getNodeName(),X("DisplayText")))
@@ -440,7 +465,48 @@ bool AnimationImp::deserialize(SessionItemDeserializer &deserializer)
          mFrames.push_back(AnimationFrame(name, number, time));
       }
    }
+
    mCurrentFrameIter = mFrames.end();
-   setCurrentFrame(&mFrames.front());
+   switch(mFrameType)
+   {
+   case FRAME_ID:
+      {
+         unsigned int currentID(0);
+         if (pRoot->hasAttribute(X("currentFrameID")))
+         {
+            currentID = StringUtilities::fromXmlString<unsigned int>(
+               A(pRoot->getAttribute(X("currentFrameID"))));
+            setCurrentFrame(currentID);
+         }
+         else
+         {
+            setCurrentFrame(&mFrames.front());
+            VERIFY_MSG(false,"Problem occurred while restoring the current frame - Frame ID was not found");
+         }
+         break;
+      }
+
+   case FRAME_TIME:
+      {
+         double currentTime(0.0);
+         if (pRoot->hasAttribute(X("currentFrameTime")))
+         {
+            currentTime = StringUtilities::fromXmlString<double>(
+               A(pRoot->getAttribute(X("currentFrameTime"))));
+            setCurrentFrame(currentTime);
+         }
+         else
+         {
+            setCurrentFrame(&mFrames.front());
+            VERIFY_MSG(false,"Problem occurred while restoring the current frame - Frame Time was not found");
+         }
+         break;
+      }
+
+   default:
+      VERIFY_MSG(false, "Unsupported frame type - animation will not be loaded");
+      break;
+   }
+
    return true;
 }
