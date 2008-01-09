@@ -14,14 +14,18 @@
 #include "GraphicLayer.h"
 #include "GraphicLayerImp.h"
 #include "RasterLayer.h"
+#include "SessionManager.h"
 #include "Slot.h"
 #include "SpatialDataView.h"
 #include "TypesFile.h"
 #include "ViewImp.h"
+#include "XercesIncludes.h"
+#include "xmlreader.h"
 
 #include <algorithm>
 #include <vector>
 using namespace std;
+XERCES_CPP_NAMESPACE_USE
 
 #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Replace the getAutoMode()/setAutoMode() interface with the overloaded setAnimations() methods (dadkins)")
 
@@ -345,6 +349,118 @@ bool FrameLabelObjectImp::replicateObject(const GraphicObject* pObject)
    else
    {
       setAnimations(pFrameLabelObject->mAnimations);
+   }
+
+   return true;
+}
+
+bool FrameLabelObjectImp::toXml(XMLWriter* pXml) const
+{
+   if (pXml == NULL)
+   {
+      return false;
+   }
+
+   if (!TextObjectImp::toXml(pXml))
+   {
+      return false;
+   }
+
+   Service<SessionManager> pSession;
+   if (pSession->isSessionLoading() == true)
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Need to add capability to save FrameLabelObject when not saving a session (rforehan)")
+   {
+      if (mpView.get() != NULL)
+      {
+         pXml->addAttr("viewId", mpView->getId());
+      }
+      else
+      {
+         if (mAnimations.size() > 0)
+         {
+            pXml->pushAddPoint(pXml->addElement("Animations"));
+            vector<Animation*>::const_iterator it;
+            for (it=mAnimations.begin(); it!=mAnimations.end(); ++it)
+            {
+               Animation* pAnim = *it;
+               if (pAnim != NULL)
+               {
+                  pXml->pushAddPoint(pXml->addElement("Animation"));
+                  pXml->addAttr("id", pAnim->getId());
+                  pXml->popAddPoint();
+               }
+            }
+            pXml->popAddPoint();
+         }
+      }
+   }
+
+   return true;
+}
+
+bool FrameLabelObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
+{
+   if (pDocument == NULL)
+   {
+      return false;
+   }
+
+   if (!TextObjectImp::fromXml(pDocument, version))
+   {
+      return false;
+   }
+
+   Service<SessionManager> pSession;
+   if (pSession->isSessionLoading() == true)
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Need to add capability to load FrameLabelObject when not loading a session (rforehan)")
+   {
+      DOMElement* pElement = static_cast<DOMElement*> (pDocument);
+      if (pElement != NULL)
+      {
+         // get the view
+         string id(A(pElement->getAttribute(X("viewId"))));
+         if (id.empty() != true)
+         {
+            View* pView = dynamic_cast<View*>(pSession->getSessionItem(id));
+            if (pView != NULL)
+            {
+               setAnimations(pView);
+            }
+         }
+         else
+         {
+            for(DOMNode* pChild = pDocument->getFirstChild(); 
+               pChild != NULL; pChild = pChild->getNextSibling())
+            {
+               if(XMLString::equals(pChild->getNodeName(), X("Animations")))
+               {
+                  vector<Animation*> animations;
+                  for(DOMNode* pGrandchild = pChild->getFirstChild();
+                     pGrandchild != NULL;
+                     pGrandchild = pGrandchild->getNextSibling())
+                  {
+                     if(XMLString::equals(pGrandchild->getNodeName(), X("Animation")))
+                     {
+                        pElement = dynamic_cast<DOMElement*>(pGrandchild);
+                        if (pElement != NULL)
+                        {
+                           string id(A(pElement->getAttribute(X("id"))));
+                           if (id.empty() != true)
+                           {
+                              Animation* pAnim = dynamic_cast<Animation*>(pSession->getSessionItem(id));
+                              if (pAnim != NULL)
+                              {
+                                 animations.push_back(pAnim);
+                              }
+                           }
+                        }
+                     }
+                  }
+                  setAnimations(animations);
+               }
+            }
+         }
+      }
    }
 
    return true;
