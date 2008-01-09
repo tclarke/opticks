@@ -445,7 +445,6 @@ bool Nitf::ImageSubheader::importGeoInformation_2_0(const ossimPropertyInterface
    {
       return false;
    }
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : TODO: Add full NITF 02.00 compatibility for IGEOLO (GeoCentric and UTM_MGRS). (dadkins)")
    else if (iCords == ICORDS_GEOGRAPHIC)
    {
       if (getGCPsFromGeographic(iGeolo, pixelCorners, numPixelCorners, gcps) == false)
@@ -456,6 +455,18 @@ bool Nitf::ImageSubheader::importGeoInformation_2_0(const ossimPropertyInterface
       pFd->setGcps(gcps);
       return true;
    }
+   else if (iCords == ICORDS_UTM_MGRS)
+   {
+      if (getGCPsFromUtmMgrs(iGeolo, pixelCorners, numPixelCorners, gcps) == false)
+      {
+         return false;
+      }
+
+      pFd->setGcps(gcps);
+      return true;
+
+   }
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : TODO: Add full NITF 02.00 compatibility for IGEOLO (GeoCentric). (dadkins)")
 
    return false;
 }
@@ -709,7 +720,7 @@ bool Nitf::ImageSubheader::exportGeoInformation(const RasterDataDescriptor *pDes
       const string fileVersionPath[] = { Nitf::NITF_METADATA, Nitf::FILE_HEADER,
          Nitf::FileHeaderFieldNames::FILE_VERSION, END_METADATA_NAME };
       const DataVariant& fileVersion = pMetadata->getAttributeByPath(fileVersionPath);
-      if (fileVersion.isValid() == false || fileVersion.toXmlString() != Nitf::VERSION_02_10)
+      if (fileVersion.isValid() == false)
       {
          return false;
       }
@@ -728,7 +739,16 @@ bool Nitf::ImageSubheader::exportGeoInformation(const RasterDataDescriptor *pDes
          return false;
       }
 
-      return pOssimCords->setValue(iCords.toXmlString()) && pOssimGeolo->setValue(iGeolo.toXmlString());
+      const string fileVersionStr = fileVersion.toXmlString();
+      const string iCordsStr = iCords.toXmlString();
+      const string iGeoloStr = iGeolo.toXmlString();
+       if (fileVersionStr == Nitf::VERSION_02_10 || (fileVersionStr == Nitf::VERSION_02_00 &&
+          (iCordsStr == ICORDS_UTM_MGRS || iCordsStr == ICORDS_GEOGRAPHIC)))
+      {
+         return pOssimCords->setValue(iCordsStr) && pOssimGeolo->setValue(iGeoloStr);
+      }
+
+       return false;
    }
 
    vector<LocationType> coords;

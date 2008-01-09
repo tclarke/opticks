@@ -480,8 +480,7 @@ bool Nitf::NitfImporter::validate(const DataDescriptor* pDescriptor, string& err
       const string iCordsPath[] = { Nitf::NITF_METADATA, Nitf::IMAGE_SUBHEADER,
          Nitf::ImageSubheaderFieldNames::ICORDS, END_METADATA_NAME };
       string iCords = pMetadata->getAttributeByPath(iCordsPath).toDisplayString();
-      if (iCords == Nitf::ImageSubheaderFieldValues::ICORDS_GEOCENTRIC ||
-          iCords == Nitf::ImageSubheaderFieldValues::ICORDS_UTM_MGRS)
+      if (iCords == Nitf::ImageSubheaderFieldValues::ICORDS_GEOCENTRIC)
       {
          errorMessage += "The ICORDS is not a supported value.\n";
       }
