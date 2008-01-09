@@ -60,10 +60,10 @@ bool GraphicElementImp::fromXml(DOMNode* pDocument, unsigned int version)
       string geocentric(A(pElement->getAttribute(X("geocentric"))));
       if ((geocentric == "true") || (geocentric == "1"))
       {
-         if (!setGeocentric(true))
-         {
-            return false;
-         }
+         mpGeocentricSource.reset(dynamic_cast<RasterElement*>(getParent()));
+         GraphicGroupImp *pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
+         VERIFY(pGroup != NULL);
+         pGroup->enableGeo();
       }
    }
 
