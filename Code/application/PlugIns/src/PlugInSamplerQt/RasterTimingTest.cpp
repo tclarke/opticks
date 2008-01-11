@@ -90,13 +90,14 @@ bool RasterTimingTest::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
       {
          pElement->getStatistics(pDesc->getActiveBand(i))->getMin();
       }
-      const int frameiterations = 1000;
+      const int frameiterations = 10000;
       clock_t startTime = clock();
+      QWidget *pWidget = pView->getWidget();
       for (int i=0; i<frameiterations; ++i, ++frameNumber)
       {
          if (frameNumber >= bands) frameNumber = 0;
          pLayer->setDisplayedBand(GRAY, pDesc->getActiveBand(frameNumber));
-         QApplication::processEvents();
+         if (pWidget) pWidget->repaint();
          if ((i+1)%(frameiterations/10) == 0)
          {
             QString message = QString("Frame ") + QString::number(i+1) + QString(" of ") + QString::number(frameiterations);
