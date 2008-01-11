@@ -12,14 +12,16 @@
 #include <QtCore/QString>
 #include <QtGui/QIcon>
 #include <QtGui/QApplication>
+#include <QtGui/QMessageBox>
 
 #include "AnimationAdapter.h"
 #include "AnimationController.h"
 #include "AnimationControllerImp.h"
 #include "AnimationToolBar.h"
+#include "AppVerify.h"
 #include "ContextMenuAction.h"
 #include "ContextMenuActions.h"
-#include "AppVerify.h"
+#include "HighResolutionTimer.h"
 #include "Icons.h"
 #include "SessionItemDeserializer.h"
 #include "SessionItemSerializer.h"
@@ -400,9 +402,7 @@ void AnimationControllerImp::play()
    if (find(mRunningControllers.begin(), mRunningControllers.end(), this) == mRunningControllers.end())
    {
       // Update the system time in milliseconds at timer start
-      timeb systemTime;
-      ftime(&systemTime);
-      mStartTime = (systemTime.time * 1000.0) + systemTime.millitm;
+      mStartTime = HrTimer::convertToSeconds(HrTimer::getTime()) * 1000.0;
       mRunningControllers.push_back(this);
    }
    if (mRunningControllers.size() == 1)
@@ -711,9 +711,12 @@ void AnimationControllerImp::updateFrameData()
    mCurrentFrame = -1;
    setCurrentFrame(currentFrame);
 }
-
+static int repeatCount = 0;
 void AnimationControllerImp::runAnimations()
 {
+   int startTime = time(NULL);
+   repeatCount = 0;
+   int frameCount = 0;
    while (mRunningControllers.empty() == false)
    {
       mppActiveController = mRunningControllers.begin();
@@ -722,6 +725,7 @@ void AnimationControllerImp::runAnimations()
          AnimationControllerImp *pActiveController = *mppActiveController;
          VERIFYNR(pActiveController != NULL);
          pActiveController->advance();
+         ++frameCount;
          QApplication::processEvents();
          if (mppActiveController != mRunningControllers.end() && pActiveController == *mppActiveController)
          {
@@ -730,14 +734,14 @@ void AnimationControllerImp::runAnimations()
          // else, it was already incremented when being removed from the list in ACI::stop
       }
    }
+   int stopTime = time(NULL);
+   QMessageBox::information(NULL, "FPS", QString::number(210*repeatCount / (double)(stopTime-startTime)));
 }
 
 void AnimationControllerImp::advance()
 {
    // Get the current system time in milliseconds
-   timeb systemTime;
-   ftime(&systemTime);
-   double currentTime = (systemTime.time * 1000.0) + systemTime.millitm;
+   double currentTime = HrTimer::convertToSeconds(HrTimer::getTime()) * 1000.0;
 
    // Compute a ratio of the elapsed system time since the last timeout and expected time
    double elapsedTime = currentTime - mStartTime;
@@ -760,6 +764,7 @@ void AnimationControllerImp::advance()
          }
          else if (mCycle == REPEAT)
          {
+            ++repeatCount;
             nextFrame = mStartFrame;
          }
          else if (mCycle == BOUNCE)
