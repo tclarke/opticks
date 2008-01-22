@@ -84,8 +84,6 @@ void ViewObjectImp::setView(View* pView)
    {
       VERIFYNR(disconnect(mpView, SIGNAL(backgroundColorChanged(const QColor&)), this,
          SLOT(setBackgroundColor(const QColor&))));
-      VERIFYNR(disconnect(mpView, SIGNAL(refreshRegistered()), this, SLOT(refresh())));
-      VERIFYNR(disconnect(mpView, SIGNAL(refreshed()), this, SLOT(redraw())));
 
       View* pOldView = dynamic_cast<View*>(mpView);
       if (pOldView != NULL)
@@ -179,6 +177,7 @@ void ViewObjectImp::setView(View* pView)
          mpView->enableReleaseInfo(false);
          mpView->blockUndo();
          mpView->hide();
+         mpView->setUpdatesEnabled(false);
 
          // Update classification string.
          // If new object has a higher level than the existing product,
@@ -211,13 +210,10 @@ void ViewObjectImp::setView(View* pView)
          // Connections
          VERIFYNR(connect(mpView, SIGNAL(backgroundColorChanged(const QColor&)), this,
             SLOT(setBackgroundColor(const QColor&))));
-         VERIFYNR(connect(mpView, SIGNAL(refreshRegistered()), this, SLOT(refresh())));
-         VERIFYNR(connect(mpView, SIGNAL(refreshed()), this, SLOT(redraw())));
       }
    }
 
    setBackgroundColor(backgroundColor);
-   refresh();
 }
 
 View* ViewObjectImp::getView() const
@@ -439,32 +435,6 @@ void ViewObjectImp::updateTextColor()
 
    ColorType textColor(clrText.red(), clrText.green(), clrText.blue());
    mpInvalidText->setTextColor(textColor);
-}
-
-void ViewObjectImp::refresh()
-{
-   GraphicLayer* pLayer = getLayer();
-   if (pLayer != NULL)
-   {
-      View* pView = pLayer->getView();
-      if (pView != NULL)
-      {
-         pView->refresh();
-      }
-   }
-}
-
-void ViewObjectImp::redraw()
-{
-   GraphicLayer* pLayer = getLayer();
-   if (pLayer != NULL)
-   {
-      ViewImp* pView = dynamic_cast<ViewImp*>(pLayer->getView());
-      if (pView != NULL)
-      {
-         pView->updateGL();
-      }
-   }
 }
 
 bool ViewObjectImp::processMouseRelease(LocationType screenCoord, 

@@ -203,7 +203,6 @@ public slots:
    virtual void setInsetPoint(const QPoint& screenCoord);
    virtual void setInsetPoint(const LocationType &worldCoord);
    virtual bool enableCrossHair(bool bEnable);
-   virtual void updateGL();
    virtual void refresh();
 
    void blockUndo();
@@ -223,8 +222,6 @@ signals:
    void extentsChanged(double dMinX, double dMinY, double dMaxX, double dMaxY);
    void selectionBoxChanged(const std::vector<LocationType>& selectionBox);
    void displayAreaChanged();
-   void refreshRegistered();
-   void refreshed();
 
 protected:
    bool event(QEvent* pEvent);
