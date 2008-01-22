@@ -1314,16 +1314,9 @@ bool ViewImp::enableCrossHair(bool bEnable)
    return false;
 }
 
-void ViewImp::updateGL()
-{
-   QGLWidget::updateGL();
-   emit refreshed();
-}
-
 void ViewImp::refresh()
 {
-   QGLWidget::update();
-   emit refreshRegistered();
+   update();
 }
 
 bool ViewImp::event(QEvent* pEvent)

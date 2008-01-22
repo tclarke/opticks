@@ -44,8 +44,6 @@ public:
 protected slots:
    void setBackgroundColor(const QColor& clrBackground);
    void updateTextColor();
-   void refresh();
-   void redraw();
 
 private:
    ViewImp* mpView;
