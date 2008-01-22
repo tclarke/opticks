@@ -1376,10 +1376,15 @@ bool PerspectiveViewImp::toXml(XMLWriter* pXml) const
    }
 
    stringstream buf;
-   pXml->addAttr("zoom", getZoomPercentage());
-   pXml->addAttr("rotation", getRotation());
-   pXml->addAttr("pitch", getPitch());
-   pXml->addAttr("pixelAspect", getPixelAspect());
+   pXml->addAttr("distance", mDist);
+   pXml->addAttr("fullDistance", mFullDistance);
+   pXml->addAttr("center", mCenter);
+   pXml->addAttr("heading", mHeading);
+   pXml->addAttr("pitch", mPitch);
+   pXml->addAttr("fieldOfView", mFov);
+   pXml->addAttr("frontPlane", mFrontPlane);
+   pXml->addAttr("backPlane", mBackPlane);
+   pXml->addAttr("pixelAspect", mPixelAspect);
    return true;
 }
 
@@ -1391,13 +1396,16 @@ bool PerspectiveViewImp::fromXml(DOMNode* pDocument, unsigned int version)
    }
 
    DOMElement *pElem = static_cast<DOMElement*>(pDocument);
-   zoomTo(StringUtilities::fromXmlString<double>(
-      A(pElem->getAttribute(X("zoom")))));
-   rotateTo(StringUtilities::fromXmlString<double>(
-      A(pElem->getAttribute(X("rotation")))));
-   flipTo(StringUtilities::fromXmlString<double>(
-      A(pElem->getAttribute(X("pitch")))));
-   setPixelAspect(StringUtilities::fromXmlString<double>(
-      A(pElem->getAttribute(X("pixelAspect")))));
+   mDist = StringUtilities::fromXmlString<double>(A(pElem->getAttribute(X("distance"))));
+   mFullDistance = StringUtilities::fromXmlString<double>(A(pElem->getAttribute(X("fullDistance"))));
+   mCenter = StringUtilities::fromXmlString<LocationType>(A(pElem->getAttribute(X("center"))));
+   mHeading = StringUtilities::fromXmlString<double>(A(pElem->getAttribute(X("heading"))));
+   mPitch = StringUtilities::fromXmlString<double>(A(pElem->getAttribute(X("pitch"))));
+   mFov = StringUtilities::fromXmlString<double>(A(pElem->getAttribute(X("fieldOfView"))));
+   mFrontPlane = StringUtilities::fromXmlString<double>(A(pElem->getAttribute(X("frontPlane"))));
+   mBackPlane = StringUtilities::fromXmlString<double>(A(pElem->getAttribute(X("backPlane"))));
+   mPixelAspect = StringUtilities::fromXmlString<double>(A(pElem->getAttribute(X("pixelAspect"))));
+
+   updateMatrices();
    return true;
 }
