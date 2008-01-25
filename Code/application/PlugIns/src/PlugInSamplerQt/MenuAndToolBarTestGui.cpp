@@ -14,14 +14,13 @@
 
 #include <QtCore/QVariant>
 #include <QtGui/QAction>
+#include <QtGui/QComboBox>
 #include <QtGui/QDoubleSpinBox>
 #include <QtGui/QLabel>
-#include <QtGui/QComboBox>
-#include <QtGui/QPushButton>
 #include <QtGui/QLayout>
-#include <QtGui/QGridLayout>
 #include <QtGui/QMenu>
-
+#include <QtGui/QPushButton>
+#include <QtGui/QWidgetAction>
 
 MenuAndToolBarTestGui::MenuAndToolBarTestGui( QWidget* pParent, const char* pName, bool modal )
 : QDialog(pParent)
@@ -192,25 +191,21 @@ void MenuAndToolBarTestGui::reorderToolboxToolbarButtons()
       std::vector<QAction*> tempItems = pToolboxBar->getItems();
       for( unsigned int index = 0; index < tempItems.size(); index++ )
       {
-         pToolboxBar->removeItem( tempItems.at( index ) );
+         QAction* pAction = tempItems.at(index);
+         if ((pAction != NULL) && (dynamic_cast<QWidgetAction*>(pAction) == NULL))
+         {
+            pToolboxBar->removeItem(pAction);
+         }
       }
 
-      if( !mToolbarItems.empty() )
+      std::vector<QAction*>::reverse_iterator iter;
+      for (iter = mToolbarItems.rbegin(); iter != mToolbarItems.rend(); ++iter)
       {
-         pToolboxBar->addButton( mToolbarItems.at( 13 ) );
-         pToolboxBar->addButton( mToolbarItems.at( 12 ) );
-         pToolboxBar->addButton( mToolbarItems.at( 11 ) );
-         pToolboxBar->addButton( mToolbarItems.at( 10 ) );
-         pToolboxBar->addButton( mToolbarItems.at( 9 ) );
-         pToolboxBar->addButton( mToolbarItems.at( 8 ) );
-         pToolboxBar->addButton( mToolbarItems.at( 7 ) );
-         pToolboxBar->addButton( mToolbarItems.at( 6 ) );
-         pToolboxBar->addButton( mToolbarItems.at( 5 ) );
-         pToolboxBar->addButton( mToolbarItems.at( 4 ) );
-         pToolboxBar->addButton( mToolbarItems.at( 3 ) );
-         pToolboxBar->addButton( mToolbarItems.at( 2 ) );
-         pToolboxBar->addButton( mToolbarItems.at( 1 ) );
-         pToolboxBar->addButton( mToolbarItems.at( 0 ) );
+         QAction* pAction = *iter;
+         if ((pAction != NULL) && (dynamic_cast<QWidgetAction*>(pAction) == NULL))
+         {
+            pToolboxBar->addButton(pAction);
+         }
       }
    }
 }
@@ -223,25 +218,21 @@ void MenuAndToolBarTestGui::resetToolboxToolbarButtons()
       std::vector<QAction*> tempItems = pToolboxBar->getItems();
       for( unsigned int index = 0; index < tempItems.size(); index++ )
       {
-         pToolboxBar->removeItem( tempItems.at( index ) );
+         QAction* pAction = tempItems.at(index);
+         if ((pAction != NULL) && (dynamic_cast<QWidgetAction*>(pAction) == NULL))
+         {
+            pToolboxBar->removeItem(pAction);
+         }
       }
 
-      if( !mToolbarItems.empty() )
+      std::vector<QAction*>::iterator iter;
+      for (iter = mToolbarItems.begin(); iter != mToolbarItems.end(); ++iter)
       {
-         pToolboxBar->addButton( mToolbarItems.at( 0 ) );
-         pToolboxBar->addButton( mToolbarItems.at( 1 ) );
-         pToolboxBar->addButton( mToolbarItems.at( 2 ) );
-         pToolboxBar->addButton( mToolbarItems.at( 3 ) );
-         pToolboxBar->addButton( mToolbarItems.at( 4 ) );
-         pToolboxBar->addButton( mToolbarItems.at( 5 ) );
-         pToolboxBar->addButton( mToolbarItems.at( 6 ) );
-         pToolboxBar->addButton( mToolbarItems.at( 7 ) );
-         pToolboxBar->addButton( mToolbarItems.at( 8 ) );
-         pToolboxBar->addButton( mToolbarItems.at( 9 ) );
-         pToolboxBar->addButton( mToolbarItems.at( 10 ) );
-         pToolboxBar->addButton( mToolbarItems.at( 11 ) );
-         pToolboxBar->addButton( mToolbarItems.at( 12 ) );
-         pToolboxBar->addButton( mToolbarItems.at( 13 ) );
+         QAction* pAction = *iter;
+         if ((pAction != NULL) && (dynamic_cast<QWidgetAction*>(pAction) == NULL))
+         {
+            pToolboxBar->addButton(pAction);
+         }
       }
    }
 }
