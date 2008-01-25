@@ -12,6 +12,7 @@
 #include <QtCore/QDateTime>
 #include <QtCore/QEvent>
 #include <QtGui/QLayout>
+#include <QtGui/QLineEdit>
 #include <QtGui/QToolButton>
 #include <QtGui/QWidgetAction>
 
@@ -103,11 +104,18 @@ AnimationToolBarImp::AnimationToolBarImp(const string& id, QWidget* parent) :
    mpFrameSpeedCombo->setInsertPolicy(QComboBox::NoInsert);
    mpFrameSpeedCombo->setToolTip("Speed (X)");
    mpFrameSpeedCombo->setEditable(true);
+   mpFrameSpeedCombo->setCompleter(NULL);
    QDoubleValidator* pValidator = new QDoubleValidator(mpFrameSpeedCombo);
    pValidator->setDecimals(2);
 
    mpFrameSpeedCombo->setValidator(pValidator);
-   connect(mpFrameSpeedCombo, SIGNAL(editTextChanged(const QString&)), this, SLOT(setFrameSpeed(const QString&)));
+   VERIFYNR(connect(mpFrameSpeedCombo, SIGNAL(activated(const QString&)), this, SLOT(setFrameSpeed(const QString&))));
+
+   QLineEdit* pSpeedEdit = mpFrameSpeedCombo->lineEdit();
+   if (pSpeedEdit != NULL)
+   {
+      VERIFYNR(connect(pSpeedEdit, SIGNAL(editingFinished()), this, SLOT(setFrameSpeed())));
+   }
 
    addWidget(mpFrameSpeedCombo);
 
@@ -130,9 +138,9 @@ AnimationToolBarImp::AnimationToolBarImp(const string& id, QWidget* parent) :
    mpFrameSlider->setFixedWidth(200);
    mpFrameSlider->setToolTip("The current position in the animation");
    mpFrameSlider->setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed));
-   connect(mpFrameSlider, SIGNAL(sliderPressed()), this, SLOT(activateSlider()));
-   connect(mpFrameSlider, SIGNAL(sliderReleased()), this, SLOT(releaseSlider()));
-   connect(mpFrameSlider, SIGNAL(actionTriggered(int)), this, SLOT(sliderActionTriggered(int)));
+   VERIFYNR(connect(mpFrameSlider, SIGNAL(sliderPressed()), this, SLOT(activateSlider())));
+   VERIFYNR(connect(mpFrameSlider, SIGNAL(sliderReleased()), this, SLOT(releaseSlider())));
+   VERIFYNR(connect(mpFrameSlider, SIGNAL(actionTriggered(int)), this, SLOT(sliderActionTriggered(int))));
 
    QHBoxLayout *pSliderLayout = new QHBoxLayout(pSliderWidget);
    pSliderLayout->setMargin(0);
@@ -153,7 +161,7 @@ AnimationToolBarImp::AnimationToolBarImp(const string& id, QWidget* parent) :
    mpCycle = new AnimationCycleButton(this);
    mpCycle->setStatusTip("Specifies the play behavior when the end of the animation is reached");
    mpCycle->setToolTip("Animation Cycle");
-   connect(mpCycle, SIGNAL(valueChanged(AnimationCycle)), this, SLOT(updateAnimationCycle(AnimationCycle)));
+   VERIFYNR(connect(mpCycle, SIGNAL(valueChanged(AnimationCycle)), this, SLOT(updateAnimationCycle(AnimationCycle))));
    addWidget(mpCycle);
 
    // Drop frames
@@ -162,9 +170,11 @@ AnimationToolBarImp::AnimationToolBarImp(const string& id, QWidget* parent) :
    mpDropFramesAction->setToolTip("Drop Frames");
    mpDropFramesAction->setCheckable(true);
    pDesktop->initializeAction(mpDropFramesAction, shortcutContext);
-   connect(mpDropFramesAction, SIGNAL(toggled(bool)), this, SLOT(setCanDropFrames(bool)));
+   VERIFYNR(connect(mpDropFramesAction, SIGNAL(toggled(bool)), this, SLOT(setCanDropFrames(bool))));
 
    // Initialization
+   setFocusPolicy(Qt::ClickFocus);     // Required to set the frame speed if the user edits the value
+                                       // and clicks the Play button without pressing the return key
    updateAnimationCycle(PLAY_ONCE);
    updateAnimationControls();
 }
@@ -344,6 +354,12 @@ void AnimationToolBarImp::setCurrentFrame(int frameIndex)
    }
 }
 
+void AnimationToolBarImp::setFrameSpeed()
+{
+   QString frameSpeed = mpFrameSpeedCombo->currentText();
+   setFrameSpeed(frameSpeed);
+}
+
 void AnimationToolBarImp::setFrameSpeed(const QString& strSpeed)
 {
    // check for an empty string
@@ -520,17 +536,20 @@ void AnimationToolBarImp::setAnimationController(AnimationController* pControlle
       AnimationControllerImp* pControllerImp = dynamic_cast<AnimationControllerImp*>(mpController);
       if (pControllerImp != NULL)
       {
-         disconnect(pControllerImp, SIGNAL(frameRangeChanged()), this, SLOT(updateFrameRange()));
-         disconnect(pControllerImp, SIGNAL(frameChanged(double)), this, SLOT(updateCurrentFrame(double)));
-         disconnect(pControllerImp, SIGNAL(animationStateChanged(AnimationState)), this,
-            SLOT(updateAnimationState(AnimationState)));
-         disconnect(pControllerImp, SIGNAL(animationCycleChanged(AnimationCycle)), this,
-            SLOT(updateAnimationCycle(AnimationCycle)));
-         disconnect(pControllerImp, SIGNAL(intervalMultiplierChanged(double)), this, SLOT(updateFrameSpeed(double)));
-         disconnect(pControllerImp, SIGNAL(animationAdded(Animation*)), this, SLOT(updateAnimationControls()));
-         disconnect(pControllerImp, SIGNAL(animationRemoved(Animation*)), this, SLOT(updateAnimationControls()));
-         disconnect(pControllerImp, SIGNAL(canDropFramesChanged(bool)), this,
-            SLOT(setCanDropFrames(bool)));
+         VERIFYNR(disconnect(pControllerImp, SIGNAL(frameRangeChanged()), this, SLOT(updateFrameRange())));
+         VERIFYNR(disconnect(pControllerImp, SIGNAL(frameChanged(double)), this, SLOT(updateCurrentFrame(double))));
+         VERIFYNR(disconnect(pControllerImp, SIGNAL(animationStateChanged(AnimationState)), this,
+            SLOT(updateAnimationState(AnimationState))));
+         VERIFYNR(disconnect(pControllerImp, SIGNAL(animationCycleChanged(AnimationCycle)), this,
+            SLOT(updateAnimationCycle(AnimationCycle))));
+         VERIFYNR(disconnect(pControllerImp, SIGNAL(intervalMultiplierChanged(double)), this,
+            SLOT(updateFrameSpeed(double))));
+         VERIFYNR(disconnect(pControllerImp, SIGNAL(animationAdded(Animation*)), this,
+            SLOT(updateAnimationControls())));
+         VERIFYNR(disconnect(pControllerImp, SIGNAL(animationRemoved(Animation*)), this,
+            SLOT(updateAnimationControls())));
+         VERIFYNR(disconnect(pControllerImp, SIGNAL(canDropFramesChanged(bool)), this,
+            SLOT(setCanDropFrames(bool))));
       }
    }
 
@@ -546,17 +565,18 @@ void AnimationToolBarImp::setAnimationController(AnimationController* pControlle
       AnimationControllerImp* pControllerImp = dynamic_cast<AnimationControllerImp*>(mpController);
       if (pControllerImp != NULL)
       {
-         connect(pControllerImp, SIGNAL(frameRangeChanged()), this, SLOT(updateFrameRange()));
-         connect(pControllerImp, SIGNAL(frameChanged(double)), this, SLOT(updateCurrentFrame(double)));
-         connect(pControllerImp, SIGNAL(animationStateChanged(AnimationState)), this,
-            SLOT(updateAnimationState(AnimationState)));
-         connect(pControllerImp, SIGNAL(animationCycleChanged(AnimationCycle)), this,
-            SLOT(updateAnimationCycle(AnimationCycle)));
-         connect(pControllerImp, SIGNAL(intervalMultiplierChanged(double)), this, SLOT(updateFrameSpeed(double)));
-         connect(pControllerImp, SIGNAL(animationAdded(Animation*)), this, SLOT(updateAnimationControls()));
-         connect(pControllerImp, SIGNAL(animationRemoved(Animation*)), this, SLOT(updateAnimationControls()));
-         connect(pControllerImp, SIGNAL(canDropFramesChanged(bool)), this,
-            SLOT(setCanDropFrames(bool)));
+         VERIFYNR(connect(pControllerImp, SIGNAL(frameRangeChanged()), this, SLOT(updateFrameRange())));
+         VERIFYNR(connect(pControllerImp, SIGNAL(frameChanged(double)), this, SLOT(updateCurrentFrame(double))));
+         VERIFYNR(connect(pControllerImp, SIGNAL(animationStateChanged(AnimationState)), this,
+            SLOT(updateAnimationState(AnimationState))));
+         VERIFYNR(connect(pControllerImp, SIGNAL(animationCycleChanged(AnimationCycle)), this,
+            SLOT(updateAnimationCycle(AnimationCycle))));
+         VERIFYNR(connect(pControllerImp, SIGNAL(intervalMultiplierChanged(double)), this,
+            SLOT(updateFrameSpeed(double))));
+         VERIFYNR(connect(pControllerImp, SIGNAL(animationAdded(Animation*)), this, SLOT(updateAnimationControls())));
+         VERIFYNR(connect(pControllerImp, SIGNAL(animationRemoved(Animation*)), this, SLOT(updateAnimationControls())));
+         VERIFYNR(connect(pControllerImp, SIGNAL(canDropFramesChanged(bool)), this,
+            SLOT(setCanDropFrames(bool))));
 
          mpDropFramesAction->setChecked(pControllerImp->getCanDropFrames());
      }

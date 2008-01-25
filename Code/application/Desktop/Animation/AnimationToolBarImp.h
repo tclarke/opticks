@@ -57,6 +57,7 @@ protected slots:
 
    void setCurrentFrame(int frameIndex);
    void sliderActionTriggered(int action);
+   void setFrameSpeed();
    void setFrameSpeed(const QString& strSpeed);
 
    // Methods to update the widgets from the animation controller
