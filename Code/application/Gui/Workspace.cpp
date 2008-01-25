@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #include "Workspace.h"
 #include "DesktopServices.h"
 #include "WorkspaceWindow.h"
@@ -336,7 +334,18 @@ bool Workspace::tileWindows(const vector<WorkspaceWindow*>& windows,
 
 void Workspace::setWindow(QWidget* pWidget, int x, int y, int winWidth, int winHeight)
 {
-   pWidget->parentWidget()->resize(winWidth,winHeight);
-   pWidget->parentWidget()->move(x,y);
-   pWidget->parentWidget()->raise();
+   if (pWidget == NULL)
+   {
+      return;
+   }
+
+   pWidget->showNormal();
+
+   QWidget* pParent = pWidget->parentWidget();
+   if (pParent != NULL)
+   {
+      pParent->resize(winWidth, winHeight);
+      pParent->move(x, y);
+      pParent->raise();
+   }
 }
