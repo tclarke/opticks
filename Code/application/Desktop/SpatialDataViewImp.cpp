@@ -1869,15 +1869,17 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
                               }
                               else // eMode == RGB_MODE
                               {
-                                 double dRedValue = 0.0;
-                                 double dGreenValue = 0.0;
-                                 double dBlueValue = 0.0;
+                                 QString redValue = "N/A";
+                                 QString greenValue = "N/A";
+                                 QString blueValue = "N/A";
 
                                  // Get the red band value
                                  DimensionDescriptor redBand = pRasterLayer->getDisplayedBand(RED);
                                  if (redBand.isValid())
                                  {
                                     // Get the value from the displayed raster element
+                                    double dRedValue = 0.0;
+
                                     RasterElement* pDisplayedRaster = pRasterLayer->getDisplayedRasterElement(RED);
                                     if (pDisplayedRaster != NULL)
                                     {
@@ -1889,6 +1891,8 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
                                     {
                                        dRedValue *= pUnits->getScaleFromStandard();
                                     }
+
+                                    redValue = QString::number(dRedValue);
                                  }
 
                                  // Get the green band value
@@ -1896,6 +1900,8 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
                                  if (greenBand.isValid())
                                  {
                                     // Get the value from the displayed raster element
+                                    double dGreenValue = 0.0;
+
                                     RasterElement* pDisplayedRaster = pRasterLayer->getDisplayedRasterElement(GREEN);
                                     if (pDisplayedRaster != NULL)
                                     {
@@ -1907,6 +1913,8 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
                                     {
                                        dGreenValue *= pUnits->getScaleFromStandard();
                                     }
+
+                                    greenValue = QString::number(dGreenValue);
                                  }
 
                                  // Get the blue band value
@@ -1914,6 +1922,8 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
                                  if (blueBand.isValid())
                                  {
                                     // Get the value from the displayed raster element
+                                    double dBlueValue = 0.0;
+
                                     RasterElement* pDisplayedRaster = pRasterLayer->getDisplayedRasterElement(BLUE);
                                     if (pDisplayedRaster != NULL)
                                     {
@@ -1925,11 +1935,13 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
                                     {
                                        dBlueValue *= pUnits->getScaleFromStandard();
                                     }
+
+                                    blueValue = QString::number(dBlueValue);
                                  }
 
-                                 if ((redBand.isValid()) && (greenBand.isValid()) && (blueBand.isValid()))
+                                 if ((redBand.isValid()) || (greenBand.isValid()) || (blueBand.isValid()))
                                  {
-                                    pBar->setCubeValue(dRedValue, dGreenValue, dBlueValue);
+                                    pBar->setCubeValue(redValue, greenValue, blueValue);
                                  }
                                  else
                                  {

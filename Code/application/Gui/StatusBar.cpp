@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #include "StatusBar.h"
 #include "ConfigurationSettings.h"
 #include "DataVariant.h"
@@ -204,15 +202,21 @@ void StatusBar::showGeoCoords(bool bShow)
 
 void StatusBar::setCubeValue(double gray)
 {
-   QString strValue = QString::number(gray);
-   m_pCubeValue_Label->setText(" Gray: " + strValue + " ");
+   setCubeValue(QString::number(gray));
+}
+
+void StatusBar::setCubeValue(const QString& strGray)
+{
+   m_pCubeValue_Label->setText(" Gray: " + strGray + " ");
 }
 
 void StatusBar::setCubeValue(double red, double green, double blue)
 {
-   QString strRed = QString::number(red);
-   QString strGreen = QString::number(green);
-   QString strBlue = QString::number(blue);
+   setCubeValue(QString::number(red), QString::number(green), QString::number(blue));
+}
+
+void StatusBar::setCubeValue(const QString& strRed, const QString& strGreen, const QString& strBlue)
+{
    m_pCubeValue_Label->setText(" R,G,B: " + strRed + ", " + strGreen + ", " + strBlue + " ");
 }
 

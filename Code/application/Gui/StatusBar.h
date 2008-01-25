@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #ifndef STATUSBAR_H
 #define STATUSBAR_H
 
@@ -54,7 +52,9 @@ public slots:
    void showGeoCoords(bool bShow);
 
    void setCubeValue(double gray);
+   void setCubeValue(const QString& strGray);
    void setCubeValue(double red, double green, double blue);
+   void setCubeValue(const QString& strRed, const QString& strGreen, const QString& strBlue);
    void clearCubeValue();
    void showCubeValue(bool bShow);
 
