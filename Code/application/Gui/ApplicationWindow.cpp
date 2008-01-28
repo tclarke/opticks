@@ -2369,7 +2369,7 @@ void ApplicationWindow::print()
 
 void ApplicationWindow::openSession()
 {
-   QString filename = QFileDialog::getOpenFileName(this, "Open Session File", QString(), "*.session");
+   QString filename = QFileDialog::getOpenFileName(this, "Open Session File", QString(), "Session Files (*.session)");
    if (filename.isEmpty() == false)
    {
       openSession(filename);
@@ -2552,36 +2552,40 @@ bool ApplicationWindow::saveSessionAs()
    }
    for (;;)
    {
-      QString filename = QFileDialog::getSaveFileName(this, "Save Session As...", initial, "*.session",
-         NULL, QFileDialog::DontConfirmOverwrite);
+      QString filename = QFileDialog::getSaveFileName(this, "Save Session As...", initial,
+         "Session Files (*.session)", NULL, QFileDialog::DontConfirmOverwrite);
       if (filename.isEmpty()) // user pressed Cancel button
       {
          return false;
       }
-      else
-      {
-         FileResource file (filename.toStdString().c_str(), "r");
-         if (file.get() != NULL)
-         {
-            int button = QMessageBox::question(this, "Save Session As", 
-               "The file already exists. Do you wish to overwrite it?", 
-               QMessageBox::Yes | QMessageBox::Default, QMessageBox::No, 
-               QMessageBox::Cancel| QMessageBox::Escape);
-            if (button == QMessageBox::Cancel)
-            {
-               return false;
-            }
-            if (button == QMessageBox::No) 
-            {
-               initial = filename;
-               continue;
-            }
-         }
 
-         mSessionFilename = filename.toStdString();
-         return saveSession();
+      QFileInfo fileInfo = QFileInfo(filename);
+      if (fileInfo.suffix() != "session")
+      {
+         filename += ".session";
       }
+
+      FileResource file(filename.toStdString().c_str(), "r");
+      if (file.get() != NULL)
+      {
+         int button = QMessageBox::question(this, "Save Session As", "The file already exists.  "
+            "Do you wish to overwrite it?", QMessageBox::Yes | QMessageBox::Default, QMessageBox::No,
+            QMessageBox::Cancel | QMessageBox::Escape);
+         if (button == QMessageBox::Cancel)
+         {
+            return false;
+         }
+         else if (button == QMessageBox::No)
+         {
+            initial = filename;
+            continue;
+         }
+      }
+
+      mSessionFilename = filename.toStdString();
+      return saveSession();
    }
+
    return false;
 }
 
