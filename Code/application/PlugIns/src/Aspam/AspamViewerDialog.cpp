@@ -297,7 +297,7 @@ void AspamViewerDialog::populateAspamList()
    catch(AssertException exc)
    {
       Service<DesktopServices> pDesktop;
-      pDesktop->showMessageBox("ASPAM Error", string("A critical error occured: ") + exc.getText(), "Ok");
+      pDesktop->showMessageBox("ASPAM Error", string("A critical error occurred: ") + exc.getText(), "Ok");
    }
 }
 

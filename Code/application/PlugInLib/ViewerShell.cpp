@@ -10,6 +10,7 @@
 #include <QtGui/QWidget>
 
 #include "ViewerShell.h"
+#include "ApplicationServices.h"
 #include "DesktopServices.h"
 #include "PlugInCallback.h"
 #include "Slot.h"
@@ -19,12 +20,13 @@ ViewerShell::ViewerShell()
 {
    setType(PlugInManagerServices::ViewerType());
    destroyAfterExecute(false);
-   Service<DesktopServices>()->attach(SIGNAL_NAME(DesktopServices, ApplicationWindowClosed), Slot(this, &ViewerShell::cleanupWidget));
+   mpAppSvcsAttachment.addSignal(SIGNAL_NAME(ApplicationServices, SessionClosed),
+      Slot(this, &ViewerShell::cleanupWidget));
+   mpAppSvcsAttachment.reset(Service<ApplicationServices>().get());
 }
 
 ViewerShell::~ViewerShell()
 {
-   Service<DesktopServices>()->detach(SIGNAL_NAME(DesktopServices, ApplicationWindowClosed), Slot(this, &ViewerShell::cleanupWidget));
 }
 
 bool ViewerShell::getInputSpecification(PlugInArgList*& pArgList)

@@ -10,7 +10,6 @@
 #include "Any.h"
 #include "AnyData.h"
 #include "AppVersion.h"
-#include "AspamManager.h"
 #include "AspamViewer.h"
 #include "AspamViewerDialog.h"
 #include "AppAssert.h"
@@ -27,7 +26,7 @@
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
 
-AspamViewer::AspamViewer() : mpMainWindow(NULL)
+AspamViewer::AspamViewer() : mpMainWindow(NULL), mbSessionClosing(false)
 {
    setName("ASPAM Viewer");
    setCreator("Ball Aerospace & Technologies Corp.");
@@ -38,6 +37,16 @@ AspamViewer::AspamViewer() : mpMainWindow(NULL)
    setDescriptorId("{B2AD86B5-3234-4f10-B60D-C3E320B026C2}");
    allowMultipleInstances(false);
    setProductionStatus(APP_IS_PRODUCTION_RELEASE);
+
+   mpMgrAttachment.addSignal(SIGNAL_NAME(AspamManager, AspamInitialized), 
+      Slot(this, &AspamViewer::updateAspams));
+   mpModelAttachment.reset(mpModelServices.get());
+   mpModelAttachment.addSignal(SIGNAL_NAME(ModelServices, ElementDestroyed),
+      Slot(this, &AspamViewer::updateAspams));
+   Service<ApplicationServices> pServices;
+   mpAppSrvcsAttachment.reset(pServices.get());
+   mpAppSrvcsAttachment.addSignal(SIGNAL_NAME(ApplicationServices, SessionClosed),
+      Slot(this, &AspamViewer::sessionClosing));
 }
 
 AspamViewer::~AspamViewer()
@@ -72,13 +81,13 @@ bool AspamViewer::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
       AspamManager *pAspamManager = instances.empty() ? NULL : dynamic_cast<AspamManager*>(instances.front());
       if(pAspamManager != NULL)
       {
-         pAspamManager->attach(SIGNAL_NAME(AspamManager, AspamInitialized), Slot(this, &AspamViewer::updateAspams));
+         mpMgrAttachment.reset(pAspamManager);
       }
    }
    catch(AssertException &exc)
    {
       Service<DesktopServices> pDesktop;
-      pDesktop->showMessageBox("ASPAM Error", string("A critical error occured: ") + exc.getText(), "Ok");
+      pDesktop->showMessageBox("ASPAM Error", string("A critical error occurred: ") + exc.getText(), "Ok");
       return false;
    }
 
@@ -90,28 +99,19 @@ QWidget* AspamViewer::getWidget() const
    return mpMainWindow;
 }
 
-bool AspamViewer::abort()
-{
-   try
-   {
-      vector<PlugIn*> instances = Service<PlugInManagerServices>()->getPlugInInstances("ASPAM Manager");
-      AspamManager *pAspamManager = instances.empty() ? NULL : dynamic_cast<AspamManager*>(instances.front());
-      if(pAspamManager != NULL)
-      {
-         pAspamManager->detach(SIGNAL_NAME(AspamManager, AspamInitialized),
-               Slot(this, &AspamViewer::updateAspams));
-      }
-      return ViewerShell::abort();
-   }
-   catch (...)
-   {
-      return false;
-   }
-}
-
 void AspamViewer::updateAspams(Subject &subject, const string &signal, const boost::any &data)
 {
-   if(dynamic_cast<AspamManager*>(&subject) != NULL)
+   if (mbSessionClosing)
+   {
+      return;
+   }
+		  
+   bool bRefreshNeeded(false);
+   if (dynamic_cast<Aspam*>(&subject) != NULL)
+   {
+      bRefreshNeeded = true;
+   }
+   else if(dynamic_cast<AspamManager*>(&subject) != NULL)
    {
       Any *pElement(boost::any_cast<Any*>(data));
       Aspam *pAspam = model_cast<Aspam*>(pElement);
@@ -120,28 +120,28 @@ void AspamViewer::updateAspams(Subject &subject, const string &signal, const boo
          pAspam->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &AspamViewer::updateAspams));
       }
    }
-   mpMainWindow->populateAspamList();
+   else if (signal == "ModelServices::ElementDestroyed")
+   {
+      DataElement* pElement(boost::any_cast<DataElement*>(data));
+      if (pElement->getType() == "Aspam")
+      {
+         bRefreshNeeded = true;
+      }
+   }
+
+   if (bRefreshNeeded)
+   {
+      mpMainWindow->populateAspamList();
+   }
 }
 
 bool AspamViewer::serialize(SessionItemSerializer &serializer) const
 {
    XMLWriter writer("AspamViewer");
-   XML_ADD_POINT(writer, aspams)
+   const AspamManager* pMgr = mpMgrAttachment.get();
+   if (pMgr != NULL)
    {
-      vector<DataElement*> aspamElements = Service<ModelServices>()->getElements("Aspam");
-      for (vector<DataElement*>::iterator ppElement=aspamElements.begin();
-         ppElement!=aspamElements.end();
-         ++ppElement)
-      {
-         Aspam *pAspam = model_cast<Aspam*>(*ppElement);
-         if (pAspam != NULL)
-         {
-            XML_ADD_POINT(writer, aspam)
-            {
-               writer.addAttr("id", (*ppElement)->getId());
-            }
-         }
-      }
+      writer.addAttr("managerId", pMgr->getId());
    }
    return serializer.serialize(writer);
 }
@@ -152,21 +152,20 @@ bool AspamViewer::deserialize(SessionItemDeserializer &deserializer)
    DOMElement* pRootElement = deserializer.deserialize(reader, "AspamViewer");
    if (pRootElement != NULL)
    {
-      FOR_EACH_DOMNODE(pRootElement, pAspamNode)
+      string mgrId = A(pRootElement->getAttribute(X("managerId")));
+      SessionItem *pSessionItem = Service<SessionManager>()->getSessionItem(mgrId);
+      AspamManager* pMgr = dynamic_cast<AspamManager*>(pSessionItem);
+      if (pMgr != NULL)
       {
-         if (XMLString::equals(pAspamNode->getNodeName(), X("aspam")))
+         mpMgrAttachment.reset(pMgr);
+      }
+      else
+      {
+         vector<PlugIn*> instances = Service<PlugInManagerServices>()->getPlugInInstances("ASPAM Manager");
+         AspamManager *pAspamManager = instances.empty() ? NULL : dynamic_cast<AspamManager*>(instances.front());
+         if(pAspamManager != NULL)
          {
-            DOMElement *pElement = dynamic_cast<DOMElement*>(pAspamNode);
-            if (pElement)
-            {
-               string id = A(pElement->getAttribute(X("id")));
-               SessionItem *pSessionItem = Service<SessionManager>()->getSessionItem(id);
-               Subject *pSubject = dynamic_cast<Subject*>(pSessionItem);
-               if (pSubject != NULL)
-               {
-                  pSubject->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &AspamViewer::updateAspams));
-               }
-            }
+            mpMgrAttachment.reset(pAspamManager);
          }
       }
    }
@@ -180,4 +179,9 @@ bool AspamViewer::deserialize(SessionItemDeserializer &deserializer)
    mpMainWindow->show();
 
    return true;
+}
+
+void AspamViewer::sessionClosing(Subject &pSubject, const std::string &signal, const boost::any &data)
+{
+   mbSessionClosing = true;
 }
