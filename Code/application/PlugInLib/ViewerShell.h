@@ -10,6 +10,7 @@
 #ifndef VIEWERSHELL_H
 #define VIEWERSHELL_H
 
+#include "AttachmentPtr.h"
 #include "ExecutableShell.h"
 
 namespace boost
@@ -17,6 +18,7 @@ namespace boost
    class any;
 }
 class QWidget;
+class ApplicationServices;
 
 /**
  *  A base class for plug-ins with modeless dialogs.
@@ -126,6 +128,8 @@ protected:
     *  @see     abort()
     */
    virtual QWidget* getWidget() const = 0;
+
+   AttachmentPtr<ApplicationServices> mpAppSvcsAttachment;
 };
 
 #endif

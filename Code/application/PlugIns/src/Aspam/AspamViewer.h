@@ -10,14 +10,16 @@
 #ifndef ASPAMVIEWER_H
 #define ASPAMVIEWER_H
 
+#include "AspamManager.h"
+#include "AttachmentPtr.h"
 #include "ModelServices.h"
 #include "ViewerShell.h"
 
 #include <boost/any.hpp>
 #include <string>
 
-class AspamManager;
 class AspamViewerDialog;
+class ApplicationServices;
 
 /**
  *  Plug-in for viewing and plotting ASPAM data.
@@ -32,7 +34,7 @@ public:
    bool getOutputSpecification(PlugInArgList*& pOutArgList);
    bool execute(PlugInArgList *pInputArgList, PlugInArgList *pOutputArgList);
    QWidget* getWidget() const;
-   bool abort();
+   void sessionClosing(Subject &pSubject, const std::string &signal, const boost::any &data);
 
    /**
     *  This slot updates the viewer dialog when aspams are added or modified.
@@ -54,6 +56,10 @@ public:
 private:
    AspamViewerDialog *mpMainWindow;
    Service<ModelServices> mpModelServices;
+   AttachmentPtr<AspamManager> mpMgrAttachment;
+   AttachmentPtr<ModelServices> mpModelAttachment;
+   AttachmentPtr<ApplicationServices> mpAppSrvcsAttachment;
+   bool mbSessionClosing;
 };
 
 #endif // ASPAMVIEWER_H
