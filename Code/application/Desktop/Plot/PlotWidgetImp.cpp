@@ -560,14 +560,16 @@ QString PlotWidgetImp::getClassificationText() const
    Service<ConfigurationSettings> pConfigSettings;
 
    QString releaseType = QString::fromStdString(StringUtilities::toDisplayString(pConfigSettings->getReleaseType()));
-
-   int iPos = strClassification.lastIndexOf(releaseType);
-   if (iPos != -1)
+   if (releaseType.isEmpty() == false)
    {
-      strClassification.truncate(iPos);
+      int iPos = strClassification.lastIndexOf(releaseType);
+      if (iPos != -1)
+      {
+         strClassification.truncate(iPos);
+      }
    }
 
-   iPos = strClassification.lastIndexOf("\n");
+   int iPos = strClassification.lastIndexOf("\n");
    if (iPos != -1)
    {
       strClassification.truncate(iPos);
@@ -694,14 +696,16 @@ QString PlotWidgetImp::getOrganizationText() const
    Service<ConfigurationSettings> pConfigSettings;
 
    QString releaseType = QString::fromStdString(StringUtilities::toDisplayString(pConfigSettings->getReleaseType()));
-
-   int iPos = strOrganization.lastIndexOf(releaseType);
-   if (iPos != -1)
+   if (releaseType.isEmpty() == false)
    {
-      strOrganization.truncate(iPos);
+      int iPos = strOrganization.lastIndexOf(releaseType);
+      if (iPos != -1)
+      {
+         strOrganization.truncate(iPos);
+      }
    }
 
-   iPos = strOrganization.lastIndexOf("\n");
+   int iPos = strOrganization.lastIndexOf("\n");
    if (iPos != -1)
    {
       strOrganization.truncate(iPos);
