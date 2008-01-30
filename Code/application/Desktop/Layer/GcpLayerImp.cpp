@@ -127,36 +127,16 @@ void GcpLayerImp::draw()
       glPushMatrix();
       glLineWidth(2.0);
 
-      ViewImp *pView = dynamic_cast<ViewImp*>(getView());
-      PerspectiveView *pPerView = dynamic_cast<PerspectiveView*>(pView);
-      VERIFYNRV(pView != NULL);
-      double rotation = 0.0;
-      double xScale = getXScaleFactor();
-      double yScale = getYScaleFactor();
-      if (pPerView != NULL)
-      {
-         rotation = pPerView->getRotation();
-         double aspect = pPerView->getPixelAspect();
-         if (aspect > 1)
-         {
-            xScale *= aspect;
-         }
-         else
-         {
-            yScale /= aspect;
-         }
-      }
-
       // Translation
       GcpPoint point = *iter;
       glTranslatef(point.mPixel.mX + 0.5, point.mPixel.mY + 0.5, 0);
 
       // Calculate the circle radius
       LocationType center;
-      pView->translateWorldToScreen(0.0, 0.0, center.mX, center.mY);
+      translateDataToScreen(0.0, 0.0, center.mX, center.mY);
 
       LocationType circlePoint;
-      pView->translateScreenToWorld(center.mX + mSymbolSize, center.mY, circlePoint.mX, circlePoint.mY);
+      translateScreenToData(center.mX + mSymbolSize, center.mY, circlePoint.mX, circlePoint.mY);
 
       double dRadius = sqrt(pow(circlePoint.mX, 2) + pow(circlePoint.mY, 2));
 
@@ -168,7 +148,12 @@ void GcpLayerImp::draw()
          gluDisk(pQuadric, dRadius, dRadius, 256, 1);
          gluDeleteQuadric(pQuadric);
 
-         glRotated(rotation, 0.0, 0.0, 1.0);
+         PerspectiveView* pPerspectiveView = dynamic_cast<PerspectiveView*>(getView());
+         if (pPerspectiveView != NULL)
+         {
+            double rotation = pPerspectiveView->getRotation();
+            glRotated(rotation, 0.0, 0.0, 1.0);
+         }
 
          glBegin(GL_LINES);
          if (mSymbol == GCP_X)
@@ -189,6 +174,7 @@ void GcpLayerImp::draw()
          glEnd();
 
          // Draw the GCP name
+         ViewImp* pView = dynamic_cast<ViewImp*>(getView());
          if (pView != NULL)
          {
             QFont gcpFont = QApplication::font();
@@ -202,7 +188,7 @@ void GcpLayerImp::draw()
             QRect textRect = fontMetrics.tightBoundingRect(strText);
 
             LocationType textCoord;
-            pView->translateWorldToScreen(point.mPixel.mX + 0.5, point.mPixel.mY + 0.5, textCoord.mX, textCoord.mY);
+            translateDataToScreen(point.mPixel.mX + 0.5, point.mPixel.mY + 0.5, textCoord.mX, textCoord.mY);
 
             int screenX = static_cast<int>(textCoord.mX + mSymbolSize);
             int screenY = pView->height() - static_cast<int>(textCoord.mY - mSymbolSize - textRect.height());
