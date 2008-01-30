@@ -1270,8 +1270,8 @@ CopyrightInformation::CopyrightInformation()
       "OF THE POSSIBILITY OF SUCH DAMAGE.");
    addDependencyCopyright("glew",
       "The OpenGL Extension Wrangler Library<br>"
-      "Copyright (C) 2002-2005, Milan Ikits &lt;milan ikits[]ieee org&gt;<br>"
-      "Copyright (C) 2002-2005, Marcelo E. Magallon &lt;mmagallo[]debian org&gt;<br>"
+      "Copyright (C) 2002-2006, Milan Ikits &lt;milan ikits[]ieee org&gt;<br>"
+      "Copyright (C) 2002-2006, Marcelo E. Magallon &lt;mmagallo[]debian org&gt;<br>"
       "Copyright (C) 2002, Lev Povalahev<br>"
       "All rights reserved.<br>"
       "<br>"
