@@ -38,7 +38,7 @@ using namespace std;
 
 namespace
 {
-   struct ElementDepthComparitor : greater<vector<string>::size_type >
+   struct ElementDepthComparitor : less<vector<string>::size_type >
    {
       bool operator()(ImportDescriptor *pA, ImportDescriptor *pB)
       {
@@ -52,7 +52,7 @@ namespace
          {
             return false;
          }
-         return greater::operator()(pDdA->getParentDesignator().size(), pDdB->getParentDesignator().size());
+         return less::operator()(pDdA->getParentDesignator().size(), pDdB->getParentDesignator().size());
       }
    };
 };
