@@ -5092,7 +5092,7 @@ void ApplicationWindow::dragEnterEvent(QDragEnterEvent *pEvent)
       return;
    }
 
-   if (pEvent->dropAction() == Qt::CopyAction)
+   if ((pEvent->proposedAction() == Qt::CopyAction) || (pEvent->proposedAction() == Qt::MoveAction))
    {
       if (files.size() > 1)
       {
@@ -5114,6 +5114,16 @@ void ApplicationWindow::dragEnterEvent(QDragEnterEvent *pEvent)
 
 void ApplicationWindow::dropEvent(QDropEvent *pEvent)
 {
+   if (pEvent == NULL)
+   {
+      return;
+   }
+
+   if ((pEvent->proposedAction() != Qt::CopyAction) && (pEvent->proposedAction() != Qt::MoveAction))
+   {
+      return;
+   }
+
    vector<string> files;
    if (pEvent->mimeData()->hasUrls())
    {
@@ -5152,6 +5162,12 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
 
    pEvent->acceptProposedAction();
 
+#if defined(WIN_API)
+   Qt::MouseButton contextMenuButton = Qt::RightButton;
+#else
+   Qt::MouseButton contextMenuButton = Qt::MidButton;
+#endif
+
    if (files.size() == 1)
    {
       QString filename = QString::fromStdString(files.front());
@@ -5159,7 +5175,7 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
       QFileInfo info(filename);
       if ((info.suffix() == "wiz") || (info.suffix() == "batchwiz"))
       {
-         if (pEvent->mouseButtons() == Qt::RightButton)
+         if (pEvent->mouseButtons() == contextMenuButton)
          {
             QMenu contextMenu(this);
             QAction* pRunWizardAction = contextMenu.addAction("Run Wizard");
@@ -5188,7 +5204,7 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
       }
       else if (info.suffix() == "session")
       {
-         if (pEvent->mouseButtons() == Qt::RightButton)
+         if (pEvent->mouseButtons() == contextMenuButton)
          {
             QMenu contextMenu(this);
             QAction* pOpenSessionAction = contextMenu.addAction("Open Session");
@@ -5211,7 +5227,7 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
    bool errorContinue = true;
    bool displayContinueMessage = true;
 
-   if (pEvent->mouseButtons() == Qt::RightButton)
+   if (pEvent->mouseButtons() == contextMenuButton)
    {
       // Query the user for how to import the files
       QMenu contextMenu(this);
