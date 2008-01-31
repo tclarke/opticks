@@ -1243,7 +1243,7 @@ QImage SpatialDataViewImp::getLayerImage(Layer* pLayer, ColorType& transparent, 
       // Set to draw to an off screen buffer
       makeCurrent();
       int w=width(), h=height();
-      if(bbox[0] > 0 && bbox[1] > 0)
+      if(bbox[0] > 0 && bbox[0] <= w && bbox[1] > 0 && bbox[1] <= h)
       {
          w=bbox[0];
          h=bbox[1];
