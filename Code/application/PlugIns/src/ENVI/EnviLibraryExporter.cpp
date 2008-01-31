@@ -7,6 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtCore/QFile>
+
 #include "AppVersion.h"
 #include "AppVerify.h"
 #include "DataVariant.h"
@@ -184,9 +186,30 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
 
    unsigned int numValues = spectrumWaves.size();
 
-   // Write out the spectral information
-   const string& filename = mpFileDescriptor->getFilename();
+   // Get the name of the spectral information file
+    const string& filename = mpFileDescriptor->getFilename();
+   string headerFile = filename;
+ 
+   // Build the name of the hdr file
+   int iPos = filename.rfind(".");
+   if (iPos != string::npos)
+   {
+      headerFile = filename.substr(0, iPos);
+   }
+   headerFile += ".hdr";
 
+// Check for overwriting hdr file – 
+//    If the header belongs to another file, it will exist but the .sli file will not
+//    All other times we can overwrite the .hdr file
+   if(QFile::exists(QString::fromStdString(headerFile)) && !QFile::exists(QString::fromStdString(filename)))
+   {
+      message = "Header file exists in the current directory and may describe another unrelated data file!";
+      if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);  
+      pStep->finalize(Message::Failure, message);
+      return false;
+   }
+
+   // Write out the spectral information
    FILE* pFp = fopen(filename.c_str(), "wb");
    if(pFp == NULL)
    {
@@ -236,16 +259,6 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
    fclose(pFp);
 
    // Open the header file
-   string headerFile = filename;
-
-   int iPos = filename.rfind(".");
-   if (iPos != string::npos)
-   {
-      headerFile = filename.substr(0, iPos);
-   }
-
-   headerFile += ".hdr";
-
    if((pFp = fopen(headerFile.c_str(), "w")) == NULL)
    {
       message = "Could not open the header file for writing!";
