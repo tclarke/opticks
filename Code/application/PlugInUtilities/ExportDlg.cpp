@@ -8,6 +8,7 @@
  */
 
 #include <QtCore/QDir>
+#include <QtGui/QListView>
 #include <QtGui/QMessageBox>
 
 #include "AppVersion.h"
@@ -61,6 +62,13 @@ ExportDlg::ExportDlg(ExporterResource& pExporter,
 
       strFilename = updateExtension(strFilename);
       selectFile(strFilename);
+
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Do not clear the initial list view selection when it is removed from the internal QFileDialog list of items that are not filtered! (Qt 4.3.1) (dsulgrov)")
+      QListView* pListView = findChild<QListView*>("listView");
+      if (pListView != NULL)
+      {
+         pListView->clearSelection();
+      }
    }
 
    updateFromFile(strFilename);
