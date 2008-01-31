@@ -669,8 +669,20 @@ public:
     *        valid layer data.  If a valid color is passed in, this will be used as
     *        the transparency color.
     * @param bbox
-    *        An integer array that is populated with the extents of the layer in screen pixels.
-    * @return True if the layer image was successfully retrieved, otherwise false.
+    *        Contains layer extents for drawing.
+    *        - This parameter is used as input if the layer is not currently displayed.
+    *        When used as input, the values are interpreted as follows:
+    *             - bbox[0] The width of the image
+    *             - bbox[1] The height of the image
+    *             - bbox[2] Ignored
+    *             - bbox[3] Ignored
+    *        - When the method returns this parameter is populated with the bounding box of the drawn portion of the layer.
+    *             - bbox[0] Minimum X
+    *             - bbox[1] Minimum Y
+    *             - bbox[2] Maximum X
+    *             - bbox[3] Maximum Y
+    *          
+    * @return \c True if the layer image was successfully retrieved, otherwise \c false.
     */
    virtual bool getLayerImage(Layer* pLayer, QImage &image, ColorType& transparent, int bbox[4]) = 0;
 
