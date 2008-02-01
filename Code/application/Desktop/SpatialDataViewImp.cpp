@@ -439,6 +439,28 @@ SpatialDataViewImp& SpatialDataViewImp::operator= (const SpatialDataViewImp& spa
       if ((mpMeasurementsLayer != NULL) && (spatialDataView.mpMeasurementsLayer != NULL))
       {
          *mpMeasurementsLayer = *(spatialDataView.mpMeasurementsLayer);
+         // Copy the measurement objects from the view's layer to this layer
+         list<GraphicObject*> selectedObjects;
+         spatialDataView.mpMeasurementsLayer->getSelectedObjects(selectedObjects);
+
+         for (list<GraphicObject*>::iterator iter = selectedObjects.begin(); iter != selectedObjects.end(); ++iter)
+         {
+            GraphicObject* pObject = *iter;
+            if (pObject != NULL)
+            {
+               GraphicObjectType objectType = pObject->getGraphicObjectType();
+
+               GraphicObject* pNewObject = mpMeasurementsLayer->addObject(objectType);
+               if (pNewObject != NULL)
+               {
+                  GraphicObjectImp* pNewObjectImp = dynamic_cast<GraphicObjectImp*>(pNewObject);
+                  if (pNewObjectImp != NULL)
+                  {
+                     pNewObjectImp->replicateObject(pObject);
+                  }
+               }
+            }
+         }
       }
 
       clear();
