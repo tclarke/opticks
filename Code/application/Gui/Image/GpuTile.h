@@ -23,6 +23,7 @@ class ImageLoader;
 
 class GpuTile : public Tile
 {
+   friend class GpuImage;
 public:
    GpuTile();
    ~GpuTile();
@@ -36,6 +37,7 @@ public:
    void destroyFilter(ImageFilterDescriptor *pDescriptor);
    void resetFilter(ImageFilterDescriptor *pDescriptor);
    void freezeFilter(ImageFilterDescriptor *pDescriptor, bool toggle = true);
+   bool getFilterFreezeFlag(ImageFilterDescriptor *pDescriptor) const;
    unsigned int readFilterBuffer(GLint xCoord, GLint yCoord, GLsizei width, GLsizei height, GLvoid *pValues);
 
    bool isTextureReady(unsigned int index) const;

@@ -187,9 +187,9 @@ void ImageFilter::resetBuffer()
 {
    // first color buffer in vector is always the buffer
    // with the filter results
-   if(!mBuffers.empty())
+   if(mBuffers.size() >= 2)
    {
-      mBuffers.front()->clear();
+      mBuffers.back()->clear();
    }
 }
 

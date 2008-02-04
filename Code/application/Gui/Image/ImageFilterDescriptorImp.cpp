@@ -8,6 +8,7 @@
  */
 
 #include "AppVerify.h"
+#include "DynamicObject.h"
 #include "GpuProgramDescriptor.h"
 #include "GpuProgramDescriptorImp.h"
 #include "ImageFilterDescriptorImp.h"
@@ -32,6 +33,7 @@ ImageFilterDescriptorImp::ImageFilterDescriptorImp(const ImageFilterDescriptorIm
    mGpuPrograms.resize(filterDescriptor.mGpuPrograms.size());
    transform(filterDescriptor.mGpuPrograms.begin(), filterDescriptor.mGpuPrograms.end(), mGpuPrograms.begin(),
       boost::bind(&GpuProgramDescriptor::copy, _1));
+   mpInputParams->merge(filterDescriptor.mpInputParams.get());
 }
 
 ImageFilterDescriptorImp::~ImageFilterDescriptorImp()
@@ -84,6 +86,7 @@ void ImageFilterDescriptorImp::clear()
    mDescription.clear();
    mType = ImageFilterDescriptor::GPU_PROCESS;
    clearImagePrograms();
+   mpInputParams->clear();
 }
 
 const vector<GpuProgramDescriptor*>& ImageFilterDescriptorImp::getGpuPrograms() const
@@ -133,4 +136,24 @@ bool ImageFilterDescriptorImp::hasGpuProgram(const GpuProgramDescriptor& gpuDesc
    }
 
    return false;
+}
+
+bool ImageFilterDescriptorImp::removeParameter(const string &name)
+{
+   return mpInputParams->removeAttribute(name);
+}
+
+bool ImageFilterDescriptorImp::setParameter(const string &name, const DataVariant &value) 
+{ 
+   return mpInputParams->setAttribute(name, value);
+}
+
+const DynamicObject *ImageFilterDescriptorImp::getParameters() const
+{
+   return mpInputParams.get();
+}
+
+const DataVariant &ImageFilterDescriptorImp::getParameter(const string &name) const
+{
+   return mpInputParams->getAttribute(name);
 }

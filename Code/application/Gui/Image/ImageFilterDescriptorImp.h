@@ -11,6 +11,7 @@
 #define IMAGEFILTERDESCRIPTORIMP_H__
 
 #include "ImageFilterDescriptor.h"
+#include "ObjectResource.h"
 
 #include <vector>
 
@@ -35,13 +36,21 @@ public:
    void clearImagePrograms();
    void clear();
    const std::vector<GpuProgramDescriptor*>& getGpuPrograms() const;
+   bool removeParameter(const std::string &name);
+   bool setParameter(const std::string &name, const DataVariant &value);
+   const DynamicObject *getParameters() const;
+   const DataVariant& getParameter(const std::string &name) const;
 
 private:
    std::string mName;                                       // name of the image filter
    std::string mDescription;                                // description of the image filter
    ImageFilterDescriptor::ImageProcessType  mType;          // type of the image filter
    std::vector<GpuProgramDescriptor*> mGpuPrograms;          // GPU programs used by the image filter
+   FactoryResource<DynamicObject> mpInputParams;
 };
+
+#define IMAGEFILTERDESCRIPTOREXTENSION_CLASSES \
+   , public ImageFilterDescriptorExt1
 
 // Adapter must implement ImageFilterDescriptor::copy()
 #define IMAGEFILTERDESCRIPTORADAPTER_METHODS(impClass) \
@@ -64,6 +73,23 @@ private:
    const std::vector<GpuProgramDescriptor*>& getGpuPrograms() const \
    { \
       return impClass::getGpuPrograms(); \
+   } \
+   bool removeParameter(const std::string &name) \
+   { \
+      return impClass::removeParameter(name); \
+   } \
+   bool setParameter(const std::string &name, const DataVariant &value) \
+   { \
+      return impClass::setParameter(name, value); \
+   } \
+   const DynamicObject *getParameters() const \
+   { \
+      return impClass::getParameters(); \
+   } \
+   const DataVariant& getParameter(const std::string &name) const \
+   { \
+      return impClass::getParameter(name); \
    }
+
 
 #endif

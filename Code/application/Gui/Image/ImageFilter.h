@@ -56,6 +56,7 @@ public:
 
    virtual void resetBuffer();
    virtual void freezeBuffer(bool toggle = true);
+   bool isBufferFrozen() const { return mFreezeFlag; }
 
    /**
     *  Returns whether or not the image filter has been initialized.

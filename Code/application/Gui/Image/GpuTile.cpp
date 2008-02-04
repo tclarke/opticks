@@ -306,6 +306,16 @@ void GpuTile::freezeFilter(ImageFilterDescriptor *pDescriptor, bool toggle)
    }
 }
 
+bool GpuTile::getFilterFreezeFlag(ImageFilterDescriptor *pDescriptor) const
+{
+   ImageFilter *pImageFilter = getFilter(pDescriptor);
+   if (pImageFilter != NULL)
+   {
+      return pImageFilter->isBufferFrozen();
+   }
+   return false;
+}
+
 bool GpuTile::isTextureReady(unsigned int index) const
 {
    return mbInitialized;
