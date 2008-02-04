@@ -753,6 +753,13 @@ void GpuImage::enableFilter(ImageFilterDescriptor *pDescriptor)
       return;
    }
 
+   initializeFilter(pDescriptor);
+}
+
+void GpuImage::initializeFilter(ImageFilterDescriptor *pDescriptor)
+{
+   VERIFYNRV(pDescriptor != NULL);
+
    const vector<Tile*>* pTiles = getActiveTiles();
    if (pTiles == NULL)
    {
@@ -778,36 +785,37 @@ void GpuImage::enableFilter(ImageFilterDescriptor *pDescriptor)
       }
    }
 
+   updateTiles(tilesToUpdate, tileZoomIndices);
+
    // Initialize tile filters
    if (pDescriptor->getType() == ImageFilterDescriptor::FEEDBACK_FILTER)
    {
-      ImageData imageInfo = getImageData();
-      unsigned int numFrames = imageInfo.mKey.mChannels;
-      DimensionDescriptor previousBand = imageInfo.mKey.mBand1;
-
-      // this value was chosen through experiment
-      // it yields good results with the existing feedback filters
-      // and does not cause much of a performance hit
+      // number of iterations to use to initialize the feedback buffer
+      // filters can override this value through the gic file
       unsigned int numInitFrames = 20;
-
-      if (numInitFrames > numFrames)
+      ImageFilterDescriptorExt1 *pDescriptorExt = dynamic_cast<ImageFilterDescriptorExt1*>(pDescriptor);
+      if (NN(pDescriptorExt))
       {
-         numInitFrames = numFrames;
+         const unsigned int *pInitFrames = dv_cast<unsigned int>(&pDescriptorExt->getParameter("initializationIterations"));
+         if (pInitFrames != NULL)
+         {
+            numInitFrames = *pInitFrames;
+         }
       }
 
-      for (unsigned int i = 0; i < numInitFrames; ++i)
+      for (unsigned int j=0; j<tilesToUpdate.size(); ++j)
       {
-         DimensionDescriptor bandDim;
-         bandDim.setActiveNumber(i);
-         mInfo.mKey.mBand1 = bandDim;
-         updateTiles(tilesToUpdate, tileZoomIndices);
+         GpuTile *pGpuTile = static_cast<GpuTile*>(tilesToUpdate[j]);
+         bool freeze = pGpuTile->getFilterFreezeFlag(pDescriptor);
+         pGpuTile->freezeFilter(pDescriptor, false);
+         for (unsigned int i = 0; i<numInitFrames; ++i)
+         {
+            // Apply the filter repeatedly on the current frame on each tile
+            // to initialize the feedback buffer. This all happens in the GPU.
+            pGpuTile->applyFilters();
+         }
+         pGpuTile->freezeFilter(pDescriptor, freeze);
       }
-
-      mInfo.mKey.mBand1 = previousBand;
-   }
-   else
-   {
-      updateTiles(tilesToUpdate, tileZoomIndices);
    }
 
    // Set the member variable, mPreviousBand, to 0 to allow the filter to be applied
@@ -894,6 +902,8 @@ void GpuImage::resetFilter(ImageFilterDescriptor *pDescriptor)
       }
       ++tileIter;
    }
+
+   initializeFilter(pDescriptor);
 }
 
 void GpuImage::freezeFilter(ImageFilterDescriptor *pDescriptor, bool toggle)

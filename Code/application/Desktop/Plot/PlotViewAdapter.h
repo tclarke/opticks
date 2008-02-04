@@ -13,7 +13,7 @@
 #include "PlotView.h"
 #include "PlotViewImp.h"
 
-class PlotViewAdapter : public PlotView, public PlotViewImp
+class PlotViewAdapter : public PlotView, public PlotViewImp PLOTVIEWEXTENSION_CLASSES
 {
 public:
    PlotViewAdapter(const std::string& id, const std::string& viewName, QGLContext* drawContext = 0,

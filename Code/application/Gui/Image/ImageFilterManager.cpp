@@ -262,6 +262,19 @@ vector<ImageFilterDescriptorImp*> ImageFilterManager::deserialize(const string& 
                for(DOMNode *pProgram = pNode->getFirstChild(); pProgram != NULL;
                   pProgram = pProgram->getNextSibling())
                {
+                  if(XMLString::equals(pProgram->getNodeName(),X("parameter")))
+                  {
+                     DOMElement *pParamElement(static_cast<DOMElement *>(pProgram));
+                     if (pParamElement != NULL)
+                     {
+                        string parameterName(A(pParamElement->getAttribute(X("name"))));
+                        string parameterType(A(pParamElement->getAttribute(X("type"))));
+                        string parameterValue(A(pParamElement->getAttribute(X("value"))));
+                        DataVariant parameterVariant(parameterType, NULL);
+                        parameterVariant.fromXmlString(parameterType, parameterValue);
+                        pFilterDescriptor->setParameter(parameterName, parameterVariant);
+                     }
+                  }
                   if(XMLString::equals(pProgram->getNodeName(),X("program")))
                   {
                      DOMElement *pElement(static_cast<DOMElement *>(pProgram));

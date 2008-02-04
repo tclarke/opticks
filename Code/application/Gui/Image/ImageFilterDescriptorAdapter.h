@@ -13,7 +13,7 @@
 #include "ImageFilterDescriptor.h"
 #include "ImageFilterDescriptorImp.h"
 
-class ImageFilterDescriptorAdapter : public ImageFilterDescriptor, public ImageFilterDescriptorImp
+class ImageFilterDescriptorAdapter : public ImageFilterDescriptor, public ImageFilterDescriptorImp IMAGEFILTERDESCRIPTOREXTENSION_CLASSES
 {
 public:
    ImageFilterDescriptorAdapter() {}

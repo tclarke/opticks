@@ -94,6 +94,7 @@ protected:
 private:
    void setCgParameterValues();
    float getTextureStretchValue(float rawValue, EncodingType dataType) const;
+   void initializeFilter(ImageFilterDescriptor *pDescriptor);
 
 private:
    // Grayscale display program
