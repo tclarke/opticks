@@ -171,6 +171,7 @@ void LatLonLayerImp::draw()
    double dMaxY = 0.0;
 
    bool bScreenCoords = false;
+   LocationType textOffset;
 
    ViewImp* pView = dynamic_cast<ViewImp*>(getView());
    if (pView != NULL)
@@ -183,6 +184,7 @@ void LatLonLayerImp::draw()
          if (pParent->inherits("ViewImp") == true)
          {
             bScreenCoords = true;
+            textOffset = LocationType(viewPort[0], viewPort[1]);
 
             dMinX = viewPort[0];
             dMinY = viewPort[1];
@@ -222,6 +224,12 @@ void LatLonLayerImp::draw()
       return;
    }
 
+   struct LineAttributeRestorer
+   {
+      LineAttributeRestorer() { glPushAttrib(GL_LINE_BIT); }
+      ~LineAttributeRestorer() { glPopAttrib(); }
+   } lineAttributeRestorer;
+
    glColor4ub(mColor.red(), mColor.green(), mColor.blue(), mColor.alpha());
    glLineWidth(mWidth);
 
@@ -256,7 +264,13 @@ void LatLonLayerImp::draw()
    xCount = 1.5 + (stop.mX - start.mX) / tickSpacing.mX;
    yCount = 1.5 + (stop.mY - start.mY) / tickSpacing.mY;
 
-   if (mStyle == LATLONSTYLE_SOLID)
+   if (mStyle == LATLONSTYLE_DASHED)
+   {
+      glEnable(GL_LINE_STIPPLE);
+      glLineStipple(2, 0x0f0f);
+   }
+
+   if (mStyle == LATLONSTYLE_SOLID || mStyle == LATLONSTYLE_DASHED)
    {
       bool onOff = false;
       bool isInData = false;
@@ -323,7 +337,7 @@ void LatLonLayerImp::draw()
                      glVertex2f(pixelVertex.mX, pixelVertex.mY);
                      glEnd ();
 
-                     drawLabel(pixelVertex, bScreenCoords, xLabel, getNearestBorder(pixelVertex));
+                     drawLabel(pixelVertex-textOffset, bScreenCoords, xLabel, getNearestBorder(pixelVertex));
                      onOff = false;
                   }
                   else
@@ -342,14 +356,14 @@ void LatLonLayerImp::draw()
                      {
                         // adjust oldVertex to be intersection of the segment with the edge of the data
                         oldVertex = adjustSegment (oldVertex, pixelVertex, mBoundingBox);
-                        drawLabel(oldVertex, bScreenCoords, xLabel, getNearestBorder(pixelVertex));
+                        drawLabel(oldVertex-textOffset, bScreenCoords, xLabel, getNearestBorder(pixelVertex));
                         glBegin (GL_LINE_STRIP);
                         glVertex2f (oldVertex.mX, oldVertex.mY);
-                          glVertex2f (pixelVertex.mX, pixelVertex.mY);
+                        glVertex2f (pixelVertex.mX, pixelVertex.mY);
                      }
                      else // j == 0
                      {
-                        drawLabel(pixelVertex, bScreenCoords, xLabel, getNearestBorder(pixelVertex));
+                        drawLabel(pixelVertex-textOffset, bScreenCoords, xLabel, getNearestBorder(pixelVertex));
                         glBegin (GL_LINE_STRIP);
                         glVertex2f (pixelVertex.mX, pixelVertex.mY);
                      }
@@ -361,7 +375,7 @@ void LatLonLayerImp::draw()
             if (onOff == true) 
             {
                glEnd ();
-               drawLabel(oldVertex, bScreenCoords, xLabel, getNearestBorder(oldVertex));
+               drawLabel(oldVertex-textOffset, bScreenCoords, xLabel, getNearestBorder(oldVertex));
             }
          }
       }
@@ -420,7 +434,7 @@ void LatLonLayerImp::draw()
                      glVertex2f(pixelVertex.mX, pixelVertex.mY);
                      glEnd ();
 
-                     drawLabel(pixelVertex, bScreenCoords, yLabel, getNearestBorder(pixelVertex));
+                     drawLabel(pixelVertex-textOffset, bScreenCoords, yLabel, getNearestBorder(pixelVertex));
 
                      onOff = false;
                   }
@@ -441,14 +455,14 @@ void LatLonLayerImp::draw()
                      {
                         // adjust oldVertex to be intersection of the segment with the edge of the data
                         oldVertex = adjustSegment (oldVertex, pixelVertex, mBoundingBox);
-                        drawLabel(oldVertex, bScreenCoords, yLabel, getNearestBorder(pixelVertex));
+                        drawLabel(oldVertex-textOffset, bScreenCoords, yLabel, getNearestBorder(pixelVertex));
                         glBegin (GL_LINE_STRIP);
-                          glVertex2f (oldVertex.mX, oldVertex.mY);
+                        glVertex2f (oldVertex.mX, oldVertex.mY);
                         glVertex2f (pixelVertex.mX, pixelVertex.mY);
                      }
                      else
                      {
-                        drawLabel(pixelVertex, bScreenCoords, yLabel, getNearestBorder(pixelVertex));
+                        drawLabel(pixelVertex-textOffset, bScreenCoords, yLabel, getNearestBorder(pixelVertex));
                         glBegin (GL_LINE_STRIP);
                         glVertex2f (pixelVertex.mX, pixelVertex.mY);
                      }
@@ -460,7 +474,7 @@ void LatLonLayerImp::draw()
             if (onOff == true) 
             {
                glEnd ();
-               drawLabel(oldVertex, bScreenCoords, yLabel, getNearestBorder(oldVertex));
+               drawLabel(oldVertex-textOffset, bScreenCoords, yLabel, getNearestBorder(oldVertex));
             }
          }
       }
@@ -524,8 +538,6 @@ void LatLonLayerImp::draw()
 
       glEnd ();
    }
-
-   glLineWidth(1.0);
 
    if (bScreenCoords == true)
    {
@@ -714,19 +726,9 @@ void LatLonLayerImp::drawLabel(const LocationType& location, bool bScreenCoords,
    LocationType textLocation = screenCoord + offset;
 
    int screenX = static_cast<int>(textLocation.mX);
-   int screenY = static_cast<int>(textLocation.mY);
+   int screenY = pView->height() - static_cast<int>(textLocation.mY);
 
-   // Since the text is drawn outside of the view object area in a product view,
-   // map the product view screen coordinates to spatial data view coordinates
-   // if drawing the layer in a product
-   if (dynamic_cast<ViewImp*>(pView->parentWidget()) != NULL)
-   {
-      QPoint screenCoord = pView->mapFromParent(QPoint(screenX, screenY));
-      screenX = screenCoord.x();
-      screenY = screenCoord.y();
-   }
-
-   pView->renderText(screenX, pView->height() - screenY, strLabel, mFont.getQFont());
+   pView->renderText(screenX, screenY, strLabel, mFont.getQFont());
 }
 
 bool LatLonLayerImp::getExtents(double& x1, double& y1, double& x4, double& y4)

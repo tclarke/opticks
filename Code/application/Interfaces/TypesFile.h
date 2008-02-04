@@ -375,7 +375,7 @@ typedef EnumWrapper<InterleaveFormatTypeEnum> InterleaveFormatType;
 /**
  *  The line style for a latitude/longitude layer.
  */
-enum LatLonStyleEnum { LATLONSTYLE_SOLID, LATLONSTYLE_CROSS, LATLONSTYLE_NONE };
+enum LatLonStyleEnum { LATLONSTYLE_SOLID, LATLONSTYLE_CROSS, LATLONSTYLE_NONE, LATLONSTYLE_DASHED };
 
 /**
  * @EnumWrapper ::LatLonStyleEnum.

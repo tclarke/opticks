@@ -23,6 +23,7 @@ LatLonStyleComboBox::LatLonStyleComboBox(QWidget* pParent)
    setEditable(false);
 
    addItem(QString::fromStdString(StringUtilities::toDisplayString(LATLONSTYLE_SOLID)));
+   addItem(QString::fromStdString(StringUtilities::toDisplayString(LATLONSTYLE_DASHED)));
    addItem(QString::fromStdString(StringUtilities::toDisplayString(LATLONSTYLE_CROSS)));
    addItem(QString::fromStdString(StringUtilities::toDisplayString(LATLONSTYLE_NONE)));
 
