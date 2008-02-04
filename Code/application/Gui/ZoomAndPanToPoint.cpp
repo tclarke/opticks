@@ -38,7 +38,7 @@ ZoomAndPanToPointDlg::ZoomAndPanToPointDlg(RasterElement *pRaster, GeocoordType 
    pGrid->setMargin(10);
    pGrid->setSpacing(5);
 
-   QString tipStrLat = "Accepts the following format/s:\n\n";
+   QString tipStrLat = "Accepts the following text format(s):\n";
    QString tipStrLon(tipStrLat);
    QString tipStrZon(tipStrLat);
    QString tipStrHem(tipStrLat);
@@ -48,10 +48,12 @@ ZoomAndPanToPointDlg::ZoomAndPanToPointDlg(RasterElement *pRaster, GeocoordType 
       mpLatitudeEdit = new QLineEdit(this);
       if (mpLatitudeEdit != NULL)
       {
-         tipStrLat += "GGGSSE..EN..N\nG = Grid Zone Designation\nS = 100,000-meter square id\n";
-         tipStrLat += "E|N = digits designating meters easting and northing\n\n";
-         tipStrLat += "18TUU8401 - zone 18T, square UU, E84000, N1000\n";
-         tipStrLat += "18TUU845016 - zone 18T, square UU, E84500, N1600\n";
+         tipStrLat += "   GGGSSE..EN..N\n";
+         tipStrLat += "   G = Grid zone designation\n";
+         tipStrLat += "   S = 100,000 meter square ID\n";
+         tipStrLat += "   E|N = Digits designating meters easting and northing\n";
+         tipStrLat += "   (e.g. 18TUU8401 - zone 18T, square UU, E84000, N1000)\n";
+         tipStrLat += "   (e.g. 18TUU845016 - zone 18T, square UU, E84500, N1600)";
          mpLatitudeEdit->setToolTip(tipStrLat);
       }
       pGrid->addWidget(mpLatitudeEdit, 1, 0, 1, 4);
@@ -60,26 +62,28 @@ ZoomAndPanToPointDlg::ZoomAndPanToPointDlg(RasterElement *pRaster, GeocoordType 
       mpLatitudeEdit = new QLineEdit(this);
       if (mpLatitudeEdit != NULL)
       {
-         tipStrLat += "space delimited:  DD MM SS.SSS,   e.g. 40 6 31.982\n";
-         tipStrLat += "dms delimited:    DDdMMmSS.SSSs,  e.g. 40d6m31.982s\n";
-         tipStrLat += "symbol delimited: DD°MM'SS.SSS\", e.g. 40°6'31.982\"\n";
-         tipStrLat += "decimal degrees:  DD.DDDDDD,      e.g. 40.108884\n";
-         tipStrLat += "concatenated:     DDMMSS.SSS,     e.g. 400631.982\n";
-         tipStrLat += "   Note: 2 chars for minutes and whole seconds, i.e. 06, not 6\n\n";
-         tipStrLat += "Preface with 'S', 's' or '-' for southern hemisphere";
+         tipStrLat += "   Space delimited: DD MM SS.SSS (e.g. 40 06 31.982)\n";
+         tipStrLat += "   DMS delimited: DDdMMmSS.SSSs (e.g. 40d06m31.982s)\n";
+         tipStrLat += "   Symbol delimited: DD°MM'SS.SSS (e.g. 40°06'31.982)\n";
+         tipStrLat += "   Decimal degrees: DD.DDDDDD (e.g. 40.108884)\n";
+         tipStrLat += "   Concatenated: DDMMSS.SSS (e.g. 400631.982)\n";
+         tipStrLat += "\nNotes:\n";
+         tipStrLat += "   Two characters are required for minutes and seconds (e.g. 06, not 6).\n";
+         tipStrLat += "   To designate the southern hemisphere, preface the value with 'S', 's', or '-'.";
          mpLatitudeEdit->setToolTip(tipStrLat);
       }
 
       mpLongitudeEdit = new QLineEdit(this);
       if (mpLongitudeEdit != NULL)
       {
-         tipStrLon += "space delimited:  DDD MM SS.SSS,   e.g. -114 6 31.982\n";
-         tipStrLon += "dms delimited:    DDDdMMmSS.SSSs,  e.g. -114d6m31.982s\n";
-         tipStrLon += "symbol delimited: DDD°MM'SS.SSS\", e.g. -114°6'31.982\"\n";
-         tipStrLon += "decimal degrees:  DDD.DDDDDD,      e.g. -114.108884\n";
-         tipStrLon += "concatenated:     DDDMMSS.SSS,     e.g. -1140631.982\n";
-         tipStrLon += "   Note: 2 chars for minutes and whole seconds, i.e. 06, not 6\n\n";
-         tipStrLon += "Preface with 'W', 'w' or '-' for western hemisphere";
+         tipStrLon += "   Space delimited: DDD MM SS.SSS (e.g. -114 06 31.982)\n";
+         tipStrLon += "   DMS delimited: DDDdMMmSS.SSSs (e.g. -114d06m31.982s)\n";
+         tipStrLon += "   Symbol delimited: DDD°MM'SS.SSS (e.g. -114°06'31.982)\n";
+         tipStrLon += "   Decimal degrees: DDD.DDDDDD (e.g. -114.108884)\n";
+         tipStrLon += "   Concatenated: DDDMMSS.SSS (e.g. -1140631.982)\n";
+         tipStrLon += "\nNotes:\n";
+         tipStrLon += "   Two characters are required for minutes and seconds (e.g. 06, not 6).\n";
+         tipStrLon += "   To designate the western hemisphere, preface the value with 'W', 'w', or '-'.";
          mpLongitudeEdit->setToolTip(tipStrLon);
       }
 
@@ -90,14 +94,14 @@ ZoomAndPanToPointDlg::ZoomAndPanToPointDlg(RasterElement *pRaster, GeocoordType 
       mpLatitudeEdit = new QLineEdit(this);
       if (mpLatitudeEdit != NULL)
       {
-         tipStrLat += "Meters North of Zone reference point, e.g. 41000";
+         tipStrLat += "   Meters north of zone reference point (e.g. 41000)";
          mpLatitudeEdit->setToolTip(tipStrLat);
       }
 
       mpLongitudeEdit = new QLineEdit(this);
       if (mpLongitudeEdit != NULL)
       {
-         tipStrLon += "Meters East of Zone reference point, e.g. 10500";
+         tipStrLon += "   Meters east of zone reference point (e.g. 10500)";
          mpLongitudeEdit->setToolTip(tipStrLon);
       }
 
@@ -109,7 +113,7 @@ ZoomAndPanToPointDlg::ZoomAndPanToPointDlg(RasterElement *pRaster, GeocoordType 
          mpZoneEdit = new QLineEdit(this);
          if (mpZoneEdit != NULL)
          {
-            tipStrZon += "Zone designator, e.g. 17";
+            tipStrZon += "   Zone designator (e.g. 17)";
             mpZoneEdit->setToolTip(tipStrZon);
          }
       }
@@ -120,7 +124,7 @@ ZoomAndPanToPointDlg::ZoomAndPanToPointDlg(RasterElement *pRaster, GeocoordType 
          mpHemEdit = new QLineEdit(this);
          if (mpHemEdit != NULL)
          {
-            tipStrHem += "Hemisphere designator, e.g. N";
+            tipStrHem += "   Hemisphere designator (e.g. N)";
             mpHemEdit->setToolTip(tipStrHem);
          }
       }
@@ -130,14 +134,14 @@ ZoomAndPanToPointDlg::ZoomAndPanToPointDlg(RasterElement *pRaster, GeocoordType 
       mpLatitudeEdit = new QLineEdit(this);
       if (mpLatitudeEdit != NULL)
       {
-         tipStrLat += "Pixel column number, e.g. 150 (first column = 1)";
+         tipStrLat += "   Pixel column number (e.g. 150)";
          mpLatitudeEdit->setToolTip(tipStrLat);
       }
 
       mpLongitudeEdit = new QLineEdit(this);
       if (mpLongitudeEdit != NULL)
       {
-         tipStrLon += "Pixel row number, e.g. 150 (first row = 1)";
+         tipStrLon += "   Pixel row number (e.g. 150)";
          mpLongitudeEdit->setToolTip(tipStrLon);
       }
 
