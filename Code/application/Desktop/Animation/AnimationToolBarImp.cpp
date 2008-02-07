@@ -204,30 +204,23 @@ void AnimationToolBarImp::forward()
    if (mpController != NULL)
    {
       AnimationState state = mpController->getAnimationState();
-      if (state == PAUSE_FORWARD || state == PAUSE_BACKWARD || state == STOP)
+      if (state == PLAY_BACKWARD || state == PAUSE_FORWARD || state == PAUSE_BACKWARD || state == STOP)
       {
+         mpController->setAnimationState(PLAY_FORWARD);
          mpController->play();
       }
       else
       {
+         // change the speed to the next value in the list
          int itemPos = mpFrameSpeedCombo->currentIndex();
-         if (state == PLAY_BACKWARD)
+         int maxItems = mpFrameSpeedCombo->count();
+         if ((itemPos + 1) < maxItems)
          {
-            // change the speed back to the default value
-            itemPos = 4;
+            itemPos++;
          }
          else
          {
-            // change the speed to the next value in the list
-            int maxItems = mpFrameSpeedCombo->count();
-            if ((itemPos + 1) < maxItems)
-            {
-               itemPos++;
-            }
-            else
-            {
-               itemPos = 0;
-            }
+            itemPos = 0;
          }
 
          QString speedMultiplier = mpFrameSpeedCombo->itemText(itemPos);
@@ -245,7 +238,7 @@ void AnimationToolBarImp::backward()
    {
       AnimationState state = mpController->getAnimationState();
 
-      if (state == PAUSE_FORWARD || state == PAUSE_BACKWARD || state == STOP)
+      if (state == PLAY_FORWARD || state == PAUSE_FORWARD || state == PAUSE_BACKWARD || state == STOP)
       {
          mpController->setAnimationState(PLAY_BACKWARD);
          mpController->play();
@@ -254,22 +247,14 @@ void AnimationToolBarImp::backward()
       {
          // change the speed to the next value in the list
          int itemPos = mpFrameSpeedCombo->currentIndex();
-         if (state == PLAY_FORWARD)
+         int maxItems = mpFrameSpeedCombo->count();
+         if ((itemPos + 1) < maxItems)
          {
-            // change the speed back to the default value
-            itemPos = 4;
+            itemPos++;
          }
          else
          {
-            int maxItems = mpFrameSpeedCombo->count();
-            if ((itemPos + 1) < maxItems)
-            {
-               itemPos++;
-            }
-            else
-            {
-               itemPos = 0;
-            }
+            itemPos = 0;
          }
 
          QString speedMultiplier = mpFrameSpeedCombo->itemText(itemPos);
