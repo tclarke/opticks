@@ -106,6 +106,8 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
    }
 
    QWidget* pDockWindowWidget = new QWidget(this);
+   mpDockedCheck = new QCheckBox("Docked", pDockWindowWidget);
+   mpDockedCheck->setChecked(true);
    mpDragDropCheck = new QCheckBox("Enable drag-and-drop to add signatures", pDockWindowWidget);
    mpPropertiesCheck = new QCheckBox("Enable custom properties", pDockWindowWidget);
    QPushButton* pPropertiesButton = new QPushButton("Properties", pDockWindowWidget);
@@ -160,6 +162,7 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
    QVBoxLayout* pDockWindowLayout = new QVBoxLayout(pDockWindowWidget);
    pDockWindowLayout->setMargin(0);
    pDockWindowLayout->setSpacing(5);
+   pDockWindowLayout->addWidget(mpDockedCheck);
    pDockWindowLayout->addWidget(mpDragDropCheck);
    pDockWindowLayout->addWidget(mpPropertiesCheck);
    pDockWindowLayout->addWidget(pPropertiesButton, 0, Qt::AlignLeft);
@@ -230,10 +233,15 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
    VERIFYNR(connect(pTitleColorButton, SIGNAL(colorChanged(const QColor&)), this, SLOT(setTitleColor(const QColor&))));
    VERIFYNR(connect(pPropertiesButton, SIGNAL(clicked()), this, SLOT(displayProperties())));
    VERIFYNR(connect(pButtonBox, SIGNAL(rejected()), this, SLOT(reject())));
+   VERIFYNR(connect(mpDockedCheck, SIGNAL(toggled(bool)), this, SLOT(setDocked(bool))));
    VERIFYNR(mpDockWindow->attach(SIGNAL_NAME(Window, SessionItemDropped),
       Slot(this, &DesktopAPITestGui::dropSessionItem)));
    VERIFYNR(pDesktop->attach(SIGNAL_NAME(DesktopServices, AboutToShowPropertiesDialog),
       Slot(this, &DesktopAPITestGui::updatePropertiesDialog)));
+   VERIFYNR(mpDockWindow->attach(SIGNAL_NAME(DockWindow, Docked),
+      Slot(this, &DesktopAPITestGui::docked)));
+   VERIFYNR(mpDockWindow->attach(SIGNAL_NAME(DockWindow, Undocked),
+      Slot(this, &DesktopAPITestGui::undocked)));
 }
 
 DesktopAPITestGui::~DesktopAPITestGui()
@@ -349,6 +357,16 @@ void DesktopAPITestGui::dropSessionItem(Subject& subject, const string& signal, 
          }
       }
    }
+}
+
+void DesktopAPITestGui::docked(Subject& subject, const string& signal, const boost::any& value)
+{
+   mpDockedCheck->setChecked(true);
+}
+
+void DesktopAPITestGui::undocked(Subject& subject, const string& signal, const boost::any& value)
+{
+   mpDockedCheck->setChecked(false);
 }
 
 void DesktopAPITestGui::addBrowseButton(bool bAdd)
@@ -534,5 +552,17 @@ void DesktopAPITestGui::displayProperties()
    {
       Service<DesktopServices> pDesktop;
       pDesktop->displayProperties(mpDockPlotWidget);
+   }
+}
+
+void DesktopAPITestGui::setDocked(bool docked)
+{
+   if (docked == true)
+   {
+      mpDockWindow->dock();
+   }
+   else
+   {
+      mpDockWindow->undock();
    }
 }

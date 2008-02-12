@@ -39,6 +39,8 @@ protected:
    void updateContextMenu(Subject& subject, const std::string& signal, const boost::any& value);
    void updatePropertiesDialog(Subject& subject, const std::string& signal, const boost::any& value);
    void dropSessionItem(Subject& subject, const std::string& signal, const boost::any& value);
+   void docked(Subject& subject, const std::string& signal, const boost::any& value);
+   void undocked(Subject& subject, const std::string& signal, const boost::any& value);
 
 protected slots:
    void addBrowseButton(bool bAdd);
@@ -49,6 +51,7 @@ protected slots:
    void setTextColor(const QColor& textColor);
    void setTitleColor(const QColor& titleColor);
    void displayProperties();
+   void setDocked(bool docked);
 
 private:
    // Toolbar buttons
@@ -65,6 +68,7 @@ private:
    // Dock window
    PlotWindow* mpDockWindow;
    PlotWidget* mpDockPlotWidget;
+   QCheckBox* mpDockedCheck;
    QCheckBox* mpDragDropCheck;
    QCheckBox* mpPropertiesCheck;
 };

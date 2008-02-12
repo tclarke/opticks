@@ -98,6 +98,9 @@ protected:
    void hideEvent(QHideEvent* pEvent);
    void contextMenuEvent(QContextMenuEvent* pEvent);
 
+protected slots:
+   void undocked(bool isUndocked);
+
 private:
    QAction* mpDockAction;
    QAction* mpUndockAction;

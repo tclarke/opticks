@@ -67,10 +67,11 @@ DockWindowImp::DockWindowImp(const string& id, const string& windowName, QWidget
    setContextMenuPolicy(Qt::DefaultContextMenu);
 
    // Connections
-   connect(mpDockAction, SIGNAL(triggered()), this, SLOT(dock()));
-   connect(mpUndockAction, SIGNAL(triggered()), this, SLOT(undock()));
-   connect(mpShowAction, SIGNAL(triggered()), this, SLOT(show()));
-   connect(mpHideAction, SIGNAL(triggered()), this, SLOT(hide()));
+   VERIFYNR(connect(mpDockAction, SIGNAL(triggered()), this, SLOT(dock())));
+   VERIFYNR(connect(mpUndockAction, SIGNAL(triggered()), this, SLOT(undock())));
+   VERIFYNR(connect(mpShowAction, SIGNAL(triggered()), this, SLOT(show())));
+   VERIFYNR(connect(mpHideAction, SIGNAL(triggered()), this, SLOT(hide())));
+   VERIFYNR(connect(this, SIGNAL(topLevelChanged(bool)), this, SLOT(undocked(bool))));
 }
 
 DockWindowImp::~DockWindowImp()
@@ -162,7 +163,6 @@ void DockWindowImp::dock()
    if (isFloating() == true)
    {
       setFloating(false);
-      notify(SIGNAL_NAME(DockWindow, Docked));
    }
 }
 
@@ -171,7 +171,18 @@ void DockWindowImp::undock()
    if (isFloating() == false)
    {
       setFloating(true);
+   }
+}
+
+void DockWindowImp::undocked(bool isUndocked)
+{
+   if (isUndocked == true)
+   {
       notify(SIGNAL_NAME(DockWindow, Undocked));
+   }
+   else
+   {
+      notify(SIGNAL_NAME(DockWindow, Docked));
    }
 }
 
