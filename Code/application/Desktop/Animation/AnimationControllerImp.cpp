@@ -12,14 +12,16 @@
 #include <QtCore/QString>
 #include <QtGui/QIcon>
 #include <QtGui/QApplication>
+#include <QtGui/QMessageBox>
 
 #include "AnimationAdapter.h"
 #include "AnimationController.h"
 #include "AnimationControllerImp.h"
 #include "AnimationToolBar.h"
+#include "AppVerify.h"
 #include "ContextMenuAction.h"
 #include "ContextMenuActions.h"
-#include "AppVerify.h"
+#include "FileResource.h"
 #include "Icons.h"
 #include "SessionItemDeserializer.h"
 #include "SessionItemSerializer.h"
@@ -53,6 +55,8 @@ AnimationControllerImp::AnimationControllerImp(FrameType frameType, const string
    mStartFrame(-1.0),
    mStopFrame(-1.0),
    mCurrentFrame(-1.0),
+   mMaxCurrentTime(0.0),
+   mEffectiveCurrentTime(0.0),
    mFrequency(60),
    mMinimumFrameRate(1, mFrequency),
    mInterval(1.0 / mFrequency),
@@ -400,9 +404,15 @@ void AnimationControllerImp::play()
    if (find(mRunningControllers.begin(), mRunningControllers.end(), this) == mRunningControllers.end())
    {
       // Update the system time in milliseconds at timer start
-      timeb systemTime;
-      ftime(&systemTime);
-      mStartTime = (systemTime.time * 1000.0) + systemTime.millitm;
+      timeb timeStruct;
+      ftime(&timeStruct);
+      mStartTime = timeStruct.time*1000.0 + timeStruct.millitm;
+      mEffectiveCurrentTime = mStartTime;
+
+      // System clock resolution limits the total frame rate to 60 frames per second.
+      // This is ameliorated by allowing the animation to continue to update in
+      // 1 ms incremements up to just under the next system clock time.
+      mMaxCurrentTime = mStartTime + 1000.0*smallestDecrement(1/60.0);
       mRunningControllers.push_back(this);
    }
    if (mRunningControllers.size() == 1)
@@ -735,13 +745,28 @@ void AnimationControllerImp::runAnimations()
 void AnimationControllerImp::advance()
 {
    // Get the current system time in milliseconds
-   timeb systemTime;
-   ftime(&systemTime);
-   double currentTime = (systemTime.time * 1000.0) + systemTime.millitm;
+   timeb timeStruct;
+   ftime(&timeStruct);
+   double currentTime = timeStruct.time*1000.0 + timeStruct.millitm;
 
    // Compute a ratio of the elapsed system time since the last timeout and expected time
-   double elapsedTime = currentTime - mStartTime;
    double expectedTime = 1000.0 / mFrequency;
+   double elapsedTime = currentTime - mStartTime;
+   if (elapsedTime == 0.0 && getCanDropFrames() == false)
+   {
+      elapsedTime = 1.0;
+      if (mEffectiveCurrentTime + elapsedTime > mMaxCurrentTime)
+      {
+         elapsedTime = mMaxCurrentTime - mEffectiveCurrentTime;
+      }
+      mEffectiveCurrentTime += elapsedTime;
+   }
+   else
+   {
+      mMaxCurrentTime = currentTime + 1000.0*smallestDecrement(1/60.0);
+      elapsedTime = currentTime - mEffectiveCurrentTime;
+      mEffectiveCurrentTime = currentTime;
+   }
    double intervalMultiplier = elapsedTime / expectedTime;
 
    // Update the start time for the next timeout
