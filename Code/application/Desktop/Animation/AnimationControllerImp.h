@@ -120,6 +120,8 @@ private:
    double mStartFrame;
    double mStopFrame;
    double mCurrentFrame;
+   double mMaxCurrentTime;
+   double mEffectiveCurrentTime;
    const int mFrequency;
    boost::rational<int> mMinimumFrameRate;
    double mInterval;
