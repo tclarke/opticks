@@ -17,50 +17,19 @@ Programs that need to be installed before building the source code:
 
 Download these required dependencies:
 -----------------------------------------------------
- - boost (https://opticks.ballforge.net/files/documents/8/65/Boost-1.33-with-local-mods.zip)
-	
- - ehs (https://opticks.ballforge.net/files/documents/8/47/ehs.zip)
+The Dependencies folder in the trunk contains a system which automatically downloads the appropriate
+dependencies. This system requires python v2.5 or later.
+> python dependencies.py --help
+will provide a usage summary. Most of the time, no command line options are needed.
+Install all the dependencies.
+> python dependencies.py
+This will download the appropriate dependencies builds and will install them in the proper directories.
+Some dependencies (notably Qt) can not be distributed on the opticks website. If you create a
+zip of the Qt build with the proper directory structure and place it in the Dependencies/packages directory,
+it will be installed as part of the download. The Qt/__init__.py file indicates the expected zip file name.
 
- - ffmpeg (https://opticks.ballforge.net/files/documents/8/13/ffmpeg.zip)
-
- - glew (https://opticks.ballforge.net/files/documents/8/11/glew.zip)
-
- - hdf4 (https://opticks.ballforge.net/files/documents/8/12/hdf4.zip)
-
- - hdf5 (https://opticks.ballforge.net/files/documents/8/17/hdf5.zip) 
-
- - libgeotiff (https://opticks.ballforge.net/files/documents/8/14/libgeotiff.zip)
-
- - libjpeg (https://opticks.ballforge.net/files/documents/8/15/libjpeg.zip)
-
- - libproj4 (https://opticks.ballforge.net/files/documents/8/16/libproj4.zip)
-
- - libtiff (https://opticks.ballforge.net/files/documents/8/18/libtiff.zip)
-
- - ossim (https://opticks.ballforge.net/files/documents/8/57/ossim-svn-rev10682-with-local-mods.zip)
-
- - pcre (https://opticks.ballforge.net/files/documents/8/48/pcre.zip)
-
- - pme (https://opticks.ballforge.net/files/documents/8/49/pme.zip)
-
- - pthreads (https://opticks.ballforge.net/files/documents/8/19/pthreads.zip)
-
- - qwt (https://opticks.ballforge.net/files/documents/8/22/qwt.zip)
-
- - shapelib (https://opticks.ballforge.net/files/documents/8/21/shapelib.zip)
-
- - xerces (https://opticks.ballforge.net/files/documents/8/26/xerces.zip) 
-
- - xqilla (https://opticks.ballforge.net/files/documents/8/35/xqilla.zip)
-
- - zlib (https://opticks.ballforge.net/files/documents/8/20/zlib.zip)
-
-Qt 4.3.1 is also required (http://trolltech.com/downloads). However due to licensing restrictions, you must built
-it manually. Instructions on how to build Qt are listed below.
-
-Once these dependencies are downloaded, set the environment variable OPTICKDEPENDENCIES to the directory where 
-you unzipped the dependencies.
-
+Point the OPTICKSDEPENDENCIES variable at the Dependencies folder so the build system can find
+the installed dependencies.
 
 Instructions on building Qt:
 -------------------------------------------
