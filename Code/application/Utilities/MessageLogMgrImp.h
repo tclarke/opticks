@@ -47,6 +47,8 @@ public:
       return SubjectImp::detach(signal, slot);
    }
 
+   void clear(); //should only be called after the current session has been closed, otherwise crashes will result.
+
 protected:
    MessageLogMgrImp();
    virtual ~MessageLogMgrImp();

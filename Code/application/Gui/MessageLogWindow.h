@@ -19,8 +19,10 @@
 #include <QtGui/QComboBox>
 #include <QtGui/QTreeView>
 
+#include "ApplicationServices.h"
+#include "AttachmentPtr.h"
 #include "DockWindowAdapter.h"
-#include "Observer.h"
+#include "MessageLogMgr.h"
 
 #include <map>
 
@@ -30,7 +32,7 @@ class MessageLog;
 class MessageLogWindowModel;
 class Step;
 
-class MessageLogWindow : public DockWindowAdapter, public Observer
+class MessageLogWindow : public DockWindowAdapter
 {
    Q_OBJECT
 
@@ -38,10 +40,8 @@ public:
    MessageLogWindow(const std::string& id, QWidget* parent = 0);
    ~MessageLogWindow();
 
-   void activeSessionChanged(Subject &subject, const std::string &signal, const boost::any &data);
-   void messageLogMgrDeleted(Subject &subject, const std::string &signal, const boost::any &data);
+   void sessionClosed(Subject &subject, const std::string &signal, const boost::any &data);
    void messageLogAdded(Subject &subject, const std::string &signal, const boost::any &data);
-   void attached(Subject &subject, const std::string &signal, const Slot &slot);
 
 protected slots:
    void setLogs(const std::vector<MessageLog*> &logs);
@@ -51,6 +51,8 @@ private:
    std::map<MessageLog*, QTreeView*> mLogs;
    QComboBox *mpLogs;
    MessageLogWindowModel *mpModel;
+   AttachmentPtr<MessageLogMgr> mpMsgLogMgr;
+   AttachmentPtr<ApplicationServices> mpAppSrvcs;
 };
 
 

@@ -55,54 +55,32 @@ MessageLogWindow::MessageLogWindow(const string& id, QWidget* parent) :
 
    setWidget(pTopFrame);
 
-   // Attach to the message log manager and session manager
-   MessageLogMgrImp *pLogMgr = MessageLogMgrImp::instance();
-   if(pLogMgr != NULL)
-   {
-      pLogMgr->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &MessageLogWindow::messageLogAdded));
-      pLogMgr->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &MessageLogWindow::messageLogMgrDeleted));
-   }
-   Service<SessionManager> pSessionMgr;
-   pSessionMgr->attach(SIGNAL_NAME(SessionManagerImp, NameChanged), Slot(this, &MessageLogWindow::activeSessionChanged));
+   Service<MessageLogMgr> pMsgLogMgr;
+   mpMsgLogMgr.addSignal(SIGNAL_NAME(Subject, Modified), Slot(this, &MessageLogWindow::messageLogAdded));
+   mpMsgLogMgr.reset(pMsgLogMgr.get());
+   mpAppSrvcs.addSignal(SIGNAL_NAME(ApplicationServices, SessionClosed), Slot(this, &MessageLogWindow::sessionClosed));
+   mpAppSrvcs.reset(Service<ApplicationServices>().get());
 
    connect(mpLogs, SIGNAL(activated(const QString &)), this, SLOT(setLog(const QString &)));
+
+   Service<SessionManager> pSessionMgr;
+   pMsgLogMgr->getLog(pSessionMgr->getName()); //force the creation of the session log
+   setLogs(pMsgLogMgr->getLogs());
+   setLog(QString::fromStdString(pSessionMgr->getName()));
 }
 
 MessageLogWindow::~MessageLogWindow()
 {
-   MessageLogMgrImp* pManager = MessageLogMgrImp::instance();
-   if(pManager != NULL)
-   {
-      // Detach the message log manager
-      pManager->detach(SIGNAL_NAME(Subject, Modified), Slot(this, &MessageLogWindow::messageLogAdded));
-      pManager->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &MessageLogWindow::messageLogMgrDeleted));
-   }
-   Service<SessionManager> pSessionMgr;
-   pSessionMgr->detach(SIGNAL_NAME(SessionManagerImp, NameChanged), Slot(this, &MessageLogWindow::activeSessionChanged));
-}
-
-void MessageLogWindow::attached(Subject &subject, const string &signal, const Slot &slot)
-{
-   messageLogAdded(subject, signal, boost::any());
 }
 
 void MessageLogWindow::messageLogAdded(Subject &subject, const string &signal, const boost::any &data)
 {
-   MessageLogMgr *pManager = dynamic_cast<MessageLogMgr*>(&subject);
-   if(pManager != NULL)
-   {
-      setLogs(pManager->getLogs());
-   }
+   setLogs(mpMsgLogMgr->getLogs());
 }
 
-void MessageLogWindow::messageLogMgrDeleted(Subject &subject, const string &signal, const boost::any &data)
+void MessageLogWindow::sessionClosed(Subject &subject, const string &signal, const boost::any &data)
 {
    setLogs(vector<MessageLog*>(0));
-}
-
-void MessageLogWindow::activeSessionChanged(Subject &subject, const string &signal, const boost::any &data)
-{
-   setLog(QString::fromStdString(boost::any_cast<string>(data)));
 }
 
 void MessageLogWindow::setLogs(const vector<MessageLog*> &logs)
@@ -118,6 +96,8 @@ void MessageLogWindow::setLogs(const vector<MessageLog*> &logs)
       mpModel->setMessageLog(NULL);
       return;
    }
+   Service<SessionManager> pSessionMgr;
+   string sessionLogName = pSessionMgr->getName();
    bool setLog = true;
    for(vector<MessageLog*>::const_iterator log = logs.begin(); log != logs.end(); ++log)
    {
@@ -133,21 +113,26 @@ void MessageLogWindow::setLogs(const vector<MessageLog*> &logs)
       {
          continue;
       }
-
       QString strName = QString::fromStdString(logName);
+      if (logName == sessionLogName)
+      {
+         strName = "Session Log";
+      }
+      
       if(strName == currentName)
       {
-         mpLogs->insertItem(0, strName);
          setLog = false;
       }
-      else
-      {
-         mpLogs->addItem(strName);
-      }
+      mpLogs->addItem(strName);
    }
    if(setLog)
    {
       mpModel->setMessageLog(logs.front());
+      mpLogs->setCurrentIndex(0);
+   }
+   else
+   {
+      mpLogs->setCurrentIndex(mpLogs->findText(currentName));
    }
 }
 
@@ -158,28 +143,34 @@ void MessageLogWindow::setLog(const QString &logName)
       mpModel->setMessageLog(NULL);
       return;
    }
-   MessageLogMgr *pManager = dynamic_cast<MessageLogMgr*>(MessageLogMgrImp::instance());
-   if(pManager != NULL)
+   string realLogName = logName.toStdString();
+   QString aliasedLogName = logName;
+   if (aliasedLogName == QString::fromStdString(Service<SessionManager>()->getName()))
    {
-      vector<MessageLog*> logs = pManager->getLogs();
-      for(vector<MessageLog*>::const_iterator lIter = logs.begin(); lIter != logs.end(); ++lIter)
+      aliasedLogName = QString::fromStdString("Session Log");
+   }
+   if (realLogName == "Session Log")
+   {
+      realLogName = Service<SessionManager>()->getName();
+   }
+   vector<MessageLog*> logs = mpMsgLogMgr->getLogs();
+   for(vector<MessageLog*>::const_iterator lIter = logs.begin(); lIter != logs.end(); ++lIter)
+   {
+      MessageLog *pLog = *lIter;
+      if((pLog != NULL) && (realLogName == pLog->getLogName()))
       {
-         MessageLog *pLog = *lIter;
-         if((pLog != NULL) && (logName == QString::fromStdString(pLog->getLogName())))
+         int idx = mpLogs->findText(aliasedLogName);
+         if(idx == -1)
          {
-            int idx = mpLogs->findText(logName);
-            if(idx == -1)
-            {
-               setLogs(pManager->getLogs());
-               idx = mpLogs->findText(logName);
-            }
-            if(idx != -1)
-            {
-               mpLogs->setCurrentIndex(idx);
-               mpModel->setMessageLog(pLog);
-            }
-            return;
+            setLogs(mpMsgLogMgr->getLogs());
+            idx = mpLogs->findText(aliasedLogName);
          }
+         if(idx != -1)
+         {
+            mpLogs->setCurrentIndex(idx);
+            mpModel->setMessageLog(pLog);
+         }
+         return;
       }
    }
 }
