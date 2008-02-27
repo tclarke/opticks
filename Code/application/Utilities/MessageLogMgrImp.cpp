@@ -47,12 +47,7 @@ MessageLogMgrImp::MessageLogMgrImp() : mLogPath()
 MessageLogMgrImp::~MessageLogMgrImp()
 {
    notify(SIGNAL_NAME(Subject, Deleted));
-   map<string, MessageLog*>::iterator it;
-   for (it = mLogMap.begin(); it != mLogMap.end(); it++)
-   {
-      MessageLogAdapter* pLog(static_cast<MessageLogAdapter*>(it->second));
-      delete pLog;
-   }
+   clear();
 
    mpJournal->close();
    mpJournal->remove();
@@ -106,10 +101,21 @@ MessageLog *MessageLogMgrImp::getLog(const string &logName)
    return mLogMap[logName];
 }
 
-MessageLog *MessageLogMgrImp::getLog()
+MessageLog* MessageLogMgrImp::getLog()
 {
    Service<SessionManager> pSessionMgr;
    return getLog(pSessionMgr->getName());
+}
+
+void MessageLogMgrImp::clear()
+{
+   map<string, MessageLog*>::iterator it;
+   for (it = mLogMap.begin(); it != mLogMap.end(); it++)
+   {
+      MessageLogAdapter* pLog(static_cast<MessageLogAdapter*>(it->second));
+      delete pLog;
+   }
+   mLogMap.clear();
 }
 
 vector<MessageLog*> MessageLogMgrImp::getLogs() const

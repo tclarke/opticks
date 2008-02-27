@@ -28,6 +28,7 @@
 #include "LatLonLayerAdapter.h"
 #include "Layer.h"
 #include "LayerList.h"
+#include "MessageLogMgrImp.h"
 #include "ModelServicesImp.h"
 #include "ModuleDescriptor.h"
 #include "ObjectResource.h"
@@ -164,6 +165,7 @@ void SessionManagerImp::close()
    ModelServicesImp::instance()->clear();
    PlugInManagerServicesImp::instance()->clear();
    DesktopServicesImp::instance()->deleteAllWindows();
+   MessageLogMgrImp::instance()->clear();
 
    mName.clear();
 }
@@ -971,6 +973,7 @@ void SessionManagerImp::newSession()
 {
    close();
    mName = SessionItemImp::generateUniqueId();
+   MessageLogMgrImp::instance()->getLog(mName); //force the session log to be created.
    ApplicationWindow *pAppWindow = static_cast<ApplicationWindow*>(Service<DesktopServices>()->getMainWidget());
    VERIFYNRV(pAppWindow != NULL);
    pAppWindow->registerPlugIns();
@@ -1006,6 +1009,7 @@ bool SessionManagerImp::open(const string &filename, Progress *pProgress)
       name = mName;
       close();
       mName = name;
+      MessageLogMgrImp::instance()->getLog(mName); //force the session log to be created.
       if (pProgress)
       {
          pProgress->updateProgress("Restoring base services...", 1, NORMAL);
