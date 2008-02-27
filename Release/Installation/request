@@ -484,7 +484,7 @@ if [ -d ${PKG_INSTALL_ROOT}$BASEDIR/$APPDIR -o -f ${PKG_INSTALL_ROOT}$BASEDIR/$A
    result="y"
 else
    puttext "Opticks will be installed to \"${PKG_INSTALL_ROOT}$BASEDIR/$APPDIR\" where the base directory is \"$BASEDIR\" (unless you have overridden using -a with pkgadd) and the application directory is \"$APPDIR\"."
-   result=`ckyorn -d "n" -p "Do you which to change the installation location, default is no?" | cut -c1-1 | tr [A-Z] [a-z]`
+   result=`ckyorn -d "n" -p "Do you wish to change the installation location, default is no?" | cut -c1-1 | tr [A-Z] [a-z]`
    if [ $result = "q" ]; then
       exit 1
    fi
