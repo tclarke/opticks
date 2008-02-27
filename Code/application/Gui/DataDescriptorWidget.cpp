@@ -87,9 +87,9 @@ DataDescriptorWidget::DataDescriptorWidget(QWidget* parent) :
    pLayout->addWidget(mpTrueColorButton, 0, Qt::AlignRight);
 
    // Connections
-   connect(mpTreeWidget, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
-      SLOT(descriptorItemChanged(QTreeWidgetItem*, int)));
-   connect(mpTrueColorButton, SIGNAL(clicked()), this, SLOT(setDisplayBandsToTrueColor()));
+   VERIFYNR(connect(mpTreeWidget, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
+      SLOT(descriptorItemChanged(QTreeWidgetItem*, int))));
+   VERIFYNR(connect(mpTrueColorButton, SIGNAL(clicked()), this, SLOT(setDisplayBandsToTrueColor())));
 }
 
 DataDescriptorWidget::~DataDescriptorWidget()
@@ -899,8 +899,46 @@ void DataDescriptorWidget::descriptorItemChanged(QTreeWidgetItem* pItem, int iCo
       return;
    }
 
+   QString itemName = pItem->text(0);
+   if ((itemName == "X Pixel Size") || (itemName == "Y Pixel Size"))
+   {
+      QString itemValue = pItem->text(iColumn);
+      if (itemValue.isEmpty() == false)
+      {
+         double pixelSize = itemValue.toDouble();
+         if (pixelSize <= 0.0)
+         {
+            QMessageBox::warning(this, APP_NAME, "The pixel size cannot be negative or zero.  "
+               "Please enter a positive number.");
+
+            RasterDataDescriptor* pRasterDescriptor = dynamic_cast<RasterDataDescriptor*>(mpDescriptor);
+            if (pRasterDescriptor != NULL)
+            {
+               if (itemName == "X Pixel Size")
+               {
+                  pixelSize = pRasterDescriptor->getXPixelSize();
+               }
+               else if (itemName == "Y Pixel Size")
+               {
+                  pixelSize = pRasterDescriptor->getYPixelSize();
+               }
+
+               VERIFYNR(disconnect(mpTreeWidget, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
+                  SLOT(descriptorItemChanged(QTreeWidgetItem*, int))));
+
+               pItem->setText(iColumn, QString::number(pixelSize));
+
+               VERIFYNR(connect(mpTreeWidget, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
+                  SLOT(descriptorItemChanged(QTreeWidgetItem*, int))));
+            }
+
+            return;
+         }
+      }
+   }
+
    mModified = true;
-   emit valueChanged(pItem->text(0));
+   emit valueChanged(itemName);
    emit modified();
 }
 

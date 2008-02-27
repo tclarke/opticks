@@ -165,42 +165,52 @@ public:
       DataElement* pElement = NULL) const = 0;
 
    /**
-    *  Set the X scale factor when drawing.
+    *  Sets the X-dimension scale factor when drawing.
     *
-    *  @param xScaleFactor
-    *         Factor to scale X by while drawing.
+    *  %Any scaling is applied before the offset is applied.
     *
-    *  @notify This method will notify signalExtentsModified.
+    *  @param   xScaleFactor
+    *           The factor by which the pixels in the X-dimension are scaled
+    *           while drawing.  If this value is negative or zero, this method
+    *           does nothing.
+    *
+    *  @notify  This method will notify signalExtentsModified() if the scale
+    *           factor value changes.
     */
    virtual void setXScaleFactor(double xScaleFactor) = 0;
 
    /**
-    *  Get the X scale factor when drawing.
+    *  Returns the X-dimension scale factor when drawing.
     *
-    *  Scaling is applied before offset.
+    *  %Any scaling is applied before the offset is applied.
     *
-    *  @return Factor to scale X by while drawing.
+    *  @return  The factor by which the pixels in the X-dimension are scaled
+    *           while drawing.
     */
    virtual double getXScaleFactor() const = 0;
 
    /**
-    *  Set the Y scale factor when drawing.
+    *  Sets the Y-dimension scale factor when drawing.
     *
-    *  Scaling is applied before offset.
+    *  %Any scaling is applied before the offset is applied.
     *
-    *  @param yScaleFactor
-    *         Factor to scale Y by while drawing.
+    *  @param   yScaleFactor
+    *           The factor by which the pixels in the Y-dimension are scaled
+    *           while drawing.  If this value is negative or zero, this method
+    *           does nothing.
     *
-    *  @notify This method will notify signalExtentsModified.
+    *  @notify  This method will notify signalExtentsModified() if the scale
+    *           factor value changes.
     */
    virtual void setYScaleFactor(double yScaleFactor) = 0;
 
    /**
-    *  Get the Y scale factor when drawing.
+    *  Returns the Y-dimension scale factor when drawing.
     *
-    *  Scaling is applied before offset.
+    *  %Any scaling is applied before the offset is applied.
     *
-    *  @return Factor to scale Y by while drawing.
+    *  @return  The factor by which the pixels in the Y-dimension are scaled
+    *           while drawing.
     */
    virtual double getYScaleFactor() const = 0;
 
