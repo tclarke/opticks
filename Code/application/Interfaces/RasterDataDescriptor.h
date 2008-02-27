@@ -417,7 +417,8 @@ public:
     *  display pixel size.
     *
     *  @param   pixelSize
-    *           The pixel size for each column in the data set.
+    *           The pixel size for each column in the data set.  If this value
+    *           is negative or zero, this method does nothing.
     *
     *  @notify  This method notifies Subject::signalModified if the given
     *           column pixel size is different than the current column pixel
@@ -449,7 +450,8 @@ public:
     *  display pixel size.
     *
     *  @param   pixelSize
-    *           The pixel size for each row in the data set.
+    *           The pixel size for each row in the data set.  If this value
+    *           is negative or zero, this method does nothing.
     *
     *  @notify  This method notifies Subject::signalModified if the given
     *           row pixel size is different than the current row pixel size.

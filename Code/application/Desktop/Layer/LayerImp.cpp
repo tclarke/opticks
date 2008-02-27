@@ -44,10 +44,10 @@ LayerImp::LayerImp(const string& id, const string& layerName, DataElement* pElem
    SessionItemImp(id, layerName),
    mbLinking(false),
    mpView(NULL),
-   mXScaleFactor(1),
-   mYScaleFactor(1),
-   mXOffset(0),
-   mYOffset(0),
+   mXScaleFactor(1.0),
+   mYScaleFactor(1.0),
+   mXOffset(0.0),
+   mYOffset(0.0),
    mpDisplayedAction(NULL)
 {
    mpElement.addSignal(SIGNAL_NAME(Subject, Modified), Slot(this, &LayerImp::elementModified));
@@ -551,6 +551,11 @@ bool LayerImp::hasUniqueElement() const
 
 void LayerImp::setXScaleFactor(double xScaleFactor)
 {
+   if (xScaleFactor <= 0.0)
+   {
+      return;
+   }
+
    if (mXScaleFactor != xScaleFactor)
    {
       mXScaleFactor = xScaleFactor;
@@ -566,6 +571,11 @@ double LayerImp::getXScaleFactor() const
 
 void LayerImp::setYScaleFactor(double yScaleFactor)
 {
+   if (yScaleFactor <= 0.0)
+   {
+      return;
+   }
+
    if (mYScaleFactor != yScaleFactor)
    {
       mYScaleFactor = yScaleFactor;

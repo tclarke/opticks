@@ -412,6 +412,11 @@ unsigned int RasterDataDescriptorImp::getBandCount() const
 
 void RasterDataDescriptorImp::setXPixelSize(double pixelSize)
 {
+   if (pixelSize <= 0.0)
+   {
+      return;
+   }
+
    if (pixelSize != mXPixelSize)
    {
       mXPixelSize = pixelSize;
@@ -426,6 +431,11 @@ double RasterDataDescriptorImp::getXPixelSize() const
 
 void RasterDataDescriptorImp::setYPixelSize(double pixelSize)
 {
+   if (pixelSize <= 0.0)
+   {
+      return;
+   }
+
    if (pixelSize != mYPixelSize)
    {
       mYPixelSize = pixelSize;
