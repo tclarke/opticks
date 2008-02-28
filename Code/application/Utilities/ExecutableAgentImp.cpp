@@ -17,7 +17,7 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "ProductView.h"
-#include "Progress.h"
+#include "ProgressImp.h"
 #include "RasterElement.h"
 #include "SessionResource.h"
 #include "SpatialDataView.h"
@@ -228,7 +228,20 @@ bool ExecutableAgentImp::executePlugIn()
       SessionSaveLock lock;
       if (mSupportsRequestedBatchSetting)
       {
+         PlugIn* pPreviousPlugIn = NULL;
+         ProgressImp* pProgressImp = dynamic_cast<ProgressImp*>(mpProgress);
+         if (pProgressImp != NULL)
+         {
+            pPreviousPlugIn = pProgressImp->getPlugIn();
+            pProgressImp->setPlugIn(pPlugIn);
+         }
+
          bSuccess = pExecutable->execute(&inArgList, &outArgList);
+
+         if (pProgressImp != NULL)
+         {
+            pProgressImp->setPlugIn(pPreviousPlugIn);
+         }
       }
       else
       {
