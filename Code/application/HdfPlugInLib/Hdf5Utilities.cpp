@@ -174,7 +174,9 @@ bool readAttribute(hid_t attrId, hid_t attrType, hid_t dataSpace, DataVariant& v
    Hdf5TypeResource memType(pReader->getReadMemoryType());
    herr_t status = H5Aread(attrId, *memType, pData);
    DO_IF(status < 0, return false);
-   var = *(reinterpret_cast<T*>(pReader->getValue()));
+   T* pValue = reinterpret_cast<T*>(pReader->getValue());
+   var = *(pValue);
+   delete pValue; //delete the value, because the DataVariant creates a deep copy of the value.
    return var.isValid();
 }
 

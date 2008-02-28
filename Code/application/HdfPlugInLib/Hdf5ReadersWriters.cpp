@@ -217,12 +217,12 @@ class StringReaderWriter : public Hdf5CustomReader, public Hdf5CustomWriter
 {
 public:
    StringReaderWriter()
-   : mpReadBuffer(NULL), mpWriteBuffer(NULL), mDataType(-1), mpValue(NULL)
+   : mpReadBuffer(NULL), mpWriteBuffer(NULL), mDataType(-1), mpValue(NULL), mDeleteFixedSpace(false)
    {
    }
 
    StringReaderWriter(hid_t dataType)
-   : mpValue(NULL), mpReadBuffer(NULL), mpWriteBuffer(NULL), mDataType(dataType)
+   : mpValue(NULL), mpReadBuffer(NULL), mpWriteBuffer(NULL), mDataType(dataType), mDeleteFixedSpace(false)
    {
       //if data cannot be read, return from constructor before mpValue is set to non-NULL.
       //so that isValid() will return false.
@@ -243,6 +243,10 @@ public:
 
    ~StringReaderWriter()
    {
+      if (mDeleteFixedSpace)
+      {
+         delete [] mpReadBuffer[0];
+      }
       delete [] mpReadBuffer;
       delete [] mpWriteBuffer;
    }
@@ -302,10 +306,11 @@ public:
       {
          if (mpReadBuffer == NULL)
          {
-            size_t size = H5Tget_size(mDataType); // get the size of the type
+            size_t strLen = H5Tget_size(mDataType); // get the length of the string
             mpReadBuffer = new char*[1];
-            mpReadBuffer[0] = new char[size + 1]; //create fixed length char* array
-            memset(mpReadBuffer[0], 0, size + 1); //set to NULL, so that string is auto null terminated
+            mpReadBuffer[0] = new char[strLen]; //create fixed length char* array
+            memset(mpReadBuffer[0], 0, strLen); //set to NULL, so that string is auto null terminated
+            mDeleteFixedSpace = true;
          }
          return mpReadBuffer[0];
       }
@@ -331,7 +336,16 @@ public:
          }
          else
          {
-            *mpValue = string(mpReadBuffer[0]);
+            htri_t isVariableLengthStr = H5Tis_variable_str(mDataType);
+            if (isVariableLengthStr)
+            {
+               *mpValue = string(mpReadBuffer[0]); //variable length strings are null terminated
+            }
+            else
+            {
+               size_t strLen = H5Tget_size(mDataType); // get the length of the string
+               *mpValue = string(mpReadBuffer[0], strLen); //fixed length strings have no terminator
+            }
          }
       }
       return mpValue;
@@ -344,6 +358,7 @@ private:
    std::string* mpValue; //not owned by class
    mutable char** mpWriteBuffer;
    mutable char** mpReadBuffer;
+   mutable bool mDeleteFixedSpace;
    hid_t mDataType;
 };
 
@@ -358,12 +373,12 @@ class StringVecReaderWriter : public Hdf5CustomReader, public Hdf5CustomWriter
 {
 public:
    StringVecReaderWriter()
-   : mpReadBuffer(NULL), mpWriteBuffer(NULL), mDataType(-1), mpValue(NULL)
+   : mpReadBuffer(NULL), mpWriteBuffer(NULL), mDataType(-1), mpValue(NULL), mDeleteFixedSpace(false)
    {
    }
 
    StringVecReaderWriter(hid_t dataType)
-   : mpValue(NULL), mpReadBuffer(NULL), mpWriteBuffer(NULL), mDataType(dataType)
+   : mpValue(NULL), mpReadBuffer(NULL), mpWriteBuffer(NULL), mDataType(dataType), mDeleteFixedSpace(false)
    {
       //if data cannot be read, return from constructor before mpValue is set to non-NULL.
       //so that isValid() will return false.
@@ -384,6 +399,10 @@ public:
 
    ~StringVecReaderWriter()
    {
+      if (mDeleteFixedSpace)
+      {
+         delete [] mpReadBuffer[0];
+      }
       delete [] mpReadBuffer;
       delete [] mpWriteBuffer;
    }
@@ -449,12 +468,14 @@ public:
       {
          if (mpReadBuffer == NULL)
          {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Test the fixed length vector string reading code (kstreith)")
-            size_t strLen = H5Tget_size(mDataType); // get the size of the type
-            mpReadBuffer = new char*[mDataSpace.front() * strLen];
-            memset(mpReadBuffer, 0, mDataSpace.front() * (strLen + 1)); //set to NULL, so that string is auto null terminated
+            size_t strLen = H5Tget_size(mDataType); // get the number of characters in the fixed length strings
+            hsize_t numberOfStrings = mDataSpace.front();
+            mpReadBuffer = new char*[1];
+            mpReadBuffer[0] = new char[numberOfStrings * strLen];
+            memset(mpReadBuffer[0], 0, numberOfStrings * strLen); //set to NULL, so that string is auto null terminated
+            mDeleteFixedSpace = true;
          }
-         return mpReadBuffer;
+         return mpReadBuffer[0];
       }
    }
 
@@ -480,15 +501,31 @@ public:
          vector<string>& stringValues = *mpValue;
          stringValues.clear();
          stringValues.reserve(numberOfStrings);
-         for (int i = 0; i < numberOfStrings; ++i)
+
+         htri_t isVariableLengthStr = H5Tis_variable_str(mDataType);
+         if (isVariableLengthStr)
          {
-            if (mpReadBuffer[i] != NULL)
+            for (int i = 0; i < numberOfStrings; ++i)
             {
-               stringValues.push_back(string(mpReadBuffer[i]));
+               if (mpReadBuffer[i] != NULL)
+               {
+                  //NOTE: variable length strings are null-terminated.
+                  stringValues.push_back(string(mpReadBuffer[i]));
+               }
+               else
+               {
+                  stringValues.push_back(string());
+               }
             }
-            else
+         }
+         else
+         {
+            size_t strLen = H5Tget_size(mDataType); // get the number of characters in the fixed length strings
+            for (int i = 0; i < numberOfStrings; ++i)
             {
-               stringValues.push_back(string());
+               char* pStringValue = &(mpReadBuffer[0][i * strLen]);
+               //NOTE: fixed length strings have no terminator
+               stringValues.push_back(string(pStringValue, strLen));
             }
          }
       }
@@ -505,6 +542,7 @@ private:
    std::vector<std::string>* mpValue; //not owned by class
    mutable char** mpReadBuffer;
    mutable char** mpWriteBuffer;
+   mutable bool mDeleteFixedSpace;
    hid_t mDataType;
    vector<hsize_t> mDataSpace;
 };
@@ -724,4 +762,5 @@ Hdf5CustomWriter* createHdf5CustomWriter<vector<string> >()
 {
    return new StringVecReaderWriter();
 }
+
 
