@@ -85,6 +85,7 @@ bool FeatureProxyConnector::initialize()
    mpServer = new QTcpServer(this);
    if(!mpServer->listen(QHostAddress::LocalHost))
    {
+      terminate();
       return false;
    }
    
@@ -98,11 +99,13 @@ bool FeatureProxyConnector::initialize()
    mpProcess->start(mExecutable, args);
    if(!mpProcess->waitForStarted())
    {
+      terminate();
       return false;
    }
 
    if(!mpServer->waitForNewConnection(3000))
    {
+      terminate();
       return false;
    }
    mpSocket = mpServer->nextPendingConnection();
