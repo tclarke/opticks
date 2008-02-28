@@ -54,7 +54,7 @@ public slots:
    void updateBoundingBox();
 
 protected:
-   QFont getScaledFont(double minSize = -1.0, double maxSize = -1.0);
+   QFont getScaledFont(double minSize = -1.0, double maxSize = 256.0);
    void drawTexture() const;
 
 private:
