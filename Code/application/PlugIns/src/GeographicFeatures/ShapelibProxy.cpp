@@ -199,7 +199,9 @@ bool ShapelibProxy::query(const std::string &handle, std::string &errorMessage,
          QPointF(pShpObject->dfYMax, pShpObject->dfXMax));
       QRectF clipRect(QPointF(minClip.mX, minClip.mY), QPointF(maxClip.mX, maxClip.mY));
 
-      if (clipRect.isEmpty() == true || objectRect.intersects(clipRect) == true)
+      if ((clipRect.isEmpty() == true) ||
+         ((objectRect.isEmpty() == true) && (clipRect.contains(objectRect.topLeft()) == true)) ||
+         (objectRect.intersects(clipRect) == true))
       {
          ArcProxyLib::Feature feature;
          feature.setType(featureType);
@@ -219,8 +221,8 @@ bool ShapelibProxy::query(const std::string &handle, std::string &errorMessage,
          
          emit featureLoaded(feature);
       }
-      SHPDestroyObject(pShpObject);
 
+      SHPDestroyObject(pShpObject);
    }
 
    return true;
