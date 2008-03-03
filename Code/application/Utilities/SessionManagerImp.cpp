@@ -631,6 +631,8 @@ void SessionManagerImp::deleteObsoleteFiles(const string &dir, const vector<Inde
 void SessionManagerImp::destroyFailedSessionItem(const string &type, SessionItem* pItem)
 {
    VERIFYNRV(pItem != NULL);
+   mItems.erase(mItems.find(pItem->getId()));
+
    map<string,DestroyerProc> destroyers;
    destroyers["PlotWidget"] = &SessionManagerImp::destroyPlotWidget;
    destroyers["PlotSet"] = &SessionManagerImp::destroyPlotSet;
