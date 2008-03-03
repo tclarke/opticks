@@ -145,11 +145,11 @@ protected:
 
    bool event(QEvent* pEvent);
    void toolTipEvent(QHelpEvent* pEvent);
-   void keyPressEvent(QKeyEvent* e);
-   void keyReleaseEvent(QKeyEvent* e);
-   void mousePressEvent(QMouseEvent* e);
-   void mouseMoveEvent(QMouseEvent* e);
-   void mouseReleaseEvent(QMouseEvent* e);
+   void keyPressEvent(QKeyEvent* pEvent);
+   void keyReleaseEvent(QKeyEvent* pEvent);
+   void mousePressEvent(QMouseEvent* pEvent);
+   void mouseMoveEvent(QMouseEvent* pEvent);
+   void mouseReleaseEvent(QMouseEvent* pEvent);
    void mouseDoubleClickEvent(QMouseEvent* pEvent);
 
    virtual double limitZoomPercentage(double dPercent);
