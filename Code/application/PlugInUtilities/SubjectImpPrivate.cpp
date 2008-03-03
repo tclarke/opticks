@@ -15,18 +15,12 @@
 
 using namespace std;
 
-SubjectImpPrivate::SubjectImpPrivate() : 
-   mpSlotsWaitingForDetach(NULL),
-   mpActiveSlot(NULL)
+SubjectImpPrivate::SubjectImpPrivate() : mpSubject(NULL)
 {
 }
 
 SubjectImpPrivate::~SubjectImpPrivate()
 {
-   if (mpSlotsWaitingForDetach != NULL)
-   {
-      delete mpSlotsWaitingForDetach;
-   }
 }
 
 bool SubjectImpPrivate::attach(Subject &subject, const string &signal, const Slot &slot)
@@ -34,6 +28,11 @@ bool SubjectImpPrivate::attach(Subject &subject, const string &signal, const Slo
    if (slot == Slot())
    {
       return false;
+   }
+
+   if (mpSubject == NULL)
+   {
+      mpSubject = &subject;
    }
 
    MapType::iterator pSlotVec=mSlots.find(signal);
@@ -58,7 +57,7 @@ bool SubjectImpPrivate::attach(Subject &subject, const string &signal, const Slo
    }
    catch(boost::bad_any_cast &exc)
    {
-      std::string msg = "Bad cast while calling processing attached method for signal " + signal + "\n" + exc.what();
+      string msg = "Bad cast while calling processing attached method for signal " + signal + "\n" + exc.what();
       VERIFYRV_MSG(false, true, msg.c_str());
    }
 
@@ -67,40 +66,31 @@ bool SubjectImpPrivate::attach(Subject &subject, const string &signal, const Slo
 
 bool SubjectImpPrivate::detach(Subject &subject, const string &signal, const Slot &slot)
 {
-   if ((&slot == mpActiveSlot) || 
-      (mpActiveSlot!=NULL && mActiveSignal == signal &&
-      (slot==Slot() || slot == *mpActiveSlot)))
-   {
-      //Slot is attempting to detach itself while
-      //it is being notified by this Subject.
-      //queue the delete request
-      if (mpSlotsWaitingForDetach == NULL)
-      {
-         mpSlotsWaitingForDetach = new std::list<Slot>();
-      }
-      mpSlotsWaitingForDetach->push_back(slot);
-      return true;
-   }
-
+   bool success = true;
    MapType::iterator pSlotVec = mSlots.find(signal);
    if (pSlotVec != mSlots.end())
    {
       list<Slot> &slotVec = pSlotVec->second;
       if (slot == Slot())
       {
+         bool shouldCallDetachMethod = true;
          list<Slot>::iterator pSlot;
          for (pSlot=slotVec.begin(); pSlot!=slotVec.end(); ++pSlot)
          {
             Slot slotCopy = *pSlot;
-            slotVec.erase(pSlot);
-            try
+            *pSlot = Slot();
+            if (shouldCallDetachMethod)
             {
-               slotCopy.callDetachMethod(subject, signal);              
-            }
-            catch(boost::bad_any_cast &exc)
-            {
-               std::string msg = "Bad cast while calling processing detached method for signal " + signal + "\n" + exc.what();
-               VERIFYRV_MSG(false, true, msg.c_str());
+               try
+               {
+                  slotCopy.callDetachMethod(subject, signal);
+               }
+               catch(boost::bad_any_cast &exc)
+               {
+                  string msg = "Bad cast while calling processing detached method for signal " + signal + "\n" + exc.what();
+                  VERIFYNR_MSG(false, msg.c_str());
+                  shouldCallDetachMethod = false;
+               }
             }
          }
       }
@@ -110,28 +100,44 @@ bool SubjectImpPrivate::detach(Subject &subject, const string &signal, const Slo
          if (pSlot != slotVec.end())
          {
             Slot slotCopy = *pSlot;
-            slotVec.erase(pSlot);
+            *pSlot = Slot();
             try
             {
                slotCopy.callDetachMethod(subject, signal);
             }
             catch(boost::bad_any_cast &exc)
             {
-               std::string msg = "Bad cast while calling processing detached method for signal " + signal + "\n" + exc.what();
-               VERIFYRV_MSG(false, true, msg.c_str());
+               string msg = "Bad cast while calling processing detached method for signal " + signal + "\n" + exc.what();
+               VERIFYNR_MSG(false, msg.c_str());
             }
          }
          else
          {
-            return false;
+            success = false;
          }
       }
+
+      removeEmptySlots(signal, slotVec);
    }
 
-   return true;
+   return success;
 }
 
-void SubjectImpPrivate::notify(Subject &subject, const string &signal, const boost::any &data)
+class PopRecursion
+{
+public:
+   PopRecursion(vector<string> &recursions, const string &recursion) : mRecursions(recursions) 
+   {
+      mRecursions.push_back(recursion);
+   }
+   ~PopRecursion() 
+   { 
+      mRecursions.pop_back(); 
+   }
+private:
+   vector<string> &mRecursions;
+};
+void SubjectImpPrivate::notify(Subject &subject, const string &signal, const string &originalSignal, const boost::any &data)
 {
    if (signal.empty())
    {
@@ -143,75 +149,36 @@ void SubjectImpPrivate::notify(Subject &subject, const string &signal, const boo
    if (pSlotVec != mSlots.end())
    {
       list<Slot> &slotVec = pSlotVec->second;
-      list<Slot>::iterator pSlot;
-      mActiveSignal = signal;
-      for (pSlot=slotVec.begin(); 
-         pSlot!=slotVec.end(); 
-         ++pSlot)
-      {
-         mpActiveSlot = &*pSlot;
-         try
-         {
-            pSlot->update(subject, signal, data);
-         }
-         catch(boost::bad_any_cast &exc)
-         {
-            std::string msg = "Bad cast while calling processing signal " + mActiveSignal + "\n" + exc.what();
-            VERIFYNRV_MSG(false, msg.c_str());
-         }
-         mpActiveSlot = NULL;
-      }
-   }
 
-   detachWaitingSlots(subject, signal);
-
-   if (signal != SIGNAL_NAME(Subject, Modified) && signal != SIGNAL_NAME(Subject, Deleted))
-   {
-      // notify slots attached to all signals
-      pSlotVec = mSlots.find(SIGNAL_NAME(Subject, Modified));
-      if (pSlotVec != mSlots.end())
+      // Scope the recursion popper
       {
-         list<Slot> &slotVec = pSlotVec->second;
+         PopRecursion popper(mRecursions, signal);
+
          list<Slot>::iterator pSlot;
-         mActiveSignal = SIGNAL_NAME(Subject, Modified);
-         for (pSlot=slotVec.begin(); pSlot!=slotVec.end(); ++pSlot)
+         for (pSlot=slotVec.begin(); 
+            pSlot!=slotVec.end(); 
+            ++pSlot)
          {
-            mpActiveSlot = &*pSlot;
             try
             {
-               pSlot->update(subject, SIGNAL_NAME(Subject, Modified), data);
+               Slot slotCopy = *pSlot;
+               slotCopy.update(subject, signal, data);
             }
             catch(boost::bad_any_cast &exc)
             {
-               std::string msg = "Bad cast while calling processing signal " + mActiveSignal + "\n" + exc.what();
+               string msg = "Bad cast while calling processing signal " + originalSignal + "\n" + exc.what();
                VERIFYNRV_MSG(false, msg.c_str());
             }
-            mpActiveSlot = NULL;
          }
       }
 
-      detachWaitingSlots(subject, SIGNAL_NAME(Subject, Modified));
+      removeEmptySlots(signal, slotVec);
    }
 
-   mActiveSignal.clear();
-}
-
-void SubjectImpPrivate::detachWaitingSlots(Subject &subject, const string &signal)
-{
-   while (mpSlotsWaitingForDetach != NULL)
+   if (signal != SIGNAL_NAME(Subject, Modified) && signal != SIGNAL_NAME(Subject, Deleted))
    {
-      //now that we have finished notifying slots,
-      //detach any that requested to be detached while
-      //they were being notified.
-      std::list<Slot>* pSlotsWaitingForDetach = mpSlotsWaitingForDetach;
-      mpSlotsWaitingForDetach = NULL;
-
-      list<Slot>::iterator pSlot;
-      for (pSlot = pSlotsWaitingForDetach->begin(); pSlot != pSlotsWaitingForDetach->end(); ++pSlot)
-      {
-         detach(subject, signal, *pSlot);
-      }
-      delete pSlotsWaitingForDetach;
+      string effectiveSignal = originalSignal + " as " + SIGNAL_NAME(Subject, Modified);
+      notify(subject, SIGNAL_NAME(Subject, Modified), effectiveSignal, data);
    }
 }
 
@@ -228,10 +195,19 @@ const list<Slot>& SubjectImpPrivate::getSlots(const string &signal)
    if (pSlotVec != mSlots.end())
    {
       list<Slot> &slotVec = pSlotVec->second;
+      removeEmptySlots(signal, slotVec);
       return slotVec;
    }
    else
    {
       return emptyList;
+   }
+}
+
+void SubjectImpPrivate::removeEmptySlots(const string &recursion, list<Slot> &slotVec)
+{
+   if (count(mRecursions.begin(), mRecursions.end(), recursion) == 0)
+   {
+      slotVec.erase(remove(slotVec.begin(), slotVec.end(), Slot()), slotVec.end());
    }
 }
