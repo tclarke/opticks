@@ -653,27 +653,27 @@ void PerspectiveViewImp::keyPressEvent(QKeyEvent* e)
    }
 
    Qt::KeyboardModifiers modifiers = e->modifiers();
-   if (modifiers & Qt::ControlModifier)
+   if (modifiers & Qt::AltModifier)
    {
       switch (e->key())
       {
          case Qt::Key_Up:
-            ViewImp::pan(QPoint(0, 0), QPoint(0, 100*height()/getZoomPercentage()));
+            ViewImp::pan(QPoint(0, 0), QPoint(0, height()));
             updateGL();
             break;
 
          case Qt::Key_Down:
-            ViewImp::pan(QPoint(0, 0), QPoint(0, -100*height()/getZoomPercentage()));
+            ViewImp::pan(QPoint(0, 0), QPoint(0, -height()));
             updateGL();
             break;
 
          case Qt::Key_Left:
-            ViewImp::pan(QPoint(0, 0), QPoint(-100*width()/getZoomPercentage(), 0));
+            ViewImp::pan(QPoint(0, 0), QPoint(-width(), 0));
             updateGL();
             break;
 
          case Qt::Key_Right:
-            ViewImp::pan(QPoint(0, 0), QPoint(100*width()/getZoomPercentage(), 0));
+            ViewImp::pan(QPoint(0, 0), QPoint(width(), 0));
             updateGL();
             break;
       }

@@ -2391,22 +2391,22 @@ void SpatialDataViewImp::toolTipEvent(QHelpEvent* pEvent)
    }
 }
 
-void SpatialDataViewImp::keyPressEvent(QKeyEvent* e)
+void SpatialDataViewImp::keyPressEvent(QKeyEvent* pEvent)
 {
-   if (e == NULL)
+   if (pEvent == NULL)
    {
       return;
    }
 
-   Qt::KeyboardModifiers modifiers = e->modifiers();
+   Qt::KeyboardModifiers modifiers = pEvent->modifiers();
 
-   switch (e->key())
+   switch (pEvent->key())
    {
       case Qt::Key_Up: // fall through to next case
       case Qt::Key_Down: // fall through to next case
       case Qt::Key_Left: // fall through to next case
       case Qt::Key_Right:
-         mPanKey = e->key();
+         mPanKey = pEvent->key();
          break;
       case Qt::Key_Shift:
          mShiftPressed = true;
@@ -2415,7 +2415,7 @@ void SpatialDataViewImp::keyPressEvent(QKeyEvent* e)
          break;
    }
 
-   if (e->key() == Qt::Key_Control)
+   if (pEvent->key() == Qt::Key_Control)
    {
       if (mpPanTimer == NULL)
       {
@@ -2425,24 +2425,24 @@ void SpatialDataViewImp::keyPressEvent(QKeyEvent* e)
       }
       if (mPanKey == 0)
       {
-         PerspectiveViewImp::keyPressEvent(e);
+         PerspectiveViewImp::keyPressEvent(pEvent);
       }
    }
    else if (modifiers & Qt::ControlModifier)
    {
       if (mPanKey == 0)
       {
-         PerspectiveViewImp::keyPressEvent(e);
+         PerspectiveViewImp::keyPressEvent(pEvent);
       }
    }
    else
    {
-      PerspectiveViewImp::keyPressEvent(e);
+      PerspectiveViewImp::keyPressEvent(pEvent);
 
       RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(getTopMostLayer(RASTER));
       RasterChannelType colorToChange = BLUE;
 
-      switch (e->key())
+      switch (pEvent->key())
       {
          case Qt::Key_R:
             colorToChange = RED;
@@ -2652,25 +2652,30 @@ void SpatialDataViewImp::keyPressEvent(QKeyEvent* e)
          default:
             return;
       }
-   }
 
-   refresh();
+      refresh();
+   }
 }
 
-void SpatialDataViewImp::keyReleaseEvent(QKeyEvent* e)
+void SpatialDataViewImp::keyReleaseEvent(QKeyEvent* pEvent)
 {
-   if (e->key() == Qt::Key_Shift)
+   if (pEvent == NULL)
+   {
+      return;
+   }
+
+   if (pEvent->key() == Qt::Key_Shift)
    {
       mShiftPressed = false;
    }
 
-   if (e->key() == Qt::Key_Control && mpPanTimer)
+   if (pEvent->key() == Qt::Key_Control && mpPanTimer)
    {
       delete mpPanTimer;
       mpPanTimer = NULL;
    }
 
-   if (e->key() == mPanKey)
+   if (pEvent->key() == mPanKey && pEvent->isAutoRepeat() == false)
    {
       mPanKey = 0;
    }
@@ -2715,13 +2720,13 @@ void SpatialDataViewImp::keyPan()
    }
 }
 
-void SpatialDataViewImp::mousePressEvent(QMouseEvent* e)
+void SpatialDataViewImp::mousePressEvent(QMouseEvent* pEvent)
 {
    bool bSuccess = false;
-   if (e != NULL)
+   if (pEvent != NULL)
    {
-      QPoint ptMouse = e->pos();
-      ptMouse.setY(height() - e->pos().y());
+      QPoint ptMouse = pEvent->pos();
+      ptMouse.setY(height() - pEvent->pos().y());
 
       string mouseMode = "";
 
@@ -2733,7 +2738,8 @@ void SpatialDataViewImp::mousePressEvent(QMouseEvent* e)
 
       if ((mouseMode == "LayerMode") && (mpActiveLayer != NULL))
       {
-         bSuccess = mpActiveLayer->processMousePress(ptMouse, e->button(), e->buttons(), e->modifiers());
+         bSuccess = mpActiveLayer->processMousePress(ptMouse,
+            pEvent->button(), pEvent->buttons(), pEvent->modifiers());
          if (bSuccess == false)
          {
             AoiLayerImp* pLayer = dynamic_cast<AoiLayerImp*>(mpActiveLayer);
@@ -2753,8 +2759,8 @@ void SpatialDataViewImp::mousePressEvent(QMouseEvent* e)
                      AoiLayerImp* pCurrentLayer = dynamic_cast<AoiLayerImp*>(*iter);
                      if ((pCurrentLayer != NULL) && (pCurrentLayer != pLayer))
                      {
-                        bSuccess = pCurrentLayer->processMousePress(ptMouse, e->button(), e->buttons(),
-                           e->modifiers());
+                        bSuccess = pCurrentLayer->processMousePress(ptMouse, pEvent->button(),
+                           pEvent->buttons(), pEvent->modifiers());
                         if (bSuccess == true)
                         {
                            setFrontLayer(*iter);
@@ -2768,29 +2774,30 @@ void SpatialDataViewImp::mousePressEvent(QMouseEvent* e)
       }
       else if ((mouseMode == "MeasurementMode") && (mpMeasurementsLayer != NULL) && (mShowMeasurements == true))
       {
-         bSuccess = mpMeasurementsLayer->processMousePress(ptMouse, e->button(), e->buttons(), e->modifiers());
+         bSuccess = mpMeasurementsLayer->processMousePress(ptMouse,
+            pEvent->button(), pEvent->buttons(), pEvent->modifiers());
       }
 
       if (bSuccess == true)
       {
-         e->accept();
+         pEvent->accept();
          refresh();
       }
    }
 
    if (bSuccess == false)
    {
-      PerspectiveViewImp::mousePressEvent(e);
+      PerspectiveViewImp::mousePressEvent(pEvent);
    }
 }
 
-void SpatialDataViewImp::mouseMoveEvent(QMouseEvent* e)
+void SpatialDataViewImp::mouseMoveEvent(QMouseEvent* pEvent)
 {
    bool bSuccess = false;
-   if (e != NULL)
+   if (pEvent != NULL)
    {
-      QPoint ptMouse = e->pos();
-      ptMouse.setY(height() - e->pos().y());
+      QPoint ptMouse = pEvent->pos();
+      ptMouse.setY(height() - pEvent->pos().y());
 
       string mouseMode = "";
 
@@ -2802,16 +2809,18 @@ void SpatialDataViewImp::mouseMoveEvent(QMouseEvent* e)
 
       if ((mouseMode == "LayerMode") && (mpActiveLayer != NULL))
       {
-         bSuccess = mpActiveLayer->processMouseMove(ptMouse, e->button(), e->buttons(), e->modifiers());
+         bSuccess = mpActiveLayer->processMouseMove(ptMouse,
+            pEvent->button(), pEvent->buttons(), pEvent->modifiers());
       }
       else if ((mouseMode == "MeasurementMode") && (mpMeasurementsLayer != NULL) && (mShowMeasurements == true))
       {
-         bSuccess = mpMeasurementsLayer->processMouseMove(ptMouse, e->button(), e->buttons(), e->modifiers());
+         bSuccess = mpMeasurementsLayer->processMouseMove(ptMouse,
+            pEvent->button(), pEvent->buttons(), pEvent->modifiers());
       }
 
       if (bSuccess == true)
       {
-         e->accept();
+         pEvent->accept();
          updateStatusBar(ptMouse);
          updateGL();
       }
@@ -2819,17 +2828,17 @@ void SpatialDataViewImp::mouseMoveEvent(QMouseEvent* e)
 
    if (bSuccess == false)
    {
-      PerspectiveViewImp::mouseMoveEvent(e);
+      PerspectiveViewImp::mouseMoveEvent(pEvent);
    }
 }
 
-void SpatialDataViewImp::mouseReleaseEvent(QMouseEvent* e)
+void SpatialDataViewImp::mouseReleaseEvent(QMouseEvent* pEvent)
 {
    bool bSuccess = false;
-   if (e != NULL)
+   if (pEvent != NULL)
    {
-      QPoint ptMouse = e->pos();
-      ptMouse.setY(height() - e->pos().y());
+      QPoint ptMouse = pEvent->pos();
+      ptMouse.setY(height() - pEvent->pos().y());
 
       string mouseMode = "";
 
@@ -2841,23 +2850,23 @@ void SpatialDataViewImp::mouseReleaseEvent(QMouseEvent* e)
 
       if ((mouseMode == "LayerMode") && (mpActiveLayer != NULL))
       {
-         bSuccess = mpActiveLayer->processMouseRelease(ptMouse, e->button(), e->buttons(), e->modifiers());
+         bSuccess = mpActiveLayer->processMouseRelease(ptMouse, pEvent->button(), pEvent->buttons(), pEvent->modifiers());
       }
       else if ((mouseMode == "MeasurementMode") && (mpMeasurementsLayer != NULL) && (mShowMeasurements == true))
       {
-         bSuccess = mpMeasurementsLayer->processMouseRelease(ptMouse, e->button(), e->buttons(), e->modifiers());
+         bSuccess = mpMeasurementsLayer->processMouseRelease(ptMouse, pEvent->button(), pEvent->buttons(), pEvent->modifiers());
       }
 
       if (bSuccess == true)
       {
-         e->accept();
+         pEvent->accept();
          refresh();
       }
    }
 
    if (bSuccess == false)
    {
-      PerspectiveViewImp::mouseReleaseEvent(e);
+      PerspectiveViewImp::mouseReleaseEvent(pEvent);
    }
 }
 
