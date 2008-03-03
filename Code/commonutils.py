@@ -82,7 +82,7 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
       temp_list.append(dependency_suffix(r"Hdf4\bin",[],"d.dll",".dll",["hd421m","hm421m"]))
       temp_list.append(dependency_suffix(r"Hdf4\bin",[],"","",["szlibdll.dll"]))
       temp_list.append(dependency_suffix(r"Hdf5\bin",["hdf5"],"dll.dll","dll.dll"))
-      temp_list.append(dependency_suffix(r"zlib\bin",["zlib1"],".dll",".dll"))
+      temp_list.append(dependency_suffix(r"zlib\bin",["zlib1"],"d.dll",".dll"))
       temp_list.append(dependency_suffix(r"zlib\bin",[],"","",["zlib1.dll"]))
       temp_list.append(dependency_dir(r"ffmpeg\Windows\build",["avcodec.dll","avformat.dll","avutil.dll"], True))
       temp_list.append(dependency_suffix(r"ossim\bin",["ossim"],"d.dll",".dll"))

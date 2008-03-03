@@ -98,8 +98,10 @@ void XmlRpcServer::registerMethodCall(const QString &name, XmlRpcMethodCallImp *
    }
 }
 
-void XmlRpcServer::getRequest(const QString &uri, const QString &contentType, const QString &body, MuHttpServer::Response &rsp)
+MuHttpServer::Response XmlRpcServer::getRequest(const QString &uri, const QString &contentType,
+                                                const QString &body, const FormValueMap &form)
 {
+   MuHttpServer::Response rsp;
    // Display help
    rsp.mBody =  "<html><head><title>" APP_NAME" XML-RPC Interface</title></head><body>\n"
                 "<h1>" APP_NAME " XML-RPC Interface</h1>\n"
@@ -177,16 +179,19 @@ void XmlRpcServer::getRequest(const QString &uri, const QString &contentType, co
    rsp.mBody += "</table></body></html>";
    rsp.mHeaders["content-type"] = "text/html";
    rsp.mCode = HTTPRESPONSECODE_200_OK;
+   return rsp;
 }
 
-void XmlRpcServer::postRequest(const QString &uri, const QString &contentType, const QString &body, MuHttpServer::Response &rsp)
+MuHttpServer::Response XmlRpcServer::postRequest(const QString &uri, const QString &contentType,
+                                                 const QString &body, const FormValueMap &form)
 {
+   MuHttpServer::Response rsp;
    if(contentType != "text/xml")
    {
       rsp.mCode = HTTPRESPONSECODE_500_INTERNALSERVERERROR;
       rsp.mHeaders["content-type"] = "text/html";
       rsp.mBody = "<html><body><h1>Invalid request</h1>The XML-RPC request is invalid.<br>Only content-type: text/xml is allowed.</body></html>";
-      return;
+      return rsp;
    }
    XmlReader xml(Service<UtilityServices>()->getMessageLog()->getLog(), false);
    try
@@ -212,6 +217,7 @@ void XmlRpcServer::postRequest(const QString &uri, const QString &contentType, c
                   "An exception was thrown while parsing the message</body></html>";
       rsp.mCode = HTTPRESPONSECODE_500_INTERNALSERVERERROR;
    }
+   return rsp;
 }
 
 void XmlRpcServer::processMethodCall(const XmlRpcMethodCall &call, MuHttpServer::Response &rsp)

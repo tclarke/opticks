@@ -49,6 +49,10 @@
 		Value="$(OPTICKSDEPENDENCIES)\libtiff"
 	/>
 	<UserMacro
+		Name="MINIZIP"
+		Value="$(OPTICKSDEPENDENCIES)\minizip"
+	/>
+	<UserMacro
 		Name="OOMODTRAN"
 		Value="$(OPTICKSDEPENDENCIES)\OoModtran"
 	/>
@@ -99,5 +103,9 @@
 	<UserMacro
 		Name="PME"
 		Value="$(OPTICKSDEPENDENCIES)\pme"
+	/>
+	<UserMacro
+		Name="ZLIB"
+		Value="$(OPTICKSDEPENDENCIES)\zlib"
 	/>
 </VisualStudioPropertySheet>
