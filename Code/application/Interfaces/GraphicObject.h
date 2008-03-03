@@ -646,6 +646,11 @@ public:
    /**
     *  Sets the displayed view in a view object.
     *
+    *  This method only sets the displayed view into a view object.
+    *  This method does <b>not</b> cause the view to actually be drawn on the screen.
+    *  As a result, any programmatic manipulation of how the view is displayed (panning, zooming, etc.)
+    *  should not be done until the view displaying this object has been repainted.
+    *
     *  @param   pView
     *           A pointer to the view to display in the view object.  NULL is
     *           a valid input, where the view object displays a message
