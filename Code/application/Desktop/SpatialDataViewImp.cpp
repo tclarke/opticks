@@ -3033,7 +3033,6 @@ double SpatialDataViewImp::limitZoomPercentage(double dPercent)
    // Use it to calculate the number of scene pixels in each dimension that will
    // be visible in the view for this zoom percentage. Limit check to be sure
    // no less that mMinZoom pixels or more than mMaxZoom * short dimension pixels.
-
    double newPixSize = dPercent * 0.01;
 
    // get scene size
@@ -3060,9 +3059,17 @@ double SpatialDataViewImp::limitZoomPercentage(double dPercent)
       maxSceneHeight = sceneHeight / mMaxZoom;
    }
 
-   // calc number scene pixels in view for dPercent
-   double scenePixsInViewWidth = screenWidth / newPixSize;
-   double scenePixsInViewHeight = screenHeight / newPixSize;
+   // calc number scene pixels in view for dPercent based on x and y pixel size
+   double xPixelSize = 1.0;
+   double yPixelSize = 1.0;
+   if (mpPrimaryRasterLayer != NULL)
+   {
+      xPixelSize = mpPrimaryRasterLayer->getXScaleFactor();
+      yPixelSize = mpPrimaryRasterLayer->getYScaleFactor();
+   }
+
+   double scenePixsInViewWidth = screenWidth / (newPixSize * xPixelSize);
+   double scenePixsInViewHeight = screenHeight / (newPixSize * yPixelSize);
 
    // check limits
    if (scenePixsInViewWidth > maxSceneWidth)
@@ -3084,8 +3091,8 @@ double SpatialDataViewImp::limitZoomPercentage(double dPercent)
    }
 
    // calc screen pixel size for limit checked view
-   double limitedPixSizeX = screenWidth/scenePixsInViewWidth;
-   double limitedPixSizeY = screenHeight/scenePixsInViewHeight;
+   double limitedPixSizeX = screenWidth / (scenePixsInViewWidth * xPixelSize);
+   double limitedPixSizeY = screenHeight / (scenePixsInViewHeight * yPixelSize);
 
    // set dPecent to limit checked zoom percentage
    dPercent = min(limitedPixSizeX, limitedPixSizeY) * 100.0;
