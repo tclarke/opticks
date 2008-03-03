@@ -438,6 +438,10 @@ bool LayerImp::fromXml(DOMNode* pDocument, unsigned int version)
       if (pElem->hasAttribute(X("dataElemId")))
       {
          setDataElement(dynamic_cast<DataElement*>(Service<SessionManager>()->getSessionItem(A(pElem->getAttribute(X("dataElemId"))))));
+         if (getDataElement() == NULL)
+         {
+            return false;
+         }
       }
       for(DOMNode *pChld = pElem->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
       {

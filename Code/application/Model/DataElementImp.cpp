@@ -280,10 +280,12 @@ bool DataElementImp::deserialize(SessionItemDeserializer &deserializer)
    if(pRoot->hasAttribute(X("parentId")))
    {
       DataElement *pParent = dynamic_cast<DataElement*>(Service<SessionManager>()->getSessionItem(A(pRoot->getAttribute(X("parentId")))));
-      if (pParent != NULL)
+      if (pParent == NULL)
       {
-         Service<ModelServices>()->setElementParent(dynamic_cast<DataElement*>(this), pParent);
+         return false;
       }
+
+      Service<ModelServices>()->setElementParent(dynamic_cast<DataElement*>(this), pParent);
    }
    Service<ModelServices>()->setElementName(dynamic_cast<DataElement*>(this), A(pRoot->getAttribute(X("name"))));
    unsigned int formatVersion = 0;

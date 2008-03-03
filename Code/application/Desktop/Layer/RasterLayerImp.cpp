@@ -352,7 +352,7 @@ bool RasterLayerImp::getExtents(double& x1, double& y1, double& x4, double& y4)
 {
    RasterElement *pRasterElement = dynamic_cast<RasterElement*>(getDataElement());
    VERIFY(pRasterElement != NULL);
-   
+
    const RasterDataDescriptor* pDescriptor =
       dynamic_cast<const RasterDataDescriptor*>(pRasterElement->getDataDescriptor());
    VERIFY(pDescriptor != NULL);
