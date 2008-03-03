@@ -7,25 +7,28 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef XMLRPCSERVER_H
-#define XMLRPCSERVER_H
+#ifndef KMLSERVER_H
+#define KMLSERVER_H
 
 #include "AlgorithmShell.h"
 #include "ConfigurationSettings.h"
 #include "MuHttpServer.h"
 
-class XmlRpcMethodCall;
-class XmlRpcMethodCallImp;
+class Layer;
+class QString;
+class QStringList;
+class RasterElement;
+class XMLWriter;
 
-class XmlRpcServer : public MuHttpServer, public AlgorithmShell
+class KMLServer : public MuHttpServer, public AlgorithmShell
 {
    Q_OBJECT
 
 public:
-   SETTING(XmlRpcServerPort, XmlRpc, int, 0);
+   SETTING(KmlServerPort, Kml, int, 0);
 
-   XmlRpcServer();
-   ~XmlRpcServer();
+   KMLServer();
+   ~KMLServer();
 
    bool setBatch()
    {
@@ -37,17 +40,7 @@ public:
    bool execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList);
 
 protected:
-   void registerMethodCall(const QString &name, XmlRpcMethodCallImp *pMethodCall);
    MuHttpServer::Response getRequest(const QString &uri, const QString &contentType, const QString &body, const FormValueMap &form);
-   MuHttpServer::Response postRequest(const QString &uri, const QString &contentType, const QString &body, const FormValueMap &form);
-   void processMethodCall(const XmlRpcMethodCall &call, MuHttpServer::Response &rsp);
-
-protected slots:
-   void debug(HttpRequest *pHttpRequest);
-   void warning(const QString &msg);
-
-private:
-   QMap<QString, XmlRpcMethodCallImp*> mMethodCalls;
 };
 
 #endif

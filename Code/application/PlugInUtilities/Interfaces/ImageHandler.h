@@ -12,7 +12,9 @@
 
 #include "MuHttpServer.h"
 
+class QBuffer;
 class QString;
+class SessionItem;
 
 /**
  * Publish view and layer images via HTTP
@@ -47,6 +49,24 @@ public:
     */
    ~ImageHandler();
 
+   /**
+    * Retrieve an image for a SessionItem and place the result in a buffer.
+    *
+    * @param pItem
+    *        The SessionItem whose image is to be retrieved. Currently, this must be a:
+    *            SpatialDataView or a Layer
+    * @param buffer
+    *        A sufficiently large buffer which will hold the resultant image.
+    * @param format
+    *        The format of the image data. This is anything which corresponds to
+    *        a loaded Qt image format plugin. Common examples are: JPEG, PNG, TIFF, or BMP
+    * @param band
+    *        If pItem is a RasterLayer, change to this active band before grabbing the image.
+    *        If pItem is not a RasterLayer or band is negative, this is ignored.
+    * @return True if the image was successfully generated, false otherwise.
+    */
+   static bool getSessionItemImage(SessionItem *pItem, QBuffer &buffer, const QString &format, int band);
+
 protected:
    /**
     * @copydoc MuHttpServer::getRequest()
@@ -57,7 +77,7 @@ protected:
     * build of Qt is supported. This requires at least PNG support. If no extension
     * is specified, PNG is assumed.
     */
-   void getRequest(const QString &uri, const QString &contentType, const QString &body, MuHttpServer::Response &rsp);
+   MuHttpServer::Response getRequest(const QString &uri, const QString &contentType, const QString &body, const FormValueMap &form);
 };
 
 #endif

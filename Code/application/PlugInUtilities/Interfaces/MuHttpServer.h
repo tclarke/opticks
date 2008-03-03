@@ -10,14 +10,18 @@
 #ifndef MUHTTPSERVER_H
 #define MUHTTPSERVER_H
 
+#include "AttachmentPtr.h"
 #include "EnumWrapper.h"
+#include "SessionManager.h"
 #include <ehs.h>
 #include <QtCore/QMap>
 #include <QtCore/QObject>
 #include <QtCore/QString>
+#include <boost/any.hpp>
 
 class QTextStream;
 class QTimer;
+class Subject;
 
 /**
  * This class provides a framework for creating HTTP micro servers in Qt.
@@ -108,6 +112,11 @@ public:
    bool start();
 
    /**
+    * Stop the server.
+    */
+   void stop(Subject &subject, const std::string &signal, const boost::any &v);
+
+   /**
     * Attach a server path to a response object.
     *
     * Requests from the registered path will be handled by pObj.
@@ -148,10 +157,11 @@ protected:
     *        The HTTP Content-type of the request.
     * @param body
     *        The body of the request.
-    * @param rsp
-    *        Out param containing an HTTP Response.
+    * @param form
+    *        Form data from the request body.
+    * @return An HTTP Response.
     */
-   virtual void postRequest(const QString &uri, const QString &contentType, const QString &body, Response &rsp);
+   virtual Response postRequest(const QString &uri, const QString &contentType, const QString &body, const FormValueMap &form);
 
    /**
     * This handles HTTP GET requests.
@@ -166,10 +176,11 @@ protected:
     *        The HTTP Content-type of the request.
     * @param body
     *        The body of the request. This is usually empty with GET requests.
-    * @param rsp
-    *        Out param containing an HTTP Response.
+    * @param form
+    *        Form data encoded in the request URL.
+    * @return An HTTP Response.
     */
-   virtual void getRequest(const QString &uri, const QString &contentType, const QString &body, Response &rsp) = 0;
+   virtual Response getRequest(const QString &uri, const QString &contentType, const QString &body, const FormValueMap &form) = 0;
 
 protected slots:
    /**
@@ -228,6 +239,7 @@ private:
    QMap<QString, EHS*> mRegistrations;
    bool mServerIsRunning;
    bool mAllowNonLocal;
+   AttachmentPtr<SessionManager> mSession;
 };
 
 #endif

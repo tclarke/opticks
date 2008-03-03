@@ -8,13 +8,18 @@
  */
 
 #include "MuHttpServer.h"
+#include "Slot.h"
 #include <ehs.h>
 #include <QtCore/QDebug>
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 #include <QtCore/QTimer>
 
-MuHttpServer::MuHttpServer(int port, QObject *pParent) : QObject(pParent), mpTimer(NULL), mServerIsRunning(false), mAllowNonLocal(false)
+MuHttpServer::MuHttpServer(int port, QObject *pParent) : QObject(pParent),
+                                                         mpTimer(NULL),
+                                                         mServerIsRunning(false),
+                                                         mAllowNonLocal(false),
+                                                         mSession(SIGNAL_NAME(SessionManager, Closed), Slot(this, &MuHttpServer::stop))
 {
    if (port > 0)
    {
@@ -58,6 +63,7 @@ bool MuHttpServer::start()
       }
       mRegistrations.clear();
       mServerIsRunning = true;
+      mSession.reset(Service<SessionManager>().get());
       return true;
    case STARTSERVER_INVALID:
       warning("Invalid server specification.");
@@ -77,6 +83,14 @@ bool MuHttpServer::start()
       break;
    }
    return false;
+}
+
+void MuHttpServer::stop(Subject &subject, const std::string &signal, const boost::any &v)
+{
+   StopServer();
+   mSession.reset(NULL);
+   mServerIsRunning = false;
+   mpTimer->stop();
 }
 
 void MuHttpServer::registerPath(const QString &path, EHS *pObj)
@@ -115,15 +129,8 @@ ResponseCode MuHttpServer::HandleRequest(HttpRequest *pHttpRequest, HttpResponse
    {
       QString contentType = pHttpRequest->oRequestHeaders["content-type"].c_str();
       QString body = pHttpRequest->sBody.c_str();
-      Response rsp;
-      if(pHttpRequest->nRequestMethod == REQUESTMETHOD_GET)
-      {
-         getRequest(uri, contentType, body, rsp);
-      }
-      else
-      {
-         postRequest(uri, contentType, body, rsp);
-      }
+      Response rsp = (pHttpRequest->nRequestMethod == REQUESTMETHOD_GET) ? getRequest(uri, contentType, body, pHttpRequest->oFormValueMap)
+                                                                         : postRequest(uri, contentType, body, pHttpRequest->oFormValueMap);
       if(rsp.mCode != HTTPRESPONSECODE_INVALID)
       {
          switch(rsp.mEncoding)
@@ -154,11 +161,13 @@ ResponseCode MuHttpServer::HandleRequest(HttpRequest *pHttpRequest, HttpResponse
    return HTTPRESPONSECODE_500_INTERNALSERVERERROR;
 }
 
-void MuHttpServer::postRequest(const QString &uri, const QString &contentType, const QString &body, MuHttpServer::Response &rsp)
+MuHttpServer::Response MuHttpServer::postRequest(const QString &uri, const QString &contentType, const QString &body, const FormValueMap &form)
 {
-   rsp.mCode = HTTPRESPONSECODE_403_FORBIDDEN;
-   rsp.mHeaders["content-type"] = "text/html";
-   rsp.mBody = QString("<html><body><h1>Forbidden</h1>POST not supported.</body></html>");
+   Response r;
+   r.mCode = HTTPRESPONSECODE_403_FORBIDDEN;
+   r.mHeaders["content-type"] = "text/html";
+   r.mBody = QString("<html><body><h1>Forbidden</h1>POST not supported.</body></html>");
+   return r;
 }
 
 void MuHttpServer::debug(HttpRequest *pHttpRequest)
