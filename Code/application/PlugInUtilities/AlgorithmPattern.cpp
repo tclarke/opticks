@@ -87,7 +87,8 @@ bool AlgorithmPlugIn::getInputSpecification(PlugInArgList *&argList)
 {
    argList = mpPlugInManagerServices->getPlugInArgList();
    VERIFY(argList != NULL);
-   if(mInteractive)
+
+   if (mInteractive)
    {
       return populateInteractiveInputArgList(argList);
    }
@@ -100,8 +101,7 @@ bool AlgorithmPlugIn::getOutputSpecification(PlugInArgList *&argList)
    argList = NULL;
 
    bool bModeSupported = mInteractive ? canRunInteractive() : canRunBatch();
-
-   if(!bModeSupported)
+   if (!bModeSupported)
    {
       return false;
    }
@@ -147,37 +147,37 @@ bool AlgorithmPlugIn::execute(PlugInArgList *inputArgList,
 {
    bool success = true;
 
-   if(inputArgList == NULL)
+   if (inputArgList == NULL)
    {
       success = false;
    }
 
    success = parseInputArgList(inputArgList);
-   if(success && (mpAlgorithm.get() != NULL))
+   if (success && (mpAlgorithm.get() != NULL))
    {
       success = mpAlgorithm->runPreprocess();
    }
 
    QDialog* pDialog = NULL;
-   if(success)
+   if (success)
    {
-      if(mInteractive)
+      if (mInteractive)
       {
          try
          {
             pDialog = getGui(mpAlgorithmData);
          }
-         catch(std::bad_alloc)
+         catch (std::bad_alloc)
          {
             QMessageBox::critical(NULL, "Out of memory", 
                "Insufficient memory available to create the GUI.", "OK");
             return false;
          }
 
-         if(pDialog != NULL)
+         if (pDialog != NULL)
          {
             success = runDialog(pDialog);
-            if(success)
+            if (success)
             {
                success = runAlgorithmFromGuiInputs();
             }
@@ -193,23 +193,23 @@ bool AlgorithmPlugIn::execute(PlugInArgList *inputArgList,
       }
    }
 
-   if(success)
+   if (success)
    {
-      if(mpAlgorithm.get() != NULL)
+      if (mpAlgorithm.get() != NULL)
       {
          success = mpAlgorithm->runPostprocess();
       }
    }
 
-   if(success)
+   if (success)
    {
-      if(outputArgList != NULL)
+      if (outputArgList != NULL)
       {
          success = setActualValuesInOutputArgList(outputArgList);
       }
    }
 
-   if(pDialog != NULL)
+   if (pDialog != NULL)
    {
       delete pDialog;
    }
@@ -220,24 +220,25 @@ bool AlgorithmPlugIn::execute(PlugInArgList *inputArgList,
 bool AlgorithmRunner::runAlgorithmFromGuiInputs()
 {
    bool success = true;
-   if(needToRunAlgorithm())
+   if (needToRunAlgorithm())
    {
       success = extractFromGui();
-      if(success)
+      if (success)
       {
          success = setupAndRunAlgorithm();
       }
    }
+
    return success;
 }
 
 bool AlgorithmPlugIn::setupAndRunAlgorithm()
 {
    bool success = false;
-   if(mpAlgorithm.get() != NULL)
+   if (mpAlgorithm.get() != NULL)
    {
       success = mpAlgorithm->setGuiData(mpAlgorithmData);
-      if(success)
+      if (success)
       {
          success = mpAlgorithm->runProcess();
       }
@@ -248,12 +249,11 @@ bool AlgorithmPlugIn::setupAndRunAlgorithm()
 
 bool AlgorithmPlugIn::abort()
 {
-   bool canAbort = hasAbort();
-   
-   if(canAbort)
+   bool canAbort = AlgorithmShell::abort();
+   if (canAbort)
    {
       propagateAbort();
-      if((mpAlgorithm.get() != NULL) && (mpAlgorithm->hasAbort()))
+      if ((mpAlgorithm.get() != NULL) && (mpAlgorithm->hasAbort()))
       {
          mpAlgorithm->abort();
       }
@@ -279,38 +279,40 @@ void AlgorithmReporter::reportProgress(ReportingLevel rptLevel, int progress, st
 
 void AlgorithmReporter::updateProgress(ReportingLevel rptLevel, int progress, std::string message) const
 {
-   if(mpProgress != NULL)
+   if (mpProgress != NULL)
    {
       string stageMessage = message;
       int stageProgress = progress;
-      if(!mStages.empty() && (mCurrentStage < mStages.size()))
+      if (!mStages.empty() && (mCurrentStage < mStages.size()))
       {
          const Stage& current = mStages[mCurrentStage];
          stageMessage = current.mMessage + "\n>>> " + message;
          stageProgress = (100 * current.mWeightSum + progress * current.mWeight) / mWeightSum;
       }
+
       mpProgress->updateProgress(stageMessage, stageProgress, rptLevel);
    }
-   if(mpStep != NULL)
+
+   if (mpStep != NULL)
    {
-      switch(rptLevel)
+      switch (rptLevel)
       {
-      case ABORT:
-         mpStep->finalize(Message::Abort, message);
-         break;
-      case ERRORS:
-         mpStep->finalize(Message::Failure, message);
-         break;
-      case WARNING:
+         case ABORT:
+            mpStep->finalize(Message::Abort, message);
+            break;
+         case ERRORS:
+            mpStep->finalize(Message::Failure, message);
+            break;
+         case WARNING:
          {
             Message *pMsg = mpStep->addMessage("Warning", "app", "BEFE67AB-8398-4976-9790-F2F6BC09CE36");
-            if(pMsg != NULL)
+            if (pMsg != NULL)
             {
                pMsg->addProperty("Message", message);
             }
          }
-      default:
-         ; // blank
+         default:
+            break;
       }
    }
 }
@@ -323,25 +325,25 @@ Progress *AlgorithmReporter::getProgress() const
 int AlgorithmReporter::getProgressPercent() const
 {
    int percent = 0;
-   if(mpProgress != NULL)
+   if (mpProgress != NULL)
    {
       string text;
       ReportingLevel gran;
       mpProgress->getProgress(text, percent, gran);
    }
+
    return percent;
 }
 
 void AlgorithmReporter::addStage(string stageMessage, int weight)
 {
    int prevWeight = 0;
-   if(!mStages.empty())
+   if (!mStages.empty())
    {
       prevWeight = mStages.back().mWeightSum + mStages.back().mWeight;
    }
 
    Stage stage(stageMessage, weight, prevWeight);
-
    mStages.push_back(stage);
 
    mWeightSum = stage.mWeightSum + stage.mWeight;
@@ -349,7 +351,7 @@ void AlgorithmReporter::addStage(string stageMessage, int weight)
 
 void AlgorithmReporter::nextStage()
 {
-   if(mCurrentStage < mStages.size())
+   if (mCurrentStage < mStages.size())
    {
       ++mCurrentStage;
    }
@@ -389,7 +391,7 @@ AlgorithmPattern::AlgorithmPattern(RasterElement* pRasterElement,
    mpObjFact = mpApplicationServices->getObjectFactory();
    ENSURE(mpObjFact != NULL);
 
-   if(mpRasterElement != NULL)
+   if (mpRasterElement != NULL)
    {
       mpRasterElement->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &AlgorithmPattern::elementDeleted));
    }
@@ -397,12 +399,12 @@ AlgorithmPattern::AlgorithmPattern(RasterElement* pRasterElement,
 
 AlgorithmPattern::~AlgorithmPattern()
 {
-   if(mpRasterElement != NULL)
+   if (mpRasterElement != NULL)
    {
       mpRasterElement->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &AlgorithmPattern::elementDeleted));
    }
 
-   if(mpPixelsToProcess != NULL)
+   if (mpPixelsToProcess != NULL)
    {
       mpObjFact->destroyObject(mpPixelsToProcess, "BitMask");
    }
@@ -422,12 +424,12 @@ bool AlgorithmPattern::runProcess()
 {
    try
    {
-      if(determinePixelsToProcess())
+      if (determinePixelsToProcess())
       {
          return processAll();
       }
    }
-   catch(AssertException message)
+   catch (AssertException message)
    {
       reportProgress(ERRORS, 0, message.getText());
    }
@@ -468,22 +470,22 @@ void AlgorithmPattern::setRoi(const BitMask *pRoi)
 
 bool AlgorithmPattern::determinePixelsToProcess() const
 {
-   if(mpPixelsToProcess != NULL)
+   if (mpPixelsToProcess != NULL)
    {
       mpPixelsToProcess->clear();
    }
    else
    {
-      mpPixelsToProcess = static_cast<BitMask *>(mpObjFact->createObject("BitMask"));
-   }
-   if(mpPixelsToProcess == NULL)
-   {
-      return false;
+      mpPixelsToProcess = static_cast<BitMask*>(mpObjFact->createObject("BitMask"));
+      if (mpPixelsToProcess == NULL)
+      {
+         return false;
+      }
    }
 
    mpPixelsToProcess->invert();
 
-   if(mpRoi != NULL)
+   if (mpRoi != NULL)
    {
       mpPixelsToProcess->intersect(*mpRoi);
    }
@@ -493,19 +495,21 @@ bool AlgorithmPattern::determinePixelsToProcess() const
 
 const BitMask *AlgorithmPattern::getPixelsToProcess() const
 {
-   if(mpPixelsToProcess == NULL)
+   if (mpPixelsToProcess == NULL)
    {
       determinePixelsToProcess();
    }
+
    return mpPixelsToProcess;
 }
 
 bool AlgorithmPattern::setGuiData(void *pAlgorithmData)
 {
-   if(pAlgorithmData == NULL)
+   if (pAlgorithmData == NULL)
    {
       return false;
    }
+
    return initialize(pAlgorithmData);
 }
 
@@ -521,7 +525,7 @@ bool AlgorithmPattern::hasAbort() const
 
 bool AlgorithmPattern::abort()
 {
-   if(canAbort())
+   if (canAbort())
    {
       return doAbort();
    }
@@ -531,7 +535,7 @@ bool AlgorithmPattern::abort()
 
 void AlgorithmPattern::elementDeleted(Subject &subject, const string &signal, const boost::any &v)
 {
-   if(&subject != mpRasterElement)
+   if (&subject != mpRasterElement)
    {
       return;
    }
@@ -552,21 +556,21 @@ void AlgorithmPattern::displayThresholdResults(RasterElement *pRasterElement,
 
    vector<Window*> windows;
    mpDesktopServices->getWindows(SPATIAL_DATA_WINDOW, windows);
-   for(unsigned int i = 0; i < windows.size() && pView == NULL; i++)
+   for (unsigned int i = 0; i < windows.size() && pView == NULL; i++)
    {
       SpatialDataWindow* pWindow = static_cast<SpatialDataWindow*>(windows[i]);
-      if(pWindow != NULL)
+      if (pWindow != NULL)
       {
          SpatialDataView* pCurrentView = pWindow->getSpatialDataView();
-         if(pCurrentView != NULL)
+         if (pCurrentView != NULL)
          {
             LayerList *pLList = pCurrentView->getLayerList();
             REQUIRE(pLList != NULL);
             vector<Layer*> layers;
             pLList->getLayers(RASTER, layers);
-            for(vector<Layer*>::const_iterator layer = layers.begin(); layer != layers.end(); ++layer)
+            for (vector<Layer*>::const_iterator layer = layers.begin(); layer != layers.end(); ++layer)
             {
-               if(*layer != NULL && static_cast<RasterElement*>((*layer)->getDataElement()) == getRasterElement())
+               if (*layer != NULL && static_cast<RasterElement*>((*layer)->getDataElement()) == getRasterElement())
                {
                   pView = pCurrentView;
                   break;
@@ -582,25 +586,25 @@ void AlgorithmPattern::displayThresholdResults(RasterElement *pRasterElement,
 
    // Get or create a valid threshold layer
    LayerList* pLayerList = pView->getLayerList();
-   if(pLayerList != NULL)
+   if (pLayerList != NULL)
    {
       pLayer = static_cast<ThresholdLayer*>(pLayerList->getLayer(THRESHOLD, pRasterElement));
-      if(pLayer == NULL)
+      if (pLayer == NULL)
       {
          pLayer = static_cast<ThresholdLayer*>(pView->createLayer(THRESHOLD, pRasterElement));
       }
 
       // Remove existing layers of other types
-      if(pLayer != NULL)
+      if (pLayer != NULL)
       {
          Layer* pRasterLayer = pLayerList->getLayer(RASTER, pRasterElement);
-         if(pRasterLayer != NULL)
+         if (pRasterLayer != NULL)
          {
             pView->deleteLayer(pRasterLayer);
          }
 
          Layer* pPseudocolorLayer = pLayerList->getLayer(PSEUDOCOLOR, pRasterElement);
-         if(pPseudocolorLayer != NULL)
+         if (pPseudocolorLayer != NULL)
          {
             pView->deleteLayer(pPseudocolorLayer);
          }
@@ -611,7 +615,7 @@ void AlgorithmPattern::displayThresholdResults(RasterElement *pRasterElement,
 
    UndoLock lock(pView);
 
-   if(color.isValid())
+   if (color.isValid())
    {
       pLayer->setColor(color);
    }
@@ -633,21 +637,21 @@ void AlgorithmPattern::displayPseudocolorResults(RasterElement *pRasterElement, 
 
    vector<Window*> windows;
    mpDesktopServices->getWindows(SPATIAL_DATA_WINDOW, windows);
-   for(unsigned int j = 0; j < windows.size() && pView == NULL; j++)
+   for (unsigned int j = 0; j < windows.size() && pView == NULL; j++)
    {
       SpatialDataWindow* pWindow = static_cast<SpatialDataWindow*>(windows[j]);
-      if(pWindow != NULL)
+      if (pWindow != NULL)
       {
          SpatialDataView* pCurrentView = pWindow->getSpatialDataView();
-         if(pCurrentView != NULL)
+         if (pCurrentView != NULL)
          {
             LayerList *pLList = pCurrentView->getLayerList();
             REQUIRE(pLList != NULL);
             vector<Layer*> layers;
             pLList->getLayers(RASTER, layers);
-            for(vector<Layer*>::const_iterator layer = layers.begin(); layer != layers.end(); ++layer)
+            for (vector<Layer*>::const_iterator layer = layers.begin(); layer != layers.end(); ++layer)
             {
-               if(*layer != NULL && static_cast<RasterElement*>((*layer)->getDataElement()) == getRasterElement())
+               if (*layer != NULL && static_cast<RasterElement*>((*layer)->getDataElement()) == getRasterElement())
                {
                   pView = pCurrentView;
                   break;
@@ -663,25 +667,25 @@ void AlgorithmPattern::displayPseudocolorResults(RasterElement *pRasterElement, 
 
    // Get or create a valid pseudocolor layer
    LayerList* pLayerList = pView->getLayerList();
-   if(pLayerList != NULL)
+   if (pLayerList != NULL)
    {
       pLayer =  static_cast<PseudocolorLayer*>(pLayerList->getLayer(PSEUDOCOLOR, pRasterElement));
-      if(pLayer == NULL)
+      if (pLayer == NULL)
       {
          pLayer = static_cast<PseudocolorLayer*>(pView->createLayer(PSEUDOCOLOR, pRasterElement));
       }
 
       // Remove existing layers of other types
-      if(pLayer != NULL)
+      if (pLayer != NULL)
       {
          Layer* pThresholdLayer = pLayerList->getLayer(THRESHOLD, pRasterElement);
-         if(pThresholdLayer != NULL)
+         if (pThresholdLayer != NULL)
          {
             pView->deleteLayer(pThresholdLayer);
          }
 
          Layer* pRasterLayer = pLayerList->getLayer(RASTER, pRasterElement);
-         if(pRasterLayer != NULL)
+         if (pRasterLayer != NULL)
          {
             pView->deleteLayer(pRasterLayer);
          }
@@ -702,7 +706,7 @@ void AlgorithmPattern::displayPseudocolorResults(RasterElement *pRasterElement, 
 
    pLayer->clear();
 
-   for(int i = 0; i < iSignatureCount; i++)
+   for (int i = 0; i < iSignatureCount; i++)
    {
       pLayer->addInitializedClass(sigNames[i], i + 1, layerColors[i], true);
    }
