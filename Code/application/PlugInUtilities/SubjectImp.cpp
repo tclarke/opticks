@@ -57,7 +57,7 @@ void SubjectImp::notify(const string &signal, const boost::any &data)
       return;
    }
 
-   mpImpPrivate->notify(*pSubject, signal, data);
+   mpImpPrivate->notify(*pSubject, signal, signal, data);
 }
 
 const string& SubjectImp::getObjectType() const

@@ -28,17 +28,16 @@ class SubjectImpPrivate
 public:
    SubjectImpPrivate();
    virtual ~SubjectImpPrivate();
-   void detachWaitingSlots(Subject& subject, const std::string &signal);
    virtual bool attach(Subject &subject, const std::string &signal, const Slot &slot);
    virtual bool detach(Subject &subject, const std::string &signal, const Slot &slot);
-   void notify(Subject &subject, const std::string &signal, const boost::any &data=boost::any());
+   void notify(Subject &subject, const std::string &signal, const std::string &originalSignal, const boost::any &data=boost::any());
    const std::list<Slot>& getSlots(const std::string & signal);
+   void removeEmptySlots(const std::string &recursion, std::list<Slot> &slotVec);
 
 private:
    MapType mSlots;
-   std::list<Slot> *mpSlotsWaitingForDetach;
-   Slot *mpActiveSlot;
-   std::string mActiveSignal;
+   std::vector<std::string> mRecursions;
+   Subject *mpSubject;
 };
 
 #endif
