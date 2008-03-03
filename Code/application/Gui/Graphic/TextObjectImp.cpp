@@ -478,10 +478,9 @@ bool TextObjectImp::processMousePress(LocationType screenCoord, Qt::MouseButton 
       bValidText = !(text.empty());
    }
 
+   mUpdateTexture = bValidText;
+   mUpdateBoundingBox = bValidText;
    pLayer->completeInsertion(bValidText);
-
-   mUpdateTexture = true;
-   mUpdateBoundingBox = true;
 
    return bValidText;
 }
