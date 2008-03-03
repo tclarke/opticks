@@ -7,10 +7,10 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "AppVersion.h"
-#include "Classification.h"
 #include "AppConfig.h"
 #include "AppVerify.h"
+#include "AppVersion.h"
+#include "Classification.h"
 #include "DataDescriptor.h"
 #include "DataElement.h"
 #include "DesktopServices.h"
@@ -337,28 +337,24 @@ bool ModelImporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
       if(pView != NULL)
       {
          LayerType layerType;
-         bool valid = true;
-         if(type.find("Annotation") != string::npos)
+         if (type.find("Annotation") == 0)
          {
             layerType = ANNOTATION;
          }
-         else if(type.find("Aoi") != string::npos)
+         else if (type.find("Aoi") == 0)
          {
             layerType = AOI_LAYER;
          }
-         else if(type.find("GcpList") != string::npos)
+         else if (type.find("GcpList") == 0)
          {
             layerType = GCP_LAYER;
          }
-         else if(type.find("Tiepoint") != string::npos)
+         else if (type.find("TiePoint") == 0)
          {
             layerType = TIEPOINT_LAYER;
          }
-         else
-         {
-            valid = false;
-         }
-         if(valid)
+
+         if (layerType.isValid() == true)
          {
             pLayer = pView->createLayer(layerType, pElement);
             if (pLayer != NULL)
