@@ -27,7 +27,7 @@
 #include "SpatialDataWindow.h"
 #include "SpatialDataView.h"
 #include "Window.h"
-#include "XmlWriter.h"
+#include "xmlwriter.h"
 
 #include <QtCore/QDateTime>
 #include <QtCore/QString>
