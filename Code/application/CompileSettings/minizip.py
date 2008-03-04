@@ -13,7 +13,7 @@ def generate(env):
     if not path:
        SCons.Warnings.warn(MinizipFound,"Could not detect minizip")
     else:
-       env.AppendUnique(CXXFLAGS="-I%s/includes" % (path),
+       env.AppendUnique(CXXFLAGS="-I%s/include" % (path),
                         LIBPATH=['%s/lib/%s' % (path,env["PLATFORM"])],
                         LIBS=['minizip'])
 
