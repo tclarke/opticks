@@ -7,11 +7,13 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #include "LayerItems.h"
-#include "StringUtilities.h"
-#include "TypesFile.h"
+#include "TypeConverter.h"
+
+class AnnotationElement;
+class AoiElement;
+class GcpList;
+class RasterElement;
 
 using namespace std;
 
@@ -25,15 +27,26 @@ LayerItems::~LayerItems()
 
 string LayerItems::getModelType(LayerType eType)
 {
-   string modelType = "";
+   if (eType == AOI_LAYER)
+   {
+      return TypeConverter::toString<AoiElement>();
+   }
 
-   if (eType == AOI_LAYER) modelType = "AoiElement";
-   else if (eType == CONTOUR_MAP) modelType = "Terrain";
-   else if (eType == GCP_LAYER) modelType = "GcpList";
-   else if (eType == LAT_LONG) modelType = "RasterElement";
-   else if (eType == PSEUDOCOLOR) modelType = "RasterElement";
-   else if (eType == RASTER) modelType = "RasterElement";
-   else if (eType == THRESHOLD) modelType = "RasterElement";
+   if (eType == ANNOTATION)
+   {
+      return TypeConverter::toString<AnnotationElement>();
+   }
 
-   return modelType;
+   if (eType == GCP_LAYER)
+   {
+      return TypeConverter::toString<GcpList>();
+   }
+
+   if (eType == LAT_LONG || eType == PSEUDOCOLOR ||
+      eType == RASTER || eType == THRESHOLD)
+   {
+      return TypeConverter::toString<RasterElement>();
+   }
+
+   return string();
 }
