@@ -9,122 +9,84 @@
 
 #include <QtGui/QHeaderView>
 #include <QtGui/QInputDialog>
-#include <QtGui/QKeyEvent>
+#include <QtGui/QMessageBox>
 #include <QtGui/QLayout>
 
 #include "AppVerify.h"
-#include "Slot.h"
 #include "TiePointEditor.h"
-#include "TiePointLayer.h"
-#include "TiePointList.h"
 #include "TiePointListUndo.h"
+#include "TiePointTableModel.h"
 #include "View.h"
 
-TiePointEditor::TiePointEditor(QWidget* parent) :
-   QDialog(parent),
-   mpTable(NULL),
+#include <string>
+using namespace std;
+
+TiePointEditor::TiePointEditor(QWidget* pParent) :
+   QDialog(pParent),
+   mpTableView(NULL),
    mpAddButton(NULL),
    mpDeleteButton(NULL),
    mpGoToButton(NULL),
-   mpCloseButton(NULL),
-   mpScrollBar(NULL),
    mpLayer(NULL),
-   mpTiePointList(NULL)
+   mpTableModel(new TiePointTableModel(this))
 {
    // Table
-   QStringList columnHeaders;
-   columnHeaders += "Ref X";
-   columnHeaders += "Ref Y";
-   columnHeaders += "Mission X";
-   columnHeaders += "Mission Y";
-   columnHeaders += "Confidence";
-   columnHeaders += "Phi";
+   mpTableView = new QTableView(this);
+   mpTableView->setSelectionMode(QAbstractItemView::SingleSelection);
+   mpTableView->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::SelectedClicked |
+      QAbstractItemView::EditKeyPressed);
+   mpTableView->setSortingEnabled(false);
+   mpTableView->setCornerButtonEnabled(false);
+   mpTableView->setModel(mpTableModel);
 
-   mpTable = new QTableWidget(this);
-   mpTable->setColumnCount(6);
-   mpTable->setHorizontalHeaderLabels(columnHeaders);
-   mpTable->setSelectionMode(QAbstractItemView::NoSelection);
-   mpTable->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-   mpTable->installEventFilter(this);
-
-   QHeaderView* pHorizHeader = mpTable->horizontalHeader();
+   QHeaderView* pHorizHeader = mpTableView->horizontalHeader();
    if (pHorizHeader != NULL)
    {
       pHorizHeader->setDefaultSectionSize(75);
       pHorizHeader->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
    }
 
-   QHeaderView* pVerticalHeader = mpTable->verticalHeader();
+   QHeaderView* pVerticalHeader = mpTableView->verticalHeader();
    if (pVerticalHeader != NULL)
    {
       pVerticalHeader->setDefaultSectionSize(20);
    }
 
-   // Scroll bar
-   mpScrollBar = new QScrollBar(this);
-   mpScrollBar->setOrientation(Qt::Vertical);
-
    // Buttons
    mpAddButton = new QPushButton("&Add", this);
    mpDeleteButton = new QPushButton("&Delete", this);
    mpGoToButton = new QPushButton("&Go To...", this);
-   mpCloseButton = new QPushButton("&Close", this);
+   QPushButton* pCloseButton = new QPushButton("&Close", this);
 
    // Layout
-   QHBoxLayout* pTableLayout = new QHBoxLayout();
-   pTableLayout->setMargin(0);
-   pTableLayout->setSpacing(0);
-   pTableLayout->addWidget(mpTable, 10);
-   pTableLayout->addWidget(mpScrollBar);
-
-   QHBoxLayout* pButtonLayout = new QHBoxLayout();
-   pButtonLayout->setMargin(0);
-   pButtonLayout->setSpacing(5);
-   pButtonLayout->addStretch();
-   pButtonLayout->addWidget(mpAddButton);
-   pButtonLayout->addWidget(mpDeleteButton);
-   pButtonLayout->addWidget(mpGoToButton);
-   pButtonLayout->addWidget(mpCloseButton);
-
-   QVBoxLayout* pLayout = new QVBoxLayout(this);
-   pLayout->setMargin(10);
-   pLayout->setSpacing(5);
-   pLayout->addLayout(pTableLayout, 10);
-   pLayout->addLayout(pButtonLayout);
+   QGridLayout* pGrid = new QGridLayout(this);
+   pGrid->setMargin(10);
+   pGrid->setSpacing(5);
+   pGrid->addWidget(mpTableView, 0, 0, 1, 4);
+   pGrid->addWidget(mpAddButton, 1, 0, Qt::AlignRight);
+   pGrid->addWidget(mpDeleteButton, 1, 1);
+   pGrid->addWidget(mpGoToButton, 1, 2);
+   pGrid->addWidget(pCloseButton, 1, 3);
+   pGrid->setRowStretch(0, 10);
+   pGrid->setColumnStretch(0, 10);
 
    // Initialization
    setWindowTitle("Tie Point Editor");
    setModal(false);
    resize(700, 400);
-   enableButtons(mpTiePointList != NULL);
+   enableButtons(false);
 
    // Connections
-   VERIFYNR(connect(mpTable, SIGNAL(cellChanged(int, int)), this, SLOT(updatePoint(int, int))));
+   VERIFYNR(connect(mpTableModel, SIGNAL(pointsModified(const std::vector<TiePoint>&, const std::vector<TiePoint>&)),
+      this, SLOT(pointsEdited(const std::vector<TiePoint>&, const std::vector<TiePoint>&))));
    VERIFYNR(connect(mpAddButton, SIGNAL(clicked()), this, SLOT(addPoint())));
    VERIFYNR(connect(mpDeleteButton, SIGNAL(clicked()), this, SLOT(deletePoint())));
    VERIFYNR(connect(mpGoToButton, SIGNAL(clicked()), this, SLOT(goToRow())));
-   VERIFYNR(connect(mpCloseButton, SIGNAL(clicked()), this, SLOT(close())));
-   VERIFYNR(connect(mpScrollBar, SIGNAL(valueChanged(int)), this, SLOT(updateTiePointTable())));
+   VERIFYNR(connect(pCloseButton, SIGNAL(clicked()), this, SLOT(close())));
 }
 
 TiePointEditor::~TiePointEditor()
 {
-}
-
-void TiePointEditor::elementModified(Subject &subject, const std::string &signal, const boost::any &data)
-{
-   if (dynamic_cast<TiePointList*>(&subject) == mpTiePointList)
-   {
-      updateTiePointTable();
-   }
-}
-
-void TiePointEditor::elementDeleted(Subject &subject, const std::string &signal, const boost::any &data)
-{
-   if (dynamic_cast<TiePointList*>(&subject) == mpTiePointList)
-   {
-      setTiePointLayer(NULL);
-   }
 }
 
 bool TiePointEditor::setTiePointLayer(Layer* pLayer)
@@ -134,371 +96,190 @@ bool TiePointEditor::setTiePointLayer(Layer* pLayer)
       return false;
    }
 
-   if (mpTiePointList != NULL)
+   // Reset the member pointer
+   mpLayer.reset(dynamic_cast<TiePointLayer*>(pLayer));
+
+   // Update the dialog caption
+   QString caption = "Tie Point Editor";
+   if (mpLayer.get() != NULL)
    {
-      mpTiePointList->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &TiePointEditor::elementDeleted));
-      mpTiePointList->detach(SIGNAL_NAME(Subject, Modified), Slot(this, &TiePointEditor::elementModified));
-      mpTiePointList->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &TiePointEditor::tiePointListDeleted));
+      string name = mpLayer->getDisplayName();
+      if (name.empty() == true)
+      {
+         name = mpLayer->getName();
+      }
+
+      if (name.empty() == false)
+      {
+         caption += " - " + QString::fromStdString(name);
+      }
    }
 
-   mpLayer = dynamic_cast<TiePointLayer*>(pLayer);
-   if (mpLayer != NULL)
+   setWindowTitle(caption);
+
+   // Update the tie points
+   TiePointList* pTiePointList = NULL;
+   if (mpLayer.get() != NULL)
    {
-      mpTiePointList = static_cast<TiePointList*>(mpLayer->getDataElement());
-   }
-   else
-   {
-      mpTiePointList = NULL;
+      pTiePointList = dynamic_cast<TiePointList*>(mpLayer->getDataElement());
    }
 
-   if (mpTiePointList != NULL)
-   {
-      mpTiePointList->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &TiePointEditor::elementDeleted));
-      mpTiePointList->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &TiePointEditor::elementModified));
-      mpTiePointList->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &TiePointEditor::tiePointListDeleted));
-   }
+   mpTableModel->setTiePointList(pTiePointList);
 
-   mpScrollBar->setValue(0);
-   updateTiePointTable();
+   // Enable the buttons
+   enableButtons(mpLayer.get() != NULL);
    return true;
 }
 
-unsigned int TiePointEditor::numVisibleRows() const
+void TiePointEditor::addPoint()
 {
-   if (mpTiePointList == NULL)
-   {
-      return 0;
-   }
-
-   if (mpTable->rowCount() == 0)
-   {
-      mpTable->setRowCount(1);
-   }
-   int headerHeight = 0;
-
-   QHeaderView* pHeader = mpTable->horizontalHeader();
-   if (pHeader != NULL)
-   {
-      headerHeight = pHeader->height();
-   }
-
-   int rowHeight = mpTable->rowHeight(0);
-   unsigned long properNumRows = (mpTable->height()-headerHeight) / rowHeight;
-   unsigned long size = mpTiePointList->getTiePoints().size();
-   properNumRows = std::min(properNumRows, size);
-   return properNumRows;
-}
-
-void TiePointEditor::updateTiePointTable()
-{
-   if (mpTable == NULL)
+   if (mpLayer.get() == NULL)
    {
       return;
    }
 
-   // Delete all table items without clearing the header names
-   mpTable->clearContents();
-
-   // ensure we're displaying the proper number of rows
-   unsigned int properNumRows = numVisibleRows();
-   if (mpTable->rowCount() != properNumRows)
+   TiePointList* pTiePointList = dynamic_cast<TiePointList*>(mpLayer->getDataElement());
+   if (pTiePointList == NULL)
    {
-      mpTable->setRowCount(properNumRows);
+      return;
    }
 
-   unsigned int numPoints = (mpTiePointList!=NULL?mpTiePointList->getTiePoints().size():0);
+   const vector<TiePoint>& oldPoints = pTiePointList->getTiePoints();
+   vector<TiePoint> tiePoints = oldPoints;
+   tiePoints.push_back(TiePoint());
 
-   // ensure scroll bar is set properly
-   int scrollBarMax = 0;
-   if (numPoints > properNumRows)
+   View* pView = mpLayer->getView();
+   if (pView != NULL)
    {
-      scrollBarMax = numPoints - properNumRows;
+      pView->addUndoAction(new SetTiePoints(pTiePointList, oldPoints, tiePoints));
    }
-   if (mpScrollBar->value() > scrollBarMax)
-   {
-      mpScrollBar->setValue(scrollBarMax);
-   }
-   if (mpScrollBar->maximum() != scrollBarMax)
-   {
-      mpScrollBar->setMaximum(scrollBarMax);
-   }
-   mpScrollBar->setPageStep(properNumRows);
-   
-   // update the table
-   VERIFYNR(disconnect(mpTable, SIGNAL(cellChanged(int, int)), this, SLOT(updatePoint(int, int))));
 
-   QStringList rowLabels;
-   for (unsigned int i=0; i<properNumRows; ++i)
-   {
-      if (mpScrollBar->value()+i >= numPoints)
-      {
-         break; // shouldn't be able to happen, but we'd crash if it did
-      }
-      rowLabels += QString::number(i+1+mpScrollBar->value());
-      const TiePoint &point (mpTiePointList->getTiePoints().at(mpScrollBar->value()+i));
-
-      QTableWidgetItem* pItem = new QTableWidgetItem(QString::number(point.mReferencePoint.mX + 1));
-      mpTable->setItem(i, 0, pItem);
-
-      pItem = new QTableWidgetItem(QString::number(point.mReferencePoint.mY + 1));
-      mpTable->setItem(i, 1, pItem);
-
-      pItem = new QTableWidgetItem(QString::number(point.mMissionOffset.mX));
-      mpTable->setItem(i, 2, pItem);
-
-      pItem = new QTableWidgetItem(QString::number(point.mMissionOffset.mY));
-      mpTable->setItem(i, 3, pItem);
-
-      pItem = new QTableWidgetItem(QString::number(point.mConfidence));
-      mpTable->setItem(i, 4, pItem);
-
-      pItem = new QTableWidgetItem(QString::number(point.mPhi));
-      mpTable->setItem(i, 5, pItem);
-   }
-   mpTable->setVerticalHeaderLabels(rowLabels);
-   enableButtons(mpTiePointList != NULL);
-   VERIFYNR(connect(mpTable, SIGNAL(cellChanged(int, int)), this, SLOT(updatePoint(int, int))));
+   int numTiePoints = static_cast<int>(tiePoints.size());
+   pTiePointList->adoptTiePoints(tiePoints);
+   goToRow(numTiePoints - 1);
 }
 
-void TiePointEditor::resizeEvent ( QResizeEvent *pEvent )
+void TiePointEditor::deletePoint()
 {
-   QDialog::resizeEvent(pEvent);
-   updateTiePointTable();
-}
-
-bool TiePointEditor::eventFilter(QObject* pObject, QEvent* pEvent)
-{
-   if (pEvent == NULL) 
+   if (mpLayer.get() == NULL)
    {
-      return false;
+      return;
    }
 
-   if (pObject == mpTable)
+   TiePointList* pTiePointList = dynamic_cast<TiePointList*>(mpLayer->getDataElement());
+   if (pTiePointList == NULL)
    {
-      if (pEvent->type() == QEvent::KeyPress)
-      {
-         QKeyEvent *pKeyEvent = static_cast<QKeyEvent*>(pEvent);
-         int key = pKeyEvent->key();
-         int modifiers = pKeyEvent->modifiers();
-         if (key == Qt::Key_PageUp && modifiers == 0)
-         {
-            int numRows = numVisibleRows();
-            int newValue = std::max(0, mpScrollBar->value()-numRows);
-            mpScrollBar->setValue(newValue);
-            return true;
-         }
-         else if (key == Qt::Key_PageDown && modifiers == 0)
-         {
-            int numRows = numVisibleRows();
-            int numPoints = (mpTiePointList!=NULL?mpTiePointList->getTiePoints().size():0);
-            int newValue = std::min(static_cast<int>(numPoints)-numRows, mpScrollBar->value()+numRows);
-            mpScrollBar->setValue(newValue);
-            return true;
-         }
-         else if (key == Qt::Key_Up && modifiers == 0)
-         {
-            if (mpTable->currentRow() == 0 && mpScrollBar->value() != 0)
-            {
-               mpScrollBar->setValue(mpScrollBar->value()-1);
-               return true;
-            }
-         }
-         else if (key == Qt::Key_Down && modifiers == 0)
-         {
-            int numRows = numVisibleRows();
-            if (mpTable->currentRow() == numRows-1 && mpScrollBar->value() != mpScrollBar->maximum())
-            {
-               mpScrollBar->setValue(mpScrollBar->value()+1);
-               return true;
-            }
-         }
-         else if (key == Qt::Key_Home)
-         {
-            mpScrollBar->setValue(mpScrollBar->minimum());
-            mpTable->setCurrentCell(0, 0);
-            return true;
-         }
-         else if (key == Qt::Key_End)
-         {
-            int numRows = numVisibleRows();
-            mpScrollBar->setValue(mpScrollBar->maximum());
-            mpTable->setCurrentCell(numRows, 0);
-            return true;
-         }
-      }
+      return;
    }
-   return false;
+
+   QModelIndex index = mpTableView->currentIndex();
+   if (index.isValid() == false)
+   {
+      QMessageBox::warning(this, "Tie Point Editor", "Please select a tie point to delete.");
+      return;
+   }
+
+   int currentRow = index.row();
+   const vector<TiePoint>& oldPoints = pTiePointList->getTiePoints();
+   vector<TiePoint> points = oldPoints;
+
+   vector<TiePoint>::iterator pPoint = points.begin() + index.row();
+   points.erase(pPoint);
+
+   View* pView = mpLayer->getView();
+   if (pView != NULL)
+   {
+      pView->addUndoAction(new SetTiePoints(pTiePointList, oldPoints, points));
+   }
+
+   pTiePointList->adoptTiePoints(points);
+
+   if (currentRow == mpTableModel->rowCount())
+   {
+      --currentRow;
+   }
+
+   goToRow(currentRow);
 }
 
 void TiePointEditor::goToRow()
 {
+   int numRows = mpTableModel->rowCount();
+   if (numRows == 0)
+   {
+      return;
+   }
+
+   QModelIndex index = mpTableView->currentIndex();
+
+   int currentRow = 0;
+   if (index.isValid() == true)
+   {
+      currentRow = index.row();
+   }
+
    bool bOk = true;
-   int numPoints = (mpTiePointList!=NULL?mpTiePointList->getTiePoints().size():0);
-   int newValue = QInputDialog::getInteger(this, "Go To Row", "Enter the row in the table to go to", 
-      mpScrollBar->value()+1, 1, numPoints, 1, &bOk);
+
+   int row = QInputDialog::getInteger(this, "Go To Tie Point",
+      "Enter the tie point number to display at the top of the table", currentRow + 1, 1, numRows, 1, &bOk);
    if (bOk)
    {
-      --newValue;
-      goToRow(newValue);
+      goToRow(--row);
    }
 }
 
 void TiePointEditor::goToRow(int row)
 {
-   int selectionRow = row;
-   row = std::min(row, mpScrollBar->maximum());
-   selectionRow -= row;
-   mpScrollBar->setValue(row);
-   mpTable->setCurrentCell(selectionRow, 0);
-}
-
-void TiePointEditor::addPoint()
-{
-   if (mpTiePointList == NULL)
+   if ((row < 0) || (row >= mpTableModel->rowCount()))
    {
       return;
    }
 
-   std::vector<TiePoint> oldPoints = mpTiePointList->getTiePoints();
-   std::vector<TiePoint> tiePoints = oldPoints;
-   tiePoints.push_back(TiePoint());
+   int currentColumn = 0;
 
-   if (mpLayer != NULL)
+   QModelIndex index = mpTableView->currentIndex();
+   if (index.isValid() == true)
+   {
+      currentColumn = index.column();
+   }
+
+   QModelIndex newIndex = mpTableModel->index(row, currentColumn);
+   if (newIndex.isValid() == true)
+   {
+      mpTableView->scrollTo(newIndex, QAbstractItemView::PositionAtTop);
+      mpTableView->setCurrentIndex(newIndex);
+      mpTableView->setFocus();
+   }
+}
+
+void TiePointEditor::pointsEdited(const vector<TiePoint>& oldPoints, const vector<TiePoint>& newPoints)
+{
+   if (mpLayer.get() == NULL)
+   {
+      return;
+   }
+
+   TiePointList* pTiePointList = dynamic_cast<TiePointList*>(mpLayer->getDataElement());
+   if (pTiePointList != NULL)
    {
       View* pView = mpLayer->getView();
       if (pView != NULL)
       {
-         pView->addUndoAction(new SetTiePoints(mpTiePointList, oldPoints, tiePoints));
+         pView->addUndoAction(new SetTiePoints(pTiePointList, oldPoints, newPoints));
       }
-   }
-
-   int numTiePoints = tiePoints.size();
-   mpTiePointList->adoptTiePoints(tiePoints);
-   goToRow(numTiePoints - 1);
-}
-
-void TiePointEditor::updatePoint(int row, int column)
-{
-   if (mpTiePointList == NULL)
-   {
-      return;
-   }
-
-   std::vector<TiePoint> oldPoints = mpTiePointList->getTiePoints();
-   std::vector<TiePoint> tiePoints = oldPoints;
-
-   QTableWidgetItem* pItem = mpTable->item(row, column);
-   if (pItem == NULL)
-   {
-      return;
-   }
-
-   QString text = pItem->text();
-
-   int intField = 0;
-   float floatField = 0.0;
-   bool bOk = true;
-   if (mpScrollBar->value()+row >= static_cast<int>(tiePoints.size()))
-   {
-      return; // shouldn't be able to happen, but we'd crash if it did
-   }
-
-   TiePoint &point(tiePoints.at(mpScrollBar->value()+row));
-   switch (column)
-   {
-      case 0:
-         intField = text.toInt(&bOk);
-         if (bOk) point.mReferencePoint.mX = intField-1;
-         break;
-      case 1:
-         intField = text.toInt(&bOk);
-         if (bOk) point.mReferencePoint.mY = intField-1;
-         break;
-      case 2:
-         floatField = text.toFloat(&bOk);
-         if (bOk) point.mMissionOffset.mX = floatField;
-         break;
-      case 3:
-         floatField = text.toFloat(&bOk);
-         if (bOk) point.mMissionOffset.mY = floatField;
-         break;
-      case 4:
-         intField = text.toInt(&bOk);
-         if (bOk) point.mConfidence = intField;
-         break;
-      case 5:
-         intField = text.toInt(&bOk);
-         if (bOk) point.mPhi = intField;
-         break;
-      default:
-         break;
-   }
-
-   if (bOk)
-   {
-      if (mpLayer != NULL)
-      {
-         View* pView = mpLayer->getView();
-         if (pView != NULL)
-         {
-            pView->addUndoAction(new SetTiePoints(mpTiePointList, oldPoints, tiePoints));
-         }
-      }
-
-      mpTiePointList->adoptTiePoints(tiePoints);
    }
 }
 
-void TiePointEditor::deletePoint()
+void TiePointEditor::showEvent(QShowEvent* pEvent)
 {
-   if (mpTiePointList == NULL)
-   {
-      return;
-   }
-
-   if (mpTable->currentItem() == NULL)
-   {
-      return;
-   }
-
-   std::vector<TiePoint> oldPoints = mpTiePointList->getTiePoints();
-   std::vector<TiePoint> points = oldPoints;
-
-   std::vector<TiePoint>::iterator pPoint = points.begin() + mpScrollBar->value() + mpTable->currentRow();
-   points.erase(pPoint);
-
-   if (mpLayer != NULL)
-   {
-      View* pView = mpLayer->getView();
-      if (pView != NULL)
-      {
-         pView->addUndoAction(new SetTiePoints(mpTiePointList, oldPoints, points));
-      }
-   }
-
-   mpTiePointList->adoptTiePoints(points);
-}
-
-void TiePointEditor::showEvent( QShowEvent *e )
-{
-   QDialog::showEvent(e);
-   updateTiePointTable();
+   QDialog::showEvent(pEvent);
    emit visibilityChanged(true);
 }
 
-void TiePointEditor::closeEvent( QCloseEvent *e )
+void TiePointEditor::hideEvent(QHideEvent* pEvent)
 {
-   QDialog::closeEvent(e);
+   QDialog::hideEvent(pEvent);
    emit visibilityChanged(false);
-}
-
-void TiePointEditor::tiePointListDeleted(Subject& subject, const std::string& signal, const boost::any& value)
-{
-   TiePointList* pTiePointList = dynamic_cast<TiePointList*>(&subject);
-   if (pTiePointList == mpTiePointList)
-   {
-      setTiePointLayer(NULL);
-   }
 }
 
 void TiePointEditor::enableButtons(bool bEnable)

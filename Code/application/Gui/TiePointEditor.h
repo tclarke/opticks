@@ -12,18 +12,16 @@
 
 #include <QtGui/QDialog>
 #include <QtGui/QPushButton>
-#include <QtGui/QScrollBar>
-#include <QtGui/QTableWidget>
+#include <QtGui/QTableView>
 
-#include <boost/any.hpp>
+#include "AttachmentPtr.h"
+#include "TiePointLayer.h"
+#include "TiePointList.h"
+
 #include <vector>
 
-#include "TypesFile.h"
-
 class Layer;
-class Subject;
-class TiePointLayer;
-class TiePointList;
+class TiePointTableModel;
 
 class TiePointEditor : public QDialog
 {
@@ -33,9 +31,6 @@ public:
    TiePointEditor(QWidget* pParent = 0);
    ~TiePointEditor();
 
-   void elementDeleted(Subject &subject, const std::string &signal, const boost::any &data);
-   void elementModified(Subject &subject, const std::string &signal, const boost::any &data);
-
 public slots:
    bool setTiePointLayer(Layer* pLayer);
 
@@ -43,32 +38,24 @@ signals:
    void visibilityChanged(bool);
 
 protected slots:
+   void addPoint();
+   void deletePoint();
    void goToRow();
    void goToRow(int row);
-   void addPoint();
-   void updatePoint(int row, int column);
-   void deletePoint();
-   void updateTiePointTable();
+   void pointsEdited(const std::vector<TiePoint>& oldPoints, const std::vector<TiePoint>& newPoints);
 
 protected:
-   void resizeEvent(QResizeEvent *pEvent);
-   bool eventFilter(QObject* o, QEvent* e);
-   unsigned int numVisibleRows() const;
-   void showEvent(QShowEvent* e);
-   void closeEvent(QCloseEvent* e);
-
-   void tiePointListDeleted(Subject& subject, const std::string& signal, const boost::any& value);
+   void showEvent(QShowEvent* pEvent);
+   void hideEvent(QHideEvent* pEvent);
 
 private:
-   QTableWidget* mpTable;
+   QTableView* mpTableView;
    QPushButton* mpAddButton;
    QPushButton* mpDeleteButton;
    QPushButton* mpGoToButton;
-   QPushButton* mpCloseButton;
-   QScrollBar* mpScrollBar;
 
-   TiePointLayer* mpLayer;
-   TiePointList *mpTiePointList;
+   AttachmentPtr<TiePointLayer> mpLayer;
+   TiePointTableModel* mpTableModel;
 
    void enableButtons(bool bEnable);
 };
