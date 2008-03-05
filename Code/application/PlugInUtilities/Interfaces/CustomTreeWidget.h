@@ -21,6 +21,8 @@
 
 #include "EnumWrapper.h"
 
+class FileBrowser;
+
 /**
  *  A tree view widget with in-cell editing capbilities.
  *
@@ -28,7 +30,7 @@
  *  editing to allow the user to change the value of a particular cell.  The
  *  following edit capabilities are provided:
  *
- *<pre>
+ *  <pre>
  *  Edit Capability     %Description
  *  ==================  =======================================================
  *  None                The cell cannot be edited by the user.
@@ -59,7 +61,7 @@
  *                      The step size and range of values in the spin box are
  *                      set by creating a QSpinBox independently from the tree
  *                      widget and calling the setSpinBox() method.
- *</pre>
+ *  </pre>
  *
  *  The default row height of tree widget items that are added to a custom tree
  *  widget is 20 pixels to provide additional room for an edit widget.
@@ -334,12 +336,49 @@ public:
    bool getFullCellEdit(QTreeWidgetItem* pItem, int iColumn) const;
 
    /**
+    *  Sets the file browser to use as the edit widget for a given cell.
+    *
+    *  This method sets a file browser as the edit widget for the given cell.
+    *  The cell edit widget type must be set to
+    *  CustomTreeWidget::BROWSE_FILE_EDIT before this method is called.
+    *
+    *  @param   pItem
+    *           The item in which to set the file browser as a cell edit widget.
+    *  @param   iColumn
+    *           The item column in which to set the file browser as its edit
+    *           widget.
+    *  @param   pFileBrowser
+    *           The file browser to use as the edit widget.  The file browser
+    *           is reparented to the viewport widget, so it will automatically
+    *           be deleted when the tree widget is deleted.
+    *
+    *  @return  Returns \c true if the file browser was successfully set as the
+    *           edit widget; otherwise returns \c false.
+    *
+    *  @see     setCellWidgetType()
+    */
+   bool setFileBrowser(QTreeWidgetItem* pItem, int iColumn, FileBrowser* pFileBrowser);
+
+   /**
+    *  Returns the file browser used as the edit widget for a given cell.
+    *
+    *  @param   pItem
+    *           The item in which to get a cell file browser edit widget.
+    *  @param   iColumn
+    *           The item column in which to get the file browser edit widget.
+    *
+    *  @return  The file browser edit widget.  A valid item is returned
+    *           regardless of the current edit widget if a file browser has
+    *           been previously set as the edit widget but not reset to \c NULL.
+    */
+   FileBrowser* getFileBrowser(QTreeWidgetItem* pItem, int iColumn) const;
+
+   /**
     *  Sets the combo box to use as the edit widget for a given cell.
     *
     *  This method sets a combo box as the edit widget for the given cell.  The
     *  cell edit widget type must be set to CustomTreeWidget::COMBO_BOX before
-    *  this method is called.  It is the responsibility of the calling object
-    *  to delete the combo box.
+    *  this method is called.
     *
     *  @param   pItem
     *           The item in which to set the combo box as a cell edit widget.
@@ -347,7 +386,9 @@ public:
     *           The item column in which to set the combo box as its edit
     *           widget.
     *  @param   pCombo
-    *           The populated combo box to use as the edit widget.
+    *           The populated combo box to use as the edit widget.  The combo
+    *           box is reparented to the viewport widget, so it will
+    *           automatically be deleted when the tree widget is deleted.
     *
     *  @return  Returns \b true if the combo box was successfully set as the
     *           edit widget; otherwise returns \b false.
@@ -375,8 +416,7 @@ public:
     *
     *  This method sets a spin box as the edit widget for the given cell.  The
     *  cell edit widget type must be set to SpinBox before this method is
-    *  called.  It is the responsibility of the calling object to delete the
-    *  spin box.
+    *  called.
     *
     *  @param   pItem
     *           The item in which to set the spin box as a cell edit widget.
@@ -384,7 +424,9 @@ public:
     *           The item column in which to set the spin box as its edit
     *           widget.
     *  @param   pSpin
-    *           The spin box to use as the edit widget.
+    *           The spin box to use as the edit widget.  The spin box is
+    *           reparented to the viewport widget, so it will automatically be
+    *           deleted when the tree widget is deleted.
     *
     *  @return  Returns \b true if the spin box was successfully set as the
     *           edit widget; otherwise returns \b false.
@@ -494,8 +536,8 @@ public slots:
     *  Sets the initial browse directory.
     *
     *  This method pertains to the initial browse directory when the user
-    *  clicks on the browse button for CustomTreeWidget::BROWSE_FILE_EDIT and
-    *  CustomTreeWidget::BROWSE_DIR_EDIT edit widget types.
+    *  clicks on the browse button for the CustomTreeWidget::BROWSE_DIR_EDIT
+    *  edit widget type.
     *
     *  @param   strDirectory
     *           The directory to set as the initial browse directory.  Set this
@@ -548,26 +590,6 @@ signals:
    void cellCheckChanged(QTreeWidgetItem* pItem, int iColumn);
 
    /**
-    *  This signal is emitted when a file is selected within a cell.
-    *
-    *  @param   pItem
-    *           The item with a selected file.
-    *  @param   iColumn
-    *           The item column containing the file that was selected.
-    */
-   void fileSelected(QTreeWidgetItem* pItem, int iColumn);
-
-   /**
-    *  This signal is emitted when a directory is selected within a cell.
-    *
-    *  @param   pItem
-    *           The item with a selected directory.
-    *  @param   iColumn
-    *           The item column containing the directory that was selected.
-    */
-   void directorySelected(QTreeWidgetItem* pItem, int iColumn);
-
-   /**
     *  This signal is emitted when the delete key is pressed.
     */
    void deleteKeyPressed();
@@ -605,7 +627,7 @@ protected:
     *  This method is called by Qt when the user presses a key on the keyboard.
     *  The default behavior is as follows:
     *
-    *<pre>
+    *  <pre>
     *  Key            Behavior
     *  =============  =========================================================
     *  Delete         Emits the deleteKeyPressed() signal.
@@ -625,7 +647,7 @@ protected:
     *  Page Up        Closes the active edit widget and accepts any changes.
     *                 Scrolls the list view to display items above the
     *                 previously displayed items.
-    *</pre>
+    *  </pre>
     *
     *  @param   e
     *           The key event associated with the key press.
@@ -735,10 +757,10 @@ protected slots:
    void setCurrentCellText(const QString& strText);
 
    /**
-    *  Invokes a file selection dialog to select a file or directory.
+    *  Invokes a directory selection dialog to select a directory.
     *
     *  This method is called when the user clicks on the browse button from
-    *  the active edit widget to select a file or directory.
+    *  the active edit widget to select a directory.
     */
    void browse();
 
@@ -756,6 +778,21 @@ protected slots:
     *  @see     closeActiveCellWidget()
     */
    void closeEdit();
+
+   /**
+    *  Accepts the changes in the active file browser edit widget.
+    *
+    *  This method sets the cell text to the current text in the active file
+    *  browser edit widget.
+    */
+   void acceptFileBrowserText();
+
+   /**
+    *  Hides the active file browser edit widget.
+    *
+    *  @see     closeActiveCellWidget()
+    */
+   void closeFileBrowser();
 
    /**
     *  Accepts the changes in the active combo box edit widget.
@@ -825,6 +862,7 @@ private:
    bool mVerticalGridlines;
 
    QLineEdit* mpEdit;
+   FileBrowser* mpFileBrowser;
    QPushButton* mpBrowse;
    QString mBrowseDir;
    QComboBox* mpCombo;
@@ -832,6 +870,7 @@ private:
    QKeySequence mShortcut;
 
    QMap<CellLocation, WidgetType> mCellWidgets;
+   QMap<CellLocation, FileBrowser*> mFileBrowsers;
    QMap<CellLocation, QComboBox*> mComboBoxes;
    QMap<CellLocation, QSpinBox*> mSpinBoxes;
    QMap<CellLocation, CheckState> mChecks;

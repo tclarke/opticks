@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #ifndef FILESETWIDGET_H
 #define FILESETWIDGET_H
 
@@ -20,6 +18,7 @@
 
 class BatchFileset;
 class CustomTreeWidget;
+class FileBrowser;
 
 class FilesetWidget : public QWidget
 {
@@ -49,6 +48,7 @@ private:
    QLineEdit* mpDirectoryEdit;
    QPushButton* mpBrowseButton;
    CustomTreeWidget* mpCriteriaTree;
+   FileBrowser* mpFileBrowser;
    QComboBox* mpInclusionCombo;
    QPushButton* mpNewButton;
    QPushButton* mpAddButton;

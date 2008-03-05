@@ -27,7 +27,8 @@ FileBrowser::FileBrowser(QWidget* pParent) :
    // Filename edit
    mpFileEdit = new QLineEdit(this);
    QCompleter *pCompleter = new QCompleter(this);
-   pCompleter->setModel(new QDirModel(pCompleter));
+   pCompleter->setModel(new QDirModel(QStringList(), QDir::NoDotAndDotDot | QDir::AllDirs | QDir::AllEntries,
+      QDir::Name | QDir::DirsFirst, pCompleter));
    mpFileEdit->setCompleter(pCompleter);
 
    // Browse button
@@ -44,6 +45,10 @@ FileBrowser::FileBrowser(QWidget* pParent) :
    pLayout->setSpacing(5);
    pLayout->addWidget(mpFileEdit, 10);
    pLayout->addWidget(pBrowseButton);
+
+   // Initialization
+   setFocusPolicy(Qt::StrongFocus);
+   setFocusProxy(mpFileEdit);
 
    // Connections
    VERIFYNR(connect(mpFileEdit, SIGNAL(textChanged(const QString&)), this, SIGNAL(filenameChanged(const QString&))));
@@ -95,7 +100,52 @@ QString FileBrowser::getBrowseDirectory() const
 
 void FileBrowser::setBrowseFileFilters(const QString& filters)
 {
-   mBrowseFilters = filters;
+   if (filters != mBrowseFilters)
+   {
+      mBrowseFilters = filters;
+
+      // Update the filters in the completer
+      QStringList dirFilters;
+
+      QStringList filterList = mBrowseFilters.split(";;", QString::SkipEmptyParts);
+      if (filterList.empty() == false)
+      {
+         // Remove the All Files filter
+         for (int i = 0; i < filterList.count(); ++i)
+         {
+            QString filter = filterList[i];
+            if (filter.startsWith("All Files") == true)
+            {
+               filterList.removeAt(i);
+               break;
+            }
+         }
+
+         // Convert the filters to the directory name filter format
+         if (filterList.empty() == false)
+         {
+            for (int i = 0; i < filterList.count(); ++i)
+            {
+               QString filter = filterList[i];
+               int startPos = filter.indexOf("(") + 1;
+               int numChars = filter.lastIndexOf(")") - startPos;
+
+               filter = filter.mid(startPos, numChars);
+               dirFilters += filter.split(' ', QString::SkipEmptyParts);
+            }
+         }
+      }
+
+      QCompleter* pCompleter = mpFileEdit->completer();
+      if (pCompleter != NULL)
+      {
+         QDirModel* pDirModel = dynamic_cast<QDirModel*>(pCompleter->model());
+         if (pDirModel != NULL)
+         {
+            pDirModel->setNameFilters(dirFilters);
+         }
+      }
+   }
 }
 
 QString FileBrowser::getBrowseFileFilters() const
@@ -137,5 +187,6 @@ void FileBrowser::browse()
    {
       // Set the edit box text
       setFilename(filename);
+      setFocus();
    }
 }
