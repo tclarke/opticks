@@ -374,7 +374,6 @@ MessageImp::MessageImp(const string &action,
       mFinalized(false),
       mComponent(component),
       mKey(key),
-      mDomNode(NULL),
       mpParent(pParent)
 {
    if(mpTimeStamp == NULL)
@@ -668,15 +667,9 @@ bool MessageImp::isKindOf(const string& name) const
 
 bool MessageImp::toXml(XMLWriter* xml) const
 {
-   if(xml == NULL)
-      return false;
-   if(mDomNode == NULL)
-   {
-      if((mDomNode = xml->addElement("message")) == NULL)
-         return false;
-   }
-   xml->pushAddPoint(mDomNode);
-   serializeReal(xml);
+   DOMElement* pNode = xml->addElement("message");
+   xml->pushAddPoint(pNode);
+   serializeReal(xml, pNode);
    xml->popAddPoint();
    return true;
 }
@@ -690,35 +683,30 @@ void MessageImp::serializeDate(string &date, string &time) const
    time = mpTimeStamp->getFormattedUtc(format);
 }
 
-void MessageImp::serializeReal(XMLWriter* xml) const
+void MessageImp::serializeReal(XMLWriter* xml, DOMElement* pNode) const
 {
-   xml->addAttr("id", id->toString(), mDomNode);
+   xml->addAttr("id", id->toString(), pNode);
    if (!mComponent.empty())
    {
-      xml->addAttr("component", mComponent, mDomNode);
+      xml->addAttr("component", mComponent, pNode);
    }
    if (!mKey.empty())
    {
-      xml->addAttr("key", mKey, mDomNode);
+      xml->addAttr("key", mKey, pNode);
    }
 
    string date, time;
    serializeDate(date, time);
-   xml->addAttr("date", date, mDomNode);
-   xml->addAttr("time", time, mDomNode);
+   xml->addAttr("date", date, pNode);
+   xml->addAttr("time", time, pNode);
 
-   xml->addAttr("name", getAction(), mDomNode);
+   xml->addAttr("name", getAction(), pNode);
 
    vector<string> propertyNames;
    mpProperties->getAttributeNames(propertyNames);
    for(vector<string>::iterator it = propertyNames.begin(); it != propertyNames.end(); ++it)
    {
-      if(mPropertyNodes.find(*it) == mPropertyNodes.end())
-      {
-         // the property node does not exist
-         mPropertyNodes[*it] = xml->addElement("property", mDomNode);
-      }
-      xml->pushAddPoint(mPropertyNodes[*it]);
+      xml->pushAddPoint(xml->addElement("property", pNode));
       xml->addAttr("name", *it);
       const DataVariant& attrValue = mpProperties->getAttribute(*it);
       string value = attrValue.toXmlString();
@@ -1166,32 +1154,28 @@ bool StepImp::toXml(XMLWriter* xml) const
 {
    if(xml == NULL)
       return false;
-   if(mDomNode == NULL)
-   {
-      if((mDomNode = xml->addElement("step")) == NULL)
-         return false;
-   }
+   DOMElement* pNode = xml->addElement("step");
    switch(getResult())
    {
       case Message::Success:
-         xml->addAttr("result", "Success", mDomNode);
+         xml->addAttr("result", "Success", pNode);
          break;
       case Message::Failure:
-         xml->addAttr("result", "Failure", mDomNode);
+         xml->addAttr("result", "Failure", pNode);
          break;
       case Message::Abort:
-         xml->addAttr("result", "Abort", mDomNode);
+         xml->addAttr("result", "Abort", pNode);
          break;
       case Message::Unresolved:
-         xml->addAttr("result", "Unresolved", mDomNode);
+         xml->addAttr("result", "Unresolved", pNode);
          break;
    }
    if (mFailureReason.size() > 0)
    {
       xml->addAttr("failureMessage", mFailureReason);
    }
-   serializeReal(xml);
-   xml->pushAddPoint(mDomNode);
+   serializeReal(xml, pNode);
+   xml->pushAddPoint(pNode);
    for(vector<Message*>::const_iterator it=mMessageList.begin();
                                       it!=mMessageList.end();
                                       ++it)
