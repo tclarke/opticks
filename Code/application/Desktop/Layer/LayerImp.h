@@ -57,6 +57,8 @@ public:
    void setName(const std::string& layerName);
    DataElement* getDataElement() const;
    bool hasUniqueElement() const;
+
+   SIGNAL_METHOD(LayerImp, ViewModified)
    void setView(ViewImp* pView);
    View* getView() const;
 

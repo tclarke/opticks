@@ -17,78 +17,103 @@
 class Animation;
 
 /**
- * This class provides access to the display properties for a frame label object.
- *
- * When a FrameLabelObject is added to a view it watches all animations associated with the view's animation controller.
- * In the special case that a FrameLabelObject is added to a SpatialDataView, it watches all animations associated
- * with the raster layers in the view controlled by the view's animation controller.
+ * This class provides access to the display properties for a FrameLabelObject.
  *
  * Possible GraphicObjectTypes: GraphicObjectType::FRAME_LABEL_OBJECT.
  *
+ * FrameLabelObjects have two modes of operation: Automatic and Manual.
+ *
+ * Automatic Mode is the default mode for a FrameLabelObject which has been added to a view by the user.
+ * When the FrameLabelObject is operating in Automatic Mode it maintains a list of Animation objects which is comprised of:
+ *    - All Animation objects in the AnimationController set into the View (ProductView)
+ *    - All Animation objects in any RasterLayer in the View (SpatialDataView)
+ *
+ * The FrameLabelObject will automatically update its list of Animation objects when:
+ *    - The object is placed in a different Layer
+ *    - An Animation in the list is deleted
+ *    - The underlying Layer is put into a different View
+ *    - The View changes its AnimationController (ProductView)
+ *    - An Animation is added to or removed from the AnimationController (ProductView)
+ *    - The AnimationController is deleted (ProductView)
+ *    - A Layer is added to or removed from the LayerList (SpatialDataView)
+ *    - A RasterLayer in the LayerList changes its Animation (SpatialDataView)
+ *
+ * Manual Mode is the default mode for a FrameLabelObject which has been created programmatically.
+ * When the FrameLabelObject is operating in Manual Mode it will only update its list of Animation objects when
+ * an Animation in the list is deleted.
+ *
  *  This subclass of Subject will notify upon the following conditions:
- *  - All notifications documented in TextObject.
+ *  - All notifications documented in TextObject
  */
 class FrameLabelObject : public TextObject
 {
 public:
    /**
-    * When multiple animations are present, this setting determines how text is displayed.
+    * When multiple Animation objects are present, this setting determines how text is displayed.
     *
-    * If this setting is \b true, then the time (or frame number) of the least recent (oldest) animation is displayed.
-    * Otherwise, the time (or frame number) of the most recent (newest) animation is displayed.
+    * If this setting is \b true, then the time (or frame number) of the least recent (oldest) Animation is displayed.
+    * Otherwise, the time (or frame number) of the most recent (newest) Animation is displayed.
     */
    SETTING(DisplayMinimumFrame, FrameLabelObject, bool, false)
 
    /**
-    *  Sets the animations for the object to monitor.
-    *  If the underlying AnimationController is modified, then all changes using this method will be lost.
+    *  Sets the Animation objects for the object to monitor.
+    *  If the object is in Automatic Mode, this method does nothing.
     *
     *  @param   animations
-    *           Animations to monitor.
+    *           Animation objects to monitor.
+    *
+    *  @see setAutoMode(), getAutoMode()
     */
    virtual void setAnimations(const std::vector<Animation*> &animations) = 0;
 
    /**
-    *  Gets the animations being monitored by the object.
+    *  Gets the Animation objects being monitored by the object.
     *
-    *  @return  Animations being monitored.
+    *  @return  Animation objects being monitored.
     */
    virtual const std::vector<Animation*> &getAnimations() const = 0;
 
    /**
-    *  Inserts an animation into the vector of animations being monitored.
-    *  If the underlying AnimationController is modified, then all changes using this method will be lost.
+    *  Inserts an Animation into the vector of Animation objects being monitored.
+    *  If the object is in Automatic Mode, this method does nothing.
     *
     *  @param   pAnimation
-    *           A pointer to an animation to insert into the vector.
+    *           A pointer to an Animation to insert into the vector.
+    *
+    *  @see setAutoMode(), getAutoMode()
     */
    virtual void insertAnimation(Animation* pAnimation) = 0;
 
    /**
-    *  Erases an animation from the vector of animations being monitored.
-    *  If the underlying AnimationController is modified, then all changes using this method will be lost.
+    *  Erases an Animation from the vector of Animation objects being monitored.
+    *  If the object is in Automatic Mode, this method does nothing.
     *
     *  @param   pAnimation
-    *           A pointer to an animation to erase from the vector.
+    *           A pointer to an Animation to erase from the vector.
+    *
+    *  @see setAutoMode(), getAutoMode()
     */
    virtual void eraseAnimation(Animation* pAnimation) = 0;
 
    /**
-    *  Sets the autoMode value.
+    *  Sets the current mode.
+    *  If autoMode matches the current mode, this method does nothing.
     *
     *  @param   autoMode
-    *           A value of \b true will cause the FrameLabelObject to clear its current animations and
-    *           automatically regenerate them based on the underlying view.
-    *           A value of \b false will cause the FrameLabelObject to clear its current animations and
-    *           set its current animation controller to \c NULL.
+    *           A value of \b true will clear all current Animation objects and operate in Automatic Mode.
+    *           A value of \b false will clear all current Animation objects and operate in Manual Mode.
+    *
+    *  @see getAutoMode()
     */
    virtual void setAutoMode(bool autoMode) = 0;
 
    /**
-    *  Gets the current autoMode value.
+    *  Gets the current mode.
     *
-    *  @return  The current autoMode setting.
+    *  @return  \b True if the object is operating in Automatic Mode, \b false otherwise.
     *
+    *  @see setAutoMode()
     */
    virtual bool getAutoMode() const = 0;
 

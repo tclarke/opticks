@@ -18,7 +18,6 @@
 #include <string>
 #include <vector>
 
-class AnimationFrame;
 class Animation;
 class RasterLayer;
 class Subject;
@@ -48,6 +47,7 @@ public:
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
 
+   void setLayer(GraphicLayer* pLayer);
    void updateGeo();
    bool replicateObject(const GraphicObject* pObject);
 
@@ -55,14 +55,14 @@ protected:
    void frameChanged(Subject &subject, const std::string &signal, const boost::any &value);
    void animationAdded(Subject &subject, const std::string &signal, const boost::any &value);
    void animationRemoved(Subject &subject, const std::string &signal, const boost::any &value);
-   void controllerDeleted(Subject &subject, const std::string &signal, const boost::any &value);
    void animationDeleted(Subject &subject, const std::string &signal, const boost::any &value);
-   void animationControllerChanged(Subject &subject, const std::string &signal, const boost::any &value);
-   void layerAdded(Subject &subject, const std::string &signal, const boost::any &value);
-   void animationChanged(Subject &subject, const std::string &signal, const boost::any &value);
    void layerDeleted(Subject &subject, const std::string &signal, const boost::any &value);
 
+   void updateAnimations(Subject &subject, const std::string &signal, const boost::any &value);
+
 private:
+   bool mAutoMode;
+   bool mLocked;
    AttachmentPtr<View> mpView;
    AttachmentPtr<LayerList> mpLayerList;
    std::vector<RasterLayer*> mLayers;
@@ -73,6 +73,9 @@ private:
    void reset();
    void clearLayers();
    void eraseLayer(RasterLayer* pLayer);
+   void updateAnimationList(bool force = false);
+   void setLocked(bool locked);
+   bool getLocked() const;
 };
 
 #define FRAMELABELOBJECTADAPTER_METHODS(impClass) \
