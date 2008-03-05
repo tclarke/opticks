@@ -200,13 +200,12 @@ public: // SubjectAdapter functionality
    virtual bool isKindOf(const std::string& name) const;
 
 protected:
-   void serializeReal(XMLWriter* pXml) const;
+   void serializeReal(XMLWriter* pXml, XERCES_CPP_NAMESPACE_QUALIFIER DOMElement* pNode) const;
    friend class MessageLogImp;
 
 protected:
    DateTime *mpTimeStamp;
    bool mFinalized;
-   mutable XERCES_CPP_NAMESPACE_QUALIFIER DOMElement *mDomNode;
 
 private:
    std::string mAction;
@@ -214,7 +213,6 @@ private:
    std::string mKey;
    NumChain *id;
    DynamicObject *mpProperties;
-   mutable std::map<std::string,XERCES_CPP_NAMESPACE_QUALIFIER DOMElement*> mPropertyNodes;
    const Step *mpParent;
 };
 
