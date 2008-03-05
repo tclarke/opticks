@@ -14,6 +14,7 @@
 
 #include "CustomTreeWidget.h"
 #include "DimensionDescriptor.h"
+#include "FileBrowser.h"
 #include "FileDescriptorWidget.h"
 #include "GeoPoint.h"
 #include "RasterFileDescriptor.h"
@@ -36,6 +37,7 @@ FileDescriptorWidget::FileDescriptorWidget(QWidget* parent) :
    mReadOnly(true),
    mModified(false),
    mpTreeWidget(NULL),
+   mpFileBrowser(NULL),
    mpGcpGroup(NULL),
    mpGcpTree(NULL)
 {
@@ -61,6 +63,11 @@ FileDescriptorWidget::FileDescriptorWidget(QWidget* parent) :
       pHeader->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
       pHeader->resizeSection(0, 150);
    }
+
+   // Band file browser
+   mpFileBrowser = new FileBrowser(mpTreeWidget);
+   mpFileBrowser->setBrowseCaption("Select Band File");
+   mpFileBrowser->hide();
 
    // GCP group box
    mpGcpGroup = new QGroupBox("Ground Control Points (GCP)", this);
@@ -583,6 +590,7 @@ void FileDescriptorWidget::initialize()
             if (mReadOnly == false)
             {
                mpTreeWidget->setCellWidgetType(pBandItem, 1, CustomTreeWidget::BROWSE_FILE_EDIT);
+               mpTreeWidget->setFileBrowser(pBandItem, 1, mpFileBrowser);
             }
          }
       }
@@ -1033,6 +1041,7 @@ void FileDescriptorWidget::updateBandFiles()
          if (mReadOnly == false)
          {
             mpTreeWidget->setCellWidgetType(pBandItem, 1, CustomTreeWidget::BROWSE_FILE_EDIT);
+            mpTreeWidget->setFileBrowser(pBandItem, 1, mpFileBrowser);
          }
       }
    }

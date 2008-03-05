@@ -16,11 +16,13 @@
 #include <QtGui/QFileDialog>
 #include <QtGui/QHeaderView>
 #include <QtGui/QImage>
+#include <QtGui/QLayout>
 #include <QtGui/QMouseEvent>
 #include <QtGui/QPainter>
 #include <QtGui/QPixmap>
 
 #include "CustomTreeWidget.h"
+#include "FileBrowser.h"
 #include "IconImages.h"
 
 CustomTreeWidget::CustomTreeWidget(QWidget* parent) :
@@ -30,13 +32,14 @@ CustomTreeWidget::CustomTreeWidget(QWidget* parent) :
    mHorizontalGridlines(false),
    mVerticalGridlines(false),
    mpEdit(NULL),
+   mpFileBrowser(NULL),
    mpBrowse(NULL),
-   mBrowseDir(QString()),
    mpCombo(NULL),
    mpSpin(NULL)
 {
    // Initialization
    setUniformRowHeights(true);
+   setStyleSheet("FileBrowser QLineEdit { border-style: none; margin-top: 1 }");
    setIconSize(QSize(1000, 20));    // Ensure that the item icons are the appropriate size
                                     // and not scaled to the default small icon size
 
@@ -51,6 +54,7 @@ CustomTreeWidget::CustomTreeWidget(QWidget* parent) :
    }
 
    connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(closeEdit()));
+   connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(closeFileBrowser()));
    connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(closeCombo()));
    connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(closeSpin()));
 }
@@ -64,6 +68,7 @@ void CustomTreeWidget::clear()
    closeActiveCellWidget(false);
 
    mCellWidgets.clear();
+   mFileBrowsers.clear();
    mComboBoxes.clear();
    mSpinBoxes.clear();
    mChecks.clear();
@@ -288,7 +293,6 @@ void CustomTreeWidget::activateCellWidget(QTreeWidgetItem* pItem, int iColumn)
    switch (eType)
    {
       case LINE_EDIT:         // Fall through to the next case
-      case BROWSE_FILE_EDIT:  // Fall through to the next case
       case BROWSE_DIR_EDIT:   // Fall through to the next case
       case SHORTCUT_EDIT:
       {
@@ -296,12 +300,8 @@ void CustomTreeWidget::activateCellWidget(QTreeWidgetItem* pItem, int iColumn)
          if (mpEdit == NULL)
          {
             mpEdit = new QLineEdit(viewport());
-            if (mpEdit != NULL)
-            {
-               mpEdit->setFrame(false);
-               mpEdit->installEventFilter(this);
-               connect(mpEdit, SIGNAL(returnPressed()), this, SLOT(acceptEditText()));
-            }
+            mpEdit->setFrame(false);
+            mpEdit->installEventFilter(this);
          }
 
          if (mpEdit != NULL)
@@ -311,12 +311,12 @@ void CustomTreeWidget::activateCellWidget(QTreeWidgetItem* pItem, int iColumn)
             mpEdit->show();
             mpEdit->setFocus();
             mpEdit->selectAll();
+            viewport()->setFocusProxy(mpEdit);
 
-            if ((eType == BROWSE_FILE_EDIT) || (eType == BROWSE_DIR_EDIT))
+            if (eType == BROWSE_DIR_EDIT)
             {
                QCompleter *pCompleter = new QCompleter(this);
-               pCompleter->setModel(new QDirModel(QStringList(), QDir::NoDotAndDotDot | 
-                  ((eType == BROWSE_DIR_EDIT) ? (QDir::Dirs | QDir::Drives) : QDir::AllEntries),
+               pCompleter->setModel(new QDirModel(QStringList(), QDir::NoDotAndDotDot | QDir::Dirs | QDir::Drives,
                   QDir::DirsFirst, pCompleter));
                mpEdit->setCompleter(pCompleter);
                if (mpBrowse == NULL)
@@ -345,6 +345,20 @@ void CustomTreeWidget::activateCellWidget(QTreeWidgetItem* pItem, int iColumn)
          }
 
          break;
+      }
+
+      case BROWSE_FILE_EDIT:
+      {
+         mpFileBrowser = getFileBrowser(pItem, iColumn);
+         if (mpFileBrowser != NULL)
+         {
+            mpFileBrowser->setFilename(strCellText);
+
+            mpFileBrowser->setGeometry(rcWidget);
+            mpFileBrowser->show();
+            mpFileBrowser->setFocus();
+            viewport()->setFocusProxy(mpFileBrowser);
+         }
       }
 
       case COMBO_BOX:
@@ -388,8 +402,9 @@ void CustomTreeWidget::activateCellWidget(QTreeWidgetItem* pItem, int iColumn)
             }
 
             mpCombo->setGeometry(rcWidget);
-            mpCombo->setFocus();
             mpCombo->show();
+            mpCombo->setFocus();
+            viewport()->setFocusProxy(mpCombo);
          }
 
          break;
@@ -405,8 +420,9 @@ void CustomTreeWidget::activateCellWidget(QTreeWidgetItem* pItem, int iColumn)
             mpSpin->setValue(iValue);
 
             mpSpin->setGeometry(rcWidget);
-            mpSpin->setFocus();
             mpSpin->show();
+            mpSpin->setFocus();
+            viewport()->setFocusProxy(mpSpin);
          }
 
          break;
@@ -442,6 +458,12 @@ void CustomTreeWidget::columnWidthChanged(int iColumn, int iOldWidth, int iNewWi
                }
             }
          }
+      }
+
+      // Resize the file browser
+      if (mpFileBrowser != NULL)
+      {
+         mpFileBrowser->setGeometry(rcWidget);
       }
 
       // Resize the combo box
@@ -695,6 +717,59 @@ bool CustomTreeWidget::getFullCellEdit(QTreeWidgetItem* pItem, int iColumn) cons
    return bFullCell;
 }
 
+bool CustomTreeWidget::setFileBrowser(QTreeWidgetItem* pItem, int iColumn, FileBrowser* pFileBrowser)
+{
+   if ((pItem == NULL) || (pFileBrowser == NULL))
+   {
+      return false;
+   }
+
+   WidgetType eType = getCellWidgetType(pItem, iColumn);
+   if ((eType != BROWSE_FILE_EDIT) && (eType != BROWSE_DIR_EDIT))
+   {
+      return false;
+   }
+
+   CellLocation cell;
+   cell.pItem = pItem;
+   cell.iColumn = iColumn;
+
+   QLayout* pBrowserLayout = pFileBrowser->layout();
+   if (pBrowserLayout != NULL)
+   {
+      pBrowserLayout->setMargin(0);
+      pBrowserLayout->setSpacing(0);
+   }
+
+   pFileBrowser->setParent(viewport());
+   pFileBrowser->hide();
+   mFileBrowsers[cell] = pFileBrowser;
+
+   return true;
+}
+
+FileBrowser* CustomTreeWidget::getFileBrowser(QTreeWidgetItem* pItem, int iColumn) const
+{
+   if (pItem == NULL)
+   {
+      return NULL;
+   }
+
+   CellLocation cell;
+   cell.pItem = pItem;
+   cell.iColumn = iColumn;
+
+   FileBrowser* pFileBrowser = NULL;
+
+   QMap<CellLocation, FileBrowser*>::const_iterator iter = mFileBrowsers.find(cell);
+   if (iter != mFileBrowsers.end())
+   {
+      pFileBrowser = iter.value();
+   }
+
+   return pFileBrowser;
+}
+
 bool CustomTreeWidget::setComboBox(QTreeWidgetItem* pItem, int iColumn, QComboBox* pCombo)
 {
    if ((pItem == NULL) || (pCombo == NULL))
@@ -933,6 +1008,18 @@ void CustomTreeWidget::closeActiveCellWidget(bool bAcceptEdit)
       }
    }
 
+   if (mpFileBrowser != NULL)
+   {
+      if (bAcceptEdit == true)
+      {
+         acceptFileBrowserText();
+      }
+      else
+      {
+         closeFileBrowser();
+      }
+   }
+
    if (mpCombo != NULL)
    {
       if (bAcceptEdit == true)
@@ -1144,45 +1231,21 @@ void CustomTreeWidget::browse()
    QString strInitialText = pItem->text(iColumn);
 
    QFileInfo fileInfo(strInitialText);
-
-   QString strLocation;
-   WidgetType eType = getCellWidgetType(pItem, iColumn);
-   if (eType == BROWSE_FILE_EDIT)
+   if (fileInfo.isDir() == false)
    {
-      if (fileInfo.isFile() == false)
-      {
-         strInitialText = mBrowseDir;
-      }
-
-      strLocation = QFileDialog::getOpenFileName(this, QString(), strInitialText);
-   }
-   else if (eType == BROWSE_DIR_EDIT)
-   {
-      if (fileInfo.isDir() == false)
-      {
-         strInitialText = mBrowseDir;
-      }
-
-      strLocation = QFileDialog::getExistingDirectory(this, QString(), strInitialText);
+      strInitialText = mBrowseDir;
    }
 
+   QString strLocation = QFileDialog::getExistingDirectory(this, QString(), strInitialText);
    if (strLocation.isEmpty() == false)
    {
       strLocation.replace(QRegExp("\\\\"), "/");
-      closeEdit();
-      setCurrentCellText(strLocation);
-
-      if (eType == BROWSE_FILE_EDIT)
-      {
-         emit fileSelected(pItem, iColumn);
-      }
-      else if (eType == BROWSE_DIR_EDIT)
-      {
-         emit directorySelected(pItem, iColumn);
-      }
    }
-   else if (mpEdit != NULL)
+
+   if (mpEdit != NULL)
    {
+      mpEdit->setText(strLocation);
+
       if (mpEdit->isVisible() == true)
       {
          mpEdit->setFocus();
@@ -1196,20 +1259,23 @@ void CustomTreeWidget::acceptEditText()
    {
       return;
    }
+
    QTreeWidgetItem* pItem = currentItem();
    if (pItem == NULL)
    {
       return;
    }
+
    QString strText = mpEdit->text();
-   if(getCellWidgetType(pItem, currentIndex().column()) == BROWSE_DIR_EDIT)
+   if (getCellWidgetType(pItem, currentIndex().column()) == BROWSE_DIR_EDIT)
    {
       QFileInfo fileInfo(strText);
-      if(fileInfo.isFile())
+      if (fileInfo.isFile())
       {
          strText = fileInfo.absolutePath();
       }
    }
+
    setCurrentCellText(strText);
    closeEdit();
 }
@@ -1233,6 +1299,32 @@ void CustomTreeWidget::closeEdit()
       }
    }
 
+   viewport()->setFocusProxy(this);
+   viewport()->setFocus();
+}
+
+void CustomTreeWidget::acceptFileBrowserText()
+{
+   if (mpFileBrowser == NULL)
+   {
+      return;
+   }
+
+   setCurrentCellText(mpFileBrowser->getFilename());
+   closeFileBrowser();
+}
+
+void CustomTreeWidget::closeFileBrowser()
+{
+   if (mpFileBrowser == NULL)
+   {
+      return;
+   }
+
+   mpFileBrowser->hide();
+   mpFileBrowser = NULL;
+
+   viewport()->setFocusProxy(this);
    viewport()->setFocus();
 }
 
@@ -1257,6 +1349,7 @@ void CustomTreeWidget::closeCombo()
    mpCombo->hide();
    mpCombo = NULL;
 
+   viewport()->setFocusProxy(this);
    viewport()->setFocus();
 }
 
@@ -1281,5 +1374,6 @@ void CustomTreeWidget::closeSpin()
    mpSpin->hide();
    mpSpin = NULL;
 
+   viewport()->setFocusProxy(this);
    viewport()->setFocus();
 }

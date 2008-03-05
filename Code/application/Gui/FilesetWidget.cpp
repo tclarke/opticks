@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #include <QtCore/QRegExp>
 #include <QtGui/QBitmap>
 #include <QtGui/QFileDialog>
@@ -18,9 +16,10 @@
 #include <QtGui/QMessageBox>
 #include <QtGui/QPixmap>
 
-#include "FilesetWidget.h"
-#include "CustomTreeWidget.h"
 #include "BatchFileset.h"
+#include "CustomTreeWidget.h"
+#include "FileBrowser.h"
+#include "FilesetWidget.h"
 #include "IconImages.h"
 
 #include <string>
@@ -73,6 +72,10 @@ FilesetWidget::FilesetWidget(QWidget* parent) :
       pHeader->resizeSection(0, 125);
       pHeader->setSortIndicatorShown(true);
    }
+
+   mpFileBrowser = new FileBrowser(mpCriteriaTree);
+   mpFileBrowser->setBrowseCaption("Select File");
+   mpFileBrowser->hide();
 
    mpInclusionCombo = new QComboBox(mpCriteriaTree);
    mpInclusionCombo->setEditable(false);
@@ -164,6 +167,7 @@ void FilesetWidget::setActiveFileset(BatchFileset* pFileset)
             pItem->setText(1, strType);
 
             mpCriteriaTree->setCellWidgetType(pItem, 0, CustomTreeWidget::BROWSE_FILE_EDIT);
+            mpCriteriaTree->setFileBrowser(pItem, 0, mpFileBrowser);
             mpCriteriaTree->setCellWidgetType(pItem, 1, CustomTreeWidget::COMBO_BOX);
             mpCriteriaTree->setComboBox(pItem, 1, mpInclusionCombo);
          }
@@ -223,6 +227,7 @@ void FilesetWidget::addSearchCriterion()
       pItem->setText(1, "include");
 
       mpCriteriaTree->setCellWidgetType(pItem, 0, CustomTreeWidget::BROWSE_FILE_EDIT);
+      mpCriteriaTree->setFileBrowser(pItem, 0, mpFileBrowser);
       mpCriteriaTree->setCellWidgetType(pItem, 1, CustomTreeWidget::COMBO_BOX);
       mpCriteriaTree->setComboBox(pItem, 1, mpInclusionCombo);
    }
@@ -270,6 +275,7 @@ void FilesetWidget::addFiles()
                      pItem->setText(1, "include");
 
                      mpCriteriaTree->setCellWidgetType(pItem, 0, CustomTreeWidget::BROWSE_FILE_EDIT);
+                     mpCriteriaTree->setFileBrowser(pItem, 0, mpFileBrowser);
                      mpCriteriaTree->setCellWidgetType(pItem, 1, CustomTreeWidget::COMBO_BOX);
                      mpCriteriaTree->setComboBox(pItem, 1, mpInclusionCombo);
                      bSuccess = true;

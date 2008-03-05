@@ -14,6 +14,7 @@
 #include "ConfigurationSettings.h"
 #include "CustomTreeWidget.h"
 #include "DesktopServices.h"
+#include "FileBrowser.h"
 #include "Filename.h"
 #include "LabeledSection.h"
 #include "MessageLogMgrImp.h"
@@ -107,7 +108,13 @@ OptionsFileLocations::OptionsFileLocations() :
          }
          else
          {
+            FileBrowser* pFileBrowser = new FileBrowser(mpFileTree);
+            pFileBrowser->setBrowseCaption("Select Template File");
+            pFileBrowser->setBrowseFileFilters("Template Files (*.spg);;All Files (*)");
+            pFileBrowser->hide();
+
             mpFileTree->setCellWidgetType(pItem, 1, CustomTreeWidget::BROWSE_FILE_EDIT);
+            mpFileTree->setFileBrowser(pItem, 1, pFileBrowser);
          }
       }
 

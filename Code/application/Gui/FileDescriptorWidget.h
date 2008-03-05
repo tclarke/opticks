@@ -14,6 +14,7 @@
 #include <QtGui/QTreeWidgetItem>
 #include <QtGui/QWidget>
 
+class FileBrowser;
 class FileDescriptor;
 class CustomTreeWidget;
 
@@ -55,6 +56,7 @@ private:
    bool mModified;
 
    CustomTreeWidget* mpTreeWidget;
+   FileBrowser* mpFileBrowser;
    QGroupBox* mpGcpGroup;
    CustomTreeWidget* mpGcpTree;
 };
