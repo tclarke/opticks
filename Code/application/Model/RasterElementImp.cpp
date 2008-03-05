@@ -19,7 +19,7 @@
 #include "FileResource.h"
 #include "Georeference.h"
 #include "Importer.h"
-#include "ModelServicesImp.h"
+#include "ModelServices.h"
 #include "ObjectResource.h"
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
@@ -210,15 +210,7 @@ double RasterElementImp::getPixelValue(DimensionDescriptor columnDim, DimensionD
    void* pData = da->getColumn();
    EncodingType dataType = pDescriptor->getDataType();
 
-   double dValue = 0.0;
-
-   ModelServicesImp* pModel = ModelServicesImp::instance();
-   if (pModel != NULL)
-   {
-      dValue = pModel->getDataValue(dataType, pData, component, 0);
-   }
-
-   return dValue;
+   return Service<ModelServices>()->getDataValue(dataType, pData, component, 0);
 }
 
 void RasterElementImp::updateData()

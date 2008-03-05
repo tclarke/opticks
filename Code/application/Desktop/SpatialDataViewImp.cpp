@@ -1914,7 +1914,7 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
                                        dRedValue *= pUnits->getScaleFromStandard();
                                     }
 
-                                    redValue = QString::number(dRedValue);
+                                    redValue = QString::number(dRedValue, 'g', numeric_limits<double>::digits10);
                                  }
 
                                  // Get the green band value
@@ -1936,7 +1936,7 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
                                        dGreenValue *= pUnits->getScaleFromStandard();
                                     }
 
-                                    greenValue = QString::number(dGreenValue);
+                                    greenValue = QString::number(dGreenValue, 'g', numeric_limits<double>::digits10);
                                  }
 
                                  // Get the blue band value
@@ -1958,7 +1958,7 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
                                        dBlueValue *= pUnits->getScaleFromStandard();
                                     }
 
-                                    blueValue = QString::number(dBlueValue);
+                                    blueValue = QString::number(dBlueValue, 'g', numeric_limits<double>::digits10);
                                  }
 
                                  if ((redBand.isValid()) || (greenBand.isValid()) || (blueBand.isValid()))

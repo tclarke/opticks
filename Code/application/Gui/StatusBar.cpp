@@ -13,6 +13,7 @@
 #include "Slot.h"
 #include "Units.h"
 
+#include <limits>
 #include <string>
 using namespace std;
 
@@ -202,7 +203,7 @@ void StatusBar::showGeoCoords(bool bShow)
 
 void StatusBar::setCubeValue(double gray)
 {
-   setCubeValue(QString::number(gray));
+   setCubeValue(QString::number(gray, 'g', numeric_limits<double>::digits10));
 }
 
 void StatusBar::setCubeValue(const QString& strGray)
@@ -212,7 +213,9 @@ void StatusBar::setCubeValue(const QString& strGray)
 
 void StatusBar::setCubeValue(double red, double green, double blue)
 {
-   setCubeValue(QString::number(red), QString::number(green), QString::number(blue));
+   setCubeValue(QString::number(red, 'g', numeric_limits<double>::digits10),
+      QString::number(green, 'g', numeric_limits<double>::digits10),
+      QString::number(blue, 'g', numeric_limits<double>::digits10));
 }
 
 void StatusBar::setCubeValue(const QString& strRed, const QString& strGreen, const QString& strBlue)

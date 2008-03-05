@@ -35,6 +35,7 @@
 #include "SessionManagerImp.h"
 #include "SpatialDataView.h"
 #include "Statistics.h"
+#include "switchOnEncoding.h"
 #include "Undo.h"
 #include "ViewImp.h"
 #include "XercesIncludes.h"
@@ -454,23 +455,128 @@ bool RasterLayerImp::isGpuImageEnabled() const
    return mUseGpuImage;
 }
 
+double RasterLayerImp::calculateThresholdForEncodingType(EncodingType type) const
+{
+
+   //calculate the width and height in screen pixels required to display the raw pixel values
+   //according to the given encoding type, assume that 3 raw pixel values will be
+   //shown, ie. RGB mode.
+   //this code assume's that for a given font that all digits are the same width.
+   QFont textFont = QApplication::font(); 
+   textFont.setPointSize(View::getSettingPixelValueMinimumFontSize());
+   textFont.setBold(false);
+   QFontMetrics metrics(textFont);
+
+   QSize fontSize = metrics.size(0, "N/A");
+   if (type == INT1SBYTE)
+   {
+      fontSize = metrics.size(0, QString::number(numeric_limits<signed char>::min()));
+   }
+   else if (type == INT1UBYTE)
+   {
+      fontSize = metrics.size(0, QString::number(numeric_limits<unsigned char>::max()));
+   }
+   else if (type == INT2SBYTES)
+   {
+      fontSize = metrics.size(0, QString::number(numeric_limits<short>::min()));
+   }
+   else if (type == INT2UBYTES)
+   {
+      fontSize = metrics.size(0, QString::number(numeric_limits<unsigned short>::max()));
+   }
+   else if (type == INT4SBYTES)
+   {
+      fontSize = metrics.size(0, QString::number(numeric_limits<int>::min()));
+   }
+   else if (type == INT4UBYTES)
+   {
+      fontSize = metrics.size(0, QString::number(numeric_limits<unsigned int>::max()));
+   }
+   else if  (type == FLT4BYTES ||
+      type == FLT8COMPLEX ||
+      type == FLT8BYTES ||
+      type == INT4SCOMPLEX /* treat integer complex as float because we want
+                           threshold to be the same regardless of the ComplexComponent */)
+   {
+      //for floating point data, test a negative value with a both a positive and negative
+      //scientific notation exponent to determine which is larger in the given font.
+      QSize double1 = metrics.size(0, QString::number(-1 * numeric_limits<double>::min()));
+      QSize double2 = metrics.size(0, QString::number(-1 * numeric_limits<double>::max()));
+      fontSize.setHeight(max(double1.height(), double2.height()));
+      fontSize.setWidth(max(double1.width(), double2.width()));
+   }
+
+   if (type == INT1SBYTE || type == INT4SCOMPLEX || type == INT1UBYTE ||
+       type == INT2SBYTES || type == INT2UBYTES)
+   {
+      //We want the threshold to be the same regardless of whether View::getSettingInsetShowCoordinates()
+      //returns true or false.
+      //For the above encoding types, the pixel coordinates which are 4-byte integers
+      //could be larger in size then the data values when rendered, so let's calculate
+      RasterElement* pElement = dynamic_cast<RasterElement*>(getDataElement());
+      if (pElement != NULL)
+      {
+         const RasterDataDescriptor* pDescriptor = 
+            dynamic_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor());
+         unsigned int largestDimension = max(pDescriptor->getRowCount(), pDescriptor->getColumnCount());
+         QString pixelCoordStr = QString::number(largestDimension);
+         QSize pixelCoordSize = metrics.size(0, pixelCoordStr);
+         fontSize.setWidth(max(fontSize.width(), pixelCoordSize.width()));
+         fontSize.setHeight(max(fontSize.height(), pixelCoordSize.height()));
+      }
+   }
+   //always require at least 32 screen pixels to draw any text, this
+   //is to minimize pixel value drawing becoming turned on when it could
+   //be very slow to perform the draw.
+   const int PIXEL_WIDTH_PADDING = 2;
+   const int ROWS_OF_DATA = 3;
+   double rawPixelRequiredWidth = max(fontSize.width() + PIXEL_WIDTH_PADDING, 32) / getXScaleFactor();
+   double rawPixelRequiredHeight = max(fontSize.height() * ROWS_OF_DATA, 32) / getYScaleFactor();
+
+   double requiredZoomPercentage = max(rawPixelRequiredHeight, rawPixelRequiredWidth) * 100.0 - 1.0;
+
+   return requiredZoomPercentage;
+}
+
 double RasterLayerImp::getNumberThreshold() const
 {
-   double dZoomThreshold = 6399.0;
+   double dZoomThreshold = 0.0;
 
-   DataElement* pElement = getDataElement();
-   if (pElement != NULL)
+   DisplayMode displayMode = getDisplayMode();
+   if (displayMode == GRAYSCALE_MODE)
    {
-      const RasterDataDescriptor* pDescriptor =
-         dynamic_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor());
-      if (pDescriptor != NULL)
+      const RasterDataDescriptor* pDescriptor = 
+         dynamic_cast<const RasterDataDescriptor*>(mpGrayRasterElement->getDataDescriptor());
+      dZoomThreshold = calculateThresholdForEncodingType(pDescriptor->getDataType());
+   }
+   else
+   {
+      EncodingType redEncoding = UNKNOWN;
+      if (mpRedRasterElement.get() != NULL)
       {
-         EncodingType eDataType = pDescriptor->getDataType();
-         if ((eDataType == INT1UBYTE) || (eDataType == INT1SBYTE))
-         {
-            dZoomThreshold = 3199.0;
-         }
+         const RasterDataDescriptor* pRedDescriptor = 
+            dynamic_cast<const RasterDataDescriptor*>(mpRedRasterElement->getDataDescriptor());
+         redEncoding = pRedDescriptor->getDataType();
       }
+      double redThreshold = calculateThresholdForEncodingType(redEncoding);
+      EncodingType greenEncoding = UNKNOWN;
+      if (mpGreenRasterElement.get() != NULL)
+      {
+         const RasterDataDescriptor* pGreenDescriptor = 
+            dynamic_cast<const RasterDataDescriptor*>(mpGreenRasterElement->getDataDescriptor());
+         greenEncoding = pGreenDescriptor->getDataType();
+      }
+      double greenThreshold = calculateThresholdForEncodingType(greenEncoding);
+
+      EncodingType blueEncoding = UNKNOWN;
+      if (mpBlueRasterElement.get() != NULL)
+      {
+         const RasterDataDescriptor* pBlueDescriptor = 
+            dynamic_cast<const RasterDataDescriptor*>(mpBlueRasterElement->getDataDescriptor());
+         blueEncoding = pBlueDescriptor->getDataType();
+      }
+      double blueThreshold = calculateThresholdForEncodingType(blueEncoding);
+      dZoomThreshold = max(max(redThreshold, greenThreshold), blueThreshold);
    }
 
    return dZoomThreshold;
@@ -479,12 +585,14 @@ double RasterLayerImp::getNumberThreshold() const
 bool RasterLayerImp::needToDrawPixelValues() const
 {
    DisplayMode displayMode = getDisplayMode();
-   if ((displayMode == GRAYSCALE_MODE) && (mGrayBand.isValid() == false))
+   if ((displayMode == GRAYSCALE_MODE) && (mGrayBand.isValid() == false || mpGrayRasterElement.get() == NULL))
    {
       return false;
    }
-   else if ((displayMode == RGB_MODE) && (mRedBand.isValid() == false) &&
-      (mGreenBand.isValid() == false) && (mBlueBand.isValid() == false))
+   else if ((displayMode == RGB_MODE) &&
+      (mRedBand.isValid() == false || mpRedRasterElement.get() == NULL) &&
+      (mGreenBand.isValid() == false || mpGreenRasterElement.get() == NULL) && 
+      (mBlueBand.isValid() == false || mpBlueRasterElement.get() == NULL))
    {
       return false;
    }
@@ -505,11 +613,21 @@ bool RasterLayerImp::needToDrawPixelValues() const
    return false;
 }
 
+namespace
+{
+   template<typename T>
+   void stringifyValue(T* pValue, ComplexComponent component, QString& strValue)
+   {
+      strValue = QString::number(ModelServices::getDataValue(*pValue, component));
+   }
+};
+
 void RasterLayerImp::drawPixelValues()
 {
    ViewImp *pView = dynamic_cast<ViewImp*>(getView());
    VERIFYNRV(pView != NULL);
    SpatialDataView *pSpatialView = dynamic_cast<SpatialDataView*>(pView);
+   VERIFYNRV(pSpatialView != NULL);
 
    bool bDrawCoords = View::getSettingInsetShowCoordinates();
 
@@ -548,11 +666,8 @@ void RasterLayerImp::drawPixelValues()
       pView->getVisibleCorners(lowerLeft, upperLeft, upperRight, lowerRight);
    }
 
-   if (pSpatialView != NULL)
-   {
-      dHeading = pSpatialView->getRotation();
-      dPitch = pSpatialView->getPitch();
-   }
+   dHeading = pSpatialView->getRotation();
+   dPitch = pSpatialView->getPitch();
 
    // Get the bounding box of the view
    translateWorldToData(lowerLeft.mX, lowerLeft.mY, lowerLeft.mX, lowerLeft.mY);
@@ -607,20 +722,17 @@ void RasterLayerImp::drawPixelValues()
    glMatrixMode(GL_MODELVIEW);
 
    QPoint shadowOffset(1, -1);
-   double radius = pView->getPixelSize(lowerLeft, lowerLeft+LocationType(1,1));
+   double radius = pSpatialView->getZoomPercentage() / 100.0;
 
-   if (pSpatialView != NULL)
-   {
-      double dZoom = pSpatialView->getZoomPercentage();
-      radius = dZoom/100;
-   }
-
-   radius *= min(getXScaleFactor(), getYScaleFactor());
-   int fontSize = radius / 4;
+   double minScaleFactor = min(getXScaleFactor(), getYScaleFactor());
+   radius *= minScaleFactor;
+   unsigned int fontSize = View::getSettingPixelValueMinimumFontSize();
+   fontSize *= pSpatialView->getZoomPercentage() / getNumberThreshold();
+   fontSize = min(fontSize, View::getSettingPixelValueMaximumFontSize());
 
    QFont textFont = QApplication::font();
+   textFont.setPointSize(fontSize);
    textFont.setBold(false);
-   textFont.setPixelSize(fontSize);
    QFontMetrics fm(textFont);
 
    GLfloat black[] = {0.0, 0.0, 0.0, 1.0};
@@ -668,7 +780,6 @@ void RasterLayerImp::drawPixelValues()
    }
    else
    {
-      Service<ModelServices> pModel;
       ComplexComponent complexComponent = getComplexComponent();
 
       DisplayMode displayMode = getDisplayMode();
@@ -710,8 +821,8 @@ void RasterLayerImp::drawPixelValues()
                      QPoint centerPoint(centerScreen.mX, centerScreen.mY - fm.ascent() / 2);
 
                      // Draw the text
-                     double dValue = pModel->getDataValue(dataType, accessor->getColumn(), complexComponent, 0);
-                     QString strGray(QString::number(dValue));
+                     QString strGray;
+                     switchOnEncoding(dataType, stringifyValue, accessor->getColumn(), complexComponent, strGray);
                      QPoint textOffset(-fm.width(strGray) / 2, 0);
 
                      glColor4fv(black);
@@ -818,8 +929,7 @@ void RasterLayerImp::drawPixelValues()
                QString strRed = "N/A";
                if ((redValid == true) && (redDataType != UNKNOWN))
                {
-                  double value = pModel->getDataValue(redDataType, redAccessor->getColumn(), complexComponent, 0);
-                  strRed = QString::number(value);
+                  switchOnEncoding(redDataType, stringifyValue, redAccessor->getColumn(), complexComponent, strRed);
                   redAccessor->nextColumn();
                }
 
@@ -827,8 +937,7 @@ void RasterLayerImp::drawPixelValues()
                QString strGreen = "N/A";
                if ((greenValid == true) && (greenDataType != UNKNOWN))
                {
-                  double value = pModel->getDataValue(greenDataType, greenAccessor->getColumn(), complexComponent, 0);
-                  strGreen = QString::number(value);
+                  switchOnEncoding(greenDataType, stringifyValue, greenAccessor->getColumn(), complexComponent, strGreen);
                   greenAccessor->nextColumn();
                }
 
@@ -836,8 +945,7 @@ void RasterLayerImp::drawPixelValues()
                QString strBlue = "N/A";
                if ((blueValid == true) && (blueDataType != UNKNOWN))
                {
-                  double value = pModel->getDataValue(blueDataType, blueAccessor->getColumn(), complexComponent, 0);
-                  strBlue = QString::number(value);
+                  switchOnEncoding(blueDataType, stringifyValue, blueAccessor->getColumn(), complexComponent, strBlue);
                   blueAccessor->nextColumn();
                }
 
