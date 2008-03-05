@@ -16,10 +16,12 @@
 #include "DynamicObjectAdapter.h"
 #include "Filename.h"
 #include "FilenameImp.h"
+#include "Int64.h"
 #include "ObjectResource.h"
 #include "SpatialDataView.h"
 #include "StringUtilities.h"
 #include "TypeConverter.h"
+#include "UInt64.h"
 #include "XercesIncludes.h"
 #include "Point.h"
 
@@ -671,6 +673,10 @@ void DataVariantFactoryImp::initializeMaps()
    registerType<DataVariantVectorValue<int> >();
    registerType<DataVariantValue<unsigned int> >();
    registerType<DataVariantVectorValue<unsigned int> >();
+   registerType<DataVariantValue<Int64> >();
+   registerType<DataVariantVectorValue<Int64> >();
+   registerType<DataVariantValue<UInt64> >();
+   registerType<DataVariantVectorValue<UInt64> >();
    registerType<DataVariantValue<int64_t> >();
    registerType<DataVariantVectorValue<int64_t> >();
    registerType<DataVariantValue<uint64_t> >();

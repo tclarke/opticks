@@ -691,6 +691,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Interfaces\Int64.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Interfaces\Interpreter.h"
 				>
 			</File>
@@ -1036,6 +1040,10 @@
 			</File>
 			<File
 				RelativePath=".\Interfaces\TypesFile.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Interfaces\UInt64.h"
 				>
 			</File>
 			<File
