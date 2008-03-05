@@ -16,6 +16,8 @@
  *    - double
  *    - void
  *    - string
+ *    - Int64 (this is a class that wraps 64-bit signed integers on all platforms)
+ *    - UInt64 (this is a class that wraps 64-bit unsigned integers on all platforms)
  *  - Enumerated types
  *    - AnimationCycle
  *    - AnimationState

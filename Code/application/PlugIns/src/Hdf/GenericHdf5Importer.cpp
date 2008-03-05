@@ -32,6 +32,7 @@
 #include "RasterUtilities.h"
 #include "TestDataPath.h"
 #include "TypesFile.h"
+#include "UInt64.h"
 
 #include <deque>
 #include <sstream>
@@ -78,8 +79,7 @@ namespace
                stringstream strm;
                strm << i;
 
-               unsigned long dim = static_cast<unsigned long>(dims[static_cast<size_t>(i)]);
-               pDimensions->setAttribute(strm.str(), dim);
+               pDimensions->setAttribute(strm.str(), UInt64(static_cast<uint64_t>(dims[static_cast<size_t>(i)])));
             }
          }
       }

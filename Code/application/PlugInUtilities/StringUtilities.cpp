@@ -14,12 +14,14 @@
 #include "DateTime.h"
 #include "Filename.h"
 #include "GeoPoint.h"
+#include "Int64.h"
 #include "Locator.h"
 #include "ObjectFactory.h"
 #include "ObjectResource.h"
 #include "Point.h"
 #include "SpatialDataView.h"
 #include "TypesFile.h"
+#include "UInt64.h"
 #include "xmlbase.h"
 
 #include <iomanip>
@@ -343,7 +345,7 @@ const char* StringUtilities::escapedToken(const string &textIn)
 //toString and fromString implementations
 
 template<>
-std::string StringUtilities::toDisplayString(const bool& val, bool* pError)
+string StringUtilities::toDisplayString(const bool& val, bool* pError)
 {
    if (pError != NULL)
    {
@@ -353,7 +355,7 @@ std::string StringUtilities::toDisplayString(const bool& val, bool* pError)
 }
 
 template<>
-std::string StringUtilities::toXmlString(const bool& val, bool* pError)
+string StringUtilities::toXmlString(const bool& val, bool* pError)
 {
    if (pError != NULL)
    {
@@ -363,7 +365,7 @@ std::string StringUtilities::toXmlString(const bool& val, bool* pError)
 }
 
 template<>
-bool StringUtilities::fromDisplayString<bool>(std::string value, bool* pError)
+bool StringUtilities::fromDisplayString<bool>(string value, bool* pError)
 {
    if (pError != NULL)
    {
@@ -393,7 +395,7 @@ bool StringUtilities::fromDisplayString<bool>(std::string value, bool* pError)
 }
 
 template<>
-bool StringUtilities::fromXmlString<bool>(std::string value, bool* pError)
+bool StringUtilities::fromXmlString<bool>(string value, bool* pError)
 {
    return StringUtilities::fromDisplayString<bool>(value, pError);
 }
@@ -815,7 +817,7 @@ ADD_ENUM_MAPPING(RT_PROTO, "", "prototype")
 END_ENUM_MAPPING()
 
 template<>
-std::string StringUtilities::toDisplayString(const ReleaseType& val, bool* pError)
+string StringUtilities::toDisplayString(const ReleaseType& val, bool* pError)
 {
    if (pError != NULL)
    {
@@ -962,7 +964,7 @@ ColorType StringUtilities::fromXmlString<ColorType>(string value, bool* pError)
 }
 
 template<>
-std::string StringUtilities::toDisplayString(const ColorType& val, bool* pError)
+string StringUtilities::toDisplayString(const ColorType& val, bool* pError)
 {
    if (pError != NULL)
    {
@@ -985,13 +987,13 @@ std::string StringUtilities::toDisplayString(const ColorType& val, bool* pError)
 }
 
 template<>
-std::string StringUtilities::toXmlString(const ColorType& val, bool* pError)
+string StringUtilities::toXmlString(const ColorType& val, bool* pError)
 {
    return toDisplayString(val, pError);
 }
 
 template<>
-std::string StringUtilities::toDisplayString(const LocationType& val, bool* pError)
+string StringUtilities::toDisplayString(const LocationType& val, bool* pError)
 {
    if (pError != NULL)
    {
@@ -1003,7 +1005,7 @@ std::string StringUtilities::toDisplayString(const LocationType& val, bool* pErr
 }
 
 template<>
-std::string StringUtilities::toXmlString(const LocationType& val, bool* pError)
+string StringUtilities::toXmlString(const LocationType& val, bool* pError)
 {
    if (pError != NULL)
    {
@@ -1069,7 +1071,7 @@ LocationType StringUtilities::fromXmlString<LocationType>(string value, bool* pE
 }
 
 template<>
-std::string StringUtilities::toDisplayString(const string& val, bool* pError)
+string StringUtilities::toDisplayString(const string& val, bool* pError)
 {
    if (pError != NULL)
    {
@@ -1079,19 +1081,19 @@ std::string StringUtilities::toDisplayString(const string& val, bool* pError)
 }
 
 template<>
-std::string StringUtilities::toDisplayString(const vector<string>& vec, bool* pError)
+string StringUtilities::toDisplayString(const vector<string>& vec, bool* pError)
 {
    return convertVectorToString(vec, pError, ", ", true);
 }
 
 template<>
-std::string StringUtilities::toXmlString(const string& val, bool* pError)
+string StringUtilities::toXmlString(const string& val, bool* pError)
 {
    return toDisplayString(val, pError);
 }
 
 template<>
-std::string StringUtilities::toXmlString(const vector<string>& vec, bool* pError)
+string StringUtilities::toXmlString(const vector<string>& vec, bool* pError)
 {
    return convertVectorToString(vec, pError, ", ", false);
 }
@@ -1125,7 +1127,7 @@ vector<string> StringUtilities::fromXmlString<vector<string> >(string value, boo
 }
 
 template<>
-std::string StringUtilities::toDisplayString<const Filename*>(const Filename* const & val, bool* pError)
+string StringUtilities::toDisplayString<const Filename*>(const Filename* const & val, bool* pError)
 {
    if (pError != NULL)
    {
@@ -1143,7 +1145,7 @@ std::string StringUtilities::toDisplayString<const Filename*>(const Filename* co
 }
 
 template<>
-std::string StringUtilities::toDisplayString(const vector<Filename*> & vec, bool* pError)
+string StringUtilities::toDisplayString(const vector<Filename*> & vec, bool* pError)
 {
    return convertVectorToString(vec, pError, ", ", true);
 }
@@ -1151,7 +1153,7 @@ std::string StringUtilities::toDisplayString(const vector<Filename*> & vec, bool
 TO_DISPLAY_POINTER_VARIATIONS(Filename)
 
 template<>
-std::string StringUtilities::toXmlString<const Filename*>(const Filename* const & val, bool* pError)
+string StringUtilities::toXmlString<const Filename*>(const Filename* const & val, bool* pError)
 {
    if (pError != NULL)
    {
@@ -1169,7 +1171,7 @@ std::string StringUtilities::toXmlString<const Filename*>(const Filename* const 
 }
 
 template<>
-std::string StringUtilities::toXmlString(const vector<Filename*>& vec, bool* pError)
+string StringUtilities::toXmlString(const vector<Filename*>& vec, bool* pError)
 {
    return convertVectorToString(vec, pError, ", ", false);
 }
@@ -1213,7 +1215,7 @@ vector<Filename*> StringUtilities::fromXmlString<vector<Filename*> >(string valu
 }
 
 template<>
-std::string StringUtilities::toDisplayString<const DateTime*>(const DateTime* const & val, bool* pError)
+string StringUtilities::toDisplayString<const DateTime*>(const DateTime* const & val, bool* pError)
 {
    if (pError != NULL)
    {
@@ -1257,7 +1259,7 @@ std::string StringUtilities::toDisplayString<const DateTime*>(const DateTime* co
 TO_DISPLAY_POINTER_VARIATIONS(DateTime)
 
 template<>
-std::string StringUtilities::toXmlString<const DateTime*>(const DateTime* const & val, bool* pError)
+string StringUtilities::toXmlString<const DateTime*>(const DateTime* const & val, bool* pError)
 {
    if (pError != NULL)
    {
@@ -1379,3 +1381,149 @@ DateTime* StringUtilities::fromXmlString<DateTime*>(string value, bool* pError)
       return NULL;
    }
 }
+
+template<>
+string StringUtilities::toDisplayString(const Int64& val, bool* pError)
+{
+   return StringUtilities::toDisplayString<int64_t>(val.get(), pError);
+}
+
+template<>
+string StringUtilities::toXmlString(const Int64& val, bool* pError)
+{
+   return StringUtilities::toXmlString<int64_t>(val.get(), pError);
+}
+
+template<>
+Int64 StringUtilities::fromDisplayString<Int64>(string value, bool* pError)
+{
+   return Int64(StringUtilities::fromDisplayString<int64_t>(value, pError));
+}
+
+template<>
+Int64 StringUtilities::fromXmlString<Int64>(string value, bool* pError)
+{
+   return Int64(StringUtilities::fromXmlString<int64_t>(value, pError));
+}
+
+namespace Int64Functors
+{
+   class CreateInt64Object
+   {
+   public:
+      Int64 operator() (const int64_t& value)
+      {
+         return Int64(value);
+      }
+   };
+}
+
+namespace UInt64Functors
+{
+   class CreateUInt64Object
+   {
+   public:
+      UInt64 operator() (const uint64_t& value)
+      {
+         return UInt64(value);
+      }
+   };
+
+};
+
+template<>
+string StringUtilities::toDisplayString(const vector<Int64>& val, bool* pError)
+{
+   vector<int64_t> tempValues(val.size());
+   copy(val.begin(), val.end(), tempValues.begin());
+   return StringUtilities::toDisplayString<vector<int64_t> >(tempValues, pError);
+}
+
+template<>
+string StringUtilities::toXmlString(const vector<Int64>& val, bool* pError)
+{
+   vector<int64_t> tempValues(val.size());
+   copy(val.begin(), val.end(), tempValues.begin());
+   return StringUtilities::toXmlString<vector<int64_t> >(tempValues, pError);
+}
+
+template<>
+vector<Int64> StringUtilities::fromDisplayString<vector<Int64> >(string value, bool* pError)
+{
+   vector<int64_t> tempValues = StringUtilities::fromDisplayString<vector<int64_t> >(value, pError);
+   vector<Int64> retValues;
+   retValues.reserve(tempValues.size());
+   transform(tempValues.begin(), tempValues.end(), back_inserter(retValues), Int64Functors::CreateInt64Object());
+   return retValues;
+}
+
+template<>
+vector<Int64> StringUtilities::fromXmlString<vector<Int64> >(string value, bool* pError)
+{
+   vector<int64_t> tempValues = StringUtilities::fromXmlString<vector<int64_t> >(value, pError);
+   vector<Int64> retValues;
+   retValues.reserve(tempValues.size());
+   transform(tempValues.begin(), tempValues.end(), back_inserter(retValues), Int64Functors::CreateInt64Object());
+   return retValues;
+}
+
+template<>
+string StringUtilities::toDisplayString(const UInt64& val, bool* pError)
+{
+   return StringUtilities::toDisplayString<uint64_t>(val.get(), pError);
+}
+
+template<>
+string StringUtilities::toXmlString(const UInt64& val, bool* pError)
+{
+   return StringUtilities::toXmlString<uint64_t>(val.get(), pError);
+}
+
+template<>
+UInt64 StringUtilities::fromDisplayString<UInt64>(string value, bool* pError)
+{
+   return UInt64(StringUtilities::fromDisplayString<uint64_t>(value, pError));
+}
+
+template<>
+UInt64 StringUtilities::fromXmlString<UInt64>(string value, bool* pError)
+{
+   return UInt64(StringUtilities::fromXmlString<uint64_t>(value, pError));
+}
+
+template<>
+string StringUtilities::toDisplayString(const vector<UInt64>& val, bool* pError)
+{
+   vector<uint64_t> tempValues(val.size());
+   copy(val.begin(), val.end(), tempValues.begin());
+   return StringUtilities::toDisplayString<vector<uint64_t> >(tempValues, pError);
+}
+
+template<>
+string StringUtilities::toXmlString(const vector<UInt64>& val, bool* pError)
+{
+   vector<uint64_t> tempValues(val.size());
+   copy(val.begin(), val.end(), tempValues.begin());
+   return StringUtilities::toXmlString<vector<uint64_t> >(tempValues, pError);
+}
+
+template<>
+vector<UInt64> StringUtilities::fromDisplayString<vector<UInt64> >(string value, bool* pError)
+{
+   vector<uint64_t> tempValues = StringUtilities::fromDisplayString<vector<uint64_t> >(value, pError);
+   vector<UInt64> retValues;
+   retValues.reserve(tempValues.size());
+   transform(tempValues.begin(), tempValues.end(), back_inserter(retValues), UInt64Functors::CreateUInt64Object());
+   return retValues;
+}
+
+template<>
+vector<UInt64> StringUtilities::fromXmlString<vector<UInt64> >(string value, bool* pError)
+{
+   vector<uint64_t> tempValues = StringUtilities::fromXmlString<vector<uint64_t> >(value, pError);
+   vector<UInt64> retValues;
+   retValues.reserve(tempValues.size());
+   transform(tempValues.begin(), tempValues.end(), back_inserter(retValues), UInt64Functors::CreateUInt64Object());
+   return retValues;
+}
+
