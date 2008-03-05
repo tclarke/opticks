@@ -5201,14 +5201,24 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
          if (pEvent->mouseButtons() == contextMenuButton)
          {
             QMenu contextMenu(this);
-            QAction* pRunWizardAction = contextMenu.addAction("Run Wizard");
+            QAction* pRunWizardAction = contextMenu.addAction("Run Wizard in current Session");
+            QAction* pRunWizardActionNewSession = contextMenu.addAction("Run Wizard in new Session");
             contextMenu.addSeparator();
-            contextMenu.addAction("Cancel");
+            QAction *pCancel = contextMenu.addAction("Cancel");
             contextMenu.setDefaultAction(pRunWizardAction);
 
-            if (contextMenu.exec(mapToGlobal(pEvent->pos())) != pRunWizardAction)
+            QAction *pSelection = contextMenu.exec(mapToGlobal(pEvent->pos()));
+            if (pSelection == pCancel)
             {
                return;
+            }
+
+            if (pSelection == pRunWizardActionNewSession)
+            {
+               if (newSession() == false)
+               {
+                  return;
+               }
             }
          }
 
