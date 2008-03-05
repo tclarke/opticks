@@ -258,18 +258,7 @@ protected slots:
 protected:
    GraphicElement *getElement() const;
 
-   /**
-    * Get a RasterElement to use for georeferencing.
-    *
-    * @param onlyIfGeocentric
-    *        Only return non-NULL if the GraphicElement is
-    *        geocentric.
-    *
-    * @return A RasterElement which has been georeferenced, or
-    *         NULL if one is not available, or the GraphicElement
-    *         is not geocentric and onlyIfGeocentric is true.
-    */
-   const RasterElement *getGeoreferenceElement(bool onlyIfGeocentric = true) const;
+   const RasterElement *getGeoreferenceElement() const;
 
 protected:
    std::vector<GraphicProperty*> mProperties;

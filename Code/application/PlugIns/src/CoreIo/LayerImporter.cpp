@@ -84,7 +84,7 @@ vector<ImportDescriptor*> LayerImporter::getImportDescriptors(const string& file
 vector<ImportDescriptor*> LayerImporter::getImportDescriptors(const string& filename, bool reportErrors)
 {
    vector<ImportDescriptor*> descriptors;
-   if(!filename.empty())
+   if (!filename.empty())
    {
       MessageLog* pLog = NULL;
       if (reportErrors == true)
@@ -96,17 +96,17 @@ vector<ImportDescriptor*> LayerImporter::getImportDescriptors(const string& file
       XmlReader xml(pLog);
       XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *pDoc = xml.parse(filename, "metadata");
       DOMElement *pRootElement = NULL;
-      if(pDoc != NULL)
+      if (pDoc != NULL)
       {
          pRootElement = pDoc->getDocumentElement();
       }
-      if(pRootElement != NULL)
+      if (pRootElement != NULL)
       {
          for(DOMNode* pChild = pRootElement->getFirstChild();
             pChild != NULL;
             pChild = pChild->getNextSibling())
          {
-            if(pChild->getNodeType() == DOMNode::ELEMENT_NODE)
+            if (pChild->getNodeType() == DOMNode::ELEMENT_NODE)
             {
                DOMElement *pChildElement = static_cast<DOMElement*>(pChild);
                string cNodeName = A(pChildElement->getNodeName());
@@ -138,6 +138,7 @@ unsigned char LayerImporter::getFileAffinity(const std::string& filename)
 
 bool LayerImporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
 {
+   Layer *pLayer = NULL;
    Progress *pProgress = NULL;
    DataElement *pElement = NULL;
    SpatialDataView* pView = NULL;
@@ -151,9 +152,9 @@ bool LayerImporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
       pMsg->addBooleanProperty("Progress Present", (pProgress != NULL));
 
       pElement = pInArgList->getPlugInArgValue<DataElement>(ImportElementArg());
-      if(pElement == NULL)
+      if (pElement == NULL)
       {
-         if(pProgress != NULL)
+         if (pProgress != NULL)
          {
             pProgress->updateProgress("No data element", 100, ERRORS);
          }
@@ -168,7 +169,7 @@ bool LayerImporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
       }
    }
 
-   if(pProgress != NULL)
+   if (pProgress != NULL)
    {
       pProgress->updateProgress((string("Read and parse file ") + pElement->getFilename()),
          20, NORMAL);
@@ -178,133 +179,134 @@ bool LayerImporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
    XmlReader xml(Service<MessageLogMgr>()->getLog());
 
    XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *pDomDocument = xml.parse(pElement->getFilename());
-   if(pDomDocument == NULL)
+   if (pDomDocument == NULL)
    {
-      if(pProgress != NULL)
+      if (pProgress != NULL)
       {
          pProgress->updateProgress("Unable to parse the file", 100, ERRORS);
       }
       pStep->finalize(Message::Failure, "Unable to parse the file");
       return false;
    }
-   
-   DOMElement *pRootElement = pDomDocument->getDocumentElement();
-   VERIFY(pRootElement != NULL);
-
-   if(pProgress != NULL)
-   {
-      pProgress->updateProgress("Create the layer", 40, NORMAL);
-   }
-
-   string name(A(pRootElement->getAttribute(X("name"))));
-   string type(A(pRootElement->getAttribute(X("type"))));
-   unsigned int formatVersion = atoi(A(pRootElement->getAttribute(X("version"))));
-
-   { // scope the MessageResource
-      MessageResource pMsg("Layer information", "app", "AA358F7A-107E-456E-8D11-36DDBE5B1645");
-      pMsg->addProperty("name", name);
-      pMsg->addProperty("type", type);
-      pMsg->addProperty("format version", formatVersion);
-   }
-
-   if (pView == NULL)
-   {
-      //no view provided, so find current view
-      SpatialDataWindow *pWindow = dynamic_cast<SpatialDataWindow*>(mpDesktop->getCurrentWorkspaceWindow());
-      if(pWindow != NULL)
-      {
-         pView = pWindow->getSpatialDataView();
-      }
-   }
-
-   if (pView == NULL)
-   {
-      if (pProgress != NULL)
-      {
-         pProgress->updateProgress("Could not access the view to create the layer.", 100, ERRORS);
-      }
-
-      pStep->finalize(Message::Failure, "Could not access the view to create the layer.");
-      return false;
-   }
-
-   bool error = false;
-   LayerType layerType = StringUtilities::fromXmlString<LayerType>(type, &error);
-   if (error == true)
-   {
-      if (pProgress != NULL)
-      {
-         pProgress->updateProgress("The layer type is invalid.", 100, ERRORS);
-      }
-
-      pStep->finalize(Message::Failure, "The layer type is invalid.");
-      return false;
-   }
-
-   LayerList* pLayerList = pView->getLayerList();
-   if (pLayerList != NULL)
-   {
-      RasterElement* pNewParentElement = pLayerList->getPrimaryRasterElement();
-      if (pNewParentElement != NULL)
-      {
-         Service<ModelServices> pModel;
-         pModel->setElementParent(pElement, pNewParentElement);
-      }
-   }
-
-   UndoGroup group(pView, "Import " + StringUtilities::toDisplayString(layerType) + " Layer");
-
-   Layer* pLayer = pView->createLayer(layerType, pElement);
-   if(pLayer == NULL)
-   {
-      if(pProgress != NULL)
-      {
-         pProgress->updateProgress("Unable to create the layer", 100, ERRORS);
-      }
-      pStep->finalize(Message::Failure, "Unable to create the layer");
-      return false;
-   }
-
-   if(pProgress != NULL)
-   {
-      pProgress->updateProgress("Build the layer", 60, NORMAL);
-   }
-   // deserialize the layer
-   bool success = true;
-   try
-   {
-      success = pLayer->fromXml(pRootElement, formatVersion);
-   }
-   catch(XmlReader::DomParseException &)
-   {
-      success = false;
-   }
-
-   if(!success)
-   {
-      // if failed deserialization, destroy the element since it's in an inconsistent state
-      pView->deleteLayer(pLayer);
-      pStep->finalize(Message::Failure, "Unable to parse the layer.");
-      if(pProgress != NULL)
-      {
-         pProgress->updateProgress("Error loading the layer", 100, ERRORS);
-      }
-   }
    else
    {
-      // Add the layer to the layer list
-      pView->addLayer(pLayer);
-      if(pOutArgList != NULL)
+      DOMElement *pRootElement = pDomDocument->getDocumentElement();
+      VERIFY(pRootElement != NULL);
+
+      if (pProgress != NULL)
       {
-         // set the output arguments
-         success = pOutArgList->setPlugInArgValue("Layer", pLayer);
+         pProgress->updateProgress("Create the layer", 40, NORMAL);
       }
-      pStep->finalize(Message::Success);
-      if(pProgress != NULL)
+
+      string name(A(pRootElement->getAttribute(X("name"))));
+      string type(A(pRootElement->getAttribute(X("type"))));
+      unsigned int formatVersion = atoi(A(pRootElement->getAttribute(X("version"))));
+
+      { // scope the MessageResource
+         MessageResource pMsg("Layer information", "app", "AA358F7A-107E-456E-8D11-36DDBE5B1645");
+         pMsg->addProperty("name", name);
+         pMsg->addProperty("type", type);
+         pMsg->addProperty("format version", formatVersion);
+      }
+
+      if (pView == NULL)
       {
-         pProgress->updateProgress("Finished loading the layer", 100, NORMAL);
+         //no view provided, so find current view
+         SpatialDataWindow *pWindow = dynamic_cast<SpatialDataWindow*>(mpDesktop->getCurrentWorkspaceWindow());
+         if (pWindow != NULL)
+         {
+            pView = pWindow->getSpatialDataView();
+         }
+      }
+
+      if (pView == NULL)
+      {
+         if (pProgress != NULL)
+         {
+            pProgress->updateProgress("Could not access the view to create the layer.", 100, ERRORS);
+         }
+
+         pStep->finalize(Message::Failure, "Could not access the view to create the layer.");
+         return false;
+      }
+      else
+      {
+         bool error = false;
+         LayerType layerType = StringUtilities::fromXmlString<LayerType>(type, &error);
+         if (error == true)
+         {
+            if (pProgress != NULL)
+            {
+               pProgress->updateProgress("The layer type is invalid.", 100, ERRORS);
+            }
+
+            pStep->finalize(Message::Failure, "The layer type is invalid.");
+            return false;
+         }
+         else
+         {
+            LayerList* pLayerList = pView->getLayerList();
+            if (pLayerList != NULL)
+            {
+               RasterElement* pNewParentElement = pLayerList->getPrimaryRasterElement();
+               if (pNewParentElement != NULL)
+               {
+                  Service<ModelServices> pModel;
+                  if (pModel->setElementParent(pElement, pNewParentElement) == false)
+                  {
+                     return false;
+                  }
+               }
+            }
+
+            UndoGroup group(pView, "Import " + StringUtilities::toDisplayString(layerType) + " Layer");
+
+            pLayer = pView->createLayer(layerType, pElement);
+            if (pLayer == NULL)
+            {
+               if (pProgress != NULL)
+               {
+                  pProgress->updateProgress("Unable to create the layer", 100, ERRORS);
+               }
+               pStep->finalize(Message::Failure, "Unable to create the layer");
+               return false;
+            }
+            else
+            {
+               if (pProgress != NULL)
+               {
+                  pProgress->updateProgress("Build the layer", 60, NORMAL);
+               }
+               // deserialize the layer
+               try
+               {
+                  if (pLayer->fromXml(pRootElement, formatVersion) == false)
+                  {
+                     return false;
+                  }
+               }
+               catch(XmlReader::DomParseException &)
+               {
+                  return false;
+               }
+            }
+         }
       }
    }
 
-   return success;
+   pStep->finalize(Message::Success);
+   if (pProgress != NULL)
+   {
+      pProgress->updateProgress("Finished loading the layer", 100, NORMAL);
+   }
+
+   // Add the layer to the layer list
+   pView->addLayer(pLayer);
+   if (pOutArgList != NULL)
+   {
+      // set the output arguments
+      pOutArgList->setPlugInArgValue("Layer", pLayer);
+   }
+
+   return true;
 }

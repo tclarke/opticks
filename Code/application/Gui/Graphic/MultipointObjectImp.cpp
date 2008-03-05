@@ -261,7 +261,6 @@ bool MultipointObjectImp::addGeoVertices(const std::vector<LocationType> &geoVer
    return addVertices(vertices, geoVertices);
 }
 
-
 bool MultipointObjectImp::addVertices(const std::vector<LocationType> &vertices, const std::vector<LocationType> &geoVertices)
 {
    if ((vertices == mVertices) && (geoVertices == mGeoVertices))
@@ -422,10 +421,7 @@ void MultipointObjectImp::scaleAndTranslateAllPoints(LocationType fixedPoint, Lo
    const RasterElement *pGeo = getGeoreferenceElement();
    if (pGeo != NULL)
    {
-      if (VERIFYNR(mGeoVertices.size() == mVertices.size()))
-      {
-         mGeoVertices = pGeo->convertPixelsToGeocoords(mVertices);
-      }
+      mGeoVertices = pGeo->convertPixelsToGeocoords(mVertices);
    }
 
    updateHandles();
@@ -517,8 +513,7 @@ bool MultipointObjectImp::toXml(XMLWriter* pXml) const
          }
       }
 
-      if ((mGeoVertices.empty() || Service<SessionManager>()->isSessionSaving()) 
-          && !mVertices.empty())
+      if (mVertices.empty() == false)
       {
          DOMElement* pAllVertElement = pXml->addElement("vertices");
          if (pAllVertElement != NULL)
@@ -560,75 +555,60 @@ bool MultipointObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
       return false;
    }
 
-   bool bSuccess = GraphicObjectImp::fromXml(pDocument, version);
-   if (bSuccess == true)
+   if (GraphicObjectImp::fromXml(pDocument, version) == false)
    {
-      DOMNode* pObjectNode = pDocument->getFirstChild();
-      while (pObjectNode != NULL)
-      {
-         if (XMLString::equals(pObjectNode->getNodeName(), X("vertices")))
-         {
-            std::vector<LocationType> vertices;
-            for (DOMNode *vertex = pObjectNode->getFirstChild();
-               vertex != NULL;
-               vertex = vertex->getNextSibling())
-            {
-               string name(A(vertex->getNodeName()));
-               if (XMLString::equals(vertex->getNodeName(), X("pixel")))
-               {
-                  DOMNode *pValue = vertex->getFirstChild();
-                  string value(A(pValue->getNodeValue()));
-                  LocationType pixel;
-                  if (XmlReader::StrToLocation(pValue->getNodeValue(), pixel) == true)
-                  {
-                     vertices.push_back(pixel);
-                  }
-               }
-            }
-
-            if (Service<SessionManager>()->isSessionLoading())
-            {
-               mVertices = vertices;
-            }
-            else
-            {
-               addVertices(vertices);
-            }
-         }
-         else if (XMLString::equals(pObjectNode->getNodeName(), X("geoVertices")))
-         {
-            std::vector<LocationType> geoVertices;
-            for (DOMNode *vertex = pObjectNode->getFirstChild();
-               vertex != NULL;
-               vertex = vertex->getNextSibling())
-            {
-               string name(A(vertex->getNodeName()));
-               if (XMLString::equals(vertex->getNodeName(), X("latlong")))
-               {
-                  DOMNode *pValue = vertex->getFirstChild();
-                  string value(A(pValue->getNodeValue()));
-                  LocationType latlong;
-                  if (XmlReader::StrToLocation(pValue->getNodeValue(), latlong) == true)
-                  {
-                     geoVertices.push_back(latlong);
-                  }
-               }
-            }
-            if (Service<SessionManager>()->isSessionLoading())
-            {
-               mGeoVertices = geoVertices;
-            }
-            else
-            {
-               bSuccess = addGeoVertices(geoVertices);
-            }
-         }
-
-         pObjectNode = pObjectNode->getNextSibling();
-      }
+      return false;
    }
 
-   return bSuccess;
+   vector<LocationType> vertices;
+   vector<LocationType> geoVertices;
+   DOMNode* pObjectNode = pDocument->getFirstChild();
+   while (pObjectNode != NULL)
+   {
+      if (XMLString::equals(pObjectNode->getNodeName(), X("vertices")))
+      {
+         getVertices(pObjectNode->getFirstChild(), "pixel", vertices);
+      }
+      else if (XMLString::equals(pObjectNode->getNodeName(), X("geoVertices")))
+      {
+         getVertices(pObjectNode->getFirstChild(), "latlong", geoVertices);
+      }
+
+      pObjectNode = pObjectNode->getNextSibling();
+   }
+
+   // Use geoVertices if they are available and this object is georeferenced, otherwise use vertices.
+   if (getGeoreferenceElement() != NULL && geoVertices.empty() == false)
+   {
+      return addGeoVertices(geoVertices);
+   }
+   else if (vertices.empty() == false)
+   {
+      return addVertices(vertices);
+   }
+
+   return false;
+}
+
+void MultipointObjectImp::getVertices(const DOMNode* pVertex, const string& nodeName, vector<LocationType>& vertices)
+{
+   while (pVertex != NULL)
+   {
+      if (XMLString::equals(pVertex->getNodeName(), X(nodeName.c_str())))
+      {
+         DOMNode *pValue = pVertex->getFirstChild();
+         if (VERIFYNR(pValue != NULL))
+         {
+            LocationType pixel;
+            if (XmlReader::StrToLocation(pValue->getNodeValue(), pixel) == true)
+            {
+               vertices.push_back(pixel);
+            }
+         }
+      }
+
+      pVertex = pVertex->getNextSibling();
+   }
 }
 
 const string& MultipointObjectImp::getObjectType() const
@@ -734,6 +714,10 @@ void MultipointObjectImp::removeVertex(unsigned int index)
    }
 
    mVertices.erase(mVertices.begin() + index);
+   if (index < mGeoVertices.size())
+   {
+      mGeoVertices.erase(mGeoVertices.begin() + index);
+   }
 
    updateBoundingBox();
    updateHandles();

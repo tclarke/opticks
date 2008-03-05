@@ -10,10 +10,11 @@
 #ifndef MULTIPOINTOBJECTIMP_H
 #define MULTIPOINTOBJECTIMP_H
 
-#include <vector>
-
+#include "LocationType.h"
 #include "PixelObjectImp.h"
 #include "TypesFile.h"
+
+#include <vector>
 
 class MultipointObjectImp : public PixelObjectImp
 {
@@ -70,6 +71,7 @@ protected:
       LocationType endPoint, bool bMaintainAspect, LocationType translateFactor = LocationType());
 
 private:
+   void getVertices(const DOMNode* pVertex, const std::string& nodeName, std::vector<LocationType>& vertices);
    std::vector<LocationType> mVertices;
    std::vector<LocationType> mGeoVertices;
    

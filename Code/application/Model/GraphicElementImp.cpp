@@ -180,7 +180,7 @@ bool GraphicElementImp::setGeocentric(bool geocentric)
    {
       if (mpGeocentricSource.get() == NULL)
       {
-         const RasterElement *pGeocentricSource = getGeoreferenceElement(false);
+         const RasterElement *pGeocentricSource = getGeoreferenceElement();
          if (pGeocentricSource == NULL)
          {
             return false;
@@ -204,21 +204,15 @@ bool GraphicElementImp::getGeocentric() const
    return false;
 }
 
-const RasterElement *GraphicElementImp::getGeoreferenceElement(bool onlyIfGeocentric) const
+const RasterElement *GraphicElementImp::getGeoreferenceElement() const
 {
-   bool geocentric = getGeocentric();
-   if (!onlyIfGeocentric || getGeocentric())
+   RasterElement *pGeoreferenceElement = dynamic_cast<RasterElement*>(getParent());
+   if (pGeoreferenceElement == NULL || !pGeoreferenceElement->isGeoreferenced())
    {
-      RasterElement *pGeoreferenceElement = dynamic_cast<RasterElement*>(getParent());
-      if (pGeoreferenceElement == NULL || !pGeoreferenceElement->isGeoreferenced())
-      {
-         return NULL;
-      }
-
-      return pGeoreferenceElement;
+      return NULL;
    }
 
-   return NULL;
+   return pGeoreferenceElement;
 }
 
 void GraphicElementImp::georeferenceModified(Subject &subject, const std::string &signal, const boost::any &data)

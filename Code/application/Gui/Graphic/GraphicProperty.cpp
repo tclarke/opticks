@@ -243,10 +243,11 @@ BoundingBoxProperty::BoundingBoxProperty(LocationType llCorner, LocationType urC
       mHasGeoCoords = false;
    }
    mHasPixelCoords = !mHasGeoCoords;
+   mGeoCoordsMatchPixelCoords = false;
 }
 
 BoundingBoxProperty::BoundingBoxProperty(LocationType llCorner, LocationType urCorner, LocationType llLatLong,
-   LocationType urLatLong) : GraphicProperty("BoundingBox")
+   LocationType urLatLong, bool geoCoordsMatchPixelCoords) : GraphicProperty("BoundingBox")
 {
    mLlCorner = llCorner;
    mUrCorner = urCorner;
@@ -254,6 +255,7 @@ BoundingBoxProperty::BoundingBoxProperty(LocationType llCorner, LocationType urC
    mUrLatLong = urLatLong;
    mHasGeoCoords = true;
    mHasPixelCoords = true;
+   mGeoCoordsMatchPixelCoords = geoCoordsMatchPixelCoords;
 }
 
 bool BoundingBoxProperty::hasGeoCoords() const
@@ -264,6 +266,11 @@ bool BoundingBoxProperty::hasGeoCoords() const
 bool BoundingBoxProperty::hasPixelCoords() const
 {
    return mHasPixelCoords;
+}
+
+bool BoundingBoxProperty::geoCoordsMatchPixelCoords() const
+{
+   return mGeoCoordsMatchPixelCoords;
 }
 
 LocationType BoundingBoxProperty::getLlCorner() const
@@ -308,7 +315,7 @@ bool BoundingBoxProperty::compare(const GraphicProperty* pProp) const
 
 GraphicProperty* BoundingBoxProperty::copy() const
 {
-   return new BoundingBoxProperty(mLlCorner, mUrCorner, mLlLatLong, mUrLatLong);
+   return new BoundingBoxProperty(mLlCorner, mUrCorner, mLlLatLong, mUrLatLong, mGeoCoordsMatchPixelCoords);
 }
 
 bool BoundingBoxProperty::toXml(XMLWriter* xml) const
