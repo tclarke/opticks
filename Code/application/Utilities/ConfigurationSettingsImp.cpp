@@ -898,7 +898,7 @@ DynamicObject* ConfigurationSettingsImp::deserialize(const Filename* pFilename) 
 
 void ConfigurationSettingsImp::updateProductionStatus()
 {
-   if(mReleaseType != RT_NORMAL)
+   if(mReleaseType != RT_NORMAL && mReleaseType != RT_PROTO)
    {
       mProductionRelease = false;
       return;

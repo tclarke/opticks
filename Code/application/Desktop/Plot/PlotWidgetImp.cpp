@@ -1092,17 +1092,17 @@ void PlotWidgetImp::setLabelText(const QString& strClassification, const QString
    // Add the release info
    Service<ConfigurationSettings> pConfigSettings;
 
+   // Top text
+   if (strTopCenterText.isEmpty() == false)
+   {
+      strTopCenterText.append("\n");
+   }
+
+   strTopCenterText.append(QString::fromStdString(
+      StringUtilities::toDisplayString(pConfigSettings->getReleaseType())));
+
    if (pConfigSettings->isProductionRelease() == false)
    {
-      // Top text
-      if (strTopCenterText.isEmpty() == false)
-      {
-         strTopCenterText.append("\n");
-      }
-
-      strTopCenterText.append(QString::fromStdString(
-         StringUtilities::toDisplayString(pConfigSettings->getReleaseType())));
-
       // Bottom text
       bool bNewLine = !(strBottomCenterText.isEmpty());
       QString strProductionUse = "Not for Production Use";

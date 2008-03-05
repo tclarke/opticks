@@ -810,6 +810,8 @@ ENUM_MAPPING_FUNCTION(ReleaseType)
 ADD_ENUM_MAPPING(RT_NORMAL, "", "normal")
 ADD_ENUM_MAPPING(RT_DEMO, "", "demo")
 ADD_ENUM_MAPPING(RT_TRAINING, "", "training")
+ADD_ENUM_MAPPING(RT_TEST, "", "testing")
+ADD_ENUM_MAPPING(RT_PROTO, "", "prototype")
 END_ENUM_MAPPING()
 
 template<>
@@ -832,6 +834,8 @@ std::string StringUtilities::toDisplayString(const ReleaseType& val, bool* pErro
       }
    case RT_DEMO:     return "Demonstration Mode";
    case RT_TRAINING: return "Training Mode";
+   case RT_TEST: return "Testing Mode";
+   case RT_PROTO: return "Prototype Product";
    default: break;
    }
    if (pError != NULL)
@@ -859,6 +863,14 @@ ReleaseType StringUtilities::fromDisplayString<ReleaseType>(string value, bool* 
    else if(value == "Training Mode")
    {
       return RT_TRAINING;
+   }
+   else if(value == "Testing Mode")
+   {
+      return RT_TEST;
+   }
+   else if(value == "Prototype Product")
+   {
+      return RT_PROTO;
    }
    if (pError != NULL)
    {

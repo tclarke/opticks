@@ -627,10 +627,14 @@ void ProductViewImp::setClassificationText(const QString& strClassification)
    pConfigSettings = ConfigurationSettingsImp::instance();
    if (pConfigSettings != NULL)
    {
+      if (strTopText.isEmpty() == false)
+      {
+         strTopText.append("\n");
+      }
+      strTopText.append(QString::fromStdString(
+         StringUtilities::toDisplayString(pConfigSettings->getReleaseType())));
       if (pConfigSettings->isProductionRelease() == false)
       {
-         strTopText.append("\n" + QString::fromStdString(
-            StringUtilities::toDisplayString(pConfigSettings->getReleaseType())));
          strBottomText.prepend("Not for Production Use\n");
       }
    }

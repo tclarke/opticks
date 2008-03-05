@@ -637,9 +637,9 @@ typedef EnumWrapper<RegionUnitsEnum> RegionUnits;
 /**
  *  Application release configuration mode.
  *
- *  Used to specify the run mode: Normal, Demonstrattion, and Training.
+ *  Used to specify the run mode: Normal, Demonstration, Training, Testing, and Prototype Product.
  */
-enum ReleaseTypeEnum { RT_NORMAL, RT_DEMO, RT_TRAINING };
+enum ReleaseTypeEnum { RT_NORMAL, RT_DEMO, RT_TRAINING, RT_TEST, RT_PROTO };
 
 /**
  * @EnumWrapper ::ReleaseTypeEnum.
