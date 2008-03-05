@@ -36,7 +36,7 @@ class XMLWriter;
  *
  *  @see    ConfigurationSettings
  */
-class ConfigurationSettingsImp : public ConfigurationSettings, public SubjectImp
+class ConfigurationSettingsImp : public ConfigurationSettings, public SubjectImp, public ConfigurationSettingsExt1
 {
 public:
    SETTING(ReleaseType, General, ReleaseType, RT_NORMAL); 
@@ -55,6 +55,7 @@ public:
    static void destroy();
 
    std::string getHome() const;
+   std::string getUserDocs() const;
    std::string getCreator() const;
    std::string getProduct() const;
    std::string getVersion() const;
@@ -119,6 +120,13 @@ protected:
    static std::string locateApplicationHome();
 
    /**
+   *  Find the user's documents directory
+   *
+   *  @return The documents directory for the user
+   */
+   static std::string locateUserDocs();
+
+   /**
     *  Constructor which can NOT be called outside this class.
     *
     *  The default constructor is protected.  The allows the instance()
@@ -171,6 +179,7 @@ private:
    mutable bool mNeedToLoadMruFiles;
 
    std::string mHomePath;
+   std::string mUserDocs;
 
    std::string mInitializationErrorMsg;
    bool mIsInitialized;

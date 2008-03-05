@@ -507,6 +507,9 @@ class Filename;
  *  defined the configuration setting are queried for specific values using the
  *  plug-in name for the Setting group name.
  *
+ *  The configuration settings interface has been extended with addition of the new
+ *  extension interface ConfigurationSettingsExt1. 
+ *
  *  This subclass of Subject will notify upon the following conditions:
  *  - The following methods are called: setSetting(), setSessionSetting,
  *    deleteUserSetting, deleteSessionSetting.
@@ -526,6 +529,7 @@ public:
    SIGNAL_METHOD(ConfigurationSettings, AboutToSave);
 
    SETTING_PTR(ImportExportPath, FileLocations, Filename)
+   SETTING_PTR(SaveOpenSessionPath, FileLocations, Filename)
    SETTING_PTR(InternalPath, FileLocations, Filename)
    SETTING(PathBookmarks, FileLocations, std::vector<Filename*>, std::vector<Filename*>())
    SETTING_PTR(MessageLogPath, FileLocations, Filename)
@@ -781,6 +785,40 @@ protected:
     * need to destroy it.
     */
    virtual ~ConfigurationSettings() {}
+};
+
+/**
+*  Extends capability of the ConfigurationSettings interface.
+*
+*  This class provides additional capability for the ConfigurationSettings interface class.
+*  A pointer to this class can be obtained by performing a dynamic cast on a
+*  pointer to ConfigurationSettings or any of its subclasses.
+*
+*  @warning A pointer to this class can only be used to call methods contained
+*           in this extension class and cannot be used to call any methods in
+*           ConfigurationSettings or its subclasses.
+*/
+class ConfigurationSettingsExt1
+{
+public:
+   /**
+   *  Get path to user's documents folder.
+   *
+   *  The path to the current user's documents folder is returned. Under Windows this is usually
+   *  C:\Documents and Settings\username\My Documents\Opticks, and under Solaris it is 
+   *  usually /export/home/username/Opticks .
+   *
+   *  @return  string
+   *           The full path to the user's documents folder.
+   */
+   virtual std::string getUserDocs() const = 0;
+
+protected:
+   /**
+   * This will be cleaned up during application close.  Plug-ins do not
+   * need to destroy it.
+   */
+   virtual ~ConfigurationSettingsExt1() {}
 };
 
 #endif
