@@ -168,6 +168,8 @@ void LayerImp::setView(ViewImp* pView)
          connect(pSpatialDataView, SIGNAL(layerHidden(Layer*)), this, SLOT(updateDisplayedAction(Layer*)));
       }
    }
+
+   notify(SIGNAL_NAME(LayerImp, ViewModified), boost::any(mpView));
 }
 
 View* LayerImp::getView() const

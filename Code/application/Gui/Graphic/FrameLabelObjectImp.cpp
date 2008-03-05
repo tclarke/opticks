@@ -17,6 +17,7 @@
 #include "SessionManager.h"
 #include "Slot.h"
 #include "SpatialDataView.h"
+#include "StringUtilities.h"
 #include "TypesFile.h"
 #include "ViewImp.h"
 #include "XercesIncludes.h"
@@ -27,15 +28,15 @@
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Replace the getAutoMode()/setAutoMode() interface with the overloaded setAnimations() methods (dadkins)")
-
 FrameLabelObjectImp::FrameLabelObjectImp(const string& id,
    GraphicObjectType type, GraphicLayer* pLayer, LocationType pixelCoord) :
    TextObjectImp(id, type, pLayer, pixelCoord),
    mpView(SIGNAL_NAME(ViewImp, AnimationControllerChanged),
-      Slot(this, &FrameLabelObjectImp::animationControllerChanged)),
+      Slot(this, &FrameLabelObjectImp::updateAnimations)),
    mpLayerList(SIGNAL_NAME(LayerList, LayerAdded),
-      Slot(this, &FrameLabelObjectImp::layerAdded))
+      Slot(this, &FrameLabelObjectImp::updateAnimations)),
+   mAutoMode(false),
+   mLocked(false)
 {
    mpAnimationController.addSignal(SIGNAL_NAME(AnimationController, AnimationAdded),
       Slot(this, &FrameLabelObjectImp::animationAdded));
@@ -44,7 +45,10 @@ FrameLabelObjectImp::FrameLabelObjectImp(const string& id,
       Slot(this, &FrameLabelObjectImp::animationRemoved));
 
    mpAnimationController.addSignal(SIGNAL_NAME(Subject, Deleted),
-      Slot(this, &FrameLabelObjectImp::controllerDeleted));
+      Slot(this, &FrameLabelObjectImp::updateAnimations));
+
+   mpLayer.addSignal(SIGNAL_NAME(LayerImp, ViewModified),
+      Slot(this, &FrameLabelObjectImp::updateAnimations));
 
    reset();
 }
@@ -56,6 +60,7 @@ FrameLabelObjectImp::~FrameLabelObjectImp()
 
 void FrameLabelObjectImp::reset()
 {
+   setLocked(false);
    mpView.reset(NULL);
    mpAnimationController.reset(NULL);
    mpLayerList.reset(NULL);
@@ -66,25 +71,59 @@ void FrameLabelObjectImp::reset()
 
 void FrameLabelObjectImp::setAutoMode(bool autoMode)
 {
-   if (autoMode != getAutoMode())
+   if (autoMode != mAutoMode)
    {
-      View* pView = NULL;
-      if (autoMode == true)
-      {
-         GraphicLayer* pLayer = getLayer();
-         if (pLayer != NULL)
-         {
-            pView = pLayer->getView();
-         }
-      }
-
-      setAnimations(pView);
+      mAutoMode = autoMode;
+      reset();
+      updateAnimationList();
+      setLocked(autoMode);
    }
 }
 
 bool FrameLabelObjectImp::getAutoMode() const
 {
-   return (mpView.get() != NULL);
+   return mAutoMode;
+}
+
+void FrameLabelObjectImp::setLocked(bool locked)
+{
+   mLocked = locked;
+}
+
+bool FrameLabelObjectImp::getLocked() const
+{
+   return mLocked;
+}
+
+void FrameLabelObjectImp::updateAnimationList(bool force)
+{
+   if (getAutoMode() == false)
+   {
+      return;
+   }
+
+   const bool wasLocked = getLocked();
+   if (force == true)
+   {
+      setLocked(false);
+   }
+
+   if (getLocked() == false)
+   {
+      View* pView = NULL;
+      GraphicLayer* pLayer = getLayer();
+      if (pLayer != NULL)
+      {
+         pView = pLayer->getView();
+      }
+
+      setAnimations(pView);
+   }
+
+   if (force == true)
+   {
+      setLocked(wasLocked);
+   }
 }
 
 bool FrameLabelObjectImp::processMousePress(LocationType screenCoord,
@@ -105,96 +144,100 @@ void FrameLabelObjectImp::frameChanged(Subject &subject, const string &signal, c
    updateText();
 }
 
-void FrameLabelObjectImp::animationControllerChanged(Subject &subject, const string &signal, const boost::any &value)
+void FrameLabelObjectImp::updateAnimations(Subject &subject, const string &signal, const boost::any &value)
 {
-   setAnimations(mpView.get());
+   updateAnimationList(true);
 }
 
 void FrameLabelObjectImp::animationAdded(Subject &subject, const std::string &signal, const boost::any &value)
 {
+   const bool wasLocked = getLocked();
+   setLocked(false);
    insertAnimation(boost::any_cast<Animation*>(value));
+   setLocked(wasLocked);
 }
 
 void FrameLabelObjectImp::animationRemoved(Subject &subject, const std::string &signal, const boost::any &value)
 {
+   const bool wasLocked = getLocked();
+   setLocked(false);
    eraseAnimation(boost::any_cast<Animation*>(value));
-}
-
-void FrameLabelObjectImp::controllerDeleted(Subject &subject, const string &signal, const boost::any &value)
-{
-   setAnimations(mpView.get());
+   setLocked(wasLocked);
 }
 
 void FrameLabelObjectImp::animationDeleted(Subject &subject, const string &signal, const boost::any &value)
 {
+   const bool wasLocked = getLocked();
+   setLocked(false);
    eraseAnimation(dynamic_cast<Animation*>(&subject));
-}
-
-void FrameLabelObjectImp::layerAdded(Subject &subject, const std::string &signal, const boost::any &value)
-{
-   setAnimations(mpView.get());
-}
-
-void FrameLabelObjectImp::animationChanged(Subject &subject, const std::string &signal, const boost::any &value)
-{
-   setAnimations(mpView.get());
+   setLocked(wasLocked);
 }
 
 void FrameLabelObjectImp::layerDeleted(Subject &subject, const std::string &signal, const boost::any &value)
 {
+   const bool wasLocked = getLocked();
+   setLocked(false);
    eraseLayer(dynamic_cast<RasterLayer*>(&subject));
+   setLocked(wasLocked);
 }
 
 void FrameLabelObjectImp::setAnimations(View* pView)
 {
-   reset();
-   mpView.reset(pView);
-   vector<Animation*> pAnimations;
-   if (mpView.get() != NULL)
+   if (getLocked() == false)
    {
-      SpatialDataView* pSpatialDataView = dynamic_cast<SpatialDataView*>(mpView.get());
-      if (pSpatialDataView == NULL)
+      reset();
+      vector<Animation*> pAnimations;
+      if (pView != NULL)
       {
-         mpAnimationController.reset(mpView->getAnimationController());
-         if (mpAnimationController.get() != NULL)
+         SpatialDataView* pSpatialDataView = dynamic_cast<SpatialDataView*>(pView);
+         if (pSpatialDataView == NULL)
          {
-            pAnimations = mpAnimationController->getAnimations();
-         }
-      }
-      else
-      {
-         mpLayerList.reset(pSpatialDataView->getLayerList());
-         VERIFYNRV(mpLayerList.get() != NULL);
-
-         vector<Layer*> pLayers;
-         mpLayerList->getLayers(RASTER, pLayers);
-         for (vector<Layer*>::iterator iter = pLayers.begin(); iter != pLayers.end(); ++iter)
-         {
-            RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(*iter);
-            VERIFYNRV(pRasterLayer != NULL);
-            pRasterLayer->attach(SIGNAL_NAME(RasterLayer, AnimationChanged), Slot(this, &FrameLabelObjectImp::animationChanged));
-            pRasterLayer->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &FrameLabelObjectImp::layerDeleted));
-            mLayers.push_back(pRasterLayer);
-            if (pRasterLayer->getAnimation() != NULL)
+            mpView.reset(pView);
+            mpAnimationController.reset(mpView->getAnimationController());
+            if (mpAnimationController.get() != NULL)
             {
-               pAnimations.push_back(pRasterLayer->getAnimation());
+               pAnimations = mpAnimationController->getAnimations();
+            }
+         }
+         else
+         {
+            mpLayerList.reset(pSpatialDataView->getLayerList());
+            VERIFYNRV(mpLayerList.get() != NULL);
+
+            vector<Layer*> pLayers;
+            mpLayerList->getLayers(RASTER, pLayers);
+            for (vector<Layer*>::iterator iter = pLayers.begin(); iter != pLayers.end(); ++iter)
+            {
+               RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(*iter);
+               VERIFYNRV(pRasterLayer != NULL);
+               pRasterLayer->attach(SIGNAL_NAME(RasterLayer, AnimationChanged),
+                  Slot(this, &FrameLabelObjectImp::updateAnimations));
+               pRasterLayer->attach(SIGNAL_NAME(Subject, Deleted),
+                  Slot(this, &FrameLabelObjectImp::layerDeleted));
+               mLayers.push_back(pRasterLayer);
+               if (pRasterLayer->getAnimation() != NULL)
+               {
+                  pAnimations.push_back(pRasterLayer->getAnimation());
+               }
             }
          }
       }
-   }
 
-   insertAnimations(pAnimations);
+      insertAnimations(pAnimations);
+   }
 }
 
 void FrameLabelObjectImp::eraseLayer(RasterLayer* pLayer)
 {
-   if (pLayer != NULL)
+   if (getLocked() == false && pLayer != NULL)
    {
       vector<RasterLayer*>::iterator location = find(mLayers.begin(), mLayers.end(), pLayer);
       if (location != mLayers.end())
       {
-         pLayer->detach(SIGNAL_NAME(RasterLayer, AnimationChanged), Slot(this, &FrameLabelObjectImp::animationChanged));
-         pLayer->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &FrameLabelObjectImp::layerDeleted));
+         pLayer->detach(SIGNAL_NAME(RasterLayer, AnimationChanged),
+            Slot(this, &FrameLabelObjectImp::updateAnimations));
+         pLayer->detach(SIGNAL_NAME(Subject, Deleted),
+            Slot(this, &FrameLabelObjectImp::layerDeleted));
          eraseAnimation(pLayer->getAnimation());
          mLayers.erase(location);
       }
@@ -203,9 +246,12 @@ void FrameLabelObjectImp::eraseLayer(RasterLayer* pLayer)
 
 void FrameLabelObjectImp::clearLayers()
 {
-   while (mLayers.empty() == false)
+   if (getLocked() == false)
    {
-      eraseLayer(mLayers.front());
+      while (mLayers.empty() == false)
+      {
+         eraseLayer(mLayers.front());
+      }
    }
 }
 
@@ -241,35 +287,33 @@ void FrameLabelObjectImp::updateText()
       }
    }
 
-   string text;
+   string text = "[Frame Label]";
    if (pFrame != NULL)
    {
       text = AnimationImp::frameToQString(pFrame, frameType, maxCount + 1).toStdString();
    }
-   if (text.empty())
-   {
-      setText("[Frame Label]");
-   }
-   else
-   {
-      setText(text.c_str());
-   }
+
+   setText(text.c_str());
 }
 
 void FrameLabelObjectImp::setAnimations(const vector<Animation*> &animations)
 {
-   reset();
-   insertAnimations(animations);
+   if (getLocked() == false)
+   {
+      reset();
+      insertAnimations(animations);
+   }
 }
 
 void FrameLabelObjectImp::insertAnimations(const vector<Animation*> &animations)
 {
-   for (vector<Animation*>::const_iterator iter = animations.begin(); iter != animations.end(); iter++)
+   if (getLocked() == false)
    {
-      insertAnimation(*iter);
+      for (vector<Animation*>::const_iterator iter = animations.begin(); iter != animations.end(); iter++)
+      {
+         insertAnimation(*iter);
+      }
    }
-
-   updateText();
 }
 
 const vector<Animation*> &FrameLabelObjectImp::getAnimations() const
@@ -279,20 +323,21 @@ const vector<Animation*> &FrameLabelObjectImp::getAnimations() const
 
 void FrameLabelObjectImp::insertAnimation(Animation* pAnimation)
 {
-   if (pAnimation != NULL)
+   if (getLocked() == false && pAnimation != NULL)
    {
       if (find(mAnimations.begin(), mAnimations.end(), pAnimation) == mAnimations.end())
       {
          pAnimation->attach(SIGNAL_NAME(Animation, FrameChanged), Slot(this, &FrameLabelObjectImp::frameChanged));
          pAnimation->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &FrameLabelObjectImp::animationDeleted));
          mAnimations.push_back(pAnimation);
+         updateText();
       }
    }
 }
 
 void FrameLabelObjectImp::eraseAnimation(Animation* pAnimation)
 {
-   if (pAnimation != NULL)
+   if (getLocked() == false && pAnimation != NULL)
    {
       vector<Animation*>::iterator location = find(mAnimations.begin(), mAnimations.end(), pAnimation);
       if (location != mAnimations.end())
@@ -300,15 +345,19 @@ void FrameLabelObjectImp::eraseAnimation(Animation* pAnimation)
          pAnimation->detach(SIGNAL_NAME(Animation, FrameChanged), Slot(this, &FrameLabelObjectImp::frameChanged));
          pAnimation->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &FrameLabelObjectImp::animationDeleted));
          mAnimations.erase(location);
+         updateText();
       }
    }
 }
 
 void FrameLabelObjectImp::clearAnimations()
 {
-   while (mAnimations.empty() == false)
+   if (getLocked() == false)
    {
-      eraseAnimation(mAnimations.front());
+      while (mAnimations.empty() == false)
+      {
+         eraseAnimation(mAnimations.front());
+      }
    }
 }
 
@@ -328,6 +377,12 @@ bool FrameLabelObjectImp::isKindOf(const string& className) const
    return TextObjectImp::isKindOf(className);
 }
 
+void FrameLabelObjectImp::setLayer(GraphicLayer* pLayer)
+{
+   TextObjectImp::setLayer(pLayer);
+   updateAnimationList(true);
+}
+
 void FrameLabelObjectImp::updateGeo()
 {
    // remain fixed in place, so do nothing
@@ -340,15 +395,18 @@ bool FrameLabelObjectImp::replicateObject(const GraphicObject* pObject)
       return false;
    }
 
+   // Copy the autoMode of pFrameLabelObject.
+   // If it is in autoMode, all necessary information is copied automatically via setAutoMode(true).
    const FrameLabelObjectImp* pFrameLabelObject = dynamic_cast<const FrameLabelObjectImp*>(pObject);
    VERIFY(pFrameLabelObject != NULL);
-   if (pFrameLabelObject->mpView.get() != NULL)
+   const bool autoMode = pFrameLabelObject->getAutoMode();
+   setAutoMode(autoMode);
+
+   // If it is not in autoMode, manually copy necessary information now.
+   if (autoMode == false)
    {
-      setAnimations(const_cast<View*>(pFrameLabelObject->mpView.get()));
-   }
-   else
-   {
-      setAnimations(pFrameLabelObject->mAnimations);
+      setAnimations(pFrameLabelObject->getAnimations());
+      setLocked(pFrameLabelObject->getLocked());
    }
 
    return true;
@@ -356,7 +414,7 @@ bool FrameLabelObjectImp::replicateObject(const GraphicObject* pObject)
 
 bool FrameLabelObjectImp::toXml(XMLWriter* pXml) const
 {
-   if (pXml == NULL)
+   if (pXml == NULL || Service<SessionManager>()->isSessionSaving() == false)
    {
       return false;
    }
@@ -366,33 +424,22 @@ bool FrameLabelObjectImp::toXml(XMLWriter* pXml) const
       return false;
    }
 
-   Service<SessionManager> pSession;
-   if (pSession->isSessionLoading() == true)
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Need to add capability to save FrameLabelObject when not saving a session (rforehan)")
+   pXml->addAttr("autoMode", StringUtilities::toXmlString<bool>(getAutoMode()));
+   if (mAnimations.size() > 0)
    {
-      if (mpView.get() != NULL)
+      pXml->pushAddPoint(pXml->addElement("Animations"));
+      vector<Animation*>::const_iterator it;
+      for (it=mAnimations.begin(); it!=mAnimations.end(); ++it)
       {
-         pXml->addAttr("viewId", mpView->getId());
-      }
-      else
-      {
-         if (mAnimations.size() > 0)
+         Animation* pAnim = *it;
+         if (pAnim != NULL)
          {
-            pXml->pushAddPoint(pXml->addElement("Animations"));
-            vector<Animation*>::const_iterator it;
-            for (it=mAnimations.begin(); it!=mAnimations.end(); ++it)
-            {
-               Animation* pAnim = *it;
-               if (pAnim != NULL)
-               {
-                  pXml->pushAddPoint(pXml->addElement("Animation"));
-                  pXml->addAttr("id", pAnim->getId());
-                  pXml->popAddPoint();
-               }
-            }
+            pXml->pushAddPoint(pXml->addElement("Animation"));
+            pXml->addAttr("id", pAnim->getId());
             pXml->popAddPoint();
          }
       }
+      pXml->popAddPoint();
    }
 
    return true;
@@ -400,7 +447,7 @@ bool FrameLabelObjectImp::toXml(XMLWriter* pXml) const
 
 bool FrameLabelObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   if (pDocument == NULL)
+   if (pDocument == NULL || Service<SessionManager>()->isSessionLoading() == false)
    {
       return false;
    }
@@ -410,54 +457,44 @@ bool FrameLabelObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
       return false;
    }
 
-   Service<SessionManager> pSession;
-   if (pSession->isSessionLoading() == true)
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Need to add capability to load FrameLabelObject when not loading a session (rforehan)")
+   DOMElement* pElement = static_cast<DOMElement*> (pDocument);
+   if (pElement != NULL)
    {
-      DOMElement* pElement = static_cast<DOMElement*> (pDocument);
-      if (pElement != NULL)
+      // Set the autoMode setting (which will also call setLocked)
+      setAutoMode(StringUtilities::fromXmlString<bool>(A(pElement->getAttribute(X("autoMode")))));
+
+      // If the object is not currently locked, load all frames
+      if (getLocked() == false)
       {
-         // get the view
-         string id(A(pElement->getAttribute(X("viewId"))));
-         if (id.empty() != true)
+         for(DOMNode* pChild = pDocument->getFirstChild(); 
+            pChild != NULL; pChild = pChild->getNextSibling())
          {
-            View* pView = dynamic_cast<View*>(pSession->getSessionItem(id));
-            if (pView != NULL)
+            if(XMLString::equals(pChild->getNodeName(), X("Animations")))
             {
-               setAnimations(pView);
-            }
-         }
-         else
-         {
-            for(DOMNode* pChild = pDocument->getFirstChild(); 
-               pChild != NULL; pChild = pChild->getNextSibling())
-            {
-               if(XMLString::equals(pChild->getNodeName(), X("Animations")))
+               vector<Animation*> animations;
+               for(DOMNode* pGrandchild = pChild->getFirstChild();
+                  pGrandchild != NULL;
+                  pGrandchild = pGrandchild->getNextSibling())
                {
-                  vector<Animation*> animations;
-                  for(DOMNode* pGrandchild = pChild->getFirstChild();
-                     pGrandchild != NULL;
-                     pGrandchild = pGrandchild->getNextSibling())
+                  if(XMLString::equals(pGrandchild->getNodeName(), X("Animation")))
                   {
-                     if(XMLString::equals(pGrandchild->getNodeName(), X("Animation")))
+                     pElement = dynamic_cast<DOMElement*>(pGrandchild);
+                     if (pElement != NULL)
                      {
-                        pElement = dynamic_cast<DOMElement*>(pGrandchild);
-                        if (pElement != NULL)
+                        string id(A(pElement->getAttribute(X("id"))));
+                        if (id.empty() != true)
                         {
-                           string id(A(pElement->getAttribute(X("id"))));
-                           if (id.empty() != true)
+                           Animation* pAnim = dynamic_cast<Animation*>(Service<SessionManager>()->getSessionItem(id));
+                           if (pAnim != NULL)
                            {
-                              Animation* pAnim = dynamic_cast<Animation*>(pSession->getSessionItem(id));
-                              if (pAnim != NULL)
-                              {
-                                 animations.push_back(pAnim);
-                              }
+                              animations.push_back(pAnim);
                            }
                         }
                      }
                   }
-                  setAnimations(animations);
                }
+
+               setAnimations(animations);
             }
          }
       }

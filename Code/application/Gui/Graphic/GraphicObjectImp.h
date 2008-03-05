@@ -274,12 +274,12 @@ protected slots:
 protected:
    mutable bool mDisplayListDirty;
    mutable bool mBitMaskDirty;
+   AttachmentPtr<GraphicLayer> mpLayer;
 
 private:
    void adjustHandles(int handle, LocationType point, bool bMaintainAspect);
 
    GraphicObjectType mType;
-   AttachmentPtr<GraphicLayer> mpLayer;
 };
 
 #define GRAPHICOBJECTADAPTER_METHODS(impClass) \
