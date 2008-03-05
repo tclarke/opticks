@@ -243,6 +243,7 @@ private:
       const DimensionDescriptor &descriptor, const std::vector<double> &values) const;
    bool xmlToChannel(DOMNode* pDocument, RasterElement*& pElem, 
       RegionUnits &units, DimensionDescriptor &descriptor, double &minValue, double &maxValue);
+   double calculateThresholdForEncodingType(EncodingType type) const;
 };
 
 #define RASTERLAYERADAPTER_METHODS(impClass) \

@@ -57,6 +57,8 @@ public:
    SETTING(InsetSize, View, unsigned int, 300)
    SETTING(InsetZoom, View, unsigned int, 5)
    SETTING(InsetZoomMode, View, InsetZoomMode, ABSOLUTE_MODE)
+   SETTING(PixelValueMinimumFontSize, View, unsigned int, 5);
+   SETTING(PixelValueMaximumFontSize, View, unsigned int, 20);
 
    /**
     *  This class accesses portions of a view image.
