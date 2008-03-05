@@ -92,6 +92,7 @@ ConfigurationSettingsImp::ConfigurationSettingsImp() : mIsInitialized(false)
    mReleaseType = RT_NORMAL;
 
    mHomePath = locateApplicationHome();
+   mUserDocs = locateUserDocs();
 
    //Perform a check to see if the app home env var is good, ie.
    //has SupportFiles available
@@ -244,6 +245,11 @@ string ConfigurationSettingsImp::locateApplicationHome()
 string ConfigurationSettingsImp::getHome() const
 {
    return mHomePath;
+}
+
+string ConfigurationSettingsImp::getUserDocs() const
+{
+   return mUserDocs;
 }
 
 string ConfigurationSettingsImp::getCreator() const
@@ -696,6 +702,46 @@ string ConfigurationSettingsImp::getUserSettingsFile(bool createDir) const
 
    QString cfgFilePath = configDirectory.absoluteFilePath(QString::fromStdString("UserSettings-" + mVersion + "-" + os + "-" + arch + mode + ".cfg"));
    return QDir::toNativeSeparators(cfgFilePath).toStdString();
+}
+
+string ConfigurationSettingsImp::locateUserDocs()
+{
+   string userDirectory;
+   QString userFolderPath;
+   QString appNamePath;
+#if defined(WIN_API)
+   char path[MAX_PATH];
+   HRESULT retValue = SHGetFolderPath(NULL, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, NULL, SHGFP_TYPE_CURRENT, path);
+   if(SUCCEEDED(retValue))
+   {
+      userFolderPath = QString::fromAscii(path);
+   }
+#else
+   char* pPath = getenv("HOME");
+   if (pPath != NULL)
+   {
+      userFolderPath = QString::fromAscii(pPath);
+   }
+#endif
+   appNamePath = APP_NAME;
+   if (!userFolderPath.isEmpty())
+   {
+      userFolderPath.replace("\\", "/");
+      QDir userFolderDir(userFolderPath);
+      if (!userFolderDir.exists())
+      {
+         return "";
+      }
+      QString appUserPath = userFolderDir.absoluteFilePath(appNamePath);
+      QDir appUserDir(appUserPath);
+      if (!appUserDir.exists())
+      {
+         userFolderDir.mkdir(appNamePath);
+      }
+      userDirectory = appUserDir.absolutePath().toStdString();
+   }
+
+   return userDirectory;
 }
 
 bool ConfigurationSettingsImp::serialize() const

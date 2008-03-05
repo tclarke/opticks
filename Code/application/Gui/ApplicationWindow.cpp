@@ -2369,9 +2369,21 @@ void ApplicationWindow::print()
 
 void ApplicationWindow::openSession()
 {
-   QString filename = QFileDialog::getOpenFileName(this, "Open Session File", QString(), "Session Files (*.session)");
+   QString pathStr;
+   const Filename* pSessionDir = ConfigurationSettings::getSettingSaveOpenSessionPath();
+   if (pSessionDir != NULL)
+   {
+      pathStr = QString::fromStdString(pSessionDir->getFullPathAndName());
+   }
+   QString filename = QFileDialog::getOpenFileName(this, "Open Session File", 
+      pathStr, "Session Files (*.session)");
    if (filename.isEmpty() == false)
    {
+      FactoryResource<Filename> pDir;
+      pDir->setFullPathAndName(filename.toStdString());
+      pDir->setFullPathAndName(pDir->getPath());
+      Service<ConfigurationSettings>()->setSessionSetting(
+         ConfigurationSettings::getSettingSaveOpenSessionPathKey(), *pDir.get());
       openSession(filename);
    }
 }
@@ -2548,7 +2560,13 @@ bool ApplicationWindow::saveSessionAs()
    QString initial = QString::fromStdString(mSessionFilename);
    if (initial.isEmpty())
    {
-      initial = QString(APP_NAME) + ".session";
+      QString pathStr;
+      const Filename* pSessionDir = ConfigurationSettings::getSettingSaveOpenSessionPath();
+      if (pSessionDir != NULL)
+      {
+         pathStr = QString::fromStdString(pSessionDir->getFullPathAndName());
+      }
+      initial = pathStr + "/" + QString(APP_NAME) + ".session";
    }
    for (;;)
    {
@@ -2582,6 +2600,11 @@ bool ApplicationWindow::saveSessionAs()
          }
       }
 
+      FactoryResource<Filename> pDir;
+      pDir->setFullPathAndName(filename.toStdString());
+      pDir->setFullPathAndName(pDir->getPath());
+      Service<ConfigurationSettings>()->setSessionSetting(
+         ConfigurationSettings::getSettingSaveOpenSessionPathKey(), *pDir.get());
       mSessionFilename = filename.toStdString();
       return saveSession();
    }

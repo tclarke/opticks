@@ -75,6 +75,7 @@ OptionsFileLocations::OptionsFileLocations() :
    pLayout->addWidget(pBookmarkSection, 10);
 
    mFileLocations.push_back(pair<string,string>("Default Import/Export Path", ConfigurationSettings::getSettingImportExportPathKey()));
+   mFileLocations.push_back(pair<string,string>("Default Session Save/Open Path", ConfigurationSettings::getSettingSaveOpenSessionPathKey()));
    mFileLocations.push_back(pair<string,string>("Default Product Template", ProductView::getSettingTemplateFileKey()));
    mFileLocations.push_back(pair<string,string>("Message Log Path", ConfigurationSettings::getSettingMessageLogPathKey()));
    mFileLocations.push_back(pair<string,string>("Plug-In Path", ConfigurationSettings::getSettingPlugInPathKey()));

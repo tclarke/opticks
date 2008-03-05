@@ -211,6 +211,20 @@ string StringUtilities::expandVariables(const string& originalString)
                         replacementString = pSettings->getHome();
                         replaced = true;
                      }
+                     else if (variableName == "USER_DOCS")
+                     {
+                        ConfigurationSettingsExt1* pExt = 
+                           dynamic_cast<ConfigurationSettingsExt1*>(pSettings.get());
+                        if (pExt != NULL)
+                        {
+                           replacementString = pExt->getUserDocs();
+                        }
+                        else
+                        {
+                           replacementString = "";
+                        }
+                        replaced = true;
+                     }
                      else if (variableName == "APP_VERSION")
                      {
                         replacementString = pSettings->getVersion();
