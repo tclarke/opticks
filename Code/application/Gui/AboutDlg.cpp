@@ -81,16 +81,18 @@ AboutDlg::AboutDlg(QWidget* parent) :
 
 
    // Release information
-   QLabel* pInfoLabel = NULL;
+   QString infoLabelStr = strReleaseType;
    if (bProductionRelease == false)
    {
-      pInfoLabel = new QLabel(strReleaseType + " - Not for Production Use", pAppInfo);
-      pInfoLabel->setFont(ftApp);
-
-      QPalette labelPalette = pInfoLabel->palette();
-      labelPalette.setColor(QPalette::WindowText, Qt::red);
-      pInfoLabel->setPalette(labelPalette);
+      infoLabelStr += " - Not for Production Use";
    }
+
+   QLabel* pInfoLabel = new QLabel(infoLabelStr, pAppInfo);
+   pInfoLabel->setFont(ftApp);
+
+   QPalette labelPalette = pInfoLabel->palette();
+   labelPalette.setColor(QPalette::WindowText, Qt::red);
+   pInfoLabel->setPalette(labelPalette);
 
    QLabel* pIconLabel = new QLabel(pAppInfo);
    Icons* pIcons = Icons::instance();
@@ -113,10 +115,7 @@ AboutDlg::AboutDlg(QWidget* parent) :
    pTextGrid->addWidget(pReleaseLabel, 1, 1);
    pTextGrid->addWidget(pRelease, 1, 2);
 
-   if ((bProductionRelease == false) && (pInfoLabel != NULL))
-   {
-      pTextGrid->addWidget(pInfoLabel, 2, 1, 1, 2);
-   }
+   pTextGrid->addWidget(pInfoLabel, 2, 1, 1, 2);
 
    pTextGrid->setRowMinimumHeight(3, 10);
    pTextGrid->addWidget(pCopyrightLabel, 4, 1, 1, 2);

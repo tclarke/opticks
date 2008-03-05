@@ -104,11 +104,14 @@ int main(int argc, char** argv)
    cout << APP_NAME_LONG << endl;
    cout << APP_NAME << " Batch Processor, Version " << version << ", Release Date " << dateString << endl;
    cout << APP_COPYRIGHT << endl;
+   cout << releaseType;
 
    if (bProductionRelease == false)
    {
-      cout << releaseType << " - Not for Production Use" << endl;
+      cout << " - Not for Production Use";
    }
+
+   cout << endl;
 
    const vector<PlugInBranding>& brandings = PlugInBranding::getBrandings();
    if (!brandings.empty())

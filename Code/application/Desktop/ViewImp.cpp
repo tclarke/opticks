@@ -1547,18 +1547,16 @@ void ViewImp::drawClassification()
    {
       // Check if the release is a production release
       Service<ConfigurationSettings> pConfigSettings;
-      if (pConfigSettings->isProductionRelease() == false)
-      {
-         // Calculate the screen width and height of the release info
-         QString strReleaseText =
-            QString::fromStdString(StringUtilities::toDisplayString(pConfigSettings->getReleaseType()));
 
-         QFontMetrics fontMetrics(mClassificationFont);
+      // Calculate the screen width and height of the release info
+      QString strReleaseText =
+         QString::fromStdString(StringUtilities::toDisplayString(pConfigSettings->getReleaseType()));
+
+      QFontMetrics fontMetrics(mClassificationFont);
+      if (!strReleaseText.isEmpty())
+      {
          int iReleaseWidth = fontMetrics.width(strReleaseText);
          int iReleaseHeight = fontMetrics.ascent();
-
-         QString strProductionText = "Not for Production Use";
-         int iProductionWidth = fontMetrics.width(strProductionText);
 
          // Release markings - Qt has an upper left origin, so there
          // is no need to offset the y-coordinate by the view height
@@ -1571,11 +1569,17 @@ void ViewImp::drawClassification()
          screenX = (iWidth / 2) - (iReleaseWidth / 2);
          screenY = topMargin + iClassificationHeight + shadowOffset + topMargin + iReleaseHeight;
          renderText(screenX, screenY, strReleaseText, mClassificationFont);
+      }
+
+      if (pConfigSettings->isProductionRelease() == false)
+      {
+         QString strProductionText = "Not for Production Use";
+         int iProductionWidth = fontMetrics.width(strProductionText);
 
          // Production markings
          qglColor(Qt::black);
-         screenX = (iWidth / 2) - (iProductionWidth / 2) + shadowOffset;
-         screenY = iHeight - bottomMargin - shadowOffset - iClassificationHeight - topMargin;
+         int screenX = (iWidth / 2) - (iProductionWidth / 2) + shadowOffset;
+         int screenY = iHeight - bottomMargin - shadowOffset - iClassificationHeight - topMargin;
          renderText(screenX, screenY, strProductionText, mClassificationFont);
 
          qglColor(mClassificationColor);
