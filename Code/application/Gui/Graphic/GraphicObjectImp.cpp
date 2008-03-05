@@ -310,36 +310,34 @@ bool GraphicObjectImp::setProperty(const GraphicProperty* pProp)
       LocationType ll = static_cast<const BoundingBoxProperty*>(pProp)->getLlCorner();
       LocationType ur = static_cast<const BoundingBoxProperty*>(pProp)->getUrCorner();
 
-      const RasterElement *pRaster = getGeoreferenceElement(false);
+      const RasterElement *pRaster = getGeoreferenceElement();
 
       if (pRaster != NULL)
       {
          bool changed = false;
          const BoundingBoxProperty* pBoundingBox = (const BoundingBoxProperty*) pProp;
-
-         LocationType llCorner = pBoundingBox->getLlCorner();
-         LocationType urCorner = pBoundingBox->getUrCorner();
-         LocationType geoLlCorner = pBoundingBox->getLlLatLong();
-         LocationType geoUrCorner = pBoundingBox->getUrLatLong();
-
-         if (pBoundingBox->hasGeoCoords() && !pBoundingBox->hasPixelCoords())
+         if (pBoundingBox->geoCoordsMatchPixelCoords() == false &&
+            (pBoundingBox->hasGeoCoords() || pBoundingBox->hasPixelCoords()))
          {
-            // Convert to scene pixel coordinates
-            llCorner = pRaster->convertGeocoordToPixel(geoLlCorner);
-            urCorner = pRaster->convertGeocoordToPixel(geoUrCorner);
-            changed = true;
-         }
-         else if (!pBoundingBox->hasGeoCoords() && pBoundingBox->hasPixelCoords())
-         {
-            // Convert to geo coordinates
-            geoLlCorner = pRaster->convertPixelToGeocoord(llCorner);
-            geoUrCorner = pRaster->convertPixelToGeocoord(urCorner);
-            changed = true;
-         }
+            LocationType llCorner = pBoundingBox->getLlCorner();
+            LocationType urCorner = pBoundingBox->getUrCorner();
+            LocationType geoLlCorner = pBoundingBox->getLlLatLong();
+            LocationType geoUrCorner = pBoundingBox->getUrLatLong();
 
-         if (changed)
-         {
-            BoundingBoxProperty newProp(llCorner, urCorner, geoLlCorner, geoUrCorner);
+            if (pBoundingBox->hasGeoCoords())
+            {
+               // If geo coordinates are available, use them
+               llCorner = pRaster->convertGeocoordToPixel(geoLlCorner);
+               urCorner = pRaster->convertGeocoordToPixel(geoUrCorner);
+            }
+            else
+            {
+               // Otherwise, use pixel coordinates
+               geoLlCorner = pRaster->convertPixelToGeocoord(llCorner);
+               geoUrCorner = pRaster->convertPixelToGeocoord(urCorner);
+            }
+
+            BoundingBoxProperty newProp(llCorner, urCorner, geoLlCorner, geoUrCorner, true);
             return setProperty(&newProp);
          }
       }
@@ -1970,7 +1968,7 @@ GraphicElement *GraphicObjectImp::getElement() const
 }
 
 
-const RasterElement *GraphicObjectImp::getGeoreferenceElement(bool onlyIfGeocentric) const
+const RasterElement *GraphicObjectImp::getGeoreferenceElement() const
 {
    GraphicElementImp *pElement = dynamic_cast<GraphicElementImp*>(getElement());
    if (pElement == NULL)
@@ -1978,7 +1976,7 @@ const RasterElement *GraphicObjectImp::getGeoreferenceElement(bool onlyIfGeocent
       return NULL;
    }
 
-   return pElement->getGeoreferenceElement(onlyIfGeocentric);
+   return pElement->getGeoreferenceElement();
 }
 
 void GraphicObjectImp::setName(const string& newName)

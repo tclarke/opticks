@@ -769,7 +769,7 @@ void ScaleBarObjectImp::updateGeoreferenceAttachment()
 {
    if (mpGeoreference.get() == NULL)
    {
-      const RasterElement *pGeoreference = getGeoreferenceElement(false);
+      const RasterElement *pGeoreference = getGeoreferenceElement();
       if (pGeoreference != NULL)
       {
          mpGeoreference.reset(const_cast<RasterElement*>(pGeoreference));

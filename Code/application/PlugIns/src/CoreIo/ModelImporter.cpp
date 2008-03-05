@@ -21,7 +21,6 @@
 #include "MessageLogResource.h"
 #include "ModelImporter.h"
 #include "ModelServices.h"
-#include "ObjectResource.h"
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
@@ -62,7 +61,7 @@ ModelImporter::ModelImporter() :
    // initialize the type map
    // this allows us to load old types into their newer counterparts
    // for example AoiElement can load AOI
-   if(sTypeMap.empty())
+   if (sTypeMap.empty())
    {
       sTypeMap["AOI"] = "AoiElement";
       sTypeMap["AOIAdapter"] = "AoiElement";
@@ -92,7 +91,7 @@ bool ModelImporter::getInputSpecification(PlugInArgList *&pInArgList)
    pArg->setDefaultValue(NULL);
    pInArgList->addArg(*pArg);
 
-   if(isBatch())
+   if (isBatch())
    {
       bool value = false;
       pInArgList->addArg<bool>("CreateLayer", &value);
@@ -115,7 +114,7 @@ vector<ImportDescriptor*> ModelImporter::getImportDescriptors(const string& file
 vector<ImportDescriptor*> ModelImporter::getImportDescriptors(const string& filename, bool reportErrors)
 {
    vector<ImportDescriptor*> descriptors;
-   if(!filename.empty())
+   if (!filename.empty())
    {
       MessageLog* pLog = NULL;
       if (reportErrors == true)
@@ -127,11 +126,11 @@ vector<ImportDescriptor*> ModelImporter::getImportDescriptors(const string& file
       XmlReader xml(pLog);
       XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *pDoc = xml.parse(filename, "metadata");
       DOMElement *pRootElement = NULL;
-      if(pDoc != NULL)
+      if (pDoc != NULL)
       {
          pRootElement = pDoc->getDocumentElement();
       }
-      if(pRootElement != NULL)
+      if (pRootElement != NULL)
       {
          ImportDescriptor* pImportDescriptor = populateImportDescriptor(pRootElement, filename);
          if (pImportDescriptor != NULL)
@@ -163,7 +162,7 @@ ImportDescriptor* ModelImporter::populateImportDescriptor(DOMElement* pElement, 
       return NULL;
    }
 
-   if(! (pElement->hasAttribute(X("name")) &&
+   if (! (pElement->hasAttribute(X("name")) &&
       pElement->hasAttribute(X("type")) &&
       pElement->hasAttribute(X("version"))))
    {
@@ -172,7 +171,7 @@ ImportDescriptor* ModelImporter::populateImportDescriptor(DOMElement* pElement, 
    string name = A(pElement->getAttribute(X("name")));
    string type = getTypeSubstitution(A(pElement->getAttribute(X("type"))));
    string dataset;
-   if(pElement->hasAttribute(X("dataset")))
+   if (pElement->hasAttribute(X("dataset")))
    {
       dataset = XmlBase::URLtoPath(pElement->getAttribute(X("dataset")));
    }
@@ -242,11 +241,11 @@ bool ModelImporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
 
       pProgress = pInArgList->getPlugInArgValue<Progress>(ProgressArg());
       pMsg->addBooleanProperty("Progress Present", (pProgress != NULL));
-      
+
       pElement = pInArgList->getPlugInArgValue<DataElement>(ImportElementArg());
-      if(pElement == NULL)
+      if (pElement == NULL)
       {
-         if(pProgress != NULL)
+         if (pProgress != NULL)
          {
             pProgress->updateProgress("No data element", 0, ERRORS);
          }
@@ -255,17 +254,18 @@ bool ModelImporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
       }
       pMsg->addProperty("Element name", pElement->getName());
 
-      if(isBatch())
+      if (isBatch())
       {
          pInArgList->getPlugInArgValue("CreateLayer", createLayer);
       }
-      else if(mpCheckBox != NULL)
+      else if (mpCheckBox != NULL)
       {
          createLayer = mpCheckBox->checkState() == Qt::Checked;
       }
       pMsg->addBooleanProperty("Create layer", createLayer);
    }
-   if(pProgress != NULL)
+
+   if (pProgress != NULL)
    {
       pProgress->updateProgress((string("Read and parse file ") + pElement->getFilename()), 20, NORMAL);
    }
@@ -274,131 +274,128 @@ bool ModelImporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
    XmlReader xml(Service<MessageLogMgr>()->getLog());
 
    XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *pDomDocument = xml.parse(pElement->getFilename());
-   if(pDomDocument == NULL)
+   if (pDomDocument == NULL)
    {
-      if(pProgress != NULL)
+      if (pProgress != NULL)
       {
          pProgress->updateProgress("Unable to parse the file", 0, ERRORS);
       }
       pStep->finalize(Message::Failure, "Unable to parse the file");
       return false;
    }
-   
-   DOMElement *pRootElement = pDomDocument->getDocumentElement();
-   VERIFY(pRootElement != NULL);
-
-   if(pProgress != NULL)
+   else
    {
-      pProgress->updateProgress("Create the element", 40, NORMAL);
-   }
+      DOMElement *pRootElement = pDomDocument->getDocumentElement();
+      VERIFY(pRootElement != NULL);
 
-   string name(A(pRootElement->getAttribute(X("name"))));
-   string type(getTypeSubstitution(A(pRootElement->getAttribute(X("type")))));
-   string datasetName(XmlBase::URLtoPath(pRootElement->getAttribute(X("dataset"))));
-   unsigned int formatVersion = atoi(A(pRootElement->getAttribute(X("version"))));
-
-   { // scope the MessageResource
-      MessageResource pMsg("Element properties", "app", "599EFB02-FC47-4865-BE51-436179268295");
-      pMsg->addProperty("name", name);
-      pMsg->addProperty("type", type);
-      pMsg->addProperty("dataset name", datasetName);
-      pMsg->addProperty("format version", formatVersion);
-   }
-
-   if(pProgress != NULL)
-   {
-      pProgress->updateProgress("Build the element", 60, NORMAL);
-   }
-   // deserialize the element
-   bool success = true;
-   try
-   {
-      success = pElement->fromXml(pRootElement, formatVersion);
-   }
-   catch(XmlReader::DomParseException &)
-   {
-      success = false;
-   }
-
-   if(createLayer && success)
-   {
-      if(pProgress != NULL)
+      if (pProgress != NULL)
       {
-         pProgress->updateProgress("Build the layer", 70, NORMAL);
+         pProgress->updateProgress("Create the element", 40, NORMAL);
       }
 
-      Layer *pLayer = NULL;
-      SpatialDataView *pView = NULL;
-      SpatialDataWindow *pWindow = dynamic_cast<SpatialDataWindow*>(mpDesktop->getCurrentWorkspaceWindow());
-      if(pWindow != NULL)
-      {
-         pView = pWindow->getSpatialDataView();
+      string name(A(pRootElement->getAttribute(X("name"))));
+      string type(getTypeSubstitution(A(pRootElement->getAttribute(X("type")))));
+      string datasetName(XmlBase::URLtoPath(pRootElement->getAttribute(X("dataset"))));
+      unsigned int formatVersion = atoi(A(pRootElement->getAttribute(X("version"))));
+
+      { // scope the MessageResource
+         MessageResource pMsg("Element properties", "app", "599EFB02-FC47-4865-BE51-436179268295");
+         pMsg->addProperty("name", name);
+         pMsg->addProperty("type", type);
+         pMsg->addProperty("dataset name", datasetName);
+         pMsg->addProperty("format version", formatVersion);
       }
-      if(pView != NULL)
+
+      if (createLayer)
       {
-         LayerType layerType;
-         if (type.find("Annotation") == 0)
+         if (pProgress != NULL)
          {
-            layerType = ANNOTATION;
-         }
-         else if (type.find("Aoi") == 0)
-         {
-            layerType = AOI_LAYER;
-         }
-         else if (type.find("GcpList") == 0)
-         {
-            layerType = GCP_LAYER;
-         }
-         else if (type.find("TiePoint") == 0)
-         {
-            layerType = TIEPOINT_LAYER;
+            pProgress->updateProgress("Build the layer", 60, NORMAL);
          }
 
-         if (layerType.isValid() == true)
+         Layer *pLayer = NULL;
+         SpatialDataView *pView = NULL;
+         SpatialDataWindow *pWindow = dynamic_cast<SpatialDataWindow*>(mpDesktop->getCurrentWorkspaceWindow());
+         if (pWindow != NULL)
          {
-            pLayer = pView->createLayer(layerType, pElement);
-            if (pLayer != NULL)
+            pView = pWindow->getSpatialDataView();
+         }
+         if (pView != NULL)
+         {
+            // Reparent the element to the primary raster element
+            LayerList* pLayerList = pView->getLayerList();
+            if (pLayerList != NULL)
             {
-               // Reparent the element to the primary raster element
-               LayerList* pLayerList = pView->getLayerList();
-               if (pLayerList != NULL)
+               RasterElement* pParent = pLayerList->getPrimaryRasterElement();
+               if (pParent != NULL)
                {
-                  RasterElement* pParent = pLayerList->getPrimaryRasterElement();
-                  if (pParent != NULL)
+                  if (Service<ModelServices>()->setElementParent(pElement, pParent) == false)
                   {
-                     Service<ModelServices> pModel;
-                     pModel->setElementParent(pElement, pParent);
+                     return false;
                   }
                }
             }
+
+            LayerType layerType;
+            if (type.find("Annotation") == 0)
+            {
+               layerType = ANNOTATION;
+            }
+            else if (type.find("Aoi") == 0)
+            {
+               layerType = AOI_LAYER;
+            }
+            else if (type.find("GcpList") == 0)
+            {
+               layerType = GCP_LAYER;
+            }
+            else if (type.find("TiePoint") == 0)
+            {
+               layerType = TIEPOINT_LAYER;
+            }
+
+            if (layerType.isValid() == true)
+            {
+               pLayer = pView->createLayer(layerType, pElement);
+            }
+         }
+
+         if (pLayer == NULL)
+         {
+            if (pProgress != NULL)
+            {
+               pProgress->updateProgress("Warning: Unable to create the layer", 60, WARNING);
+            }
+
+            return false;
          }
       }
-      if(pLayer == NULL)
+
+      if (pProgress != NULL)
       {
-         if(pProgress != NULL)
+         pProgress->updateProgress("Build the element", 70, NORMAL);
+      }
+      // deserialize the element
+      try
+      {
+         if (pElement->fromXml(pRootElement, formatVersion) == false)
          {
-            pProgress->updateProgress("Warning: Unable to create the layer", 70, WARNING);
+            return false;
          }
+      }
+      catch(XmlReader::DomParseException &)
+      {
+         return false;
       }
    }
 
-   if(!success)
+   pStep->finalize(Message::Success);
+   if (pProgress != NULL)
    {
-      pStep->finalize(Message::Failure, "Unable to parse the element.");
-      if(pProgress != NULL)
-      {
-         pProgress->updateProgress("Error loading the element", 0, ERRORS);
-      }
+      pProgress->updateProgress("Finished loading the element", 100, NORMAL);
    }
-   else
-   {
-      pStep->finalize(Message::Success);
-      if(pProgress != NULL)
-      {
-         pProgress->updateProgress("Finished loading the element", 100, NORMAL);
-      }
-   }
-   return success;
+
+   return true;
 }
 
 QWidget *ModelImporter::getImportOptionsWidget(DataDescriptor *pDescriptor)
@@ -420,7 +417,7 @@ QWidget *ModelImporter::getImportOptionsWidget(DataDescriptor *pDescriptor)
 string ModelImporter::getTypeSubstitution(string type)
 {
    map<string,string>::const_iterator newType = sTypeMap.find(type);
-   if(newType != sTypeMap.end())
+   if (newType != sTypeMap.end())
    {
       return newType->second;
    }

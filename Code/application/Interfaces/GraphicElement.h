@@ -66,7 +66,7 @@ public:
 
    /**
     *  Sets whether the GraphicObjects within this GraphicElement are
-    *  geographic in nature.  This object's parent will be used
+    *  geocentric in nature.  This object's parent will be used
     *  for georeferencing.
     *
     *  @param geocentric
@@ -84,7 +84,7 @@ public:
 
    /**
     *  Gets whether the GraphicObjects within this GraphicElement are
-    *  geographic in nature.
+    *  geocentric in nature.
     *
     *  @return True if the objects are geocentric, false otherwise.
     *

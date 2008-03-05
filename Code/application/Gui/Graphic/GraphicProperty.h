@@ -99,10 +99,12 @@ class BoundingBoxProperty : public GraphicProperty
 {
 public:
    BoundingBoxProperty(LocationType llCorner, LocationType urCorner, bool geoCoords = false);
-   BoundingBoxProperty(LocationType llCorner, LocationType urCorner, LocationType llLatLong, LocationType urLatLong);
+   BoundingBoxProperty(LocationType llCorner, LocationType urCorner,
+      LocationType llLatLong, LocationType urLatLong, bool geoCoordsMatchPixelCoords = false);
 
    bool hasGeoCoords() const;
    bool hasPixelCoords() const;
+   bool geoCoordsMatchPixelCoords() const;
    LocationType getLlCorner() const;
    LocationType getUrCorner() const;
    LocationType getLlLatLong() const;
@@ -121,6 +123,7 @@ private:
    LocationType mUrLatLong;
    bool mHasGeoCoords;
    bool mHasPixelCoords;
+   bool mGeoCoordsMatchPixelCoords;
 };
 
 
