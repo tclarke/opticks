@@ -41,7 +41,6 @@ PolarGridlinesImp& PolarGridlinesImp::operator= (const PolarGridlinesImp& object
       mAngle = object.mAngle;
       mDrawLocations = object.mDrawLocations;
 
-      emit modified();
       notify(SIGNAL_NAME(Subject, Modified));
    }
 
@@ -364,7 +363,6 @@ void PolarGridlinesImp::updateLocations()
       mDrawLocations.push_back(value);
    }
 
-   emit modified();
    notify(SIGNAL_NAME(Subject, Modified));
 }
 

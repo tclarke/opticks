@@ -128,6 +128,7 @@ void PlotObjectImp::setSelected(bool bSelect)
    {
       mbSelected = bSelect;
       emit selected(mbSelected);
+      emit legendPixmapChanged();
       notify(SIGNAL_NAME(PlotObject, Selected), boost::any(mbSelected));
    }
 }

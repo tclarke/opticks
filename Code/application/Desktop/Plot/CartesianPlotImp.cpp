@@ -111,10 +111,6 @@ CartesianPlotImp::CartesianPlotImp(const string& id, const string& viewName, QGL
    mVerticalGridlines.setLineStyle(DOT);
    mVerticalGridlines.setColor(ColorType(212, 208, 200));
    mVerticalGridlines.setVisible(false);
-
-   // Connections
-   connect(&mHorizontalGridlines, SIGNAL(modified()), this, SLOT(refresh()));
-   connect(&mVerticalGridlines, SIGNAL(modified()), this, SLOT(refresh()));
 }
 
 CartesianPlotImp::~CartesianPlotImp()

@@ -207,6 +207,18 @@ PlotViewImp::~PlotViewImp()
 
       glDeleteLists(mDisplayListIndex, DISPLAY_LIST_SIZE);
    }
+
+   for (list<PlotObject*>::iterator iter = mObjects.begin(); iter != mObjects.end(); )
+   {
+      PlotObject* pObject = *iter;
+      iter = mObjects.erase(iter);
+      if (pObject != NULL)
+      {
+         emit objectDeleted(pObject);
+         notify(SIGNAL_NAME(PlotView, ObjectDeleted), pObject);
+         delete dynamic_cast<PlotObjectImp*>(pObject);
+      }
+   }
 }
 
 bool PlotViewImp::canRename() const

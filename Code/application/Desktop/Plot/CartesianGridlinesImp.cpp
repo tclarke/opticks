@@ -45,7 +45,6 @@ CartesianGridlinesImp& CartesianGridlinesImp::operator= (const CartesianGridline
       mOrientation = object.mOrientation;
       mLines = object.mLines;
 
-      emit modified();
       notify(SIGNAL_NAME(Subject, Modified));
    }
 
@@ -174,7 +173,6 @@ void CartesianGridlinesImp::updateLocations()
    }
 
    emit extentsChanged();
-   emit modified();
    notify(SIGNAL_NAME(Subject, Modified));
 }
 

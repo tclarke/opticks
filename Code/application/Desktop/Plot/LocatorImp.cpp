@@ -33,8 +33,6 @@ LocatorImp::LocatorImp(PlotViewImp* pPlot, bool bPrimary) :
       connect(pPlot, SIGNAL(displayAreaChanged()), this, SLOT(updateExtents()));
    }
 
-   connect(this, SIGNAL(locationChanged(const LocationType&)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(styleChanged(const Locator::LocatorStyle&)), this, SIGNAL(modified()));
    connect(this, SIGNAL(locationChanged(const LocationType&)),
       this, SIGNAL(extentsChanged()));
 }
@@ -245,7 +243,6 @@ void LocatorImp::setColor(const QColor& locatorColor)
    if (locatorColor != mColor)
    {
       mColor = locatorColor;
-      emit modified();
       notify(SIGNAL_NAME(Subject, Modified));
    }
 }
@@ -265,7 +262,6 @@ void LocatorImp::setLineWidth(int iWidth)
    if (iWidth != mLineWidth)
    {
       mLineWidth = iWidth;
-      emit modified();
       notify(SIGNAL_NAME(Subject, Modified));
    }
 }
@@ -280,7 +276,6 @@ void LocatorImp::setLineStyle(LineStyle eStyle)
    if (eStyle != mLineStyle)
    {
       mLineStyle = eStyle;
-      emit modified();
       notify(SIGNAL_NAME(Subject, Modified));
    }
 }

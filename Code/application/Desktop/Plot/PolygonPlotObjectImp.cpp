@@ -35,6 +35,7 @@ PolygonPlotObjectImp::PolygonPlotObjectImp(PlotViewImp* pPlot, bool bPrimary) :
    mFillStyle(EMPTY_FILL),
    mHatchStyle(SOLID)
 {
+   VERIFYNR(connect(this, SIGNAL(lineDisplayChanged(bool)), this, SIGNAL(legendPixmapChanged())));
 }
 
 PolygonPlotObjectImp::~PolygonPlotObjectImp()
@@ -51,7 +52,6 @@ PolygonPlotObjectImp& PolygonPlotObjectImp::operator= (const PolygonPlotObjectIm
       mFillStyle = object.mFillStyle;
       mHatchStyle = object.mHatchStyle;
 
-      emit modified();
       notify(SIGNAL_NAME(Subject, Modified));
    }
 
@@ -461,7 +461,7 @@ void PolygonPlotObjectImp::setFillColor(const QColor& fillColor)
    if (fillColor != mFillColor)
    {
       mFillColor = fillColor;
-      emit modified();
+      emit legendPixmapChanged();
       notify(SIGNAL_NAME(Subject, Modified));
    }
 }
@@ -471,7 +471,7 @@ void PolygonPlotObjectImp::setFillStyle(const FillStyle& fillStyle)
    if (fillStyle != mFillStyle)
    {
       mFillStyle = fillStyle;
-      emit modified();
+      emit legendPixmapChanged();
       notify(SIGNAL_NAME(Subject, Modified));
    }
 }
@@ -481,7 +481,7 @@ void PolygonPlotObjectImp::setHatchStyle(const SymbolType& hatchStyle)
    if (hatchStyle != mHatchStyle)
    {
       mHatchStyle = hatchStyle;
-      emit modified();
+      emit legendPixmapChanged();
       notify(SIGNAL_NAME(Subject, Modified));
    }
 }

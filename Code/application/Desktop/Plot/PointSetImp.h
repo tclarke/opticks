@@ -18,6 +18,8 @@
 #include "TypesFile.h"
 #include "Point.h"
 
+#include <boost/any.hpp>
+#include <string>
 #include <vector>
 
 class PointSetImp : public PlotObjectImp
@@ -88,9 +90,10 @@ signals:
    void pointRemoved(Point* pPoint);
    void pointsSet(const std::vector<Point*>& points);
    void pointLocationChanged(Point* pPoint, const LocationType& location);
+   void lineDisplayChanged(bool display);
 
-protected slots:
-   void propagateLocationChanged(const LocationType& pointLocation);
+protected:
+   void propagateLocationChanged(Subject& subject, const std::string& signal, const boost::any& value);
 
 private:
    // Points

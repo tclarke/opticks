@@ -58,10 +58,10 @@ public slots:
    virtual void setSelected(bool bSelect);
 
 signals:
+   void legendPixmapChanged();
    void visibilityChanged(bool bDisplayed);
    void selected(bool bSelected);
    void renamed(const QString& strNewName);
-   void modified();
    void extentsChanged();
 
 private:

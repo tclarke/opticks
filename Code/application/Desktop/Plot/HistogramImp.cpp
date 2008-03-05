@@ -26,10 +26,10 @@ HistogramImp::HistogramImp(PlotViewImp* pPlot, bool bPrimary) :
    PlotObjectImp(pPlot, bPrimary),
    mColor(Qt::black)
 {
-   connect(this, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(histogramChanged()), this, SIGNAL(modified()));
-   connect(this, SIGNAL(histogramChanged()),
-      this, SIGNAL(extentsChanged()));
+   VERIFYNR(connect(this, SIGNAL(histogramChanged()),
+      this, SIGNAL(extentsChanged())));
+   VERIFYNR(connect(this, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(legendPixmapChanged())));
+
 }
 
 HistogramImp::~HistogramImp()
