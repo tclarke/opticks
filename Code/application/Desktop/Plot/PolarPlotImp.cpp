@@ -68,9 +68,6 @@ PolarPlotImp::PolarPlotImp(const string& id, const string& viewName, QGLContext*
    mGridlines.setLineStyle(SOLID_LINE);
    mGridlines.setColor(ColorType(212, 208, 200));
    mGridlines.setVisible(true);
-
-   // Connections
-   connect(&mGridlines, SIGNAL(modified()), this, SLOT(refresh()));
 }
 
 PolarPlotImp::~PolarPlotImp()

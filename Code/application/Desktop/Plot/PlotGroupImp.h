@@ -39,7 +39,6 @@ public:
    PlotObject* hitObject(LocationType point) const;
    bool hit(LocationType point) const;
    bool getExtents(double& dMinX, double& dMinY, double& dMaxX, double& dMaxY);
-   const QPixmap& getLegendPixmap(bool bSelected) const;
 
    virtual bool toXml(XMLWriter* pXml) const;
    virtual bool fromXml(DOMNode* pDocument, unsigned int version);

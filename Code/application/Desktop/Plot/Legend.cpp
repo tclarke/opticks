@@ -81,8 +81,8 @@ bool Legend::insertItem(PlotObject* pObject)
       pItem->setIcon(0, QIcon(pix));
       pItem->setText(0, strName);
 
-      connect(pObjectImp, SIGNAL(renamed(const QString&)), this, SLOT(updateItemText(const QString&)));
-      connect(pObjectImp, SIGNAL(modified()), this, SLOT(updateItemPixmap()));
+      VERIFYNR(connect(pObjectImp, SIGNAL(renamed(const QString&)), this, SLOT(updateItemText(const QString&))));
+      VERIFYNR(connect(pObjectImp, SIGNAL(legendPixmapChanged()), this, SLOT(updateItemPixmap())));
 
       mObjects.insert(pObject, pItem);
       return true;
@@ -165,8 +165,8 @@ bool Legend::removeItem(PlotObject* pObject)
       PlotObjectImp* pObjectImp = dynamic_cast<PlotObjectImp*>(pObject);
       if (pObjectImp != NULL)
       {
-         disconnect(pObjectImp, SIGNAL(renamed(const QString&)), this, SLOT(updateItemText(const QString&)));
-         disconnect(pObjectImp, SIGNAL(modified()), this, SLOT(updateItemPixmap()));
+         VERIFYNR(disconnect(pObjectImp, SIGNAL(renamed(const QString&)), this, SLOT(updateItemText(const QString&))));
+         VERIFYNR(disconnect(pObjectImp, SIGNAL(legendPixmapChanged()), this, SLOT(updateItemPixmap())));
       }
 
       QTreeWidgetItem* pItem = iter.value();

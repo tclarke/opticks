@@ -24,13 +24,6 @@ GridlinesImp::GridlinesImp(PlotViewImp* pPlot, bool bPrimary) :
    mMaxMajorLines(10),
    mMaxMinorLines(4)
 {
-   connect(this, SIGNAL(minorGridlinesEnabled(bool)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(lineWidthChanged(int)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(lineStyleChanged(LineStyle)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(maxNumMajorLinesChanged(int)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(maxNumMinorLinesChanged(int)), this, SIGNAL(modified()));
-
    if (pPlot != NULL)
    {
       connect(pPlot, SIGNAL(displayAreaChanged()), this, SLOT(updateLocations()));
@@ -54,7 +47,6 @@ GridlinesImp& GridlinesImp::operator= (const GridlinesImp& object)
       mMaxMajorLines = object.mMaxMajorLines;
       mMaxMinorLines = object.mMaxMinorLines;
 
-      emit modified();
       notify(SIGNAL_NAME(Subject, Modified));
    }
 
@@ -106,6 +98,11 @@ void GridlinesImp::enableMinorGridlines(bool bEnable)
    {
       mMinorGridlines = bEnable;
       emit minorGridlinesEnabled(mMinorGridlines);
+      PlotViewImp* pPlot = getPlot();
+      if (pPlot != NULL)
+      {
+         pPlot->refresh();
+      }
       updateLocations();
       notify(SIGNAL_NAME(Subject, Modified));
    }
@@ -120,6 +117,11 @@ void GridlinesImp::setColor(const QColor& clrLine)
 
    mColor = clrLine;
    emit colorChanged(mColor);
+   PlotViewImp* pPlot = getPlot();
+   if (pPlot != NULL)
+   {
+      pPlot->refresh();
+   }
    notify(SIGNAL_NAME(Subject, Modified));
 }
 
@@ -132,6 +134,11 @@ void GridlinesImp::setLineWidth(int iWidth)
 
    mLineWidth = iWidth;
    emit lineWidthChanged(mLineWidth);
+   PlotViewImp* pPlot = getPlot();
+   if (pPlot != NULL)
+   {
+      pPlot->refresh();
+   }
    notify(SIGNAL_NAME(Subject, Modified));
 }
 
@@ -144,6 +151,11 @@ void GridlinesImp::setLineStyle(LineStyle eStyle)
 
    mLineStyle = eStyle;
    emit lineStyleChanged(mLineStyle);
+   PlotViewImp* pPlot = getPlot();
+   if (pPlot != NULL)
+   {
+      pPlot->refresh();
+   }
    notify(SIGNAL_NAME(Subject, Modified));
 }
 
@@ -154,6 +166,11 @@ void GridlinesImp::setMaxNumMajorLines(int numLines)
       mMaxMajorLines = numLines;
       updateLocations();
       emit maxNumMajorLinesChanged(mMaxMajorLines);
+      PlotViewImp* pPlot = getPlot();
+      if (pPlot != NULL)
+      {
+         pPlot->refresh();
+      }
       notify(SIGNAL_NAME(Subject, Modified));
    }
 }
@@ -165,6 +182,11 @@ void GridlinesImp::setMaxNumMinorLines(int numLines)
       mMaxMinorLines = numLines;
       updateLocations();
       emit maxNumMinorLinesChanged(mMaxMinorLines);
+      PlotViewImp* pPlot = getPlot();
+      if (pPlot != NULL)
+      {
+         pPlot->refresh();
+      }
       notify(SIGNAL_NAME(Subject, Modified));
    }
 }

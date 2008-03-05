@@ -63,7 +63,6 @@ ArrowImp& ArrowImp::operator= (const ArrowImp& object)
       mLine = object.mLine;
       mArrowHead = object.mArrowHead;
 
-      emit modified();
       notify(SIGNAL_NAME(Subject, Modified));
    }
 
@@ -233,7 +232,6 @@ void ArrowImp::setArrowStyle(const ArrowStyle& eStyle)
    mStyle = eStyle;
 
    updateArrowHead();
-   emit modified();
    notify(SIGNAL_NAME(Subject, Modified));
 }
 
@@ -250,7 +248,6 @@ void ArrowImp::setBaseLocation(const LocationType& baseLocation)
    {
       pPoint->setLocation(baseLocation);
       updateArrowHead();
-      emit modified();
       notify(SIGNAL_NAME(Subject, Modified));
    }
 }
@@ -262,7 +259,6 @@ void ArrowImp::setTipLocation(const LocationType& tipLocation)
    {
       pPoint->setLocation(tipLocation);
       updateArrowHead();
-      emit modified();
       notify(SIGNAL_NAME(Subject, Modified));
    }
 }
@@ -275,8 +271,7 @@ void ArrowImp::setColor(const QColor& newColor)
       mLine.setLineColor(arrowColor);
       mArrowHead.setLineColor(arrowColor);
       mArrowHead.setFillColor(arrowColor);
-
-      emit modified();
+      emit legendPixmapChanged();
       notify(SIGNAL_NAME(Subject, Modified));
    }
 }

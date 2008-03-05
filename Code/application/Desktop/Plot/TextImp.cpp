@@ -69,7 +69,6 @@ TextImp& TextImp::operator= (const TextImp& object)
       mFont = object.mFont;
       mColor = object.mColor;
 
-      emit modified();
       notify(SIGNAL_NAME(Subject, Modified));
    }
 
@@ -239,7 +238,6 @@ void TextImp::setLocation(const LocationType& location)
       mLocation = location;
       emit locationChanged(mLocation);
       notify(SIGNAL_NAME(Text, LocationChanged), boost::any(mLocation));
-      emit modified();
    }
 }
 
@@ -256,7 +254,6 @@ void TextImp::setText(const QString& strText)
       mText = strText;
       emit textChanged(mText);
       notify(SIGNAL_NAME(Text, TextChanged), boost::any(mText.toStdString()));
-      emit modified();
    }
 }
 
@@ -265,7 +262,7 @@ void TextImp::setFont(const QFont& textFont)
    if (textFont != mFont)
    {
       mFont = textFont;
-      emit modified();
+      emit legendPixmapChanged();
       notify(SIGNAL_NAME(Subject, Modified));
    }
 }
@@ -280,7 +277,7 @@ void TextImp::setColor(const QColor& clrText)
    if (clrText != mColor)
    {
       mColor = clrText;
-      emit modified();
+      emit legendPixmapChanged();
       notify(SIGNAL_NAME(Text, ColorChanged), boost::any(
          ColorType(mColor.red(), mColor.green(), mColor.blue())));
    }

@@ -24,9 +24,6 @@ CurveCollectionImp::CurveCollectionImp(PlotViewImp* pPlot, bool bPrimary) :
    mLineWidth(1),
    mLineStyle(SOLID_LINE)
 {
-   connect(this, SIGNAL(curveAdded(Curve*)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(curveDeleted(Curve*)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(pointsChanged()), this, SIGNAL(modified()));
    connect(this, SIGNAL(curveAdded(Curve*)), this, SIGNAL(extentsChanged()));
    connect(this, SIGNAL(pointsChanged()), this, SIGNAL(extentsChanged()));
 }
@@ -321,57 +318,54 @@ const QPixmap& CurveCollectionImp::getLegendPixmap(bool bSelected) const
    static QColor pixColor;
    static QColor selectedPixColor;
 
-   if (getNumCurves() > 0)
+   QColor currentColor = getColor();
+   if (currentColor.isValid() == false)
    {
-      QColor currentColor = getColor();
-      if (currentColor.isValid() == false)
+      currentColor = Qt::black;
+   }
+
+   if ((bSelected == true) && (selectedPix.isNull() == false))
+   {
+      if (selectedPixColor != currentColor)
       {
-         currentColor = Qt::black;
+         selectedPixColor = currentColor;
+         selectedPix.fill(Qt::white);
+
+         QRect rcPixmap = selectedPix.rect();
+
+         QPolygon points(4);
+         points.setPoint(0, rcPixmap.center().x() - 4, rcPixmap.center().y());
+         points.setPoint(1, rcPixmap.center().x(), rcPixmap.center().y() + 4);
+         points.setPoint(2, rcPixmap.center().x() + 4, rcPixmap.center().y());
+         points.setPoint(3, rcPixmap.center().x(), rcPixmap.center().y() - 4);
+
+         QPainter p(&selectedPix);
+         p.setPen(QPen(currentColor, 1));
+         p.drawLine(rcPixmap.left() + 2, rcPixmap.center().y(), rcPixmap.right() - 2, rcPixmap.center().y());
+         p.setBrush(Qt::black);
+         p.setPen(QPen(Qt::black, 1));
+         p.drawPolygon(points);
+         p.end();
       }
 
-      if ((bSelected == true) && (selectedPix.isNull() == false))
+      return selectedPix;
+   }
+   else if ((bSelected == false) && (pix.isNull() == false))
+   {
+      if (pixColor != currentColor)
       {
-         if (selectedPixColor != currentColor)
-         {
-            selectedPixColor = currentColor;
-            selectedPix.fill(Qt::white);
+         pixColor = currentColor;
+         pix.fill(Qt::white);
 
-            QRect rcPixmap = selectedPix.rect();
+         QRect rcPixmap = pix.rect();
 
-            QPolygon points(4);
-            points.setPoint(0, rcPixmap.center().x() - 4, rcPixmap.center().y());
-            points.setPoint(1, rcPixmap.center().x(), rcPixmap.center().y() + 4);
-            points.setPoint(2, rcPixmap.center().x() + 4, rcPixmap.center().y());
-            points.setPoint(3, rcPixmap.center().x(), rcPixmap.center().y() - 4);
-
-            QPainter p(&selectedPix);
-            p.setPen(QPen(currentColor, 1));
-            p.drawLine(rcPixmap.left() + 2, rcPixmap.center().y(), rcPixmap.right() - 2, rcPixmap.center().y());
-            p.setBrush(Qt::black);
-            p.setPen(QPen(Qt::black, 1));
-            p.drawPolygon(points);
-            p.end();
-         }
-
-         return selectedPix;
+         QPainter p(&pix);
+         p.setPen(QPen(currentColor, 1));
+         p.drawLine(rcPixmap.left() + 2, rcPixmap.center().y(), rcPixmap.right() - 2, rcPixmap.center().y());
+         p.end();
       }
-      else if ((bSelected == false) && (pix.isNull() == false))
-      {
-         if (pixColor != currentColor)
-         {
-            pixColor = currentColor;
-            pix.fill(Qt::white);
 
-            QRect rcPixmap = pix.rect();
-
-            QPainter p(&pix);
-            p.setPen(QPen(currentColor, 1));
-            p.drawLine(rcPixmap.left() + 2, rcPixmap.center().y(), rcPixmap.right() - 2, rcPixmap.center().y());
-            p.end();
-         }
-
-         return pix;
-      }
+      return pix;
    }
 
    return PlotObjectImp::getLegendPixmap(bSelected);
@@ -418,7 +412,7 @@ void CurveCollectionImp::setColor(const QColor& clrCurve)
          }
       }
 
-      emit modified();
+      emit legendPixmapChanged();
       notify(SIGNAL_NAME(Subject, Modified));
    }
 }
@@ -445,7 +439,6 @@ void CurveCollectionImp::setLineWidth(int iWidth)
          }
       }
 
-      emit modified();
       notify(SIGNAL_NAME(Subject, Modified));
    }
 }
@@ -467,7 +460,6 @@ void CurveCollectionImp::setLineStyle(LineStyle eStyle)
          }
       }
 
-      emit modified();
       notify(SIGNAL_NAME(Subject, Modified));
    }
 }

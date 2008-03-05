@@ -29,7 +29,6 @@ CurveImp::CurveImp(PlotViewImp* pPlot, bool bPrimary) :
    mLineWidth(1),
    mLineStyle(SOLID_LINE)
 {
-   connect(this, SIGNAL(pointsChanged(const std::vector<LocationType>&)), this, SIGNAL(modified()));
    connect(this, SIGNAL(pointsChanged(const std::vector<LocationType>&)),
       this, SIGNAL(extentsChanged()));
 }
@@ -360,7 +359,7 @@ void CurveImp::setColor(const QColor& clrCurve)
    if (clrCurve != mColor)
    {
       mColor = clrCurve;
-      emit modified();
+      emit legendPixmapChanged();
       notify(SIGNAL_NAME(Subject, Modified));
    }
 }
@@ -375,7 +374,6 @@ void CurveImp::setLineWidth(int iWidth)
    if (iWidth != mLineWidth)
    {
       mLineWidth = iWidth;
-      emit modified();
       notify(SIGNAL_NAME(Subject, Modified));
    }
 }
@@ -385,7 +383,6 @@ void CurveImp::setLineStyle(LineStyle eStyle)
    if (eStyle != mLineStyle)
    {
       mLineStyle = eStyle;
-      emit modified();
       notify(SIGNAL_NAME(Subject, Modified));
    }
 }

@@ -35,11 +35,8 @@ RegionObjectImp::RegionObjectImp(PlotViewImp* pPlot, bool bPrimary) :
    mTransparency(255),
    mBorder(false)
 {
-   connect(this, SIGNAL(regionChanged(double, double, double, double)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(colorsChanged(const std::vector<ColorType>&)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(transparencyChanged(int)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(borderToggled(bool)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(regionChanged(double, double, double, double)), this, SIGNAL(extentsChanged()));
+   VERIFYNR(connect(this, SIGNAL(regionChanged(double, double, double, double)), this, SIGNAL(extentsChanged())));
+   VERIFYNR(connect(this, SIGNAL(colorsChanged(const std::vector<ColorType>&)), this, SIGNAL(legendPixmapChanged())));
 }
 
 RegionObjectImp::~RegionObjectImp()

@@ -78,7 +78,7 @@ PointSetImp& PointSetImp::operator= (const PointSetImp& object)
 
       if (getInteractive())
       {
-         emit modified();
+         emit legendPixmapChanged();
          notify(SIGNAL_NAME(Subject, Modified));
       }
       else
@@ -249,20 +249,12 @@ bool PointSetImp::insertPoint(Point* pPoint)
       return false;
    }
 
-   PointImp* pPointImp = dynamic_cast<PointImp*>(pPoint);
-   if (pPointImp != NULL)
-   {
-      connect(pPointImp, SIGNAL(locationChanged(const LocationType&)), this,
-         SLOT(propagateLocationChanged(const LocationType&)));
-      connect(pPointImp, SIGNAL(modified()), this, SIGNAL(modified()));
-   }
-
+   pPoint->attach(SIGNAL_NAME(Point, LocationChanged), Slot(this, &PointSetImp::propagateLocationChanged));
    mPoints.push_back(pPoint);
    if (getInteractive())
    {
       emit pointAdded(pPoint);
       notify(SIGNAL_NAME(PointSet, PointAdded), boost::any(pPoint));
-      emit modified();
    }
    else
    {
@@ -282,14 +274,7 @@ void PointSetImp::setPoints(const vector<Point*>& points)
       pPoint = *iter;
       if (pPoint != NULL)
       {
-         PointImp* pPointImp = dynamic_cast<PointImp*>(pPoint);
-         if (pPointImp != NULL)
-         {
-            connect(pPointImp, SIGNAL(locationChanged(const LocationType&)), this,
-               SLOT(propagateLocationChanged(const LocationType&)));
-            connect(pPointImp, SIGNAL(modified()), this, SIGNAL(modified()));
-         }
-
+         pPoint->attach(SIGNAL_NAME(Point, LocationChanged), Slot(this, &PointSetImp::propagateLocationChanged));
          mPoints.push_back(pPoint);
       }
    }
@@ -298,7 +283,6 @@ void PointSetImp::setPoints(const vector<Point*>& points)
    {
       emit pointsSet(mPoints);
       notify(SIGNAL_NAME(PointSet, PointsSet), boost::any(mPoints));
-      emit modified();
    }
    else
    {
@@ -356,9 +340,7 @@ bool PointSetImp::removePoint(Point* pPoint, bool bDelete)
          PointImp* pPointImp = dynamic_cast<PointImp*> (pPoint);
          if (pPointImp != NULL)
          {
-            disconnect(pPointImp, SIGNAL(modified()), this, SIGNAL(modified()));
-            disconnect(pPointImp, SIGNAL(locationChanged(const LocationType&)), this,
-               SLOT(propagateLocationChanged(const LocationType&)));
+            pPointImp->detach(SIGNAL_NAME(Point, LocationChanged), Slot(this, &PointSetImp::propagateLocationChanged));
             mPoints.erase(iter);
             if (getInteractive())
             {
@@ -396,9 +378,7 @@ void PointSetImp::clear(bool bDelete)
       PointImp* pPoint = dynamic_cast<PointImp*>(*iter);
       if (NN(pPoint))
       {
-         disconnect(pPoint, SIGNAL(modified()), this, SIGNAL(modified()));
-         disconnect(pPoint, SIGNAL(locationChanged(const LocationType&)), this,
-            SLOT(propagateLocationChanged(const LocationType&)));
+         pPoint->detach(SIGNAL_NAME(Point, LocationChanged), Slot(this, &PointSetImp::propagateLocationChanged));
          if (bDelete == true)
          {
             delete pPoint;
@@ -411,7 +391,6 @@ void PointSetImp::clear(bool bDelete)
    {
       emit pointsSet(mPoints);
       notify(SIGNAL_NAME(PointSet, PointsSet), boost::any(mPoints));
-      emit modified();
    }
    else
    {
@@ -750,7 +729,11 @@ void PointSetImp::setPointColor(const QColor& clrSymbol)
 
 void PointSetImp::displayLine(bool bDisplay)
 {
-   mLine = bDisplay;
+   if (mLine != bDisplay)
+   {
+      mLine = bDisplay;
+      emit lineDisplayChanged(bDisplay);
+   }
 }
 
 void PointSetImp::setLineColor(const QColor& clrLine)
@@ -765,7 +748,7 @@ void PointSetImp::setLineColor(const QColor& clrLine)
       mLineColor = clrLine;
       if (getInteractive())
       {
-         emit modified();
+         emit legendPixmapChanged();
          notify(SIGNAL_NAME(Subject, Modified));
       }
       else
@@ -787,7 +770,6 @@ void PointSetImp::setLineWidth(int iWidth)
       mLineWidth = iWidth;
       if (getInteractive())
       {
-         emit modified();
          notify(SIGNAL_NAME(Subject, Modified));
       }
       else
@@ -802,15 +784,14 @@ void PointSetImp::setLineStyle(const LineStyle& eStyle)
    if (eStyle != mLineStyle)
    {
       mLineStyle = eStyle;
-      emit modified();
       notify(SIGNAL_NAME(Subject, Modified));
    }
 }
 
-void PointSetImp::propagateLocationChanged(const LocationType& pointLocation)
+void PointSetImp::propagateLocationChanged(Subject& subject, const string& signal, const boost::any& value)
 {
-   PointAdapter* pPoint = NULL;
-   pPoint = const_cast<PointAdapter*> (static_cast<const PointAdapter*> (sender()));
+   Point* pPoint = dynamic_cast<Point*>(&subject);
+   LocationType pointLocation = boost::any_cast<LocationType>(value);
    if (pPoint != NULL)
    {
       if (getInteractive())
@@ -837,7 +818,6 @@ void PointSetImp::setInteractive(bool interactive)
       {
          emit pointsSet(mPoints);
          notify(SIGNAL_NAME(PointSet, PointsSet), boost::any(mPoints));
-         emit modified();
       }
    }
 
@@ -876,7 +856,6 @@ void PointSetImp::deleteSelectedPoints(bool filterVisible)
    mPoints = newPoints;
    emit pointsSet(mPoints);
    notify(SIGNAL_NAME(PointSet, PointsSet), boost::any(mPoints));
-   emit modified();
 }
 
 bool PointSetImp::toXml(XMLWriter* pXml) const

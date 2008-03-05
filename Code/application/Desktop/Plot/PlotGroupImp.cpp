@@ -120,7 +120,6 @@ PlotGroupImp& PlotGroupImp::operator= (const PlotGroupImp& object)
          ++iter;
       }
 
-      emit modified();
       notify(SIGNAL_NAME(Subject, Modified));
    }
 
@@ -362,13 +361,6 @@ bool PlotGroupImp::getExtents(double& dMinX, double& dMinY, double& dMaxX, doubl
    return true;
 }
 
-const QPixmap& PlotGroupImp::getLegendPixmap(bool bSelected) const
-{
-   // TODO: Create a valid pixmap
-
-   return PlotObjectImp::getLegendPixmap(bSelected);
-}
-
 void PlotGroupImp::setVisible(bool bVisible)
 {
    if (isVisible() != bVisible)
@@ -425,7 +417,6 @@ bool PlotGroupImp::insertObject(PlotObject* pObject)
 
    mObjects.push_back(pObject);
    emit objectAdded(pObject);
-   emit modified();
    notify(SIGNAL_NAME(PlotGroup, ObjectAdded), boost::any(pObject));
    return true;
 }
@@ -452,7 +443,6 @@ bool PlotGroupImp::removeObject(PlotObject* pObject, bool bDelete)
             delete dynamic_cast<PlotObjectImp*>(pObject);
          }
 
-         emit modified();
          notify(SIGNAL_NAME(Subject, Modified));
          return true;
       }

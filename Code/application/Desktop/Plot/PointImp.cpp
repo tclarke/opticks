@@ -30,8 +30,11 @@ PointImp::PointImp(PlotViewImp* pPlot, bool bPrimary) :
    mSymbolSize(5),
    mColor(Qt::black)
 {
-   connect(this, SIGNAL(locationChanged(const LocationType&)),
-      this, SIGNAL(extentsChanged()));
+   VERIFYNR(connect(this, SIGNAL(locationChanged(const LocationType&)),
+      this, SIGNAL(extentsChanged())));
+   VERIFYNR(connect(this, SIGNAL(symbolSizeChanged(int)), this, SIGNAL(legendPixmapChanged())));
+   VERIFYNR(connect(this, SIGNAL(symbolChanged(const Point::PointSymbolType&)), this, SIGNAL(legendPixmapChanged())));
+   VERIFYNR(connect(this, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(legendPixmapChanged())));
 }
 
 PointImp::PointImp(PlotViewImp* pPlot, bool bPrimary, LocationType point) :
@@ -41,8 +44,11 @@ PointImp::PointImp(PlotViewImp* pPlot, bool bPrimary, LocationType point) :
    mSymbolSize(5),
    mColor(Qt::black)
 {
-   connect(this, SIGNAL(locationChanged(const LocationType&)),
-      this, SIGNAL(extentsChanged()));
+   VERIFYNR(connect(this, SIGNAL(locationChanged(const LocationType&)),
+      this, SIGNAL(extentsChanged())));
+   VERIFYNR(connect(this, SIGNAL(symbolSizeChanged(int)), this, SIGNAL(legendPixmapChanged())));
+   VERIFYNR(connect(this, SIGNAL(symbolChanged(const Point::PointSymbolType&)), this, SIGNAL(legendPixmapChanged())));
+   VERIFYNR(connect(this, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(legendPixmapChanged())));
 }
 
 PointImp::PointImp(PlotViewImp* pPlot, bool bPrimary, double dX, double dY) :
@@ -52,8 +58,11 @@ PointImp::PointImp(PlotViewImp* pPlot, bool bPrimary, double dX, double dY) :
    mSymbolSize(5),
    mColor(Qt::black)
 {
-   connect(this, SIGNAL(locationChanged(const LocationType&)),
-      this, SIGNAL(extentsChanged()));
+   VERIFYNR(connect(this, SIGNAL(locationChanged(const LocationType&)),
+      this, SIGNAL(extentsChanged())));
+   VERIFYNR(connect(this, SIGNAL(symbolSizeChanged(int)), this, SIGNAL(legendPixmapChanged())));
+   VERIFYNR(connect(this, SIGNAL(symbolChanged(const Point::PointSymbolType&)), this, SIGNAL(legendPixmapChanged())));
+   VERIFYNR(connect(this, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(legendPixmapChanged())));
 }
 
 PointImp::~PointImp()
@@ -71,7 +80,6 @@ PointImp& PointImp::operator= (const PointImp& object)
       mSymbolSize = object.mSymbolSize;
       mColor = object.mColor;
 
-      emit modified();
       notify(SIGNAL_NAME(Subject, Modified));
    }
 
@@ -804,7 +812,6 @@ void PointImp::setLocation(const LocationType& location)
       mLocation = location;
       emit locationChanged(mLocation);
       notify(SIGNAL_NAME(Point, LocationChanged), boost::any(mLocation));
-      emit modified();
    }
 }
 
@@ -820,7 +827,6 @@ void PointImp::setSymbol(const Point::PointSymbolType& eSymbol)
       mSymbol = eSymbol;
       emit symbolChanged(mSymbol);
       notify(SIGNAL_NAME(Point, SymbolChanged), boost::any(mSymbol));
-      emit modified();
    }
 }
 
@@ -831,7 +837,6 @@ void PointImp::setSymbolSize(int iSize)
       mSymbolSize = iSize;
       emit symbolSizeChanged(mSymbolSize);
       notify(SIGNAL_NAME(Point, SymbolSizeChanged), boost::any(mSymbolSize));
-      emit modified();
    }
 }
 
@@ -848,7 +853,6 @@ void PointImp::setColor(const QColor& clrSymbol)
       emit colorChanged(mColor);
       notify(SIGNAL_NAME(Point, ColorChanged), boost::any(
          ColorType(mColor.red(), mColor.green(), mColor.blue())));
-      emit modified();
    }
 }
 
