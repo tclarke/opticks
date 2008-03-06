@@ -507,7 +507,9 @@ void SessionItemModel::SessionItemWrapper::removeChild(SessionItemWrapper* pWrap
 
    int row = 0;
    vector<SessionItemWrapper*>::reverse_iterator iter;
-   for (iter = mChildren.rbegin(), row = static_cast<int>(mChildren.size()) - 1; iter != mChildren.rend(); ++iter, -row)
+   for (iter = mChildren.rbegin(), row = static_cast<int>(mChildren.size()) - 1;
+        iter != mChildren.rend();
+        ++iter, --row)
    {
       SessionItemWrapper* pCurrentWrapper = *iter;
       if (pCurrentWrapper == pWrapper)

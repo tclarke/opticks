@@ -10,9 +10,11 @@
 #ifndef PLUGINMODEL_H
 #define PLUGINMODEL_H
 
+#include "AttachmentPtr.h"
+#include "PlugInManagerServices.h"
 #include "SessionItemModel.h"
 
-class PlugInManagerServicesImp;
+class ModuleDescriptor;
 
 class PlugInModel : public SessionItemModel
 {
@@ -24,14 +26,13 @@ public:
    void removePlugIn(Subject& subject, const std::string& signal, const boost::any& value);
    void addModule(Subject& subject, const std::string& signal, const boost::any& value);
    void removeModule(Subject& subject, const std::string& signal, const boost::any& value);
-   void plugInManagerDeleted(Subject& subject, const std::string& signal, const boost::any& value);
 
 protected:
-   void initialize();
+   void addModuleItem(ModuleDescriptor* pModule);
+   void removeModuleItem(ModuleDescriptor* pModule);
 
 private:
-   PlugInManagerServicesImp* mpManager;
-   bool mbManagerDeleted;
+   AttachmentPtr<PlugInManagerServices> mpManager;
 };
 
 #endif
