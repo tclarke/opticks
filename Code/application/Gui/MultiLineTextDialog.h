@@ -14,6 +14,10 @@
 
 #include <QtGui/QDialog>
 
+#include "ConfigurationSettings.h"
+
+#include <string>
+
 class QTextEdit;
 
 class MultiLineTextDialog : public QDialog
@@ -21,9 +25,14 @@ class MultiLineTextDialog : public QDialog
    Q_OBJECT
 
 public:
+   SETTING(Geometry, MultiLineTextDialog, std::string, "")
+
    MultiLineTextDialog(QWidget* pParent);
    QString getText() const; // return is empty() if user cancels
    void setText(const QString& text);
+
+public slots:
+   void accept();
 
 private:
    QTextEdit *mpEdit;

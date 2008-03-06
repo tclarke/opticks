@@ -7,12 +7,17 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtCore/QByteArray>
+#include <QtCore/QString>
 #include <QtGui/QFrame>
 #include <QtGui/QGridLayout>
 #include <QtGui/QPushButton>
 #include <QtGui/QTextEdit>
 
+#include "AppVerify.h"
 #include "MultiLineTextDialog.h"
+
+using namespace std;
 
 MultiLineTextDialog::MultiLineTextDialog(QWidget *pParent) :
    QDialog(pParent)
@@ -43,9 +48,21 @@ MultiLineTextDialog::MultiLineTextDialog(QWidget *pParent) :
    setWindowTitle("Enter Text");
    setModal(true);
 
+   const string geometry = MultiLineTextDialog::getSettingGeometry();
+   if (geometry.empty() == false)
+   {
+      VERIFYNR(restoreGeometry(QByteArray::fromBase64(QByteArray(geometry.c_str(), geometry.length()))));
+   }
+
    // Connections
-   connect(pOK, SIGNAL(clicked()), this, SLOT(accept()));
-   connect(pCancel, SIGNAL(clicked()), this, SLOT(reject()));
+   VERIFYNR(connect(pOK, SIGNAL(clicked()), this, SLOT(accept())));
+   VERIFYNR(connect(pCancel, SIGNAL(clicked()), this, SLOT(reject())));
+}
+
+void MultiLineTextDialog::accept()
+{
+   MultiLineTextDialog::setSettingGeometry(QString(saveGeometry().toBase64()).toStdString());
+   QDialog::accept();
 }
 
 QString MultiLineTextDialog::getText() const
