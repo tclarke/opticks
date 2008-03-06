@@ -18,29 +18,62 @@ using namespace std;
 
 PlugInModel::PlugInModel(QObject* pParent) :
    SessionItemModel(pParent),
-   mpManager(PlugInManagerServicesImp::instance()),
-   mbManagerDeleted(false)
+   mpManager(Service<PlugInManagerServices>().get())
 {
    // Initialization
-   initialize();
+   PlugInManagerServicesImp* pManagerImp = dynamic_cast<PlugInManagerServicesImp*>(mpManager.get());
+   if (pManagerImp != NULL)
+   {
+      const vector<ModuleDescriptor*>& modules = pManagerImp->getModuleDescriptors();
+      for (vector<ModuleDescriptor*>::size_type i = 0; i < modules.size(); ++i)
+      {
+         ModuleDescriptor* pModule = modules[i];
+         if (pModule != NULL)
+         {
+            addModuleItem(pModule);
+         }
+      }
+   }
 
    // Connections
-   mpManager->attach(SIGNAL_NAME(PlugInManagerServices, PlugInCreated), Slot(this, &PlugInModel::addPlugIn));
-   mpManager->attach(SIGNAL_NAME(PlugInManagerServices, PlugInDestroyed), Slot(this, &PlugInModel::removePlugIn));
-   mpManager->attach(SIGNAL_NAME(PlugInManagerServices, ModuleCreated), Slot(this, &PlugInModel::addModule));
-   mpManager->attach(SIGNAL_NAME(PlugInManagerServices, ModuleDestroyed), Slot(this, &PlugInModel::removeModule));
-   mpManager->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &PlugInModel::plugInManagerDeleted));
+   mpManager.addSignal(SIGNAL_NAME(PlugInManagerServices, ModuleCreated), Slot(this, &PlugInModel::addModule));
+   mpManager.addSignal(SIGNAL_NAME(PlugInManagerServices, ModuleDestroyed), Slot(this, &PlugInModel::removeModule));
+   mpManager.addSignal(SIGNAL_NAME(PlugInManagerServices, PlugInCreated), Slot(this, &PlugInModel::addPlugIn));
+   mpManager.addSignal(SIGNAL_NAME(PlugInManagerServices, PlugInDestroyed), Slot(this, &PlugInModel::removePlugIn));
 }
 
 PlugInModel::~PlugInModel()
 {
-   if (mbManagerDeleted == false)
+   // Remove the module items
+   PlugInManagerServicesImp* pManagerImp = dynamic_cast<PlugInManagerServicesImp*>(mpManager.get());
+   if (pManagerImp != NULL)
    {
-      mpManager->detach(SIGNAL_NAME(PlugInManagerServices, PlugInCreated), Slot(this, &PlugInModel::addPlugIn));
-      mpManager->detach(SIGNAL_NAME(PlugInManagerServices, PlugInDestroyed), Slot(this, &PlugInModel::removePlugIn));
-      mpManager->detach(SIGNAL_NAME(PlugInManagerServices, ModuleCreated), Slot(this, &PlugInModel::addModule));
-      mpManager->detach(SIGNAL_NAME(PlugInManagerServices, ModuleDestroyed), Slot(this, &PlugInModel::removeModule));
-      mpManager->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &PlugInModel::plugInManagerDeleted));
+      const vector<ModuleDescriptor*>& modules = pManagerImp->getModuleDescriptors();
+      for (vector<ModuleDescriptor*>::size_type i = 0; i < modules.size(); ++i)
+      {
+         ModuleDescriptor* pModule = modules[i];
+         if (pModule != NULL)
+         {
+            removeModuleItem(pModule);
+         }
+      }
+   }
+}
+void PlugInModel::addModule(Subject& subject, const string& signal, const boost::any& value)
+{
+   ModuleDescriptor* pModule = boost::any_cast<ModuleDescriptor*>(value);
+   if (pModule != NULL)
+   {
+      addModuleItem(pModule);
+   }
+}
+
+void PlugInModel::removeModule(Subject& subject, const string& signal, const boost::any& value)
+{
+   ModuleDescriptor* pModule = boost::any_cast<ModuleDescriptor*>(value);
+   if (pModule != NULL)
+   {
+      removeModuleItem(pModule);
    }
 }
 
@@ -86,27 +119,40 @@ void PlugInModel::removePlugIn(Subject& subject, const string& signal, const boo
    }
 }
 
-void PlugInModel::addModule(Subject& subject, const string& signal, const boost::any& value)
+void PlugInModel::addModuleItem(ModuleDescriptor* pModule)
 {
-   ModuleDescriptor *pModule = boost::any_cast<ModuleDescriptor*>(value);
-   SessionItemWrapper* pRootWrapper = getRootWrapper();
-   SessionItemWrapper* pModuleWrapper = pRootWrapper->addChild(pModule);
-   if(pModuleWrapper != NULL)
+   if (pModule == NULL)
    {
+      return;
+   }
+
+   SessionItemWrapper* pRootWrapper = getRootWrapper();
+   if (pRootWrapper == NULL)
+   {
+      return;
+   }
+
+   // Add the module item
+   SessionItemWrapper* pModuleWrapper = pRootWrapper->addChild(pModule);
+   if (pModuleWrapper != NULL)
+   {
+      // Add the plug-in descriptor items
       vector<PlugInDescriptorImp*> descriptors = pModule->getPlugInSet();
-      for (vector<PlugInDescriptorImp*>::size_type j = 0; j < descriptors.size(); ++j)
+      for (vector<PlugInDescriptorImp*>::size_type i = 0; i < descriptors.size(); ++i)
       {
-         PlugInDescriptorImp* pDescriptor = descriptors[j];
+         PlugInDescriptorImp* pDescriptor = descriptors[i];
          SessionItem* pDescriptorItem = dynamic_cast<SessionItem*>(pDescriptor);
+
          if ((pDescriptor != NULL) && (pDescriptorItem != NULL))
          {
             SessionItemWrapper* pDescriptorWrapper = pModuleWrapper->addChild(pDescriptorItem);
             if (pDescriptorWrapper != NULL)
             {
+               // Add the plug-in instance items
                vector<PlugIn*> plugIns = pDescriptor->getPlugIns();
-               for (vector<PlugIn*>::size_type k = 0; k < plugIns.size(); ++k)
+               for (vector<PlugIn*>::size_type j = 0; j < plugIns.size(); ++j)
                {
-                  SessionItem* pPlugIn = dynamic_cast<SessionItem*>(plugIns[k]);
+                  SessionItem* pPlugIn = dynamic_cast<SessionItem*>(plugIns[j]);
                   if (pPlugIn != NULL)
                   {
                      pDescriptorWrapper->addChild(pPlugIn);
@@ -118,60 +164,16 @@ void PlugInModel::addModule(Subject& subject, const string& signal, const boost:
    }
 }
 
-void PlugInModel::removeModule(Subject& subject, const string& signal, const boost::any& value)
+void PlugInModel::removeModuleItem(ModuleDescriptor* pModule)
 {
-   ModuleDescriptor *pModule = boost::any_cast<ModuleDescriptor*>(value);
-   SessionItemWrapper* pRootWrapper = getRootWrapper();
-   pRootWrapper->removeChild(pModule);
-}
-void PlugInModel::plugInManagerDeleted(Subject& subject, const string& signal, const boost::any& value)
-{
-   mbManagerDeleted = true;
-}
-
-void PlugInModel::initialize()
-{
-   // Clear any existing data
-   clear();
-
-   // Add the modules and plug-ins
-   SessionItemWrapper* pRootWrapper = getRootWrapper();
-
-   const vector<ModuleDescriptor*>& modules = mpManager->getModuleDescriptors();
-   for (vector<ModuleDescriptor*>::size_type i = 0; i < modules.size(); ++i)
+   if (pModule == NULL)
    {
-      ModuleDescriptor* pModule = modules[i];
-      if (pModule != NULL)
-      {
-         SessionItemWrapper* pModuleWrapper = pRootWrapper->addChild(pModule);
-         if (pModuleWrapper != NULL)
-         {
-            vector<PlugInDescriptorImp*> descriptors = pModule->getPlugInSet();
-            for (vector<PlugInDescriptorImp*>::size_type j = 0; j < descriptors.size(); ++j)
-            {
-               PlugInDescriptorImp* pDescriptor = descriptors[j];
-               SessionItem* pDescriptorItem = dynamic_cast<SessionItem*>(pDescriptor);
-               if ((pDescriptor != NULL) && (pDescriptorItem != NULL))
-               {
-                  SessionItemWrapper* pDescriptorWrapper = pModuleWrapper->addChild(pDescriptorItem);
-                  if (pDescriptorWrapper != NULL)
-                  {
-                     vector<PlugIn*> plugIns = pDescriptor->getPlugIns();
-                     for (vector<PlugIn*>::size_type k = 0; k < plugIns.size(); ++k)
-                     {
-                        SessionItem* pPlugIn = dynamic_cast<SessionItem*>(plugIns[k]);
-                        if (pPlugIn != NULL)
-                        {
-                           pDescriptorWrapper->addChild(pPlugIn);
-                        }
-                     }
-                  }
-               }
-            }
-         }
-      }
+      return;
    }
 
-   // Reset the model to update the view
-   reset();
+   SessionItemWrapper* pRootWrapper = getRootWrapper();
+   if (pRootWrapper != NULL)
+   {
+      pRootWrapper->removeChild(pModule);
+   }
 }
