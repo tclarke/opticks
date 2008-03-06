@@ -13,6 +13,7 @@
 #include "AoiElementAdapter.h"
 #include "AppAssert.h"
 #include "AppVerify.h"
+#include "AttachmentPtr.h"
 #include "DataDescriptorAdapter.h"
 #include "DataElementAdapter.h"
 #include "DataElementGroupAdapter.h"
@@ -665,6 +666,8 @@ bool ModelServicesImp::destroyElement(DataElement* pElement)
       return false;
    }
 
+   AttachmentPtr<DataElement> pParent(pElement);
+
    // Destroy the element's children
    vector<DataElement*> children = getElements(pElement, string());
 
@@ -676,6 +679,12 @@ bool ModelServicesImp::destroyElement(DataElement* pElement)
       {
          destroyElement(pChild);
       }
+   }
+
+   // Check if the parent element was destroyed as a result of destroying its children
+   if (pParent.get() == NULL)
+   {
+      return true;
    }
 
    // Destroy the element

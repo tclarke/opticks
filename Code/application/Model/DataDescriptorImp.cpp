@@ -9,7 +9,6 @@
 
 #include "DataDescriptorImp.h"
 #include "DataDescriptor.h"
-#include "DataElement.h"
 #include "FileDescriptorAdapter.h"
 #include "ModelServicesImp.h"
 #include "RasterFileDescriptorAdapter.h"
@@ -82,7 +81,7 @@ const string& DataDescriptorImp::getType() const
 
 DataElement* DataDescriptorImp::getParent() const
 {
-   return mpParent;
+   return const_cast<DataElement*>(mpParent.get());
 }
 
 vector<string> DataDescriptorImp::getParentDesignator() const
@@ -92,9 +91,9 @@ vector<string> DataDescriptorImp::getParentDesignator() const
 
 void DataDescriptorImp::setParent(DataElement *pParent)
 {
-   if (pParent != mpParent)
+   if (pParent != mpParent.get())
    {
-      mpParent = pParent;
+      mpParent.reset(pParent);
       generateParentDesignator();
       notify(SIGNAL_NAME(Subject, Modified));
    }
@@ -187,11 +186,12 @@ FileDescriptorImp* DataDescriptorImp::getFileDescriptor()
 
 DataDescriptor* DataDescriptorImp::copy() const
 {
-   if(mpParent == NULL && !mParentDesignator.empty())
+   if ((mpParent.get() == NULL) && (!mParentDesignator.empty()))
    {
       return copy(mName, mParentDesignator);
    }
-   return copy(mName, mpParent);
+
+   return copy(mName, const_cast<DataElement*>(mpParent.get()));
 }
 
 DataDescriptor* DataDescriptorImp::copy(const string& name, DataElement* pParent) const
@@ -214,7 +214,7 @@ DataDescriptor* DataDescriptorImp::copy(const string& name, DataElement* pParent
    return pDescriptor;
 }
 
-DataDescriptor* DataDescriptorImp::copy(const std::string& name, const std::vector<std::string>& parent) const
+DataDescriptor* DataDescriptorImp::copy(const string& name, const vector<string>& parent) const
 {
    ModelServicesImp* pModel = ModelServicesImp::instance();
    if (pModel == NULL)
@@ -249,16 +249,15 @@ void DataDescriptorImp::addToMessageLog(Message* pMessage) const
 
    // Parent element
    string parentElement;
-   if (mpParent != NULL)
+   if (mpParent.get() != NULL)
    {
       parentElement = mpParent->getName();
    }
    else
    {
-
-      for(vector<string>::const_iterator part = mParentDesignator.begin(); part != mParentDesignator.end(); ++part)
+      for (vector<string>::const_iterator part = mParentDesignator.begin(); part != mParentDesignator.end(); ++part)
       {
-         if(part != mParentDesignator.begin())
+         if (part != mParentDesignator.begin())
          {
             parentElement += "/" + *part;
          }
@@ -327,7 +326,7 @@ bool DataDescriptorImp::toXml(XMLWriter* pXml) const
    if ((bSuccess == true) && (mpFileDescriptor != NULL))
    {
       pXml->pushAddPoint(pXml->addElement("FileDescriptor"));
-      if(mpFileDescriptor != NULL)
+      if (mpFileDescriptor != NULL)
       {
          bSuccess = mpFileDescriptor->toXml(pXml);
       }
@@ -444,7 +443,7 @@ bool DataDescriptorImp::isKindOfDataDescriptor(const string& className)
 void DataDescriptorImp::generateParentDesignator()
 {
    mParentDesignator.clear();
-   if(mpParent != NULL)
+   if (mpParent.get() != NULL)
    {
       mParentDesignator = mpParent->getParentDesignator();
       mParentDesignator.push_back(mpParent->getName());
