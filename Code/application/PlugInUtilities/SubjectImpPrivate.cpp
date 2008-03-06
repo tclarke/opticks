@@ -13,6 +13,9 @@
 
 #include <QtCore/QtGlobal>
 
+#include <algorithm>
+#include <vector>
+
 using namespace std;
 
 SubjectImpPrivate::SubjectImpPrivate() : mpSubject(NULL)
@@ -137,6 +140,7 @@ public:
 private:
    vector<string> &mRecursions;
 };
+
 void SubjectImpPrivate::notify(Subject &subject, const string &signal, const string &originalSignal, const boost::any &data)
 {
    if (signal.empty())
@@ -154,15 +158,24 @@ void SubjectImpPrivate::notify(Subject &subject, const string &signal, const str
       {
          PopRecursion popper(mRecursions, signal);
 
-         list<Slot>::iterator pSlot;
-         for (pSlot=slotVec.begin(); 
-            pSlot!=slotVec.end(); 
-            ++pSlot)
+         // Keep a (unique) vector of Slots which have been notified to ensure that no Slot is notified more than once
+         // For efficiency, only check the vector when Slots have been added during notification
+         // This prevents an infinite loop when a Slot does a detach/attach to a signal
+         unsigned int slotNum = 0;
+         const unsigned int numOriginalSlots = slotVec.size();
+         vector<Slot> notifiedSlots;
+         notifiedSlots.reserve(numOriginalSlots);
+         for (list<Slot>::iterator pSlot = slotVec.begin(); pSlot != slotVec.end(); ++pSlot, ++slotNum)
          {
             try
             {
                Slot slotCopy = *pSlot;
-               slotCopy.update(subject, signal, data);
+               if (slotNum < numOriginalSlots ||
+                  find(notifiedSlots.begin(), notifiedSlots.end(), slotCopy) == notifiedSlots.end())
+               {
+                  notifiedSlots.push_back(slotCopy);
+                  slotCopy.update(subject, signal, data);
+               }
             }
             catch(boost::bad_any_cast &exc)
             {
