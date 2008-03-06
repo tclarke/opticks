@@ -45,15 +45,14 @@ void ProgressTracker::Stage::initialize(Stage *pParent)
    mpParent = pParent;
    if(pParent == NULL)
    {
-      mpStep = StepResource(mMessage, mComponent, mKey, "Progress Tracker Step Failed");
+      mpStep = StepResource(mMessage, mComponent, mKey);
    }
    else
    {
       Step *pStep = pParent->getStep();
       if(pStep != NULL)
       {
-         mpStep = StepResource(pStep->addStep(mMessage, mComponent, mKey, false),
-                                    "Progress Tracker Step Failed");
+         mpStep = StepResource(pStep->addStep(mMessage, mComponent, mKey, false));
       }
    }
 }
