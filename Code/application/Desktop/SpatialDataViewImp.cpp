@@ -256,6 +256,7 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
    if (mpMeasurementsLayer != NULL)
    {
       VERIFYNR(connect(mpMeasurementsLayer, SIGNAL(modified()), this, SLOT(refresh())));
+      VERIFYNR(connect(mpMeasurementsLayer, SIGNAL(modified()), this, SLOT(notifyLayerModified())));
    }
 
    ApplicationWindow* pAppWindow = static_cast<ApplicationWindow*>(pDesktop->getMainWidget());
@@ -305,7 +306,8 @@ SpatialDataViewImp::~SpatialDataViewImp()
             LayerImp* pLayerImp = dynamic_cast<LayerImp*> (pLayer);
             if (pLayerImp != NULL)
             {
-               disconnect(pLayerImp, SIGNAL(modified()), this, SLOT(refresh()));
+               VERIFYNR(disconnect(pLayerImp, SIGNAL(modified()), this, SLOT(refresh())));
+               VERIFYNR(disconnect(pLayerImp, SIGNAL(modified()), this, SLOT(notifyLayerModified())));
             }
 
             // Detach the element
@@ -590,6 +592,15 @@ LayerList* SpatialDataViewImp::getLayerList() const
    return mpLayerList;
 }
 
+void SpatialDataViewImp::notifyLayerModified()
+{
+   Layer* pLayer = dynamic_cast<Layer*>(sender());
+   if (pLayer != NULL)
+   {
+      emit layerModified(pLayer);
+   }
+}
+
 Layer* SpatialDataViewImp::createLayer(const LayerType& layerType)
 {
    return createLayer(layerType, NULL, QString());
@@ -687,8 +698,9 @@ bool SpatialDataViewImp::addLayer(Layer* pLayer)
       // Set the view to refresh when the layer is modified
       if (pLayerImp != NULL)
       {
-         connect(pLayerImp, SIGNAL(modified()), this, SLOT(refresh()));
-         connect(pLayerImp, SIGNAL(extentsModified()), this, SLOT(updateExtents()));
+         VERIFYNR(connect(pLayerImp, SIGNAL(modified()), this, SLOT(refresh())));
+         VERIFYNR(connect(pLayerImp, SIGNAL(modified()), this, SLOT(notifyLayerModified())));
+         VERIFYNR(connect(pLayerImp, SIGNAL(extentsModified()), this, SLOT(updateExtents())));
       }
 
       // Show the layer
@@ -1080,6 +1092,7 @@ bool SpatialDataViewImp::deleteLayer(Layer* pLayer, bool bClearUndo)
    // Disconnect
    LayerImp *pLayerImp = dynamic_cast<LayerImp*>(pLayer);
    disconnect(pLayerImp, SIGNAL(modified()), this, SLOT(refresh()));
+   disconnect(pLayerImp, SIGNAL(modified()), this, SLOT(notifyLayerModified()));
    disconnect(pLayerImp, SIGNAL(extentsModified()), this, SLOT(updateExtents()));
 
    // Detach the element

@@ -128,6 +128,7 @@ public slots:
 
 signals:
    void textureModeChanged(const TextureMode& textureMode);
+   void layerModified(Layer* pLayer);
    void layerAdded(Layer* pLayer);
    void layerShown(Layer* pLayer);
    void layerHidden(Layer* pLayer);
@@ -160,6 +161,7 @@ protected:
 protected slots:
    void keyPan();
    void updateMouseCursor(const MouseMode* pMouseMode);
+   void notifyLayerModified();
    void createLayer(QAction* pAction);
    void copyLayer();
    void convertLayer();
