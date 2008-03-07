@@ -10,6 +10,7 @@
 #ifndef PROGRESSRESOURCE_H__
 #define PROGRESSRESOURCE_H__
 
+#include "ApplicationServices.h"
 #include "Progress.h"
 #include "Resource.h"
 #include "DesktopServices.h"
@@ -43,37 +44,26 @@ public:
    Progress *obtainResource(const Args &args) const 
    {
       Progress *pProgress = args.mpProgress;
-      if(pProgress == NULL)
+      if (pProgress == NULL)
       {
-         Service<UtilityServices> pUtility;
-         if(pUtility.get() != NULL)
-         {
-            pProgress = pUtility->getProgress(args.mThreadSafe);
-         }
+         pProgress = Service<UtilityServices>()->getProgress(args.mThreadSafe);
       }
-      if(pProgress != NULL && args.mCreateDialog)
+
+      if (pProgress != NULL && args.mCreateDialog == true && Service<ApplicationServices>()->isInteractive() == true)
       {
-         Service<DesktopServices> pDesktop;
-         bool success = (pDesktop.get() != NULL);
-         if(success)
-         {
-            success = pDesktop->createProgressDialog(args.mCaption, pProgress);
-         }
-         if(!success)
+         if (Service<DesktopServices>()->createProgressDialog(args.mCaption, pProgress) == false)
          {
             releaseResource(args, pProgress);
             pProgress = NULL;
          }
       }
+
       return pProgress;
    }
+
    void releaseResource(const Args &args, Progress *pProgress) const 
    {
-      Service<UtilityServices> pUtility;
-      if(pUtility.get() != NULL)
-      {
-         pUtility->destroyProgress(pProgress);
-      }
+      Service<UtilityServices>()->destroyProgress(pProgress);
    }
 };
 
@@ -101,7 +91,8 @@ public:
     *           If true, a thread-safe Progress object is created.
     */
    explicit ProgressResource(const std::string &caption = std::string(), bool threadSafe = false) :
-         Resource<Progress,ProgressObject>(ProgressObject::Args(threadSafe, !caption.empty(), caption)) {}
+         Resource<Progress,ProgressObject>(ProgressObject::Args(threadSafe,
+            !caption.empty() && Service<ApplicationServices>()->isInteractive(), caption)) {}
    /**
     *  Constructs a Resource object that manages a Progress object.
     *
@@ -115,7 +106,8 @@ public:
     *           created with this caption.
     */
    explicit ProgressResource(Progress &progress, const std::string &caption = std::string()) :
-         Resource<Progress,ProgressObject>(ProgressObject::Args(&progress, !caption.empty(), caption)) {}
+         Resource<Progress,ProgressObject>(ProgressObject::Args(&progress,
+            !caption.empty() && Service<ApplicationServices>()->isInteractive(), caption)) {}
 };
 
 #endif
