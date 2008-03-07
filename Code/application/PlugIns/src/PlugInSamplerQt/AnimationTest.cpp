@@ -274,20 +274,26 @@ void AnimationTestDlg::createAnimations()
    srand(static_cast<unsigned int>(time(NULL)));
    const unsigned int numValues = static_cast<unsigned int>(mpNumFrames->value());
    const unsigned int numAnimations = static_cast<unsigned int>(mpNumAnimations->value());
+   int animWidth = QString::number(numAnimations-1).length();
+   int valWidth = QString::number(numValues-1).length();
    for (unsigned int i = 0; i < numAnimations; ++i)
    {
-      QString animationName = QString("Animation_%1").arg(++mAnimationNumber, 4, 10, QChar('0'));
+      QString animationName = QString("Animation_%1").arg(++mAnimationNumber, animWidth, 10, QChar('0'));
       Animation* pAnimation = mpController->createAnimation(animationName.toStdString());
       VERIFYNRV(pAnimation != NULL);
 
       vector<AnimationFrame> frames;
       for (unsigned int j = 0; j < numValues; j++)
       {
-         QString animationFrameName = QString("AnimationFrame_%1").arg(j, 4, 10, QChar('0'));
+         QString animationFrameName = QString("AnimationFrame_%1").arg(j, valWidth, 10, QChar('0'));
 
          // Get a random value between 0 and 1. Scale the value by range and offset it by minValue.
          double frameTime = ((static_cast<double>(rand()) / static_cast<double>(RAND_MAX)) * range) + minValue;
          frames.push_back(AnimationFrame(animationFrameName.toStdString(), i, frameTime));
+         if (j == 0) // insert a duplicate frame
+         {
+            frames.push_back(AnimationFrame(animationFrameName.toStdString() + "_dup", i, frameTime));
+         }
       }
 
       pAnimation->setFrames(frames);
