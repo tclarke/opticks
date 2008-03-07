@@ -24,6 +24,7 @@
 #include "PerspectiveViewImp.h"
 #include "SessionManager.h"
 #include "SpatialDataView.h"
+#include "SpatialDataViewImp.h"
 #include "TextObjectAdapter.h"
 #include "View.h"
 #include "ViewImp.h"
@@ -84,6 +85,12 @@ void ViewObjectImp::setView(View* pView)
    {
       VERIFYNR(disconnect(mpView, SIGNAL(backgroundColorChanged(const QColor&)), this,
          SLOT(setBackgroundColor(const QColor&))));
+
+      SpatialDataViewImp* pSpatialDataViewImp = dynamic_cast<SpatialDataViewImp*>(mpView);
+      if (pSpatialDataViewImp != NULL)
+      {
+         VERIFYNR(disconnect(pSpatialDataViewImp, SIGNAL(layerModified(Layer*)), this, SLOT(refresh())));
+      }
 
       View* pOldView = dynamic_cast<View*>(mpView);
       if (pOldView != NULL)
@@ -215,6 +222,12 @@ void ViewObjectImp::setView(View* pView)
          // Connections
          VERIFYNR(connect(mpView, SIGNAL(backgroundColorChanged(const QColor&)), this,
             SLOT(setBackgroundColor(const QColor&))));
+
+         SpatialDataViewImp* pSpatialDataViewImp = dynamic_cast<SpatialDataViewImp*>(mpView);
+         if (pSpatialDataViewImp != NULL)
+         {
+            VERIFYNR(connect(pSpatialDataViewImp, SIGNAL(layerModified(Layer*)), this, SLOT(refresh())));
+         }
       }
    }
 
@@ -440,6 +453,19 @@ void ViewObjectImp::updateTextColor()
 
    ColorType textColor(clrText.red(), clrText.green(), clrText.blue());
    mpInvalidText->setTextColor(textColor);
+}
+
+void ViewObjectImp::refresh()
+{
+   GraphicLayer* pLayer = getLayer();
+   if (pLayer != NULL)
+   {
+      View* pView = pLayer->getView();
+      if (pView != NULL)
+      {
+         pView->refresh();
+      }
+   }
 }
 
 bool ViewObjectImp::processMouseRelease(LocationType screenCoord, 
