@@ -301,9 +301,19 @@ double AnimationImp::getNextFrameValue(AnimationState direction, size_t offset) 
    else if (direction == PLAY_FORWARD)
    {
       frame = mCurrentFrameIter;
-      for (size_t i = 0; frame != mFrames.end() && i < offset; ++i, ++frame)
+      double prevValue = -1.0;
+      for (size_t i = 0; frame != mFrames.end(); ++i, ++frame)
       {
-         // no body
+         double curValue = getFrameValue(&*frame);
+         if (curValue == prevValue) // don't count duplicate frames
+         {
+            ++offset;
+         }
+         if (i >= offset)
+         {
+            break;
+         }
+         prevValue = curValue;
       }
    }
    else
@@ -311,8 +321,13 @@ double AnimationImp::getNextFrameValue(AnimationState direction, size_t offset) 
       frame = mCurrentFrameIter;
       while (frame != mFrames.begin() && offset > 0)
       {
+         double prevValue = getFrameValue (&*frame);
          --frame;
-         --offset;
+         double curValue = getFrameValue (&*frame);
+         if (prevValue != curValue) // don't count duplicate frames
+         {
+            --offset;
+         }
       }
 
       if (offset != 0)

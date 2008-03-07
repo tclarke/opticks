@@ -208,6 +208,8 @@ public:
     * Get the value of the next frame.
     *
     * This method is used to find what the value will be for some offset away from the current frame.
+    * This method only counts unique frames, so a string of duplicate frames will count as 1 frame
+    * relative to the offset.
     *
     * @param direction
     *        The direction to go. 
