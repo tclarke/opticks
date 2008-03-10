@@ -67,7 +67,7 @@ ViewImp::ViewImp(const string& id, const string& viewName, QGLContext* drawConte
    mMaxX(1.0),
    mMaxY(1.0),
    mInset(false),
-   mCrossHair(true),
+   mCrossHair(false),
    mpAnimationController(NULL),
    mpUndoStack(new UndoStack(this)),
    mUndoBlocked(false),
