@@ -13,14 +13,14 @@
 #define APP_NAME "Opticks"
 #define APP_NAME_LONG "Opticks"
 #define APP_CONTACT_INFORMATION "users@opticks.ballforge.net"
-#define APP_COPYRIGHT "Copyright © 2007, Ball Aerospace & Technologies Corp."
+#define APP_COPYRIGHT "Copyright © 2008, Ball Aerospace & Technologies Corp."
 #define APP_SPONSOR "Ball"
-#define APP_VERSION_NUMBER "Unofficial"
+#define APP_VERSION_NUMBER "4.1.1"
 #define APP_IS_PRODUCTION_RELEASE true
-#define APP_COPYRIGHT_MSG "© 2000 - 2007 Ball Aerospace & Technologies Corp., Fairborn, Ohio"
-#define APP_RELEASE_DATE_YEAR 2007
-#define APP_RELEASE_DATE_MONTH 12
-#define APP_RELEASE_DATE_DAY 19 
+#define APP_COPYRIGHT_MSG "© 2000 - 2008 Ball Aerospace & Technologies Corp., Fairborn, Ohio"
+#define APP_RELEASE_DATE_YEAR 2008
+#define APP_RELEASE_DATE_MONTH 3
+#define APP_RELEASE_DATE_DAY 14 
 
 
 #endif
