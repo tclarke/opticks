@@ -214,7 +214,7 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir):
    plugins_file = None
    libs = ["PlugInLib", "PlugInUtilities", "HdfPlugInLib", "NitfPlugInLib"]
    plugins = [ "Aspam", "AutoImporter", "BandMath", "CoreIo", "DataFusion", "Dted",
-      "ENVI", "Generic", "GeographicFeatures", "Georeference", "Hdf", "Ice",
+      "ENVI", "Generic", "GeographicFeatures", "Georeference", "Hdf", "Ice", "Kml",
       "MovieExporter", "Nitf", "NitfCommonTre", "Pca", "Pictures", "Results", 
       "Scripts", "SecondMoment", "ShapeFileExporter", "Sio", "WizardExecutor",
       "WizardItems" ]

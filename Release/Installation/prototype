@@ -48,6 +48,7 @@ f none $APPDIR/DefaultSettings/2-ApplicationMode.cfg=$OpticksCodeDir/Release/Def
 f none $APPDIR/DefaultSettings/40-PicturesExporters.cfg=$OpticksCodeDir/Release/DefaultSettings/40-PicturesExporters.cfg 644 root $GROUP
 f none $APPDIR/DefaultSettings/41-MovieExporter.cfg=$OpticksCodeDir/Release/DefaultSettings/41-MovieExporter.cfg 0644 root $GROUP
 f none $APPDIR/DefaultSettings/42-Nitf.cfg=$OpticksCodeDir/Release/DefaultSettings/42-Nitf.cfg 644 root $GROUP
+f none $APPDIR/DefaultSettings/50-KmlServer.cfg=$OpticksCodeDir/Release/DefaultSettings/50-KmlServer.cfg 644 root $GROUP
 d none $APPDIR/PlugIns 0755 root $GROUP
 f none $APPDIR/PlugIns/Aspam.so=$OpticksBinariesDir/PlugIns/Aspam.so 644 root $GROUP
 f none $APPDIR/PlugIns/AutoImporter.so=$OpticksBinariesDir/PlugIns/AutoImporter.so 644 root $GROUP
@@ -61,6 +62,7 @@ f none $APPDIR/PlugIns/GeographicFeatures.so=$OpticksBinariesDir/PlugIns/Geograp
 f none $APPDIR/PlugIns/Georeference.so=$OpticksBinariesDir/PlugIns/Georeference.so 644 root $GROUP
 f none $APPDIR/PlugIns/Hdf.so=$OpticksBinariesDir/PlugIns/Hdf.so 644 root $GROUP
 f none $APPDIR/PlugIns/Ice.so=$OpticksBinariesDir/PlugIns/Ice.so 644 root $GROUP
+f none $APPDIR/PlugIns/Kml.so=$OpticksBinariesDir/PlugIns/Kml.so 644 root $GROUP
 f none $APPDIR/PlugIns/MovieExporter.so=$OpticksBinariesDir/PlugIns/MovieExporter.so 644 root $GROUP
 f none $APPDIR/PlugIns/Nitf.so=$OpticksBinariesDir/PlugIns/Nitf.so 644 root $GROUP
 f none $APPDIR/PlugIns/NitfCommonTre.so=$OpticksBinariesDir/PlugIns/NitfCommonTre.so 644 root $GROUP
