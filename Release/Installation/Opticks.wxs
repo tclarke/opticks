@@ -178,6 +178,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
                <File Name="42-Nitf.cfg" Id="F__NitfCfg" />
                <File Name="3-ApplicationTempDir.cfg" Id="F__TempDirCfg" Source="$(sys.SOURCEFILEDIR)"/>
                <Util:XmlFile Id="F__UpdateTempDirCfg" Action="setValue" File="[#F__TempDirCfg]" ElementPath="/ConfigurationSettings/group/attribute/attribute/value" Value="[TEMPDATADIR]" />
+	       <File Name="50-KmlServer.cfg" Id="F__KmlServerCfg" />
             </Component>
             <Component Id="C__SaveTempDataDirSelection" Guid="$(var.C__SaveTempDataDirSelectionGuid)" Win64="no">
                <RegistryValue Key="Software\Opticks\$(var.PublicVersionNumber) $(var.UserPlatform)\StoredTempDataDirSelection" Value="[TEMPDATADIR]" Root="HKMU" Action="write" Id="R__StoredTempDataDirSelection" Type="string" KeyPath="yes" />
@@ -226,6 +227,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
                <File Name="Georeference.dll" Id="F__GeoreferencePlugIn" DiskId="1" />
                <File Name="Hdf.dll" Id="F__HdfPlugIn" DiskId="1" />
                <File Name="Ice.dll" Id="F__IcePlugIn" DiskId="1" />
+	       <File Name="Kml.dll" Id="F__KmlPlugIn" DiskId="1" />
                <File Name="MovieExporter.dll" Id="F__MovieExporterPlugIn" DiskId="1" />
                <File Name="Nitf.dll" Id="F__NitfPlugIn" DiskId="1" />
                <File Name="NitfCommonTre.dll" Id="F__NitfCommonTrePlugIn" DiskId="1" />
