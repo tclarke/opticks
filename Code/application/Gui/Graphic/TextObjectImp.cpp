@@ -427,29 +427,43 @@ void TextObjectImp::updateBoundingBox()
    GraphicLayer* pLayer = getLayer();
    if (pLayer != NULL)
    {
+      // Get the pixel scene-to-screen ratio
+      double xScale = 1.0;
+      double yScale = 1.0;
+
+      PerspectiveView* pView = dynamic_cast<PerspectiveView*>(pLayer->getView());
+      if (pView != NULL)
+      {
+         double zoomFactor = 100.0 / pView->getZoomPercentage();
+         xScale = zoomFactor / pLayer->getXScaleFactor();
+         yScale = zoomFactor / pLayer->getYScaleFactor();
+      }
+
+      // Determine if the scene is flipped
       bool bHorizontalFlip = false;
       bool bVerticalFlip = false;
       pLayer->isFlipped(llCorner, urCorner, bHorizontalFlip, bVerticalFlip);
 
-      double dScreenX = 0.0;
-      double dScreenY = 0.0;
-      pLayer->translateDataToScreen(llCorner.mX, llCorner.mY, dScreenX, dScreenY);
-
+      // Compute the upper left coordinate
       if ((bHorizontalFlip == false) && (bVerticalFlip == false))
       {
-         pLayer->translateScreenToData(dScreenX + iWidth, dScreenY + iHeight, urCorner.mX, urCorner.mY);
+         urCorner.mX = llCorner.mX + (iWidth * xScale);
+         urCorner.mY = llCorner.mY + (iHeight * yScale);
       }
       else if ((bHorizontalFlip == true) && (bVerticalFlip == false))
       {
-         pLayer->translateScreenToData(dScreenX - iWidth, dScreenY + iHeight, urCorner.mX, urCorner.mY);
+         urCorner.mX = llCorner.mX - (iWidth * xScale);
+         urCorner.mY = llCorner.mY + (iHeight * yScale);
       }
       else if ((bHorizontalFlip == true) && (bVerticalFlip == true))
       {
-         pLayer->translateScreenToData(dScreenX - iWidth, dScreenY - iHeight, urCorner.mX, urCorner.mY);
+         urCorner.mX = llCorner.mX - (iWidth * xScale);
+         urCorner.mY = llCorner.mY - (iHeight * yScale);
       }
       else if ((bHorizontalFlip == false) && (bVerticalFlip == true))
       {
-         pLayer->translateScreenToData(dScreenX + iWidth, dScreenY - iHeight, urCorner.mX, urCorner.mY);
+         urCorner.mX = llCorner.mX + (iWidth * xScale);
+         urCorner.mY = llCorner.mY - (iHeight * yScale);
       }
    }
    else

@@ -705,16 +705,21 @@ void GraphicLayerImp::drawSelectionRectangle (LocationType ll, LocationType ur) 
 
 void GraphicLayerImp::drawHandle(LocationType point, bool bSelectionHandle)
 {
-   double dScreenX = 0.0;
-   double dScreenY = 0.0;
-   translateDataToScreen(point.mX, point.mY, dScreenX, dScreenY);
+   double xScale = 1.0;
+   double yScale = 1.0;
 
-   double x1 = 0.0;
-   double x2 = 0.0;
-   double y1 = 0.0;
-   double y2 = 0.0;
-   translateScreenToData(dScreenX - mHandleSize, dScreenY - mHandleSize, x1, y1);
-   translateScreenToData(dScreenX + mHandleSize, dScreenY + mHandleSize, x2, y2);
+   PerspectiveView* pView = dynamic_cast<PerspectiveView*>(getView());
+   if (pView != NULL)
+   {
+      double zoomFactor = 100.0 / pView->getZoomPercentage();
+      xScale = zoomFactor / getXScaleFactor();
+      yScale = zoomFactor / getYScaleFactor();
+   }
+
+   double x1 = point.mX - (mHandleSize * xScale);
+   double x2 = point.mX + (mHandleSize * xScale);
+   double y1 = point.mY - (mHandleSize * yScale);
+   double y2 = point.mY + (mHandleSize * yScale);
 
    if (bSelectionHandle == true)
    {
