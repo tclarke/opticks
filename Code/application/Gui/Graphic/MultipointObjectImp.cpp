@@ -458,11 +458,34 @@ bool MultipointObjectImp::setProperty(const GraphicProperty* pProperty)
 
 bool MultipointObjectImp::hit(LocationType pixelCoord) const
 {
-   const int iHitTolerance = 5;
+   // Define the hit tolerance in scene pixels as being within the vertex pixel
+   double hitTolerance = 0.5;
+
+   GraphicLayer* pLayer = getLayer();
+   if (pLayer != NULL)
+   {
+      PerspectiveView* pView = dynamic_cast<PerspectiveView*>(pLayer->getView());
+      if (pView != NULL)
+      {
+         // If the zoom level is smaller than a three pixel screen tolerance,
+         // use the screen tolerance equivalent instead
+         const double screenTolerance = 3.0;
+
+         double zoomFactor = pView->getZoomPercentage() / 100.0;
+         if (zoomFactor < screenTolerance)
+         {
+            double xScale = 1.0 / zoomFactor / pLayer->getXScaleFactor();
+            double yScale = 1.0 / zoomFactor / pLayer->getYScaleFactor();
+
+            hitTolerance = min(screenTolerance * xScale, screenTolerance * yScale);
+         }
+      }
+   }
+
    for (unsigned int i = 0; i < mVertices.size(); ++i)
    {
-      if ((fabs(mVertices.at(i).mX - pixelCoord.mX) < iHitTolerance)
-         && (fabs(mVertices.at(i).mY - pixelCoord.mY) < iHitTolerance))
+      if ((fabs(mVertices.at(i).mX - pixelCoord.mX) < hitTolerance)
+         && (fabs(mVertices.at(i).mY - pixelCoord.mY) < hitTolerance))
       {
          return true;
       }
