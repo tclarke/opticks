@@ -19,6 +19,7 @@
 #include "GraphicObjectFactory.h"
 #include "GraphicObjectImp.h"
 #include "MultipointObjectImp.h"
+#include "PolylineObjectImp.h"
 #include "ProductView.h"
 #include "SessionManager.h"
 #include "Undo.h"
@@ -726,6 +727,82 @@ void AddVertices::executeRedo()
    {
       pObject->clearVertices();
       pObject->addVertices(mNewVertices, mNewGeoVertices);
+   }
+}
+
+/////////////
+// NewPath //
+/////////////
+
+NewPath::NewPath(PolylineObjectImp* pObject, unsigned int path) :
+   UndoAction(dynamic_cast<SessionItem*>(pObject)),
+   mPath(path)
+{
+   if (pObject != NULL)
+   {
+      GraphicLayer* pLayer = pObject->getLayer();
+      if (pLayer != NULL)
+      {
+         View* pView = pLayer->getView();
+         if (pView != NULL)
+         {
+            mViewId = pView->getId();
+         }
+
+         mLayerId = pLayer->getId();
+      }
+   }
+
+   setText("New Path");
+}
+
+SessionItem* NewPath::getSessionItem() const
+{
+   if (mLayerId.empty() == false)
+   {
+      const string& objectId = getSessionItemId();
+      if (objectId.empty() == false)
+      {
+         return GraphicUndoUtilities::getObject(mViewId, mLayerId, objectId);
+      }
+   }
+
+   return NULL;
+}
+
+void NewPath::updateSessionItem(const string& oldId, const string& newId)
+{
+   if (oldId.empty() == false)
+   {
+      if (oldId == mViewId)
+      {
+         mViewId = newId;
+      }
+
+      if (oldId == mLayerId)
+      {
+         mLayerId = newId;
+      }
+   }
+
+   UndoAction::updateSessionItem(oldId, newId);
+}
+
+void NewPath::executeUndo()
+{
+   PolylineObjectImp* pObject = dynamic_cast<PolylineObjectImp*>(getSessionItem());
+   if (pObject != NULL)
+   {
+      pObject->removePath(mPath);
+   }
+}
+
+void NewPath::executeRedo()
+{
+   PolylineObjectImp* pObject = dynamic_cast<PolylineObjectImp*>(getSessionItem());
+   if (pObject != NULL)
+   {
+      pObject->addPath(mPath);
    }
 }
 
