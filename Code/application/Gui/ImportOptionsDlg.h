@@ -52,6 +52,8 @@ protected:
 
 protected slots:
    void updateCurrentDataset();
+   void selectAllDatasets();
+   void deselectAllDatasets();
    void generateDimensionVector(const QString& strValueName);
    void updateDataRows(const std::vector<DimensionDescriptor>& rows);
    void updateDataColumns(const std::vector<DimensionDescriptor>& columns);

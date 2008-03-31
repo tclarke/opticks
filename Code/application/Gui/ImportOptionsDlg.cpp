@@ -88,6 +88,9 @@ ImportOptionsDlg::ImportOptionsDlg(Importer* pImporter, const vector<ImportDescr
    mpDatasetTree->setTextElideMode(Qt::ElideLeft);
    mpDatasetTree->header()->hide();
 
+   QPushButton* pImportAllButton = new QPushButton("Import All", pDatasetWidget);
+   QPushButton* pImportNoneButton = new QPushButton("Import None", pDatasetWidget);
+
    // Tab widget
    mpTabWidget = new QTabWidget(pSplitter);
 
@@ -140,11 +143,15 @@ ImportOptionsDlg::ImportOptionsDlg(Importer* pImporter, const vector<ImportDescr
       pMetadataLayout->setMargin(10);
    }
 
-   QVBoxLayout* pDatasetLayout = new QVBoxLayout(pDatasetWidget);
+   QGridLayout* pDatasetLayout = new QGridLayout(pDatasetWidget);
    pDatasetLayout->setMargin(0);
    pDatasetLayout->setSpacing(5);
-   pDatasetLayout->addWidget(pDatasetLabel);
-   pDatasetLayout->addWidget(mpDatasetTree, 10);
+   pDatasetLayout->addWidget(pDatasetLabel, 0, 0, 1, 2);
+   pDatasetLayout->addWidget(mpDatasetTree, 1, 0, 1, 2);
+   pDatasetLayout->addWidget(pImportAllButton, 2, 0, Qt::AlignRight);
+   pDatasetLayout->addWidget(pImportNoneButton, 2, 1);
+   pDatasetLayout->setRowStretch(1, 10);
+   pDatasetLayout->setColumnStretch(0, 10);
 
    QHBoxLayout* pButtonLayout = new QHBoxLayout();
    pButtonLayout->setMargin(0);
@@ -273,6 +280,8 @@ ImportOptionsDlg::ImportOptionsDlg(Importer* pImporter, const vector<ImportDescr
    VERIFYNR(connect(mpDatasetTree, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(validate())));
    VERIFYNR(connect(mpDatasetTree, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(enforceSelections(QTreeWidgetItem*))));
    VERIFYNR(connect(mpDatasetTree, SIGNAL(itemSelectionChanged()), this, SLOT(updateCurrentDataset())));
+   VERIFYNR(connect(pImportAllButton, SIGNAL(clicked()), this, SLOT(selectAllDatasets())));
+   VERIFYNR(connect(pImportNoneButton, SIGNAL(clicked()), this, SLOT(deselectAllDatasets())));
    VERIFYNR(connect(mpOkButton, SIGNAL(clicked()), this, SLOT(accept())));
    VERIFYNR(connect(pCancelButton, SIGNAL(clicked()), this, SLOT(reject())));
    updateConnections(true);
@@ -624,6 +633,30 @@ void ImportOptionsDlg::updateCurrentDataset()
 
    // Activate the dataset
    setCurrentDataset(pDataset);
+}
+
+void ImportOptionsDlg::selectAllDatasets()
+{
+   for (map<ImportDescriptor*, QTreeWidgetItem*>::iterator iter = mDatasets.begin(); iter != mDatasets.end(); ++iter)
+   {
+      QTreeWidgetItem* pItem = iter->second;
+      if (pItem != NULL)
+      {
+         pItem->setCheckState(0, Qt::Checked);
+      }
+   }
+}
+
+void ImportOptionsDlg::deselectAllDatasets()
+{
+   for (map<ImportDescriptor*, QTreeWidgetItem*>::iterator iter = mDatasets.begin(); iter != mDatasets.end(); ++iter)
+   {
+      QTreeWidgetItem* pItem = iter->second;
+      if (pItem != NULL)
+      {
+         pItem->setCheckState(0, Qt::Unchecked);
+      }
+   }
 }
 
 void ImportOptionsDlg::generateDimensionVector(const QString& strValueName)
