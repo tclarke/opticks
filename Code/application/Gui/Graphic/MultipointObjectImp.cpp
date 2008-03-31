@@ -378,12 +378,6 @@ void MultipointObjectImp::scaleAndTranslateAllPoints(LocationType fixedPoint, Lo
    double dScaleX(1.0);
    double dScaleY(1.0);
 
-   if (endPoint == fixedPoint)
-   {
-      // already done!
-      return;
-   }
-
    if ( (fabs(endPoint.mX - startPoint.mX) > HANDLE_DELTA_THRESHOLD) && 
         (fabs(startPoint.mX - fixedPoint.mX) > HANDLE_DELTA_THRESHOLD) )
    {
