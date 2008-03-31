@@ -59,16 +59,19 @@ public:
 
 protected:
    /**
-    * Starting point of new path in the shape.  
+    * This vector contains the indices of mVertices which should not be connected to the preceding vertex
     *
-    * This should always have size of at least one, with the first value
-    * being zero.
+    * This should always have size of at least one, with the first value being zero.
     */
    std::vector<unsigned int> mPaths;
 
 private:
    bool mUseHitTolerance;
    mutable bool mResetSymbolName;
+
+   friend class NewPath;
+   bool addPath(unsigned int path);
+   bool removePath(unsigned int path);
 };
 
 #define POLYLINEOBJECTADAPTER_METHODS(impClass) \

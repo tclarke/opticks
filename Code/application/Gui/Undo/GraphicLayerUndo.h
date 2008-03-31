@@ -26,6 +26,7 @@ class GraphicObjectImp;
 class GraphicProperty;
 class Layer;
 class MultipointObjectImp;
+class PolylineObjectImp;
 
 class GraphicLayerMemento : public LayerMemento
 {
@@ -179,7 +180,6 @@ public:
    void executeRedo();
 };
 
-
 class AddVertices : public UndoAction
 {
 public:
@@ -202,6 +202,22 @@ private:
    std::vector<LocationType> mNewGeoVertices;
 };
 
+class NewPath : public UndoAction
+{
+public:
+   NewPath(PolylineObjectImp* pObject, unsigned int path);
+
+   SessionItem* getSessionItem() const;
+   void updateSessionItem(const std::string& oldId, const std::string& newId);
+
+   void executeUndo();
+   void executeRedo();
+
+private:
+   std::string mViewId;
+   std::string mLayerId;
+   unsigned int mPath;
+};
 
 namespace GraphicUndoUtilities
 {

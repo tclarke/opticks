@@ -18,6 +18,7 @@
 #include "glCommon.h"
 #include "GraphicLayer.h"
 #include "GraphicLayerImp.h"
+#include "GraphicLayerUndo.h"
 #include "MessageLogResource.h"
 #include "View.h"
 
@@ -285,16 +286,53 @@ bool PolylineObjectImp::replicateObject(const GraphicObject *pObject)
 
 bool PolylineObjectImp::newPath()
 {
-   unsigned int back = getVertices().size();
+   const unsigned int path = getVertices().size();
+   if (addPath(path) == false)
+   {
+      return false;
+   }
+
+   GraphicLayer* pLayer = getLayer();
+   if (pLayer != NULL)
+   {
+      View* pView = pLayer->getView();
+      if (pView != NULL)
+      {
+         pView->addUndoAction(new NewPath(this, path));
+      }
+   }
+
+   return true;
+}
+
+bool PolylineObjectImp::addPath(unsigned int path)
+{
    if (mPaths.empty() == false)
    {
-      if (back == mPaths.back())
+      if (path <= mPaths.back())
       {
-         // do not allow the same value twice in the vector
+         // Do not allow the same value twice in the vector; force the values to be sorted
          return false;
       }
    }
-   mPaths.push_back(getVertices().size());
+
+   if (path > getVertices().size())
+   {
+      return false;
+   }
+
+   mPaths.push_back(path);
+   return true;
+}
+
+bool PolylineObjectImp::removePath(unsigned int path)
+{
+   if (path != mPaths.back())
+   {
+      return false;
+   }
+
+   mPaths.pop_back();
    return true;
 }
 
