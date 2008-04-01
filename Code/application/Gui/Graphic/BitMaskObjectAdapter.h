@@ -13,7 +13,7 @@
 #include "BitMaskObject.h"
 #include "BitMaskObjectImp.h"
 
-class BitMaskObjectAdapter : public BitMaskObject, public BitMaskObjectImp
+class BitMaskObjectAdapter : public BitMaskObject, public BitMaskObjectImp GRAPHICOBJECTEXTENSION_CLASSES
 {
 public:
    BitMaskObjectAdapter(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer, LocationType pixelCoord) :

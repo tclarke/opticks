@@ -239,7 +239,7 @@ public:
     */
    virtual bool insertionUndoable() const;
 
-   GraphicLayer* getLayer() const;
+   virtual GraphicLayer* getLayer() const;
    virtual void setLayer(GraphicLayer *pLayer);
 
    virtual void temporaryGlContextChange() {}
@@ -281,6 +281,9 @@ private:
 
    GraphicObjectType mType;
 };
+
+#define GRAPHICOBJECTEXTENSION_CLASSES \
+   , public GraphicObjectExt1
 
 #define GRAPHICOBJECTADAPTER_METHODS(impClass) \
    SESSIONITEMADAPTER_METHODS(impClass) \
@@ -555,7 +558,10 @@ private:
    bool getLineScaled() const \
    { \
       return impClass::getLineScaled(); \
+   } \
+   GraphicLayer* getLayer() const \
+   { \
+      return impClass::getLayer(); \
    }
-
 
 #endif

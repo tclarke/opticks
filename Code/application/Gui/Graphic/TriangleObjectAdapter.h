@@ -13,7 +13,7 @@
 #include "TriangleObject.h"
 #include "TriangleObjectImp.h"
 
-class TriangleObjectAdapter : public TriangleObject, public TriangleObjectImp
+class TriangleObjectAdapter : public TriangleObject, public TriangleObjectImp GRAPHICOBJECTEXTENSION_CLASSES
 {
 public:
    TriangleObjectAdapter(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer,

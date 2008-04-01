@@ -13,7 +13,7 @@
 #include "GraphicObject.h"
 #include "MeasurementObjectImp.h"
 
-class MeasurementObjectAdapter : public GraphicObject, public MeasurementObjectImp
+class MeasurementObjectAdapter : public GraphicObject, public MeasurementObjectImp GRAPHICOBJECTEXTENSION_CLASSES
 {
 public:
    MeasurementObjectAdapter(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer,

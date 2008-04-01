@@ -13,7 +13,7 @@
 #include "MultipointObject.h"
 #include "MultipointObjectImp.h"
 
-class MultipointObjectAdapter : public MultipointObject, public MultipointObjectImp
+class MultipointObjectAdapter : public MultipointObject, public MultipointObjectImp GRAPHICOBJECTEXTENSION_CLASSES
 {
 public:
    MultipointObjectAdapter(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer,

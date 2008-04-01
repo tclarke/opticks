@@ -13,7 +13,7 @@
 #include "CgmObject.h"
 #include "CgmObjectImp.h"
 
-class CgmObjectAdapter : public CgmObject, public CgmObjectImp
+class CgmObjectAdapter : public CgmObject, public CgmObjectImp GRAPHICOBJECTEXTENSION_CLASSES
 {
 public:
    CgmObjectAdapter(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer, LocationType pixelCoord) :

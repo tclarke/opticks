@@ -12,22 +12,28 @@
 #include "FeatureProxyConnector.h"
 #include "GraphicGroup.h"
 #include "GraphicElement.h"
+#include "GraphicLayer.h"
+#include "GraphicObject.h"
 #include "ObjectResource.h"
 #include "Progress.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "TypeConverter.h"
+#include "Undo.h"
 
 #include <algorithm>
+
 #include <boost/bind.hpp>
 
-const std::string FeatureClass::CONNECTION_KEY = "connection";
-const std::string FeatureClass::QUERY_KEY = "query";
-const std::string FeatureClass::CLIPPING_TYPE_KEY = "clippingtype";
-const std::string FeatureClass::CLIP_LL_KEY = "clipll";
-const std::string FeatureClass::CLIP_UR_KEY = "clipur";
-const std::string FeatureClass::LAYER_NAME_KEY = "layername";
-const std::string FeatureClass::DEFAULT_LAYER_NAME = "New feature class";
+using namespace std;
+
+const string FeatureClass::CONNECTION_KEY = "connection";
+const string FeatureClass::QUERY_KEY = "query";
+const string FeatureClass::CLIPPING_TYPE_KEY = "clippingtype";
+const string FeatureClass::CLIP_LL_KEY = "clipll";
+const string FeatureClass::CLIP_UR_KEY = "clipur";
+const string FeatureClass::LAYER_NAME_KEY = "layername";
+const string FeatureClass::DEFAULT_LAYER_NAME = "New feature class";
 
 FeatureClass::FeatureClass() : mpParentElement(NULL), mClippingType(SCENE_CLIP), 
    mLayerName(DEFAULT_LAYER_NAME), mpLoadGroup(NULL), mpLoadProgress(NULL),
@@ -41,12 +47,12 @@ FeatureClass::~FeatureClass()
 {
    if (!mFeatureClassId.empty())
    {
-      std::string errorMessage;
+      string errorMessage;
       close(errorMessage);
    }
 }
 
-bool FeatureClass::open(std::string &errorMessage)
+bool FeatureClass::open(string &errorMessage)
 {
    if (!close(errorMessage))
    {
@@ -63,7 +69,7 @@ bool FeatureClass::open(std::string &errorMessage)
    return true;
 }
 
-bool FeatureClass::close(std::string &errorMessage)
+bool FeatureClass::close(string &errorMessage)
 {
    if (mFeatureClassId.empty())
    {
@@ -98,7 +104,7 @@ bool FeatureClass::setConnectionParameters(const ArcProxyLib::ConnectionParamete
 {
    if (mConnection != connection)
    {
-      std::string errorMessage;
+      string errorMessage;
       close(errorMessage);
 
       mConnection = connection;
@@ -125,7 +131,7 @@ bool FeatureClass::clearQueries()
    return true;
 }
 
-const std::vector<QueryOptions> &FeatureClass::getQueries() const
+const vector<QueryOptions> &FeatureClass::getQueries() const
 {
    return mQueries;
 }
@@ -147,9 +153,9 @@ void FeatureClass::setClipping(LocationType ll, LocationType ur)
    mUrClip = ur;
 }
 
-std::pair<LocationType, LocationType> FeatureClass::getClipping() const
+pair<LocationType, LocationType> FeatureClass::getClipping() const
 {
-   std::pair<LocationType, LocationType> clipping;
+   pair<LocationType, LocationType> clipping;
 
    switch (mClippingType)
    {
@@ -172,21 +178,21 @@ std::pair<LocationType, LocationType> FeatureClass::getClipping() const
                   LocationType ul = pGrandParent->convertPixelToGeocoord(LocationType(0, pDesc->getRowCount()));
                   LocationType ur = pGrandParent->convertPixelToGeocoord(LocationType(pDesc->getColumnCount(), pDesc->getRowCount()));
 
-                  clipping.first.mX = std::min(ll.mX, ur.mX);
-                  clipping.first.mX = std::min(clipping.first.mX, lr.mX);
-                  clipping.first.mX = std::min(clipping.first.mX, ur.mX);
+                  clipping.first.mX = min(ll.mX, ur.mX);
+                  clipping.first.mX = min(clipping.first.mX, lr.mX);
+                  clipping.first.mX = min(clipping.first.mX, ur.mX);
 
-                  clipping.first.mY = std::min(ll.mY, ur.mY);
-                  clipping.first.mY = std::min(clipping.first.mY, lr.mY);
-                  clipping.first.mY = std::min(clipping.first.mY, ur.mY);
+                  clipping.first.mY = min(ll.mY, ur.mY);
+                  clipping.first.mY = min(clipping.first.mY, lr.mY);
+                  clipping.first.mY = min(clipping.first.mY, ur.mY);
 
-                  clipping.second.mX = std::max(ll.mX, ur.mX);
-                  clipping.second.mX = std::max(clipping.second.mX, lr.mX);
-                  clipping.second.mX = std::max(clipping.second.mX, ur.mX);
+                  clipping.second.mX = max(ll.mX, ur.mX);
+                  clipping.second.mX = max(clipping.second.mX, lr.mX);
+                  clipping.second.mX = max(clipping.second.mX, ur.mX);
 
-                  clipping.second.mY = std::max(ll.mY, ur.mY);
-                  clipping.second.mY = std::max(clipping.second.mY, lr.mY);
-                  clipping.second.mY = std::max(clipping.second.mY, ur.mY);
+                  clipping.second.mY = max(ll.mY, ur.mY);
+                  clipping.second.mY = max(clipping.second.mY, lr.mY);
+                  clipping.second.mY = max(clipping.second.mY, ur.mY);
                }
             }
          }
@@ -201,7 +207,7 @@ std::pair<LocationType, LocationType> FeatureClass::getClipping() const
    return clipping;
 }
 
-void FeatureClass::setLayerName(const std::string &layerName)
+void FeatureClass::setLayerName(const string &layerName)
 {
    if (!layerName.empty())
    {
@@ -209,11 +215,11 @@ void FeatureClass::setLayerName(const std::string &layerName)
    }
 }
 
-const std::string &FeatureClass::getLayerName() const
+const string &FeatureClass::getLayerName() const
 {
-   if (mLayerName.find(DEFAULT_LAYER_NAME) != std::string::npos)
+   if (mLayerName.find(DEFAULT_LAYER_NAME) != string::npos)
    {
-      std::string featureClassName = this->mConnection.getFeatureClass();
+      string featureClassName = this->mConnection.getFeatureClass();
       if (!featureClassName.empty())
       {
          const_cast<FeatureClass*>(this)->mLayerName = featureClassName;
@@ -222,11 +228,23 @@ const std::string &FeatureClass::getLayerName() const
    return mLayerName;
 }
 
-bool FeatureClass::update(Progress *pProgress, std::string &errorMessage)
+bool FeatureClass::update(Progress *pProgress, string &errorMessage)
 {
    VERIFY(mpParentElement != NULL);
    GraphicGroup *pGroup = mpParentElement->getGroup();
    VERIFY(pGroup != NULL);
+
+   GraphicObjectExt1* pGroupExt1 = dynamic_cast<GraphicObjectExt1*>(pGroup);
+   VERIFY(pGroupExt1 != NULL);
+
+   View* pView = NULL;
+   GraphicLayer* pLayer = pGroupExt1->getLayer();
+   if (pLayer != NULL)
+   {
+      pView = pLayer->getView();
+   }
+
+   UndoGroup undoGroup(pView, "Update Geographic Features");
 
    if (pProgress) pProgress->updateProgress("Removing old shapes", 0, NORMAL);
    pGroup->removeAllObjects(true);
@@ -251,13 +269,13 @@ bool FeatureClass::update(Progress *pProgress, std::string &errorMessage)
    mProgressSize = 89 / mQueries.size();
    mProgressBase = 10;
 
-   std::pair<LocationType, LocationType> clipping = getClipping();
+   pair<LocationType, LocationType> clipping = getClipping();
 
    VERIFYNR(connect(pProxy, SIGNAL(featureLoaded(const ArcProxyLib::Feature&)), 
       this, SLOT(addFeature(const ArcProxyLib::Feature&))));
 
 
-   for (std::vector<QueryOptions>::const_iterator iter = mQueries.begin();
+   for (vector<QueryOptions>::const_iterator iter = mQueries.begin();
       success && iter != mQueries.end(); ++iter)
    {
       mProgress = 0;
@@ -319,21 +337,21 @@ void FeatureClass::addFeature(const ArcProxyLib::Feature &feature)
 
       pGraphic->setName(feature.getLabel());
 
-      std::vector<std::pair<double, double> >::const_iterator currentVertex = feature.getVertices().begin();
-      std::vector<LocationType>::size_type previousIndex = 0;
-      for(std::vector<size_t>::const_iterator path = feature.getPaths().begin();
+      vector<pair<double, double> >::const_iterator currentVertex = feature.getVertices().begin();
+      vector<LocationType>::size_type previousIndex = 0;
+      for(vector<size_t>::const_iterator path = feature.getPaths().begin();
                                          path != feature.getPaths().end(); ++path)
       {
-         std::vector<std::pair<double, double> >::const_iterator endVertex = currentVertex + (*path - previousIndex);
-         std::vector<LocationType> vertices;
-         std::copy(currentVertex, endVertex, std::back_inserter(vertices));
+         vector<pair<double, double> >::const_iterator endVertex = currentVertex + (*path - previousIndex);
+         vector<LocationType> vertices;
+         std::copy(currentVertex, endVertex, back_inserter(vertices));
          pGraphic->addGeoVertices(vertices);
          pGraphic->newPath();
          currentVertex = endVertex;
          previousIndex = *path;
       }
-      std::vector<LocationType> vertices;
-      std::copy(currentVertex, feature.getVertices().end(), std::back_inserter(vertices));
+      vector<LocationType> vertices;
+      std::copy(currentVertex, feature.getVertices().end(), back_inserter(vertices));
       pGraphic->addGeoVertices(vertices);
       mpLoadQueryOptions->setOnGraphicObject(pGraphic);
    }
@@ -348,7 +366,7 @@ FactoryResource<DynamicObject> FeatureClass::toDynamicObject() const
 
    pDynObj->setAttribute(CONNECTION_KEY, *pConnection.get());
 
-   for (std::vector<QueryOptions>::const_iterator iter = mQueries.begin();
+   for (vector<QueryOptions>::const_iterator iter = mQueries.begin();
       iter != mQueries.end(); ++iter)
    {
       FactoryResource<DynamicObject> pQuery(iter->toDynamicObject());
@@ -372,7 +390,7 @@ bool FeatureClass::fromDynamicObject(const DynamicObject *pDynObj)
       return false;
    }
 
-   std::string errorMessage;
+   string errorMessage;
    close(errorMessage);
 
    mQueries.clear();
@@ -382,10 +400,10 @@ bool FeatureClass::fromDynamicObject(const DynamicObject *pDynObj)
    const DynamicObject *pQueries = pDynObj->getAttribute(QUERY_KEY).getPointerToValue<DynamicObject>();
    VERIFY(pQueries != NULL);
 
-   std::vector<std::string> attributeNames;
+   vector<string> attributeNames;
    pQueries->getAttributeNames(attributeNames);
 
-   for (std::vector<std::string>::const_iterator iter = attributeNames.begin();
+   for (vector<string>::const_iterator iter = attributeNames.begin();
       iter != attributeNames.end(); ++iter)
    {
       QueryOptions query;
@@ -398,9 +416,9 @@ bool FeatureClass::fromDynamicObject(const DynamicObject *pDynObj)
       mClippingType = static_cast<ClippingTypeEnum>(dv_cast<int>(pDynObj->getAttribute(CLIPPING_TYPE_KEY)));
       mLlClip = dv_cast<LocationType>(pDynObj->getAttribute(CLIP_LL_KEY));
       mUrClip = dv_cast<LocationType>(pDynObj->getAttribute(CLIP_UR_KEY));
-      mLayerName = dv_cast<std::string>(pDynObj->getAttribute(LAYER_NAME_KEY));
+      mLayerName = dv_cast<string>(pDynObj->getAttribute(LAYER_NAME_KEY));
    }
-   catch (std::bad_cast e)
+   catch (bad_cast e)
    {
       VERIFY_MSG(false, "Clipping information missing");
    }
@@ -414,7 +432,7 @@ const ArcProxyLib::FeatureClassProperties &FeatureClass::getFeatureClassProperti
 }
 
 bool FeatureClass::testConnection(const ArcProxyLib::ConnectionParameters &connection, 
-   ArcProxyLib::FeatureClassProperties &properties, std::string &errorMessage)
+   ArcProxyLib::FeatureClassProperties &properties, string &errorMessage)
 {
    FeatureClass featureClass;
    featureClass.setConnectionParameters(connection);
@@ -430,7 +448,7 @@ bool FeatureClass::testConnection(const ArcProxyLib::ConnectionParameters &conne
 
 bool FeatureClass::hasLabels() const
 {
-   for (std::vector<QueryOptions>::const_iterator iter = mQueries.begin();
+   for (vector<QueryOptions>::const_iterator iter = mQueries.begin();
       iter != mQueries.end(); ++iter)
    {
       if (!iter->getFormatString().empty())

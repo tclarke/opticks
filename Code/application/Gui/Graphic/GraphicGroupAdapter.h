@@ -13,7 +13,7 @@
 #include "GraphicGroup.h"
 #include "GraphicGroupImp.h"
 
-class GraphicGroupAdapter : public GraphicGroup, public GraphicGroupImp
+class GraphicGroupAdapter : public GraphicGroup, public GraphicGroupImp GRAPHICOBJECTEXTENSION_CLASSES
 {
 public:
    GraphicGroupAdapter(const std::string& id, GraphicObjectType type, GraphicLayer *pLayer, LocationType pixelCoord) :

@@ -23,6 +23,7 @@
 class BitMask;
 class CgmObject;
 class Font;
+class GraphicLayer;
 class View;
 
 /**
@@ -38,7 +39,7 @@ class View;
  *    the object is modified.
  *  - All notifications documented in Subject.
  *
- *  @see     GraphicLayer, GraphicObjectType
+ *  @see     GraphicObjectExt1, GraphicLayer, GraphicObjectType
  */
 class GraphicObject : public SessionItem, public Subject, public Serializable
 {
@@ -791,6 +792,36 @@ protected:
     * This should be destroyed by calling GraphicLayer::removeObject.
     */
    virtual ~GraphicObject() {}
+};
+
+/**
+ * Extends capability of the GraphicObject interface.
+ *
+ * This class provides additional capability for the GraphicObject interface class.
+ * A pointer to this class can be obtained by performing a dynamic cast on a
+ * pointer to GraphicObject or any of its subclasses.
+ *
+ * @warning A pointer to this class can only be used to call methods contained
+ *           in this extension class and cannot be used to call any methods in
+ *           GraphicObject or its subclasses.
+ */
+class GraphicObjectExt1
+{
+public:
+   /**
+    * Get the GraphicLayer displaying this GraphicObject.
+    * 
+    * @return
+    *         The GraphicLayer displaying this GraphicObject. \c NULL is
+    *         returned if no GraphicLayer is displaying this GraphicObject.
+    */
+   virtual GraphicLayer* getLayer() const = 0;
+
+protected:
+   /**
+    * This should be destroyed by calling GraphicLayer::removeObject.
+    */
+   virtual ~GraphicObjectExt1() {}
 };
 
 #endif
