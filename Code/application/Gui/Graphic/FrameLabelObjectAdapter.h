@@ -13,7 +13,7 @@
 #include "FrameLabelObject.h"
 #include "FrameLabelObjectImp.h"
 
-class FrameLabelObjectAdapter : public FrameLabelObject, public FrameLabelObjectImp
+class FrameLabelObjectAdapter : public FrameLabelObject, public FrameLabelObjectImp GRAPHICOBJECTEXTENSION_CLASSES
 {
 public:
    FrameLabelObjectAdapter(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer,

@@ -13,7 +13,7 @@
 #include "PolylineObject.h"
 #include "PolylineObjectImp.h"
 
-class PolylineObjectAdapter : public PolylineObject, public PolylineObjectImp
+class PolylineObjectAdapter : public PolylineObject, public PolylineObjectImp GRAPHICOBJECTEXTENSION_CLASSES
 {
 public:
    PolylineObjectAdapter(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer,

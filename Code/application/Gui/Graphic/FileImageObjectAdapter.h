@@ -13,7 +13,7 @@
 #include "FileImageObject.h"
 #include "FileImageObjectImp.h"
 
-class FileImageObjectAdapter : public FileImageObject, public FileImageObjectImp
+class FileImageObjectAdapter : public FileImageObject, public FileImageObjectImp GRAPHICOBJECTEXTENSION_CLASSES
 {
 public:
    FileImageObjectAdapter(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer,

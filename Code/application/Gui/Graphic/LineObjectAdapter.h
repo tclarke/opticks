@@ -13,7 +13,7 @@
 #include "LineObject.h"
 #include "LineObjectImp.h"
 
-class LineObjectAdapter : public LineObject, public LineObjectImp
+class LineObjectAdapter : public LineObject, public LineObjectImp GRAPHICOBJECTEXTENSION_CLASSES
 {
 public:
    LineObjectAdapter(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer, LocationType pixelCoord) :

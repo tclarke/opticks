@@ -13,7 +13,7 @@
 #include "ScaleBarObject.h"
 #include "ScaleBarObjectImp.h"
 
-class ScaleBarObjectAdapter : public ScaleBarObject, public ScaleBarObjectImp
+class ScaleBarObjectAdapter : public ScaleBarObject, public ScaleBarObjectImp GRAPHICOBJECTEXTENSION_CLASSES
 {
 public:
    ScaleBarObjectAdapter(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer,

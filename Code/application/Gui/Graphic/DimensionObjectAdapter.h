@@ -13,7 +13,7 @@
 #include "DimensionObject.h"
 #include "DimensionObjectImp.h"
 
-class DimensionObjectAdapter : public DimensionObject, public DimensionObjectImp
+class DimensionObjectAdapter : public DimensionObject, public DimensionObjectImp GRAPHICOBJECTEXTENSION_CLASSES
 {
 public:
    DimensionObjectAdapter(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer,

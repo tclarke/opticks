@@ -13,7 +13,7 @@
 #include "NorthArrowObject.h"
 #include "NorthArrowObjectImp.h"
 
-class NorthArrowObjectAdapter : public NorthArrowObject, public NorthArrowObjectImp
+class NorthArrowObjectAdapter : public NorthArrowObject, public NorthArrowObjectImp GRAPHICOBJECTEXTENSION_CLASSES
 {
 public:
    NorthArrowObjectAdapter(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer,

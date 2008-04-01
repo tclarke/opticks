@@ -13,7 +13,7 @@
 #include "ArrowObject.h"
 #include "ArrowObjectImp.h"
 
-class ArrowObjectAdapter : public ArrowObject, public ArrowObjectImp
+class ArrowObjectAdapter : public ArrowObject, public ArrowObjectImp GRAPHICOBJECTEXTENSION_CLASSES
 {
 public:
    ArrowObjectAdapter(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer, LocationType pixelCoord) :

@@ -13,7 +13,7 @@
 #include "RawImageObject.h"
 #include "RawImageObjectImp.h"
 
-class RawImageObjectAdapter : public RawImageObject, public RawImageObjectImp
+class RawImageObjectAdapter : public RawImageObject, public RawImageObjectImp GRAPHICOBJECTEXTENSION_CLASSES
 {
 public:
    RawImageObjectAdapter(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer,
