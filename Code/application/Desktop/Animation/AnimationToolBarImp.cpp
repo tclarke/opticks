@@ -216,18 +216,12 @@ void AnimationToolBarImp::forward()
          int maxItems = mpFrameSpeedCombo->count();
          if ((itemPos + 1) < maxItems)
          {
-            itemPos++;
-         }
-         else
-         {
-            itemPos = 0;
-         }
+            QString speedMultiplier = mpFrameSpeedCombo->itemText(++itemPos);
+            double multiplier = speedMultiplier.toDouble();
 
-         QString speedMultiplier = mpFrameSpeedCombo->itemText(itemPos);
-         double multiplier = speedMultiplier.toDouble();
-
-         // use multiplier to change the speed at which the animation is playing
-         mpController->fastForward(multiplier);
+            // use multiplier to change the speed at which the animation is playing
+            mpController->fastForward(multiplier);
+         }
       }
    }
 }
@@ -250,18 +244,12 @@ void AnimationToolBarImp::backward()
          int maxItems = mpFrameSpeedCombo->count();
          if ((itemPos + 1) < maxItems)
          {
-            itemPos++;
-         }
-         else
-         {
-            itemPos = 0;
-         }
+            QString speedMultiplier = mpFrameSpeedCombo->itemText(++itemPos);
+            double multiplier = speedMultiplier.toDouble();
 
-         QString speedMultiplier = mpFrameSpeedCombo->itemText(itemPos);
-         double multiplier = speedMultiplier.toDouble();
-
-         // use multiplier to change the speed at which the animation is playing
-         mpController->fastRewind(multiplier);
+            // use multiplier to change the speed at which the animation is playing
+            mpController->fastRewind(multiplier);
+         }
       }
    }
 }
