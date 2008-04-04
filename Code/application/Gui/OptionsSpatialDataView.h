@@ -88,6 +88,7 @@ private:
    QSpinBox* mpInsetZoomSpin;
    QComboBox* mpInsetZoom;
    QCheckBox* mpShowCoordinates;
+   QCheckBox* mpDisplayCrosshair;
    QSpinBox* mpFastPanSpeedSpin;
    QSpinBox* mpSlowPanSpeedSpin;
    PanLimitTypeComboBox* mpPanLimit;
