@@ -161,6 +161,7 @@ protected:
 protected slots:
    void keyPan();
    void updateMouseCursor(const MouseMode* pMouseMode);
+   void updateStatusBar();
    void notifyLayerModified();
    void createLayer(QAction* pAction);
    void copyLayer();

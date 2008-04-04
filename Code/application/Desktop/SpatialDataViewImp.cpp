@@ -310,6 +310,13 @@ SpatialDataViewImp::~SpatialDataViewImp()
                VERIFYNR(disconnect(pLayerImp, SIGNAL(modified()), this, SLOT(notifyLayerModified())));
             }
 
+            RasterLayerImp* pRasterLayer = dynamic_cast<RasterLayerImp*>(pLayer);
+            if (pRasterLayer != NULL)
+            {
+               VERIFYNR(disconnect(pRasterLayer, SIGNAL(displayedBandChanged(RasterChannelType, DimensionDescriptor)),
+                  this, SLOT(updateStatusBar())));
+            }
+
             // Detach the element
             DataElement* pElement = pLayer->getDataElement();
             if (pElement != NULL)
@@ -703,6 +710,13 @@ bool SpatialDataViewImp::addLayer(Layer* pLayer)
          VERIFYNR(connect(pLayerImp, SIGNAL(extentsModified()), this, SLOT(updateExtents())));
       }
 
+      RasterLayerImp* pRasterLayer = dynamic_cast<RasterLayerImp*>(pLayer);
+      if (pRasterLayer != NULL)
+      {
+         VERIFYNR(connect(pRasterLayer, SIGNAL(displayedBandChanged(RasterChannelType, DimensionDescriptor)),
+            this, SLOT(updateStatusBar())));
+      }
+
       // Show the layer
       UndoLock lock(dynamic_cast<View*>(this));
       showLayer(pLayer);
@@ -1094,6 +1108,13 @@ bool SpatialDataViewImp::deleteLayer(Layer* pLayer, bool bClearUndo)
    disconnect(pLayerImp, SIGNAL(modified()), this, SLOT(refresh()));
    disconnect(pLayerImp, SIGNAL(modified()), this, SLOT(notifyLayerModified()));
    disconnect(pLayerImp, SIGNAL(extentsModified()), this, SLOT(updateExtents()));
+
+   RasterLayerImp* pRasterLayer = dynamic_cast<RasterLayerImp*>(pLayer);
+   if (pRasterLayer != NULL)
+   {
+      VERIFYNR(disconnect(pRasterLayer, SIGNAL(displayedBandChanged(RasterChannelType, DimensionDescriptor)),
+         this, SLOT(updateStatusBar())));
+   }
 
    // Detach the element
    DataElement* pElement = pLayer->getDataElement();
@@ -3300,6 +3321,18 @@ void SpatialDataViewImp::updateMouseCursor(const MouseMode* pMouseMode)
 
          setCursor(mouseCursor);
       }
+   }
+}
+
+void SpatialDataViewImp::updateStatusBar()
+{
+   QPoint globalPoint = QCursor::pos();
+   QPoint viewPoint = mapFromGlobal(globalPoint);
+
+   if ((viewPoint.x() >= 0) && (viewPoint.x() < width()) && (viewPoint.y() >= 0) && (viewPoint.y() < height()))
+   {
+      viewPoint.setY(height() - viewPoint.y());
+      updateStatusBar(viewPoint);
    }
 }
 
