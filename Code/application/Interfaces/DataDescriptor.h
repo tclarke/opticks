@@ -15,6 +15,7 @@
 #include "TypesFile.h"
 
 #include <string>
+#include <vector>
 
 class Classification;
 class DataElement;
