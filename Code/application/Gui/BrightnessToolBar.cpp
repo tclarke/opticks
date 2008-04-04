@@ -476,6 +476,8 @@ void BrightnessToolBar::updateLayerCombo(bool updateCurrentRasterLayer)
          mpLayerCombo->setCurrentIndex(0);
       }
    }
+
+   adjustSize();
 }
 
 void BrightnessToolBar::updateBandCombo(bool updateCurrentBand)
