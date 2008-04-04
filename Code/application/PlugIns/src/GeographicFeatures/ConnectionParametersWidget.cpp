@@ -269,18 +269,19 @@ void ConnectionParametersWidget::setAvailableConnectionTypes(
    {
       switch (*iter)
       {
-      case ArcProxyLib::SHAPELIB_CONNECTION:
-         mpShpButton->setEnabled(true);
-         break;
-      case ArcProxyLib::SHP_CONNECTION:
-         mpShpButton->setEnabled(true);
-         mpUseArcCheck->setEnabled(true);
-         break;
-      case ArcProxyLib::SDE_CONNECTION:
-         mpSdeButton->setEnabled(true);
-         break;
-      default:
-         break;
+         case ArcProxyLib::SHAPELIB_CONNECTION:
+            mpShpButton->setEnabled(true);
+            break;
+         case ArcProxyLib::SHP_CONNECTION:
+            mpShpButton->setEnabled(true);
+            mpUseArcCheck->setEnabled(true);
+            mpUseArcCheck->setChecked(true);
+            break;
+         case ArcProxyLib::SDE_CONNECTION:
+            mpSdeButton->setEnabled(true);
+            break;
+         default:
+            break;
       }
    }
 }
