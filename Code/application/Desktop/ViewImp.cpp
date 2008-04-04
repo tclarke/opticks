@@ -76,7 +76,7 @@ ViewImp::ViewImp(const string& id, const string& viewName, QGLContext* drawConte
 {
    ColorType color = View::getSettingBackgroundColor();
    mBackgroundColor = COLORTYPE_TO_QCOLOR(color);
-
+   mCrossHair = View::getSettingDisplayCrosshair();
    mOrigin = View::getSettingDataOrigin();
 
    mClassificationFont.setFamily("Helvetica");

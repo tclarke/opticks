@@ -93,6 +93,7 @@ OptionsSpatialDataView::OptionsSpatialDataView() :
    mpActiveLayer = new QCheckBox("Activate Layer When Histogram Selected", this);
    mpShowCoordinates = new QCheckBox("Show Pixel Coordinates When Zoomed In", this);
    mpShowCoordinates->setToolTip("Show pixel coordinates instead of raw values when zoomed in.");
+   mpDisplayCrosshair = new QCheckBox("Display Crosshair", this);
 
    QWidget* pOtherOptionsWidget = new QWidget(this);
    QVBoxLayout* pOtherOptionsLayout = new QVBoxLayout(pOtherOptionsWidget);
@@ -102,6 +103,7 @@ OptionsSpatialDataView::OptionsSpatialDataView() :
    pOtherOptionsLayout->addWidget(mpConfirmLayerDelete);
    pOtherOptionsLayout->addWidget(mpActiveLayer);
    pOtherOptionsLayout->addWidget(mpShowCoordinates);
+   pOtherOptionsLayout->addWidget(mpDisplayCrosshair);
    LabeledSection* pOtherOptionsSection = new LabeledSection(pOtherOptionsWidget, "Other Options", this);
 
    // Panning and Zooming Limit
@@ -168,6 +170,7 @@ OptionsSpatialDataView::OptionsSpatialDataView() :
    mpGeoCoordTooltip->setChecked(SpatialDataView::getSettingGeoCoordTooltip());
    mpConfirmLayerDelete->setChecked(SpatialDataView::getSettingConfirmLayerDelete());
    mpActiveLayer->setChecked(HistogramWindow::getSettingLayerActivation());
+   mpDisplayCrosshair->setChecked(View::getSettingDisplayCrosshair());
 }
    
 void OptionsSpatialDataView::applyChanges()
@@ -193,6 +196,7 @@ void OptionsSpatialDataView::applyChanges()
    double zoomRatio = zoomPercent / 100.0;
    SpatialDataView::setSettingMaximumZoomRatio(zoomRatio);
    SpatialDataView::setSettingGeoCoordTooltip(mpGeoCoordTooltip->isChecked());
+   View::setSettingDisplayCrosshair(mpDisplayCrosshair->isChecked());
    SpatialDataView::setSettingConfirmLayerDelete(mpConfirmLayerDelete->isChecked());
    HistogramWindow::setSettingLayerActivation(mpActiveLayer->isChecked());
 }

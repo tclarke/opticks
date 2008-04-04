@@ -59,6 +59,7 @@ public:
    SETTING(InsetZoomMode, View, InsetZoomMode, ABSOLUTE_MODE)
    SETTING(PixelValueMinimumFontSize, View, unsigned int, 5);
    SETTING(PixelValueMaximumFontSize, View, unsigned int, 20);
+   SETTING(DisplayCrosshair, View, bool, false)
 
    /**
     *  This class accesses portions of a view image.
@@ -584,25 +585,25 @@ public:
    virtual void setInsetPoint(const LocationType& worldCoord) = 0;
 
    /**
-    *  Toggles the display of the view cross hair.
+    *  Toggles the display of the view crosshair.
     *
-    *  This methods toggles the display of a cross hair mark in the center of
+    *  This methods toggles the display of a crosshair mark in the center of
     *  the view.
     *
     *  @param   bEnable
-    *           Set this value to TRUE to display the cross hair in the view or
-    *           to FALSE to hide the cross hair.
+    *           Set this value to TRUE to display the crosshair in the view or
+    *           to FALSE to hide the crosshair.
     *
-    *  @return  TRUE if the cross hair was successfully enabled or disabled, or
-    *           FALSE if the cross hair is not supported by the view.
+    *  @return  TRUE if the crosshair was successfully enabled or disabled, or
+    *           FALSE if the crosshair is not supported by the view.
     */
    virtual bool enableCrossHair(bool bEnable) = 0;
 
    /**
-    *  Queries whether the view cross hair is enabled.
+    *  Queries whether the view crosshair is enabled.
     *
-    *  @return  TRUE if the cross hair is enabled, whereby it is drawn in the
-    *           center of the view, or FALSE if the cross hair is disabled.
+    *  @return  TRUE if the crosshair is enabled, whereby it is drawn in the
+    *           center of the view, or FALSE if the crosshair is disabled.
     */
    virtual bool isCrossHairEnabled() const = 0;
 

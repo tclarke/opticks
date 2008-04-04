@@ -171,12 +171,12 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
    QAction* pCrossHairSeparatorAction = new QAction(this);
    pCrossHairSeparatorAction->setSeparator(true);
 
-   // Cross hair
-   QAction* pCrossHairAction = new QAction("Cross Hair", this);
+   // Crosshair
+   QAction* pCrossHairAction = new QAction("Crosshair", this);
    pCrossHairAction->setCheckable(true);
-   pCrossHairAction->setChecked(isCrossHairEnabled());
+   pCrossHairAction->setChecked(View::getSettingDisplayCrosshair());
    pCrossHairAction->setAutoRepeat(false);
-   pCrossHairAction->setToolTip("Show or hide the cross hair");
+   pCrossHairAction->setToolTip("Show or hide the crosshair");
    pDesktop->initializeAction(pCrossHairAction, shortcutContext);
 
    // Smoothing
