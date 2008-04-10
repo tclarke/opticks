@@ -460,16 +460,27 @@ QVariant MessageLogWindowModel::data(const QModelIndex &index, int role) const
             }
             break;
          }
-         case Qt::BackgroundColorRole:
+         case Qt::BackgroundRole:
          {
             if(pMessageImp->getComponent().empty() || pMessageImp->getKey().empty())
             {
-               return QColor(Qt::yellow);
+               return QVariant(Qt::yellow);
             }
             if(pMessageImp->getResult() == Message::Failure)
             {
-               return QColor(Qt::red);
+               return QVariant(Qt::red);
             }
+
+            break;
+         }
+         case Qt::ForegroundRole:
+         {
+            if (pMessageImp->getResult() == Message::Failure)
+            {
+               return QVariant(Qt::white);
+            }
+
+            break;
          }
          default:
             ; // blank
