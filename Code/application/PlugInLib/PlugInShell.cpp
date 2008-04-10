@@ -66,12 +66,12 @@ vector<string> PlugInShell::getPropertiesPages() const
 
 bool PlugInShell::serialize(SessionItemSerializer& serializer) const
 {
-   return false;
+   return true;
 }
 
 bool PlugInShell::deserialize(SessionItemDeserializer& deserializer)
 {
-   return false;
+   return true;
 }
 
 string PlugInShell::getVersion() const
