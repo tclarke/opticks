@@ -249,10 +249,6 @@ namespace
          {
             return pBandNames->at(activeNumber);
          }
-         else
-         {
-            return "";
-         }
       }
       ostringstream formatter;
       string bandPrefix = "Band";
