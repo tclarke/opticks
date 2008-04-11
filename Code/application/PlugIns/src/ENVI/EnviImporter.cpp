@@ -517,13 +517,17 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
                   if (pField != NULL)
                   {
                      vector<string> bandNames;
+                     bandNames.reserve(bands.size());  
+                     vector<string> strNames;
                      for (unsigned int i = 0; i < pField->mChildren.size(); ++i)
                      {
-                        string bandName = pField->mChildren[i]->mValue;
-                        if (bandName.empty() == false)
-                        {
-                           bandNames.push_back(bandName);
-                        }
+                        strNames = StringUtilities::split(pField->mChildren[i]->mValue, ',');
+                        copy(strNames.begin(), strNames.end(), back_inserter(bandNames));
+                     }
+                     vector<string>::iterator it;
+                     for (it=bandNames.begin(); it!= bandNames.end(); ++it)
+                     {
+                        *it = StringUtilities::stripWhitespace(*it);
                      }
 
                      if (pMetadata != NULL)
@@ -820,4 +824,41 @@ bool EnviImporter::parseHeader(const string& filename)
 
    bool bSuccess = mFields.populateFromHeader(filename);
    return bSuccess;
+}
+
+bool EnviImporter::validate(const DataDescriptor* pDescriptor, string& errorMessage) const
+{
+   if (RasterElementImporterShell::validate(pDescriptor, errorMessage) == false)
+   {
+      return false;
+   }
+
+   const RasterDataDescriptor* pRasterDesc = dynamic_cast<const RasterDataDescriptor*>(pDescriptor);
+   if (pRasterDesc == NULL)
+   {
+      errorMessage = "The data descriptor is invalid!";
+      return false;
+   }
+
+   const DynamicObject* pMetadata = pRasterDesc->getMetadata();
+   if (pMetadata != NULL)
+   {
+      string pNamesPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME, 
+         NAMES_METADATA_NAME, END_METADATA_NAME };
+      const vector<string>* pBandNames(NULL);
+      pBandNames = dv_cast<vector<string> >(&pMetadata->getAttributeByPath(pNamesPath));
+
+      if (pBandNames != NULL && pBandNames->size() != pRasterDesc->getBandCount())
+      {
+         if (errorMessage.empty() == false)
+         {
+            errorMessage += "\n";
+         }
+
+         errorMessage += "Possible problem in ENVI header file: The number of band "
+            "names did not match the number of bands.";
+      }
+   }
+
+   return true;
 }
