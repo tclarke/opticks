@@ -30,6 +30,8 @@
 #include "AppVersion.h"
 #include "CgmObject.h"
 #include "CgmObjectImp.h"
+#include "ContextMenu.h"
+#include "ContextMenuActions.h"
 #include "DataElement.h"
 #include "DesktopServicesImp.h"
 #include "DirectionalArrowObjectImp.h"
@@ -44,6 +46,7 @@
 #include "GraphicGroup.h"
 #include "GraphicGroupImp.h"
 #include "GuiFunctors.h"
+#include "Icons.h"
 #include "LatLonInsertObject.h"
 #include "MultiLineTextDialog.h"
 #include "OrthographicView.h"
@@ -73,6 +76,8 @@ XERCES_CPP_NAMESPACE_USE
 
 GraphicLayerImp::GraphicLayerImp(const string& id, const string& layerName, DataElement* pElement) :
    LayerImp(id, layerName, pElement),
+   mpExplorer(Service<SessionExplorer>().get(), SIGNAL_NAME(SessionExplorer, AboutToShowSessionItemContextMenu),
+      Slot(this, &GraphicLayerImp::updateContextMenu)),
    mHandleSize (4.0),
    mProcessingMouseEvent(false),
    mGroupHasLayerSet(false), 
@@ -2042,4 +2047,119 @@ void GraphicLayerImp::temporaryGlContextChange()
 bool GraphicLayerImp::insertingObjectNull() const
 {
    return (mpInsertingObject == NULL);
+}
+
+void GraphicLayerImp::updateContextMenu(Subject& subject, const string& signal, const boost::any& value)
+{
+   if (dynamic_cast<SessionExplorer*>(&subject) == NULL)
+   {
+      return;
+   }
+
+   ContextMenu* pMenu = boost::any_cast<ContextMenu*>(value);
+   if (pMenu == NULL)
+   {
+      return;
+   }
+
+   if (getLayerLocked() == true)
+   {
+      return;
+   }
+
+   QObject* pParent = pMenu->getActionParent();
+
+   Icons* pIcons = Icons::instance();
+   VERIFYNRV(pIcons != NULL);
+
+   vector<SessionItem*> items = pMenu->getSessionItems();
+
+   unsigned int numItems = items.size();
+   if (numItems == 1)
+   {
+      GraphicObject* pObject = dynamic_cast<GraphicObject*>(items.front());
+      if ((pObject != NULL) && (hasObject(pObject) == true))
+      {
+         // Separator
+         QAction* pSeparatorAction = new QAction(pParent);
+         pSeparatorAction->setSeparator(true);
+         pMenu->addActionBefore(pSeparatorAction, APP_GRAPHICLAYER_OBJECT_DELETE_SEPARATOR_ACTION,
+            APP_SESSIONEXPLORER_RENAME_ACTION);
+
+         // Delete
+         QAction* pDeleteAction = new QAction(pIcons->mDelete, "Delete", pParent);
+         pDeleteAction->setAutoRepeat(false);
+         pDeleteAction->setData(QVariant::fromValue(pObject));
+         connect(pDeleteAction, SIGNAL(triggered()), this, SLOT(deleteObject()));
+         pMenu->addActionBefore(pDeleteAction, APP_GRAPHICLAYER_OBJECT_DELETE_ACTION,
+            APP_GRAPHICLAYER_OBJECT_DELETE_SEPARATOR_ACTION);
+      }
+   }
+   else if (numItems > 1)
+   {
+      vector<GraphicObject*> objects = pMenu->getSessionItems<GraphicObject>();
+      if (objects.size() == numItems)
+      {
+         QList<QVariant> objectList;
+         for (vector<GraphicObject*>::iterator iter = objects.begin(); iter != objects.end(); ++iter)
+         {
+            GraphicObject* pObject = *iter;
+            if (pObject != NULL)
+            {
+               if (hasObject(pObject) == false)
+               {
+                  return;
+               }
+
+               QVariant object = QVariant::fromValue(pObject);
+               objectList.append(object);
+            }
+         }
+
+         // Delete
+         QAction* pDeleteAction = new QAction(pIcons->mDelete, "Delete", pParent);
+         pDeleteAction->setAutoRepeat(false);
+         pDeleteAction->setData(QVariant(objectList));
+         connect(pDeleteAction, SIGNAL(triggered()), this, SLOT(deleteObject()));
+         pMenu->addAction(pDeleteAction, APP_GRAPHICLAYER_OBJECT_DELETE_ACTION);
+      }
+   }
+}
+
+void GraphicLayerImp::deleteObject()
+{
+   QAction* pAction = dynamic_cast<QAction*>(sender());
+   if (pAction == NULL)
+   {
+      return;
+   }
+
+   QVariant objectVariant = pAction->data();
+   if (objectVariant.canConvert<GraphicObject*>() == true)
+   {
+      GraphicObject* pObject = objectVariant.value<GraphicObject*>();
+      if (pObject != NULL)
+      {
+         removeObject(pObject, true);
+      }
+   }
+   else if (objectVariant.canConvert(QVariant::List) == true)
+   {
+      QList<QVariant> objects = objectVariant.toList();
+      if (objects.empty() == true)
+      {
+         return;
+      }
+
+      UndoGroup group(getView(), "Delete Graphic Objects");
+
+      for (int i = 0; i < objects.count(); ++i)
+      {
+         GraphicObject* pObject = objects[i].value<GraphicObject*>();
+         if (pObject != NULL)
+         {
+            removeObject(pObject, true);
+         }
+      }
+   }
 }

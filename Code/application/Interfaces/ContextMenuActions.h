@@ -103,6 +103,16 @@
 #define APP_DOCKWINDOW_UNDOCK_ACTION "APP_DOCKWINDOW_UNDOCK_ACTION"
 
 /**
+ *  Destroys the selected GraphicObject objects contained in a GraphicLayer.
+ */
+#define APP_GRAPHICLAYER_OBJECT_DELETE_ACTION "APP_GRAPHICLAYER_OBJECT_DELETE_ACTION"
+
+/**
+ *  Default menu separator.
+ */
+#define APP_GRAPHICLAYER_OBJECT_DELETE_SEPARATOR_ACTION "APP_GRAPHICLAYER_OBJECT_DELETE_SEPARATOR_ACTION"
+
+ /**
  *  Invokes a dialog for users to filter data values out of the displayed
  *  histogram.
  */
@@ -129,7 +139,7 @@
 #define APP_HISTOGRAMPLOT_ELEMENT_MENU_ACTION "APP_HISTOGRAMPLOT_ELEMENT_MENU_ACTION"
 
 /**
- *  Default menu separator that is aded at the end of the group of histogram
+ *  Default menu separator that is added at the end of the group of histogram
  *  plot actions added to the context menu.
  */
 #define APP_HISTOGRAMPLOT_END_SEPARATOR_ACTION "APP_HISTOGRAMPLOT_END_SEPARATOR_ACTION"

@@ -10,6 +10,7 @@
 #ifndef GRAPHICOBJECTIMP_H
 #define GRAPHICOBJECTIMP_H
 
+#include <QtCore/QMetaType>
 #include <QtCore/QObject>
 
 #include "AttachmentPtr.h"
@@ -47,6 +48,8 @@ enum HandleTypeEnum { BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT, MIDDLE_RIGHT, TO
  * @EnumWrapper ::HandleTypeEnum.
  */
 typedef EnumWrapper<HandleTypeEnum> HandleType;
+
+Q_DECLARE_METATYPE(GraphicObject*)
 
 class GraphicObjectImp : public QObject, public SessionItemImp, public SubjectImp
 {
