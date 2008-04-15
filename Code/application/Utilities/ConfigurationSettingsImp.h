@@ -110,6 +110,7 @@ protected:
 
    bool serialize() const;
    bool deserialize();
+   void deserializeMruFiles();
    void applicationClosed(Subject& subject, const std::string& signal, const boost::any &args);
 
    /**
@@ -175,8 +176,8 @@ private:
    FactoryResource<DynamicObject> mpSessionSettings;
    FactoryResource<DynamicObject> mpDefaultSettings;
 
-   mutable std::vector<MruFile> mMruFiles;
-   mutable bool mNeedToLoadMruFiles;
+   std::vector<MruFile> mMruFiles;
+   bool mNeedToLoadMruFiles;
 
    std::string mHomePath;
    std::string mUserDocs;

@@ -473,6 +473,9 @@ void ConfigurationSettingsImp::removeMruFile(const string& filename)
       return;
    }
 
+   // Make sure the MRU files have been deserialized before trying to remove the file
+   deserializeMruFiles();
+
    Service<ModelServices> pModel;
 
    QString strFilename = QString::fromStdString(filename).toLower();
@@ -508,9 +511,15 @@ void ConfigurationSettingsImp::removeMruFile(const string& filename)
 
 const vector<MruFile>& ConfigurationSettingsImp::getMruFiles() const
 {
+   const_cast<ConfigurationSettingsImp*>(this)->deserializeMruFiles();
+   return mMruFiles;
+}
+
+void ConfigurationSettingsImp::deserializeMruFiles()
+{
    if (!mNeedToLoadMruFiles)
    {
-      return mMruFiles;
+      return;
    }
 
    FactoryResource<Filename> pFilename;
@@ -522,7 +531,7 @@ const vector<MruFile>& ConfigurationSettingsImp::getMruFiles() const
    if (pDomDoc == NULL)
    {
       mNeedToLoadMruFiles = false;
-      return mMruFiles;
+      return;
    }
 
    XERCES_CPP_NAMESPACE_QUALIFIER DOMNodeList *pConfList(NULL);
@@ -530,7 +539,7 @@ const vector<MruFile>& ConfigurationSettingsImp::getMruFiles() const
    if (pConfList == NULL || pConfList->getLength() != 1)
    {
       mNeedToLoadMruFiles = false;
-      return mMruFiles;
+      return;
    }
 
    XERCES_CPP_NAMESPACE_QUALIFIER DOMNodeList *pSettingsNodes(NULL);
@@ -627,9 +636,8 @@ const vector<MruFile>& ConfigurationSettingsImp::getMruFiles() const
          }
       }
    }
-   mNeedToLoadMruFiles = false;
 
-   return mMruFiles;
+   mNeedToLoadMruFiles = false;
 }
 
 void ConfigurationSettingsImp::applicationClosed(Subject& subject, const std::string& signal, const boost::any &args)
@@ -970,7 +978,7 @@ bool ConfigurationSettingsImp::serializeSettings(const string& filename, const D
    {
       xmlWriter.pushAddPoint(xmlWriter.addElement("group"));
       xmlWriter.addAttr("name", "MRUFiles");
-      for(vector<MruFile>::iterator iter = mMruFiles.begin(); iter != mMruFiles.end(); ++iter)
+      for (vector<MruFile>::const_iterator iter = mMruFiles.begin(); iter != mMruFiles.end(); ++iter)
       {
          MruFile mruFile = *iter;
          if(mruFile.mName.empty() || mruFile.mImporterName.empty() || mruFile.mDescriptors.empty())
