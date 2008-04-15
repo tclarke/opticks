@@ -686,6 +686,15 @@ bool GraphicGroupImp::removeObject(GraphicObject* pObject, bool bDelete)
          delete pObjectImp;
       }
 
+      View* pView = NULL;
+
+      GraphicLayer* pLayer = getLayer();
+      if (pLayer != NULL)
+      {
+         pView = pLayer->getView();
+      }
+
+      UndoLock undoLock(pView);
       updateBoundingBox();
       emit modified();
       return true;

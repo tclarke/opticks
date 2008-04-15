@@ -10,8 +10,10 @@
 #ifndef GRAPHICLAYERIMP_H
 #define GRAPHICLAYERIMP_H
 
+#include "AttachmentPtr.h"
 #include "LayerImp.h"
 #include "LocationType.h"
+#include "SessionExplorer.h"
 #include "TypesFile.h"
 
 #include <list>
@@ -239,7 +241,10 @@ protected:
 
    void onElementModified();
 
+   void updateContextMenu(Subject& subject, const std::string& signal, const boost::any& value);
+
 protected slots:
+   void deleteObject();
    void updateHandles(GraphicProperty* pProperty);
 
 signals:
@@ -250,6 +255,8 @@ signals:
    void currentTypeChanged(GraphicObjectType newType);
 
 private:
+   AttachmentPtr<SessionExplorer> mpExplorer;
+
    bool mbHideSelectionBox;
    bool mShowLabels;
    bool mLayerLocked;
