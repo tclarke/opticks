@@ -24,6 +24,7 @@
 #include "ImageFilterDescriptor.h"
 #include "ImageFilterDescriptorImp.h"
 #include "ImageFilterManager.h"
+#include "MathUtil.h"
 #include "PropertiesRasterLayer.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
@@ -48,6 +49,7 @@
 
 #include <boost/tuple/tuple.hpp>
 
+#include <algorithm>
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
 
@@ -616,9 +618,16 @@ bool RasterLayerImp::needToDrawPixelValues() const
 namespace
 {
    template<typename T>
-   void stringifyValue(T* pValue, ComplexComponent component, QString& strValue)
+   void stringifyValue(T* pValue, ComplexComponent component, const vector<int>& badValues, QString& strValue)
    {
-      strValue = QString::number(ModelServices::getDataValue(*pValue, component));
+      T value = ModelServices::getDataValue(*pValue, component);
+      strValue = QString::number(value);
+
+      int badValue = static_cast<int>(roundDouble(value));
+      if (binary_search(badValues.begin(), badValues.end(), badValue) == true)
+      {
+         strValue.clear();
+      }
    }
 };
 
@@ -787,6 +796,7 @@ void RasterLayerImp::drawPixelValues()
       {
          DataAccessor accessor(NULL, NULL);
          EncodingType dataType = UNKNOWN;
+         vector<int> badValues;
 
          if (mGrayBand.isValid() == true)
          {
@@ -803,6 +813,12 @@ void RasterLayerImp::drawPixelValues()
 
                accessor = pElement->getDataAccessor(pRequest.release());
                dataType = pDescriptor->getDataType();
+
+               Statistics* pStatistics = pElement->getStatistics(mGrayBand);
+               if (pStatistics != NULL)
+               {
+                  badValues = pStatistics->getBadValues();
+               }
             }
          }
 
@@ -822,20 +838,24 @@ void RasterLayerImp::drawPixelValues()
 
                      // Draw the text
                      QString strGray;
-                     switchOnEncoding(dataType, stringifyValue, accessor->getColumn(), complexComponent, strGray);
-                     QPoint textOffset(-fm.width(strGray) / 2, 0);
+                     switchOnEncoding(dataType, stringifyValue, accessor->getColumn(), complexComponent,
+                        badValues, strGray);
+                     if (strGray.isEmpty() == false)
+                     {
+                        QPoint textOffset(-fm.width(strGray) / 2, 0);
 
-                     glColor4fv(black);
+                        glColor4fv(black);
 
-                     int screenX = centerPoint.x() + textOffset.x() + shadowOffset.x();
-                     int screenY = pView->height() - (centerPoint.y() + textOffset.y() + shadowOffset.y());
-                     pView->renderText(screenX, screenY, strGray, textFont);
+                        int screenX = centerPoint.x() + textOffset.x() + shadowOffset.x();
+                        int screenY = pView->height() - (centerPoint.y() + textOffset.y() + shadowOffset.y());
+                        pView->renderText(screenX, screenY, strGray, textFont);
 
-                     glColor4fv(white);
+                        glColor4fv(white);
 
-                     screenX = centerPoint.x() + textOffset.x();
-                     screenY = pView->height() - (centerPoint.y() + textOffset.y());
-                     pView->renderText(screenX, screenY, strGray, textFont);
+                        screenX = centerPoint.x() + textOffset.x();
+                        screenY = pView->height() - (centerPoint.y() + textOffset.y());
+                        pView->renderText(screenX, screenY, strGray, textFont);
+                     }
 
                      accessor->nextColumn();
                   }
@@ -857,6 +877,10 @@ void RasterLayerImp::drawPixelValues()
          EncodingType greenDataType = UNKNOWN;
          EncodingType blueDataType = UNKNOWN;
 
+         vector<int> redBadValues;
+         vector<int> greenBadValues;
+         vector<int> blueBadValues;
+
          if (mRedBand.isValid() == true)
          {
             RasterElement* pElement = getDisplayedRasterElement(RED);
@@ -872,6 +896,12 @@ void RasterLayerImp::drawPixelValues()
 
                redAccessor = pElement->getDataAccessor(pRequest.release());
                redDataType = pDescriptor->getDataType();
+
+               Statistics* pStatistics = pElement->getStatistics(mRedBand);
+               if (pStatistics != NULL)
+               {
+                  redBadValues = pStatistics->getBadValues();
+               }
             }
          }
 
@@ -890,6 +920,12 @@ void RasterLayerImp::drawPixelValues()
 
                greenAccessor = pElement->getDataAccessor(pRequest.release());
                greenDataType = pDescriptor->getDataType();
+
+               Statistics* pStatistics = pElement->getStatistics(mGreenBand);
+               if (pStatistics != NULL)
+               {
+                  greenBadValues = pStatistics->getBadValues();
+               }
             }
          }
 
@@ -908,6 +944,12 @@ void RasterLayerImp::drawPixelValues()
 
                blueAccessor = pElement->getDataAccessor(pRequest.release());
                blueDataType = pDescriptor->getDataType();
+
+               Statistics* pStatistics = pElement->getStatistics(mBlueBand);
+               if (pStatistics != NULL)
+               {
+                  blueBadValues = pStatistics->getBadValues();
+               }
             }
          }
 
@@ -929,7 +971,8 @@ void RasterLayerImp::drawPixelValues()
                QString strRed = "N/A";
                if ((redValid == true) && (redDataType != UNKNOWN))
                {
-                  switchOnEncoding(redDataType, stringifyValue, redAccessor->getColumn(), complexComponent, strRed);
+                  switchOnEncoding(redDataType, stringifyValue, redAccessor->getColumn(), complexComponent,
+                     redBadValues, strRed);
                   redAccessor->nextColumn();
                }
 
@@ -937,7 +980,8 @@ void RasterLayerImp::drawPixelValues()
                QString strGreen = "N/A";
                if ((greenValid == true) && (greenDataType != UNKNOWN))
                {
-                  switchOnEncoding(greenDataType, stringifyValue, greenAccessor->getColumn(), complexComponent, strGreen);
+                  switchOnEncoding(greenDataType, stringifyValue, greenAccessor->getColumn(), complexComponent,
+                     greenBadValues, strGreen);
                   greenAccessor->nextColumn();
                }
 
@@ -945,7 +989,8 @@ void RasterLayerImp::drawPixelValues()
                QString strBlue = "N/A";
                if ((blueValid == true) && (blueDataType != UNKNOWN))
                {
-                  switchOnEncoding(blueDataType, stringifyValue, blueAccessor->getColumn(), complexComponent, strBlue);
+                  switchOnEncoding(blueDataType, stringifyValue, blueAccessor->getColumn(), complexComponent,
+                     blueBadValues, strBlue);
                   blueAccessor->nextColumn();
                }
 
@@ -956,31 +1001,49 @@ void RasterLayerImp::drawPixelValues()
 
                glColor4fv(black);
 
-               int screenX = centerPoint.x() + redTextOffset.x() + shadowOffset.x();
-               int screenY = pView->height() - (centerPoint.y() + redTextOffset.y() + shadowOffset.y());
-               pView->renderText(screenX, screenY, strRed, textFont);
+               if (strRed.isEmpty() == false)
+               {
+                  int screenX = centerPoint.x() + redTextOffset.x() + shadowOffset.x();
+                  int screenY = pView->height() - (centerPoint.y() + redTextOffset.y() + shadowOffset.y());
+                  pView->renderText(screenX, screenY, strRed, textFont);
+               }
 
-               screenX = centerPoint.x() + greenTextOffset.x() + shadowOffset.x();
-               screenY = pView->height() - (centerPoint.y() + greenTextOffset.y() + shadowOffset.y());
-               pView->renderText(screenX, screenY, strGreen, textFont);
+               if (strGreen.isEmpty() == false)
+               {
+                  int screenX = centerPoint.x() + greenTextOffset.x() + shadowOffset.x();
+                  int screenY = pView->height() - (centerPoint.y() + greenTextOffset.y() + shadowOffset.y());
+                  pView->renderText(screenX, screenY, strGreen, textFont);
+               }
 
-               screenX = centerPoint.x() + blueTextOffset.x() + shadowOffset.x();
-               screenY = pView->height() - (centerPoint.y() + blueTextOffset.y() + shadowOffset.y());
-               pView->renderText(screenX, screenY, strBlue, textFont);
+               if (strBlue.isEmpty() == false)
+               {
+                  int screenX = centerPoint.x() + blueTextOffset.x() + shadowOffset.x();
+                  int screenY = pView->height() - (centerPoint.y() + blueTextOffset.y() + shadowOffset.y());
+                  pView->renderText(screenX, screenY, strBlue, textFont);
+               }
 
                glColor4fv(white);
 
-               screenX = centerPoint.x() + redTextOffset.x();
-               screenY = pView->height() - (centerPoint.y() + redTextOffset.y());
-               pView->renderText(screenX, screenY, strRed, textFont);
+               if (strRed.isEmpty() == false)
+               {
+                  int screenX = centerPoint.x() + redTextOffset.x();
+                  int screenY = pView->height() - (centerPoint.y() + redTextOffset.y());
+                  pView->renderText(screenX, screenY, strRed, textFont);
+               }
 
-               screenX = centerPoint.x() + greenTextOffset.x();
-               screenY = pView->height() - (centerPoint.y() + greenTextOffset.y());
-               pView->renderText(screenX, screenY, strGreen, textFont);
+               if (strGreen.isEmpty() == false)
+               {
+                  int screenX = centerPoint.x() + greenTextOffset.x();
+                  int screenY = pView->height() - (centerPoint.y() + greenTextOffset.y());
+                  pView->renderText(screenX, screenY, strGreen, textFont);
+               }
 
-               screenX = centerPoint.x() + blueTextOffset.x();
-               screenY = pView->height() - (centerPoint.y() + blueTextOffset.y());
-               pView->renderText(screenX, screenY, strBlue, textFont);
+               if (strBlue.isEmpty() == false)
+               {
+                  int screenX = centerPoint.x() + blueTextOffset.x();
+                  int screenY = pView->height() - (centerPoint.y() + blueTextOffset.y());
+                  pView->renderText(screenX, screenY, strBlue, textFont);
+               }
             }
 
             if (redValid == true)
