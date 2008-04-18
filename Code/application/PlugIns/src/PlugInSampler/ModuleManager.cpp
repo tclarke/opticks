@@ -31,6 +31,7 @@
 #include "DummyCustomImporter.h"
 #include "MessageLogTest.h"
 #include "ModuleManager.h"
+#include "SampleRasterElementImporter.h"
 #include "Scriptor.h"
 
 //
@@ -45,7 +46,7 @@ const char *ModuleManager::mspUniqueId = "{76379291-3175-45b7-8752-45FA936F0E22}
 
 unsigned int ModuleManager::getTotalPlugIns()
 {
-   return 7;
+   return 8;
 }
 
 PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
@@ -55,31 +56,35 @@ PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
    switch (plugInNumber)
    {
       case 0:
-         pPlugIn = static_cast<PlugIn*>(new Scriptor);
+         pPlugIn = new Scriptor;
          break;
 
       case 1:
-         pPlugIn = static_cast<PlugIn*>(new BackgroundTest);
+         pPlugIn = new BackgroundTest;
          break;
 
       case 2:
-         pPlugIn = static_cast<PlugIn*>(new CustomElementPlugIn);
+         pPlugIn = new CustomElementPlugIn;
          break;
 
       case 3:
-         pPlugIn = static_cast<PlugIn*>(new AnyPlugIn);
+         pPlugIn = new AnyPlugIn;
          break;
 
       case 4:
-         pPlugIn = static_cast<PlugIn*>( new DummyCustomAlgorithm );
+         pPlugIn = new DummyCustomAlgorithm;
          break;
 
       case 5:
-         pPlugIn = static_cast<PlugIn*>( new DummyCustomImporter );
+         pPlugIn = new DummyCustomImporter;
          break;
 
       case 6:
-         pPlugIn = static_cast<PlugIn*>( new MessageLogTestPlugin );
+         pPlugIn = new MessageLogTestPlugin;
+         break;
+
+      case 7:
+         pPlugIn = new SampleRasterElementImporter;
          break;
 
       default:

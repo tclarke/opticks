@@ -44,6 +44,11 @@ private:
 
 /**
  *  Automatically track progress basic on predefined steps.
+ *
+ *  @note There are short term plans to replace ProgressTracker
+ *        with a similar system that functions more like StepResource.
+ *        Keep watching the release notes and the developer's mailing
+ *        list for announcements.
  */
 class ProgressTracker
 {

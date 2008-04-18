@@ -69,6 +69,34 @@
 				>
 			</File>
 			<File
+				RelativePath=".\howto_buildenvironment.txt"
+				>
+			</File>
+			<File
+				RelativePath=".\howto_importer.txt"
+				>
+			</File>
+			<File
+				RelativePath=".\howto_tutorial1.txt"
+				>
+			</File>
+			<File
+				RelativePath=".\howto_tutorial2.txt"
+				>
+			</File>
+			<File
+				RelativePath=".\howto_tutorial3.txt"
+				>
+			</File>
+			<File
+				RelativePath=".\howto_tutorial4.txt"
+				>
+			</File>
+			<File
+				RelativePath=".\howtos.txt"
+				>
+			</File>
+			<File
 				RelativePath=".\iceformat.txt"
 				>
 			</File>

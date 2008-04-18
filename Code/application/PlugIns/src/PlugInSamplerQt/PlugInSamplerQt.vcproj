@@ -20,7 +20,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="..\..\..\CompileSettings\32bitSettings.vsprops;..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\Qt-Debug.vsprops;..\..\..\CompileSettings\AllCommonSettings-Debug-32bit.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\Xerces-Debug.vsprops;..\..\..\CompileSettings\boost.vsprops;..\..\..\CompileSettings\UpdateBuildRevision.vsprops"
+			InheritedPropertySheets="..\..\..\CompileSettings\32bitSettings.vsprops;..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\Qt-Debug.vsprops;..\..\..\CompileSettings\AllCommonSettings-Debug-32bit.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\Xerces-Debug.vsprops;..\..\..\CompileSettings\boost.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -97,7 +97,7 @@
 		<Configuration
 			Name="Debug|x64"
 			ConfigurationType="2"
-			InheritedPropertySheets="..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\Qt-Debug.vsprops;..\..\..\CompileSettings\AllCommonSettings-Debug-64bit.vsprops;..\..\..\CompileSettings\64bitSettings.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\Xerces-Debug.vsprops;..\..\..\CompileSettings\boost.vsprops;..\..\..\CompileSettings\UpdateBuildRevision.vsprops"
+			InheritedPropertySheets="..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\Qt-Debug.vsprops;..\..\..\CompileSettings\AllCommonSettings-Debug-64bit.vsprops;..\..\..\CompileSettings\64bitSettings.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\Xerces-Debug.vsprops;..\..\..\CompileSettings\boost.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -174,7 +174,7 @@
 		<Configuration
 			Name="Release|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="..\..\..\CompileSettings\32bitSettings.vsprops;..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\Qt-Release.vsprops;..\..\..\CompileSettings\AllCommonSettings-Release-32bit.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\Xerces-Release.vsprops;..\..\..\CompileSettings\boost.vsprops;..\..\..\CompileSettings\UpdateBuildRevision.vsprops"
+			InheritedPropertySheets="..\..\..\CompileSettings\32bitSettings.vsprops;..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\Qt-Release.vsprops;..\..\..\CompileSettings\AllCommonSettings-Release-32bit.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\Xerces-Release.vsprops;..\..\..\CompileSettings\boost.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -251,7 +251,7 @@
 		<Configuration
 			Name="Release|x64"
 			ConfigurationType="2"
-			InheritedPropertySheets="..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\Qt-Release.vsprops;..\..\..\CompileSettings\AllCommonSettings-Release-64bit.vsprops;..\..\..\CompileSettings\64bitSettings.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\Xerces-Release.vsprops;..\..\..\CompileSettings\boost.vsprops;..\..\..\CompileSettings\UpdateBuildRevision.vsprops"
+			InheritedPropertySheets="..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\Qt-Release.vsprops;..\..\..\CompileSettings\AllCommonSettings-Release-64bit.vsprops;..\..\..\CompileSettings\64bitSettings.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\Xerces-Release.vsprops;..\..\..\CompileSettings\boost.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
