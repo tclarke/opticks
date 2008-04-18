@@ -805,7 +805,7 @@ public:
    *  Get path to user's documents folder.
    *
    *  The path to the current user's documents folder is returned. Under Windows this is usually
-   *  C:\Documents and Settings\username\My Documents\Opticks, and under Solaris it is 
+   *  C:\\Documents and Settings\\username\\My Documents\\%Opticks, and under Solaris it is 
    *  usually /export/home/username/Opticks .
    *
    *  @return  string

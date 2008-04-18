@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="PlugInSamplerOoModtran"
-	ProjectGUID="{24A240DF-2076-4AEF-89F9-591BD82FCD4D}"
-	RootNamespace="PlugInSamplerOoModtran"
+	Name="Tutorial"
+	ProjectGUID="{93926B8A-738B-4DEB-9045-AE7C0BB4ABD4}"
+	RootNamespace="Tutorial"
 	>
 	<Platforms>
 		<Platform
@@ -20,7 +20,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="..\..\..\CompileSettings\32bitSettings.vsprops;..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\AllCommonSettings-Debug-32bit.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\boost.vsprops;..\..\..\CompileSettings\Qt-Debug.vsprops;..\..\..\CompileSettings\OoModtran-Debug.vsprops"
+			InheritedPropertySheets="..\..\..\CompileSettings\32bitSettings.vsprops;..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\AllCommonSettings-Debug-32bit.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\Xerces-Debug.vsprops;..\..\..\CompileSettings\Qt-Debug.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -43,13 +43,10 @@
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="1"
-				TypeLibraryName=".\Debug/PlugInSamplerOoModtran.tlb"
+				TypeLibraryName=".\Debug/Tutorial.tlb"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories=""
-				AssemblerListingLocation=""
-				BrowseInformationFile=""
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -64,9 +61,6 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				Version=""
-				AdditionalLibraryDirectories=""
-				IgnoreDefaultLibraryNames=""
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -96,7 +90,7 @@
 		<Configuration
 			Name="Debug|x64"
 			ConfigurationType="2"
-			InheritedPropertySheets="..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\AllCommonSettings-Debug-64bit.vsprops;..\..\..\CompileSettings\64bitSettings.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\OoModtran-Debug.vsprops;..\..\..\CompileSettings\boost.vsprops;..\..\..\CompileSettings\Qt-Debug.vsprops"
+			InheritedPropertySheets="..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\AllCommonSettings-Debug-64bit.vsprops;..\..\..\CompileSettings\64bitSettings.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\Xerces-Debug.vsprops;..\..\..\CompileSettings\Qt-Debug.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -119,13 +113,10 @@
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="3"
-				TypeLibraryName=".\Debug/PlugInSamplerOoModtran.tlb"
+				TypeLibraryName=".\Debug/Tutorial.tlb"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories=""
-				AssemblerListingLocation=""
-				BrowseInformationFile=""
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -140,9 +131,6 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				Version=""
-				AdditionalLibraryDirectories=""
-				IgnoreDefaultLibraryNames=""
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -172,7 +160,7 @@
 		<Configuration
 			Name="Release|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="..\..\..\CompileSettings\32bitSettings.vsprops;..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\AllCommonSettings-Release-32bit.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\OoModtran-Release.vsprops;..\..\..\CompileSettings\boost.vsprops;..\..\..\CompileSettings\Qt-Release.vsprops"
+			InheritedPropertySheets="..\..\..\CompileSettings\32bitSettings.vsprops;..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\AllCommonSettings-Release-32bit.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\Xerces-Release.vsprops;..\..\..\CompileSettings\Qt-Release.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -195,13 +183,10 @@
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="1"
-				TypeLibraryName=".\Release/PlugInSamplerOoModtran.tlb"
+				TypeLibraryName=".\Release/Tutorial.tlb"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories=""
-				PrecompiledHeaderFile=""
-				AssemblerListingLocation=""
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -216,9 +201,6 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				Version=""
-				AdditionalLibraryDirectories=""
-				IgnoreDefaultLibraryNames=""
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -248,7 +230,7 @@
 		<Configuration
 			Name="Release|x64"
 			ConfigurationType="2"
-			InheritedPropertySheets="..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\AllCommonSettings-Release-64bit.vsprops;..\..\..\CompileSettings\64bitSettings.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\OoModtran-Release.vsprops;..\..\..\CompileSettings\boost.vsprops;..\..\..\CompileSettings\Qt-Release.vsprops"
+			InheritedPropertySheets="..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\AllCommonSettings-Release-64bit.vsprops;..\..\..\CompileSettings\64bitSettings.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\Xerces-Release.vsprops;..\..\..\CompileSettings\Qt-Release.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -271,13 +253,10 @@
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="3"
-				TypeLibraryName=".\Release/PlugInSamplerOoModtran.tlb"
+				TypeLibraryName=".\Release/Tutorial.tlb"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories=""
-				PrecompiledHeaderFile=""
-				AssemblerListingLocation=""
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -292,9 +271,6 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				Version=""
-				AdditionalLibraryDirectories=""
-				IgnoreDefaultLibraryNames=""
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -330,15 +306,23 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
-				RelativePath=".\ModtranRunner.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ModtranRunnerAlgorithm.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\ModuleManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Tutorial1.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Tutorial2.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Tutorial3.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Tutorial4.cpp"
 				>
 			</File>
 		</Filter>
@@ -347,22 +331,21 @@
 			Filter="h;hpp;hxx;hm;inl"
 			>
 			<File
-				RelativePath=".\ModtranRunner.h"
+				RelativePath=".\Tutorial1.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ModtranRunnerAlgorithm.h"
+				RelativePath=".\Tutorial2.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ModtranRunnerInputs.h"
+				RelativePath=".\Tutorial3.h"
 				>
 			</File>
-		</Filter>
-		<Filter
-			Name="Resource Files"
-			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
-			>
+			<File
+				RelativePath=".\Tutorial4.h"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

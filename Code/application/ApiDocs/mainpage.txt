@@ -3,6 +3,8 @@
  *
  * <h2>Getting Started:</h2>
  * <ul>
+ * <li>Look at the \ref howtos page.
+ * It contains a general plug-in development tutorial and informative howtos on various parts of the %Opticks SDK.
  * <li>There are sample Opticks plug-ins provided in the
  * Toolkit\\Application\\PlugIns\\src folder of a Opticks Installation provided
  * the Developer's Toolkit was installed.</li>
