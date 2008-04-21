@@ -70,8 +70,6 @@ public:
 
    void temporaryGlContextChange();
 
-   int getNextObjectNumber() { return mNextObjectNumber++; }
-
 signals:
    void abortedAdd(GraphicObject *pObj);
 
@@ -85,7 +83,6 @@ private:
    bool mbNeedsLayout;
    LocationType mLlCorner;
    LocationType mUrCorner;
-   int mNextObjectNumber;
 
    template<typename T, typename U>
    bool propagateProperty(T method, U value);
