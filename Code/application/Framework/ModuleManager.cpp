@@ -29,6 +29,7 @@
 #include "OptionsGcpLayer.h"
 #include "OptionsGeneral.h"
 #include "OptionsLatLonLayer.h"
+#include "OptionsMeasurementLayer.h"
 #include "OptionsOverviewWindow.h"
 #include "OptionsPseudocolorLayer.h"
 #include "OptionsRasterLayer.h"
@@ -49,6 +50,8 @@
 #include "PropertiesGraphicObject.h"
 #include "PropertiesHistogramPlot.h"
 #include "PropertiesLatLonLayer.h"
+#include "PropertiesMeasurementLayer.h"
+#include "PropertiesMeasurementObject.h"
 #include "PropertiesModuleDescriptor.h"
 #include "PropertiesPlotView.h"
 #include "PropertiesPlugInDescriptor.h"
@@ -72,7 +75,7 @@ const char *ModuleManager::mspValidationKey = "none";
 
 unsigned int ModuleManager::getTotalPlugIns()
 {
-   return 39;
+   return 42;
 }
 
 PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
@@ -82,64 +85,64 @@ PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
    switch (plugInNumber)
    {
       case 0:
-         pPlugIn = new MemoryMappedPager();
+         pPlugIn = new CopyrightInformation();
          break;
       case 1:
          pPlugIn = new InMemoryPager();
          break;
       case 2:
-         pPlugIn = new OptionQWidgetWrapper<OptionsGeneral>();
+         pPlugIn = new MemoryMappedPager();
          break;
       case 3:
-         pPlugIn = new OptionQWidgetWrapper<OptionsSession>();
-         break;
-      case 4:
-         pPlugIn = new OptionQWidgetWrapper<OptionsStatusBar>();
-         break;
-      case 5:
-         pPlugIn = new OptionQWidgetWrapper<OptionsShortcuts>();
-         break;
-      case 6:
-         pPlugIn = new OptionQWidgetWrapper<OptionsOverviewWindow>();
-         break;
-      case 7:
-         pPlugIn = new OptionQWidgetWrapper<OptionsView>();
-         break;
-      case 8:
-         pPlugIn = new OptionQWidgetWrapper<OptionsSpatialDataView>();
-         break;
-      case 9:
          pPlugIn = new OptionQWidgetWrapper<OptionsAnnotationLayer>();
          break;
-      case 10:
-         pPlugIn = new OptionQWidgetWrapper<OptionsRasterLayer>();
-         break;
-      case 11:
+      case 4:
          pPlugIn = new OptionQWidgetWrapper<OptionsAoiLayer>();
          break;
-      case 12:
-         pPlugIn = new OptionQWidgetWrapper<OptionsGcpLayer>();
-         break;
-      case 13:
-         pPlugIn = new OptionQWidgetWrapper<OptionsLatLonLayer>();
-         break;
-      case 14:
-         pPlugIn = new OptionQWidgetWrapper<OptionsPseudocolorLayer>();
-         break;
-      case 15:
-         pPlugIn = new OptionQWidgetWrapper<OptionsThresholdLayer>();
-         break;
-      case 16:
-         pPlugIn = new OptionQWidgetWrapper<OptionsTiePointLayer>();
-         break;
-      case 17:
+      case 5:
          pPlugIn = new OptionQWidgetWrapper<OptionsFileLocations>();
          break;
+      case 6:
+         pPlugIn = new OptionQWidgetWrapper<OptionsGcpLayer>();
+         break;
+      case 7:
+         pPlugIn = new OptionQWidgetWrapper<OptionsGeneral>();
+         break;
+      case 8:
+         pPlugIn = new OptionQWidgetWrapper<OptionsLatLonLayer>();
+         break;
+      case 9:
+         pPlugIn = new OptionQWidgetWrapper<OptionsMeasurementLayer>();
+         break;
+      case 10:
+         pPlugIn = new OptionQWidgetWrapper<OptionsOverviewWindow>();
+         break;
+      case 11:
+         pPlugIn = new OptionQWidgetWrapper<OptionsPseudocolorLayer>();
+         break;
+      case 12:
+         pPlugIn = new OptionQWidgetWrapper<OptionsRasterLayer>();
+         break;
+      case 13:
+         pPlugIn = new OptionQWidgetWrapper<OptionsSession>();
+         break;
+      case 14:
+         pPlugIn = new OptionQWidgetWrapper<OptionsShortcuts>();
+         break;
+      case 15:
+         pPlugIn = new OptionQWidgetWrapper<OptionsSpatialDataView>();
+         break;
+      case 16:
+         pPlugIn = new OptionQWidgetWrapper<OptionsStatusBar>();
+         break;
+      case 17:
+         pPlugIn = new OptionQWidgetWrapper<OptionsThresholdLayer>();
+         break;
       case 18:
-         pPlugIn = new PropertiesQWidgetWrapper<PropertiesAnnotationLayer>();
+         pPlugIn = new OptionQWidgetWrapper<OptionsTiePointLayer>();
          break;
       case 19:
-         pPlugIn = new PropertiesQWidgetWrapper<PropertiesAoiLayer>();
+         pPlugIn = new OptionQWidgetWrapper<OptionsView>();
          break;
       case 20:
          pPlugIn = new PropertiesDataDescriptor();
@@ -151,52 +154,62 @@ PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
          pPlugIn = new PropertiesFileDescriptor();
          break;
       case 23:
-         pPlugIn = new PropertiesQWidgetWrapper<PropertiesGcpLayer>();
+         pPlugIn = new PropertiesQWidgetWrapper<PropertiesAnnotationLayer>();
          break;
       case 24:
-         pPlugIn = new PropertiesQWidgetWrapper<PropertiesGraphicObject>();
+         pPlugIn = new PropertiesQWidgetWrapper<PropertiesAoiLayer>();
          break;
       case 25:
-         pPlugIn = new PropertiesQWidgetWrapper<PropertiesHistogramPlot>();
+         pPlugIn = new PropertiesQWidgetWrapper<PropertiesGcpLayer>();
          break;
       case 26:
-         pPlugIn = new PropertiesQWidgetWrapper<PropertiesLatLonLayer>();
+         pPlugIn = new PropertiesQWidgetWrapper<PropertiesGraphicObject>();
          break;
       case 27:
-         pPlugIn = new PropertiesQWidgetWrapper<PropertiesModuleDescriptor>();
+         pPlugIn = new PropertiesQWidgetWrapper<PropertiesHistogramPlot>();
          break;
       case 28:
-         pPlugIn = new PropertiesQWidgetWrapper<PropertiesPlotView>();
+         pPlugIn = new PropertiesQWidgetWrapper<PropertiesLatLonLayer>();
          break;
       case 29:
-         pPlugIn = new PropertiesQWidgetWrapper<PropertiesPlugInDescriptor>();
+         pPlugIn = new PropertiesQWidgetWrapper<PropertiesMeasurementLayer>();
          break;
       case 30:
-         pPlugIn = new PropertiesQWidgetWrapper<PropertiesProductView>();
+         pPlugIn = new PropertiesQWidgetWrapper<PropertiesMeasurementObject>();
          break;
       case 31:
-         pPlugIn = new PropertiesQWidgetWrapper<PropertiesPseudocolorLayer>();
+         pPlugIn = new PropertiesQWidgetWrapper<PropertiesModuleDescriptor>();
          break;
       case 32:
-         pPlugIn = new PropertiesQWidgetWrapper<PropertiesRasterLayer>();
+         pPlugIn = new PropertiesQWidgetWrapper<PropertiesPlotView>();
          break;
       case 33:
-         pPlugIn = new PropertiesQWidgetWrapper<PropertiesScriptingWindow>();
+         pPlugIn = new PropertiesQWidgetWrapper<PropertiesPlugInDescriptor>();
          break;
       case 34:
-         pPlugIn = new PropertiesQWidgetWrapper<PropertiesSpatialDataView>();
+         pPlugIn = new PropertiesQWidgetWrapper<PropertiesProductView>();
          break;
       case 35:
-         pPlugIn = new PropertiesQWidgetWrapper<PropertiesThresholdLayer>();
+         pPlugIn = new PropertiesQWidgetWrapper<PropertiesPseudocolorLayer>();
          break;
       case 36:
-         pPlugIn = new PropertiesQWidgetWrapper<PropertiesTiePointLayer>();
+         pPlugIn = new PropertiesQWidgetWrapper<PropertiesRasterLayer>();
          break;
       case 37:
-         pPlugIn = new PropertiesQWidgetWrapper<PropertiesView>();
+         pPlugIn = new PropertiesQWidgetWrapper<PropertiesScriptingWindow>();
          break;
       case 38:
-         pPlugIn = new CopyrightInformation();
+         pPlugIn = new PropertiesQWidgetWrapper<PropertiesSpatialDataView>();
+         break;
+      case 39:
+         pPlugIn = new PropertiesQWidgetWrapper<PropertiesThresholdLayer>();
+         break;
+      case 40:
+         pPlugIn = new PropertiesQWidgetWrapper<PropertiesTiePointLayer>();
+         break;
+      case 41:
+         pPlugIn = new PropertiesQWidgetWrapper<PropertiesView>();
+         break;
       default:
          break;
    }

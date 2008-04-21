@@ -237,6 +237,9 @@ protected:
     */
    void addAcceptableGraphicType(GraphicObjectType type);
 
+   void removeAcceptableGraphicType(GraphicObjectType type);
+   void clearAcceptableGraphicTypes();
+
    virtual void drawGroup();
 
    void onElementModified();

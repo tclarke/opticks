@@ -701,6 +701,7 @@ void DataVariantFactoryImp::initializeMaps()
    registerType<DataVariantValue<ComplexComponent> >();
    registerType<DataVariantValue<DataOrigin> >();
    registerType<DataVariantValue<DisplayMode> >();
+   registerType<DataVariantValue<DistanceUnits> >();
    registerType<DataVariantValue<DmsFormatType> >();
    registerType<DataVariantValue<EncodingType> >();
    registerType<DataVariantValue<EndianType> >();

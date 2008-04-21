@@ -92,10 +92,10 @@ bool GeoAlgorithms::initVincenty(double aLat1, double aLon1,
    mVincentyU2 = atan(m1MinF*tan(aLat2));
    aLon1   = getMod(aLon1, (GeoConversions::TWO_PI));
    aLon2     = getMod(aLon2, (GeoConversions::TWO_PI));
-   mVincentyL  = abs(aLon2-aLon1);
-   if (mVincentyL > PI)
+   mVincentyL  = aLon2-aLon1;
+   if (abs(mVincentyL) > PI)
    {
-     mVincentyL = GeoConversions::TWO_PI - mVincentyL;
+     mVincentyL = getSign(mVincentyL) * (GeoConversions::TWO_PI - abs(mVincentyL));
    }
 
    // Initialize Variables for Loop

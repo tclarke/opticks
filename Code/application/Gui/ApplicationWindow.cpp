@@ -4706,7 +4706,7 @@ void ApplicationWindow::enableToolBars(bool bEnable)
          }
          else if (bMeasurementMode == true)
          {
-            bEnableMeasurement = pSpatialDataView->isMeasurementsLayerShown();
+            bEnableMeasurement = true;
          }
       }
 

@@ -17,51 +17,48 @@
 #include "GraphicLayer.h"
 #include "Layer.h"
 #include "LayerList.h"
+#include "MeasurementLayer.h"
+#include "MeasurementLayerImp.h"
 #include "MeasurementObjectImp.h"
 #include "SpatialDataView.h"
+#include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "RasterLayer.h"
-#include "RasterDataDescriptor.h"
 #include "Units.h"
 
 #include <string>
 using namespace std;
+XERCES_CPP_NAMESPACE_USE
 
 MeasurementObjectImp::MeasurementObjectImp(const string& id, GraphicObjectType type, GraphicLayer* pLayer,
                                            LocationType aPixelCoord) :
    LineObjectImp(id, type, pLayer, aPixelCoord)
 {
    // Properties used by MeasurementObject
-   addProperty("FillColor");
    addProperty("LineColor");
    addProperty("LineWidth");
    addProperty("Font");
    addProperty("FontSize");
    addProperty("TextColor");
-   addProperty("Rotation");
    
    mpGeoreference.addSignal(SIGNAL_NAME(RasterElement, GeoreferenceModified), 
       Slot(this, &MeasurementObjectImp::georeferenceModified));
 
    // Default Graphic Object Values
-   ColorType lineColor;
-   ColorType textColor;
-   ColorType fillColor;
-   lineColor.mRed    = 0xff;
-   lineColor.mBlue   = 0x0;
-   lineColor.mGreen  = 0xff;
-   textColor.mRed    = 0xff;
-   textColor.mBlue   = 0x0;
-   textColor.mGreen  = 0xff;
-   fillColor.mRed    = 0x0;
-   fillColor.mBlue   = 0x0;
-   fillColor.mGreen  = 0x0;
-   QFont font("Times New Roman", 16, QFont::Bold);
-   setLineColor(lineColor);
-   setTextColor(textColor);
-   setFillColor(fillColor);
+   string face = MeasurementLayer::getSettingTextFont();
+   int iSize = MeasurementLayer::getSettingTextFontSize();
+   bool bBold = MeasurementLayer::getSettingTextBold();
+   bool bItalic = MeasurementLayer::getSettingTextItalics();
+   bool bUnderline = MeasurementLayer::getSettingTextUnderline();
+   QFont font(QString::fromStdString(face), iSize);
+   font.setBold(bBold);
+   font.setItalic(bItalic);
+   font.setUnderline(bUnderline);
+
+   setLineColor(MeasurementLayer::getSettingLineColor());
+   setLineWidth(MeasurementLayer::getSettingLineWidth());
+   setTextColor(MeasurementLayer::getSettingTextColor());
    setFont(font);
-   setLineWidth(2);
 
    // Set default member variable values
    mArrowHeadOffset  = 8;
@@ -74,9 +71,13 @@ MeasurementObjectImp::MeasurementObjectImp(const string& id, GraphicObjectType t
    mDistanceText     = "";
    mStartLocText     = "";
    mEndLocText       = "";
-   mDrawnDistanceUnit = NO_DISTANCE_UNIT;
-   mDrawnGeocoord = GEOCOORD_GENERAL;
-   mDrawnDmsFormat = DMS_FULL;
+
+   mBearingPrecision = MeasurementLayer::getSettingBearingPrecision();
+   mDistancePrecision = MeasurementLayer::getSettingDistancePrecision();
+   mEndPointsPrecision = MeasurementLayer::getSettingEndPointsPrecision();
+
+   setHitToleranceFactor(16.0);
+   setUseHitTolerance(true);
 }
 
 MeasurementObjectImp::~MeasurementObjectImp()
@@ -100,7 +101,7 @@ void MeasurementObjectImp::draw(double zoomFactor) const
    // Get the current view 
    SpatialDataView* pView = NULL;
 
-   GraphicLayer* pLayer = getLayer();
+   MeasurementLayerImp* pLayer = dynamic_cast<MeasurementLayerImp*>(getLayer());
    if (pLayer != NULL)
    {
       pView = dynamic_cast<SpatialDataView*>(pLayer->getView());
@@ -195,118 +196,37 @@ void MeasurementObjectImp::draw(double zoomFactor) const
    textOffset = (pixelSize == 0.0) ? 0.0 : (mTextOffset * sqrtLineWidth) / pixelSize;
    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
    QFontMetrics ftMetrics(font);
-   
-   // Calculate start and end text info
-   bool startLocDrawTop = false; // Whether to draw the start lat/lon text on the top or bottom of the specified point
-   bool endLocDrawTop   = false; // Whether to draw the end lat/lon text on the top or bottom of the specified point
-   if (urCorner.mY < llCorner.mY)
-   {
-      startLocDrawTop   = true;
-      endLocDrawTop     = false;
-   }
-   else
-   {
-      startLocDrawTop   = false;
-      endLocDrawTop     = true;
-   }
-   
-   // Calculate bearing text info
-   LocationType bearingTextStartPoint; // The location to display the bearing text
-   LocationType bearingTextEndPoint;   // The pseudo end location of the baring text (only used to calculate angle)
-   double bearingTextTheta = 0;        // Angle (in radians) of bearing text
-   bool bearingDrawTop     = false;    // The vertical origin to draw text from (True = top, False = bottom)
-   QRect bearingTextBoundingBox;       // Bounding box surrounding the bearing text
-   bearingTextBoundingBox  = ftMetrics.boundingRect(0, 0, maxTextureSize, maxTextureSize, 
-                                                    Qt::AlignLeft | Qt::TextWordWrap, mBearingText);
-   if (arrowEndPoint.mX < arrowStartPoint.mX)   // To the left of the origin (text underneath line)
-   {
-      startPerc = ((pixelSize == 0.0) || (arrowLength == 0.0)) ? 0.0 :
-                  1.0 - (bearingTextBoundingBox.width()/pixelSize)/arrowLength;
-      startPerc = (startPerc < 0.0) ? 0.0 : startPerc;
-      startPerc = (startPerc > 1.0) ? 1.0 : startPerc;
-      DrawUtil::getParallelLine(arrowEndPoint, arrowStartPoint, (-1) * textOffset, startPerc, float(1),
-                                bearingTextStartPoint, bearingTextEndPoint);
-      bearingDrawTop = true;
-   } 
-   else   // To the right of the origin (text on top of the line)
-   {
-      DrawUtil::getParallelLine(arrowStartPoint, arrowEndPoint, textOffset, float(0), float(1),
-                                bearingTextStartPoint, bearingTextEndPoint);
-      bearingDrawTop = false;
-   }
-   bearingTextTheta = ((bearingTextEndPoint.mX - bearingTextStartPoint.mX) == 0.0) ? 0.0 :
-                      bearingTextTheta = atan((bearingTextEndPoint.mY - bearingTextStartPoint.mY)/
-                      (bearingTextEndPoint.mX - bearingTextStartPoint.mX));
-   
-   // Calculate distance text info
-   LocationType distanceTextStartPoint; // The location to display the distance text
-   LocationType distanceTextEndPoint;   // The pseudo end location of the distance text (only used to calculate angle)
-   double distanceTextTheta   = 0;      // Angle (in radians) of distnace text
-   bool distanceDrawTop       = false;  // The vertical origin to draw text from (True = top, False = bottom)
-   double distanceTextWidth   = 0;      // The width of the ditance text bounding box (in screen pixels)
-   QRect distanceTextBoundingBox;       // Bounding box that surrounds the distance text
-   distanceTextBoundingBox    = ftMetrics.boundingRect(0, 0, maxTextureSize, maxTextureSize, 
-                                                       Qt::AlignLeft | Qt::TextWordWrap, mDistanceText);
-   distanceTextWidth          = distanceTextBoundingBox.width();
-   if ((pixelSize == 0.0) || (lineLength == 0.0))
-   {
-      startPerc = 0.0;
-   } 
-   else
-   {
-      if (urCorner.mX < llCorner.mX)
-      {
-         startPerc = .5 + (distanceTextWidth/pixelSize/2)/lineLength;
-         distanceDrawTop = false;
-      }
-      else
-      {
-         startPerc = .5 - (distanceTextWidth/pixelSize/2)/lineLength;
-         distanceDrawTop = true;
-      }
-   }
-   startPerc = (startPerc < 0.0) ? 0.0 : startPerc;
-   startPerc = (startPerc > 1.0) ? 1.0 : startPerc;
-   DrawUtil::getParallelLine(llCorner, urCorner, (-1) * textOffset, startPerc, float(1), distanceTextStartPoint,
-                             distanceTextEndPoint);
-   if (lineLength < (distanceTextBoundingBox.width()/pixelSize))
-   {
-      if (urCorner.mX < llCorner.mX)
-      {
-         DrawUtil::getParallelLine(llCorner, urCorner, (-1) * textOffset, float(0), float(1), distanceTextEndPoint,
-                                   distanceTextStartPoint);
-      } 
-      else
-      {
-         DrawUtil::getParallelLine(llCorner, urCorner, (-1) * textOffset, float(0), float(1), distanceTextStartPoint,
-                                   distanceTextEndPoint);
-      }
-      
-   }
-   distanceTextTheta = ((distanceTextEndPoint.mX - distanceTextStartPoint.mX) == 0.0) ? 0.0 :
-                       distanceTextTheta = atan((distanceTextEndPoint.mY - distanceTextStartPoint.mY)/
-                       (distanceTextEndPoint.mX - distanceTextStartPoint.mX));
-   
-   // Calculate start and end location text info
-   LocationType startLocPoint;   // The location to display the "start location" text
-   LocationType endLocPoint;     // The location to display the "end location" text
-   startLocPoint = llCorner;
-   endLocPoint   = urCorner;
-   startLocPoint.mY += textOffset;
-   endLocPoint.mY += textOffset;
-   
-   if (mDrawnDistanceUnit != msDistanceUnit ||
-      mDrawnGeocoord != msGeocoord ||
-      mDrawnDmsFormat != msDmsFormat)
+  
+   double viewRotation = pView->getRotation();
+   viewRotation = GeoConversions::convertDegToRad(viewRotation);
+
+   if (mDrawnDistanceUnit != pLayer->getDistanceUnits() ||
+      mDrawnGeocoord != pLayer->getGeocoordType() ||
+      mDrawnDmsFormat != pLayer->getGeoFormat())
    {
       refreshGeoInformation(); // only modifies cache stuff
    }
-   // Draw the text
-   double viewRotation = ((SpatialDataView*) pView)->getRotation();
-   viewRotation = GeoConversions::convertDegToRad(viewRotation);
-   if (msDrawLabels)
+
+   if (pLayer->getDisplayEndPoints())
    {
-      if (!mStartLocText.isEmpty() && msDrawLabels)
+      // Calculate start and end text info
+      bool startLocDrawTop = false; // Whether to draw the start lat/lon text on the top or bottom of the specified point
+      bool endLocDrawTop   = true;  // Whether to draw the end lat/lon text on the top or bottom of the specified point
+      if (urCorner.mY < llCorner.mY)
+      {
+         startLocDrawTop   = true;
+         endLocDrawTop     = false;
+      }
+
+      // Calculate start and end location text info
+      LocationType startLocPoint;   // The location to display the "start location" text
+      LocationType endLocPoint;     // The location to display the "end location" text
+      startLocPoint = llCorner;
+      endLocPoint   = urCorner;
+      startLocPoint.mY += textOffset;
+      endLocPoint.mY += textOffset;
+
+      if (!mStartLocText.isEmpty())
       {
          DrawUtil::drawRotatedText(mStartLocTextTexture, mStartLocText, font,
             textColor, startLocPoint, viewRotation, startLocDrawTop);
@@ -316,17 +236,103 @@ void MeasurementObjectImp::draw(double zoomFactor) const
          DrawUtil::drawRotatedText(mEndLocTextTexture, mEndLocText, font,
             textColor, endLocPoint, viewRotation, endLocDrawTop);
       }
+   }
+   
+   if (pLayer->getDisplayBearing())
+   {
+      // Calculate bearing text info
+      LocationType bearingTextStartPoint; // The location to display the bearing text
+      LocationType bearingTextEndPoint;   // The pseudo end location of the baring text (only used to calculate angle)
+      double bearingTextTheta = 0;        // Angle (in radians) of bearing text
+      bool bearingDrawTop     = false;    // The vertical origin to draw text from (True = top, False = bottom)
+      QRect bearingTextBoundingBox;       // Bounding box surrounding the bearing text
+      bearingTextBoundingBox  = ftMetrics.boundingRect(0, 0, maxTextureSize, maxTextureSize, 
+         Qt::AlignLeft | Qt::TextWordWrap, mBearingText);
+      if (arrowEndPoint.mX < arrowStartPoint.mX)   // To the left of the origin (text underneath line)
+      {
+         startPerc = ((pixelSize == 0.0) || (arrowLength == 0.0)) ? 0.0 :
+            1.0 - (bearingTextBoundingBox.width()/pixelSize)/arrowLength;
+         startPerc = (startPerc < 0.0) ? 0.0 : startPerc;
+         startPerc = (startPerc > 1.0) ? 1.0 : startPerc;
+         DrawUtil::getParallelLine(arrowEndPoint, arrowStartPoint, (-1) * textOffset, startPerc, float(1),
+            bearingTextStartPoint, bearingTextEndPoint);
+         bearingDrawTop = true;
+      } 
+      else   // To the right of the origin (text on top of the line)
+      {
+         DrawUtil::getParallelLine(arrowStartPoint, arrowEndPoint, textOffset, float(0), float(1),
+            bearingTextStartPoint, bearingTextEndPoint);
+         bearingDrawTop = false;
+      }
+      bearingTextTheta = ((bearingTextEndPoint.mX - bearingTextStartPoint.mX) == 0.0) ? 0.0 :
+         bearingTextTheta = atan((bearingTextEndPoint.mY - bearingTextStartPoint.mY)/
+         (bearingTextEndPoint.mX - bearingTextStartPoint.mX));
+
       if (!mBearingText.isEmpty())
       {
          DrawUtil::drawRotatedText(mBearingTextTexture, mBearingText, font,
             textColor, bearingTextStartPoint, bearingTextTheta, bearingDrawTop);
       }  
+   }
+   
+   if (pLayer->getDisplayDistance())
+   {
+      // Calculate distance text info
+      LocationType distanceTextStartPoint; // The location to display the distance text
+      LocationType distanceTextEndPoint;   // The pseudo end location of the distance text (only used to calculate angle)
+      double distanceTextTheta   = 0;      // Angle (in radians) of distnace text
+      bool distanceDrawTop       = false;  // The vertical origin to draw text from (True = top, False = bottom)
+      double distanceTextWidth   = 0;      // The width of the ditance text bounding box (in screen pixels)
+      QRect distanceTextBoundingBox;       // Bounding box that surrounds the distance text
+      distanceTextBoundingBox    = ftMetrics.boundingRect(0, 0, maxTextureSize, maxTextureSize, 
+         Qt::AlignLeft | Qt::TextWordWrap, mDistanceText);
+      distanceTextWidth          = distanceTextBoundingBox.width();
+      if ((pixelSize == 0.0) || (lineLength == 0.0))
+      {
+         startPerc = 0.0;
+      } 
+      else
+      {
+         if (urCorner.mX < llCorner.mX)
+         {
+            startPerc = .5 + (distanceTextWidth/pixelSize/2)/lineLength;
+            distanceDrawTop = false;
+         }
+         else
+         {
+            startPerc = .5 - (distanceTextWidth/pixelSize/2)/lineLength;
+            distanceDrawTop = true;
+         }
+      }
+      startPerc = (startPerc < 0.0) ? 0.0 : startPerc;
+      startPerc = (startPerc > 1.0) ? 1.0 : startPerc;
+      DrawUtil::getParallelLine(llCorner, urCorner, (-1) * textOffset, startPerc, float(1), distanceTextStartPoint,
+         distanceTextEndPoint);
+      if (lineLength < (distanceTextBoundingBox.width()/pixelSize))
+      {
+         if (urCorner.mX < llCorner.mX)
+         {
+            DrawUtil::getParallelLine(llCorner, urCorner, (-1) * textOffset, float(0), float(1), distanceTextEndPoint,
+               distanceTextStartPoint);
+         } 
+         else
+         {
+            DrawUtil::getParallelLine(llCorner, urCorner, (-1) * textOffset, float(0), float(1), distanceTextStartPoint,
+               distanceTextEndPoint);
+         }
+
+      }
+      distanceTextTheta = ((distanceTextEndPoint.mX - distanceTextStartPoint.mX) == 0.0) ? 0.0 :
+         distanceTextTheta = atan((distanceTextEndPoint.mY - distanceTextStartPoint.mY)/
+         (distanceTextEndPoint.mX - distanceTextStartPoint.mX));
+
       if (!mDistanceText.isEmpty())
       {
          DrawUtil::drawRotatedText(mDistanceTextTexture, mDistanceText, font,
             textColor, distanceTextStartPoint, distanceTextTheta, distanceDrawTop);
       }
-   }   
+   }
+
    // GL options
    glLineWidth(lineWidth);
    #if defined(WIN_API)
@@ -357,12 +363,15 @@ void MeasurementObjectImp::draw(double zoomFactor) const
    glVertex2d(barStartPoint2.mX, barStartPoint2.mY);
    glEnd();
 
-   // Draw the arrow
-   glBegin(GL_LINE_STRIP);
-   glVertex2d(arrowStartPoint.mX, arrowStartPoint.mY);
-   glVertex2d(arrowEndPoint.mX, arrowEndPoint.mY);
-   glVertex2d(arrowHeadBasePoint.mX, arrowHeadBasePoint.mY);
-   glEnd();
+   // Draw the arrow if bearing is displayed
+   if (pLayer->getDisplayBearing())
+   {
+      glBegin(GL_LINE_STRIP);
+      glVertex2d(arrowStartPoint.mX, arrowStartPoint.mY);
+      glVertex2d(arrowEndPoint.mX, arrowEndPoint.mY);
+      glVertex2d(arrowHeadBasePoint.mX, arrowHeadBasePoint.mY);
+      glEnd();
+   }
 
    // Set GL options to draw stippled line (Main line)
    glEnable(GL_LINE_STIPPLE);
@@ -432,53 +441,57 @@ bool MeasurementObjectImp::setProperty(const GraphicProperty* pProp)
 
    return LineObjectImp::setProperty(pProp);
 }
-
-
-void MeasurementObjectImp::setDrawLabels(bool drawLabels)
+void MeasurementObjectImp::setDistancePrecision(int precision)
 {
-   msDrawLabels = drawLabels;
+   if (mDistancePrecision != precision)
+   {
+      mDistancePrecision = precision;
+      refreshGeoInformation();
+   }
 }
 
-bool MeasurementObjectImp::getDrawLabels()
+int MeasurementObjectImp::getDistancePrecision() const
 {
-   return msDrawLabels;
+   return mDistancePrecision;
 }
 
-bool MeasurementObjectImp::msDrawLabels = true;
-
-DistanceUnits MeasurementObjectImp::getDistanceUnit()
+void MeasurementObjectImp::setBearingPrecision(int precision)
 {
-   return msDistanceUnit;
+   if (mBearingPrecision != precision)
+   {
+      mBearingPrecision = precision;
+      refreshGeoInformation();
+   }
 }
 
-void MeasurementObjectImp::setDistanceUnit(DistanceUnits unit)
+int MeasurementObjectImp::getBearingPrecision() const
 {
-   msDistanceUnit = unit;
+   return mBearingPrecision;
 }
 
-DistanceUnits MeasurementObjectImp::msDistanceUnit = KILOMETER;
-
-GeocoordType MeasurementObjectImp::msGeocoord = GEOCOORD_GENERAL;
-
-DmsFormatType MeasurementObjectImp::msDmsFormat = DMS_FULL;
-
-void MeasurementObjectImp::getGeocoordTypes(GeocoordType &geocoord, DmsFormatType &dms)
+void MeasurementObjectImp::setEndPointsPrecision(int precision)
 {
-   geocoord = msGeocoord;
-   dms = msDmsFormat;
+   if (mEndPointsPrecision != precision)
+   {
+      mEndPointsPrecision = precision;
+      refreshGeoInformation();
+   }
 }
 
-void MeasurementObjectImp::setGeocoordTypes(GeocoordType geocoord, DmsFormatType dms)
+int MeasurementObjectImp::getEndPointsPrecision() const
 {
-   msGeocoord = geocoord;
-   msDmsFormat = dms;
+   return mEndPointsPrecision;
 }
 
 void MeasurementObjectImp::refreshGeoInformation() const
 {
-   mDrawnDistanceUnit = msDistanceUnit;
-   mDrawnGeocoord = msGeocoord;
-   mDrawnDmsFormat = msDmsFormat;
+   MeasurementLayerImp* pLayer = dynamic_cast<MeasurementLayerImp*>(getLayer());
+   if (pLayer != NULL)
+   {
+      mDrawnDistanceUnit = pLayer->getDistanceUnits();
+      mDrawnGeocoord = pLayer->getGeocoordType();
+      mDrawnDmsFormat = pLayer->getGeoFormat();
+   }
 
    generateGeoStrings();
 }
@@ -620,8 +633,8 @@ string MeasurementObjectImp::generateGeoStrings() const
       // set location text
       if (mDrawnGeocoord == GEOCOORD_LATLON)
       {
-         startLoc = startLlPoint.getText(mDrawnDmsFormat);
-         endLoc = endLlPoint.getText(mDrawnDmsFormat);
+         startLoc = startLlPoint.getText(mDrawnDmsFormat, mEndPointsPrecision);
+         endLoc = endLlPoint.getText(mDrawnDmsFormat, mEndPointsPrecision);
       }
       else if (mDrawnGeocoord == GEOCOORD_UTM)
       {
@@ -635,26 +648,26 @@ string MeasurementObjectImp::generateGeoStrings() const
       }
       else if (mDrawnGeocoord == GEOCOORD_GENERAL)
       {
-         startLoc = "(" + QString::number(llCorner.mX).toStdString() + ", " +
-            QString::number(llCorner.mY).toStdString() + ")";
-         endLoc = "(" + QString::number(urCorner.mX).toStdString() + ", " +
-            QString::number(urCorner.mY).toStdString() + ")";
+         startLoc = "(" + QString::number(llCorner.mX, 'f', mEndPointsPrecision).toStdString() + ", " +
+            QString::number(llCorner.mY, 'f', mEndPointsPrecision).toStdString() + ")";
+         endLoc = "(" + QString::number(urCorner.mX, 'f', mEndPointsPrecision).toStdString() + ", " +
+            QString::number(urCorner.mY, 'f', mEndPointsPrecision).toStdString() + ")";
       }
    }
    else
    {
-      startLoc = "(" + QString::number(llCorner.mX).toStdString() + ", " +
-         QString::number(llCorner.mY).toStdString() + ")";
-      endLoc = "(" + QString::number(urCorner.mX).toStdString() + ", " +
-         QString::number(urCorner.mY).toStdString() + ")";
+      startLoc = "(" + QString::number(llCorner.mX, 'f', mEndPointsPrecision).toStdString() + ", " +
+         QString::number(llCorner.mY, 'f', mEndPointsPrecision).toStdString() + ")";
+      endLoc = "(" + QString::number(urCorner.mX, 'f', mEndPointsPrecision).toStdString() + ", " +
+         QString::number(urCorner.mY, 'f', mEndPointsPrecision).toStdString() + ")";
       azimuthVal = algs.getPythagoreanAzimuth(llCorner.mX,llCorner.mY, urCorner.mX, urCorner.mY);
       azimuthVal = GeoConversions::convertRadToDeg(azimuthVal);
       distanceVal = algs.getPythagoreanDistance(urCorner.mX, urCorner.mY, llCorner.mX, llCorner.mY);
       distanceUnit = "";
    }
 
-   bearing = QString::number(azimuthVal).toStdString();
-   distance = QString::number(distanceVal).toStdString();
+   bearing = QString::number(azimuthVal, 'f', mBearingPrecision).toStdString();
+   distance = QString::number(distanceVal, 'f', mDistancePrecision).toStdString();
 
    QString bearingText = QString::fromStdString(bearing) + " deg";
    QString distanceText = QString::fromStdString(distance) + " " + QString::fromStdString(distanceUnit);
@@ -739,4 +752,57 @@ void MeasurementObjectImp::georeferenceModified(Subject &subject, const std::str
 {
    updateGeo();
    generateGeoStrings();
+}
+
+
+bool MeasurementObjectImp::toXml(XMLWriter* pXml) const
+{
+   if (pXml == NULL || !LineObjectImp::toXml(pXml))
+   {
+      return false;
+   }
+
+   pXml->addAttr("bearingPrecision", mBearingPrecision);
+   pXml->addAttr("distancePrecision", mDistancePrecision);
+   pXml->addAttr("endPointPrecision", mEndPointsPrecision);
+
+   return true;
+}
+
+bool MeasurementObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
+{
+   if (pDocument == NULL || !LineObjectImp::fromXml(pDocument, version))
+   {
+      return false;
+   }
+
+   mBearingPrecision = StringUtilities::fromXmlString<int>(
+      A(static_cast<DOMElement*>(pDocument)->getAttribute(X("bearingPrecision"))));
+   mDistancePrecision = StringUtilities::fromXmlString<int>(
+      A(static_cast<DOMElement*>(pDocument)->getAttribute(X("distancePrecision"))));
+   mEndPointsPrecision = StringUtilities::fromXmlString<int>(
+      A(static_cast<DOMElement*>(pDocument)->getAttribute(X("endPointPrecision"))));
+
+   return true;
+}
+
+
+bool MeasurementObjectImp::replicateObject(const GraphicObject* pObject)
+{
+   const MeasurementObjectImp* pMeas = dynamic_cast<const MeasurementObjectImp*>(pObject);
+   if (pMeas == NULL)
+   {
+      return false;
+   }
+
+   bool bSuccess = false;
+   bSuccess = LineObjectImp::replicateObject(pObject);
+   if (bSuccess)
+   {
+      mBearingPrecision = pMeas->getBearingPrecision();
+      mDistancePrecision = pMeas->getDistancePrecision();
+      mEndPointsPrecision = pMeas->getEndPointsPrecision();
+   }
+
+   return bSuccess;
 }

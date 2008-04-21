@@ -11,17 +11,21 @@
 #define MEASUREMENTTOOLBAR_H
 
 #include <QtGui/QAction>
+#include <QtGui/QButtonGroup>
 #include <QtGui/QMenu>
 
-#include "ToolBarAdapter.h"
-
+#include "AttachmentPtr.h"
 #include "PixmapGrid.h"
 #include "PixmapGridButton.h"
+#include "RasterElement.h"
+#include "ToolBarAdapter.h"
 #include "TypesFile.h"
 
-class AnnotationLayer;
 class DistanceUnitsButton;
 class Layer;
+class LocationUnitsButton;
+class MeasurementLayerImp;
+class QString;
 
 class MeasurementToolBar : public ToolBarAdapter
 {
@@ -50,28 +54,41 @@ public slots:
    bool setMeasurementsLayer(Layer* pLayer);
 
 protected:
+   void georeferenceModified(Subject &subject, const std::string &signal, const boost::any &data);
    void measurementsLayerDeleted(Subject& subject, const std::string& signal, const boost::any& value);
+   bool isGeoreferenced() const;
 
 protected slots:
    void setDrawMode(bool on);
    void showLayer(bool bShow);
-   void setDrawLabels(bool drawLabels);
-   void setLocationUnit(const QString& locationIdentifier);
+   void setDrawBearingLabel(bool drawLabel);
+   void setDrawDistanceLabel(bool drawLabel);
+   void setDrawEndPointsLabel(bool drawLabel);
+   void setLocationUnit(GeocoordType geoType, DmsFormatType geoFormat);
    void setDistanceUnit(DistanceUnits units);
    void redrawObjects();
+   void setSelectionObject(GraphicObjectType eType);
+   void updateGeoreference();
+   void updateRaster();
 
 private:
+   QButtonGroup* mpObjectGroup;
    QAction* mpDrawAction;
+   QAction* mpMoveAction;
    QAction* mpShowAction;
-   QAction* mpLabelsAction;
+   QAction* mpBearingLabelAction;
+   QAction* mpDistanceLabelAction;
+   QAction* mpEndPointsLabelAction;
 
    // Location units actions
-   PixmapGridButton* mpLocationUnits;
+   LocationUnitsButton* mpLocationUnits;
 
    // Distance units actions
    DistanceUnitsButton* mpDistanceUnits;
 
-   AnnotationLayer* mpMeasurementsLayer;
+   bool mbToolbarEnabled;
+   MeasurementLayerImp* mpMeasurementsLayer;
+   AttachmentPtr<RasterElement> mpRaster;
 };
 
 class DistanceUnitsGrid : public PixmapGrid
@@ -79,7 +96,7 @@ class DistanceUnitsGrid : public PixmapGrid
    Q_OBJECT
 
 public:
-   DistanceUnitsGrid(QWidget* pParent);
+   DistanceUnitsGrid(QWidget* pParent = NULL);
    void setCurrentValue(DistanceUnits value);
    DistanceUnits getCurrentValue() const;
 
@@ -95,16 +112,44 @@ class DistanceUnitsButton : public PixmapGridButton
    Q_OBJECT
 
 public:
-   DistanceUnitsButton(QWidget* pParent);
+   DistanceUnitsButton(QWidget* pParent = NULL);
 
    void setCurrentValue(DistanceUnits value);
    DistanceUnits getCurrentValue() const;
 
 signals:
    void valueChanged(DistanceUnits value);
+};
+
+class LocationUnitsGrid : public PixmapGrid
+{
+   Q_OBJECT
+
+public:
+   LocationUnitsGrid(QWidget* pParent = NULL);
+   void setCurrentValue(GeocoordType geoType, DmsFormatType geoFormat);
+   void getCurrentValue(GeocoordType &geoType, DmsFormatType &geoFormat) const;
+   void stringToLocationUnits(const QString &strVal, GeocoordType &geoType, DmsFormatType &geoFormat) const;
+
+signals: 
+   void valueChanged(GeocoordType geoType, DmsFormatType geoFormat);
 
 private slots:
-   void translateChange();
+   void translateChange(const QString&);
+};
+
+class LocationUnitsButton : public PixmapGridButton
+{
+   Q_OBJECT
+
+public:
+   LocationUnitsButton(QWidget* pParent = NULL);
+
+   void setCurrentValue(GeocoordType geoType, DmsFormatType geoFormat);
+   void getCurrentValue(GeocoordType &geoType, DmsFormatType &geoFormat) const;
+
+signals:
+   void valueChanged(GeocoordType geoType, DmsFormatType geoFormat);
 };
 
 #endif

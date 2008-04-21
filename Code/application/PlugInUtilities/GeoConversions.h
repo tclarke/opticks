@@ -17,6 +17,28 @@
  */
 namespace GeoConversions
 {
+   // PI and Derivatives Constants
+   const double PI_OVER_2 = PI/2.0;
+   const double PI_OVER_4 = PI/4.0;
+   const double TWO_PI = 2.0 * PI;
+   const double THREE_PI_OVER_2 = 3.0 * PI / 2.0;
+   const double DEG_TO_RAD = PI / 180.0;
+   const double RAD_TO_DEG = 180.0 / PI;
+
+   // WGS-84 Constants
+   const double POLAR_RAD_M = 6356752.31424518; //!< Polar Radius-Km
+   const double EQU_RAD_M = 6378137.0;          //!< Equatorial Radius-meters
+   const double EQU_RAD_KM = 6378.137;          //!< Equatorial Radius-Km
+   const double AVG_EQU_RAD_KM = 6371.0;        //!< Avg Equatorial Radius-Km
+   const double FLATTENING = 1.000000/298.257223563;
+   const double INV_FLATTENING = 298.257223563;
+   const double EPS = 0.000000000005;
+
+   // Common Trig Constants
+   const double HALF_SQRT_TWO(sqrt(2.0)/2.0);
+   const double SIN_45(HALF_SQRT_TWO);
+   const double COS_45(HALF_SQRT_TWO);
+
    /**
     *   Converts degrees to radians.
     *
@@ -27,7 +49,7 @@ namespace GeoConversions
     */
    inline double convertDegToRad(double aDegrees)
    {
-      return aDegrees * 0.01745329252;
+      return aDegrees * DEG_TO_RAD;
    }
 
    /**
@@ -40,7 +62,7 @@ namespace GeoConversions
    */
    inline double convertRadToDeg(double aRadians)
    {
-      return aRadians * 57.2957795129;
+      return aRadians * RAD_TO_DEG;
    }
 
    /**
@@ -147,25 +169,4 @@ namespace GeoConversions
    {
       return aRad * 3437.7467707849392526;
    }
-
-
-   // PI and Derivatives Constants
-   const double PI_OVER_2 = PI/2.0;
-   const double PI_OVER_4 = PI/4.0;
-   const double TWO_PI = 2.0 * PI;
-   const double THREE_PI_OVER_2 = 3.0 * PI / 2.0;
-
-   // WGS-84 Constants
-   const double POLAR_RAD_M = 6356752.31424518;    //!< Polar Radius-Km
-   const double EQU_RAD_M = 6378137.0;      //!< Equatorial Radius-meters
-   const double EQU_RAD_KM = 6378.137;     //!< Equatorial Radius-Km
-   const double AVG_EQU_RAD_KM = 6371.0; //!< Avg Equatorial Radius-Km
-   const double FLATTENING = 1.000000/298.257223563;
-   const double INV_FLATTENING = 298.257223563;
-   const double EPS = 0.000000000005;
-   
-   // Common Trig Constants
-   const double HALF_SQRT_TWO(sqrt(2.0)/2.0);
-   const double SIN_45(HALF_SQRT_TWO);
-   const double COS_45(HALF_SQRT_TWO);
 };

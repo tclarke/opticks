@@ -36,7 +36,15 @@ public:
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
 
+protected:
+   bool getUseHitTolerance() const;
+   bool setUseHitTolerance(bool bUse);
+
+   double getHitToleranceFactor() const;
+   bool setHitToleranceFactor(double hitFactor);
+
 private:
+   double mToleranceFactor;
    bool mUseHitTolerance;
 };
 

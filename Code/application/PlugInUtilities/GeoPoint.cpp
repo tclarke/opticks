@@ -169,8 +169,21 @@ double DmsPoint::getValue() const
    return mValue;
 }
 
-string DmsPoint::getValueText(DmsFormatType format) const
+string DmsPoint::getValueText(DmsFormatType format, int precision) const
 {
+   char formatChar('%');
+   char quoteChar('"');
+
+   // initialize to default values
+   int degSecPrecision(3);
+   int minutePrecision(2);
+
+   if (precision != -1)
+   {
+      minutePrecision = precision;
+      degSecPrecision = precision;
+   }
+
    bool bPositive = true;
    double dPositiveValue = mValue;
 
@@ -212,68 +225,64 @@ string DmsPoint::getValueText(DmsFormatType format) const
       else if (mType == DmsPoint::DMS_LONGITUDE) direction = 'W';
    }
 
-   // put switch statement here to test various formatting of values
-
    char buffer[1024];
-   if (dSeconds > 0.0)
+   string strVal;
+   string formatStr;
+   switch (format)
    {
-      // write out everything in full: degrees, minutes, and seconds
-      switch(format)
+   case DMS_FULL:
+      sprintf(buffer, "%c%d%s", direction, iDegrees, DEG_CHAR.c_str());
+      strVal = buffer;
+      if (iMinutes > 0)
       {
-      case DMS_FULL:
-         sprintf(buffer, "%c%d%s%d'%g\"", direction, iDegrees, DEG_CHAR.c_str(), iMinutes, dSeconds);
-         break;
-      case DMS_FULL_DECIMAL:
-         sprintf(buffer, "%c%.3lf%s", direction, dPositiveValue, DEG_CHAR.c_str());
-         break;
-      case DMS_MINUTES_DECIMAL:
-         sprintf(buffer, "%c%d%s%2.2lf'", direction, iDegrees, DEG_CHAR.c_str(), (60.0 * (dPositiveValue - iDegrees)) );
-         break;
-      default:
-         return string("");
+         sprintf(buffer, "%d%s", iMinutes, "'");
+         strVal += buffer;
       }
-   }
-   else
-   {
-      // need to test if the minutes field needs to be written - seconds field doesn't need to be written, however
-      switch(format)
+      else
       {
-      case DMS_FULL:
-         if (iMinutes > 0)
+         if (dSeconds > 0.0)
          {
-            sprintf(buffer, "%c%d%s%d'", direction, iDegrees, DEG_CHAR.c_str(), iMinutes);
+            strVal += "0'";
          }
-         else
-         {
-            sprintf(buffer, "%c%d%s", direction, iDegrees, DEG_CHAR.c_str());
-         }
-         break;
-      case DMS_FULL_DECIMAL:
-         if (iMinutes > 0)
-         {
-            sprintf(buffer, "%c%.3f%s", direction, dPositiveValue, DEG_CHAR.c_str());
-         }
-         else
-         {
-            sprintf(buffer, "%c%.0lf%s", direction, dPositiveValue, DEG_CHAR.c_str());
-         }
-         break;
-      case DMS_MINUTES_DECIMAL:
-         if (iMinutes > 0)
-         {
-            sprintf(buffer, "%c%d%s%2.2lf'", direction, iDegrees, DEG_CHAR.c_str(), (60.0 * (dPositiveValue - iDegrees)) );
-         }
-         else
-         {
-            sprintf(buffer, "%c%.0lf%s", direction, dPositiveValue, DEG_CHAR.c_str());
-         }
-         break;
-      default:
-         return string("");
       }
+      if (dSeconds > 0.0)
+      {
+         sprintf(buffer, "%c.%df%c", formatChar, degSecPrecision, quoteChar);
+         formatStr = buffer;
+         sprintf(buffer, formatStr.c_str(), dSeconds);
+         strVal += buffer;
+      }
+      break;
+
+   case DMS_FULL_DECIMAL:
+      
+      sprintf(buffer, "%c.%df%s", formatChar, minutePrecision, DEG_CHAR.c_str());
+      formatStr = buffer;
+      sprintf(buffer, formatStr.c_str(), dPositiveValue);
+      strVal = buffer;
+      break;
+
+   case DMS_MINUTES_DECIMAL:
+      // set scope for variable dMinutes
+      {
+         sprintf(buffer, "%c%d%s", direction, iDegrees, DEG_CHAR.c_str());
+         strVal = buffer;
+         double dMinutes = 60.0 * (dPositiveValue - iDegrees);
+         if (dMinutes > 0.0)
+         {
+            sprintf(buffer, "%c.%df'", formatChar, degSecPrecision);
+            formatStr = buffer;
+            sprintf(buffer, formatStr.c_str(), dMinutes);
+            strVal += buffer;
+         }
+      }
+      break;
+
+   default:
+      return string("");
    }
 
-   return string(buffer);
+   return strVal;
 }
 
 DmsPoint& DmsPoint::operator =(const DmsPoint &original)
@@ -355,24 +364,24 @@ const DmsPoint& LatLonPoint::getLongitude() const
    return mLongitude;
 }
 
-string LatLonPoint::getText(DmsFormatType format) const
+string LatLonPoint::getText(DmsFormatType format, int precision) const
 {
-   string latitudeText = getLatitudeText(format);
-   string longitudeText = getLongitudeText(format);
+   string latitudeText = getLatitudeText(format, precision);
+   string longitudeText = getLongitudeText(format, precision);
 
    string latLonText = latitudeText + ", " + longitudeText;
    return latLonText;
 }
 
-string LatLonPoint::getLatitudeText(DmsFormatType format) const
+string LatLonPoint::getLatitudeText(DmsFormatType format, int precision) const
 {
-   string latitudeText = mLatitude.getValueText(format);
+   string latitudeText = mLatitude.getValueText(format, precision);
    return latitudeText;
 }
 
-string LatLonPoint::getLongitudeText(DmsFormatType format) const
+string LatLonPoint::getLongitudeText(DmsFormatType format, int precision) const
 {
-   string longitudeText = mLongitude.getValueText(format);
+   string longitudeText = mLongitude.getValueText(format, precision);
    return longitudeText;
 }
 

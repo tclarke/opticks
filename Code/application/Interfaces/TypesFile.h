@@ -837,6 +837,7 @@ template <> class VariantTypeValidator<AnimationState> {};
 template <> class VariantTypeValidator<ArcRegion> {};
 template <> class VariantTypeValidator<DataOrigin> {};
 template <> class VariantTypeValidator<DisplayMode> {};
+template <> class VariantTypeValidator<DistanceUnits> {};
 template <> class VariantTypeValidator<DmsFormatType> {};
 template <> class VariantTypeValidator<EncodingType> {};
 template <> class VariantTypeValidator<EndianType> {};
