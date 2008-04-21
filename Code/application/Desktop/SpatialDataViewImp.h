@@ -22,11 +22,11 @@
 #include <string>
 #include <vector>
 
-class AnnotationLayerAdapter;
 class DataElement;
 class LayerImp;
 class LayerList;
 class LayerListAdapter;
+class MeasurementLayerAdapter;
 class MouseMode;
 class RasterElement;
 class RasterLayer;
@@ -184,7 +184,7 @@ private:
    TextureMode mTextureMode;
    LayerListAdapter* mpLayerList;
    RasterLayer* mpPrimaryRasterLayer;
-   AnnotationLayerAdapter* mpMeasurementsLayer;
+   MeasurementLayerAdapter* mpMeasurementsLayer;
    bool mShowMeasurements;
    LayerImp* mpActiveLayer;
    LayerImp* mpDrawLayer;

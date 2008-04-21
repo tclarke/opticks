@@ -731,6 +731,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Interfaces\MeasurementLayer.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Interfaces\MenuBar.h"
 				>
 			</File>

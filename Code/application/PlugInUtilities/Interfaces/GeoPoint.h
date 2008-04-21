@@ -119,12 +119,16 @@ public:
     *
     *  @param   format
     *           The text format for the string.
+    *  @param   precision
+    *           The number of digits after decimal point. Defaults to three for
+    *           decimal degrees and seconds and two for decimal minutes.
     *
     *  @return  The value of the DMS point as an formatted string.
     *
     *  @see     DmsFormatType, getValue()
     */
-   std::string getValueText(DmsFormatType format = DMS_FULL) const;
+   std::string getValueText(DmsFormatType format = DMS_FULL,
+                            int precision = -1) const;
 
    /**
     *  Sets the type and value to that of another DMS point.
@@ -240,36 +244,48 @@ public:
     *
     *  @param   format
     *           The text format for the string.
+    *  @param   precision
+    *           The number of digits after decimal point. Defaults to three for
+    *           decimal degrees and seconds and two for decimal minutes.
     *
     *  @return  The value of the latitude/longitude coordinate as a formatted string.
     *
     *  @see     DmsFormatType, getCoordinates(), getLatitudeText(), getLongitudeText()
     */
-   std::string getText(DmsFormatType format = DMS_FULL) const;
+   std::string getText(DmsFormatType format = DMS_FULL,
+                       int precision = -1) const;
 
    /**
     *  Returns the latitude value in a given text format.
     *
     *  @param   format
     *           The text format for the string.
+    *  @param   precision
+    *           The number of digits after decimal point. Defaults to three for
+    *           decimal degrees and seconds and two for decimal minutes.
     *
     *  @return  The latitude value as a formatted string.
     *
     *  @see     DmsFormatType, getText(), getLongitudeText()
     */
-   std::string getLatitudeText(DmsFormatType format = DMS_FULL) const;
+   std::string getLatitudeText(DmsFormatType format = DMS_FULL,
+                               int precision = -1) const;
 
    /**
     *  Returns the longitude value in a given text format.
     *
     *  @param   format
     *           The text format for the string.
+    *  @param   precision
+    *           The number of digits after decimal point. Defaults to three for
+    *           decimal degrees and seconds and two for decimal minutes.
     *
     *  @return  The longitude value as a formatted string.
     *
     *  @see     DmsFormatType, getText(), getLatitudeText()
     */
-   std::string getLongitudeText(DmsFormatType format = DMS_FULL) const;
+   std::string getLongitudeText(DmsFormatType format = DMS_FULL,
+                                int precision = -1) const;
 
    /**
     *  Sets the latitude and longitude values to that of another latitude/longitude

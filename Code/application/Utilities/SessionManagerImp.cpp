@@ -28,6 +28,7 @@
 #include "LatLonLayerAdapter.h"
 #include "Layer.h"
 #include "LayerList.h"
+#include "MeasurementLayerAdapter.h"
 #include "MessageLogMgrImp.h"
 #include "ModelServicesImp.h"
 #include "ModuleDescriptor.h"
@@ -342,6 +343,10 @@ SessionItem *SessionManagerImp::createLayer(const string &type, const string &id
       else if (strType == "LatLonLayerAdapter")
       {
          pLayer = new LatLonLayerAdapter(id, name, NULL);
+      }
+      else if (strType == "MeasurementLayerAdapter")
+      {
+         pLayer = new MeasurementLayerAdapter(id, name, NULL);
       }
       else if (strType == "PseudocolorLayerAdapter")
       {

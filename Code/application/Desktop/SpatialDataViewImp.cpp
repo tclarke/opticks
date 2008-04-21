@@ -13,7 +13,6 @@
 #include "AnimationController.h"
 #include "AnimationServices.h"
 #include "AnnotationElementAdapter.h"
-#include "AnnotationLayerAdapter.h"
 #include "AoiElement.h"
 #include "AoiElementImp.h"
 #include "AoiLayerAdapter.h"
@@ -36,6 +35,7 @@
 #include "LayerListAdapter.h"
 #include "LayerUndo.h"
 #include "MathUtil.h"
+#include "MeasurementLayerAdapter.h"
 #include "ModelServices.h"
 #include "MouseModeImp.h"
 #include "PlotWindowAdapter.h"
@@ -105,7 +105,7 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
 {
    // Measurements layer
    DataDescriptorAdapter measurementsDescriptor("Measurements", "AnnotationElement", NULL);
-   mpMeasurementsLayer = new AnnotationLayerAdapter(SessionItemImp::generateUniqueId(), "Measurements",
+   mpMeasurementsLayer = new MeasurementLayerAdapter(SessionItemImp::generateUniqueId(), "Measurements",
       new AnnotationElementAdapter(measurementsDescriptor, SessionItemImp::generateUniqueId()));
 
    // Context menu actions
@@ -449,10 +449,10 @@ SpatialDataViewImp& SpatialDataViewImp::operator= (const SpatialDataViewImp& spa
       {
          *mpMeasurementsLayer = *(spatialDataView.mpMeasurementsLayer);
          // Copy the measurement objects from the view's layer to this layer
-         list<GraphicObject*> selectedObjects;
-         spatialDataView.mpMeasurementsLayer->getSelectedObjects(selectedObjects);
+         list<GraphicObject*> objects;
+         spatialDataView.mpMeasurementsLayer->getObjects(objects);
 
-         for (list<GraphicObject*>::iterator iter = selectedObjects.begin(); iter != selectedObjects.end(); ++iter)
+         for (list<GraphicObject*>::iterator iter = objects.begin(); iter != objects.end(); ++iter)
          {
             GraphicObject* pObject = *iter;
             if (pObject != NULL)
@@ -3739,11 +3739,12 @@ bool SpatialDataViewImp::fromXml(DOMNode* pDocument, unsigned int version)
 
    if(pElem->hasAttribute(X("measurementLayerId")))
    {
-      AnnotationLayerAdapter* pMeasLayer = dynamic_cast<AnnotationLayerAdapter*>(
+      MeasurementLayerAdapter* pMeasLayer = dynamic_cast<MeasurementLayerAdapter*>(
          SessionManagerImp::instance()->getSessionItem(A(pElem->getAttribute(X("measurementLayerId")))));
       if (pMeasLayer != NULL)
       {
          VERIFY(mpMeasurementsLayer != NULL);
+         *mpMeasurementsLayer = *pMeasLayer;
          GraphicGroupImp* pCurGroup = dynamic_cast<GraphicGroupImp*>(mpMeasurementsLayer->getGroup());  
          GraphicGroup* pRestorGroup = pMeasLayer->getGroup();
          if (pCurGroup != NULL && pRestorGroup != NULL)

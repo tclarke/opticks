@@ -22,7 +22,9 @@ using namespace std;
 
 LineObjectImp::LineObjectImp(const string& id, GraphicObjectType type, GraphicLayer* pLayer,
                              LocationType pixelCoord) :
-   PixelObjectImp(id, type, pLayer, pixelCoord)
+   PixelObjectImp(id, type, pLayer, pixelCoord),
+   mToleranceFactor(2.0),
+   mUseHitTolerance(true)
 {
    addProperty("LineWidth");
    addProperty("LineColor");
@@ -38,8 +40,6 @@ LineObjectImp::LineObjectImp(const string& id, GraphicObjectType type, GraphicLa
    mHandles.push_back(pixelCoord);
    mHandles.push_back(pixelCoord);
    mHandles.push_back(pixelCoord);
-
-   mUseHitTolerance = true;
 }
 
 void LineObjectImp::drawVector(double zoomFactor) const
@@ -127,7 +127,7 @@ bool LineObjectImp::hit(LocationType pixelCoord) const
    LocationType urCorner = getUrCorner();
 
    double dTolerance = 0.5 + DBL_EPSILON;
-   if (mUseHitTolerance == true)
+   if (getUseHitTolerance())
    {
       GraphicLayer* pLayer = NULL;
       pLayer = getLayer();
@@ -136,7 +136,7 @@ bool LineObjectImp::hit(LocationType pixelCoord) const
          View* pView = pLayer->getView();
          if (pView != NULL)
          {
-            dTolerance = 2.0 / pView->getPixelSize(llCorner, urCorner);
+            dTolerance = mToleranceFactor / pView->getPixelSize(llCorner, urCorner);
          }
          dTolerance /= min(pLayer->getXScaleFactor(), pLayer->getYScaleFactor());
       }
@@ -297,3 +297,26 @@ bool LineObjectImp::isKindOf(const string& className) const
 
    return PixelObjectImp::isKindOf(className);
 }
+
+double LineObjectImp::getHitToleranceFactor() const
+{
+   return mToleranceFactor;
+}
+
+bool LineObjectImp::setHitToleranceFactor(double hitFactor)
+{
+   mToleranceFactor = hitFactor;
+   return true;
+}
+
+bool LineObjectImp::getUseHitTolerance() const
+{
+   return mUseHitTolerance;
+}
+
+bool LineObjectImp::setUseHitTolerance(bool bUse)
+{
+   mUseHitTolerance = bUse;
+   return true;
+}
+

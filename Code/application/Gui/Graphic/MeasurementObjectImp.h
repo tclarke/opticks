@@ -50,24 +50,26 @@ public:
    void draw(double zoomFactor) const;
 
    bool setProperty(const GraphicProperty* pProp);
-   
-   static void setDrawLabels(bool drawLabels);
-   static bool getDrawLabels();
 
-   static DistanceUnits getDistanceUnit();
-   static void setDistanceUnit(DistanceUnits unit);
+   bool replicateObject(const GraphicObject* pObject);
 
-   static void getGeocoordTypes(GeocoordType &geocoord, DmsFormatType &dms);
-   static void setGeocoordTypes(GeocoordType geocoord, DmsFormatType dms);
+   void setDistancePrecision(int precision);
+   int getDistancePrecision() const;
+   void setBearingPrecision(int precision);
+   int getBearingPrecision() const;
+   void setEndPointsPrecision(int precision);
+   int getEndPointsPrecision() const;
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
 
+   bool toXml(XMLWriter* pXml) const;
+   bool fromXml(DOMNode* pDocument, unsigned int version);
+
 private:
-   static bool msDrawLabels;
-   static DistanceUnits msDistanceUnit;
-   static GeocoordType msGeocoord;
-   static DmsFormatType msDmsFormat;
+   int mDistancePrecision;
+   int mBearingPrecision;
+   int mEndPointsPrecision;
 
    void refreshGeoInformation() const;
    std::string generateGeoStrings() const;

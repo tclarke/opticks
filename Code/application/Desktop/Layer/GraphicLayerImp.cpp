@@ -1848,6 +1848,16 @@ void GraphicLayerImp::addAcceptableGraphicType(GraphicObjectType type)
    mAcceptableTypes.insert(type);
 }
 
+void GraphicLayerImp::removeAcceptableGraphicType(GraphicObjectType type)
+{
+   mAcceptableTypes.erase(type);
+}
+
+void GraphicLayerImp::clearAcceptableGraphicTypes()
+{
+   mAcceptableTypes.clear();
+}
+
 void GraphicLayerImp::reset()
 {
    // nothing to reset

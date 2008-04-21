@@ -522,8 +522,14 @@ Icons::Icons()
    mMeasurementDistanceUnits = QPixmap(IconImages::MeasurementDistanceUnitsIcon);
    mMeasurementDistanceUnits.setMask(mMeasurementDistanceUnits.createHeuristicMask());
 
-   mMeasurementLabelsOnOff = QPixmap(IconImages::MeasurementLabelsOnOffIcon);
-   mMeasurementLabelsOnOff.setMask(mMeasurementLabelsOnOff.createHeuristicMask());
+   mMeasurementDistanceLabelOnOff = QPixmap(IconImages::MeasurementDistanceLabelOnOffIcon);
+   mMeasurementDistanceLabelOnOff.setMask(mMeasurementDistanceLabelOnOff.createHeuristicMask());
+
+   mMeasurementBearingLabelOnOff = QPixmap(IconImages::MeasurementBearingLabelOnOffIcon);
+   mMeasurementBearingLabelOnOff.setMask(mMeasurementBearingLabelOnOff.createHeuristicMask());
+
+   mMeasurementEndPtsLabelOnOff = QPixmap(IconImages::MeasurementEndPtsLabelOnOffIcon);
+   mMeasurementEndPtsLabelOnOff.setMask(mMeasurementEndPtsLabelOnOff.createHeuristicMask());
 
    mMeasurementNoLocUnit = QPixmap(IconImages::MeasurementNoLocUnitIcon);
    mMeasurementNoLocUnit.setMask(mMeasurementNoLocUnit.createHeuristicMask());

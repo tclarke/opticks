@@ -245,7 +245,9 @@ public:
    QPixmap mMeasurementStyle;
    QPixmap mMeasurementLocationUnits;
    QPixmap mMeasurementDistanceUnits;
-   QPixmap mMeasurementLabelsOnOff;
+   QPixmap mMeasurementDistanceLabelOnOff;
+   QPixmap mMeasurementBearingLabelOnOff;
+   QPixmap mMeasurementEndPtsLabelOnOff;
    QPixmap mMeasurementNoLocUnit;
    QPixmap mMeasurementDecDeg;
    QPixmap mMeasurementDecMin;

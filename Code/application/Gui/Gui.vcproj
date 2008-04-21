@@ -424,6 +424,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\OptionsMeasurementLayer.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\OptionsOverviewWindow.cpp"
 				>
 			</File>
@@ -517,6 +521,14 @@
 			</File>
 			<File
 				RelativePath=".\PropertiesLatLonLayer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PropertiesMeasurementLayer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PropertiesMeasurementObject.cpp"
 				>
 			</File>
 			<File
@@ -2289,6 +2301,50 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\OptionsMeasurementLayer.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing $(InputName).h..."
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
+						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing $(InputName).h..."
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
+						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing $(InputName).h..."
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
+						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing $(InputName).h..."
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
+						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\OptionsOverviewWindow.h"
 				>
 				<FileConfiguration
@@ -3062,6 +3118,94 @@
 			</File>
 			<File
 				RelativePath=".\PropertiesLatLonLayer.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing $(InputName).h..."
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
+						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing $(InputName).h..."
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
+						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing $(InputName).h..."
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
+						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing $(InputName).h..."
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
+						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\PropertiesMeasurementLayer.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing $(InputName).h..."
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
+						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing $(InputName).h..."
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
+						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing $(InputName).h..."
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
+						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing $(InputName).h..."
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
+						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\PropertiesMeasurementObject.h"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -4157,6 +4301,10 @@
 				>
 			</File>
 			<File
+				RelativePath="$(BuildDir)\Moc\$(ProjectName)\moc_OptionsMeasurementLayer.cpp"
+				>
+			</File>
+			<File
 				RelativePath="$(BuildDir)\Moc\$(ProjectName)\moc_OptionsOverviewWindow.cpp"
 				>
 			</File>
@@ -4226,6 +4374,14 @@
 			</File>
 			<File
 				RelativePath="$(BuildDir)\Moc\$(ProjectName)\moc_PropertiesLatLonLayer.cpp"
+				>
+			</File>
+			<File
+				RelativePath="$(BuildDir)\Moc\$(ProjectName)\moc_PropertiesMeasurementLayer.cpp"
+				>
+			</File>
+			<File
+				RelativePath="$(BuildDir)\Moc\$(ProjectName)\moc_PropertiesMeasurementObject.cpp"
 				>
 			</File>
 			<File
