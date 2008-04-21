@@ -32,17 +32,53 @@
 #include "XercesIncludes.h"
 
 #include <limits>
+#include <list>
 #include <math.h>
 
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
 
+namespace
+{
+   string getGraphicObjectName(GraphicObjectType type, GraphicLayer* pLayer)
+   {
+      string objectTypeName = StringUtilities::toDisplayString(type);
+      if (pLayer == NULL)
+      {
+         return objectTypeName;
+      }
+
+      GraphicElement* pElement = dynamic_cast<GraphicElement*>(pLayer->getDataElement());
+      if (pElement == NULL)
+      {
+         return objectTypeName;
+      }
+
+      GraphicGroup* pGroup = pElement->getGroup();
+      if (pGroup == NULL)
+      {
+         return objectTypeName;
+      }
+
+      unsigned int objectNum = 1;
+      const list<GraphicObject*>& objects = pGroup->getObjects();
+      for(list<GraphicObject*>::const_iterator iter = objects.begin(); iter != objects.end(); ++iter)
+      {
+         const GraphicObject* pObject = *iter;
+         VERIFYRV(pObject != NULL, objectTypeName);
+         if (pObject->getGraphicObjectType() == type)
+         {
+            ++objectNum;
+         }
+      }
+
+      return objectTypeName + " " + StringUtilities::toDisplayString(objectNum);
+   }
+};
+
 GraphicObjectImp::GraphicObjectImp(const string& id, GraphicObjectType type, GraphicLayer* pLayer,
                                    LocationType pixelCoord) :
-SessionItemImp(id, StringUtilities::toDisplayString(type) + ((pLayer != NULL)
-                        ? StringUtilities::toDisplayString(dynamic_cast<GraphicGroupImp*>(
-                                    dynamic_cast<GraphicElement*>(pLayer->getDataElement())->getGroup())->getNextObjectNumber())
-                        : "")),
+   SessionItemImp(id, getGraphicObjectName(type, pLayer)),
    mDisplayListDirty(true),
    mBitMaskDirty(true),
    mType(type),

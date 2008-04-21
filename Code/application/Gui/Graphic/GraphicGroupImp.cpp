@@ -40,7 +40,7 @@ XERCES_CPP_NAMESPACE_USE
 
 GraphicGroupImp::GraphicGroupImp(const string& id, GraphicObjectType type, GraphicLayer* pLayer,
                                  LocationType pixelCoord) :
-   GraphicObjectImp(id, type, pLayer, pixelCoord), mNextObjectNumber(1)
+   GraphicObjectImp(id, type, pLayer, pixelCoord)
 {
    mbNeedsLayout = true;
 }
