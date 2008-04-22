@@ -341,8 +341,23 @@ void WizardWidget::showValues(QTreeWidgetItem* pItem)
    // Set the current widgets to display the value
    setValueWidgets(strNodeType);
 
-   // Set the value in the editor
-   mpValueEditor->setValue(value);
+   // Set the value in the widgets
+   if (strNodeType == "File set")
+   {
+      string filesetName = value.toDisplayString();
+      if (filesetName.empty() == false)
+      {
+         int index = mpValueFilesetCombo->findText(QString::fromStdString(filesetName));
+         if (index != -1)
+         {
+            mpValueFilesetCombo->setCurrentIndex(index);
+         }
+      }
+   }
+   else
+   {
+      mpValueEditor->setValue(value);
+   }
 
    VERIFYNR(connect(mpTypeCombo, SIGNAL(activated(const QString&)), this, SIGNAL(modified())));
    VERIFYNR(connect(mpValueEditor, SIGNAL(modified()), this, SIGNAL(modified())));
