@@ -641,7 +641,7 @@ bool ViewImp::getCurrentImage(QImage &image)
 
       GlContextSave contextSave;
       makeCurrent();
-      QGLFramebufferObject fbo(iWidth, iHeight);
+      QGLFramebufferObject fbo(iWidth, iHeight, QGLFramebufferObject::CombinedDepthStencil);
       fbo.bind();
       drawImage(iWidth, iHeight);
       fbo.release();
