@@ -7,14 +7,11 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "ApplicationServices.h"
 #include "AppVerify.h"
 #include "AppVersion.h"
-
 #include "DesktopServices.h"
 #include "MessageLog.h"
 #include "MessageLogMgr.h"
-#include "UtilityServices.h"
 
 #include <errno.h>
 #include <sstream>
@@ -22,15 +19,15 @@
 void LogVerificationErrorProc(const char *pExpression, const char *pFilename, unsigned int line, const char *pMsg)
 {
    Service<MessageLogMgr> pMessageLogMgr;
-   MessageLog *pLog(pMessageLogMgr->getLog());
-   if(pLog != NULL)
+
+   MessageLog* pLog = pMessageLogMgr->getLog();
+   if (pLog != NULL)
    {
-      Message *pMessage(pLog->createMessage("Internal Application Error",
-                                            "app",
-                                            "94B15D95-4EBC-4ccd-9045-2F89D91CD5A7"));
-      if(pMessage != NULL)
+      Message* pMessage = pLog->createMessage(std::string("Internal ") + APP_NAME + std::string(" Error"), "app",
+         "94B15D95-4EBC-4ccd-9045-2F89D91CD5A7");
+      if (pMessage != NULL)
       {
-         if(pMsg != NULL)
+         if (pMsg != NULL)
          {
             pMessage->addProperty("Message", pMsg);
          }
@@ -39,14 +36,12 @@ void LogVerificationErrorProc(const char *pExpression, const char *pFilename, un
             pMessage->addProperty("Verify", pExpression);
             pMessage->addProperty("File", pFilename);
             pMessage->addProperty("Line", line);
-            pMessage->addProperty("Message", std::string("Please report this error to: ") + APP_CONTACT_INFORMATION +
-                                             "\nPlease attach your session log file if possible.");
          }
       }
    }
 
 #if !defined(DEBUG)
-   //in release mode, check presence of OPTICKS_SHOW_VERIFY environment variable
+   // In release mode, check for the presence of the OPTICKS_SHOW_VERIFY environment variable
    const char* pValue = getenv("OPTICKS_SHOW_VERIFY");
    if (pValue != NULL)
    {
@@ -58,14 +53,13 @@ void LogVerificationErrorProc(const char *pExpression, const char *pFilename, un
       }
       else
       {
-         text << "Internal " << APP_NAME << " Error: Verification Failed\n\nVerify(" << pExpression 
-            << ")   \nFile: " << pFilename << "\n   Line: " << line 
-            << "\n\nPlease report this error to: " << APP_CONTACT_INFORMATION
-            << "\nPlease attach your session log file, if possible.";
+         text << "Internal " << APP_NAME << " Error: Verification Failed\n\nVerify(" << pExpression
+            << ")\n   File: " << pFilename << "\n   Line: " << line;
       }
+
       Service<DesktopServices> pDesktop;
-      pDesktop->showMessageBox("Verification Error", text.str());
-#if !defined(DEBUG)       
+      pDesktop->showMessageBox(APP_NAME, text.str());
+#if !defined(DEBUG)
    }
 #endif
 }

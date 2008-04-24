@@ -4961,17 +4961,12 @@ void ApplicationWindow::checkColorDepth(QWidget* pSplash)
                   "It is possible that your display adapter supports\n"
                   "the necessary mode but is incorrectly configured.\n"
                   "\nPlease contact your local computer administrator to\n"
-                  "correct this problem or contact the %2 team.\n"
-                  "\n%3").arg(nbp).arg(APP_NAME).arg(APP_CONTACT_INFORMATION);
-      if(QMessageBox::warning(this,"Display Lacks Sufficient Color Depth",
-                              msg,
-                              QMessageBox::Ignore,
-                              QMessageBox::Abort,
-                              QMessageBox::NoButton) == QMessageBox::Abort)
+                  "correct this problem.").arg(nbp).arg(APP_NAME);
+      if (QMessageBox::warning(this, QString::fromStdString(APP_NAME), msg,
+         QMessageBox::Ignore | QMessageBox::Abort) == QMessageBox::Abort)
       {
          // we use the system exit() instead of QApplication::exit()
          // since we are not in the Qt event loop at this point
-         //
          exit(42);
       }
    }
