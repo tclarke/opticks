@@ -1478,10 +1478,10 @@ void ViewImp::drawSelectionBox()
 
    for (i = 0; i < screenCoords.size(); i++)
    {
-      glVertex2f(screenCoords.at(i).mX + 2, screenCoords.at(i).mY - 2);
+      glVertex2f(screenCoords.at(i).mX + 1, screenCoords.at(i).mY - 1);
    }
 
-   glVertex2f(screenCoords.at(0).mX + 2, screenCoords.at(0).mY - 2);
+   glVertex2f(screenCoords.at(0).mX + 1, screenCoords.at(0).mY - 1);
    glEnd();
 
    // Draw the white selection box

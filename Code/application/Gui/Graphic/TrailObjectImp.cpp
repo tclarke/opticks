@@ -7,8 +7,12 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include "DrawUtil.h"
 #include "glCommon.h"
 #include "TrailObjectImp.h"
+
+#include <math.h>
+#include <limits>
 
 using namespace std;
 
@@ -58,46 +62,82 @@ void TrailObjectImp::setStencilBufferSize(int rows, int columns)
    }
 }
 
-void TrailObjectImp::addToStencil(LocationType lowerLeft, LocationType lowerRight, LocationType upperLeft,
-                                  LocationType upperRight)
+void TrailObjectImp::addToStencil(LocationType lowerLeft, LocationType lowerRight,
+                                  LocationType upperLeft, LocationType upperRight)
 {
    if (mpBuffer == NULL)
    {
       return;
    }
 
+   // find min rect to contain selection box
+   vector<double> xVals, yVals;
+   xVals.push_back(lowerLeft.mX);
+   xVals.push_back(lowerRight.mX);
+   xVals.push_back(upperRight.mX); 
+   xVals.push_back(upperLeft.mX);
+   yVals.push_back(lowerLeft.mY);
+   yVals.push_back(lowerRight.mY);
+   yVals.push_back(upperRight.mY);
+   yVals.push_back(upperLeft.mY);
+   double minX = *(min_element(xVals.begin(), xVals.end()));
+   double minY = *(min_element(yVals.begin(), yVals.end()));
+   double maxX = *(max_element(xVals.begin(), xVals.end()));
+   double maxY = *(max_element(yVals.begin(), yVals.end()));
+   
+   const int numVertices = 5;
+   LocationType vertices[numVertices];
+   double smallIncrement = numeric_limits<double>::epsilon();
+   vertices[0] = lowerLeft;
+   vertices[0].mX -= smallIncrement;  // expand polygon by fraction of pixel around border so pixels on edge
+   vertices[0].mY -= smallIncrement;  // or on vertices of selection box are "within" polygon
+   vertices[1] = lowerRight;
+   vertices[1].mX += smallIncrement;
+   vertices[1].mY -= smallIncrement;
+   vertices[2] = upperRight;
+   vertices[2].mX += smallIncrement;
+   vertices[2].mY += smallIncrement;
+   vertices[3] = upperLeft;
+   vertices[3].mX -= smallIncrement;
+   vertices[3].mY += smallIncrement;
+   vertices[4] = vertices[0];  // close polygon
+
+   // clamp min/max to overview window
+   int minXi = static_cast<int>(max(0.0, minX));
+   int minYi = static_cast<int>(max(0.0, minY));
+   int maxXi = static_cast<int>(min(static_cast<double>(mColumns-1), maxX));
+   int maxYi = static_cast<int>(min(static_cast<double>(mRows-1), maxY));
+
    // Calculate the number of rows and columns used
-   int numCols = 0;
-   int numRows = 0;
-   int offset = 0;
+   int numCols = maxXi - minXi + 1;
+   int numRows = maxYi - minYi + 1;
+   int offset = minYi * mColumns + minXi;
 
-   if (upperRight.mX >= lowerLeft.mX)
-   {
-      numCols = static_cast<int>(upperRight.mX) - static_cast<int>(lowerLeft.mX) + 1;
-      offset  = static_cast<int>(lowerLeft.mX);
-   }
-   else
-   {
-      numCols = static_cast<int>(lowerLeft.mX) - static_cast<int>(upperRight.mX) + 1;
-      offset  = static_cast<int>(upperRight.mX);
-   }
-
-   if (upperRight.mY >= lowerLeft.mY)
-   {
-      numRows = static_cast<int>(upperRight.mY) - static_cast<int>(lowerLeft.mY) + 1;
-      offset += ((static_cast<int>(lowerLeft.mY)) * mColumns);
-   }
-   else
-   {
-      numRows = static_cast<int>(lowerLeft.mY)- static_cast<int>(upperRight.mY) + 1;
-      offset += ((static_cast<int>(upperRight.mY)) * mRows);
-   }
-
-   // Write 0 to all locations within the rectangle
+   // Write 0 to all locations within the selection box area
    char* pTmp = mpBuffer + offset;
-   for (int row = 0; row < numRows; ++row)
+   int hitOffset;
+   int hitColumns;
+   for (int row = minYi; row < minYi+numRows; ++row)
    {
-      memset(pTmp, 0, numCols);
+      hitOffset = 0;
+      while (!DrawUtil::isWithin(LocationType(hitOffset+minXi, row), vertices, numVertices)
+         && hitOffset < numCols)
+      {
+         ++hitOffset;
+      }
+      if (hitOffset < numCols)
+      {
+         hitColumns = 0;
+         while (DrawUtil::isWithin(LocationType(hitOffset+hitColumns+minXi, row), vertices, numVertices)
+            && (hitOffset + hitColumns) < numCols )
+         {
+            ++hitColumns;
+         }
+         if ((hitOffset + hitColumns) <= numCols)
+         {
+            memset(pTmp+hitOffset, 0, hitColumns);
+         }
+      }
       pTmp += mColumns;
    }
 }
