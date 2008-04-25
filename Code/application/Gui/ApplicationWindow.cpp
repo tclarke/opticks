@@ -5083,27 +5083,33 @@ void ApplicationWindow::dragEnterEvent(QDragEnterEvent *pEvent)
       for (int i = 0; i < urls.count(); ++i)
       {
          QUrl url = urls[i];
-         files.push_back(url.toLocalFile().toStdString());
+         string filename = url.toLocalFile().toStdString();
+         if (filename.empty() == false)
+         {
+            files.push_back(filename);
+         }
       }
    }
    else if (pEvent->mimeData()->hasFormat("text/plain"))
    {
       QString filename = pEvent->mimeData()->text();
-      QByteArray charArray = filename.toAscii();
-      for (int i = 0; i < filename.length(); ++i)
+      if (filename.isEmpty() == false)
       {
-         if (charArray[i] == '\\')
+         QByteArray charArray = filename.toAscii();
+         for (int i=0; i<filename.length(); ++i)
          {
-            charArray[i] = '/';
+            if (charArray[i] == '\\')
+            {
+               charArray[i] = '/';
+            }
+            else if (charArray[i] == '\n' || charArray[i] == '\r')
+            {
+               charArray[i] = 0;
+               break;
+            }
          }
-         else if (charArray[i] == '\n' || charArray[i] == '\r')
-         {
-            charArray[i] = 0;
-            break;
-         }
+         files.push_back(charArray.data());
       }
-
-      files.push_back(charArray.data());
    }
    else
    {
@@ -5196,14 +5202,14 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
          if (pEvent->mouseButtons() == contextMenuButton)
          {
             QMenu contextMenu(this);
-            QAction* pRunWizardAction = contextMenu.addAction("Run Wizard in current Session");
-            QAction* pRunWizardActionNewSession = contextMenu.addAction("Run Wizard in new Session");
+            QAction* pRunWizardAction = contextMenu.addAction("Run wizard in current session");
+            QAction* pRunWizardActionNewSession = contextMenu.addAction("Run wizard in new session");
             contextMenu.addSeparator();
             QAction *pCancel = contextMenu.addAction("Cancel");
             contextMenu.setDefaultAction(pRunWizardAction);
 
             QAction *pSelection = contextMenu.exec(mapToGlobal(pEvent->pos()));
-            if (pSelection == pCancel)
+            if ((pSelection == pCancel) || (pSelection == NULL)) 
             {
                return;
             }
@@ -5235,7 +5241,7 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
          if (pEvent->mouseButtons() == contextMenuButton)
          {
             QMenu contextMenu(this);
-            QAction* pOpenSessionAction = contextMenu.addAction("Open Session");
+            QAction* pOpenSessionAction = contextMenu.addAction("Open session");
             contextMenu.addSeparator();
             contextMenu.addAction("Cancel");
             contextMenu.setDefaultAction(pOpenSessionAction);
