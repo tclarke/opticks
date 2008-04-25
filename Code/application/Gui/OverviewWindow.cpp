@@ -344,22 +344,16 @@ void OverviewWindow::updateSelectionBox()
    // update snail trail if zoom factor greater than or equal zoom threshold
    if ((mpTrail != NULL) && (static_cast<int>(mpView->getZoomPercentage() + 0.5) >= mZoomThreshold))
    {
-      int iWidth  = width();
-      int iHeight = height();
-
-      // Set the largest and smallest allowable coordinates
-      double maxWidth  = static_cast<double>(iWidth  - 1);
-      double maxHeight = static_cast<double>(iHeight - 1);
-      LocationType max(maxWidth, maxHeight);
-      LocationType min(0.0, 0.0);
-
       // Translate each point into a screen location
-      translateWorldToScreen(lowerLeft, min, max);
-      translateWorldToScreen(lowerRight, min, max);
-      translateWorldToScreen(upperLeft, min, max);
-      translateWorldToScreen(upperRight, min, max);
+      if (mpOverview != NULL)
+      {
+         mpOverview->translateWorldToScreen(lowerLeft.mX, lowerLeft.mY, lowerLeft.mX, lowerLeft.mY);
+         mpOverview->translateWorldToScreen(lowerRight.mX, lowerRight.mY, lowerRight.mX, lowerRight.mY);
+         mpOverview->translateWorldToScreen(upperLeft.mX, upperLeft.mY, upperLeft.mX, upperLeft.mY);
+         mpOverview->translateWorldToScreen(upperRight.mX, upperRight.mY, upperRight.mX, upperRight.mY);
 
-      mpTrail->addToStencil(lowerLeft, lowerRight, upperLeft, upperRight);
+         mpTrail->addToStencil(lowerLeft, lowerRight, upperLeft, upperRight);
+      }
    }
 
    mpSelectionWidget->setSelection(selectionArea);
@@ -467,24 +461,4 @@ void OverviewWindow::takeSnapshot()
          pClipboard->setImage(image);
       }
    }
-}
-
-void OverviewWindow::translateWorldToScreen(LocationType& point,
-                                            const LocationType& min,
-                                            const LocationType& max) const
-{
-   LocationType pointScreen(point);
-
-   if (mpOverview != NULL)
-   {
-      // Translate point into a point on the screen.
-      mpOverview->translateWorldToScreen(point.mX, point.mY, pointScreen.mX, pointScreen.mY);
-   }
-
-   // Ensure that pointScreen is within the provided limits.
-   pointScreen.clampMinimum(min);
-   pointScreen.clampMaximum(max);
-
-   // Assign point to the point on the screen.
-   point = pointScreen;
 }

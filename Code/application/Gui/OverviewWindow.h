@@ -57,10 +57,6 @@ protected:
    SpatialDataViewImp* createOverview();
    TrailObjectImp* createSnailTrail(SpatialDataViewImp* pOverview);
 
-   void translateWorldToScreen(LocationType& point,
-                               const LocationType& min,
-                               const LocationType& max) const;
-
 protected slots:
    void updateView(const std::vector<LocationType>& selectionArea);
    void updateSelectionBox();
