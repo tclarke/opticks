@@ -31,6 +31,7 @@
 
 class AlgorithmResource;
 class ApplicationServices;
+class SpatialDataView;
 class Step;
 
 class PCA : public AlgorithmShell
@@ -70,6 +71,7 @@ private:
    bool m_GetStatistics(std::vector<std::string> aoiList);
    BitMask* mp_AOIbitmask;
    bool mb_UseAoi;
+   bool mDisplayResults;
 
    unsigned int m_NumRows;
    unsigned int m_NumColumns;
@@ -84,6 +86,7 @@ private:
    Service<UtilityServices> mpUtilities;
    Service<ApplicationServices> mpAppSvcs;
    Progress* mpProgress;
+   SpatialDataView* mpView;
    RasterElement* mpRaster;
    RasterElement* mpPCARaster;
    RasterElement* mpSecondMomentMatrix;
