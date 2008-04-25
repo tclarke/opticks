@@ -427,6 +427,7 @@ using namespace std;
 
 PCA::PCA() :
    mpProgress(NULL),
+   mpView(NULL),
    mpRaster(NULL),
    mpSecondMomentMatrix(NULL),
    mp_MatrixValues(NULL),
@@ -436,6 +437,7 @@ PCA::PCA() :
    m_NumBands(0),
    mbInteractive(false),
    mbAbort(false),
+   mDisplayResults(true),
    mb_UseAoi(false),
    m_CalcMethod(SECONDMOMENT),
    mbUseEigenValPlot(false),
@@ -512,6 +514,7 @@ bool PCA::getInputSpecification(PlugInArgList*& pArgList)
       VERIFY(pArgList->addArg<EncodingType>("Output Encoding Type", NULL));
       VERIFY(pArgList->addArg<int>("Max Scale Value", NULL));
       VERIFY(pArgList->addArg<RasterElement>("Second Moment Matrix", NULL));
+      VERIFY(pArgList->addArg<bool>("Display Results", false));
    }
 
    return true;
@@ -522,6 +525,7 @@ bool PCA::getOutputSpecification(PlugInArgList*& pArgList)
    // Set up list
    pArgList = mpPlugInMgr->getPlugInArgList();
    VERIFY(pArgList != NULL);
+   VERIFY(pArgList->addArg<SpatialDataView>(ViewArg(), NULL));
    VERIFY(pArgList->addArg<RasterElement>("Corrected Data Cube", NULL));
    return true;
 }
@@ -674,16 +678,19 @@ bool PCA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
          }
 
          // arg extraction so we can continue and do the actual calculations
-         int numComponents;
-         if (pInArgList->getPlugInArgValue("Components", numComponents) == false)
+         PlugInArg* pComponentsArg = NULL;
+         int numComponents = static_cast<int>(m_NumBands);
+         if (pInArgList->getArg("Components", pComponentsArg) == true &&
+            pComponentsArg != NULL && pComponentsArg->isActualSet() &&
+            pInArgList->getPlugInArgValue("Components", numComponents) == false)
          {
-            pStep->finalize(Message::Failure, "Number of components not specified!");
+            pStep->finalize(Message::Failure, "Unable to determine number of components.");
             return false;
          }
 
 #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Number of Components input argument should be an unsigned int (dadkins)")
          m_NumComponentsToUse = static_cast<unsigned int>(numComponents);
-         if (numComponents <= 0 || m_NumBands < m_NumComponentsToUse)
+         if (m_NumComponentsToUse <= 0 || m_NumBands < m_NumComponentsToUse)
          {
             pStep->finalize(Message::Failure, "Invalid number of components specified!");
             return false;
@@ -740,10 +747,19 @@ bool PCA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
          }
 
          // output data type argument
-         if (pInArgList->getPlugInArgValue<EncodingType>("Output Encoding Type",
-            m_OutputDataType) == false || m_OutputDataType.isValid() == false)
+         PlugInArg* pEncodingTypeArg = NULL;
+         m_OutputDataType = pDescriptor->getDataType();
+         if (pInArgList->getArg("Output Encoding Type", pEncodingTypeArg) == true &&
+            pEncodingTypeArg != NULL && pEncodingTypeArg->isActualSet() &&
+            pInArgList->getPlugInArgValue("Output Encoding Type", m_OutputDataType) == false)
          {
-            pStep->finalize(Message::Failure, "Invalid Output Encoding Type!");
+            pStep->finalize(Message::Failure, "Unable to determine output encoding type.");
+            return false;
+         }
+
+         if (m_OutputDataType.isValid() == false)
+         {
+            pStep->finalize(Message::Failure, "Invalid output encoding type.");
             return false;
          }
 
@@ -769,8 +785,8 @@ bool PCA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
             maxThreshold = numeric_limits<unsigned short>::max();
             break;
          default:
-            pStep->finalize(Message::Failure, "Invalid Output Encoding Type!");
-            return false;
+            maxThreshold = numeric_limits<int>::max();
+            break;
          }
 
          if (m_MaxScaleValue > maxThreshold)
@@ -778,10 +794,13 @@ bool PCA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
             pStep->finalize(Message::Failure, "Bad Maximum Scale Value!");
             return false;
          }
-      }
 
-      // Second Moment RasterElement
-      mpSecondMomentMatrix = pInArgList->getPlugInArgValue<RasterElement>("Second Moment Matrix");
+         // Second Moment RasterElement
+         mpSecondMomentMatrix = pInArgList->getPlugInArgValue<RasterElement>("Second Moment Matrix");
+
+         // Display Results
+         VERIFY(pInArgList->getPlugInArgValue("Display Results", mDisplayResults));
+      }
 
       // log PCA options
       if(bLoadFromFile)
@@ -936,27 +955,13 @@ bool PCA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
          }
       }
 
-      // Set the corrected cube value in the output arg list
-      PlugInArg* pArg = NULL;
-      if(!pOutArgList->getArg("Corrected Data Cube", pArg) || (pArg == NULL))
+      // Set the values in the output arg list
+      if (pOutArgList != NULL)
       {
-         if (mpPCARaster!= NULL)
-         {
-            mpModel->destroyElement(mpPCARaster);
-            if(mbAbort)
-            {
-               pStep->finalize(Message::Abort);
-            }
-            else
-            {
-               pStep->finalize(Message::Failure, "Error setting output argument");
-            }
-
-            return false;
-         }
+         VERIFY(pOutArgList->setPlugInArgValue(ViewArg(), mpView));
+         VERIFY(pOutArgList->setPlugInArgValue("Corrected Data Cube", mpPCARaster));
       }
 
-      pArg->setActualValue(static_cast<void*>(mpPCARaster));
       if(mpProgress != NULL)
       {
          mpProgress->updateProgress("Principle Component Analysis completed",100,NORMAL);
@@ -972,8 +977,8 @@ bool PCA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 
       return false;
    }
-   pStep->finalize(Message::Success);
 
+   pStep->finalize(Message::Success);
    return true;
 }
 
@@ -1050,21 +1055,25 @@ bool PCA::extractInputArgs(PlugInArgList* pArgList)
 
 bool PCA::m_CreatePCACube()
 {
-   string filename = mpRaster->getFilename();
-   if(filename.empty())
+   string outputName = mpRaster->getFilename();
+   if (outputName.empty() == true)
    {
-      mMessage = "Could not access the cube's filename!";
-      if(mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, ERRORS);
-      mpStep->finalize(Message::Failure, mMessage);
-      return false;
+      outputName = mpRaster->getName();
+      if (outputName.empty() == true)
+      {
+         mMessage = "Could not access the cube's name!";
+         if(mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, ERRORS);
+         mpStep->finalize(Message::Failure, mMessage);
+         return false;
+      }
    }
 
    StepResource pStep(mMessage, "app", "2EA8BA45-E826-4bb1-AB94-968D29184F80", "Can't create spectral cube");
 
-   int loc = filename.rfind('.');
+   int loc = outputName.rfind('.');
    if (loc == string::npos)
    {
-      loc = filename.length();
+      loc = outputName.length();
    }
    string addOn = "";
    switch(m_CalcMethod)
@@ -1079,7 +1088,7 @@ bool PCA::m_CreatePCACube()
       addOn = "_pca_ccm";
       break;
    }
-   filename = filename.insert(loc, addOn);
+   outputName = outputName.insert(loc, addOn);
 
    const RasterDataDescriptor* pDescriptor = dynamic_cast<const RasterDataDescriptor*>(mpRaster->getDataDescriptor());
    if (pDescriptor == NULL)
@@ -1092,9 +1101,8 @@ bool PCA::m_CreatePCACube()
 
    ProcessingLocation outLocation = pDescriptor->getProcessingLocation();
 
-   mpPCARaster = RasterUtilities::createRasterElement(filename, m_NumRows, m_NumColumns, m_NumComponentsToUse,
-      m_OutputDataType, BIP,
-      (outLocation == IN_MEMORY ? true : false), NULL);
+   mpPCARaster = RasterUtilities::createRasterElement(outputName, m_NumRows, m_NumColumns,
+      m_NumComponentsToUse, m_OutputDataType, BIP, outLocation == IN_MEMORY, NULL);
 
    if (mpPCARaster == NULL)
    {
@@ -1515,7 +1523,7 @@ bool PCA::m_ComputePCAaoi()
 
 bool PCA::m_CreatePCAView()
 {
-   if(mbInteractive) // only create a view in interactive mode!
+   if(mDisplayResults)
    {
       if(mpProgress != NULL) mpProgress->updateProgress("Creating view...", 0, NORMAL);
 
@@ -1533,13 +1541,12 @@ bool PCA::m_CreatePCAView()
          return false;
       }
 
-      SpatialDataView* pView = NULL;
       if(pWindow != NULL)
       {
-         pView = pWindow->getSpatialDataView();
+         mpView = pWindow->getSpatialDataView();
       }
 
-      if(pView == NULL)
+      if(mpView == NULL)
       {
          mMessage = "Could not obtain new view!";
          if(mpProgress != NULL) mpProgress->updateProgress(mMessage, 25, ERRORS);
@@ -1547,12 +1554,12 @@ bool PCA::m_CreatePCAView()
          return false;
       }
 
-      pView->setPrimaryRasterElement(mpPCARaster);
+      mpView->setPrimaryRasterElement(mpPCARaster);
 
       if(mpProgress != NULL) mpProgress->updateProgress("Creating view...", 50, NORMAL);
 
-      UndoLock lock(pView);
-      if (pView->createLayer(RASTER, mpPCARaster) == NULL)
+      UndoLock lock(mpView);
+      if (mpView->createLayer(RASTER, mpPCARaster) == NULL)
       {
          mpDesktop->deleteWindow(pWindow);
          mpPCARaster = NULL;
@@ -1636,7 +1643,7 @@ bool PCA::m_CreatePCAView()
                            pGcpList->addPoints(gcps);
 
                            // Create the GCP list layer
-                           pView->createLayer(GCP_LAYER, pGcpList);
+                           mpView->createLayer(GCP_LAYER, pGcpList);
                         }
                      }
                   }
