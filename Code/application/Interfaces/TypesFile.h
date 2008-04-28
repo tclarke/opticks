@@ -855,6 +855,7 @@ template <> class VariantTypeValidator<PlotObjectType> {};
 template <> class VariantTypeValidator<PositionType> {};
 template <> class VariantTypeValidator<ProcessingLocation> {};
 template <> class VariantTypeValidator<SessionSaveType> {};
+template <> class VariantTypeValidator<RasterChannelType> {};
 template <> class VariantTypeValidator<RegionUnits> {};
 template <> class VariantTypeValidator<ReleaseType> {};
 template <> class VariantTypeValidator<StretchType> {};

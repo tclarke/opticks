@@ -370,6 +370,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GetPrimaryRasterLayer.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\GetView.cpp"
 				>
 			</File>
@@ -407,6 +411,14 @@
 			</File>
 			<File
 				RelativePath=".\SelectPlugIn.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SetDisplayedBand.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SetDisplayMode.cpp"
 				>
 			</File>
 			<File
@@ -467,6 +479,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GetPrimaryRasterLayer.h"
+				>
+			</File>
+			<File
 				RelativePath=".\GetView.h"
 				>
 			</File>
@@ -496,6 +512,14 @@
 			</File>
 			<File
 				RelativePath=".\SelectPlugIn.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SetDisplayedBand.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SetDisplayMode.h"
 				>
 			</File>
 			<File

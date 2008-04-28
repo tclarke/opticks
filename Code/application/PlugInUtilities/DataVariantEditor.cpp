@@ -83,6 +83,9 @@ DataVariantEditor::DataVariantEditor(QWidget* parent) :
    temp = DataVariantEditorDelegate("ProcessingLocation", DataVariantEditorDelegate::ENUMERATION);
    temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<ProcessingLocation>());
    mDelegates.push_back(temp);
+   temp = DataVariantEditorDelegate("RasterChannelType", DataVariantEditorDelegate::ENUMERATION);
+   temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<RasterChannelType>());
+   mDelegates.push_back(temp);
    mDelegates.push_back(DataVariantEditorDelegate("vector<char>", DataVariantEditorDelegate::VECTOR));
    mDelegates.push_back(DataVariantEditorDelegate("vector<unsigned char>", DataVariantEditorDelegate::VECTOR));
    mDelegates.push_back(DataVariantEditorDelegate("vector<short>", DataVariantEditorDelegate::VECTOR));
