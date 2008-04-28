@@ -720,6 +720,7 @@ void DataVariantFactoryImp::initializeMaps()
    registerType<DataVariantValue<PlotObjectType> >();
    registerType<DataVariantValue<PositionType> >();
    registerType<DataVariantValue<ProcessingLocation> >();
+   registerType<DataVariantValue<RasterChannelType> >();
    registerType<DataVariantValue<SessionSaveType> >();
    registerType<DataVariantValue<ReleaseType> >();
    registerType<DataVariantValue<StretchType> >();

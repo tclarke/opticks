@@ -34,12 +34,15 @@
 #include "ExportDataSet.h"
 #include "GetDataDescriptor.h"
 #include "GetFilename.h"
+#include "GetPrimaryRasterLayer.h"
 #include "GetView.h"
 #include "ImportDataSet.h"
 #include "LoadLayer.h"
 #include "PrintView.h"
 #include "SaveLayer.h"
 #include "SelectPlugIn.h"
+#include "SetDisplayedBand.h"
+#include "SetDisplayMode.h"
 #include "TemplateUtilities.h"
 
 //
@@ -54,7 +57,7 @@ const char *ModuleManager::mspUniqueId = "{BA831023-B042-4c89-9B2D-E1ACE238CB04}
 
 unsigned int ModuleManager::getTotalPlugIns()
 {
-   return 26;
+   return 29;
 }
 
 PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
@@ -63,107 +66,119 @@ PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
    switch (plugInNumber)
    {
       case 0:
-         pPlugIn = static_cast<PlugIn*>(new CreateAnimation);
+         pPlugIn = new CreateAnimation;
          break;
 
       case 1:
-         pPlugIn = static_cast<PlugIn*>(new CreateExportFileDescriptor);
+         pPlugIn = new CreateExportFileDescriptor;
          break;
 
       case 2:
-         pPlugIn = static_cast<PlugIn*>(new CreateFileDescriptor);
+         pPlugIn = new CreateFileDescriptor;
          break;
 
       case 3:
-         pPlugIn = static_cast<PlugIn*>(new CreateRasterFileDescriptor);
+         pPlugIn = new CreateRasterFileDescriptor;
          break;
 
       case 4:
-         pPlugIn = static_cast<PlugIn*>(new DeriveAoi);
+         pPlugIn = new DeriveAoi;
          break;
 
       case 5:
-         pPlugIn = static_cast<PlugIn*>(new EditDataDescriptor);
+         pPlugIn = new DeriveProduct;
          break;
 
       case 6:
-         pPlugIn = static_cast<PlugIn*>(new ExportDataSet);
+         pPlugIn = new EditDataDescriptor;
          break;
 
       case 7:
-         pPlugIn = static_cast<PlugIn*> (new GetDataSet);
+         pPlugIn = new ExportDataSet;
          break;
 
       case 8:
-         pPlugIn = static_cast<PlugIn*>(new GetDataDescriptor);
+         pPlugIn = new GetDataDescriptor;
          break;
 
       case 9:
-         pPlugIn = static_cast<PlugIn*>(new GetExistingFilename);
+         pPlugIn = new GetDataSet;
          break;
 
       case 10:
-         pPlugIn = static_cast<PlugIn*>(new GetExistingFilenames);
+         pPlugIn = new GetExistingFilename;
          break;
 
       case 11:
-         pPlugIn = static_cast<PlugIn*>(new GetNewFilename);
+         pPlugIn = new GetExistingFilenames;
          break;
 
       case 12:
-         pPlugIn = static_cast<PlugIn*>(new ImportDataSet);
+         pPlugIn = new GetNewFilename;
          break;
 
       case 13:
-         pPlugIn = static_cast<PlugIn*>(new LoadAoi);
+         pPlugIn = new GetPrimaryRasterLayer;
          break;
 
       case 14:
-         pPlugIn = static_cast<PlugIn*>(new LoadAnnotation);
+         pPlugIn = new ImportDataSet;
          break;
 
       case 15:
-         pPlugIn = static_cast<PlugIn*>(new LoadGcpList);
+         pPlugIn = new LoadAnnotation;
          break;
 
       case 16:
-         pPlugIn = static_cast<PlugIn*>(new LoadTemplate);
+         pPlugIn = new LoadAoi;
          break;
 
       case 17:
-         pPlugIn = static_cast<PlugIn*>(new PrintView);
+         pPlugIn = new LoadGcpList;
          break;
 
       case 18:
-         pPlugIn = static_cast<PlugIn*>(new SaveAoi);
+         pPlugIn = new LoadTemplate;
          break;
 
       case 19:
-         pPlugIn = static_cast<PlugIn*>(new SaveAoiFromDataSet);
+         pPlugIn = new PrintView;
          break;
 
       case 20:
-         pPlugIn = static_cast<PlugIn*>(new SaveAnnotation);
+         pPlugIn = new SaveAnnotation;
          break;
 
       case 21:
-         pPlugIn = static_cast<PlugIn*>(new SaveGcpList);
+         pPlugIn = new SaveAoi;
          break;
 
       case 22:
-         pPlugIn = static_cast<PlugIn*>(new SaveGcpListFromDataSet);
+         pPlugIn = new SaveAoiFromDataSet;
          break;
 
       case 23:
-         pPlugIn = static_cast<PlugIn*>(new SaveTemplate);
+         pPlugIn = new SaveGcpList;
          break;
 
       case 24:
-         pPlugIn = static_cast<PlugIn*>(new SelectPlugIn);
+         pPlugIn = new SaveGcpListFromDataSet;
          break;
 
       case 25:
-         pPlugIn = static_cast<PlugIn*> (new DeriveProduct);
+         pPlugIn = new SaveTemplate;
+         break;
+
+      case 26:
+         pPlugIn = new SelectPlugIn;
+         break;
+
+      case 27:
+         pPlugIn = new SetDisplayedBand;
+         break;
+
+      case 28:
+         pPlugIn = new SetDisplayMode;
          break;
 
       default:

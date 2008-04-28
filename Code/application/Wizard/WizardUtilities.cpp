@@ -176,6 +176,7 @@ void WizardUtilities::runWizard(WizardObject* pWizard)
    bool bBatch = pWizard->isBatch();
 
    ExecutableResource wizardExecutor(plugInName, string(), NULL, bBatch);
+   VERIFYNRV(wizardExecutor.get() != NULL);
    wizardExecutor->getInArgList().setPlugInArgValue("Wizard", pWizard);
    wizardExecutor->createProgressDialog(true);
 
