@@ -31,24 +31,27 @@
 #include "SplashScreen.h"
 #include "WizardUtilities.h"
 
-#include <string>
 using namespace std;
+
+InteractiveApplication::InteractiveApplication(QCoreApplication& app) :
+   Application(app)
+{
+   if (isXmlInitialized() == false)
+   {
+      reportError("Unable to initialize Xerces/XQilla.");
+      exit(-1);
+   }
+}
+
+InteractiveApplication::~InteractiveApplication()
+{
+}
 
 int InteractiveApplication::run(int argc, char** argv)
 {
    // Generate the XML files
-   string errorMessage = "";
-
-   bool bSuccess = generateXML(errorMessage);
-   if (bSuccess == false)
+   if (generateXml() == false)
    {
-      QString strError = "Not all XML files could be generated!";
-      if (errorMessage.empty() == false)
-      {
-         strError = QString::fromStdString(errorMessage);
-      }
-
-      QMessageBox::critical(NULL, APP_NAME, strError);
       return -1;
    }
 
@@ -82,14 +85,15 @@ int InteractiveApplication::run(int argc, char** argv)
       {
          configSettingsErrorMsg = "Unable to locate configuration settings";
       }
-      QMessageBox::critical(NULL, QString(APP_NAME) + " Start-up Error", configSettingsErrorMsg.c_str());
+
+      reportError(configSettingsErrorMsg);
       return -1;
    }
    else
    {
       if (!configSettingsErrorMsg.empty())
       {
-         QMessageBox::warning(NULL, QString(APP_NAME) + " Start-up Error", configSettingsErrorMsg.c_str());
+         reportWarning(configSettingsErrorMsg);
       }
    }
 
@@ -265,7 +269,6 @@ int InteractiveApplication::run(int argc, char** argv)
    }
 
    // If there are any wizards, run them
-   //
    executeStartupBatchWizards(pProgress);
 
    // Destroy the progress object and progress dialog
@@ -303,4 +306,23 @@ int InteractiveApplication::run(int argc, char** argv)
 
    // Initiate the GUI event loop, which returns when the user exits the application
    return qApplication.exec();
+}
+
+void InteractiveApplication::reportWarning(const string& warningMessage) const
+{
+   if (warningMessage.empty() == false)
+   {
+      QMessageBox::warning(NULL, QString::fromStdString(APP_NAME), QString::fromStdString(warningMessage));
+   }
+}
+
+void InteractiveApplication::reportError(const string& errorMessage) const
+{
+   string message = errorMessage;
+   if (message.empty() == true)
+   {
+      message = "Unknown error";
+   }
+
+   QMessageBox::critical(NULL, QString::fromStdString(APP_NAME), QString::fromStdString(message));
 }
