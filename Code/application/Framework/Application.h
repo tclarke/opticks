@@ -7,13 +7,10 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #ifndef APPLICATION_H__
 #define APPLICATION_H__
 
 #include <string>
-#include <vector>
 
 class Progress;
 class QCoreApplication;
@@ -33,11 +30,16 @@ public:
 protected:
    Application(QCoreApplication &app);
 
-   bool generateXML(std::string& errorMessage = std::string());
+   bool isXmlInitialized() const;
+   bool generateXml();
    bool executeStartupBatchWizards(Progress* pProgress);
+
+   virtual void reportWarning(const std::string& warningMessage) const = 0;
+   virtual void reportError(const std::string& errorMessage) const = 0;
 
 private:
    QCoreApplication &mApplication;
+   bool mXmlInitialized;
 };
 
 #endif

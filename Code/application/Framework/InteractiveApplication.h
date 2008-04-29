@@ -6,21 +6,25 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
- 
-
 
 #ifndef INTERACTIVEAPPLICATION_H__
 #define INTERACTIVEAPPLICATION_H__
 
 #include "Application.h"
 
+#include <string>
+
 class InteractiveApplication : public Application
 {
 public:
-   InteractiveApplication(QCoreApplication &app) : Application (app) {};
-   virtual ~InteractiveApplication() {};
+   InteractiveApplication(QCoreApplication& app);
+   ~InteractiveApplication();
 
    int run(int argc, char** argv);
+
+protected:
+   void reportWarning(const std::string& warningMessage) const;
+   void reportError(const std::string& errorMessage) const;
 };
 
 #endif

@@ -19,19 +19,18 @@ class BatchApplication : public Application, public SubjectAdapter
 {
 public:
    BatchApplication(QCoreApplication& app);
-   virtual ~BatchApplication();
+   ~BatchApplication();
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
 
-   virtual int run(int argc, char** argv);
-   virtual int test(int argc, char** argv);
-   virtual int version(int argc, char** argv);
+   int run(int argc, char** argv);
+   int test(int argc, char** argv);
+   int version(int argc, char** argv);
 
 protected:
-   void log(const std::string& message,
-            std::string component,
-            std::string key);
+   void reportWarning(const std::string& warningMessage) const;
+   void reportError(const std::string& errorMessage) const;
 };
 
 #endif

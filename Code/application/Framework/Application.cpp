@@ -14,14 +14,14 @@
 #include <unistd.h>
 #endif
 
-#include "Application.h"
-#include "AppVersion.h"
 #include "AnimationServicesImp.h"
+#include "Application.h"
 #include "ApplicationServicesImp.h"
+#include "AppVersion.h"
 #include "ArgumentList.h"
 #include "BatchWizard.h"
-#include "ConnectionManager.h"
 #include "ConfigurationSettingsImp.h"
+#include "ConnectionManager.h"
 #include "DataVariantFactoryImp.h"
 #include "DesktopServicesImp.h"
 #include "FileFinderImp.h"
@@ -40,7 +40,9 @@
 #include <iostream>
 using namespace std;
 
-Application::Application(QCoreApplication &app) : mApplication(app)
+Application::Application(QCoreApplication& app) :
+   mApplication(app),
+   mXmlInitialized(true)
 {
    // Initialize Xerces and XQilla
    try
@@ -49,9 +51,9 @@ Application::Application(QCoreApplication &app) : mApplication(app)
    }
    catch(const XERCES_CPP_NAMESPACE_QUALIFIER XMLException &)
    {
-      cerr << "Unable to initialize Xerces/XQilla" << endl;
-      exit(-1);
+      mXmlInitialized = false;
    }
+
    ModuleManager::instance()->setService(ConnectionManager::instance());
 }
 
@@ -92,9 +94,10 @@ int Application::run(int argc, char** argv)
    {
       if (configSettingsErrorMsg.empty())
       {
-         configSettingsErrorMsg = "Unable to locate configuration settings";   
+         configSettingsErrorMsg = "Unable to locate configuration settings";
       }
-      cerr << APP_NAME << " ERROR: " << configSettingsErrorMsg << endl;
+
+      reportError(configSettingsErrorMsg);
       return -1;
    }
    else
@@ -103,7 +106,7 @@ int Application::run(int argc, char** argv)
       //if so treat as a warning
       if (!configSettingsErrorMsg.empty())
       {
-         cerr << APP_NAME << " WARNING: " << configSettingsErrorMsg << endl;
+         reportWarning(configSettingsErrorMsg);
       }
    }
 
@@ -111,16 +114,17 @@ int Application::run(int argc, char** argv)
    unsigned int numberOfProcessors = UtilityServicesImp::instance()->getNumProcessors();
    string processorArg = ArgumentList::instance()->getOption("processors");
    Service<ConfigurationSettings> pSettings;
-   if( !processorArg.empty() )
+   if (!processorArg.empty())
    {
       unsigned int procArgValue = atoi(processorArg.c_str());
-      if( procArgValue >= 1u && procArgValue <= numberOfProcessors )
+      if (procArgValue >= 1u && procArgValue <= numberOfProcessors)
       {
          pSettings->setSessionSetting(ConfigurationSettings::getSettingThreadCountKey(), procArgValue);
       }
       else
       {
-         cerr << APP_NAME << " WARNING: Bad processors argument, using actual number of processors as reported by system" << endl;
+         reportWarning("The requested number of processors are not available.  Using the actual number of "
+            "processors on the system instead.");
          pSettings->setSessionSetting(ConfigurationSettings::getSettingThreadCountKey(), numberOfProcessors);
       }
    }
@@ -187,12 +191,16 @@ int Application::run(int argc, char** argv)
    return 0;
 }
 
-bool Application::generateXML(string& errorMessage)
+bool Application::isXmlInitialized() const
+{
+   return mXmlInitialized;
+}
+
+bool Application::generateXml()
 {
    vector<string> files;
 
-   ArgumentList* pArgumentList = NULL;
-   pArgumentList = ArgumentList::instance();
+   ArgumentList* pArgumentList = ArgumentList::instance();
    if (pArgumentList != NULL)
    {
       files = pArgumentList->getOptions("generate");
@@ -210,14 +218,14 @@ bool Application::generateXML(string& errorMessage)
          string outputFilename = WizardUtilities::deriveBatchWizardFilename(wizardFilename);
          if (!WizardUtilities::writeBatchWizard(batchWizards, outputFilename))
          {
-            errorMessage = "Cannot write out batch wizard file: " + outputFilename;
+            reportError("Cannot write out batch wizard file: " + outputFilename);
             delete pBatchWizard;
             return false;
          }
       }
       else
       {
-         errorMessage = "Cannot load the wizard file: " + wizardFilename;
+         reportError("Cannot load the wizard file: " + wizardFilename);
          delete pBatchWizard;
          return false;
       }
