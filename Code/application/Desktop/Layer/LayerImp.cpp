@@ -152,8 +152,12 @@ void LayerImp::setView(ViewImp* pView)
       SpatialDataViewImp* pSpatialDataView = dynamic_cast<SpatialDataViewImp*>(mpView);
       if (pSpatialDataView != NULL)
       {
-         disconnect(pSpatialDataView, SIGNAL(layerShown(Layer*)), this, SLOT(updateDisplayedAction(Layer*)));
-         disconnect(pSpatialDataView, SIGNAL(layerHidden(Layer*)), this, SLOT(updateDisplayedAction(Layer*)));
+         VERIFYNR(disconnect(pSpatialDataView, SIGNAL(layerShown(Layer*)),
+            this, SLOT(updateDisplayedAction(Layer*))));
+         VERIFYNR(disconnect(pSpatialDataView, SIGNAL(layerHidden(Layer*)),
+            this, SLOT(updateDisplayedAction(Layer*))));
+         VERIFYNR(disconnect(pSpatialDataView, SIGNAL(layerActivated(Layer*)),
+            this, SLOT(layerActivated(Layer*))));
       }
    }
 
@@ -164,8 +168,12 @@ void LayerImp::setView(ViewImp* pView)
       SpatialDataViewImp* pSpatialDataView = dynamic_cast<SpatialDataViewImp*>(mpView);
       if (pSpatialDataView != NULL)
       {
-         connect(pSpatialDataView, SIGNAL(layerShown(Layer*)), this, SLOT(updateDisplayedAction(Layer*)));
-         connect(pSpatialDataView, SIGNAL(layerHidden(Layer*)), this, SLOT(updateDisplayedAction(Layer*)));
+         VERIFYNR(connect(pSpatialDataView, SIGNAL(layerShown(Layer*)),
+            this, SLOT(updateDisplayedAction(Layer*))));
+         VERIFYNR(connect(pSpatialDataView, SIGNAL(layerHidden(Layer*)),
+            this, SLOT(updateDisplayedAction(Layer*))));
+         VERIFYNR(connect(pSpatialDataView, SIGNAL(layerActivated(Layer*)),
+            this, SLOT(layerActivated(Layer*))));
       }
    }
 
@@ -744,4 +752,9 @@ void LayerImp::updateDisplayedAction(Layer* pLayer)
    {
       mpDisplayedAction->setChecked(pView->isLayerDisplayed(pThisLayer));
    }
+}
+
+void LayerImp::layerActivated(Layer* pLayer)
+{
+   layerActivated(dynamic_cast<LayerImp*>(pLayer) == this);
 }

@@ -136,10 +136,12 @@ protected:
 protected:
    bool mbLinking;
    AttachmentPtr<DataElement> mpElement;
+   virtual void layerActivated(bool activated) { }
 
 protected slots:
    void showLayer(bool show);
    void updateDisplayedAction(Layer* pLayer);
+   void layerActivated(Layer* pLayer);
 
 private:
    void setDataElement(DataElement* pElement);

@@ -2173,3 +2173,12 @@ void GraphicLayerImp::deleteObject()
       }
    }
 }
+
+void GraphicLayerImp::layerActivated(bool activated)
+{
+   if (activated == false)
+   {
+      completeInsertion(false);
+      deselectAllObjects();
+   }
+}

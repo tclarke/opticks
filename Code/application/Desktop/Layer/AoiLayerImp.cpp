@@ -9,16 +9,19 @@
 
 #include <math.h>
 
+#include <QtCore/QRect>
+#include <QtCore/QString>
 #include <QtGui/QApplication>
 #include <QtGui/QMessageBox>
+#include <QtGui/QFontMetrics>
 
 #include "glCommon.h"
+#include "AoiLayer.h"
 #include "AoiLayerImp.h"
 #include "AnnotationToolBar.h"
 #include "AoiElement.h"
 #include "AoiElementImp.h"
 #include "AoiToolBar.h"
-#include "AoiLayerAdapter.h"
 #include "AoiLayerUndo.h"
 #include "BitMaskImp.h"
 #include "BitMaskObjectImp.h"
@@ -76,9 +79,12 @@ AoiLayerImp::AoiLayerImp(const string& id, const string& layerName, DataElement*
       setIcon(pIcons->mDrawPixel);
    }
 
-   mHandleSize = 4.0;
-   mHandleDrawn = false;
+   mLabelHandleSize = 4.0;
+   mLabelHandleDrawn = false;
    mLabelMoving = false;
+   mFont = QApplication::font();
+   mFont.setBold(true);
+   mFont.setPointSize(12);
 
    bool autoColorOn = AoiLayer::getSettingAutoColor();
    if (autoColorOn == true)
@@ -95,9 +101,9 @@ AoiLayerImp::AoiLayerImp(const string& id, const string& layerName, DataElement*
 
    mSymbol = AoiLayer::getSettingMarkerSymbol();
 
-   connect(this, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(symbolChanged(const SymbolType&)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(objectAdded(GraphicObject *)), this, SLOT(objectWasAdded(GraphicObject *)));
+   VERIFYNR(connect(this, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(modified())));
+   VERIFYNR(connect(this, SIGNAL(symbolChanged(const SymbolType&)), this, SIGNAL(modified())));
+   VERIFYNR(connect(this, SIGNAL(objectAdded(GraphicObject *)), this, SLOT(objectWasAdded(GraphicObject *))));
 
    AoiElement *pAoi = dynamic_cast<AoiElement*>(pElement);
    if (pAoi != NULL)
@@ -450,11 +456,6 @@ void AoiLayerImp::draw()
       return;
    }
 
-   // Draw the point labels
-   QFont aoiFont = QApplication::font();
-   aoiFont.setBold(true);
-   aoiFont.setPointSize(12);
-
    // Draw the layer name label
    mLabelLocation = getGroup()->getLlCorner() - mLabelOffset;
 
@@ -465,18 +466,16 @@ void AoiLayerImp::draw()
 
       LocationType screenCoord;
       translateDataToScreen(mLabelLocation.mX, mLabelLocation.mY, screenCoord.mX, screenCoord.mY);
-      screenCoord = screenCoord + mHandleSize + 2.0;
+      screenCoord = screenCoord + mLabelHandleSize + 2.0;
 
       int screenX = static_cast<int>(screenCoord.mX);
       int screenY = pView->height() - static_cast<int>(screenCoord.mY);
       QString strText = QString::fromStdString(getName());
-      pView->renderText(screenX, screenY, strText, aoiFont);
+      pView->renderText(screenX, screenY, strText, mFont);
 
       // Draw text handle if appropriate
-      Layer* pCurrentLayer = pView->getTopMostLayer(AOI_LAYER);
-      if (pCurrentLayer == (AoiLayerAdapter*) this)
+      if (mLabelHandleDrawn)
       {
-         mHandleDrawn = true;
          glColor3f(255.0,255.0,255.0);
          glLineWidth(1);
 
@@ -485,10 +484,10 @@ void AoiLayerImp::draw()
          zoomFactor = 1.0 / zoomFactor;
 
          float x1,x2,y1,y2;
-         x1 = mLabelLocation.mX - mHandleSize * zoomFactor / getXScaleFactor();
-         x2 = mLabelLocation.mX + mHandleSize * zoomFactor / getXScaleFactor();
-         y1 = mLabelLocation.mY - mHandleSize * zoomFactor / getYScaleFactor();
-         y2 = mLabelLocation.mY + mHandleSize * zoomFactor / getYScaleFactor();
+         x1 = mLabelLocation.mX - mLabelHandleSize * zoomFactor / getXScaleFactor();
+         x2 = mLabelLocation.mX + mLabelHandleSize * zoomFactor / getXScaleFactor();
+         y1 = mLabelLocation.mY - mLabelHandleSize * zoomFactor / getYScaleFactor();
+         y2 = mLabelLocation.mY + mLabelHandleSize * zoomFactor / getYScaleFactor();
          glBegin(GL_POLYGON);
          glVertex2f(x1,y1);
          glVertex2f(x2,y1);
@@ -529,21 +528,9 @@ bool AoiLayerImp::processMousePress(const QPoint& screenCoord, Qt::MouseButton b
                       !getObjects().empty() && insertingObjectNull();
    if (getCurrentGraphicObjectType() == MOVE_OBJECT && button == Qt::LeftButton)
    {
-      ViewImp* pView = dynamic_cast<ViewImp*> (getView());
-      VERIFY(pView != NULL);
-
-      GraphicGroup *pGroup = getGroup();
-      VERIFY(pGroup != NULL);
-
-      LocationType labelPos = pGroup->getLlCorner() - mLabelOffset;
-      LocationType labelScreen;
-      LocationType world;
-      translateDataToWorld(labelPos.mX, labelPos.mY, world.mX, world.mY);
-      pView->translateWorldToScreen(world.mX, world.mY, labelScreen.mX, labelScreen.mY);
-      if (fabs(screenCoord.x() - labelScreen.mX) < mHandleSize && 
-         fabs(screenCoord.y() - labelScreen.mY) < mHandleSize)
+      mLabelMoving = hitLabel(screenCoord);
+      if (mLabelMoving == true)
       {
-         mLabelMoving = true;
          return true;
       }
    }
@@ -595,7 +582,6 @@ bool AoiLayerImp::processMouseMove(const QPoint& screenCoord, Qt::MouseButton bu
    }
 
    return GraphicLayerImp::processMouseMove(screenCoord, button, buttons, modifiers);
-
 }
 
 bool AoiLayerImp::processMouseRelease(const QPoint& screenCoord, Qt::MouseButton button, Qt::MouseButtons buttons,
@@ -665,5 +651,37 @@ bool AoiLayerImp::willDrawAsPixels() const
    }
 
    return false;
+}
 
+bool AoiLayerImp::hitLabel(const QPoint& screenCoord) const
+{
+   const string& name = getName();
+   if (name.empty() == true)
+   {
+      return false;
+   }
+
+   GraphicGroup *pGroup = getGroup();
+   VERIFY(pGroup != NULL);
+
+   LocationType labelPos = pGroup->getLlCorner() - mLabelOffset;
+   LocationType labelScreen;
+   translateDataToScreen(labelPos.mX, labelPos.mY, labelScreen.mX, labelScreen.mY);
+
+   QFontMetrics metrics(mFont);
+   int labelWidth = metrics.width(QString::fromStdString(name));
+   int labelHeight = metrics.height();
+
+   QRect labelRect(labelScreen.mX, labelScreen.mY, labelWidth, labelHeight);
+   return labelRect.contains(screenCoord);
+}
+
+void AoiLayerImp::layerActivated(bool activated)
+{
+   GraphicLayerImp::layerActivated(activated);
+   if (mLabelHandleDrawn != activated)
+   {
+      mLabelHandleDrawn = activated;
+      emit modified();
+   }
 }

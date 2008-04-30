@@ -15,7 +15,8 @@
 #include "AnnotationElementAdapter.h"
 #include "AoiElement.h"
 #include "AoiElementImp.h"
-#include "AoiLayerAdapter.h"
+#include "AoiLayer.h"
+#include "AoiLayerImp.h"
 #include "AppAssert.h"
 #include "AppConfig.h"
 #include "ApplicationWindow.h"
@@ -2770,37 +2771,43 @@ void SpatialDataViewImp::mousePressEvent(QMouseEvent* pEvent)
          pMouseMode->getName(mouseMode);
       }
 
-      if ((mouseMode == "LayerMode") && (mpActiveLayer != NULL))
+      if (mouseMode == "LayerMode")
       {
-         bSuccess = mpActiveLayer->processMousePress(ptMouse,
-            pEvent->button(), pEvent->buttons(), pEvent->modifiers());
-         if (bSuccess == false)
+         if (mpActiveLayer != NULL)
          {
-            AoiLayerImp* pLayer = dynamic_cast<AoiLayerImp*>(mpActiveLayer);
-            if (pLayer != NULL)
+            bSuccess = mpActiveLayer->processMousePress(ptMouse,
+               pEvent->button(), pEvent->buttons(), pEvent->modifiers());
+         }
+
+         GraphicLayer* pGraphicLayer = dynamic_cast<GraphicLayer*>(mpActiveLayer);
+         AoiLayer* pAoiLayer = dynamic_cast<AoiLayer*>(mpActiveLayer);
+         if (bSuccess == true && pGraphicLayer != NULL && pGraphicLayer->getNumSelectedObjects() == 0 &&
+            (pAoiLayer == NULL || pAoiLayer->getMode() == AOI_MOVE))
+         {
+            // No objects selected, so activate another GraphicLayer
+            vector<Layer*> displayedLayers = getDisplayedLayers();
+            for (vector<Layer*>::reverse_iterator iter = displayedLayers.rbegin(); iter != displayedLayers.rend(); ++iter)
             {
-               Service<DesktopServices> pDesktop;
-
-               ModeType eMode = pDesktop->getAoiSelectionMode();
-               if (eMode == AOI_MOVE)
+               GraphicLayerImp* pCurrentLayer = dynamic_cast<GraphicLayerImp*>(*iter);
+               if ((pCurrentLayer != NULL) && (pCurrentLayer != mpActiveLayer))
                {
-                  // No objects available, so bring another AOI layer to the front
-                  vector<Layer*> displayedLayers = getDisplayedLayers();
+                  AoiLayerImp* pCurrentAoiLayer = dynamic_cast<AoiLayerImp*>(*iter);
 
-                  vector<Layer*>::reverse_iterator iter;
-                  for (iter = displayedLayers.rbegin(); iter != displayedLayers.rend(); ++iter)
+                  // If ptMouse hits an object within pCurrentLayer or if ptMouse hits the label of pCurrentAoiLayer,
+                  // then pCurrentLayer should be activated.
+                  if ((pCurrentLayer->hit(ptMouse) != NULL) ||
+                     (pCurrentAoiLayer != NULL && pCurrentAoiLayer->hitLabel(ptMouse) == true))
                   {
-                     AoiLayerImp* pCurrentLayer = dynamic_cast<AoiLayerImp*>(*iter);
-                     if ((pCurrentLayer != NULL) && (pCurrentLayer != pLayer))
+                     setActiveLayer(dynamic_cast<Layer*>(pCurrentLayer));
+                     if (pCurrentAoiLayer != NULL)
                      {
-                        bSuccess = pCurrentLayer->processMousePress(ptMouse, pEvent->button(),
-                           pEvent->buttons(), pEvent->modifiers());
-                        if (bSuccess == true)
-                        {
-                           setFrontLayer(*iter);
-                           break;
-                        }
+                        pCurrentAoiLayer->setMode(AOI_MOVE);
                      }
+
+                     pCurrentLayer->processMousePress(ptMouse,
+                        pEvent->button(), pEvent->buttons(), pEvent->modifiers());
+                     bSuccess = true;
+                     break;
                   }
                }
             }
