@@ -12,6 +12,7 @@
 
 #include <QtCore/QPoint>
 #include <QtGui/QColor>
+#include <QtGui/QFont>
 
 #include "ColorType.h"
 #include "GraphicLayerImp.h"
@@ -60,6 +61,7 @@ public:
 
    virtual bool mayDrawAsPixels() const;
    virtual bool willDrawAsPixels() const;
+   bool hitLabel(const QPoint& screenCoord) const;
 
 public slots:
    void setColor(const QColor& aoiColor);
@@ -74,6 +76,7 @@ signals:
    void modeChanged(ModeType mode);
 
 protected:
+   void layerActivated(bool activated);
    virtual void drawGroup();
 
    QColor mColor;
@@ -82,12 +85,13 @@ protected:
 private:
    bool mustDrawAsBitmask() const;
 
-   float mHandleSize;
+   double mLabelHandleSize;
    LocationType mLabelOffset;
    LocationType mLabelLocation;
-   bool mHandleDrawn;
+   bool mLabelHandleDrawn;
    bool mLabelMoving;
    ModeType mCurrentMode;
+   QFont mFont;
 
    static unsigned int msNumLayers;
 };

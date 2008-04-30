@@ -245,6 +245,7 @@ protected:
    void onElementModified();
 
    void updateContextMenu(Subject& subject, const std::string& signal, const boost::any& value);
+   void layerActivated(bool activated);
 
 protected slots:
    void deleteObject();
