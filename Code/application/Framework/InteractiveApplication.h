@@ -11,6 +11,16 @@
 #define INTERACTIVEAPPLICATION_H__
 
 #include "Application.h"
+#include <QtGui/QApplication>
+
+class OpticksApplication : public QApplication
+{
+public:
+   OpticksApplication(int argc, char **argv);
+   ~OpticksApplication();
+
+   virtual bool notify(QObject *pRecv, QEvent *pEvent);
+};
 
 #include <string>
 
