@@ -33,6 +33,29 @@
 
 using namespace std;
 
+OpticksApplication::OpticksApplication(int argc, char **argv) :
+         QApplication(argc, argv)
+{
+}
+
+OpticksApplication::~OpticksApplication()
+{
+}
+
+bool OpticksApplication::notify(QObject *pRecv, QEvent *pEvent)
+{
+   try
+   {
+      return QApplication::notify(pRecv, pEvent);
+   }
+   catch(...)
+   {
+      // log the message, complain, and abort
+      VERIFY(false);
+      abort();
+   }
+}
+
 InteractiveApplication::InteractiveApplication(QCoreApplication& app) :
    Application(app)
 {

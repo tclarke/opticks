@@ -445,7 +445,7 @@ class SolarisBuilder(Builder):
     def prep_to_run(self, lib_path, default_dir, opticks_home, build_dir):
         dp = self.depend_path
 
-        if build_dir == "None":
+        if build_dir == None:
             build_dir = "Build"
 
         so_path = "LibsFor%s" % (self.mode)

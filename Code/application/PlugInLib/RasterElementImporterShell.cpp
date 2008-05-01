@@ -658,111 +658,92 @@ bool RasterElementImporterShell::performImport() const
 
    string message;
 
-   try
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Re-evalutate this code when plug-ins are being loaded into the global symbol space (tclarke)")
+   // This was changed from a try/catch due to a problem with the exceptions 
+   // not being caught and propagating up to QApplication::notify on solaris.
+   // it is believed this is due to how we load plug-ins;
+   // they are loaded into a private symbol space. When this changes,
+   // re-evaluate the try/catch model.
+   if (pDescriptor->getProcessingLocation() == ON_DISK_READ_ONLY)
    {
-      if (pDescriptor->getProcessingLocation() == ON_DISK_READ_ONLY)
+      if (createRasterPager(mpRasterElement) == false)
       {
-         if (createRasterPager(mpRasterElement) == false)
-         {
-            if (isAborted()) throw std::exception();
-            message = "Could not create pager for RasterElement";
-            if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
-            pStep->finalize(Message::Failure, message);
-            return false;
-         }
-      }
-      else
-      {
-         if (mpRasterElement->createDefaultPager() == false)
-         {
-            if (isAborted()) throw std::exception();
-            message = "Could not allocate resources for new RasterElement";
-            if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
-            pStep->finalize(Message::Failure, message);
-            return false;
-         }
-         RasterDataDescriptor *pSourceDescriptor = RasterUtilities::generateUnchippedRasterDataDescriptor(mpRasterElement);
-         if (pSourceDescriptor == NULL)
-         {
-            if (isAborted()) throw std::exception();
-            message = "Could not get unchipped RasterDataDescriptor";
-            if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
-            pStep->finalize(Message::Failure, message);
-            return false;
-         }
-
-         ModelResource<RasterElement> pSourceRaster(pSourceDescriptor);
-         if (pSourceRaster.get() == NULL)
-         {
-            if (isAborted()) throw std::exception();
-            message = "Could not create source RasterElement";
-            if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
-            pStep->finalize(Message::Failure, message);
-            return false;
-         }
-
-         if (createRasterPager(pSourceRaster.get()) == false)
-         {
-            if (isAborted()) throw std::exception();
-            message = "Could not create pager for source RasterElement";
-            if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
-            pStep->finalize(Message::Failure, message);
-            return false;
-         }
-
-         if (copyData(pSourceRaster.get()) == false)
-         {
-            if (isAborted()) throw std::exception();
-            message = "Could not copy data from source RasterElement";
-            if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
-            pStep->finalize(Message::Failure, message);
-            return false;
-         }
-
-         double value = 0.0;
-         uint64_t badValueCount = mpRasterElement->sanitizeData(value);
-         if (badValueCount != 0)
-         {
-            char buffer[256];
-            sprintf (buffer, "%llu bad value(s) found in data.\nBad values set to %f.", badValueCount, value);
-            if (mpProgress != NULL)
-            {
-               mpProgress->updateProgress(buffer, 100, WARNING);
-            }
-         }
-
-         if (mUsingMemoryMappedPager)
-         {
-            if (isAborted()) throw std::exception();
-            DynamicObject* pMetadata = pDescriptor->getMetadata();
-            if (pMetadata != NULL)
-            {
-               pMetadata->setAttribute("Is_Original_File_Raw_Data", true);
-            }
-         }
+         return checkAbortOrError("Could not create pager for RasterElement", pStep.get());
       }
    }
-   catch (...)
+   else
    {
-      if (!isAborted())
+      if (mpRasterElement->createDefaultPager() == false)
       {
-         message = "Unknown error";
-         if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
-         pStep->finalize(Message::Failure, message);
-         return false;
+         return checkAbortOrError("Could not allocate resources for new RasterElement", pStep.get());
       }
-   }
+      RasterDataDescriptor *pSourceDescriptor = RasterUtilities::generateUnchippedRasterDataDescriptor(mpRasterElement);
+      if (pSourceDescriptor == NULL)
+      {
+         return checkAbortOrError("Could not get unchipped RasterDataDescriptor", pStep.get());
+      }
 
-   if (isAborted())
-   {
-      message = getName() + " Aborted!";
-      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ABORT);
-      pStep->finalize(Message::Abort, message);
-      return false;
+      ModelResource<RasterElement> pSourceRaster(pSourceDescriptor);
+      if (pSourceRaster.get() == NULL)
+      {
+         return checkAbortOrError("Could not create source RasterElement", pStep.get());
+      }
+
+      if (createRasterPager(pSourceRaster.get()) == false)
+      {
+         return checkAbortOrError("Could not create pager for source RasterElement", pStep.get());
+      }
+
+      if (copyData(pSourceRaster.get()) == false)
+      {
+         return checkAbortOrError("Could not copy data from source RasterElement", pStep.get());
+      }
+
+      double value = 0.0;
+      uint64_t badValueCount = mpRasterElement->sanitizeData(value);
+      if (badValueCount != 0)
+      {
+         char buffer[256];
+         sprintf (buffer, "%llu bad value(s) found in data.\nBad values set to %f.", badValueCount, value);
+         if (mpProgress != NULL)
+         {
+            mpProgress->updateProgress(buffer, 100, WARNING);
+         }
+      }
+
+      if (mUsingMemoryMappedPager)
+      {
+         if(!checkAbortOrError("", pStep.get(), false))
+         {
+            return false;
+         }
+         DynamicObject* pMetadata = pDescriptor->getMetadata();
+         if (pMetadata != NULL)
+         {
+            pMetadata->setAttribute("Is_Original_File_Raw_Data", true);
+         }
+      }
    }
 
    pStep->finalize(Message::Success);
    return true;
+}
+
+bool RasterElementImporterShell::checkAbortOrError(string message, Step *pStep, bool checkForError) const
+{
+   bool error = true;
+   if(isAborted())
+   {
+      error = false;
+      message = getName() + " Aborted!";
+   }
+   else if(!checkForError)
+   {
+      return true;
+   }
+   if(mpProgress != NULL) mpProgress->updateProgress(message, 0, error ? ERRORS : ABORT);
+   pStep->finalize(error ? Message::Failure : Message::Abort, message);
+   return false;
 }
 
 SpatialDataView* RasterElementImporterShell::createView() const

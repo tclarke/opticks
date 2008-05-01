@@ -344,6 +344,8 @@ protected:
    Service<UtilityServices> mpUtilities;
 
 private:
+   bool checkAbortOrError(std::string message, Step *pStep, bool checkForError=true) const;
+
    mutable bool mUsingMemoryMappedPager;
    Progress* mpProgress;
    RasterElement* mpRasterElement;
