@@ -294,7 +294,8 @@ RasterPage* GeoTiffPager::getPage(DataRequest *pOriginalRequest,
          (colNumber  >= numColumns) || ((colNumber  + concurrentColumns) > numColumns) ||
          (bandNumber >= numBands)   || ((bandNumber + concurrentBands)   > numBands))
       {
-         throw string("Invalid accessor request");
+         // Since it is acceptable to increment off the end of the data, do not report an error message
+         throw string();
       }
    
       /**
@@ -419,8 +420,11 @@ RasterPage* GeoTiffPager::getPage(DataRequest *pOriginalRequest,
    catch(string &exc)
    {
       pPage = NULL;
-      MessageResource pMsg("GeoTIFF Pager Error", "app", "71B84E03-6AF1-4971-9F83-69E3C8BC6BF3");
-      pMsg->addProperty("Message", exc);
+      if (exc.empty() == false)
+      {
+         MessageResource pMsg("GeoTIFF Pager Error", "app", "71B84E03-6AF1-4971-9F83-69E3C8BC6BF3");
+         pMsg->addProperty("Message", exc);
+      }
    }
 
    //unlock the mutex now
