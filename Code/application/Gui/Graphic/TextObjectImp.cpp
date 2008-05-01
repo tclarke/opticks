@@ -20,6 +20,7 @@
 #include "GraphicLayerImp.h"
 #include "MipMappedTextures.h"
 #include "MultiLineTextDialog.h"
+#include "OrthographicView.h"
 #include "ProductView.h"
 #include "SpatialDataView.h"
 #include "View.h"
@@ -427,43 +428,63 @@ void TextObjectImp::updateBoundingBox()
    GraphicLayer* pLayer = getLayer();
    if (pLayer != NULL)
    {
-      // Get the pixel scene-to-screen ratio
-      double xScale = 1.0;
-      double yScale = 1.0;
-
-      PerspectiveView* pView = dynamic_cast<PerspectiveView*>(pLayer->getView());
-      if (pView != NULL)
-      {
-         double zoomFactor = 100.0 / pView->getZoomPercentage();
-         xScale = zoomFactor / pLayer->getXScaleFactor();
-         yScale = zoomFactor / pLayer->getYScaleFactor();
-      }
-
       // Determine if the scene is flipped
       bool bHorizontalFlip = false;
       bool bVerticalFlip = false;
       pLayer->isFlipped(llCorner, urCorner, bHorizontalFlip, bVerticalFlip);
 
       // Compute the upper left coordinate
-      if ((bHorizontalFlip == false) && (bVerticalFlip == false))
+      PerspectiveView* pView = dynamic_cast<PerspectiveView*>(pLayer->getView());
+      if (pView != NULL)
       {
-         urCorner.mX = llCorner.mX + (iWidth * xScale);
-         urCorner.mY = llCorner.mY + (iHeight * yScale);
+         double zoomFactor = 100.0 / pView->getZoomPercentage();
+         double xScale = zoomFactor / pLayer->getXScaleFactor();
+         double yScale = zoomFactor / pLayer->getYScaleFactor();
+
+         if ((bHorizontalFlip == false) && (bVerticalFlip == false))
+         {
+            urCorner.mX = llCorner.mX + (iWidth * xScale);
+            urCorner.mY = llCorner.mY + (iHeight * yScale);
+         }
+         else if ((bHorizontalFlip == true) && (bVerticalFlip == false))
+         {
+            urCorner.mX = llCorner.mX - (iWidth * xScale);
+            urCorner.mY = llCorner.mY + (iHeight * yScale);
+         }
+         else if ((bHorizontalFlip == true) && (bVerticalFlip == true))
+         {
+            urCorner.mX = llCorner.mX - (iWidth * xScale);
+            urCorner.mY = llCorner.mY - (iHeight * yScale);
+         }
+         else if ((bHorizontalFlip == false) && (bVerticalFlip == true))
+         {
+            urCorner.mX = llCorner.mX + (iWidth * xScale);
+            urCorner.mY = llCorner.mY - (iHeight * yScale);
+         }
       }
-      else if ((bHorizontalFlip == true) && (bVerticalFlip == false))
+
+      if (dynamic_cast<OrthographicView*>(pLayer->getView()) != NULL)
       {
-         urCorner.mX = llCorner.mX - (iWidth * xScale);
-         urCorner.mY = llCorner.mY + (iHeight * yScale);
-      }
-      else if ((bHorizontalFlip == true) && (bVerticalFlip == true))
-      {
-         urCorner.mX = llCorner.mX - (iWidth * xScale);
-         urCorner.mY = llCorner.mY - (iHeight * yScale);
-      }
-      else if ((bHorizontalFlip == false) && (bVerticalFlip == true))
-      {
-         urCorner.mX = llCorner.mX + (iWidth * xScale);
-         urCorner.mY = llCorner.mY - (iHeight * yScale);
+         double dScreenX = 0.0;
+         double dScreenY = 0.0;
+         pLayer->translateDataToScreen(llCorner.mX, llCorner.mY, dScreenX, dScreenY);
+
+         if ((bHorizontalFlip == false) && (bVerticalFlip == false))
+         {
+            pLayer->translateScreenToData(dScreenX + iWidth, dScreenY + iHeight, urCorner.mX, urCorner.mY);
+         }
+         else if ((bHorizontalFlip == true) && (bVerticalFlip == false))
+         {
+            pLayer->translateScreenToData(dScreenX - iWidth, dScreenY + iHeight, urCorner.mX, urCorner.mY);
+         }
+         else if ((bHorizontalFlip == true) && (bVerticalFlip == true))
+         {
+            pLayer->translateScreenToData(dScreenX - iWidth, dScreenY - iHeight, urCorner.mX, urCorner.mY);
+         }
+         else if ((bHorizontalFlip == false) && (bVerticalFlip == true))
+         {
+            pLayer->translateScreenToData(dScreenX + iWidth, dScreenY - iHeight, urCorner.mX, urCorner.mY);
+         }
       }
    }
    else
