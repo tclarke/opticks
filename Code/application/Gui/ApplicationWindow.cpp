@@ -5322,9 +5322,10 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
             return;
          }
 
-         if (pProgress.get() != NULL)
+         vector<DataElement*> importedDatasets = importer->getImportedElements();
+         if ((importedDatasets.empty() == true) && (pProgress.get() != NULL))
          {
-            string msg = "Unable to import " + files[i];
+            string msg = "Unable to import " + files[i] + ".\n";
             pProgress->updateProgress(msg, 0, WARNING);
          }
       }

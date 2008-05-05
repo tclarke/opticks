@@ -171,10 +171,17 @@ void ImportDlg::accept()
       }
 
       // Invoke the Options dialog if no valid data sets are selected
-      if (ImportAgentImp::validateImportDescriptors(mDescriptors, dynamic_cast<Importer*>(mpImporter)) == false)
+      string errorMessage;
+      if (ImportAgentImp::validateImportDescriptors(mDescriptors, dynamic_cast<Importer*>(mpImporter),
+         errorMessage) < mDescriptors.size())
       {
-         invokeOptionsDialog();
-         if (ImportAgentImp::validateImportDescriptors(mDescriptors, dynamic_cast<Importer*>(mpImporter)) == false)
+         if (invokeOptionsDialog() == false)
+         {
+            return;
+         }
+
+         if (ImportAgentImp::validateImportDescriptors(mDescriptors, dynamic_cast<Importer*>(mpImporter),
+            errorMessage) == 0)
          {
             return;
          }
@@ -345,7 +352,6 @@ bool ImportDlg::invokeOptionsDialog()
    updateDescriptorsIfNeeded();
 
    // Display the dialog
-   int iReturn = QDialog::Rejected;
    if (mDescriptors.empty() == false)
    {
       // Use the default dialog

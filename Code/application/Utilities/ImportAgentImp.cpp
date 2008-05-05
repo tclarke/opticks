@@ -290,11 +290,12 @@ bool ImportAgentImp::execute()
       }
 
       // Validate the descriptors
-      bool bValidImport = validateImportDescriptors(descriptors, pImporter);
+      string errorMessage;
+      unsigned int numValidDescriptors = validateImportDescriptors(descriptors, pImporter, errorMessage);
 
       // Display the options dialog if necessary
       if ((pImporter != NULL) && ((mEditType == ImportAgentExt1::ALWAYS_EDIT) ||
-         ((mEditType == ImportAgentExt1::AS_NEEDED_EDIT) && (bValidImport == false))))
+         ((mEditType == ImportAgentExt1::AS_NEEDED_EDIT) && (numValidDescriptors < descriptors.size()))))
       {
          Service<DesktopServices> pDesktop;
          vector<ImportDescriptor*> importerDescriptors = descriptors;
@@ -326,11 +327,20 @@ bool ImportAgentImp::execute()
          }
 
          mDescriptors = descriptors;
+
+         // Check for valid descriptors
+         numValidDescriptors = validateImportDescriptors(descriptors, pImporter, errorMessage);
       }
 
-      // Ensure the descriptors are valid; they could be invalid if the user cancelled the options dialog
-      if (validateImportDescriptors(descriptors, pImporter) == false)
+      if (numValidDescriptors == 0)
       {
+         Progress* pProgress = getProgress();
+         if ((pProgress != NULL) && (errorMessage.empty() == false))
+         {
+            createProgressDialog();
+            pProgress->updateProgress(errorMessage, 0, ERRORS);
+         }
+
          return false;
       }
    }
@@ -487,13 +497,17 @@ vector<DataElement*> ImportAgentImp::getImportedElements() const
    return mImportedElements;
 }
 
-bool ImportAgentImp::validateImportDescriptors(const vector<ImportDescriptor*>& descriptors, Importer* pImporter)
+unsigned int ImportAgentImp::validateImportDescriptors(const vector<ImportDescriptor*>& descriptors,
+                                                       Importer* pImporter, string& errorMessage)
 {
    if ((descriptors.empty() == true) || (pImporter == NULL))
    {
-      return false;
+      return 0;
    }
 
+   errorMessage.clear();
+
+   unsigned int numValid = 0;
    for (vector<ImportDescriptor*>::const_iterator iter = descriptors.begin(); iter != descriptors.end(); ++iter)
    {
       ImportDescriptor* pImportDescriptor = *iter;
@@ -504,17 +518,27 @@ bool ImportAgentImp::validateImportDescriptors(const vector<ImportDescriptor*>& 
          {
             DataDescriptor* pDescriptor = pImportDescriptor->getDataDescriptor();
 
-            string errorMessage;
-            if (pImporter->validate(pDescriptor, errorMessage) == true)
+            string currentError;
+            bool validDescriptor = pImporter->validate(pDescriptor, currentError);
+            if (currentError.empty() == false)
             {
-               // The import is valid if at least one data set validates successfully
-               return true;
+               if (errorMessage.empty() == false)
+               {
+                  errorMessage += "\n\n";
+               }
+
+               errorMessage += currentError;
+            }
+
+            if (validDescriptor == true)
+            {
+               numValid++;
             }
          }
       }
    }
 
-   return false;
+   return numValid;
 }
 
 void ImportAgentImp::populateArgValues(PlugInArgList *pArgList)

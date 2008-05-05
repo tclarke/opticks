@@ -49,7 +49,8 @@ public:
    bool execute();
    std::vector<DataElement*> getImportedElements() const;
 
-   static bool validateImportDescriptors(const std::vector<ImportDescriptor*>& descriptors, Importer* pImporter);
+   static unsigned int validateImportDescriptors(const std::vector<ImportDescriptor*>& descriptors,
+      Importer* pImporter, std::string& errorMessage);
 
 protected:
    void populateArgValues(PlugInArgList *pArgList);
