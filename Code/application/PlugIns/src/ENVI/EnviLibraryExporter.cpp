@@ -103,7 +103,7 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
    StepResource pStep("Execute ENVI Signature Library Exporter", "app", "11AA6583-E6E8-4830-8ADA-B880E30BEACB");
    mpStep = pStep.get();
 
-   if(!extractPlugInArgs(pInArgList))
+   if (!extractPlugInArgs(pInArgList))
    {
       return false;
    }
@@ -113,10 +113,10 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
    // Check for a valid number of signatures
    vector<Signature*> signatures;
    VERIFY(mpSignatureSet != NULL);
-   if(!extractSignatures(*mpSignatureSet, signatures))
+   if (!extractSignatures(*mpSignatureSet, signatures))
    {
       message = "Cannot extract all of the signatures from the library!";
-      if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);  
+      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);  
       pStep->finalize(Message::Failure, message);
       return false;
    }
@@ -124,7 +124,7 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
    if (signatures.empty() == true)
    {
       message = "The signature set contains no signatures!";
-      if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);  
+      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);  
       pStep->finalize(Message::Failure, message);
       return false;
    }
@@ -148,7 +148,7 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
          if ((currentWaves != spectrumWaves) && (spectrumWaves.empty() == false))
          {
             message = "Error ENVI Library Exporter004: All signatures must have the same wavelengths!";
-            if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);  
+            if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);  
             pStep->finalize(Message::Failure, message);
             return false;
          }
@@ -201,33 +201,33 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
 // Check for overwriting hdr file – 
 //    If the header belongs to another file, it will exist but the .sli file will not
 //    All other times we can overwrite the .hdr file
-   if(QFile::exists(QString::fromStdString(headerFile)) && !QFile::exists(QString::fromStdString(filename)))
+   if (QFile::exists(QString::fromStdString(headerFile)) && !QFile::exists(QString::fromStdString(filename)))
    {
       message = "Header file exists in the current directory and may describe another unrelated data file!";
-      if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);  
+      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);  
       pStep->finalize(Message::Failure, message);
       return false;
    }
 
    // Write out the spectral information
    FILE* pFp = fopen(filename.c_str(), "wb");
-   if(pFp == NULL)
+   if (pFp == NULL)
    {
       message = "Could not open the library file for writing!";
-      if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);  
+      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);  
       pStep->finalize(Message::Failure, message);
       return false;
    }
 
    message = "Exporting signature data...";
-   if(mpProgress != NULL) mpProgress->updateProgress(message, 0, NORMAL);
+   if (mpProgress != NULL) mpProgress->updateProgress(message, 0, NORMAL);
 
    for (unsigned int i = 0; i < numSignatures; ++i)
    {
-      if(mbAbort)
+      if (mbAbort)
       {
          message = "ENVI signature library export aborted!";
-         if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ABORT);
+         if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ABORT);
          pStep->finalize(Message::Abort);
 
          fclose(pFp);
@@ -236,7 +236,7 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
       }
 
       Signature* pSignature = signatures[i];
-      if(pSignature != NULL)
+      if (pSignature != NULL)
       {
          vector<double> spectrumValues;
          DataVariant reflectanceVariant = pSignature->getData("Reflectance");
@@ -250,7 +250,7 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
          }
       }
 
-      if(mpProgress != NULL)
+      if (mpProgress != NULL)
       {
          mpProgress->updateProgress(message, (i + 1) * 100 / numSignatures / 2, NORMAL);
       }
@@ -259,10 +259,10 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
    fclose(pFp);
 
    // Open the header file
-   if((pFp = fopen(headerFile.c_str(), "w")) == NULL)
+   if ((pFp = fopen(headerFile.c_str(), "w")) == NULL)
    {
       message = "Could not open the header file for writing!";
-      if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);  
+      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);  
       pStep->finalize(Message::Failure, message);
 
       remove(filename.c_str());
@@ -270,7 +270,7 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
    }
 
    message = "Exporting header data...";
-   if(mpProgress != NULL) mpProgress->updateProgress(message, 50, NORMAL);
+   if (mpProgress != NULL) mpProgress->updateProgress(message, 50, NORMAL);
    pStep->finalize(Message::Failure, message);
 
    // Write the header information
@@ -298,10 +298,10 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
 
    for (unsigned int i = 0; i < numSignatures; ++i)
    {
-      if(mbAbort)
+      if (mbAbort)
       {
          message = "ENVI signature library export aborted!";
-         if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ABORT);
+         if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ABORT);
          pStep->finalize(Message::Failure, message);
 
          fclose(pFp);
@@ -311,7 +311,7 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
       }
 
       Signature* pSignature = signatures[i];
-      if(pSignature != NULL)
+      if (pSignature != NULL)
       {
          string spectrumName = pSignature->getName().c_str();
          if (spectrumName.empty() == false)
@@ -328,7 +328,7 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
          }
       }
 
-      if(mpProgress != NULL)
+      if (mpProgress != NULL)
       {
          mpProgress->updateProgress(message, 50 + ((i + 1) * 100 / numSignatures / 4), NORMAL);
       }
@@ -339,10 +339,10 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
 
    for (unsigned int i = 0; i < numValues; i++)
    {
-      if(mbAbort)
+      if (mbAbort)
       {
          message = "ENVI signature library export aborted!";
-         if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ABORT);
+         if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ABORT);
          pStep->finalize(Message::Failure, message);
 
          fclose(pFp);
@@ -351,14 +351,14 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
          return false;
       }
 
-      if(i > 0)
+      if (i > 0)
       {
          fprintf(pFp, ",\n");
       }
 
       fprintf(pFp, "%g", spectrumWaves[i]);
 
-      if(mpProgress != NULL)
+      if (mpProgress != NULL)
       {
          mpProgress->updateProgress(message, 75 + ((i + 1) * 100 / numValues / 4), NORMAL);
       }
@@ -368,7 +368,7 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
    fclose(pFp);
 
    message = "ENVI signature library export complete!";
-   if(mpProgress != NULL) mpProgress->updateProgress(message, 100, NORMAL);
+   if (mpProgress != NULL) mpProgress->updateProgress(message, 100, NORMAL);
    pStep->finalize(Message::Success);
 
    return true;
@@ -382,7 +382,7 @@ bool EnviLibraryExporter::abort()
 
 bool EnviLibraryExporter::extractPlugInArgs(PlugInArgList* pArgList)
 {
-   if(pArgList == NULL)
+   if (pArgList == NULL)
    {
       return false;
    }
@@ -390,16 +390,16 @@ bool EnviLibraryExporter::extractPlugInArgs(PlugInArgList* pArgList)
    PlugInArg* pArg = NULL;
 
    // Progress
-   if(pArgList->getArg(ProgressArg(), pArg) && (pArg != NULL))
+   if (pArgList->getArg(ProgressArg(), pArg) && (pArg != NULL))
    {
       mpProgress = pArg->getPlugInArgValue<Progress>();
    }
 
    // Signature set
-   if(!pArgList->getArg(ExportItemArg(), pArg) || (pArg == NULL))
+   if (!pArgList->getArg(ExportItemArg(), pArg) || (pArg == NULL))
    {
       string message = "Could not read the signature set input value!";
-      if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
+      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
       mpStep->finalize(Message::Failure, message);
       return false;
    }
@@ -408,16 +408,16 @@ bool EnviLibraryExporter::extractPlugInArgs(PlugInArgList* pArgList)
    if (mpSignatureSet == NULL)
    {
       string message = "The signature set input value is invalid!";
-      if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);  
+      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);  
       mpStep->finalize(Message::Failure, message);
       return false;
    }
 
     // File descriptor
-   if(!pArgList->getArg(ExportDescriptorArg(), pArg) || (pArg == NULL))
+   if (!pArgList->getArg(ExportDescriptorArg(), pArg) || (pArg == NULL))
    {
       string message = "Could not read the file descriptor input value!";
-      if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
+      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
       mpStep->finalize(Message::Failure, message);
       return false;
    }
@@ -426,7 +426,7 @@ bool EnviLibraryExporter::extractPlugInArgs(PlugInArgList* pArgList)
    if (mpFileDescriptor == NULL)
    {
       string message = "The file descriptor input value is invalid!";
-      if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
+      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
       mpStep->finalize(Message::Failure, message);
       return false;
    }
@@ -438,10 +438,10 @@ bool EnviLibraryExporter::extractSignatures(SignatureSet &signatureSet, vector<S
 {
    std::vector<Signature*> setSigs = signatureSet.getSignatures();
 
-   for(std::vector<Signature*>::iterator iter = setSigs.begin(); iter != setSigs.end(); ++iter)
+   for (std::vector<Signature*>::iterator iter = setSigs.begin(); iter != setSigs.end(); ++iter)
    {
       Signature* pCurrentSignature = *iter;
-      if(pCurrentSignature != NULL)
+      if (pCurrentSignature != NULL)
       {
          SignatureSet *pCurrentSigSet = dynamic_cast<SignatureSet*>(pCurrentSignature);
          if (pCurrentSigSet != NULL)

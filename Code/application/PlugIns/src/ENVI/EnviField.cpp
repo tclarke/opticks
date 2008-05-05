@@ -22,10 +22,10 @@ EnviField* parseEnviField(vector<string>::iterator& lineIterator)
    int position;
 
    position = line.find("{");
-   if(position < 0)
+   if (position < 0)
    {
       position = line.find("=");
-      if(position == string::npos)
+      if (position == string::npos)
       {
          pField->mTag = "";
          pField->mValue = StringUtilities::stripWhitespace(line);
@@ -46,21 +46,21 @@ EnviField* parseEnviField(vector<string>::iterator& lineIterator)
    {
       int position2 = line.find ("=");
       pField->mTag = StringUtilities::toLower(StringUtilities::stripWhitespace(line.substr(0, position2)));
-      for(int i = 0; i <= position; i++)
+      for (int i = 0; i <= position; i++)
       {
          (*lineIterator)[i] = ' ';
       }
 
-      for(;;) // escape condition within the loop
+      for (;;) // escape condition within the loop
       {
          EnviField *pChild = parseEnviField(lineIterator);
-         if(pChild != NULL)
+         if (pChild != NULL)
          {
             pField->mChildren.push_back(pChild);
          }
          line = *lineIterator;
          position = line.find("}");
-         if(position != string::npos)
+         if (position != string::npos)
          {
             pChild->mValue = StringUtilities::stripWhitespace(pChild->mValue.substr(0, pChild->mValue.length() - 1));
             break;
@@ -75,10 +75,10 @@ EnviField* parseEnviField(vector<string>::iterator& lineIterator)
 
 EnviField::~EnviField()
 {
-   for(vector<EnviField*>::iterator iter = mChildren.begin(); iter != mChildren.end(); ++iter)
+   for (vector<EnviField*>::iterator iter = mChildren.begin(); iter != mChildren.end(); ++iter)
    {
       EnviField* pField = *iter;
-      if(pField != NULL)
+      if (pField != NULL)
       {
          delete pField;
       }
@@ -87,7 +87,7 @@ EnviField::~EnviField()
 
 bool EnviField::populateFromHeader(const std::string& filename)
 {
-   if(filename.empty())
+   if (filename.empty())
    {
       return false;
    }
@@ -96,14 +96,14 @@ bool EnviField::populateFromHeader(const std::string& filename)
    int i;
 
    FILE* pFp = fopen(filename.c_str(), "rt");
-   if(pFp == NULL)
+   if (pFp == NULL)
    {
       return false;
    }
 
    char pBuffer[2048];
    fgets(pBuffer, 2047, pFp);
-   if(strncmp(pBuffer, "ENVI", 4) != 0)
+   if (strncmp(pBuffer, "ENVI", 4) != 0)
    {
       fclose(pFp);
       return false;
@@ -118,9 +118,9 @@ bool EnviField::populateFromHeader(const std::string& filename)
 
    while(feof(pFp) == 0)
    {
-      if(fgets(pBuffer, 2047, pFp) == NULL)
+      if (fgets(pBuffer, 2047, pFp) == NULL)
       {
-         if(feof(pFp) == 0)
+         if (feof(pFp) == 0)
          {
             fclose(pFp);
             return false;
@@ -129,16 +129,16 @@ bool EnviField::populateFromHeader(const std::string& filename)
 
       // strip trailing whitespace from the string
       i = strlen(pBuffer) - 1;
-      if(i > 2047)
+      if (i > 2047)
       {
          fclose(pFp);
          return false;
       }
 
       int j;
-      for(j = i; j >= 0; j--)
+      for (j = i; j >= 0; j--)
       {
-         if(!isascii(pBuffer[j]) || (pBuffer[j] < 9))
+         if (!isascii(pBuffer[j]) || (pBuffer[j] < 9))
          {
             fclose(pFp);
             return false;
@@ -150,7 +150,7 @@ bool EnviField::populateFromHeader(const std::string& filename)
          pBuffer[i--] = 0;
       }
 
-      if(strlen(pBuffer) == 0)
+      if (strlen(pBuffer) == 0)
       {
          continue;
       }
@@ -169,13 +169,13 @@ bool EnviField::populateFromHeader(const std::string& filename)
    // Parse the header text for the field values
    vector<string>::iterator lineIterator = headerText.begin();
 
-   if(lineIterator == headerText.end()) 
+   if (lineIterator == headerText.end()) 
    {
       return false;
    }
 
    // ENVI header must have "ENVI\n" as the first line
-   if(*lineIterator != "ENVI")
+   if (*lineIterator != "ENVI")
    {
       return false;
    }
@@ -184,10 +184,10 @@ bool EnviField::populateFromHeader(const std::string& filename)
    mValue = "";
 
    ++lineIterator;
-   for(; lineIterator != headerText.end(); ++lineIterator)
+   for (; lineIterator != headerText.end(); ++lineIterator)
    {
       EnviField* pField = parseEnviField(lineIterator);
-      if(pField != NULL)
+      if (pField != NULL)
       {
          mChildren.push_back(pField);
       }
@@ -202,9 +202,9 @@ EnviField* EnviField::find(const string& tag) const
    for (iter = mChildren.begin(); iter != mChildren.end(); ++iter)
    {
       EnviField* pField = *iter;
-      if(pField != NULL)
+      if (pField != NULL)
       {
-         if(pField->mTag == tag)
+         if (pField->mTag == tag)
          {
             return pField;
          }

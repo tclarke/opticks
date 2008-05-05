@@ -18,12 +18,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "EnviExporter.h"
-#include "Classification.h"
 #include "AppVerify.h"
+#include "Classification.h"
 #include "DimensionDescriptor.h"
+#include "EnviExporter.h"
 #include "Filename.h"
 #include "MessageLogResource.h"
+#include "ModelServices.h"
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
@@ -34,6 +35,7 @@
 #include "RasterUtilities.h"
 #include "SpecialMetadata.h"
 #include "TypesFile.h"
+#include "Units.h"
 
 #include <algorithm>
 #include <vector>
@@ -106,7 +108,7 @@ bool EnviExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
    StepResource pStep("Execute ENVI Exporter", "app", "AFDB9430-4D60-447b-8406-6B1C58F8A027");
    mpStep = pStep.get();
 
-   if(!extractInputArgs(pInArgList))
+   if (!extractInputArgs(pInArgList))
    {
       return false;
    }
@@ -149,7 +151,7 @@ bool EnviExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
    if (pFileDescriptor->getPostlineBytes() > 0)
    {
       message = "An ENVI header cannot represent a data set with postline bytes.";
-      if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
+      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
       pStep->finalize(Message::Failure, message);
       return false;
    }
@@ -158,7 +160,7 @@ bool EnviExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
    if (pFileDescriptor->getPrebandBytes() > 0)
    {
       message = "An ENVI header cannot represent a data set with preband bytes.";
-      if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
+      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
       pStep->finalize(Message::Failure, message);
       return false;
    }
@@ -167,7 +169,7 @@ bool EnviExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
    if (pFileDescriptor->getPostbandBytes() > 0)
    {
       message = "An ENVI header cannot represent a data set with postband bytes.";
-      if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
+      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
       pStep->finalize(Message::Failure, message);
       return false;
    }
@@ -179,7 +181,7 @@ bool EnviExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
    if ((interleave == BSQ) && (bandFiles.empty() == false))
    {
       message = "An ENVI header cannot represent BSQ multi-file data.";
-      if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
+      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
       pStep->finalize(Message::Failure, message);
       return false;
    }
@@ -209,10 +211,10 @@ bool EnviExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
    const string& filename = mpFileDescriptor->getFilename();
 
    FILE* pStream = fopen(filename.c_str(), "wt");
-   if(pStream == NULL)
+   if (pStream == NULL)
    {
       message = "Unable to write to file:\n" + filename;
-      if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
+      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
       pStep->finalize(Message::Failure, message);
       return false;
    }
@@ -256,10 +258,10 @@ bool EnviExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
    }
 
    message = "Start ENVI Export";
-   if(mpProgress != NULL) mpProgress->updateProgress(message, 0, NORMAL);
+   if (mpProgress != NULL) mpProgress->updateProgress(message, 0, NORMAL);
 
    int i = fprintf(pStream, "ENVI\n");
-   if(i > 0)
+   if (i > 0)
    {
       i = fprintf(pStream, "description = {\n");
    }
@@ -271,32 +273,32 @@ bool EnviExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
          i = fprintf(pStream, "    FILENAME = %s\n", filename.c_str());
       }
    }
-   if(i > 0)
+   if (i > 0)
    {
       const Classification *pClass = mpRaster->getClassification();
-      if(pClass != NULL)
+      if (pClass != NULL)
       {
          string classLevel = pClass->getLevel();
-         if(classLevel != "U")
+         if (classLevel != "U")
          {
             string level = "U";
-            if(classLevel == "U")
+            if (classLevel == "U")
             {
                level = "UNCLASSIFIED";
             }
-            else if(classLevel == "C")
+            else if (classLevel == "C")
             {
                level = "CONFIDENTIAL";
             }
-            else if(classLevel == "R")
+            else if (classLevel == "R")
             {
                level = "RESTRICTED";
             }
-            else if(classLevel == "S")
+            else if (classLevel == "S")
             {
                level = "SECRET";
             }
-            else if(classLevel == "T")
+            else if (classLevel == "T")
             {
                level = "TOP SECRET";
             }
@@ -343,15 +345,15 @@ bool EnviExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
       }
    }
 
-   if(i > 0)
+   if (i > 0)
    {
       i = fprintf(pStream, "}\n");
    }
 
-   if(mAbortFlag)
+   if (mAbortFlag)
    {
       message = "ENVI export aborted!";
-      if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ABORT);
+      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ABORT);
       pStep->finalize(Message::Abort);
 
       fclose(pStream);
@@ -359,31 +361,31 @@ bool EnviExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
       return false;
    }
 
-   if(i > 0)
+   if (i > 0)
    {
       i = fprintf(pStream, "samples = %d\n", pFileDescriptor->getColumnCount());
    }
-   if(i > 0)
+   if (i > 0)
    {
       i = fprintf(pStream, "lines = %d\n", pFileDescriptor->getRowCount());
    }
-   if(i > 0)
+   if (i > 0)
    {
       i = fprintf(pStream, "bands = %d\n", pFileDescriptor->getBandCount());
    }
-   if(i > 0)
+   if (i > 0)
    {
       i = fprintf(pStream, "header offset = %d\n", pFileDescriptor->getHeaderBytes());
    }
-   if(i > 0)
+   if (i > 0)
    {
       i = fprintf(pStream, "file type = ENVI Standard\n");
    }
-   if(i > 0)
+   if (i > 0)
    {
       i = fprintf(pStream, "data type = %d\n", dataType);
    }
-   if(i > 0)
+   if (i > 0)
    {
       i = fprintf(pStream, "interleave = %s\n", pInterleaves[pFileDescriptor->getInterleaveFormat()]);
    }
@@ -394,31 +396,132 @@ bool EnviExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
       bMsb = true;
    }
 
-   if(i > 0)
+   if (i > 0)
    {
       i = fprintf(pStream, "byte order = %d\n", bMsb);
    }
 
+   if (i > 0)
+   {
+      DimensionDescriptor dimDesc = pFileDescriptor->getActiveColumn(0);
+      if (dimDesc.isValid())
+      {
+         if (dimDesc.isOriginalNumberValid())
+         {
+            if (dimDesc.getOriginalNumber() > 0)
+            {
+               i = fprintf(pStream, "x start = %d\n", dimDesc.getOriginalNumber() + 1); // ENVI uses 1 based numbers
+            }
+         }
+      }
+   }
+   if (i > 0)
+   {
+      DimensionDescriptor dimDesc = pFileDescriptor->getActiveRow(0);
+      if (dimDesc.isValid())
+      {
+         if (dimDesc.isOriginalNumberValid())
+         {
+            if (dimDesc.getOriginalNumber() > 0)
+            {
+               i = fprintf(pStream, "y start = %d\n", dimDesc.getOriginalNumber() + 1);
+            }
+         }
+      }
+   }
+
+   // geo points
+   if (i > 0)
+   {
+      if (mpRaster->isGeoreferenced())
+      {
+         const vector<DimensionDescriptor>& rows = pFileDescriptor->getRows();
+         const vector<DimensionDescriptor>& cols = pFileDescriptor->getColumns();
+         if (!rows.empty() && !cols.empty())
+         {
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This functionality should be moved into a method in a new RasterElementExporterShell class (dsulgrov)")
+            list<GcpPoint> gcps;
+            unsigned int startRow, startCol, endRow, endCol;
+            startRow = rows.front().getActiveNumber();
+            endRow = rows.back().getActiveNumber();
+            startCol = cols.front().getActiveNumber();
+            endCol = cols.back().getActiveNumber();
+            GcpPoint urPoint, ulPoint, lrPoint, llPoint, centerPoint;
+            ulPoint.mPixel = LocationType(startCol, startRow);
+            urPoint.mPixel = LocationType(endCol, startRow);
+            llPoint.mPixel = LocationType(startCol, endRow);
+            lrPoint.mPixel = LocationType(endCol, endRow);
+
+            ulPoint.mCoordinate = mpRaster->convertPixelToGeocoord(ulPoint.mPixel);
+            urPoint.mCoordinate = mpRaster->convertPixelToGeocoord(urPoint.mPixel);
+            llPoint.mCoordinate = mpRaster->convertPixelToGeocoord(llPoint.mPixel);
+            lrPoint.mCoordinate = mpRaster->convertPixelToGeocoord(lrPoint.mPixel);
+
+            //reset the coordinates, because on import they are required to be in
+            //on-disk numbers not active numbers
+            unsigned int diskStartRow, diskStartCol, diskEndRow, diskEndCol;
+            diskStartRow = rows.front().getOnDiskNumber();
+            diskEndRow = rows.back().getOnDiskNumber();
+            diskStartCol = cols.front().getOnDiskNumber();
+            diskEndCol = cols.back().getOnDiskNumber();
+            ulPoint.mPixel = LocationType(diskStartCol, diskStartRow);
+            urPoint.mPixel = LocationType(diskEndCol, diskStartRow);
+            llPoint.mPixel = LocationType(diskStartCol, diskEndRow);
+            lrPoint.mPixel = LocationType(diskEndCol, diskEndRow);
+
+            gcps.push_back(ulPoint);
+            gcps.push_back(urPoint);
+            gcps.push_back(llPoint);
+            gcps.push_back(lrPoint);
+
+            list<GcpPoint>::const_iterator it;
+            fprintf(pStream, "geo points = {");
+            for (it=gcps.begin(); it!=gcps.end(); ++it)
+            {
+               GcpPoint gcp = *it;
+               // add 1.5 to adjust from Opticks to ENVI pixel coordinate systems
+               i = fprintf(pStream, "\n %.4f, %.4f, %.8f, %.8f", gcp.mPixel.mX + 1.5, 
+                  gcp.mPixel.mY + 1.5, gcp.mCoordinate.mX, gcp.mCoordinate.mY);
+            }
+            i = fprintf(pStream, "}\n");
+         }
+      }
+   }
+
+   // reflectance scale factor
+   if (i > 0)
+   {
+      const Units* pUnits = pDescriptor->getUnits();
+      if (pUnits != NULL)
+      {
+         if (pUnits->getUnitType() == REFLECTANCE && 
+            abs(pUnits->getScaleFromStandard() - 1.0) > 0.0000001)
+         {
+            float fltVal = static_cast<float>(1.0/pUnits->getScaleFromStandard());
+            i = fprintf(pStream, "reflectance scale factor = %f\n", fltVal);
+         }
+      }
+   }
    // Bad bands
    const vector<DimensionDescriptor>& allBands = pFileDescriptor->getBands();
    vector<DimensionDescriptor>::const_iterator allBandsIter;
-   if(i > 0)
+   if (i > 0)
    {
       const vector<DimensionDescriptor>& activeBands = pDescriptor->getBands();
-      if(allBands.size() != activeBands.size())
+      if (allBands.size() != activeBands.size())
       {
-         if(i > 0)
+         if (i > 0)
          {
             i = fprintf(pStream, "bbl = {\n");
          }
 
          unsigned int count = 0;
-         for(allBandsIter = allBands.begin(); allBandsIter != allBands.end(); ++allBandsIter, ++count)
+         for (allBandsIter = allBands.begin(); allBandsIter != allBands.end(); ++allBandsIter, ++count)
          {
-            if(mAbortFlag)
+            if (mAbortFlag)
             {
                message = "ENVI export aborted!";
-               if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ABORT);
+               if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ABORT);
                pStep->finalize(Message::Abort);
 
                fclose(pStream);
@@ -426,37 +529,37 @@ bool EnviExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
                return false;
             }
 
-            if(allBandsIter->isActiveNumberValid())
+            if (allBandsIter->isActiveNumberValid())
             {
-               if(i > 0)
+               if (i > 0)
                {
                   i = fprintf(pStream, "1");
                }
             }
             else
             {
-               if(i > 0)
+               if (i > 0)
                {
                   i = fprintf(pStream, "0");
                }
             }
 
-            if(allBandsIter == (allBands.end() - 1))
+            if (allBandsIter == (allBands.end() - 1))
             {
-               if(i > 0)
+               if (i > 0)
                {
                   i = fprintf(pStream, "}\n");
                }
             }
             else
             {
-               if(i > 0)
+               if (i > 0)
                {
                   i = fprintf(pStream, ",");
                }
-               if(i > 0)
+               if (i > 0)
                {
-                  if((count + 1) % 40 == 0)
+                  if ((count + 1) % 40 == 0)
                   {
                      i = fprintf(pStream, "\n");
                   }
@@ -467,7 +570,7 @@ bool EnviExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
    }
 
    // Wavelengths
-   if(i > 0)
+   if (i > 0)
    {
       vector<double> centerWavelengths;
       vector<double> startWavelengths;
@@ -501,19 +604,21 @@ bool EnviExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
          }
       }
 
-      if(!centerWavelengths.empty())
+      if (!centerWavelengths.empty())
       {
-         if(i > 0)
+         i = fprintf(pStream, "wavelength units = Micrometers\n");
+
+         if (i > 0)
          {
             i = fprintf (pStream, "wavelength = {\n");
          }
 
          for (allBandsIter = allBands.begin(); allBandsIter != allBands.end(); ++allBandsIter)
          {
-            if(mAbortFlag)
+            if (mAbortFlag)
             {
                message = "ENVI export aborted!";
-               if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ABORT);
+               if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ABORT);
                pStep->finalize(Message::Abort);
 
                fclose(pStream);
@@ -538,31 +643,31 @@ bool EnviExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
                i = fprintf(pStream, "%1.12g", wavelength);
             }
          }
-         if(i > 0)
+         if (i > 0)
          {
             i = fprintf(pStream, "}");
          }
       }
 
-      if(!centerWavelengths.empty())
+      if (!centerWavelengths.empty())
       {
-         if(i > 0)
+         if (i > 0)
          {
             i = fprintf(pStream, "\n");
          }
-         if(i > 0)
+         if (i > 0)
          {
             i = fprintf(pStream, "fwhm = {\n");
          }
 
-         if(!startWavelengths.empty() && !endWavelengths.empty())
+         if (!startWavelengths.empty() && !endWavelengths.empty())
          {
             for (allBandsIter = allBands.begin(); allBandsIter != allBands.end(); ++allBandsIter)
             {
-               if(mAbortFlag)
+               if (mAbortFlag)
                {
                   message = "ENVI export aborted!";
-                  if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ABORT);
+                  if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ABORT);
                   pStep->finalize(Message::Abort);
 
                   fclose(pStream);
@@ -588,7 +693,7 @@ bool EnviExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
                   i = fprintf(pStream, "%1.12g", fwhm);
                }
             }
-            if(i > 0)
+            if (i > 0)
             {
                i = fprintf(pStream, "}");
             }
@@ -601,7 +706,7 @@ bool EnviExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
             double value = 0.0;
             for (wave = centerWavelengths.begin(); wave != centerWavelengths.end(); ++wave)
             {
-               if((wave + 1) != centerWavelengths.end())
+               if ((wave + 1) != centerWavelengths.end())
                {
                   double centerWavelength = *wave;
                   double nextCenterWavelength = *(wave + 1);
@@ -613,10 +718,10 @@ bool EnviExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
 
             for (allBandsIter = allBands.begin(); allBandsIter != allBands.end(); ++allBandsIter)
             {
-               if(mAbortFlag)
+               if (mAbortFlag)
                {
                   message = "ENVI export aborted!";
-                  if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ABORT);
+                  if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ABORT);
                   pStep->finalize(Message::Abort);
 
                   fclose(pStream);
@@ -643,7 +748,7 @@ bool EnviExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
                   i = fprintf(pStream, "%1.12g", fwhm);
                }
             }
-            if(i > 0)
+            if (i > 0)
             {
                i = fprintf(pStream, "}");
             }
@@ -652,22 +757,22 @@ bool EnviExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
    }
 
    //band names
-   if(i > 0)
+   if (i > 0)
    {      
       vector<string> bandNames = RasterUtilities::getBandNames(pDescriptor);
       if (!bandNames.empty())
       {
-         if(i > 0)
+         if (i > 0)
          {
             i = fprintf (pStream, "\nband names = {\n");
          }
 
          for (allBandsIter = allBands.begin(); allBandsIter != allBands.end(); ++allBandsIter)
          {
-            if(mAbortFlag)
+            if (mAbortFlag)
             {
                message = "ENVI export aborted!";
-               if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ABORT);
+               if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ABORT);
                pStep->finalize(Message::Abort);
 
                fclose(pStream);
@@ -692,7 +797,7 @@ bool EnviExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
                i = fprintf(pStream, "%s", bandName.c_str());
             }
          }
-         if(i > 0)
+         if (i > 0)
          {
             i = fprintf(pStream, "}");
          }
@@ -700,24 +805,24 @@ bool EnviExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
    }
 
    // Add a new line so that ENVI will successfully read the file
-   if(i > 0)
+   if (i > 0)
    {
       i = fprintf(pStream, "\n");
    }
 
    fclose(pStream);
 
-   if(i <= 0)
+   if (i <= 0)
    {
       message = "Error writing to file:\n" + filename;
-      if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
+      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
       pStep->finalize(Message::Failure, message);
       return false;
    }
    else
    {
       message = "Completed ENVI Export";
-      if(mpProgress != NULL) mpProgress->updateProgress(message, 100, NORMAL);
+      if (mpProgress != NULL) mpProgress->updateProgress(message, 100, NORMAL);
       pStep->finalize(Message::Success);
    }
 
@@ -732,7 +837,7 @@ bool EnviExporter::abort()
 
 bool EnviExporter::extractInputArgs(PlugInArgList* pArgList)
 {
-   if(pArgList == NULL)
+   if (pArgList == NULL)
    {
       return false;
    }
@@ -740,16 +845,16 @@ bool EnviExporter::extractInputArgs(PlugInArgList* pArgList)
    PlugInArg* pArg = NULL;
 
    // Progress
-   if(pArgList->getArg(ProgressArg(), pArg) && (pArg != NULL))
+   if (pArgList->getArg(ProgressArg(), pArg) && (pArg != NULL))
    {
       mpProgress = pArg->getPlugInArgValue<Progress>();
    }
 
    // Sensor data
-   if(!pArgList->getArg(ExportItemArg(), pArg) || (pArg == NULL))
+   if (!pArgList->getArg(ExportItemArg(), pArg) || (pArg == NULL))
    {
       string message = "Could not read the raster element input value!";
-      if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
+      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
       mpStep->finalize(Message::Failure, message);
       return false;
    }
@@ -758,16 +863,16 @@ bool EnviExporter::extractInputArgs(PlugInArgList* pArgList)
    if (mpRaster == NULL)
    {
       string message = "The raster element input value is invalid!";
-      if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);  
+      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);  
       mpStep->finalize(Message::Failure, message);
       return false;
    }
 
     // File descriptor
-   if(!pArgList->getArg(ExportDescriptorArg(), pArg) || (pArg == NULL))
+   if (!pArgList->getArg(ExportDescriptorArg(), pArg) || (pArg == NULL))
    {
       string message = "Could not read the file descriptor input value!";
-      if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
+      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
       mpStep->finalize(Message::Failure, message);
       return false;
    }
@@ -776,7 +881,7 @@ bool EnviExporter::extractInputArgs(PlugInArgList* pArgList)
    if (mpFileDescriptor == NULL)
    {
       string message = "The file descriptor input value is invalid!";
-      if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
+      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
       mpStep->finalize(Message::Failure, message);
       return false;
    }

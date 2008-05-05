@@ -10,8 +10,9 @@
 #ifndef ENVIIMPORTER_H
 #define ENVIIMPORTER_H
 
-#include "RasterElementImporterShell.h"
+#include "EnumWrapper.h"
 #include "EnviField.h"
+#include "RasterElementImporterShell.h"
 
 #include <string>
 #include <vector>
@@ -27,7 +28,14 @@ public:
    bool validate(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
 
 protected:
+   enum WavelengthUnitsEnum{ WU_UNKNOWN, WU_MICROMETERS, WU_NANOMETERS, WU_WAVENUMBER, 
+      WU_GHZ, WU_MHZ, WU_INDEX};
+   typedef EnumWrapper<WavelengthUnitsEnum> WavelengthUnitsType;
+   WavelengthUnitsType strToType(std::string strType);
+
    bool parseHeader(const std::string& filename);
+   bool parseWavelengths(EnviField* pField, std::vector<double>* pWavelengthCenters, 
+      WavelengthUnitsType eType);
    std::string findDataFile(const std::string& headerPath);
    std::string findHeaderFile(const std::string& dataPath);
 
