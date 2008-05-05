@@ -200,7 +200,7 @@ bool EnviLibraryImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
 
    string message;
 
-   if(!extractPlugInArgs(pInArgList))
+   if (!extractPlugInArgs(pInArgList))
    {
       return false;
    }
@@ -216,7 +216,7 @@ bool EnviLibraryImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
    }
 
    message = "Reading the values from the header file...";
-   if(mpProgress != NULL) { mpProgress->updateProgress(message, 0, NORMAL); }
+   if (mpProgress != NULL) { mpProgress->updateProgress(message, 0, NORMAL); }
 
    DynamicObject *pMetadata = mpSignatureLibrary->getMetadata();
    VERIFY(pMetadata != NULL);
@@ -264,15 +264,15 @@ bool EnviLibraryImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
    }
 
 
-   if(mbAbort)
+   if (mbAbort)
    {
       message = "ENVI signature library import aborted!";
-      if(mpProgress != NULL) { mpProgress->updateProgress(message, 0, ABORT); }
+      if (mpProgress != NULL) { mpProgress->updateProgress(message, 0, ABORT); }
       pStep->finalize(Message::Abort);
       return false;
    }
 
-   if(mpProgress != NULL)
+   if (mpProgress != NULL)
    {
       mpProgress->updateProgress(message, 10, NORMAL);
    }
@@ -281,20 +281,20 @@ bool EnviLibraryImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
    vector<string> sigNames;
 
    EnviField* pSigNamesField = mFields.find("spectra names");
-   if(pSigNamesField != NULL)
+   if (pSigNamesField != NULL)
    {
-      for(unsigned int i = 0; i < pSigNamesField->mChildren.size(); i++)
+      for (unsigned int i = 0; i < pSigNamesField->mChildren.size(); i++)
       {
-         if(mbAbort)
+         if (mbAbort)
          {
             message = "ENVI signature library import aborted!";
-            if(mpProgress != NULL) { mpProgress->updateProgress(message, 0, ABORT); }
+            if (mpProgress != NULL) { mpProgress->updateProgress(message, 0, ABORT); }
             pStep->finalize(Message::Abort);
             return false;
          }
 
          EnviField* pField = pSigNamesField->mChildren[i];
-         if(pField != NULL)
+         if (pField != NULL)
          {
             vector<char> bufferVector(pField->mValue.size() + 1);
             char *pBuffer = &bufferVector.front();
@@ -330,20 +330,20 @@ bool EnviLibraryImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
    unsigned int uiNanometerValues = 0;
 
    EnviField* pWavelengthField = mFields.find("wavelength");
-   if(pWavelengthField != NULL)
+   if (pWavelengthField != NULL)
    {
-      for(unsigned int i = 0; i < pWavelengthField->mChildren.size(); i++)
+      for (unsigned int i = 0; i < pWavelengthField->mChildren.size(); i++)
       {
-         if(mbAbort)
+         if (mbAbort)
          {
             message = "ENVI signature library import aborted!";
-            if(mpProgress != NULL) { mpProgress->updateProgress(message, 0, ABORT); }
+            if (mpProgress != NULL) { mpProgress->updateProgress(message, 0, ABORT); }
             pStep->finalize(Message::Abort);
             return false;
          }
 
          EnviField* pField = pWavelengthField->mChildren[i];
-         if(pField != NULL)
+         if (pField != NULL)
          {
             vector<char> bufferVector(pField->mValue.size() + 1);
             char* pBuffer = &(bufferVector.front());
@@ -354,9 +354,9 @@ bool EnviLibraryImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
             {
                double dWavelength = 0.0;
                int count = sscanf(pPtr, "%lf", &dWavelength);
-               if(count == 1)
+               if (count == 1)
                {
-                  if(dWavelength > 50.0)    // Assumed to be in nanometers
+                  if (dWavelength > 50.0)    // Assumed to be in nanometers
                   {
                      uiNanometerValues++;
                   }
@@ -372,7 +372,7 @@ bool EnviLibraryImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
             }
          }
 
-         if(mpProgress != NULL)
+         if (mpProgress != NULL)
          {
             mpProgress->updateProgress(message,
                35 + ((i + 1) * 15 / pWavelengthField->mChildren.size()), NORMAL);
@@ -424,12 +424,12 @@ bool EnviLibraryImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
    pMetadata->setAttributeByPath(pCenterPath, wavelengths);
 
    message = "Mapping the library...";
-   if(mpProgress != NULL) { mpProgress->updateProgress(message, 50, NORMAL); }
+   if (mpProgress != NULL) { mpProgress->updateProgress(message, 50, NORMAL); }
 
    bool cubeLoaded = mpSignatureLibrary->import(dataFile, "ENVI Importer");
 
    message = "ENVI library import complete!";
-   if(mpProgress != NULL) { mpProgress->updateProgress(message, 100, NORMAL); }
+   if (mpProgress != NULL) { mpProgress->updateProgress(message, 100, NORMAL); }
    pStep->finalize(Message::Success);
 
    return true;
@@ -443,7 +443,7 @@ bool EnviLibraryImporter::abort()
 
 bool EnviLibraryImporter::extractPlugInArgs(PlugInArgList* pArgList)
 {
-   if(pArgList == NULL)
+   if (pArgList == NULL)
    {
       return false;
    }
@@ -524,12 +524,12 @@ string EnviLibraryImporter::findDataFile(const string& filename)
 {
    // Check the fields from the header
    EnviField* pField = mFields.find("description");
-   if(pField != NULL)
+   if (pField != NULL)
    {
       EnviField* pFilenameField = pField->find("filename");
-      if(pFilenameField != NULL)
+      if (pFilenameField != NULL)
       {
-         if(!pFilenameField->mValue.empty())
+         if (!pFilenameField->mValue.empty())
          {
             return pFilenameField->mValue;
          }

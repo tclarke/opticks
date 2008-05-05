@@ -228,6 +228,7 @@ void IceWriter::writeCube(const string& hdfPath,
    {
       if (!rows.empty() && !cols.empty())
       {
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This functionality should be moved into a method in a new RasterElementExporterShell class (dsulgrov)")
          list<GcpPoint> gcps;
          unsigned int startRow, startCol, endRow, endCol;
          startRow = rows.front().getActiveNumber();

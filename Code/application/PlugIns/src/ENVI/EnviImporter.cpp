@@ -7,6 +7,9 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtCore/QString>
+#include <QtCore/QStringList>
+
 #include "AppVersion.h"
 #include "EnviImporter.h"
 #include "Classification.h"
@@ -14,6 +17,7 @@
 #include "DynamicObject.h"
 #include "Endian.h"
 #include "FileFinder.h"
+#include "GeoPoint.h"
 #include "ImportDescriptor.h"
 #include "ModelServices.h"
 #include "ObjectFactory.h"
@@ -30,7 +34,6 @@
 using namespace std;
 
 static bool parseDefaultBands(EnviField* pField, vector<unsigned int>* pBandNumbers);
-static bool parseWavelengths(EnviField* pField, vector<double>* pWavelengthCenters);
 static bool parseFwhm(EnviField* pField, vector<double>* pWavelengthStarts,
                       const vector<double>* pWavelengthCenters, vector<double>* pWavelengthEnds);
 static bool parseBbl(EnviField* pField, vector<unsigned int>* pBadBands);
@@ -109,16 +112,16 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
                   int columnOffset = 0;
                   int rowOffset = 0;
 
-                  pField = mFields.find("x-start");
+                  pField = mFields.find("x start");
                   if (pField != NULL)
                   {
-                     columnOffset = atoi(pField->mValue.c_str());
+                     columnOffset = atoi(pField->mValue.c_str()) - 1; // ENVI numbers are 1 based vs Opticks being 0 based
                   }
 
-                  pField = mFields.find("y-start");
+                  pField = mFields.find("y start");
                   if (pField != NULL)
                   {
-                     rowOffset = atoi(pField->mValue.c_str());
+                     rowOffset = atoi(pField->mValue.c_str()) - 1; // ENVI numbers are 1 based vs Opticks being 0 based
                   }
 
                   // Rows
@@ -288,6 +291,35 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
                      }
                   }
 
+                  if (gcps.empty())  // not in description, check for geo points keyword
+                  {
+                     pField = mFields.find("geo points");
+                     if (pField != NULL)
+                     {
+                        vector<double> geoValues;
+                        const int expectedNumValues = 16;  // 4 values for each of the 4 corners
+                        geoValues.reserve(expectedNumValues);
+                        for (unsigned int i=0; i<pField->mChildren.size(); i++)
+                        {
+                           vectorFromField(pField->mChildren.at(i), geoValues, "%lf");
+                        }
+
+                        if (geoValues.size() == expectedNumValues)
+                        {
+                           vector<double>::iterator iter = geoValues.begin();
+                           GcpPoint gcp;
+                           while (iter != geoValues.end())
+                           {
+                              gcp.mPixel.mX = *iter++ - 1.5;  // adjust ref point for ENVI's use of
+                              gcp.mPixel.mY = *iter++ - 1.5;  // upper left corner and one-based first pixel
+                              gcp.mCoordinate.mX = *iter++;   // GcpPoint has lat as mX and Lon as mY 
+                              gcp.mCoordinate.mY = *iter++;   // geo point field has lat then lon value
+                              gcps.push_back(gcp);
+                           }
+                        }
+                     }
+                  }
+
                   // GCPs
                   if (gcps.empty() == false)
                   {
@@ -428,6 +460,7 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
                         {
                            pUnits->setScaleFromStandard(1.0 / scalingFactor);
                            pUnits->setUnitName("Reflectance");
+                           pUnits->setUnitType(REFLECTANCE);
                         }
                      }
                   }
@@ -538,12 +571,20 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
                      }
                   }
 
+                  // wavelength units
+                  pField = mFields.find("wavelength units");
+                  WavelengthUnitsType eType(WU_UNKNOWN);
+                  if (pField != NULL)
+                  {
+                     eType = strToType(pField->mValue);
+                  }
+
                   // Wavelengths
                   vector<double> centerWavelengths;
                   pField = mFields.find("wavelength");
                   if (pField != NULL)
                   {
-                     parseWavelengths(pField, &centerWavelengths);
+                     parseWavelengths(pField, &centerWavelengths, eType);
                      if (pMetadata != NULL)
                      {
                         string pCenterPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME, 
@@ -596,6 +637,65 @@ unsigned char EnviImporter::getFileAffinity(const std::string& filename)
    }
 }
 
+bool EnviImporter::parseWavelengths (EnviField *field, 
+                                     vector<double>* pWavelengthCenters, 
+                                     WavelengthUnitsType eType)
+{
+   unsigned int i;
+   double maxWavelength(0.0);
+
+   for (i=0; i<field->mChildren.size(); i++)
+   {
+      vectorFromField(field->mChildren.at(i), *pWavelengthCenters, "%lf");
+   }
+   for (i=0; i<pWavelengthCenters->size(); ++i)
+   {
+      if (pWavelengthCenters->at(i) > maxWavelength)
+      {
+         maxWavelength = pWavelengthCenters->at(i);
+      }
+   }
+
+   switch (eType)
+   {
+   case WU_MICROMETERS:  // already in micrometers, nothing further to do
+      break;
+
+   case WU_NANOMETERS:
+      for (i = 0; i < pWavelengthCenters->size(); ++i)
+      {
+         pWavelengthCenters->at(i) *= 0.001;  // convert to micrometers
+      }
+      break;
+
+   case WU_WAVENUMBER:
+      for (i = 0; i < pWavelengthCenters->size(); ++i)
+      {
+         pWavelengthCenters->at(i) = 10000.0/pWavelengthCenters->at(i);  // convert to micrometers
+      }
+      break;
+
+   case WU_GHZ:     // fall through
+   case WU_MHZ:     // fall through
+   case WU_INDEX:
+      pWavelengthCenters->clear();  // not supported
+      return false;
+
+   case WU_UNKNOWN: // fall through
+   default:
+      if (maxWavelength > 50.0)  // could be in nanometers, so convert
+      {
+         for (i = 0; i < pWavelengthCenters->size(); ++i)
+         {
+            pWavelengthCenters->at(i) *= 0.001;  // convert to micrometers
+         }
+      }
+      break;
+   }
+
+   return true;
+}
+
 static bool parseDefaultBands(EnviField* pField, vector<unsigned int>* pBandNumbers)
 {
    if ((pField == NULL) || (pBandNumbers == NULL))
@@ -617,34 +717,6 @@ static bool parseDefaultBands(EnviField* pField, vector<unsigned int>* pBandNumb
 }
 
 static double sWavelengthScaleFactor = 1.0;
-
-static bool parseWavelengths (EnviField *field, 
-                              vector<double>* pWavelengthCenters)
-{
-   unsigned int i;
-   double maxWavelength = 0.0;
-
-   for (i=0; i<field->mChildren.size(); i++)
-   {
-      vectorFromField(field->mChildren.at(i), *pWavelengthCenters, "%lf");
-   }
-   for (i=0; i<pWavelengthCenters->size(); ++i)
-   {
-      if (pWavelengthCenters->at(i) > maxWavelength)
-      {
-         maxWavelength = pWavelengthCenters->at(i);
-      }
-   }
-   if (maxWavelength > 50.0) // wavelengths are in nanometers, convert to microns
-   {
-      sWavelengthScaleFactor = 1.0 / 1000.0;
-      for (i = 0; i < pWavelengthCenters->size(); ++i)
-      {
-         pWavelengthCenters->at(i) *= (float) sWavelengthScaleFactor;
-      }
-   }
-   return true;
-}
 
 static bool parseFwhm(EnviField *field,
                       vector<double>* pWavelengthStarts,
@@ -861,4 +933,36 @@ bool EnviImporter::validate(const DataDescriptor* pDescriptor, string& errorMess
    }
 
    return true;
+}
+
+EnviImporter::WavelengthUnitsType EnviImporter::strToType(string strType)
+{
+   string target = StringUtilities::toLower(StringUtilities::stripWhitespace(strType));
+   WavelengthUnitsType eType;
+   if (target == "micrometers")
+   {
+      eType = WU_MICROMETERS;
+   }
+   else if (target == "nanometers")
+   {
+      eType = WU_NANOMETERS;
+   }
+   else if (target == "wavenumber")
+   {
+      eType = WU_WAVENUMBER;
+   }
+   else if (target == "ghz")
+   {
+      eType = WU_GHZ;
+   }
+   else if (target == "mhz")
+   {
+      eType = WU_MHZ;
+   }
+   else if (target == "unknown")
+   {
+      eType = WU_UNKNOWN;
+   }
+
+   return eType;
 }
