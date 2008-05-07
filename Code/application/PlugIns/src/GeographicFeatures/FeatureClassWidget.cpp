@@ -116,7 +116,11 @@ FeatureClassWidget::FeatureClassWidget(QWidget* pParent) :
    pLayout->addWidget(mpProgressBar, 1, 0);
    pLayout->addWidget(mpErrorLabel, 1, 1);
    pLayout->addWidget(pTestConnectionButton, 1, 2);
-   
+
+   // Initialization
+   setWindowTitle("Shape File");
+
+   // Connections
    VERIFYNR(connect(pTabWidget, SIGNAL(currentChanged(int)), this, SLOT(testConnection())));
    VERIFYNR(connect(pTestConnectionButton, SIGNAL(clicked()), this, SLOT(testConnection())));
 
