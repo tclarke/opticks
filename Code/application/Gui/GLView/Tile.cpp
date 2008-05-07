@@ -124,12 +124,13 @@ void Tile::allocateTexture(unsigned int index, int channels, unsigned char *pTex
    mTextures[index].genTexture(channels*512*512/(factor*factor));
    mTextures[index].bind();
 
-   glTexParameterf(GL_TEXTURE_2D,  GL_TEXTURE_WRAP_S, GL_CLAMP);
-   glTexParameterf(GL_TEXTURE_2D,  GL_TEXTURE_WRAP_T, GL_CLAMP);
+   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-   glTexImage2D(GL_TEXTURE_2D, 0, channels, mTexSizeX/factor, mTexSizeY/factor, 0, mTexFormat, GL_UNSIGNED_BYTE, pTextureData);
+   glTexImage2D(GL_TEXTURE_2D, 0, channels, mTexSizeX / factor, mTexSizeY / factor, 0, mTexFormat,
+      GL_UNSIGNED_BYTE, pTextureData);
 }
 
 void Tile::setupTexture(unsigned int index, unsigned char* pTextureData)
