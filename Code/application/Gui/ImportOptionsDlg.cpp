@@ -23,7 +23,6 @@
 #include "ImportOptionsDlg.h"
 #include "MetadataWidget.h"
 #include "ModelServices.h"
-#include "PlugIn.h"
 #include "RasterDataDescriptor.h"
 #include "RasterFileDescriptor.h"
 #include "RasterUtilities.h"
@@ -511,16 +510,7 @@ void ImportOptionsDlg::setCurrentDataset(ImportDescriptor* pImportDescriptor)
          QString strCaption = mpImporterPage->windowTitle();
          if (strCaption.isEmpty() == true)
          {
-            PlugIn* pPlugIn = dynamic_cast<PlugIn*>(mpImporter);
-            if (pPlugIn != NULL)
-            {
-               strCaption = QString::fromStdString(pPlugIn->getName());
-            }
-
-            if (strCaption.isEmpty() == true)
-            {
-               strCaption = "Importer";
-            }
+            strCaption = "Importer";
          }
 
          mpTabWidget->addTab(mpImporterPage, strCaption);
