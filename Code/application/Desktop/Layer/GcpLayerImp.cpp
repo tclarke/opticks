@@ -249,6 +249,11 @@ bool GcpLayerImp::processMousePress(const QPoint& screenCoord, Qt::MouseButton b
       return false;
    }
 
+   if (button != Qt::LeftButton)
+   {
+      return false;
+   }
+
    LocationType pixelCoord;
    pView->translateScreenToWorld(screenCoord.x(), screenCoord.y(), pixelCoord.mX, pixelCoord.mY);
 
