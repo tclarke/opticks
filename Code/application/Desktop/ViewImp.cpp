@@ -1826,6 +1826,17 @@ bool ViewImp::toXml(XMLWriter* pXml) const
    pXml->addAttr("releaseInfoEnabled", mReleaseInfoEnabled);
    pXml->addAttr("origin", mOrigin);
    pXml->addAttr("crossHair", mCrossHair);
+
+   if (mpMouseMode != NULL)
+   {
+      string mouseMode;
+      mpMouseMode->getName(mouseMode);
+      if (mouseMode.empty() == false)
+      {
+         pXml->addAttr("mouseMode", mouseMode);
+      }
+   }
+
    if (mpAnimationController != NULL)
    {
       pXml->addAttr("animationControllerId", mpAnimationController->getId());
@@ -1887,6 +1898,12 @@ bool ViewImp::fromXml(DOMNode* pDocument, unsigned int version)
       A(pElem->getAttribute(X("origin")))));
    enableCrossHair(StringUtilities::fromXmlString<bool>(A(pElem->getAttribute(X("crossHair")))));
 
+   if (pElem->hasAttribute(X("mouseMode")))
+   {
+      string mouseMode = A(pElem->getAttribute(X("mouseMode")));
+      setMouseMode(QString::fromStdString(mouseMode));
+   }
+
    if (pElem->hasAttribute(X("animationControllerId")))
    {
       string controllerId(A(pElem->getAttribute(X("animationControllerId"))));
@@ -1896,7 +1913,6 @@ bool ViewImp::fromXml(DOMNode* pDocument, unsigned int version)
       {
          setAnimationController(pController);
       }
-
    }
 
    // re-establish view links
