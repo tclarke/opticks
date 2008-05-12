@@ -20,12 +20,13 @@
 #include <QtGui/QPixmap>
 #include <QtGui/QPushButton>
 
+#include "AppConfig.h"
+#include "AppVerify.h"
 #include "AppVersion.h"
 #include "BatchEditorDlg.h"
 #include "BatchFileParser.h"
 #include "BatchFileset.h"
 #include "BatchWizard.h"
-#include "AppConfig.h"
 #include "ConfigurationSettings.h"
 #include "FilenameImp.h"
 #include "FilesetWidget.h"
@@ -52,7 +53,7 @@ BatchEditorDlg::BatchEditorDlg(QWidget* parent) :
    // View actions
    QActionGroup* pViewGroup = new QActionGroup(this);
    pViewGroup->setExclusive(true);
-   connect(pViewGroup, SIGNAL(triggered(QAction*)), this, SLOT(setView(QAction*)));
+   VERIFYNR(connect(pViewGroup, SIGNAL(triggered(QAction*)), this, SLOT(setView(QAction*))));
 
    mpFilesetAction = pViewGroup->addAction("&File Sets");
    mpFilesetAction->setCheckable(true);
@@ -108,7 +109,7 @@ BatchEditorDlg::BatchEditorDlg(QWidget* parent) :
    mpViewLabel = new QLabel(pCentralWidget);
    mpViewCombo = new QComboBox(pCentralWidget);
    mpViewCombo->setEditable(false);
-   connect(mpViewCombo, SIGNAL(activated(int)), this, SLOT(setWidgetValues(int)));
+   VERIFYNR(connect(mpViewCombo, SIGNAL(activated(int)), this, SLOT(setWidgetValues(int))));
 
    QFont labelFont = mpViewLabel->font();
    labelFont.setBold(true);
@@ -122,11 +123,11 @@ BatchEditorDlg::BatchEditorDlg(QWidget* parent) :
 
    // Fileset widget
    mpFilesetWidget = new FilesetWidget();
-   connect(mpFilesetWidget, SIGNAL(modified()), this, SLOT(setModified()));
+   VERIFYNR(connect(mpFilesetWidget, SIGNAL(modified()), this, SLOT(setModified())));
 
    // Wizard widget
    mpWizardWidget = new WizardWidget();
-   connect(mpWizardWidget, SIGNAL(modified()), this, SLOT(setModified()));
+   VERIFYNR(connect(mpWizardWidget, SIGNAL(modified()), this, SLOT(setModified())));
 
    // Widget stack
    mpStack = new QStackedWidget(pCentralWidget);
@@ -144,9 +145,9 @@ BatchEditorDlg::BatchEditorDlg(QWidget* parent) :
    pCloseButton->setDefault(true);
    pCloseButton->setFocus();
 
-   connect(pAddButton, SIGNAL(clicked()), this, SLOT(add()));
-   connect(pRemoveButton, SIGNAL(clicked()), this, SLOT(remove()));
-   connect(pCloseButton, SIGNAL(clicked()), this, SLOT(close()));
+   VERIFYNR(connect(pAddButton, SIGNAL(clicked()), this, SLOT(add())));
+   VERIFYNR(connect(pRemoveButton, SIGNAL(clicked()), this, SLOT(remove())));
+   VERIFYNR(connect(pCloseButton, SIGNAL(clicked()), this, SLOT(close())));
 
    QHBoxLayout* pButtonLayout = new QHBoxLayout();
    pButtonLayout->setMargin(0);
@@ -398,7 +399,7 @@ bool BatchEditorDlg::save()
 
       if (mWizards.empty() == true)
       {
-         QMessageBox::critical(this, "Batch Wizard Editor", "No wizards have been specifed to execute.  "
+         QMessageBox::critical(this, "Batch Wizard Editor", "No wizards have been specified to execute.  "
             "The batch file will not be saved!");
          return false;
       }
@@ -512,8 +513,6 @@ void BatchEditorDlg::add()
 {
    if (mpFilesetAction->isChecked() == true)
    {
-      mpFilesetWidget->acceptEditedValues(true);
-
       bool bSuccess = false;
 
       QString strFileset = QInputDialog::getText(this, "Add File Set", "File set name:",
@@ -638,8 +637,6 @@ void BatchEditorDlg::remove()
 
    if (mpFilesetAction->isChecked() == true)
    {
-      mpFilesetWidget->acceptEditedValues(true);
-
       strView = "file set";
       string filesetName = strName.toStdString();
 
