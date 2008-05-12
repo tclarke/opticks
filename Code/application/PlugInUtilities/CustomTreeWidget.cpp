@@ -9,6 +9,7 @@
 
 #include <QtCore/QFileInfo>
 #include <QtCore/QRegExp>
+#include <QtGui/QApplication>
 #include <QtGui/QBitmap>
 #include <QtGui/QColorDialog>
 #include <QtGui/QCompleter>
@@ -21,6 +22,7 @@
 #include <QtGui/QPainter>
 #include <QtGui/QPixmap>
 
+#include "AppVerify.h"
 #include "CustomTreeWidget.h"
 #include "FileBrowser.h"
 #include "IconImages.h"
@@ -50,13 +52,13 @@ CustomTreeWidget::CustomTreeWidget(QWidget* parent) :
    QHeaderView* pHeader = header();
    if (pHeader != NULL)
    {
-      connect(pHeader, SIGNAL(sectionResized(int, int, int)), this, SLOT(columnWidthChanged(int, int, int)));
+      VERIFYNR(connect(pHeader, SIGNAL(sectionResized(int, int, int)), this, SLOT(columnWidthChanged(int, int, int))));
    }
 
-   connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(closeEdit()));
-   connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(closeFileBrowser()));
-   connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(closeCombo()));
-   connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(closeSpin()));
+   VERIFYNR(connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(closeEdit())));
+   VERIFYNR(connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(closeFileBrowser())));
+   VERIFYNR(connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(closeCombo())));
+   VERIFYNR(connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(closeSpin())));
 }
 
 CustomTreeWidget::~CustomTreeWidget()
@@ -329,7 +331,7 @@ void CustomTreeWidget::activateCellWidget(QTreeWidgetItem* pItem, int iColumn)
                   if (mpBrowse != NULL)
                   {
                      mpBrowse->setFixedWidth(25);
-                     connect(mpBrowse, SIGNAL(clicked()), this, SLOT(browse()));
+                     VERIFYNR(connect(mpBrowse, SIGNAL(clicked()), this, SLOT(browse())));
                   }
                }
 
@@ -357,6 +359,7 @@ void CustomTreeWidget::activateCellWidget(QTreeWidgetItem* pItem, int iColumn)
             mpFileBrowser->setGeometry(rcWidget);
             mpFileBrowser->show();
             mpFileBrowser->setFocus();
+            mpFileBrowser->installEventFilter(this);
             viewport()->setFocusProxy(mpFileBrowser);
          }
       }
@@ -404,6 +407,7 @@ void CustomTreeWidget::activateCellWidget(QTreeWidgetItem* pItem, int iColumn)
             mpCombo->setGeometry(rcWidget);
             mpCombo->show();
             mpCombo->setFocus();
+            mpCombo->installEventFilter(this);
             viewport()->setFocusProxy(mpCombo);
          }
 
@@ -422,6 +426,7 @@ void CustomTreeWidget::activateCellWidget(QTreeWidgetItem* pItem, int iColumn)
             mpSpin->setGeometry(rcWidget);
             mpSpin->show();
             mpSpin->setFocus();
+            mpSpin->installEventFilter(this);
             viewport()->setFocusProxy(mpSpin);
          }
 
@@ -911,6 +916,40 @@ bool CustomTreeWidget::eventFilter(QObject* pObject, QEvent* pEvent)
 {
    if ((pObject != NULL) && (pEvent != NULL))
    {
+      QEvent::Type eventType = pEvent->type();
+      if (eventType == QEvent::FocusOut)
+      {
+         QWidget* pFocusWidget = QApplication::focusWidget();
+         if (pObject == mpEdit)
+         {
+            if (mpEdit->isVisible() == true)
+            {
+               if (mpBrowse != NULL)
+               {
+                  if (pFocusWidget != mpBrowse)
+                  {
+                     closeActiveCellWidget(true);
+                  }
+               }
+               else
+               {
+                  closeActiveCellWidget(true);
+               }
+            }
+         }
+         else if (pObject == mpCombo)
+         {
+            if ((pFocusWidget != mpCombo) && (pFocusWidget != mpCombo->view()))
+            {
+               closeActiveCellWidget(true);
+            }
+         }
+         else if ((pObject == mpFileBrowser) || (pObject == mpSpin))
+         {
+            closeActiveCellWidget(true);
+         }
+      }
+
       if (pObject == mpEdit)
       {
          // Get the current item
@@ -924,7 +963,7 @@ bool CustomTreeWidget::eventFilter(QObject* pObject, QEvent* pEvent)
             // Convert from the entered text to a keyboard shortcut
             if (getCellWidgetType(pItem, iColumn) == SHORTCUT_EDIT)
             {
-               if (pEvent->type() == QEvent::KeyPress)
+               if (eventType == QEvent::KeyPress)
                {
                   QKeyEvent* pKeyEvent = static_cast<QKeyEvent*>(pEvent);
 
@@ -1321,6 +1360,7 @@ void CustomTreeWidget::closeFileBrowser()
       return;
    }
 
+   mpFileBrowser->removeEventFilter(this);
    mpFileBrowser->hide();
    mpFileBrowser = NULL;
 
@@ -1346,6 +1386,7 @@ void CustomTreeWidget::closeCombo()
       return;
    }
 
+   mpCombo->removeEventFilter(this);
    mpCombo->hide();
    mpCombo = NULL;
 
@@ -1371,6 +1412,7 @@ void CustomTreeWidget::closeSpin()
       return;
    }
 
+   mpSpin->removeEventFilter(this);
    mpSpin->hide();
    mpSpin = NULL;
 

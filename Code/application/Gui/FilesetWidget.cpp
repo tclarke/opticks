@@ -16,6 +16,7 @@
 #include <QtGui/QMessageBox>
 #include <QtGui/QPixmap>
 
+#include "AppVerify.h"
 #include "BatchFileset.h"
 #include "CustomTreeWidget.h"
 #include "FileBrowser.h"
@@ -107,15 +108,15 @@ FilesetWidget::FilesetWidget(QWidget* parent) :
    pGrid->setColumnStretch(0, 10);
 
    // Connections
-   connect(mpDirectoryEdit, SIGNAL(textChanged(const QString&)), mpCriteriaTree,
-      SLOT(setBrowseDir(const QString&)));
-   connect(mpBrowseButton, SIGNAL(clicked()), this, SLOT(browseForDirectory()));
-   connect(mpCriteriaTree, SIGNAL(cellTextChanged(QTreeWidgetItem*, int)), this,
-      SLOT(validateFile(QTreeWidgetItem*, int)));
-   connect(mpNewButton, SIGNAL(clicked()), this, SLOT(addSearchCriterion()));
-   connect(mpAddButton, SIGNAL(clicked()), this, SLOT(addFiles()));
-   connect(mpDeleteButton, SIGNAL(clicked()), this, SLOT(deleteSelectedCriteria()));
-   connect(this, SIGNAL(modified()), this, SLOT(updateFileset()));
+   VERIFYNR(connect(mpDirectoryEdit, SIGNAL(textChanged(const QString&)), mpCriteriaTree,
+      SLOT(setBrowseDir(const QString&))));
+   VERIFYNR(connect(mpBrowseButton, SIGNAL(clicked()), this, SLOT(browseForDirectory())));
+   VERIFYNR(connect(mpCriteriaTree, SIGNAL(cellTextChanged(QTreeWidgetItem*, int)), this,
+      SLOT(validateFile(QTreeWidgetItem*, int))));
+   VERIFYNR(connect(mpNewButton, SIGNAL(clicked()), this, SLOT(addSearchCriterion())));
+   VERIFYNR(connect(mpAddButton, SIGNAL(clicked()), this, SLOT(addFiles())));
+   VERIFYNR(connect(mpDeleteButton, SIGNAL(clicked()), this, SLOT(deleteSelectedCriteria())));
+   VERIFYNR(connect(this, SIGNAL(modified()), this, SLOT(updateFileset())));
 }
 
 FilesetWidget::~FilesetWidget()
@@ -186,8 +187,8 @@ void FilesetWidget::setActiveFileset(BatchFileset* pFileset)
    mpAddButton->setEnabled(bEnable);
    mpDeleteButton->setEnabled(bEnable);
 
-   connect(mpDirectoryEdit, SIGNAL(textChanged(const QString&)), this, SIGNAL(modified()));
-   connect(mpCriteriaTree, SIGNAL(cellTextChanged(QTreeWidgetItem*, int)), this, SIGNAL(modified()));
+   VERIFYNR(connect(mpDirectoryEdit, SIGNAL(textChanged(const QString&)), this, SIGNAL(modified())));
+   VERIFYNR(connect(mpCriteriaTree, SIGNAL(cellTextChanged(QTreeWidgetItem*, int)), this, SIGNAL(modified())));
 }
 
 void FilesetWidget::acceptEditedValues(bool bAccept)
@@ -197,8 +198,6 @@ void FilesetWidget::acceptEditedValues(bool bAccept)
 
 void FilesetWidget::browseForDirectory()
 {
-   acceptEditedValues(true);
-
    QString strDefault = mpDirectoryEdit->text();
    if (strDefault.isEmpty() == false)
    {
@@ -218,8 +217,6 @@ void FilesetWidget::browseForDirectory()
 
 void FilesetWidget::addSearchCriterion()
 {
-   acceptEditedValues(true);
-
    QTreeWidgetItem* pItem = new QTreeWidgetItem(mpCriteriaTree);
    if (pItem != NULL)
    {
@@ -237,8 +234,6 @@ void FilesetWidget::addSearchCriterion()
 
 void FilesetWidget::addFiles()
 {
-   acceptEditedValues(true);
-
    bool bSuccess = false;
    while (bSuccess == false)
    {
@@ -300,8 +295,6 @@ void FilesetWidget::addFiles()
 
 void FilesetWidget::deleteSelectedCriteria()
 {
-   acceptEditedValues(true);
-
    int iNumSelected = 0;
 
    QTreeWidgetItemIterator iter(mpCriteriaTree);

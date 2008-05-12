@@ -7,21 +7,19 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "OptionsShortcuts.h"
+#include <QtGui/QApplication>
+#include <QtGui/QHeaderView>
+#include <QtGui/QVBoxLayout>
 
 #include "ApplicationWindow.h"
 #include "CustomTreeWidget.h"
 #include "DynamicObject.h"
 #include "LabeledSection.h"
 #include "ObjectResource.h"
+#include "OptionsShortcuts.h"
 #include "PlugInManagerServicesImp.h"
 
-#include <QtGui/QApplication>
-#include <QtGui/QHeaderView>
-#include <QtGui/QVBoxLayout>
-
 #include <string>
-
 using namespace std;
 
 OptionsShortcuts::OptionsShortcuts() :
@@ -60,11 +58,9 @@ OptionsShortcuts::OptionsShortcuts() :
    shortcutsIntoGui(ApplicationWindow::getSettingShortcuts(), NULL);
    mpShortcutTree->sortItems(0, Qt::AscendingOrder);
 }
-   
-void OptionsShortcuts::applyChanges()
-{  
-   mpShortcutTree->closeActiveCellWidget(true);
 
+void OptionsShortcuts::applyChanges()
+{
    FactoryResource<DynamicObject> pShortcutRes;
 
    for (int count = 0; count < mpShortcutTree->topLevelItemCount(); count++)

@@ -13,8 +13,8 @@
 #include <QtGui/QMessageBox>
 #include <QtGui/QPushButton>
 
-#include "AppVersion.h"
 #include "AppVerify.h"
+#include "AppVersion.h"
 #include "CustomTreeWidget.h"
 #include "LabeledSection.h"
 #include "PropertiesPseudocolorLayer.h"
@@ -24,6 +24,7 @@
 #include "Undo.h"
 #include "View.h"
 
+#include <limits>
 using namespace std;
 
 PropertiesPseudocolorLayer::PropertiesPseudocolorLayer() :
@@ -187,8 +188,6 @@ bool PropertiesPseudocolorLayer::applyChanges()
    mpPseudocolorLayer->setSymbol(mpSymbolButton->getCurrentValue());
 
    // Classes
-   mpClassesTree->closeActiveCellWidget(true);
-
    PseudocolorLayerImp* pLayer = dynamic_cast<PseudocolorLayerImp*>(mpPseudocolorLayer);
    if (pLayer != NULL)
    {
@@ -401,7 +400,7 @@ void PropertiesPseudocolorLayer::addClass()
    while (isUnique == false)
    {
       classValue = QInputDialog::getInteger(this, "New Class", "Enter the data value to associate with the new class:",
-         classValue, -2147483647, 2147483647, 1, &ok);
+         classValue, numeric_limits<int>::min(), numeric_limits<int>::max(), 1, &ok);
       if (ok == false)
       {
          return;

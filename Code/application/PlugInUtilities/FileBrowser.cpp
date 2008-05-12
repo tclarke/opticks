@@ -7,12 +7,14 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtGui/QAbstractItemView>
+#include <QtGui/QApplication>
 #include <QtGui/QBitmap>
 #include <QtGui/QCompleter>
 #include <QtGui/QDirModel>
 #include <QtGui/QFileDialog>
+#include <QtGui/QFocusEvent>
 #include <QtGui/QHBoxLayout>
-#include <QtGui/QPushButton>
 
 #include "AppAssert.h"
 #include "AppVerify.h"
@@ -30,21 +32,22 @@ FileBrowser::FileBrowser(QWidget* pParent) :
    pCompleter->setModel(new QDirModel(QStringList(), QDir::NoDotAndDotDot | QDir::AllDirs | QDir::AllEntries,
       QDir::Name | QDir::DirsFirst, pCompleter));
    mpFileEdit->setCompleter(pCompleter);
+   mpFileEdit->installEventFilter(this);
 
    // Browse button
    QPixmap pixOpen(IconImages::OpenIcon);
    pixOpen.setMask(pixOpen.createHeuristicMask());
    QIcon icnBrowse(pixOpen);
 
-   QPushButton* pBrowseButton = new QPushButton(icnBrowse, QString(), this);
-   pBrowseButton->setFixedWidth(27);
+   mpBrowseButton = new QPushButton(icnBrowse, QString(), this);
+   mpBrowseButton->setFixedWidth(27);
 
    // Layout
    QHBoxLayout* pLayout = new QHBoxLayout(this);
    pLayout->setMargin(0);
    pLayout->setSpacing(5);
    pLayout->addWidget(mpFileEdit, 10);
-   pLayout->addWidget(pBrowseButton);
+   pLayout->addWidget(mpBrowseButton);
 
    // Initialization
    setFocusPolicy(Qt::StrongFocus);
@@ -52,7 +55,7 @@ FileBrowser::FileBrowser(QWidget* pParent) :
 
    // Connections
    VERIFYNR(connect(mpFileEdit, SIGNAL(textChanged(const QString&)), this, SIGNAL(filenameChanged(const QString&))));
-   VERIFYNR(connect(pBrowseButton, SIGNAL(clicked()), this, SLOT(browse())));
+   VERIFYNR(connect(mpBrowseButton, SIGNAL(clicked()), this, SLOT(browse())));
 }
 
 FileBrowser::~FileBrowser()
@@ -161,6 +164,33 @@ void FileBrowser::setBrowseExistingFile(bool bExistingFile)
 bool FileBrowser::isBrowseExistingFile() const
 {
    return mExistingFile;
+}
+
+bool FileBrowser::eventFilter(QObject* pObject, QEvent* pEvent)
+{
+   if ((pObject != NULL) && (pEvent != NULL))
+   {
+      if (pObject == mpFileEdit)
+      {
+         if (pEvent->type() == QEvent::FocusOut)
+         {
+            QCompleter* pCompleter = mpFileEdit->completer();
+            VERIFY(pCompleter != NULL);
+
+            QAbstractItemView* pCompleterView = pCompleter->popup();
+            VERIFY(pCompleterView != NULL);
+
+            QWidget* pFocusWidget = QApplication::focusWidget();
+            if ((pFocusWidget != mpBrowseButton) && (pFocusWidget != pCompleterView))
+            {
+               QFocusEvent* pFocusEvent = static_cast<QFocusEvent*>(pEvent);
+               QApplication::sendEvent(this, pFocusEvent);
+            }
+         }
+      }
+   }
+
+   return QWidget::eventFilter(pObject, pEvent);
 }
 
 void FileBrowser::browse()

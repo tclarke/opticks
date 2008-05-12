@@ -7,7 +7,12 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "OptionsFileLocations.h"
+#include <QtCore/QDir>
+#include <QtCore/QRegExp>
+#include <QtGui/QHeaderView>
+#include <QtGui/QLabel>
+#include <QtGui/QMessageBox>
+#include <QtGui/QVBoxLayout>
 
 #include "ApplicationWindow.h"
 #include "AppVersion.h"
@@ -19,18 +24,11 @@
 #include "LabeledSection.h"
 #include "MessageLogMgrImp.h"
 #include "ObjectResource.h"
+#include "OptionsFileLocations.h"
 #include "ProductView.h"
 #include "UtilityServices.h"
 
-#include <QtCore/QDir>
-#include <QtCore/QRegExp>
-#include <QtGui/QHeaderView>
-#include <QtGui/QLabel>
-#include <QtGui/QMessageBox>
-#include <QtGui/QVBoxLayout>
-
 #include <string>
-
 using namespace std;
 
 const QString OptionsFileLocations::sBookmarkListSentinal = "Enter path...";
@@ -142,11 +140,9 @@ OptionsFileLocations::OptionsFileLocations() :
    addBookmark();
    VERIFYNRV(connect(mpBookmarkList, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(addBookmark())));
 }
-   
-void OptionsFileLocations::applyChanges()
-{  
-   mpFileTree->closeActiveCellWidget(true); //accept changes in any active cells
 
+void OptionsFileLocations::applyChanges()
+{
    Service<ConfigurationSettings> pSettings;
    QTreeWidgetItemIterator iter(mpFileTree);
    while (*iter != NULL)

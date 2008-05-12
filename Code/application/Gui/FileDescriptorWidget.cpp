@@ -12,6 +12,7 @@
 #include <QtGui/QLayout>
 #include <QtGui/QMessageBox>
 
+#include "AppVerify.h"
 #include "CustomTreeWidget.h"
 #include "DimensionDescriptor.h"
 #include "FileBrowser.h"
@@ -113,8 +114,8 @@ FileDescriptorWidget::FileDescriptorWidget(QWidget* parent) :
    pLayout->addWidget(mpGcpGroup);
 
    // Connections
-   connect(mpTreeWidget, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
-      SLOT(descriptorItemChanged(QTreeWidgetItem*, int)));
+   VERIFYNR(connect(mpTreeWidget, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
+      SLOT(descriptorItemChanged(QTreeWidgetItem*, int))));
 }
 
 FileDescriptorWidget::~FileDescriptorWidget()
@@ -661,8 +662,6 @@ bool FileDescriptorWidget::applyToFileDescriptor(FileDescriptor* pFileDescriptor
    {
       return true;
    }
-
-   mpTreeWidget->closeActiveCellWidget(true);
 
    if (mModified == false)
    {

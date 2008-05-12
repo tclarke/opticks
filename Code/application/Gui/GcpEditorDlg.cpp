@@ -15,10 +15,11 @@
 #include <QtGui/QMessageBox>
 #include <QtGui/QRadioButton>
 
-#include "GcpEditorDlg.h"
 #include "AppAssert.h"
+#include "AppVerify.h"
 #include "CustomTreeWidget.h"
 #include "DesktopServices.h"
+#include "GcpEditorDlg.h"
 #include "GeoPoint.h"
 #include "GcpLayerImp.h"
 #include "GcpList.h"
@@ -160,14 +161,15 @@ GcpEditorDlg::GcpEditorDlg(QWidget* parent) :
    enableGcp();
 
    // Connections
-   connect(mpListCombo, SIGNAL(activated(int)), this, SLOT(setActiveLayer(int)));
-   connect(mpGcpView, SIGNAL(cellTextChanged(QTreeWidgetItem*, int)), this, SLOT(updateGcp(QTreeWidgetItem*, int)));
-   connect(mpNewButton, SIGNAL(clicked()), this, SLOT(newGcp()));
-   connect(mpDeleteButton, SIGNAL(clicked()), this, SLOT(deleteGcp()));
-   connect(pCoordButtonGroup, SIGNAL(buttonClicked(int)), this, SLOT(setCoordinateFormat(int)));
-   connect(mpPropertiesButton, SIGNAL(clicked()), this, SLOT(setGcpProperties()));
-   connect(mpApplyButton, SIGNAL(clicked()), this, SLOT(apply()));
-   connect(pCloseButton, SIGNAL(clicked()), this, SLOT(close()));
+   VERIFYNR(connect(mpListCombo, SIGNAL(activated(int)), this, SLOT(setActiveLayer(int))));
+   VERIFYNR(connect(mpGcpView, SIGNAL(cellTextChanged(QTreeWidgetItem*, int)), this,
+      SLOT(updateGcp(QTreeWidgetItem*, int))));
+   VERIFYNR(connect(mpNewButton, SIGNAL(clicked()), this, SLOT(newGcp())));
+   VERIFYNR(connect(mpDeleteButton, SIGNAL(clicked()), this, SLOT(deleteGcp())));
+   VERIFYNR(connect(pCoordButtonGroup, SIGNAL(buttonClicked(int)), this, SLOT(setCoordinateFormat(int))));
+   VERIFYNR(connect(mpPropertiesButton, SIGNAL(clicked()), this, SLOT(setGcpProperties())));
+   VERIFYNR(connect(mpApplyButton, SIGNAL(clicked()), this, SLOT(apply())));
+   VERIFYNR(connect(pCloseButton, SIGNAL(clicked()), this, SLOT(close())));
 }
 
 GcpEditorDlg::~GcpEditorDlg()
@@ -541,7 +543,7 @@ bool GcpEditorDlg::addLayer(Layer* pLayer)
    GcpLayerImp* pGcpLayerImp = dynamic_cast<GcpLayerImp*>(pGcpLayer);
    if (pGcpLayerImp != NULL)
    {
-      connect(pGcpLayerImp, SIGNAL(nameChanged(const QString&)), this, SLOT(updateLayerNames()));
+      VERIFYNR(connect(pGcpLayerImp, SIGNAL(nameChanged(const QString&)), this, SLOT(updateLayerNames())));
    }
 
    enableGcp();
@@ -574,7 +576,7 @@ bool GcpEditorDlg::removeLayer(Layer* pLayer)
       GcpLayerImp* pGcpLayerImp = dynamic_cast<GcpLayerImp*>(pGcpLayer);
       if (pGcpLayerImp != NULL)
       {
-         disconnect(pGcpLayerImp, SIGNAL(nameChanged(const QString&)), this, SLOT(updateLayerNames()));
+         VERIFYNR(disconnect(pGcpLayerImp, SIGNAL(nameChanged(const QString&)), this, SLOT(updateLayerNames())));
       }
 
       enableGcp();
@@ -750,8 +752,6 @@ void GcpEditorDlg::updateGcp(QTreeWidgetItem* pItem, int iColumn)
 
 void GcpEditorDlg::newGcp()
 {
-   mpGcpView->closeActiveCellWidget(true);
-
    GcpPoint point;
    insertGcp(point);
    mbModified = true;
@@ -759,8 +759,6 @@ void GcpEditorDlg::newGcp()
 
 void GcpEditorDlg::deleteGcp()
 {
-   mpGcpView->closeActiveCellWidget(true);
-
    list<GcpPoint> gcps;
 
    int numItems = mpGcpView->topLevelItemCount();
@@ -789,8 +787,6 @@ void GcpEditorDlg::deleteGcp()
 
 void GcpEditorDlg::setCoordinateFormat(int iIndex)
 {
-   mpGcpView->closeActiveCellWidget(true);
-
    QHeaderView* pHeader = mpGcpView->header();
    QTreeWidgetItem* pHeaderItem = mpGcpView->headerItem();
    if ((pHeader == NULL) || (pHeaderItem == NULL))
@@ -856,8 +852,6 @@ void GcpEditorDlg::setCoordinateFormat(int iIndex)
 
 void GcpEditorDlg::setGcpProperties()
 {
-   mpGcpView->closeActiveCellWidget(true);
-
    if (mpLayer == NULL)
    {
       QMessageBox::critical(this, "GCP Editor", "The GCP list layer could not be found!");
@@ -870,8 +864,6 @@ void GcpEditorDlg::setGcpProperties()
 
 void GcpEditorDlg::apply()
 {
-   mpGcpView->closeActiveCellWidget(true);
-
    if ((mbModified == false) || (mpGcpList == NULL))
    {
       return;

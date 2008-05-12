@@ -637,8 +637,6 @@ bool DataDescriptorWidget::applyToDataDescriptor(DataDescriptor* pDescriptor)
       return true;
    }
 
-   mpTreeWidget->closeActiveCellWidget(true);
-
    if (mModified == false)
    {
       return true;
@@ -654,7 +652,8 @@ bool DataDescriptorWidget::applyToDataDescriptor(DataDescriptor* pDescriptor)
    if (strProcessingLocation.isEmpty() == false)
    {
       bool bError = true;
-      ProcessingLocation location = StringUtilities::fromDisplayString<ProcessingLocation>(strProcessingLocation.toStdString(), &bError);
+      ProcessingLocation location =
+         StringUtilities::fromDisplayString<ProcessingLocation>(strProcessingLocation.toStdString(), &bError);
       if (bError == false)
       {
          pDescriptor->setProcessingLocation(location);
@@ -759,7 +758,8 @@ bool DataDescriptorWidget::applyToDataDescriptor(DataDescriptor* pDescriptor)
    if (strInterleave.isEmpty() == false)
    {
       bool bError = true;
-      InterleaveFormatType interleave = StringUtilities::fromDisplayString<InterleaveFormatType>(strInterleave.toStdString(), &bError);
+      InterleaveFormatType interleave =
+         StringUtilities::fromDisplayString<InterleaveFormatType>(strInterleave.toStdString(), &bError);
       if (bError == false)
       {
          pRasterDescriptor->setInterleaveFormat(interleave);
