@@ -12,17 +12,17 @@
 #include <QtGui/QApplication>
 #include <QtGui/QMessageBox>
 
+#include "AppConfig.h"
 #include "ApplicationServicesImp.h"
 #include "ApplicationWindow.h"
 #include "AppVersion.h"
 #include "ArgumentList.h"
-#include "AppConfig.h"
-#include "InteractiveApplication.h"
 #include "ConfigurationSettingsImp.h"
 #include "DataVariant.h"
 #include "FilenameImp.h"
-#include "PlugInManagerServicesImp.h"
+#include "InteractiveApplication.h"
 #include "PlugInBranding.h"
+#include "PlugInManagerServicesImp.h"
 #include "PlugInResource.h"
 #include "ProgressAdapter.h"
 #include "ProgressDlg.h"
@@ -256,29 +256,37 @@ int InteractiveApplication::run(int argc, char** argv)
             if (strFilename.isEmpty() == false)
             {
                QFileInfo info(strFilename);
-               if (info.suffix() == "wiz")
+               if ((info.isFile() == true) && (info.exists() == true))
                {
-                  pAppWindow->runWizard(strFilename);
-               }
-               else if (info.suffix() == "batchwiz")
-               {
-                  vector<string> batchFiles;
-                  batchFiles.push_back(normalizedFilename);
-                  WizardUtilities::runBatchFiles(batchFiles, pProgress);
-               }
-               else if (info.suffix() == "session")
-               {
-                  string saveKey = SessionManager::getSettingQueryForSaveKey();
-                  SessionSaveType saveType = SESSION_DONT_AUTO_SAVE;
+                  if (info.suffix() == "wiz")
+                  {
+                     pAppWindow->runWizard(strFilename);
+                  }
+                  else if (info.suffix() == "batchwiz")
+                  {
+                     vector<string> batchFiles;
+                     batchFiles.push_back(normalizedFilename);
+                     WizardUtilities::runBatchFiles(batchFiles, pProgress);
+                  }
+                  else if (info.suffix() == "session")
+                  {
+                     string saveKey = SessionManager::getSettingQueryForSaveKey();
+                     SessionSaveType saveType = SESSION_DONT_AUTO_SAVE;
 
-                  pConfigSettings->setSessionSetting(saveKey, saveType);
-                  pAppWindow->openSession(strFilename);
-                  pConfigSettings->deleteSessionSetting(saveKey);
+                     pConfigSettings->setSessionSetting(saveKey, saveType);
+                     pAppWindow->openSession(strFilename);
+                     pConfigSettings->deleteSessionSetting(saveKey);
+                  }
+                  else
+                  {
+                     ImporterResource importer("Auto Importer", normalizedFilename, pProgress, false);
+                     importer->execute();
+                  }
                }
                else
                {
-                  ImporterResource importer("Auto Importer", normalizedFilename, pProgress, false);
-                  importer->execute();
+                  reportWarning("The specified file '" + normalizedFilename +
+                     "' does not exist and cannot be loaded.");
                }
             }
          }
