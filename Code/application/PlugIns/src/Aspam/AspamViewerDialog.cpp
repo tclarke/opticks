@@ -281,13 +281,21 @@ void AspamViewerDialog::populateAspamList()
       for(vector<DataElement*>::const_iterator ait = aspamsDe.begin(); ait != aspamsDe.end(); ++ait)
       {
          Any *pAspamContainer(static_cast<Any*>(*ait));
-         QString text = QString::fromLatin1(pAspamContainer->getName().c_str());
-         text = text.section("/", -1);
-         mAspams[text] = pAspamContainer;
-         mpAspamList->addItem(text);
-         if(text == currentItemText)
+         if (pAspamContainer != NULL)
          {
-            mpAspamList->setCurrentIndex(mpAspamList->count() - 1);
+            string name = pAspamContainer->getDisplayName();
+            if (name.empty() == true)
+            {
+               name = pAspamContainer->getName();
+            }
+
+            QString text = QString::fromStdString(name);
+            mAspams[text] = pAspamContainer;
+            mpAspamList->addItem(text);
+            if(text == currentItemText)
+            {
+               mpAspamList->setCurrentIndex(mpAspamList->count() - 1);
+            }
          }
       }
       mpAspamList->setMinimumSize(mpAspamList->sizeHint());
