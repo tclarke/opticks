@@ -159,6 +159,7 @@ QString DataDescriptorWidget::getDescriptorValue(const QString& strValueName) co
 void DataDescriptorWidget::initialize()
 {
    mpTreeWidget->clear();
+   mpTrueColorButton->setEnabled(false);
    mpTrueColorButton->setVisible(!mReadOnly);
 
    if (mpDescriptor == NULL)
@@ -273,11 +274,17 @@ void DataDescriptorWidget::initialize()
       }
    }
 
-   // Spatial data descriptor items
+   // Raster data descriptor items
    RasterDataDescriptor* pRasterDescriptor = dynamic_cast<RasterDataDescriptor*>(mpDescriptor);
    if (pRasterDescriptor == NULL)
    {
       return;
+   }
+
+   // True color button
+   if (RasterUtilities::canBeDisplayedInTrueColor(pRasterDescriptor) == true)
+   {
+      mpTrueColorButton->setEnabled(true);
    }
 
    // Rows
