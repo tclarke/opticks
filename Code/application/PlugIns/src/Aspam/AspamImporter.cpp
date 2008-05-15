@@ -178,11 +178,9 @@ vector<ImportDescriptor*> AspamImporter::getImportDescriptors(const string &file
    vector<ImportDescriptor*> descriptors;
    if(!filename.empty())
    {
-      FactoryResource<Filename> pFilename;
-      pFilename->setFullPathAndName(filename);
-      string name = pFilename->getTitle();
       Service<ModelServices> pModel;
-      ImportDescriptor* pImportDescriptor = pModel->createImportDescriptor(name, "Aspam", NULL);
+
+      ImportDescriptor* pImportDescriptor = pModel->createImportDescriptor(filename, "Aspam", NULL);
       if (pImportDescriptor != NULL)
       {
          DataDescriptor* pDescriptor = pImportDescriptor->getDataDescriptor();
