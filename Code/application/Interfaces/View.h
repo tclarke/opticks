@@ -46,7 +46,7 @@ class UndoAction;
  *  - The user right-clicks in the view to invoke a context menu.
  *  - Everything else documented in Subject.
  *
- *  @see     Window
+ *  @see     Window, ViewExt1
  */
 class View : public SessionItem, public Subject
 {
@@ -972,6 +972,36 @@ protected:
     *  @see     UndoGroup, inUndoGroup(), addUndoAction()
     */
    virtual void endUndoGroup() = 0;
+};
+
+/**
+ *  Extends capability of the View interface.
+ *
+ *  This class provides additional capability for the View interface class.
+ *  A pointer to this class can be obtained by performing a dynamic cast on a
+ *  pointer to View or any of its subclasses.
+ *
+ *  @warning A pointer to this class can only be used to call methods contained
+ *           in this extension class and cannot be used to call any methods in
+ *           View or its subclasses.
+ */
+class ViewExt1
+{
+public:
+   /**
+    * Enable/disable display of classification markings.
+    *
+    * @param enable
+    *        If true (the default), classification markings are display on the view.
+    *        If false, classification markings are not displayed.
+    */
+   virtual void enableClassification(bool enable) = 0;
+
+protected:
+   /**
+    * This should be destroyed by calling DesktopServices::deleteView.
+    */
+   virtual ~ViewExt1() {}
 };
 
 #endif

@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "ProductViewAdapter.h"
 #include "AnnotationLayer.h"
+#include "ProductViewAdapter.h"
 
 using namespace std;
 

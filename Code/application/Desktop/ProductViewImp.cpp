@@ -7,24 +7,17 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QApplication>
-#include <QtGui/QCursor>
-#include <QtGui/QKeyEvent>
-#include <QtGui/QMessageBox>
-#include <QtGui/QMouseEvent>
-
 #include "glCommon.h"
-#include "ProductViewImp.h"
 #include "AnnotationElementAdapter.h"
 #include "AnnotationLayerAdapter.h"
+#include "AppAssert.h"
 #include "ApplicationWindow.h"
+#include "AppVerify.h"
 #include "AppVersion.h"
 #include "ClassificationLayerAdapter.h"
 #include "ConfigurationSettingsImp.h"
 #include "ContextMenu.h"
 #include "ContextMenuActions.h"
-#include "AppAssert.h"
-#include "AppVerify.h"
 #include "DataDescriptorAdapter.h"
 #include "DesktopServices.h"
 #include "GraphicLayerUndo.h"
@@ -34,6 +27,7 @@
 #include "ModelServicesImp.h"
 #include "MouseModeImp.h"
 #include "ProductViewAdapter.h"
+#include "ProductViewImp.h"
 #include "ProductViewUndo.h"
 #include "PropertiesProductView.h"
 #include "SessionManager.h"
@@ -50,6 +44,13 @@
 #include <list>
 #include <map>
 #include <string>
+
+#include <QtGui/QApplication>
+#include <QtGui/QCursor>
+#include <QtGui/QKeyEvent>
+#include <QtGui/QMessageBox>
+#include <QtGui/QMouseEvent>
+
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
 
@@ -81,10 +82,6 @@ ProductViewImp::ProductViewImp(const string& id, const string& viewName, QGLCont
 
    // Initialization
    blockUndo();
-   setClassificationText(getClassificationText());    // Sets the text in the classification layer
-   setClassificationFont(QApplication::font());
-   setClassificationColor(Qt::black);
-
    TextObject* pTopText = mpClassificationLayer->getTopText();
    if (pTopText != NULL)
    {
@@ -96,6 +93,10 @@ ProductViewImp::ProductViewImp(const string& id, const string& viewName, QGLCont
    {
       pBottomText->setTextAlignment(Qt::AlignHCenter);
    }
+   VERIFYNR(connect(this, SIGNAL(classificationChanged(const QString&)), this, SLOT(updateClassificationMarks(const QString&))));
+   updateClassificationMarks(getClassificationText()); // Sets the text in the classification layer
+   setClassificationFont(QApplication::font());
+   setClassificationColor(Qt::black);
 
    enableClassification(false);
    enableReleaseInfo(false);
@@ -616,39 +617,30 @@ bool ProductViewImp::enableInset(bool bEnable)
    return false;
 }
 
-void ProductViewImp::setClassificationText(const QString& strClassification)
+void ProductViewImp::updateClassificationMarks(const QString &newClassification)
 {
-   PerspectiveViewImp::setClassificationText(strClassification);
+   QString strTopText = newClassification;
+   QString strBottomText = newClassification;
 
-   QString strTopText = strClassification;
-   QString strBottomText = strClassification;
-
-   ConfigurationSettingsImp* pConfigSettings = NULL;
-   pConfigSettings = ConfigurationSettingsImp::instance();
-   if (pConfigSettings != NULL)
+   Service<ConfigurationSettings> pConfigSettings;
+   if(!strTopText.isEmpty())
    {
-      if (strTopText.isEmpty() == false)
-      {
-         strTopText.append("\n");
-      }
-      strTopText.append(QString::fromStdString(
-         StringUtilities::toDisplayString(pConfigSettings->getReleaseType())));
-      if (pConfigSettings->isProductionRelease() == false)
-      {
-         strBottomText.prepend("Not for Production Use\n");
-      }
+      strTopText.append("\n");
+   }
+   strTopText.append(QString::fromStdString(StringUtilities::toDisplayString(pConfigSettings->getReleaseType())));
+   if(!pConfigSettings->isProductionRelease())
+   {
+      strBottomText.prepend("Not for Production Use\n");
    }
 
-   TextObject* pTopText = NULL;
-   pTopText = mpClassificationLayer->getTopText();
-   if (pTopText != NULL)
+   TextObject *pTopText = mpClassificationLayer->getTopText();
+   if(pTopText != NULL)
    {
       pTopText->setText(strTopText.toStdString());
    }
 
-   TextObject* pBottomText = NULL;
-   pBottomText = mpClassificationLayer->getBottomText();
-   if (pBottomText != NULL)
+   TextObject *pBottomText = mpClassificationLayer->getBottomText();
+   if(pBottomText != NULL)
    {
       pBottomText->setText(strBottomText.toStdString());
    }

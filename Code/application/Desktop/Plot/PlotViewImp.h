@@ -160,7 +160,7 @@ private:
 };
 
 #define PLOTVIEWEXTENSION_CLASSES \
-   , public PlotViewExt1
+   VIEWEXTENSION_CLASSES, public PlotViewExt1
 
 #define PLOTVIEWADAPTER_METHODS(impClass) \
    ORTHOGRAPHICVIEWADAPTER_METHODS(impClass) \
