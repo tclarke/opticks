@@ -74,7 +74,6 @@ public:
    bool fromXml(DOMNode* pDocument, unsigned int version);
 
 public slots:
-   void setClassificationText(const QString& strClassification);
    void setClassificationFont(const QFont& classificationFont);
    void setClassificationColor(const QColor& clrClassification);
    void rotateTo(double dDegrees);
@@ -117,6 +116,7 @@ protected slots:
    void updateClassificationLocation();
    void updateMouseCursor(const MouseMode* pMouseMode);
    void setActiveLayer();
+   void updateClassificationMarks(const QString &newClassification);
 
 private:
    void connectLayers();

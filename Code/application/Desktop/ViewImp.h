@@ -395,6 +395,9 @@ private:
    void drawImage(int width, int height);
 };
 
+#define VIEWEXTENSION_CLASSES \
+   , public ViewExt1
+
 #define VIEWADAPTER_METHODS(impClass) \
    SESSIONITEMADAPTER_METHODS(impClass) \
    SUBJECTADAPTER_METHODS(impClass) \
@@ -677,6 +680,10 @@ private:
    void endUndoGroup() \
    { \
       impClass::endUndoGroup(); \
+   } \
+   void enableClassification(bool bEnable) \
+   { \
+      impClass::enableClassification(bEnable); \
    }
 
 #endif

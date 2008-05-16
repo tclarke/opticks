@@ -1052,17 +1052,18 @@ void ViewImp::reorderImage(unsigned int pImage[], int iWidth, int iHeight)
 
 void ViewImp::setClassificationText(const QString& strClassification)
 {
-   QString strNewClassification = "UNKNOWN";
-
-   if (strClassification.isEmpty() == true)
+   QString strNewClassification = strClassification.trimmed();
+   if(strNewClassification.isEmpty())
    {
-      Service<UtilityServices> pUtilities;
-      strNewClassification = QString::fromStdString(pUtilities->getDefaultClassification());
+      strNewClassification = QString::fromStdString(Service<UtilityServices>()->getDefaultClassification());
    }
-   else
-   {
-      strNewClassification = strClassification;
-   }
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This should check available classification markings to ensure the classification string starts with a valid level (tclarke)")
+   // pseudocode
+   // stringlist valid = Service<something>()->getValidClassificationLevels();
+   // bool found = false;
+   // for(str in valid)
+   //   if(strNewClassification.startsWith(str)) { valid = true; break; }
+   // if(!valid) return false;
 
    if (strNewClassification != mClassificationText)
    {
