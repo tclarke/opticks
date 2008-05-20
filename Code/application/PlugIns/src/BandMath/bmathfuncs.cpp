@@ -895,16 +895,13 @@ int OpParams(char* ops, char* val)
    return retval;
 }
 
-
-
-int eval(Progress *progress, vector<DataAccessor> &dataCubes, 
+int eval(Progress* pProgress, vector<DataAccessor>& dataCubes,
          const vector<EncodingType> &types,
          int rows, int columns, int bands, char* exp, 
          DataAccessor returnAccessor, 
          bool degrees, char* error, 
-         bool cubeMath)
+         bool cubeMath, bool interactive)
 {
-
    int StringSize = strlen(exp)*2;
    if(StringSize < 80)
    {
@@ -914,7 +911,6 @@ int eval(Progress *progress, vector<DataAccessor> &dataCubes,
    char* pString = new char[StringSize];
 
    int iError = ParseExp(exp, bands, pString, dataCubes.size());
-
    if(iError)
    {
       strcpy(error, pString);
@@ -956,7 +952,6 @@ int eval(Progress *progress, vector<DataAccessor> &dataCubes,
             i++;
          }
 
-
          pItems[pos] = i+1;
          pos++;
          pString[i] = 0;
@@ -978,7 +973,6 @@ int eval(Progress *progress, vector<DataAccessor> &dataCubes,
 
    srand(time(NULL));
 
-
    int BandNum = 0;
 
    int BandCount = 1;
@@ -986,7 +980,6 @@ int eval(Progress *progress, vector<DataAccessor> &dataCubes,
    {
       BandCount = bands;
    }
-
 
    float *pReturnValue = NULL;
    void *pCubeValue = NULL;
@@ -1016,62 +1009,86 @@ int eval(Progress *progress, vector<DataAccessor> &dataCubes,
             }
             catch(DivZero)
             {
-               if(DispDZMes)
+               if (interactive == true)
                {
-                  MBox mb("Warning", "Warning bandmathfuncs003: Divide By Zero\nSelect 'OK' to continue, \n"
-                     "all bad values will be set to 0.  \nOr 'Cancel' to cancel the operation.",
-                     MB_OK_CANCEL_ALWAYS, NULL);
+                  if(DispDZMes)
+                  {
+                     MBox mb("Warning", "Warning bandmathfuncs003: Divide By Zero\nSelect 'OK' to continue, \n"
+                        "all bad values will be set to 0.  \nOr 'Cancel' to cancel the operation.",
+                        MB_OK_CANCEL_ALWAYS, NULL);
 
-                  if(mb.exec() == QDialog::Rejected)
-                  {
-                     return -2;
+                     if(mb.exec() == QDialog::Rejected)
+                     {
+                        return -2;
+                     }
+                     else if(mb.cbAlways->isChecked())
+                     {
+                        DispDZMes = false;
+                     }
                   }
-                  else if(mb.cbAlways->isChecked())
-                  {
-                     DispDZMes = false;
-                  }
+               }
+               else
+               {
+                  strcpy(error, "The band math operation attempted to divide by zero.");
+                  return -1;
                }
 
                memset(pReturnValue, 0, BandCount*sizeof(float)); // clear the point
             }
             catch(Undefined)
             {
-               if(DispUDMes)
+               if (interactive == true)
                {
-                  MBox mb("Warning", "Warning bandmathfuncs001: Undefined Value\n"
-                     "Select 'OK' to continue, \nall bad values will be set to 0.  \n"
-                     "Or 'Cancel' to cancel the operation.",
-                     MB_OK_CANCEL_ALWAYS, NULL);
+                  if(DispUDMes)
+                  {
+                     MBox mb("Warning", "Warning bandmathfuncs001: Undefined Value\n"
+                        "Select 'OK' to continue, \nall bad values will be set to 0.  \n"
+                        "Or 'Cancel' to cancel the operation.",
+                        MB_OK_CANCEL_ALWAYS, NULL);
 
-                  if(mb.exec() == QDialog::Rejected)
-                  {
-                     return -2;
+                     if(mb.exec() == QDialog::Rejected)
+                     {
+                        return -2;
+                     }
+                     else if(mb.cbAlways->isChecked())
+                     {
+                        DispUDMes = false;
+                     }
                   }
-                  else if(mb.cbAlways->isChecked())
-                  {
-                     DispUDMes = false;
-                  }
+               }
+               else
+               {
+                  strcpy(error, "The band math operation encountered an undefined value.");
+                  return -1;
                }
 
                memset(pReturnValue, 0, BandCount*sizeof(float)); // clear the point
             }
             catch(Complex)
             {
-               if(DispCMMes)
+               if (interactive == true)
                {
-                  MBox mb("Warning", "Warning bandmathfuncs002: Math Operation Resulted in a Complex Number\n"
-                     "Select 'OK' to continue, \nall bad values will be set to 0.\n"
-                     "Or 'Cancel' to cancel the operation.",
-                     MB_OK_CANCEL_ALWAYS, NULL);
+                  if(DispCMMes)
+                  {
+                     MBox mb("Warning", "Warning bandmathfuncs002: Math Operation Resulted in a Complex Number\n"
+                        "Select 'OK' to continue, \nall bad values will be set to 0.\n"
+                        "Or 'Cancel' to cancel the operation.",
+                        MB_OK_CANCEL_ALWAYS, NULL);
 
-                  if(mb.exec() == QDialog::Rejected)
-                  {
-                     return -2;
+                     if(mb.exec() == QDialog::Rejected)
+                     {
+                        return -2;
+                     }
+                     else if(mb.cbAlways->isChecked())
+                     {
+                        DispCMMes = false;
+                     }
                   }
-                  else if(mb.cbAlways->isChecked())
-                  {
-                     DispCMMes = false;
-                  }
+               }
+               else
+               {
+                  strcpy(error, "The band math operation resulted in an invalid complex number.");
+                  return -1;
                }
 
                memset(pReturnValue, 0, BandCount*sizeof(float)); // clear the point
@@ -1079,18 +1096,14 @@ int eval(Progress *progress, vector<DataAccessor> &dataCubes,
 
             catch(NoData)
             {
-               MBox mb("Error", "Error BandMath 046: Data Cube Missing", MB_OK, NULL);
-               strcpy(error, "Error BandMath 046: Data Cube Missing");
-               mb.exec();
-               return -2;
+               strcpy(error, "The band math operation could not be perfomed because the data is not available.");
+               return -1;
             }
 
             catch(...)
             {
-               MBox mb("Error", "Error BandMath 032: Floating Point Error", MB_OK, NULL);
-               strcpy(error, "ErrorBandMath 032: Floating Point Error");
-               mb.exec();
-               return -2;
+               strcpy(error, "The band math operation resulted in a floating point error.");
+               return -1;
             }
          }
          returnAccessor->nextColumn();
@@ -1104,16 +1117,15 @@ int eval(Progress *progress, vector<DataAccessor> &dataCubes,
       {
          dataCubes[cubeNum]->nextRow();
       }
-      
-      if(progress != NULL)
+
+      if (pProgress != NULL)
       {
-         progress->updateProgress( "Band Math",  100 * i / rows, NORMAL);
+         pProgress->updateProgress("Band Math", 100 * i / rows, NORMAL);
       }
    }
 
    return 0;
 }
-
 
 double doubleFromEncoding(EncodingType encoding, void *data, int offset)
 {

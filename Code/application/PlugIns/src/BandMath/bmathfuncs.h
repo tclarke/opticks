@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,7 +29,6 @@ class DivZero {};
 class Undefined {};
 class Complex {};
 class NoData {};
-
 
 bool ParseIsOp(char* ops, char* val);
 int OpParams(char* ops, char* val);
@@ -93,7 +90,7 @@ DataNode* BuildTreeFromInfix(char* ops, char* exp, int* offsetTable, int NumElem
 int eval(Progress *progress, std::vector<DataAccessor> &dataCubes,
          const std::vector<EncodingType> &types, int rows, int columns,
          int bands, char *exp, DataAccessor returnAccessor, bool degrees,
-         char *error, bool cubeMath);
+         char *error, bool cubeMath, bool interactive);
 
 inline double GRand()
 {
