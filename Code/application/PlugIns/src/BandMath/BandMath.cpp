@@ -407,7 +407,7 @@ bool BandMath::execute(PlugInArgList *pInputArgList, PlugInArgList *pOutputArgLi
          strcpy(mutableExpression, mExpression.c_str());
 
          errorCode = eval(mpProgress, accessors, types, mCubeRows, mCubeColumns,
-            mCubeBands, mutableExpression, returnDa, mbDegrees, errorVal, mbCubeMath);
+            mCubeBands, mutableExpression, returnDa, mbDegrees, errorVal, mbCubeMath, mbInteractive);
 
          delete [] mutableExpression;
       }
@@ -444,7 +444,7 @@ bool BandMath::execute(PlugInArgList *pInputArgList, PlugInArgList *pOutputArgLi
 
          errorCode = eval(mpProgress, accessors, dataTypes, mCubeRows,
             mCubeColumns, mCubeBands, mutableExpression, returnDa,
-            mbDegrees, errorVal, mbCubeMath);
+            mbDegrees, errorVal, mbCubeMath, mbInteractive);
 
          delete [] mutableExpression;
       }
