@@ -2542,6 +2542,7 @@ bool ApplicationWindow::saveSession()
       if (status.first == SessionManager::FAILURE) 
       {
          remove(mSessionFilename.c_str());
+         progress.updateProgress("Session saving failed.", 0, ERRORS);
          return false;
       }
       else if (status.first == SessionManager::LOCKED)
