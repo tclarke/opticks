@@ -37,6 +37,18 @@ public:
    std::string getDefaultClassification() const;
    ColorType getAutoColor(int color_index) const;
 
+   bool loadSecurityMarkings(const std::string &strFilename);
+
+   const std::vector<std::string>& getCountryCodes() const;
+   const std::vector<std::string>& getCodewords() const;
+   const std::vector<std::string>& getSystems() const;
+   const std::vector<std::string>& getFileReleasing() const;
+   const std::vector<std::string>& getDeclassificationExemptions() const;
+   const std::vector<std::string>& getClassificationReasons() const;
+   const std::vector<std::string>& getDeclassificationTypes() const;
+   const std::vector<std::string>& getFileDowngrades() const;
+   const std::vector<std::string>& getFileControls() const;
+
    size_t getMaxMemoryBlockSize();
    size_t getTotalPhysicalMemory();
    size_t getAvailableVirtualMemory();
@@ -62,6 +74,16 @@ private:
    std::map<DateTime*, DateTimeImp*> mDts;
    std::map<Progress*, ProgressImp*> mProgs;
    std::map<std::string, std::string> mSubtypeDirectories;
+
+   std::vector<std::string> mCountryCodes;
+   std::vector<std::string> mCodeword;
+   std::vector<std::string> mFileReleasing;
+   std::vector<std::string> mClassificationReason;
+   std::vector<std::string> mDeclassificationExemption;
+   std::vector<std::string> mDeclassificationType;
+   std::vector<std::string> mSystems;
+   std::vector<std::string> mFileDowngrade;
+   std::vector<std::string> mFileControl;
 
    static UtilityServicesImp* spInstance;
    static bool mDestroyed;

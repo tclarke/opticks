@@ -186,7 +186,16 @@ int Application::run(int argc, char** argv)
       return -1;
    }
 
-   pManager->buildPlugInList(plugPath);
+
+   const Filename* pSupportFilesPath = ConfigurationSettings::getSettingSupportFilesPath();
+   UtilityServicesImp *pUtils = UtilityServicesImp::instance();
+   if (pSupportFilesPath != NULL && pUtils != NULL)
+   {
+      pUtils->loadSecurityMarkings(pSupportFilesPath->getFullPathAndName() + SLASH + "SecurityMarkings");
+   }
+   
+   
+    pManager->buildPlugInList(plugPath);
 
    return 0;
 }

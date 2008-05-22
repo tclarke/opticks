@@ -283,7 +283,7 @@ private:
    void selectComboFromString(QComboBox* pComboBox, const QString& strText);
    void setDateEdit(QDateEdit* pDateEdit, const DateTime* pDateTime);
    void dateChanged(const QObject *pSender, const QDate &date);
-   void loadCountryCodes();
+   
 
 private slots:
    void checkAddButton(int iIndex);
