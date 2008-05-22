@@ -22,6 +22,10 @@ http://www.gnu.org/licenses/lgpl.html
       </xsd:annotation>
       <xsd:attribute name="version" type="xsd:positiveInteger" fixed="3" use="required" />
    </xsd:attributeGroup>
+   <xsd:attributeGroup name="SecurityValues">
+      <xsd:attribute name="data" type="xsd:string" use="required"/>
+      <xsd:attribute name="priority" type="xsd:integer" default="32768"/>
+   </xsd:attributeGroup>
    <xsd:simpleType name="coordinateType">
       <xsd:annotation>
          <xsd:documentation xml:lang="en">
@@ -1092,4 +1096,54 @@ http://www.gnu.org/licenses/lgpl.html
       <xsd:attributeGroup ref="opticks:versionHeader" />
    </xsd:complexType>
    <xsd:element name="Branding" type="opticks:Branding" />
+   <xsd:complexType name="SecurityMarkings">
+      <xsd:sequence>
+         <xsd:element name="CountryCode" minOccurs="0" maxOccurs="unbounded" form="qualified">
+            <xsd:complexType>
+               <xsd:attributeGroup ref="opticks:SecurityValues" />
+            </xsd:complexType>
+         </xsd:element>
+         <xsd:element name="Codeword" minOccurs="0" maxOccurs="unbounded" form="qualified">
+            <xsd:complexType>
+               <xsd:attributeGroup ref="opticks:SecurityValues" />
+            </xsd:complexType>
+         </xsd:element>
+         <xsd:element name="Systems" minOccurs="0" maxOccurs="unbounded" form="qualified">
+            <xsd:complexType>
+               <xsd:attributeGroup ref="opticks:SecurityValues" />
+            </xsd:complexType>  
+         </xsd:element>
+         <xsd:element name="FileReleasing" minOccurs="0" maxOccurs="unbounded" form="qualified">
+            <xsd:complexType>
+               <xsd:attributeGroup ref="opticks:SecurityValues" />
+            </xsd:complexType>
+         </xsd:element>
+         <xsd:element name="DeclassificationExemption" minOccurs="0" maxOccurs="unbounded" form="qualified">
+            <xsd:complexType>
+               <xsd:attributeGroup ref="opticks:SecurityValues" />
+            </xsd:complexType>
+         </xsd:element>
+         <xsd:element name="ClassificationReason" minOccurs="0" maxOccurs="unbounded" form="qualified">
+            <xsd:complexType>
+               <xsd:attributeGroup ref="opticks:SecurityValues" />
+            </xsd:complexType>
+         </xsd:element>
+         <xsd:element name="DeclassificationType" minOccurs="0" maxOccurs="unbounded" form="qualified">
+            <xsd:complexType>
+               <xsd:attributeGroup ref="opticks:SecurityValues" />
+            </xsd:complexType>
+         </xsd:element>
+         <xsd:element name="FileDowngrade" minOccurs="0" maxOccurs="unbounded" form="qualified">
+            <xsd:complexType>
+               <xsd:attributeGroup ref="opticks:SecurityValues" />
+            </xsd:complexType>
+         </xsd:element>
+         <xsd:element name="FileControl" minOccurs="0" maxOccurs="unbounded" form="qualified">
+            <xsd:complexType>
+               <xsd:attributeGroup ref="opticks:SecurityValues" />
+            </xsd:complexType>
+         </xsd:element>
+      </xsd:sequence>
+   </xsd:complexType>
+   <xsd:element name="SecurityMarkings" type="opticks:SecurityMarkings"/>
 </xsd:schema>
