@@ -46,7 +46,8 @@ class Message;
  *
  *  The file descriptor is intended to indicate how a data element was imported
  *  and therefore is typically set only by importers and not as a result of
- *  creating a new data element or exporting an existing data element.
+ *  creating a new data element or exporting an existing data element. The file
+ *  descriptor is owned by the data descriptor class.
  *
  *  This subclass of Subject will notify upon the following conditions:
  *  - The following methods are called: setClassification(), setMetadata(),
@@ -268,8 +269,10 @@ public:
     *  Returns the file descriptor indicating how the data is stored on disk.
     *
     *  @return  A pointer to the file descriptor describing how the data is
-    *           stored on disk.  If \b NULL is returned, this indicates that
-    *           the data element was not created as a result of an import.
+    *           stored on disk.  Do not delete this pointer since it's owned by
+    *           the data descriptor which will handle its deletion.
+    *           If \b NULL is returned, this indicates that the data element 
+    *           was not created as a result of an import.
     *
     *  @see     setFileDescriptor()
     */
@@ -282,9 +285,10 @@ public:
     *  @return  The file descriptor describing how the data is stored on disk.
     *           The file descriptor represented by the returned pointer should
     *           not be modified.  To modify the values, call the non-const
-    *           version of getFileDescriptor().  If \b NULL is returned, this
-    *           indicates that the data element was not created as a result of
-    *           an import.
+    *           version of getFileDescriptor().  Do not delete this pointer 
+    *           since it's owned by the data descriptor which will handle its 
+    *           deletion. If \b NULL is returned, this indicates that the data 
+    *           element was not created as a result of an import.
     *
     *  @see     setFileDescriptor()
     */
