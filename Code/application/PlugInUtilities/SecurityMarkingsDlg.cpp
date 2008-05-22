@@ -8,7 +8,7 @@
  */
 
 #include <QtCore/QDir>
-#include <QtCore/QDirIterator>
+
 #include <QtGui/QInputDialog>
 #include <QtGui/QLabel>
 #include <QtGui/QLayout>
@@ -28,9 +28,10 @@
 #include "PlugInManagerServices.h"
 #include "StringUtilities.h"
 #include "UtilityServices.h"
+#include "UtilityServicesImp.h"
 
 #include <string>
-#include <fstream>
+
 using namespace std;
 
 namespace
@@ -385,7 +386,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
    {
       strDefaultDir += "/";
    }
-
+   
    if ((pWidget == NULL) || (pWidget == mpClassLevelCombo))
    {
       populateListFromFile(mpClassLevelCombo, strDefaultDir + "ClassificationLevels.txt", false);
@@ -393,47 +394,84 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
 
    if ((pWidget == NULL) || (pWidget == mpCodewordList))
    {
-      populateListFromFile(mpCodewordList, strDefaultDir + "Codewords.txt", false);
+      vector<string> codewords = UtilityServicesImp::instance()->getCodewords();
+      mpCodewordList->clear();
+      for (vector<string>::iterator iter = codewords.begin(); iter != codewords.end(); ++iter)
+      {
+         mpCodewordList->addItem(QString::fromStdString((*iter)));
+      }
    }
-
-   if ((pWidget == NULL) || (pWidget == mpSystemList))
+   else if ((pWidget == NULL) || (pWidget == mpSystemList))
    {
-      populateListFromFile(mpSystemList, strDefaultDir + "Systems.txt", false);
+      vector<string> systems = UtilityServicesImp::instance()->getSystems();
+      mpSystemList->clear();
+      for (vector<string>::iterator iter = systems.begin(); iter != systems.end(); ++iter)
+      {
+         mpSystemList->addItem(QString::fromStdString((*iter)));
+      }
    }
-
-   if ((pWidget == NULL) || (pWidget == mpCountryCodeList))
+   else if ((pWidget == NULL) || (pWidget == mpCountryCodeList))
    {
-      loadCountryCodes();
+      vector<string> countryCodes = UtilityServicesImp::instance()->getCountryCodes();
+      mpCountryCodeList->clear();
+      for (vector<string>::iterator iter = countryCodes.begin(); iter != countryCodes.end(); ++iter)
+      {
+         mpCountryCodeList->addItem(QString::fromStdString((*iter)));
+      }
    }
-
-   if ((pWidget == NULL) || (pWidget == mpFileReleasingList))
+   else if ((pWidget == NULL) || (pWidget == mpFileReleasingList))
    {
-      populateListFromFile(mpFileReleasingList, strDefaultDir + "FileReleasing.txt", false);
+      vector<string> fileReleasing = UtilityServicesImp::instance()->getFileReleasing();
+      mpFileReleasingList->clear();
+      for (vector<string>::iterator iter = fileReleasing.begin(); iter != fileReleasing.end(); ++iter)
+      {
+         mpFileReleasingList->addItem(QString::fromStdString((*iter)));
+      }
    }
-
-   if ((pWidget == NULL) || (pWidget == mpExemptionList))
+   else if ((pWidget == NULL) || (pWidget == mpExemptionList))
    {
-      populateListFromFile(mpExemptionList, strDefaultDir + "DeclassificationExemption.txt", false);
+      vector<string> exemption = UtilityServicesImp::instance()->getDeclassificationExemptions();
+      mpExemptionList->clear();
+      for (vector<string>::iterator iter = exemption.begin(); iter != exemption.end(); ++iter)
+      {
+         mpExemptionList->addItem(QString::fromStdString((*iter)));
+      }
    }
-
-   if ((pWidget == NULL) || (pWidget == mpClassReasonCombo))
+   else if ((pWidget == NULL) || (pWidget == mpClassReasonCombo))
    {
-      populateListFromFile(mpClassReasonCombo, strDefaultDir + "ClassificationReason.txt", true);
+      vector<string> classReason = UtilityServicesImp::instance()->getClassificationReasons();
+      mpClassReasonCombo->clear();
+      for (vector<string>::iterator iter = classReason.begin(); iter != classReason.end(); ++iter)
+      {
+         mpClassReasonCombo->addItem(QString::fromStdString((*iter)));
+      }
    }
-
-   if ((pWidget == NULL) || (pWidget == mpDeclassTypeCombo))
+   else if ((pWidget == NULL) || (pWidget == mpDeclassTypeCombo))
    {
-      populateListFromFile(mpDeclassTypeCombo, strDefaultDir + "DeclassificationType.txt", true);
+      vector<string> declassType = UtilityServicesImp::instance()->getDeclassificationTypes();
+      mpDeclassTypeCombo->clear();
+      for (vector<string>::iterator iter = declassType.begin(); iter != declassType.end(); ++iter)
+      {
+         mpDeclassTypeCombo->addItem(QString::fromStdString((*iter)));
+      }
    }
-
-   if ((pWidget == NULL) || (pWidget == mpFileDowngradeCombo))
+   else if ((pWidget == NULL) || (pWidget == mpFileDowngradeCombo))
    {
-      populateListFromFile(mpFileDowngradeCombo, strDefaultDir + "FileDowngrade.txt", true);
+      vector<string> fileDowngrade = UtilityServicesImp::instance()->getFileDowngrades();
+      mpFileDowngradeCombo->clear();
+      for (vector<string>::iterator iter = fileDowngrade.begin(); iter != fileDowngrade.end(); ++iter)
+      {
+         mpFileDowngradeCombo->addItem(QString::fromStdString((*iter)));
+      }
    }
-
-   if ((pWidget == NULL) || (pWidget == mpFileControlCombo))
+   else if ((pWidget == NULL) || (pWidget == mpFileControlCombo))
    {
-      populateListFromFile(mpFileControlCombo, strDefaultDir + "FileControls.txt", true);
+      vector<string> fileControl = UtilityServicesImp::instance()->getFileControls();
+      mpFileControlCombo->clear();
+      for (vector<string>::iterator iter = fileControl.begin(); iter != fileControl.end(); ++iter)
+      {
+         mpFileControlCombo->addItem(QString::fromStdString((*iter)));
+      }
    }
 
    deserializeFavorites();
@@ -1205,60 +1243,5 @@ void SecurityMarkingsDlg::dateChanged(const QObject *pSender, const QDate &date)
          mpDowngradeDateEdit->setDate(QDate());
       }
       mDowngradeDateIsValid = date.isValid();
-   }
-}
-
-void SecurityMarkingsDlg::loadCountryCodes()
-{
-   mpCountryCodeList->clear();
-   QString markingsDir = QDir::currentPath() + QString::fromStdString(SLASH);
-
-   const Filename* pSupportFilesPath = ConfigurationSettings::getSettingSupportFilesPath();
-   if (pSupportFilesPath != NULL)
-   {
-      markingsDir = QString::fromStdString(pSupportFilesPath->getFullPathAndName() + SLASH + "SecurityMarkings" + SLASH);
-   }
-   if (markingsDir.isEmpty())
-   {
-      return;
-   }
-
-   string temp = markingsDir.toStdString();
-   QDirIterator fileIter(markingsDir, QStringList() << "CountryCode*");
-   vector<string> codes;
-   bool foundUsa = false;
-   while (fileIter.hasNext())
-   {
-      fileIter.next();
-      string path = fileIter.filePath().toStdString();
-      ifstream countryCodeFile(path.c_str(), ios_base::in);
-      string countryCode;
-      while (countryCodeFile.good())
-      {
-         getline(countryCodeFile, countryCode);
-         if (countryCode != "USA")
-         {
-            if (!countryCode.empty())
-            {
-               codes.push_back(countryCode);
-            }
-         }
-         else
-         {
-            foundUsa = true;
-         }
-      }
-   }
-   sort(codes.begin(), codes.end());
-   codes.erase(unique(codes.begin(), codes.end()), codes.end());   
-   if (foundUsa)
-   {
-      codes.insert(codes.begin(), "USA"); 
-   }   
-   for(vector<string>::iterator iter = codes.begin();
-       iter != codes.end();
-       ++iter)
-   {
-      mpCountryCodeList->addItem(QString::fromStdString(*iter));
    }
 }

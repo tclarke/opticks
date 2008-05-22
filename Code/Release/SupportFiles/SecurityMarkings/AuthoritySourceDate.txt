@@ -1,5 +1,0 @@
-mm/dd/yy
-mm-dd-yy
-dd-Mmm-yy
-dd Mmm, yyyy
-ddMmmyy

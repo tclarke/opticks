@@ -7,8 +7,12 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtCore/QDir>
+#include <QtCore/QStringList>
+
+#include <algorithm>
+
 #include "AppConfig.h"
-#include "UtilityServicesImp.h"
 
 #include "ColorMap.h"
 #include "ConfigurationSettingsImp.h"
@@ -16,7 +20,12 @@
 #include "MessageLogMgrImp.h"
 #include "ProgressAdapter.h"
 #include "SessionManager.h"
+#include "StringUtilities.h"
 #include "ThreadSafeProgressAdapter.h"
+#include "UtilityServicesImp.h"
+#include "xmlreader.h"
+
+
 
 #if defined(WIN_API)
 #include <direct.h>
@@ -31,6 +40,12 @@ using namespace std;
 #include "ExportAgentAdapter.h"
 #include "ImportAgentAdapter.h"
 #include "ExecutableAgentAdapter.h"
+
+struct SecurityFieldValue
+{
+   string mType;
+   string mName;
+};
 
 UtilityServicesImp* UtilityServicesImp::spInstance = NULL;
 bool UtilityServicesImp::mDestroyed = false;
@@ -277,6 +292,182 @@ size_t UtilityServicesImp::getMaxMemoryBlockSize()
 #endif
 }
 
+
+bool UtilityServicesImp::loadSecurityMarkings(const string &strFilename)
+{
+   Service<MessageLogMgr> pMsgLog;
+   MessageLog *pLog = pMsgLog->getLog();
+
+   QDir xmldir(QString::fromStdString(strFilename));
+   if (!xmldir.exists())
+   {
+      return false;
+   }
+
+   QStringList secExtensions;
+   secExtensions.append("*.sec");
+
+   XmlReader read(pLog, true);
+   multimap<unsigned short,QString> dir;
+
+
+   QFileInfoList secFiles = xmldir.entryInfoList(secExtensions, QDir::Files, QDir::Name);
+   for (QFileInfoList::iterator secIter = secFiles.begin(); secIter != secFiles.end(); ++secIter)
+   {
+      QFileInfo cfgFile = *secIter;
+      QStringList entries = cfgFile.fileName().split("-");
+      if (entries.size() >= 2) 
+      {
+         QString loadOrderStr = entries[0];
+         bool success;
+         unsigned int loadOrder = loadOrderStr.toUInt(&success);
+         if (success)
+         {
+            dir.insert(pair<unsigned short,QString>(loadOrder,(*secIter).absoluteFilePath()));
+         }         
+      }
+   }
+
+   multimap<unsigned short,SecurityFieldValue> markingValues;
+
+   for (multimap<unsigned short,QString>::iterator iter = dir.begin(); iter != dir.end(); ++iter)
+   {
+      XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *pDocument = NULL;
+      pDocument = read.parse((*iter).second.toStdString());
+               
+      if (pDocument == NULL)
+      {
+         continue;
+      }
+
+      XERCES_CPP_NAMESPACE_QUALIFIER DOMElement *pRoot = NULL;
+
+      pRoot = pDocument->getDocumentElement();
+      if (pRoot == NULL)
+      {
+         continue;
+      }
+
+      XERCES_CPP_NAMESPACE_QUALIFIER DOMNodeList* pChild = pRoot->getChildNodes();
+      for (unsigned int i = 0;i < pChild->getLength(); ++i)
+      {
+         XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pNode = pChild->item(i);
+
+         // Check the child node type to see if it's a element.
+         if (pNode->getNodeType() != DOMNode::ELEMENT_NODE)
+         {
+            continue;
+         }
+
+         XERCES_CPP_NAMESPACE_QUALIFIER DOMElement* pElement = static_cast<XERCES_CPP_NAMESPACE_QUALIFIER DOMElement*>(pNode);
+         if (pElement != NULL)
+         {            
+            SecurityFieldValue marking;
+            marking.mType = A(pElement->getTagName());
+            marking.mName = A(pElement->getAttribute(X("data")));
+            int value = StringUtilities::fromXmlString<int>(A(pElement->getAttribute(X("priority"))));
+            markingValues.insert(pair<unsigned short,SecurityFieldValue>(value, marking));
+         }
+      }
+   }
+
+   for (multimap<unsigned short,SecurityFieldValue>::iterator iter = markingValues.begin(); iter != markingValues.end(); ++iter)
+   {
+      if ((*iter).second.mType == "CountryCode")
+      {
+         mCountryCodes.push_back((*iter).second.mName);
+      }
+      else if ((*iter).second.mType == "Codeword")
+      {
+         mCodeword.push_back((*iter).second.mName);
+      }
+      else if ((*iter).second.mType == "Systems")
+      {
+         mSystems.push_back((*iter).second.mName);
+      }
+      else if ((*iter).second.mType == "FileReleasing")
+      {
+          mFileReleasing.push_back((*iter).second.mName);
+      }
+      else if ((*iter).second.mType == "DeclassificationExemption")
+      {
+         mDeclassificationExemption.push_back((*iter).second.mName);
+      }
+      else if ((*iter).second.mType == "ClassificationReason")
+      {
+         mClassificationReason.push_back((*iter).second.mName);
+      }
+      else if ((*iter).second.mType == "DeclassificationType")
+      {
+         mDeclassificationType.push_back((*iter).second.mName);
+      }
+      else if ((*iter).second.mType == "FileDowngrade")
+      {
+         mFileDowngrade.push_back((*iter).second.mName);
+      }
+      else if ((*iter).second.mType == "FileControl")
+      {
+         mFileControl.push_back((*iter).second.mName);
+      }      
+   }
+
+   mCountryCodes.erase(unique(mCountryCodes.begin(), mCountryCodes.end()), mCountryCodes.end());  
+   mCodeword.erase(unique(mCodeword.begin(), mCodeword.end()), mCodeword.end());
+   mSystems.erase(unique(mSystems.begin(), mSystems.end()), mSystems.end());
+   mFileReleasing.erase(unique(mFileReleasing.begin(), mFileReleasing.end()), mFileReleasing.end());
+   mDeclassificationExemption.erase(unique(mDeclassificationExemption.begin(), mDeclassificationExemption.end()), mDeclassificationExemption.end());
+   mClassificationReason.erase(unique(mClassificationReason.begin(), mClassificationReason.end()), mClassificationReason.end());
+   mDeclassificationType.erase(unique(mDeclassificationType.begin(), mDeclassificationType.end()), mDeclassificationType.end());
+   mFileDowngrade.erase(unique(mFileDowngrade.begin(), mFileDowngrade.end()), mFileDowngrade.end());
+   mFileControl.erase(unique(mFileControl.begin(), mFileControl.end()), mFileControl.end());
+
+   return true;
+}
+
+const vector<string>& UtilityServicesImp::getCountryCodes() const
+{
+   return mCountryCodes;
+}
+
+const vector<string>& UtilityServicesImp::getCodewords() const 
+{
+   return mCodeword;
+}
+
+const vector<string>& UtilityServicesImp::getSystems() const
+{
+   return mSystems;
+}
+
+const vector<string>& UtilityServicesImp::getFileReleasing() const
+{
+   return mFileReleasing;
+}
+
+const vector<string>& UtilityServicesImp::getDeclassificationExemptions() const
+{
+   return mDeclassificationExemption;
+}
+
+const vector<string>& UtilityServicesImp::getClassificationReasons() const
+{
+   return mClassificationReason;
+}
+
+const vector<string>& UtilityServicesImp::getDeclassificationTypes() const
+{
+   return mDeclassificationType;
+}
+
+const vector<string>& UtilityServicesImp::getFileDowngrades() const
+{
+   return mFileDowngrade;
+}
+
+const vector<string>& UtilityServicesImp::getFileControls() const
+{
+   return mFileControl;
+}
 
 size_t UtilityServicesImp::getTotalPhysicalMemory()
 {
