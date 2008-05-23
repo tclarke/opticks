@@ -7,5 +7,6 @@
 	<Tool
 		Name="VCCLCompilerTool"
 		PreprocessorDefinitions="_OPENMP_NOFORCE_MANIFEST"
+		OpenMP="true"
 	/>
 </VisualStudioPropertySheet>

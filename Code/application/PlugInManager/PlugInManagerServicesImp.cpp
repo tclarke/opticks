@@ -63,6 +63,20 @@ void PlugInManagerServicesImp::destroy()
 
 PlugInManagerServicesImp::PlugInManagerServicesImp()
 {
+#if defined(WIN_API)
+   //Currently the excluded list only includes the Visual Studio 2005 runtime dll's
+   //because they are required to be present in the plug-in path and simply by
+   //calling LoadLibrary on those dll's it will cause errors to be generated
+   //to include Windows system modal dialogs and errors in the message log.
+   mExcludedPlugIns.push_back("vcomp.dll");
+   mExcludedPlugIns.push_back("vcompd.dll");
+   mExcludedPlugIns.push_back("msvcp80.dll");
+   mExcludedPlugIns.push_back("msvcp80d.dll");
+   mExcludedPlugIns.push_back("msvcr80.dll");
+   mExcludedPlugIns.push_back("msvcr80d.dll");
+   mExcludedPlugIns.push_back("msvcm80.dll");
+   mExcludedPlugIns.push_back("msvcm80d.dll");
+#endif
 }
 
 PlugInManagerServicesImp::~PlugInManagerServicesImp()
@@ -90,6 +104,13 @@ bool PlugInManagerServicesImp::isKindOf(const string& className) const
 
 DynamicModule* PlugInManagerServicesImp::getDynamicModule(const string& value)
 {
+   //Only attempt to load a plug-in .dll if it's not in the excluded list.
+   QFileInfo modulePath(QString::fromStdString(value));
+   QString fileName = modulePath.fileName().toLower();
+   if (std::find(mExcludedPlugIns.begin(), mExcludedPlugIns.end(), fileName.toStdString()) != mExcludedPlugIns.end())
+   {
+      return new DynamicModuleImp();
+   }
    return new DynamicModuleImp(value.c_str());
 }
 

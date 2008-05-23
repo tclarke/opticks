@@ -11,7 +11,6 @@
 		Name="VCCLCompilerTool"
 		PreprocessorDefinitions="NOMINMAX"
 		FloatingPointExceptions="false"
-		OpenMP="true"
 		ProgramDataBaseFileName="$(BuildDir)\Binaries-$(PlatformName)-$(ConfigurationName)\Pdbs\$(ProjectName)\$(ProjectName).pdb"
 		WarningLevel="3"
 		Detect64BitPortabilityProblems="true"
