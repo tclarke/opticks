@@ -431,3 +431,23 @@ unsigned int GpuTile::readFilterBuffer(GLint xCoord, GLint yCoord, GLsizei width
 
    return numElements;
 }
+
+void *GpuTile::getTexData(unsigned int bytes)
+{
+   if (bytes == 0)
+   {
+      return NULL;
+   }
+
+   if (mTexData.size() * sizeof(unsigned int) < bytes)
+   {
+      unsigned int elements = bytes / sizeof(unsigned int);
+      if (bytes % sizeof(unsigned int) != 0)
+      {
+         ++elements;
+      }
+      mTexData.resize(elements);
+   }
+
+   return &mTexData.front();
+}

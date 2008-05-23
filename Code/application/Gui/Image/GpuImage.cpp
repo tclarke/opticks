@@ -75,7 +75,8 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor channel, uns
 
    initializeGrayscale();
 
-   GLenum texFormat = ((format == GL_RGBA || format == GL_LUMINANCE_ALPHA)? GL_LUMINANCE_ALPHA : GL_LUMINANCE);
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : If no alpha, this should be GL_LUMINANCE. Fix when GpuTile can change format. (tjohnson)")
+   GLenum texFormat = ((format == GL_RGBA || format == GL_LUMINANCE_ALPHA)? GL_LUMINANCE_ALPHA : GL_LUMINANCE_ALPHA);
    Image::initialize(tileSizeX, tileSizeY, channel, imageSizeX, imageSizeY, channels, texFormat, type, pData,
       stretchType, stretchPoints, pRasterElement, badValues);
 }
@@ -91,7 +92,8 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor channel, uns
 
    initializeGrayscale();
 
-   GLenum texFormat = ((format == GL_RGBA || format == GL_LUMINANCE_ALPHA)? GL_LUMINANCE_ALPHA : GL_LUMINANCE);
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : If no alpha, this should be GL_LUMINANCE. Fix when GpuTile can change format. (tjohnson)")
+   GLenum texFormat = ((format == GL_RGBA || format == GL_LUMINANCE_ALPHA)? GL_LUMINANCE_ALPHA : GL_LUMINANCE_ALPHA);
    Image::initialize(tileSizeX, tileSizeY, channel, imageSizeX, imageSizeY, channels, texFormat, type, component,
       pData, stretchType, stretchPoints, pRasterElement, badValues);
 }
@@ -108,7 +110,8 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor channel, uns
 
    initializeColormap(colorMap);
 
-   GLenum texFormat = ((format == GL_RGBA || format == GL_LUMINANCE_ALPHA)? GL_LUMINANCE_ALPHA : GL_LUMINANCE);
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : If no alpha, this should be GL_LUMINANCE. Fix when GpuTile can change format. (tjohnson)")
+   GLenum texFormat = ((format == GL_RGBA || format == GL_LUMINANCE_ALPHA)? GL_LUMINANCE_ALPHA : GL_LUMINANCE_ALPHA);
    Image::initialize(tileSizeX, tileSizeY, channel, imageSizeX, imageSizeY, channels, texFormat, type, pData,
       stretchType, stretchPoints, pRasterElement, colorMap, badValues);
 }
@@ -125,7 +128,8 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor channel, uns
 
    initializeColormap(colorMap);
 
-   GLenum texFormat = ((format == GL_RGBA || format == GL_LUMINANCE_ALPHA)? GL_LUMINANCE_ALPHA : GL_LUMINANCE);
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : If no alpha, this should be GL_LUMINANCE. Fix when GpuTile can change format. (tjohnson)")
+   GLenum texFormat = ((format == GL_RGBA || format == GL_LUMINANCE_ALPHA)? GL_LUMINANCE_ALPHA : GL_LUMINANCE_ALPHA);
    Image::initialize(tileSizeX, tileSizeY, channel, imageSizeX, imageSizeY, channels, texFormat, type, component,
       pData, stretchType, stretchPoints, pRasterElement, colorMap, badValues);
 }
@@ -191,87 +195,46 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor band1, Dimen
       pRasterElement1, pRasterElement2, pRasterElement3);
 }
 
-class GpuTileThread;
-class GpuTileInput
+template<class T>
+int roundOffTarget(T target)
 {
-public:
-   GpuTileInput(const vector<GpuTile*>& tiles, vector<int>& tileZoomIndices, const Image::ImageData& info) :
-      mTiles(tiles), mTileZoomIndices(tileZoomIndices), mInfo(info)
-   {
-   }
-
-   const vector<GpuTile*>& mTiles;
-   vector<int>& mTileZoomIndices;
-   const Image::ImageData& mInfo;
-};
-
-class GpuTileOutput
-{
-public:
-   bool compileOverallResults(const vector<GpuTileThread*>& threads) { return true; }
-};
-
-void GpuImage::updateTiles(vector<Tile*>& tilesToUpdate, vector<int>& tileZoomIndices)
-{
-   vector<GpuTile*> tiles;
-   for (unsigned int i = 0; i < tilesToUpdate.size(); ++i)
-   {
-      GpuTile* pTile = dynamic_cast<GpuTile*> (tilesToUpdate[i]);
-      if (pTile != NULL)
-      {
-         tiles.push_back(pTile);
-      }
-   }
-
-   const ImageData& info = getImageData();
-   GpuTileInput tileInput(tiles, tileZoomIndices, info);
-   GpuTileOutput tileOutput;
-
-   StatusBarReporter barReporter("Generating Image", "app", "6860C9DA-5643-4e32-B8F1-4CD5B01350E9");
-   StatusBarReporter *pReporter = NULL;
-   if (tiles.size() > 1)
-   {
-      pReporter = &barReporter;
-   }
-
-   unsigned int threadCount = ConfigurationSettings::getSettingThreadCount();
-   MultiThreadedAlgorithm<GpuTileInput, GpuTileOutput, GpuTileThread> imageTileAlgorithm
-      (threadCount, tileInput, tileOutput, pReporter);
-   imageTileAlgorithm.run();
+   return static_cast<int>(target);
 }
 
-class SetGpuTile : public ThreadCommand
+int roundOffTarget(float target)
+{
+   double dValue = static_cast<double> (target);
+   return roundDouble(dValue);
+}
+
+int roundOffTarget(double target)
+{
+   return roundDouble(target);
+}
+
+template<typename In>
+In getFromSource(In src)
+{
+   return src - numeric_limits<In>::min();
+}
+
+double getFromSource(float src)
+{
+   return static_cast<double> (src);
+}
+
+double getFromSource(double src)
+{
+   return src;
+}
+
+class GpuTileProcessor
 {
 public:
-   SetGpuTile(GpuTile* pTile, void* pData, EncodingType encodingType, int zoomIndex) :
-      mpTile(pTile), mpData(pData), mEncodingType(encodingType), mZoomIndex(zoomIndex)
-   {
-   }
-
-   void run()
-   {
-      if (mpTile != NULL)
-      {
-         mpTile->setupTile(mpData, mEncodingType, mZoomIndex);
-      }
-   }
-
-private:
-   GpuTile* mpTile;
-   void* mpData;
-   EncodingType mEncodingType;
-   int mZoomIndex;
-};
-
-class GpuTileThread : public AlgorithmThread
-{
-public:
-   GpuTileThread(const GpuTileInput& input, int threadCount, int threadIndex, ThreadReporter& reporter) :
-      AlgorithmThread(threadIndex, reporter),
-      mTiles(input.mTiles),
-      mTileZoomIndices(input.mTileZoomIndices),
-      mInfo(input.mInfo),
-      mTileRange(getThreadRange(threadCount, mTiles.size()))
+   GpuTileProcessor(const vector<GpuTile*>& tiles, vector<int>& tileZoomIndices, const Image::ImageData& info) :
+      mTiles(tiles),
+      mTileZoomIndices(tileZoomIndices),
+      mInfo(info)
       {
       }
 
@@ -281,10 +244,9 @@ private:
    const vector<GpuTile*>& mTiles;
    vector<int>& mTileZoomIndices;
    const Image::ImageData& mInfo;
-   Range mTileRange;
 
    template <typename In, typename Out>
-   void populateTextureData(vector<Out>& texData, unsigned int tileSizeX, unsigned int tileSizeY,
+   void populateTextureData(Out* pTexData, unsigned int tileSizeX, unsigned int tileSizeY,
       DataAccessor da, int currentChannel, int totalChannels, EncodingType outputType)
    {
       std::vector<int>::const_iterator badBegin = mInfo.mKey.mBadValues.begin();
@@ -297,116 +259,137 @@ private:
          singleBadValue = mInfo.mKey.mBadValues.front();
       }
 
-      vector<Out>::iterator targetBase = texData.begin();
-      for (unsigned int y1 = 0; y1 < tileSizeY; y1++, targetBase += (mInfo.mTileSizeX * totalChannels))
+      Out* pTargetBase = pTexData;
+
+      int channelMinus1 = currentChannel - 1;    // Subtract one since currentChannel is a one-based value
+      int channelStep = totalChannels - currentChannel;
+      if (bHas1BadValue)
       {
-         vector<Out>::iterator target = targetBase;
-         target += (currentChannel - 1);     // Subtract one since currentChannel is a one-based value
-
-         for (unsigned int x1 = 0; x1 < tileSizeX; x1++)
+         for (unsigned int y1 = 0; y1 < tileSizeY; y1++, pTargetBase += (mInfo.mTileSizeX * totalChannels))
          {
-            In* source = reinterpret_cast<In*>(da->getColumn());
-            if ((outputType == FLT4BYTES) || (outputType == FLT8BYTES))
+            Out* pTarget = pTargetBase;
+            pTarget += channelMinus1;
+            for (unsigned int x1 = 0; x1 < tileSizeX; x1++)
             {
-               *target = static_cast<Out> (*source);
-            }
-            else
-            {
-               *target = static_cast<Out> (*source - numeric_limits<In>::min());
-            }
-
-            if (bBadValues)
-            {
-               double dValue = static_cast<double> (*target);
-               int tempInt = roundDouble(dValue);
-
-               target += (totalChannels - currentChannel);
-               if (bHas1BadValue)
+               In source = getFromSource(*static_cast<In*>(da->getColumn()));
+               *pTarget = static_cast<Out>(source);
+               pTarget += channelStep;
+               if (roundOffTarget(source) == singleBadValue)
                {
-                  if (tempInt == singleBadValue)
-                  {
-                     *target = static_cast<Out> (0);
-                  }
-                  else
-                  {
-                     *target = numeric_limits<Out>::max();
-                  }
-               }
-               else if (binary_search(badBegin, badEnd, tempInt))
-               {
-                  *target = static_cast<Out> (0);
+                  *pTarget = static_cast<Out> (0);
                }
                else
                {
-                  *target = numeric_limits<Out>::max();
+                  *pTarget = numeric_limits<Out>::max();
                }
 
-               ++target;
+               ++pTarget;
+               da->nextColumn();
             }
-            else
-            {
-               if (totalChannels == 2)
-               {
-                  ++target;
-                  *target = numeric_limits<Out>::max();
-                  ++target;
-               }
-               else if (static_cast<int>(x1) < mInfo.mTileSizeX - 1)
-               {
-                  target += totalChannels;
-               }
-            }
-
-            da->nextColumn();
+            da->nextRow();
          }
+      }
+      else
+      {
+         if (bBadValues)
+         {
+            for (unsigned int y1 = 0; y1 < tileSizeY; y1++, pTargetBase += (mInfo.mTileSizeX * totalChannels))
+            {
+               Out* pTarget = pTargetBase;
+               pTarget += channelMinus1;
+               for (unsigned int x1 = 0; x1 < tileSizeX; x1++)
+               {
+                  In source = getFromSource(*static_cast<In*>(da->getColumn()));
+                  *pTarget = static_cast<Out>(source);
+                  int tempInt = roundOffTarget(source);
 
-         da->nextRow();
+                  pTarget += channelStep;
+                  if (binary_search(badBegin, badEnd, tempInt))
+                  {
+                     *pTarget = static_cast<Out> (0);
+                  }
+                  else
+                  {
+                     *pTarget = numeric_limits<Out>::max();
+                  }
+
+                  ++pTarget;
+                  da->nextColumn();
+               }
+               da->nextRow();
+            }
+         }
+         else
+         {
+            for (unsigned int y1 = 0; y1 < tileSizeY; y1++, pTargetBase += (mInfo.mTileSizeX * totalChannels))
+            {
+               Out* pTarget = pTargetBase;
+               pTarget += channelMinus1;
+               for (unsigned int x1 = 0; x1 < tileSizeX; x1++)
+               {
+                  *pTarget = static_cast<Out>(getFromSource(*static_cast<In*>(da->getColumn())));
+
+                  if (totalChannels == 2)
+                  {
+                     ++pTarget;
+                     *pTarget = numeric_limits<Out>::max();
+                     ++pTarget;
+                  }
+                  else if (static_cast<int>(x1) < mInfo.mTileSizeX - 1)
+                  {
+                     pTarget += totalChannels;
+                  }
+                  da->nextColumn();
+               }
+               da->nextRow();
+            }
+         }
       }
    }
 
    template <typename Out>
-   void populateTextureData(vector<Out>& texData, EncodingType inputType, unsigned int tileSizeX,
+   void populateTextureData(Out* pTexData, EncodingType inputType, unsigned int tileSizeX,
       unsigned int tileSizeY, DataAccessor da, int currentChannel, int totalChannels, EncodingType outputType)
    {
       switch (inputType)
       {
          case INT1UBYTE:
-            populateTextureData<unsigned char>(texData, tileSizeX, tileSizeY, da,
+            populateTextureData<unsigned char>(pTexData, tileSizeX, tileSizeY, da,
                currentChannel, totalChannels, outputType);
             break;
 
          case INT1SBYTE:
-            populateTextureData<signed char>(texData, tileSizeX, tileSizeY, da,
+            populateTextureData<signed char>(pTexData, tileSizeX, tileSizeY, da,
                currentChannel, totalChannels, outputType);
             break;
 
          case INT2UBYTES:
-            populateTextureData<unsigned short>(texData, tileSizeX, tileSizeY, da,
+            populateTextureData<unsigned short>(pTexData, tileSizeX, tileSizeY, da,
                currentChannel, totalChannels, outputType);
             break;
 
          case INT2SBYTES:
-            populateTextureData<signed short>(texData, tileSizeX, tileSizeY, da,
+            populateTextureData<signed short>(pTexData, tileSizeX, tileSizeY, da,
                currentChannel, totalChannels, outputType);
             break;
 
          case INT4UBYTES:
-            populateTextureData<unsigned int>(texData, tileSizeX, tileSizeY, da,
+            populateTextureData<unsigned int>(pTexData, tileSizeX, tileSizeY, da,
                currentChannel, totalChannels, outputType);
             break;
 
          case INT4SBYTES:
-            populateTextureData<signed int>(texData, tileSizeX, tileSizeY, da,
+            populateTextureData<signed int>(pTexData, tileSizeX, tileSizeY, da,
                currentChannel, totalChannels, outputType);
             break;
 
          case FLT4BYTES:
-            populateTextureData<float>(texData, tileSizeX, tileSizeY, da,
+            populateTextureData<float>(pTexData, tileSizeX, tileSizeY, da,
                currentChannel, totalChannels, outputType);
             break;
 
          case FLT8BYTES:
-            populateTextureData<double>(texData, tileSizeX, tileSizeY, da,
+            populateTextureData<double>(pTexData, tileSizeX, tileSizeY, da,
                currentChannel, totalChannels, outputType);
             break;
 
@@ -516,11 +499,6 @@ private:
    template <typename Out>
    void createGrayscale(EncodingType outputType)
    {
-      if (mTileRange.mLast < mTileRange.mFirst)
-      {
-         return;
-      }
-
       int bufSize = mInfo.mTileSizeX * mInfo.mTileSizeY;
       int channels = 1;
 
@@ -531,10 +509,8 @@ private:
          channels++;
       }
 
-      vector<Out> texData(bufSize);
-
       int oldPercentDone = -1;
-      for (int i = mTileRange.mFirst; i <= mTileRange.mLast; ++i)
+      for (unsigned int i = 0; i < mTiles.size(); ++i)
       {
          GpuTile* pTile = mTiles[i];
          if (pTile != NULL)
@@ -564,15 +540,9 @@ private:
                return;
             }
 
-            populateTextureData(texData, mInfo.mRawType[0], geomSizeX, geomSizeY, da, 1, channels, outputType);
-            runInMainThread(SetGpuTile(pTile, &texData[0], outputType, mTileZoomIndices[i]));
-         }
-
-         int percentDone = 100 * (i - mTileRange.mFirst + 1) / (mTileRange.mLast - mTileRange.mFirst + 1);
-         if (percentDone >= oldPercentDone + 10)
-         {
-            oldPercentDone = percentDone;
-            getReporter().reportProgress(getThreadIndex(), percentDone);
+            Out *pTexData = static_cast<Out*>(pTile->getTexData(bufSize * sizeof(Out)));
+            populateTextureData(pTexData, mInfo.mRawType[0], geomSizeX, geomSizeY, da, 1, channels, outputType);
+            pTile->setupTile(pTexData, outputType, mTileZoomIndices[i]);
          }
       }
    }
@@ -580,16 +550,11 @@ private:
    template <typename Out>
    void createRgb(EncodingType outputType)
    {
-      if (mTileRange.mLast < mTileRange.mFirst)
-      {
-         return;
-      }
-
       int bufSize = mInfo.mTileSizeX * mInfo.mTileSizeY * 3;
       vector<Out> texData(bufSize);
 
       int oldPercentDone = -1;
-      for (int i = mTileRange.mFirst; i <= mTileRange.mLast; ++i)
+      for (unsigned int i = 0; i < mTiles.size(); ++i)
       {
          GpuTile* pTile = mTiles[i];
          if (pTile != NULL)
@@ -631,7 +596,7 @@ private:
                {
                   return;
                }
-               populateTextureData(texData, mInfo.mRawType[0], geomSizeX, geomSizeY, daRed, 1, 3, outputType);
+               populateTextureData(&texData.front(), mInfo.mRawType[0], geomSizeX, geomSizeY, daRed, 1, 3, outputType);
             }
             else
             {
@@ -657,7 +622,7 @@ private:
                   return;
                }
 
-               populateTextureData(texData, mInfo.mRawType[1], geomSizeX, geomSizeY, daGreen, 2, 3, outputType);
+               populateTextureData(&texData.front(), mInfo.mRawType[1], geomSizeX, geomSizeY, daGreen, 2, 3, outputType);
             }
             else
             {
@@ -683,27 +648,37 @@ private:
                   return;
                }
 
-               populateTextureData(texData, mInfo.mRawType[2], geomSizeX, geomSizeY, daBlue, 3, 3, outputType);
+               populateTextureData(&texData.front(), mInfo.mRawType[2], geomSizeX, geomSizeY, daBlue, 3, 3, outputType);
             }
             else
             {
                populateEmptyTextureData(texData, mInfo.mRawType[2], geomSizeX, geomSizeY, 3, 3, outputType);
             }
 
-            runInMainThread(SetGpuTile(pTile, &texData[0], outputType, mTileZoomIndices[i]));
-         }
-
-         int percentDone = 100 * (i - mTileRange.mFirst + 1) / (mTileRange.mLast - mTileRange.mFirst + 1);
-         if (percentDone >= oldPercentDone + 10)
-         {
-            oldPercentDone = percentDone;
-            getReporter().reportProgress(getThreadIndex(), percentDone);
+            pTile->setupTile(&texData.front(), outputType, mTileZoomIndices[i]);
          }
       }
    }
-};    // End of GpuTileThread class declaration
+};    // End of GpuTileProcessor class declaration
 
-void GpuTileThread::run()
+void GpuImage::updateTiles(vector<Tile*>& tilesToUpdate, vector<int>& tileZoomIndices)
+{
+   vector<GpuTile*> tiles;
+   for (unsigned int i = 0; i < tilesToUpdate.size(); ++i)
+   {
+      GpuTile* pTile = dynamic_cast<GpuTile*> (tilesToUpdate[i]);
+      if (pTile != NULL)
+      {
+         tiles.push_back(pTile);
+      }
+   }
+
+   const ImageData& info = getImageData();
+   GpuTileProcessor processor(tiles, tileZoomIndices, info);
+   processor.run();
+}
+
+void GpuTileProcessor::run()
 {
    if (mInfo.mKey.mStretchPoints2.empty() == true)    // Grayscale or colormap
    {

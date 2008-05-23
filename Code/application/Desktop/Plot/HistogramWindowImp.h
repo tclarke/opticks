@@ -12,11 +12,14 @@
 
 #include "AttachmentPtr.h"
 #include "PlotWindowImp.h"
+#include "RasterLayer.h"
 #include "SessionExplorer.h"
+
+#include <boost/shared_ptr.hpp>
+#include <set>
 
 class Layer;
 class PlotWidget;
-class RasterLayer;
 
 class HistogramWindowImp : public PlotWindowImp
 {
@@ -53,20 +56,44 @@ signals:
 
 protected:
    bool event(QEvent* pEvent);
+   void showEvent(QShowEvent * pEvent);
 
    void createPlots(RasterLayer* pLayer, DisplayMode displayMode);
    void createPlots(RasterLayer* pLayer, DisplayMode displayMode, PlotSet* pPlotSet);
    void deletePlots(RasterLayer* pLayer, DisplayMode displayMode);
+   void updatePlotInfo(RasterLayer* pLayer, RasterChannelType channel);
 
 protected slots:
    void setCurrentPlot(const DisplayMode& displayMode);
    void activateLayer(PlotWidget* pPlot);
    void updatePlotInfo(RasterChannelType channel);
-   void updatePlotInfo(RasterLayer* pLayer, RasterChannelType channel);
 
 private:
    AttachmentPtr<SessionExplorer> mpExplorer;
    bool mDisplayModeChanging;
+
+   class HistogramUpdater
+   {
+   public:
+      HistogramUpdater(HistogramWindowImp *pWindow);
+
+      void initialize(RasterLayer* pLayer, RasterChannelType channel);
+      void update();
+   private:
+      class UpdateMomento
+      {
+      public:
+         UpdateMomento(HistogramWindowImp *pWindow, RasterLayer* pLayer, RasterChannelType channel);
+         bool operator<(const UpdateMomento &rhs) const;
+         void update();
+      private:
+         HistogramWindowImp *mpWindow;
+         boost::shared_ptr<AttachmentPtr<RasterLayer> > mpRasterLayer;
+         RasterChannelType mChannel;
+      };
+      std::set<UpdateMomento> mUpdatesPending;
+      HistogramWindowImp *mpWindow;
+   } mUpdater;
 };
 
 #define HISTOGRAMWINDOWADAPTER_METHODS(impClass) \

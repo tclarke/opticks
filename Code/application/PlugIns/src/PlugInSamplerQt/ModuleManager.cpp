@@ -8,6 +8,7 @@
  */
 
 #include "AnimationTest.h"
+#include "AnimationTimingTest.h"
 #include "AppConfig.h"
 #include "CloseNotificationTest.h"
 #include "DataPlotterPlugIn.h"
@@ -52,9 +53,9 @@ unsigned int ModuleManager::getTotalPlugIns()
 {
 // This is necessary since one of the PlugIns is Windows specific.
 #if defined(WIN_API)
-   return 21;
+   return 22;
 #else
-   return 20;
+   return 21;
 #endif
 }
 
@@ -144,11 +145,15 @@ PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
          pPlugIn = new MouseModePlugIn();
          break;
 
+      case 20:
+         pPlugIn = new AnimationTimingTestPlugIn();
+         break;
+
       // This is necessary since one of the PlugIns is Windows specific.
       // When adding new PlugIns make sure WindowsControl is the last one in
       // the switch statement
       #if defined(WIN_API)
-      case 20:
+      case 21:
          pPlugIn = new WindowsControl();
          break;
       #endif
