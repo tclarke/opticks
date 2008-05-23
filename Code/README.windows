@@ -20,22 +20,43 @@ will provide a usage summary. Most of the time, no command line options are need
 Install all the dependencies.
 > python dependencies.py
 This will download the appropriate dependencies builds and will install them in the proper directories.
-Some dependencies (notably Qt) can not be distributed on the opticks website. If you create a
-zip of the Qt build with the proper directory structure and place it in the Dependencies/packages directory,
-it will be installed as part of the download. The Qt/__init__.py file indicates the expected zip file name.
+
+Qt will not download properly, this is because Qt can either be licensed
+commercially or under the terms of the GPL license. Please look below for information on obtaining Qt.
 
 Point the OPTICKSDEPENDENCIES variable at the Dependencies folder so the build system can find
 the installed dependencies.
 
-Instructions on building Qt:
+Instructions on obtaining Qt:
+------------------------------------------ 
+
+-  First determine if Qt will be used under the commercial or GPL license, this depends on the type
+   of development you will be doing with Opticks. Please review the developer FAQ for Qt available at
+   http://trolltech.com/developer/downloads/qt/faq to determine under which license you will be using Qt.
+
+-  If Qt will be used under the open-source or GPL license, follow the instructions below:
+        -  Download a pre-built binary of Qt 4.3.4 Open-Source edition available on the Opticks website at:
+           https://opticks.ballforge.net/files/documents/8/112/Qt-4.3.4-opensource.zip.
+        -  Put the downloaded .zip file into your OPTICKSDEPENDENCIES\packages folder.  This assumes you
+           have followed the above instructions on downloading the other required dependencies for Opticks.
+           Rename the download .zip file from Qt-4.3.4-opensource.zip to Qt-4.3.4.zip
+        -  Run "python dependencies.py" on the command-line.  This will deploy your Qt 4.3.4 open-source edition
+           binaries to the proper locations.
+
+-  If Qt will be used under the commercial Qt license, follow the instructions below:
+        -  Once you have purchased a commercial license, download the Qt 4.3.4 source code binaries
+           for the Windows platform.
+        -  Follow the instructions listed below on how to build Qt from the source code.
+
+
+
+Instructions on building Qt from source:
 ------------------------------------------ 
 
 (Please note that there are only 32-bit binary builds of Qt available from TrollTech. Because of this, 
 in order to run Qt in 64-bit, Qt must be manually built on windows in both 32-bit and 64-bit binary builds.)
 
-
 Things to do before building Qt:
-
 
 -  First extract the Qt zip file to a directory on your system.
 
@@ -55,17 +76,17 @@ A. Building the 32-bit version:
 
 3. Once you in the directory, type:
 
-	configure.exe -qt-gif -qt-libpng -qt-libmng -qt-libtiff -qt-libjpeg
+        configure.exe -qt-gif -qt-libpng -qt-libmng -qt-libtiff -qt-libjpeg
 
    This will generate a Makefile.
    
 4. Now to start the compilation, run nmake by typing:
 
-	nmake
+        nmake
 
 5. Once the compilation is complete, then type:
 
-	nmake install
+        nmake install
 
    The reason for doing this is so you will only need the include directory from Qt, not the src one. 
    
@@ -82,17 +103,17 @@ B. Building the 64-bit version:
 
 3. Once you in the directory, type:
 
-	configure.exe -qt-gif -qt-libpng -qt-libmng -qt-libtiff -qt-libjpeg
+        configure.exe -qt-gif -qt-libpng -qt-libmng -qt-libtiff -qt-libjpeg
 
    This will generate a Makefile.
    
 4. Now to start the compilation, run nmake by typing:
 
-	nmake
+        nmake
 
 5. Once the compilation is complete, then type:
 
-	nmake install
+        nmake install
 
    The reason for doing this is so you will only need the include directory from Qt, not the src one. 
 
@@ -148,11 +169,11 @@ To set the variables to the right file path, you must follow these steps:
 
 1. Make sure that Visual studio is shut down.
 
-2. Go to the application folder, here you should see a file named Opticks.vcproj.FILLINUSERNAME.user.template.	
+2. Go to the application folder, here you should see a file named Opticks.vcproj.FILLINUSERNAME.user.template.
 
 3. Change FILLINUSERNAME to your user name and remove the template file extension. You may need to remove the existing
    .user file.
-	Example: Opticks.vcproj.username.user
+        Example: Opticks.vcproj.username.user
 
 4. Once this is done, the environment variables should be pointing to the .dll files and Opticks can now be able 
 to run in Visual Studio.
