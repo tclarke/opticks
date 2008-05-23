@@ -44,6 +44,8 @@ public:
 
    std::vector<ImageFilterDescriptor*> getFilters() const;
 
+   void *getTexData(unsigned int bytes);
+
 protected:
    void applyFilters();
 
@@ -55,6 +57,7 @@ private:
    bool mbInitialized;
 
    std::vector<ImageFilter*> mFilters;
+   std::vector<unsigned int> mTexData;
 };
 
 #endif

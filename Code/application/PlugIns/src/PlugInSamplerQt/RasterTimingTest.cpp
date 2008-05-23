@@ -93,19 +93,30 @@ bool RasterTimingTest::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
       const int frameiterations = 10000;
       clock_t startTime = clock();
       QWidget *pWidget = pView->getWidget();
-      for (int i=0; i<frameiterations; ++i, ++frameNumber)
+      int i = 0;
+      for (i=0; i<frameiterations; ++i, ++frameNumber)
       {
          if (frameNumber >= bands) frameNumber = 0;
          pLayer->setDisplayedBand(GRAY, pDesc->getActiveBand(frameNumber));
          if (pWidget) pWidget->repaint();
-         if ((i+1)%(frameiterations/10) == 0)
+         if ((i+1)%(frameiterations/100) == 0)
          {
             QString message = QString("Frame ") + QString::number(i+1) + QString(" of ") + QString::number(frameiterations);
             pDesktop->setStatusBarMessage(message.toStdString());
          }
+         if ((i+1) % 20 == 0)
+         {
+            clock_t stopTime = clock();
+            double elapsedTime = static_cast<double>(stopTime - startTime) / CLOCKS_PER_SEC;
+            if (elapsedTime > 30)
+            {
+               ++i;
+               break;
+            }
+         }
       }
       clock_t stopTime = clock();
-      double framesPerSec = frameiterations / (static_cast<double>(stopTime - startTime) / CLOCKS_PER_SEC);
+      double framesPerSec = i / (static_cast<double>(stopTime - startTime) / CLOCKS_PER_SEC);
 
       QMessageBox::information(pDesktop->getMainWidget(), "Frame Rate", 
          "The number of frames per second was:\n" + QString::number(framesPerSec));

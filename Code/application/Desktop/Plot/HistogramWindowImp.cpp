@@ -42,7 +42,8 @@ HistogramWindowImp::HistogramWindowImp(const string& id, const string& windowNam
    PlotWindowImp(id, windowName, parent),
    mpExplorer(Service<SessionExplorer>().get(), SIGNAL_NAME(SessionExplorer, AboutToShowSessionItemContextMenu),
       Slot(this, &HistogramWindowImp::updateContextMenu)),
-   mDisplayModeChanging(false)
+   mDisplayModeChanging(false),
+   mUpdater(this)
 {
    Icons* pIcons = Icons::instance();
    REQUIRE(pIcons != NULL);
@@ -750,12 +751,25 @@ void HistogramWindowImp::activateLayer(PlotWidget* pPlot)
    emit plotActivated(pLayer, channel);
 }
 
+void HistogramWindowImp::showEvent(QShowEvent * pEvent)
+{
+   QWidget::showEvent(pEvent);
+   mUpdater.update();
+}
+
 void HistogramWindowImp::updatePlotInfo(RasterChannelType channel)
 {
    RasterLayer* pLayer = dynamic_cast<RasterLayer*>(sender());
    if (pLayer != NULL)
    {
-      updatePlotInfo(pLayer, channel);
+      if (isVisible())
+      {
+         updatePlotInfo(pLayer, channel);
+      }
+      else
+      {
+         mUpdater.initialize(pLayer, channel);
+      }
    }
 }
 
@@ -808,13 +822,7 @@ void HistogramWindowImp::updatePlotInfo(RasterLayer* pLayer, RasterChannelType c
             dynamic_cast<RasterDataDescriptor*>(pElement->getDataDescriptor());
          if (pDescriptor != NULL)
          {
-            vector<string> bandNames = RasterUtilities::getBandNames(pDescriptor);
-
-            unsigned int bandNumber = band.getActiveNumber();
-            if (bandNumber < bandNames.size())
-            {
-               strBand = QString::fromStdString(bandNames[bandNumber]);
-            }
+            strBand = QString::fromStdString(RasterUtilities::getBandName(pDescriptor, band));
          }
       }
    }
@@ -839,5 +847,50 @@ void HistogramWindowImp::updatePlotInfo(RasterLayer* pLayer, RasterChannelType c
 
          pPlotSet->setTabToolTip(index, strTip);
       }
+   }
+}
+
+HistogramWindowImp::HistogramUpdater::HistogramUpdater(HistogramWindowImp *pWindow) : mpWindow(pWindow)
+{
+}
+
+void HistogramWindowImp::HistogramUpdater::initialize(RasterLayer* pLayer, RasterChannelType channel)
+{
+   mUpdatesPending.insert(UpdateMomento(mpWindow, pLayer, channel));
+}
+
+void HistogramWindowImp::HistogramUpdater::update()
+{
+   for_each(mUpdatesPending.begin(), mUpdatesPending.end(), mem_fun_ref(&UpdateMomento::update));
+   mUpdatesPending.clear();
+}
+
+HistogramWindowImp::HistogramUpdater::UpdateMomento::UpdateMomento(HistogramWindowImp *pWindow, RasterLayer *pLayer, 
+                                                                   RasterChannelType channel) :
+   mpWindow(pWindow), mpRasterLayer(new AttachmentPtr<RasterLayer>(pLayer)), mChannel(channel)
+{
+}
+
+void HistogramWindowImp::HistogramUpdater::UpdateMomento::update()
+{
+   RasterLayer *pLayer = mpRasterLayer.get()==NULL?NULL:mpRasterLayer.get()->get();
+   if (pLayer == NULL || mpWindow == NULL)
+   {
+      return;
+   }
+   mpWindow->updatePlotInfo(pLayer, mChannel);
+}
+
+bool HistogramWindowImp::HistogramUpdater::UpdateMomento::operator<(const UpdateMomento &rhs) const
+{
+   RasterLayer *pLeftLayer = mpRasterLayer.get()==NULL?NULL:mpRasterLayer.get()->get();
+   RasterLayer *pRightLayer = rhs.mpRasterLayer.get()==NULL?NULL:rhs.mpRasterLayer.get()->get();
+   if (pLeftLayer == pRightLayer)
+   {
+      return this->mChannel < rhs.mChannel;
+   }
+   else
+   {
+      return pLeftLayer < pRightLayer;
    }
 }
