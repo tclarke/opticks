@@ -215,12 +215,14 @@ public:
     *           The input node name.
     *  @param   type
     *           The input node type.
+    *  @param   description
+    *           The input node description.
     *
     *  @return  A pointer to the new input node.
     *
     *  @see     WizardItemImp::addOutputNode
     */
-   WizardNode* addInputNode(const std::string& name, const std::string& type);
+   WizardNode* addInputNode(const std::string& name, const std::string& type, const std::string& description);
 
    /**
     *  Returns the current number of input nodes.
@@ -302,12 +304,14 @@ public:
     *           The output node name.
     *  @param   type
     *           The output node type.
+    *  @param   description
+    *           The output node description.
     *
     *  @return  A pointer to the new output node.
     *
     *  @see     WizardItemImp::addInputNode
     */
-   WizardNode* addOutputNode(const std::string& name, const std::string& type);
+   WizardNode* addOutputNode(const std::string& name, const std::string& type, const std::string& description);
 
    /**
     *  Returns the current number of output nodes.

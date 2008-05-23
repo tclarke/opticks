@@ -21,14 +21,14 @@ XERCES_CPP_NAMESPACE_USE
 
 string WizardNodeImp::mVersion = "Wizard Node Version 3.0";
 
-WizardNodeImp::WizardNodeImp(WizardItem* pItem, string name, string type)
+WizardNodeImp::WizardNodeImp(WizardItem* pItem, string name, string type, string description) : 
+   mpItem(pItem),
+   mName(name),
+   mType(type),
+   mDescription(description),
+   mOriginalType(type),
+   mpShallowCopyValue(NULL)
 {
-   mpItem = pItem;
-   mName = name;
-   mType = type;
-   mOriginalType = type;
-   mpShallowCopyValue = NULL;
-
    if (type.empty() == false)
    {
       mValidTypes.push_back(type);
@@ -50,6 +50,7 @@ WizardNodeImp& WizardNodeImp::operator =(const WizardNodeImp& node)
    {
       mName = node.mName.c_str();
       mType = node.mType.c_str();
+      mDescription = node.mDescription.c_str();
       mOriginalType = node.mOriginalType.c_str();
       setValidTypes(node.mValidTypes);
       setValue(node.mpShallowCopyValue);
@@ -67,7 +68,7 @@ void WizardNodeImp::setName(const string& nodeName)
 {
    if (nodeName != mName)
    {
-      mName = "" + nodeName;
+      mName = nodeName;
       WizardNodeChangeType eChange = NodeName;
       notify(SIGNAL_NAME(Subject, Modified), boost::any(&eChange));
    }
@@ -87,7 +88,7 @@ void WizardNodeImp::setType(const string& nodeType)
          deleteValue();
       }
 
-      mType = "" + nodeType;
+      mType = nodeType;
       WizardNodeChangeType eChange = NodeType;
       notify(SIGNAL_NAME(Subject, Modified), boost::any(&eChange));
    }
@@ -98,11 +99,26 @@ const string& WizardNodeImp::getType() const
    return mType;
 }
 
+void WizardNodeImp::setDescription(const string& nodeDescription)
+{
+   if (nodeDescription != mDescription)
+   {
+      mDescription = nodeDescription;
+      WizardNodeChangeType eChange = NodeDescription;
+      notify(SIGNAL_NAME(Subject, Modified), boost::any(&eChange));
+   }
+}
+
+const string& WizardNodeImp::getDescription() const
+{
+   return mDescription;
+}
+
 void WizardNodeImp::setOriginalType(const string& originalType)
 {
    if (originalType != mOriginalType)
    {
-      mOriginalType = "" + originalType;
+      mOriginalType = originalType;
    }
 }
 
@@ -282,6 +298,8 @@ bool WizardNodeImp::isNodeConnected(WizardNode* pNode) const
 
 bool WizardNodeImp::toXml(XMLWriter* xml) const
 {
+   // This will get all of the infomation for the wizard node
+   // except the description.
    xml->addAttr("version", mVersion);
    xml->addAttr("name", mName);
    xml->addAttr("originalType", mOriginalType);

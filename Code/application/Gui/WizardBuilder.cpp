@@ -355,6 +355,7 @@ WizardBuilder::WizardBuilder(QWidget* parent) :
    columnNames.append("Order");
    columnNames.append("Name");
    columnNames.append("Type");
+   columnNames.append("Description");
 
    QLabel* pInLabel = new QLabel("Inputs:", pInfoWidget);
    mpInputsTree = new QTreeWidget(pInfoWidget);
@@ -580,6 +581,7 @@ void WizardBuilder::buildInputNodes(WizardItem* pItem, const PlugInArgList* pArg
 
       string argName = "";
       string argType = "";
+      string argDescription = "";
       QColor clrNode = Qt::white;
 
       if (pArg != NULL)
@@ -593,10 +595,12 @@ void WizardBuilder::buildInputNodes(WizardItem* pItem, const PlugInArgList* pArg
          {
             argType = "Unknown";
          }
+
+         argDescription = pArg->getDescription();
       }
 
       WizardNode* pNode = NULL;
-      pNode = ((WizardItemImp*) pItem)->addInputNode(argName, argType);
+      pNode = dynamic_cast<WizardItemImp*>(pItem)->addInputNode(argName, argType, argDescription);
       if (pNode != NULL)
       {
          vector<string> validTypes;
@@ -659,6 +663,7 @@ void WizardBuilder::buildOutputNodes(WizardItem* pItem, const PlugInArgList* pAr
 
       string argName = "";
       string argType = "";
+      string argDescription = "";
       QColor clrNode = Qt::white;
 
       if (pArg != NULL)
@@ -672,10 +677,12 @@ void WizardBuilder::buildOutputNodes(WizardItem* pItem, const PlugInArgList* pAr
          {
             argType = "Unknown";
          }
+
+         argDescription = pArg->getDescription();
       }
 
       WizardNodeImp* pNode = static_cast<WizardNodeImp*>
-         ((static_cast<WizardItemImp*> (pItem))->addOutputNode(argName, argType));
+         ((static_cast<WizardItemImp*> (pItem))->addOutputNode(argName, argType, argDescription));
       if (pNode != NULL)
       {
          vector<string> validTypes;
@@ -1456,7 +1463,7 @@ void WizardBuilder::addValueItem()
          setItemBatchMode(pItem, bBatch);
 
          // Add the output node
-         WizardNodeImp* pNode = static_cast<WizardNodeImp*>(pItem->addOutputNode(name, type));
+         WizardNodeImp* pNode = static_cast<WizardNodeImp*>(pItem->addOutputNode(name, type, ""));
          if (pNode != NULL)
          {
             const DataVariant &var = dlgValue.getValue();
@@ -2162,10 +2169,12 @@ void WizardBuilder::updateItemInfo()
       {
          WizardNode* pNode = NULL;
          pNode = inputNodes.at(j);
+
          if (pNode != NULL)
          {
             QString strNodeName;
             QString strNodeType;
+            QString strNodeDescription;
 
             string nodeName = pNode->getName();
             if (nodeName.empty() == false)
@@ -2179,6 +2188,19 @@ void WizardBuilder::updateItemInfo()
                strNodeType = QString::fromStdString(nodeType);
             }
 
+            WizardNodeExt1* pNodeExt1 = dynamic_cast<WizardNodeExt1*>(pNode);
+            string nodeDescripton;
+            if (pNodeExt1 != NULL)
+            {
+               nodeDescripton = pNodeExt1->getDescription();
+
+            }
+
+            if (nodeDescripton.empty() == false)
+            {
+               strNodeDescription = QString::fromStdString(nodeDescripton);
+            }
+
             QTreeWidgetItem* pTreeItem = new QTreeWidgetItem(mpInputsTree);
             if (pTreeItem != NULL)
             {
@@ -2186,6 +2208,7 @@ void WizardBuilder::updateItemInfo()
                pTreeItem->setText(1, strOrder);
                pTreeItem->setText(2, strNodeName);
                pTreeItem->setText(3, strNodeType);
+               pTreeItem->setText(4, strNodeDescription);
             }
          }
       }
@@ -2198,10 +2221,12 @@ void WizardBuilder::updateItemInfo()
       {
          WizardNode* pNode = NULL;
          pNode = outputNodes.at(j);
+
          if (pNode != NULL)
          {
             QString strNodeName;
             QString strNodeType;
+            QString strNodeDescription;
 
             string nodeName = pNode->getName();
             if (nodeName.empty() == false)
@@ -2215,6 +2240,19 @@ void WizardBuilder::updateItemInfo()
                strNodeType = QString::fromStdString(nodeType);
             }
 
+            WizardNodeExt1* pNodeExt1 = dynamic_cast<WizardNodeExt1*>(pNode);
+            string nodeDescription;
+            if (pNodeExt1 != NULL)
+            {
+               nodeDescription = pNodeExt1->getDescription();
+            }
+
+            if (nodeDescription.empty() == false)
+            {
+               strNodeDescription = QString::fromStdString(nodeDescription);
+            }
+            
+
             QTreeWidgetItem* pTreeItem = new QTreeWidgetItem(mpOutputsTree);
             if (pTreeItem != NULL)
             {
@@ -2222,6 +2260,7 @@ void WizardBuilder::updateItemInfo()
                pTreeItem->setText(1, strOrder);
                pTreeItem->setText(2, strNodeName);
                pTreeItem->setText(3, strNodeType);
+               pTreeItem->setText(4, strNodeDescription);
             }
          }
       }
