@@ -81,7 +81,8 @@ protected:
 private:
    static PlugInManagerServicesImp* spInstance;
    static bool mDestroyed;
-
+   
+   std::vector<std::string> mExcludedPlugIns;
    std::vector<ModuleDescriptor*> mModules;
    std::map<std::string, PlugInDescriptorImp*> mPlugIns;
 };
