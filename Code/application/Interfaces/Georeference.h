@@ -16,7 +16,7 @@ class QWidget;
 class RasterElement;
 
 /**
- *  Interface specific to georeference plug-ins
+ *  Interface specific to georeference plug-ins.
  *
  *  Defines the georeference specific interface to all algorithm plug-ins. 
  *  This interface contains all georeference specific operations.
@@ -24,6 +24,8 @@ class RasterElement;
  *  For Georeference plug-ins to properly serialize and deserialize as part of
  *  a session, they need to implement SessionItem::serialize and 
  *  SessionItem::deserialize.
+ *
+ *  @see GeoreferenceExt1
  */
 class Georeference
 {
@@ -104,7 +106,7 @@ public:
      *
      * @param pRaster
      *        The RasterElement to test.
-     * @return True if the plugin can handle the RasterElement, false otherwise
+     * @return \c true if the plugin can handle the RasterElement, \c false otherwise
      */
     virtual bool canHandleRasterElement(RasterElement *pRaster) const = 0;
 
@@ -115,6 +117,37 @@ protected:
     *  the PlugIn interface and calling PlugInManagerServices::destroyPlugIn().
     */
    virtual ~Georeference() {}
+};
+
+/**
+ *  Extension interface specific to georeference plug-ins.
+ *
+ *  If a georeference plug-in can accurately extrapolate beyond the extents of
+ *  its associated raster element, it should inherit and implement this interface.
+ */
+class GeoreferenceExt1
+{
+public:
+    /**
+     *  Specifies whether the plug-in can accurately extrapolate beyond the
+     *  extents of its associated raster element.
+     *
+     *  E.g. if this method returns \c true, the status bar will display geocoordinates
+     *  regardless of whether the cursor is within its associated raster element
+     *  or not.
+     *
+     *  @return  Returns \c true if the plug-in can extrapolate, otherwise returns
+     *           \c false.
+     */
+   virtual bool canExtrapolate() const = 0;
+
+protected:
+   /**
+    *  Since the GeoreferenceExt1 interface is usually used in conjunction with the
+    *  PlugIn and Executable interfaces, this should be destroyed by casting to
+    *  the PlugIn interface and calling PlugInManagerServices::destroyPlugIn().
+    */
+   virtual ~GeoreferenceExt1() {}
 };
 
 #endif

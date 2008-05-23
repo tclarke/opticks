@@ -23,8 +23,8 @@
 class SampleGeoref : public GeoreferenceShell
 {
 public:
-   SampleGeoref(void);
-   ~SampleGeoref(void);
+   SampleGeoref();
+   ~SampleGeoref();
 
    bool setInteractive();
 
@@ -45,6 +45,8 @@ public:
 
    void animationFrameChanged(Subject &subject, const std::string &signal, const boost::any &data);
 
+   bool canExtrapolate() const;
+
 private:
    static LocationType rotate(LocationType loc, double rad);
 
@@ -52,6 +54,8 @@ private:
    int mYSize;
    double mXScale;
    double mYScale;
+
+   bool mExtrapolate;
 
    double mFrames;
    unsigned int mCurrentFrame;

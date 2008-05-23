@@ -29,8 +29,17 @@
 XERCES_CPP_NAMESPACE_USE
 
 SampleGeoref::SampleGeoref() :
-   mpGui(NULL),
-   mpAnimation(SIGNAL_NAME(Animation, FrameChanged), Slot(this, &SampleGeoref::animationFrameChanged))
+   mXSize(10),
+   mYSize(5),
+   mXScale(1.0),
+   mYScale(1.0),
+   mExtrapolate(false),
+   mFrames(1.0),
+   mCurrentFrame(1),
+   mRotate(false),
+   mpAnimation(SIGNAL_NAME(Animation, FrameChanged), Slot(this, &SampleGeoref::animationFrameChanged)),
+   mpRaster(NULL),
+   mpGui(NULL)
 {
    setName("SampleGeoref");
    setCreator("Ball Aerospace & Technologies, Corp.");
@@ -43,7 +52,7 @@ SampleGeoref::SampleGeoref() :
    destroyAfterExecute(false);
 }
 
-SampleGeoref::~SampleGeoref(void)
+SampleGeoref::~SampleGeoref()
 {
 }
 
@@ -58,6 +67,7 @@ bool SampleGeoref::getInputSpecification(PlugInArgList*& pArgList)
    bool success = GeoreferenceShell::getInputSpecification(pArgList);
    success = success && pArgList->addArg<int>("XSize", 10);
    success = success && pArgList->addArg<int>("YSize", 5);
+   success = success && pArgList->addArg<bool>("Extrapolate", false);
    success = success && pArgList->addArg<bool>("Animated", false);
    success = success && pArgList->addArg<bool>("Rotate", false);
    success = success && pArgList->addArg<View>(ViewArg());
@@ -76,13 +86,11 @@ bool SampleGeoref::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
 
    // Default values
    bool animated = false;
-   mXSize = 10;
-   mYSize = 5;
-   mRotate = false;
 
    // get factors from pInArgList
    pInArgList->getPlugInArgValue("XSize", mXSize);
    pInArgList->getPlugInArgValue("YSize", mYSize);
+   pInArgList->getPlugInArgValue("Extrapolate", mExtrapolate);
    pInArgList->getPlugInArgValue("Animated", animated);
    pInArgList->getPlugInArgValue("Rotate", mRotate);
 
@@ -96,14 +104,10 @@ bool SampleGeoref::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
       mYSize = mpGui->getYSize();
       animated = mpGui->getAnimated();
       mRotate = mpGui->getRotate();
+      mExtrapolate = mpGui->getExtrapolate();
    }
 
-   if (!animated)
-   {
-      mCurrentFrame = 1;
-      mFrames = 1;
-   }
-   else
+   if (animated)
    {
       SpatialDataView *pSpatialView = dynamic_cast<SpatialDataView*>(pView);
       FAIL_IF(pSpatialView == NULL, "Could not find spatial data view.", return false);
@@ -233,6 +237,7 @@ bool SampleGeoref::serialize(SessionItemSerializer &serializer) const
    writer.addAttr("xScale", mXScale);
    writer.addAttr("yScale", mYScale);
    writer.addAttr("frames", mFrames);
+   writer.addAttr("extrapolate", mExtrapolate);
    writer.addAttr("currentFrame", mCurrentFrame);
    writer.addAttr("rotate", mRotate);
    const Animation *pAnim = mpAnimation.get();
@@ -258,6 +263,7 @@ bool SampleGeoref::deserialize(SessionItemDeserializer &deserializer)
          mXScale = atof(A(pRootElement->getAttribute(X("xScale"))));
          mYScale = atof(A(pRootElement->getAttribute(X("yScale"))));
          mFrames = atof(A(pRootElement->getAttribute(X("frames"))));
+         mExtrapolate = StringUtilities::fromXmlString<bool>(A(pRootElement->getAttribute(X("extrapolate"))));
          mCurrentFrame = atoi(A(pRootElement->getAttribute(X("currentFrame"))));
          mRotate = atoi(A(pRootElement->getAttribute(X("rotate"))));
          std::string animId = A(pRootElement->getAttribute(X("animationId")));
@@ -273,4 +279,9 @@ bool SampleGeoref::deserialize(SessionItemDeserializer &deserializer)
       }
    }
    return false;
+}
+
+bool SampleGeoref::canExtrapolate() const
+{
+   return mExtrapolate;
 }
