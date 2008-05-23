@@ -13,7 +13,7 @@
 #include "ProductView.h"
 #include "ProductViewImp.h"
 
-class ProductViewAdapter : public ProductView, public ProductViewImp VIEWEXTENSION_CLASSES
+class ProductViewAdapter : public ProductView, public ProductViewImp PRODUCTVIEWADAPTEREXTENSION_CLASSES
 {
 public:
    ProductViewAdapter(const std::string& id, const std::string& viewName, QGLContext* drawContext = 0,

@@ -246,6 +246,9 @@ private:
    double calculateThresholdForEncodingType(EncodingType type) const;
 };
 
+#define RASTERLAYERADAPTEREXTENSION_CLASSES \
+   LAYERADAPTEREXTENSION_CLASSES
+
 #define RASTERLAYERADAPTER_METHODS(impClass) \
    LAYERADAPTER_METHODS(impClass) \
    bool isGpuImageSupported() const \

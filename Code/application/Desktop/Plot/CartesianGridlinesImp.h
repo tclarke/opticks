@@ -42,6 +42,9 @@ private:
    PlotGroupAdapter mLines;
 };
 
+#define CARTESIANGRIDLINESADAPTEREXTENSION_CLASSES \
+   GRIDLINESADAPTEREXTENSION_CLASSES
+
 #define CARTESIANGRIDLINESADAPTER_METHODS(impClass) \
    GRIDLINESADAPTER_METHODS(impClass) \
    OrientationType getOrientation() const \

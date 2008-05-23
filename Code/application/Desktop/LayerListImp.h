@@ -83,6 +83,9 @@ private:
    std::vector<Layer*> mDisplayedLayers;
 };
 
+#define LAYERLISTADAPTEREXTENSION_CLASSES \
+   SUBJECTADAPTEREXTENSION_CLASSES
+
 #define LAYERLISTADAPTER_METHODS(impClass) \
    SUBJECTADAPTER_METHODS(impClass) \
    RasterElement* getPrimaryRasterElement() const \

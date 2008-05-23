@@ -15,7 +15,7 @@
 
 class RasterElement;
 
-class RasterLayerAdapter : public RasterLayer, public RasterLayerImp
+class RasterLayerAdapter : public RasterLayer, public RasterLayerImp RASTERLAYERADAPTEREXTENSION_CLASSES
 {
 public:
    RasterLayerAdapter(const std::string& id, const std::string& layerName, RasterElement* pRasterElement);

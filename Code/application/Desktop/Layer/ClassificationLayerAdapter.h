@@ -15,7 +15,7 @@
 
 class AnnotationElement;
 
-class ClassificationLayerAdapter : public ClassificationLayer, public ClassificationLayerImp
+class ClassificationLayerAdapter : public ClassificationLayer, public ClassificationLayerImp CLASSIFICATIONLAYERADAPTEREXTENSION_CLASSES
 {
 public:
    ClassificationLayerAdapter(const std::string& id, const std::string& layerName, AnnotationElement* pElement);

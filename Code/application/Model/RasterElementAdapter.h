@@ -13,7 +13,7 @@
 #include "RasterElement.h"
 #include "RasterElementImp.h"
 
-class RasterElementAdapter : public RasterElement, public RasterElementImp
+class RasterElementAdapter : public RasterElement, public RasterElementImp RASTERELEMENTADAPTEREXTENSION_CLASSES
 {
 public:
    RasterElementAdapter(const DataDescriptorImp& descriptor, const std::string& id);

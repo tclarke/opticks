@@ -857,10 +857,10 @@ void AnimationControllerImp::destroyAnimation()
    AnimationImp* pAnimationImp = const_cast<AnimationImp*> (dynamic_cast<const AnimationImp*> (sender()));
    if (pAnimationImp != NULL)
    {
-      const list<Slot> &frameChangedObservers = pAnimationImp->getSlots(SIGNAL_NAME(Animation, FrameChanged));
+      const list<SafeSlot> &frameChangedObservers = pAnimationImp->getSlots(SIGNAL_NAME(Animation, FrameChanged));
       if (frameChangedObservers.empty())
       {
-         const list<Slot>& deletedObservers = pAnimationImp->getSlots(SIGNAL_NAME(Subject, Deleted));
+         const list<SafeSlot>& deletedObservers = pAnimationImp->getSlots(SIGNAL_NAME(Subject, Deleted));
          if (deletedObservers.size() == 1)
          {
             if (deletedObservers.front() == Slot(this, &AnimationControllerImp::movieDeleted))

@@ -22,8 +22,7 @@ public:
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
 
-   bool attach(const std::string& signal, const Slot& slot);
-   bool detach(const std::string& signal, const Slot& slot);
+   SUBJECTADAPTER_METHODS(SubjectImp)
 
    void setBatch();
    void setInteractive();

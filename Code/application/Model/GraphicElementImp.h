@@ -53,6 +53,9 @@ private:
    AttachmentPtr<RasterElement> mpGeocentricSource;
 };
 
+#define GRAPHICELEMENTADAPTEREXTENSION_CLASSES \
+   DATAELEMENTADAPTEREXTENSION_CLASSES
+
 #define GRAPHICELEMENTADAPTER_METHODS(impClass) \
    DATAELEMENTADAPTER_METHODS(impClass) \
    GraphicGroup *getGroup() \

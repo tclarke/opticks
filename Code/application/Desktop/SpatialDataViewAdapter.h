@@ -13,7 +13,7 @@
 #include "SpatialDataView.h"
 #include "SpatialDataViewImp.h"
 
-class SpatialDataViewAdapter : public SpatialDataView, public SpatialDataViewImp VIEWEXTENSION_CLASSES
+class SpatialDataViewAdapter : public SpatialDataView, public SpatialDataViewImp SPATIALDATAVIEWADAPTEREXTENSION_CLASSES
 {
 public:
    SpatialDataViewAdapter(const std::string& id, const std::string& viewName, QGLContext* drawContext = 0,

@@ -13,7 +13,7 @@
 #include "AnimationToolBar.h"
 #include "AnimationToolBarImp.h"
 
-class AnimationToolBarAdapter : public AnimationToolBar, public AnimationToolBarImp
+class AnimationToolBarAdapter : public AnimationToolBar, public AnimationToolBarImp ANIMATIONTOOLBARADAPTEREXTENSION_CLASSES
 {
 public:
    AnimationToolBarAdapter(const std::string& id, QWidget* parent = 0);

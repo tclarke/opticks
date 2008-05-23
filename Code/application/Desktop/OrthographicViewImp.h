@@ -64,6 +64,9 @@ private:
    bool mLockRatio;
 };
 
+#define ORTHOGRAPHICVIEWADAPTEREXTENSION_CLASSES \
+   VIEWADAPTEREXTENSION_CLASSES
+
 #define ORTHOGRAPHICVIEWADAPTER_METHODS(impClass) \
    VIEWADAPTER_METHODS(impClass) \
    void lockAspectRatio(bool bLock) \

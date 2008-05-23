@@ -44,6 +44,9 @@ private:
    std::vector<TiePoint> mTiePoints;
 };
 
+#define TIEPOINTLISTADAPTEREXTENSION_CLASSES \
+   DATAELEMENTADAPTEREXTENSION_CLASSES
+
 #define TIEPOINTLISTADAPTER_METHODS(impClass) \
    DATAELEMENTADAPTER_METHODS(impClass) \
    void setMissionDatasetName(std::string missionName) \

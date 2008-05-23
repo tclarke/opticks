@@ -13,7 +13,7 @@
 #include "DockWindow.h"
 #include "DockWindowImp.h"
 
-class DockWindowAdapter : public DockWindow, public DockWindowImp
+class DockWindowAdapter : public DockWindow, public DockWindowImp DOCKWINDOWADAPTEREXTENSION_CLASSES
 {
 public:
    DockWindowAdapter(const std::string& id, const std::string& windowName, QWidget* parent = 0);

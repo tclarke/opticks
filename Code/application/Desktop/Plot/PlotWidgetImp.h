@@ -167,6 +167,10 @@ private:
    void setLabelColor(const QColor& clrClassification, const QColor& clrOrganization);
 };
 
+#define PLOTWIDGETADAPTEREXTENSION_CLASSES \
+   SESSIONITEMADAPTEREXTENSION_CLASSES \
+   SUBJECTADAPTEREXTENSION_CLASSES
+
 #define PLOTWIDGETADAPTER_METHODS(impClass) \
    SESSIONITEMADAPTER_METHODS(impClass) \
    SUBJECTADAPTER_METHODS(impClass) \

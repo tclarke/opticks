@@ -13,7 +13,7 @@
 #include "HistogramWindow.h"
 #include "HistogramWindowImp.h"
 
-class HistogramWindowAdapter : public HistogramWindow, public HistogramWindowImp
+class HistogramWindowAdapter : public HistogramWindow, public HistogramWindowImp HISTOGRAMWINDOWADAPTEREXTENSION_CLASSES
 {
 public:
    HistogramWindowAdapter(const std::string& id, QWidget* parent = 0);

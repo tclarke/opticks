@@ -44,6 +44,9 @@ private:
    std::vector<double> mDrawLocations;
 };
 
+#define POLARGRIDLINESADAPTEREXTENSION_CLASSES \
+   GRIDLINESADAPTEREXTENSION_CLASSES
+
 #define POLARGRIDLINESADAPTER_METHODS(impClass) \
    GRIDLINESADAPTER_METHODS(impClass) \
    void setRadialInterval(double angle) \

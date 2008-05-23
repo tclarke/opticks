@@ -13,7 +13,7 @@
 #include "PlotWidget.h"
 #include "PlotWidgetImp.h"
 
-class PlotWidgetAdapter : public PlotWidget, public PlotWidgetImp
+class PlotWidgetAdapter : public PlotWidget, public PlotWidgetImp PLOTWIDGETADAPTEREXTENSION_CLASSES
 {
 public:
    PlotWidgetAdapter(const std::string& id, const std::string& plotName, PlotType plotType, PlotSet* pPlotSet,

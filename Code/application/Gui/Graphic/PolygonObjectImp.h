@@ -57,11 +57,10 @@ private:
       GLfloat weight[4], void** pOutData);
 };
 
+#define POLYGONOBJECTADAPTEREXTENSION_CLASSES \
+   POLYLINEOBJECTADAPTEREXTENSION_CLASSES
+
 #define POLYGONOBJECTADAPTER_METHODS(impClass) \
-   GRAPHICOBJECTADAPTER_METHODS(impClass) \
-   const std::vector<LocationType> &getVertices() const \
-   { \
-      return impClass::getVertices(); \
-   }
+   POLYLINEOBJECTADAPTER_METHODS(impClass)
 
 #endif

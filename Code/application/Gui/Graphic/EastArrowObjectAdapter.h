@@ -13,7 +13,7 @@
 #include "EastArrowObject.h"
 #include "EastArrowObjectImp.h"
 
-class EastArrowObjectAdapter : public EastArrowObject, public EastArrowObjectImp GRAPHICOBJECTEXTENSION_CLASSES
+class EastArrowObjectAdapter : public EastArrowObject, public EastArrowObjectImp EASTARROWOBJECTADAPTEREXTENSION_CLASSES
 {
 public:
    EastArrowObjectAdapter(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer,

@@ -63,6 +63,9 @@ private:
    PolygonPlotObjectAdapter mArrowHead;
 };
 
+#define ARROWADAPTEREXTENSION_CLASSES \
+   PLOTOBJECTADAPTEREXTENSION_CLASSES
+
 #define ARROWADAPTER_METHODS(impClass) \
    PLOTOBJECTADAPTER_METHODS(impClass) \
    ArrowStyle getArrowStyle() const \

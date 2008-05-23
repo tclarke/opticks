@@ -15,6 +15,7 @@
 #include <QtCore/QTextStream>
 
 #include "MessageLog.h"
+#include "SerializableImp.h"
 #include "SubjectImp.h"
 #include "SubjectAdapter.h"
 #include "TypesFile.h"
@@ -134,6 +135,59 @@ private:
    XMLWriter *mpWriter;
 };
 
+#define MESSAGELOGADAPTEREXTENSION_CLASSES \
+   SUBJECTADAPTEREXTENSION_CLASSES
+
+#define MESSAGELOGADAPTER_METHODS(impClass) \
+   SUBJECTADAPTER_METHODS(impClass) \
+Message* createMessage(const std::string &action, \
+                       const std::string &component, \
+                       const std::string &key, \
+                       bool finalizeOnCreate = false, \
+                       bool recurse = true) \
+{ \
+   return impClass::createMessage(action, component, key, finalizeOnCreate, recurse); \
+} \
+Step* createStep(const std::string &action, \
+       const std::string &component, \
+       const std::string &key, \
+       bool recurse = true) \
+{ \
+   return impClass::createStep(action, component, key, recurse); \
+} \
+MessageLog::size_t size() const  \
+{  \
+   return impClass::size();  \
+} \
+MessageLog::iterator begin() \
+{ \
+   return impClass::begin(); \
+} \
+MessageLog::const_iterator begin() const \
+{ \
+   return impClass::begin(); \
+} \
+MessageLog::iterator end() \
+{ \
+   return impClass::end(); \
+} \
+MessageLog::const_iterator end() const \
+{ \
+   return impClass::end(); \
+} \
+Message *operator[](MessageLog::size_t i)  \
+{  \
+   return impClass::operator[](i);  \
+} \
+const Message *operator[](MessageLog::size_t i) const  \
+{  \
+   return impClass::operator[](i);  \
+} \
+const std::string& getLogName() \
+{ \
+   return impClass::getLogName(); \
+}
+
 class MessageImp : public SubjectImp, public Serializable
 {
 public:
@@ -193,6 +247,7 @@ public:
 
 public: // serialize functionality
    virtual bool toXml(XMLWriter* pXml) const;
+   virtual bool fromXml(DOMNode* pDocument, unsigned int version) const { return false; }
    virtual void serializeDate(std::string &date, std::string &time) const;
 
 public: // SubjectAdapter functionality
@@ -240,7 +295,7 @@ public:
                                bool recurse=true);
 
    virtual bool finalize(Message::Result result = Message::Success);
-   virtual bool finalize(Message::Result result = Message::Success, const std::string& failureReason = "");
+   virtual bool finalize(Message::Result result, const std::string& failureReason);
    virtual const std::string& getFailureMessage() const;
    virtual Message::Result getResult() const;
 
@@ -276,8 +331,13 @@ private:
    Step *mpCurrentStep;
 };
 
+#define MESSAGEADAPTEREXTENSION_CLASSES \
+   SUBJECTADAPTEREXTENSION_CLASSES \
+   SERIALIZABLEADAPTEREXTENSION_CLASSES
+
 #define MESSAGEADAPTER_METHODS(impClass) \
    SUBJECTADAPTER_METHODS(impClass) \
+   SERIALIZABLEADAPTER_METHODS(impClass) \
 bool addProperty(const std::string &name, const char *value) \
 { \
    return impClass::addProperty(name, value); \
@@ -468,35 +528,70 @@ void serializeDate(std::string &date, std::string &time) const \
    impClass::serializeDate(date, time); \
 } \
  \
-bool toXml(XMLWriter* pXml) const \
-{ \
-   return impClass::toXml(pXml); \
-} \
- \
-const std::string& getObjectType() const \
-{ \
-   static std::string type("MessageAdapter"); \
-   return type; \
-} \
- \
-bool isKindOf(const std::string& name) const \
-{ \
-   if ((name == getObjectType()) || (name == "Message")) \
-   { \
-      return true; \
-   } \
- \
-   return impClass::isKindOf(name); \
-} \
-   \
-bool fromXml(DOMNode* pDocument, unsigned int version) \
-{ \
-   return false; \
-} \
- \
 const DynamicObject *getProperties() const \
 { \
-   return MessageImp::getProperties(); \
+   return impClass::getProperties(); \
+}
+
+#define STEPADAPTEREXTENSION_CLASSES \
+   MESSAGEADAPTEREXTENSION_CLASSES
+
+#define STEPADAPTER_METHODS(impClass) \
+   MESSAGEADAPTER_METHODS(impClass) \
+bool finalize(Message::Result result, const std::string& failureReason) \
+{ \
+   return impClass::finalize(result, failureReason); \
 } \
+const std::string& getFailureMessage() const \
+{ \
+   return impClass::getFailureMessage(); \
+} \
+Step *StepAdapter::addStep(const std::string &action, \
+                           const std::string &component, \
+                           const std::string &key, \
+                           bool recurse=true) \
+{ \
+   return impClass::addStep(action, component, key, recurse); \
+} \
+Message *StepAdapter::addMessage(const std::string &action, \
+                                 const std::string &component, \
+                                 const std::string &key, \
+                                 bool finalizeOnCreate=false, \
+                                 bool recurse=true) \
+{ \
+   return impClass::addMessage(action, component, key, finalizeOnCreate, recurse); \
+} \
+Step::size_t size() const  \
+{  \
+   return impClass::size();  \
+} \
+Step::iterator begin() \
+{ \
+   return impClass::begin(); \
+} \
+Step::const_iterator begin() const \
+{ \
+   return impClass::begin(); \
+} \
+Step::iterator end() \
+{ \
+   return impClass::end(); \
+} \
+Step::const_iterator end() const \
+{ \
+   return impClass::end(); \
+} \
+Message *operator[](Step::size_t i)  \
+{  \
+   return impClass::operator[](i);  \
+} \
+const Message *operator[](Step::size_t i) const  \
+{  \
+   return impClass::operator[](i);  \
+} \
+const Step *getParent() const  \
+{  \
+   return impClass::getParent();  \
+}
 
 #endif

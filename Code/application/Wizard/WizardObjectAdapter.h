@@ -13,7 +13,7 @@
 #include "WizardObject.h"
 #include "WizardObjectImp.h"
 
-class WizardObjectAdapter : public WizardObject, public WizardObjectImp
+class WizardObjectAdapter : public WizardObject, public WizardObjectImp WIZARDOBJECTADAPTEREXTENSION_CLASSES
 {
 public:
    WizardObjectAdapter();

@@ -122,16 +122,6 @@ bool DesktopServicesImp::isKindOf(const string& className) const
    return SubjectImp::isKindOf(className);
 }
 
-bool DesktopServicesImp::attach(const string& signal, const Slot& slot)
-{
-   return SubjectImp::attach(signal, slot);
-}
-
-bool DesktopServicesImp::detach(const string& signal, const Slot& slot)
-{
-   return SubjectImp::detach(signal, slot);
-}
-
 QWidget* DesktopServicesImp::getMainWidget() const
 {
    QWidgetList topLevelWidgets = QApplication::topLevelWidgets();

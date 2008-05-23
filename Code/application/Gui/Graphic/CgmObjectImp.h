@@ -142,6 +142,9 @@ private:
    short* mpCgm;
 };
 
+#define CGMOBJECTADAPTEREXTENSION_CLASSES \
+   GRAPHICGROUPADAPTEREXTENSION_CLASSES
+
 #define CGMOBJECTADAPTER_METHODS(impClass) \
    GRAPHICGROUPADAPTER_METHODS(impClass) \
    virtual short* toCgm(int& lBytes) \

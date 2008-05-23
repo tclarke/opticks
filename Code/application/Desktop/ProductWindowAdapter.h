@@ -13,7 +13,7 @@
 #include "ProductWindow.h"
 #include "ProductWindowImp.h"
 
-class ProductWindowAdapter : public ProductWindow, public ProductWindowImp
+class ProductWindowAdapter : public ProductWindow, public ProductWindowImp PRODUCTWINDOWADAPTEREXTENSION_CLASSES
 {
 public:
    ProductWindowAdapter(const std::string& id, const std::string& windowName, QWidget* parent = 0);

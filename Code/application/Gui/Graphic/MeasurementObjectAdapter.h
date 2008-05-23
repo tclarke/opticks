@@ -13,7 +13,7 @@
 #include "GraphicObject.h"
 #include "MeasurementObjectImp.h"
 
-class MeasurementObjectAdapter : public GraphicObject, public MeasurementObjectImp GRAPHICOBJECTEXTENSION_CLASSES
+class MeasurementObjectAdapter : public GraphicObject, public MeasurementObjectImp MEASUREMENTOBJECTADAPTEREXTENSION_CLASSES
 {
 public:
    MeasurementObjectAdapter(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer,
@@ -44,7 +44,7 @@ public:
       return MeasurementObjectImp::isKindOf(className);
    }
 
-   GRAPHICOBJECTADAPTER_METHODS(MeasurementObjectImp)
+   MEASUREMENTOBJECTADAPTER_METHODS(MeasurementObjectImp)
 };
 
 #endif

@@ -13,7 +13,7 @@
 #include "PolarPlot.h"
 #include "PolarPlotImp.h"
 
-class PolarPlotAdapter : public PolarPlot, public PolarPlotImp POLARPLOTEXTENSION_CLASSES
+class PolarPlotAdapter : public PolarPlot, public PolarPlotImp POLARPLOTADAPTEREXTENSION_CLASSES
 {
 public:
    PolarPlotAdapter(const std::string& id, const std::string& viewName, QGLContext* pDrawContext = 0,

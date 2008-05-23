@@ -59,6 +59,9 @@ private:
    std::vector<PlotObject*> mObjects;
 };
 
+#define PLOTGROUPADAPTEREXTENSION_CLASSES \
+   PLOTOBJECTADAPTEREXTENSION_CLASSES
+
 #define PLOTGROUPADAPTER_METHODS(impClass) \
    PLOTOBJECTADAPTER_METHODS(impClass) \
    virtual PlotObject* addObject(const PlotObjectType& eType) \

@@ -50,6 +50,9 @@ private:
    std::list<GcpPoint> selected;
 };
 
+#define GCPLISTADAPTEREXTENSION_CLASSES \
+   DATAELEMENTADAPTEREXTENSION_CLASSES
+
 #define GCPLISTADAPTER_METHODS(impClass) \
    DATAELEMENTADAPTER_METHODS(impClass) \
    int getCount() const \

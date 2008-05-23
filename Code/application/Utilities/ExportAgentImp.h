@@ -58,6 +58,9 @@ private:
    FileDescriptor* mpFileDescriptor;
 };
 
+#define EXPORTAGENTADAPTEREXTENSION_CLASSES \
+   EXECUTABLEAGENTADAPTEREXTENSION_CLASSES
+
 #define EXPORTAGENTADAPTER_METHODS(impClass) \
    EXECUTABLEAGENTADAPTER_METHODS(impClass) \
    void instantiate(std::string exporterName, Progress* pProgress, bool batch) \

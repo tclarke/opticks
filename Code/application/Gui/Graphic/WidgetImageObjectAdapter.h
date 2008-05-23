@@ -13,7 +13,7 @@
 #include "WidgetImageObject.h"
 #include "WidgetImageObjectImp.h"
 
-class WidgetImageObjectAdapter : public WidgetImageObject, public WidgetImageObjectImp GRAPHICOBJECTEXTENSION_CLASSES
+class WidgetImageObjectAdapter : public WidgetImageObject, public WidgetImageObjectImp WIDGETIMAGEOBJECTADAPTEREXTENSION_CLASSES
 {
 public:
    WidgetImageObjectAdapter(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer,

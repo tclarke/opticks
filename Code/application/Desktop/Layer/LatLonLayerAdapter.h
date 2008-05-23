@@ -15,7 +15,7 @@
 
 class RasterElement;
 
-class LatLonLayerAdapter : public LatLonLayer, public LatLonLayerImp
+class LatLonLayerAdapter : public LatLonLayer, public LatLonLayerImp LATLONLAYERADAPTEREXTENSION_CLASSES
 {
 public:
    LatLonLayerAdapter(const std::string& id, const std::string& layerName, RasterElement* pRaster);

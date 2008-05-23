@@ -62,6 +62,9 @@ private:
    bool mToggledAllPoints;
 };
 
+#define AOIELEMENTADAPTEREXTENSION_CLASSES \
+   GRAPHICELEMENTADAPTEREXTENSION_CLASSES
+
 #define AOIELEMENTADAPTER_METHODS(impClass) \
    GRAPHICELEMENTADAPTER_METHODS(impClass) \
    void clearPoints() \

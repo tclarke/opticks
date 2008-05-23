@@ -13,7 +13,7 @@
 #include "Text.h"
 #include "TextImp.h"
 
-class TextAdapter : public Text, public TextImp
+class TextAdapter : public Text, public TextImp TEXTADAPTEREXTENSION_CLASSES
 {
 public:
    TextAdapter(PlotViewImp* pPlot, bool bPrimary);

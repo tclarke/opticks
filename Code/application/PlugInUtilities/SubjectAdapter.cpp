@@ -13,14 +13,6 @@
 
 using namespace std;
 
-SubjectAdapter::SubjectAdapter()
-{
-}
-
-SubjectAdapter::~SubjectAdapter()
-{
-}
-
 bool SubjectAdapter::attach(const std::string &signal, const Slot &slot)
 {
    return SubjectImp::attach(signal, slot);

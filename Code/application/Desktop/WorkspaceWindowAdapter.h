@@ -13,7 +13,7 @@
 #include "WorkspaceWindow.h"
 #include "WorkspaceWindowImp.h"
 
-class WorkspaceWindowAdapter : public WorkspaceWindow, public WorkspaceWindowImp
+class WorkspaceWindowAdapter : public WorkspaceWindow, public WorkspaceWindowImp WORKSPACEWINDOWADAPTEREXTENSION_CLASSES
 {
 public:
    WorkspaceWindowAdapter(const std::string& id, const std::string& windowName, QWidget* parent = 0);

@@ -65,6 +65,9 @@ private:
    LineStyle mLineStyle;
 };
 
+#define CURVEADAPTEREXTENSION_CLASSES \
+   PLOTOBJECTADAPTEREXTENSION_CLASSES
+
 #define CURVEADAPTER_METHODS(impClass) \
    PLOTOBJECTADAPTER_METHODS(impClass) \
    bool setPoints(const std::vector<LocationType>& points) \

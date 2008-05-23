@@ -8,7 +8,7 @@
  */
 
 #include "SubjectImpPrivate.h"
-#include "Slot.h"
+#include "SafeSlot.h"
 #include "Subject.h"
 
 #include <QtCore/QtGlobal>
@@ -28,7 +28,7 @@ SubjectImpPrivate::~SubjectImpPrivate()
 
 bool SubjectImpPrivate::attach(Subject &subject, const string &signal, const Slot &slot)
 {
-   if (slot == Slot())
+   if (slot == SafeSlot())
    {
       return false;
    }
@@ -41,11 +41,11 @@ bool SubjectImpPrivate::attach(Subject &subject, const string &signal, const Slo
    MapType::iterator pSlotVec=mSlots.find(signal);
    if (pSlotVec != mSlots.end())
    {
-      list<Slot> &slotVec = pSlotVec->second;
-      list<Slot>::iterator pSlot;
+      list<SafeSlot> &slotVec = pSlotVec->second;
+      list<SafeSlot>::iterator pSlot;
       for (pSlot=slotVec.begin(); pSlot!=slotVec.end(); ++pSlot)
       {
-         if (*pSlot == slot) 
+         if (*pSlot == slot)
          {
             return false;
          }
@@ -53,6 +53,12 @@ bool SubjectImpPrivate::attach(Subject &subject, const string &signal, const Slo
    }
 
    mSlots[signal].push_back(slot);
+   SafeSlot &mappedSlot(mSlots[signal].back());
+   SlotInvalidator *pInvalidator = mappedSlot.getInvalidator();
+   if (pInvalidator)
+   {
+      pInvalidator->activate(&mappedSlot);
+   }
 
    try
    {
@@ -73,15 +79,20 @@ bool SubjectImpPrivate::detach(Subject &subject, const string &signal, const Slo
    MapType::iterator pSlotVec = mSlots.find(signal);
    if (pSlotVec != mSlots.end())
    {
-      list<Slot> &slotVec = pSlotVec->second;
-      if (slot == Slot())
+      list<SafeSlot> &slotVec = pSlotVec->second;
+      if (slot == SafeSlot())
       {
          bool shouldCallDetachMethod = true;
-         list<Slot>::iterator pSlot;
+         list<SafeSlot>::iterator pSlot;
          for (pSlot=slotVec.begin(); pSlot!=slotVec.end(); ++pSlot)
          {
-            Slot slotCopy = *pSlot;
-            *pSlot = Slot();
+            SlotInvalidator *pInvalidator = pSlot->getInvalidator();
+            if (pInvalidator)
+            {
+               pInvalidator->deactivate();
+            }
+            SafeSlot slotCopy = *pSlot;
+            *pSlot = SafeSlot();
             if (shouldCallDetachMethod)
             {
                try
@@ -99,11 +110,16 @@ bool SubjectImpPrivate::detach(Subject &subject, const string &signal, const Slo
       }
       else
       {
-         list<Slot>::iterator pSlot = find(slotVec.begin(), slotVec.end(), slot);
+         list<SafeSlot>::iterator pSlot = find(slotVec.begin(), slotVec.end(), slot);
          if (pSlot != slotVec.end())
          {
-            Slot slotCopy = *pSlot;
-            *pSlot = Slot();
+            SlotInvalidator *pInvalidator = pSlot->getInvalidator();
+            if (pInvalidator)
+            {
+               pInvalidator->deactivate();
+            }
+            SafeSlot slotCopy = *pSlot;
+            *pSlot = SafeSlot();
             try
             {
                slotCopy.callDetachMethod(subject, signal);
@@ -152,7 +168,7 @@ void SubjectImpPrivate::notify(Subject &subject, const string &signal, const str
    MapType::iterator pSlotVec = mSlots.find(signal);
    if (pSlotVec != mSlots.end())
    {
-      list<Slot> &slotVec = pSlotVec->second;
+      list<SafeSlot> &slotVec = pSlotVec->second;
 
       // Scope the recursion popper
       {
@@ -163,13 +179,13 @@ void SubjectImpPrivate::notify(Subject &subject, const string &signal, const str
          // This prevents an infinite loop when a Slot does a detach/attach to a signal
          unsigned int slotNum = 0;
          const unsigned int numOriginalSlots = slotVec.size();
-         vector<Slot> notifiedSlots;
+         vector<SafeSlot> notifiedSlots;
          notifiedSlots.reserve(numOriginalSlots);
-         for (list<Slot>::iterator pSlot = slotVec.begin(); pSlot != slotVec.end(); ++pSlot, ++slotNum)
+         for (list<SafeSlot>::iterator pSlot = slotVec.begin(); pSlot != slotVec.end(); ++pSlot, ++slotNum)
          {
             try
             {
-               Slot slotCopy = *pSlot;
+               SafeSlot slotCopy = *pSlot;
                if (slotNum < numOriginalSlots ||
                   find(notifiedSlots.begin(), notifiedSlots.end(), slotCopy) == notifiedSlots.end())
                {
@@ -195,9 +211,9 @@ void SubjectImpPrivate::notify(Subject &subject, const string &signal, const str
    }
 }
 
-const list<Slot>& SubjectImpPrivate::getSlots(const string &signal)
+const list<SafeSlot>& SubjectImpPrivate::getSlots(const string &signal)
 {
-   static list<Slot> emptyList;
+   static list<SafeSlot> emptyList;
 
    if (signal.empty())
    {
@@ -207,7 +223,7 @@ const list<Slot>& SubjectImpPrivate::getSlots(const string &signal)
    MapType::iterator pSlotVec = mSlots.find(signal);
    if (pSlotVec != mSlots.end())
    {
-      list<Slot> &slotVec = pSlotVec->second;
+      list<SafeSlot> &slotVec = pSlotVec->second;
       removeEmptySlots(signal, slotVec);
       return slotVec;
    }
@@ -217,10 +233,20 @@ const list<Slot>& SubjectImpPrivate::getSlots(const string &signal)
    }
 }
 
-void SubjectImpPrivate::removeEmptySlots(const string &recursion, list<Slot> &slotVec)
+void SubjectImpPrivate::removeEmptySlots(const string &recursion, list<SafeSlot> &slotVec)
 {
    if (count(mRecursions.begin(), mRecursions.end(), recursion) == 0)
    {
-      slotVec.erase(remove(slotVec.begin(), slotVec.end(), Slot()), slotVec.end());
+      for(list<SafeSlot>::iterator pSlot=slotVec.begin(); pSlot!=slotVec.end(); )
+      {
+         if (pSlot->isValid() == false)
+         {
+            pSlot = slotVec.erase(pSlot);
+         }
+         else
+         {
+            ++pSlot;
+         }
+      }
    }
 }

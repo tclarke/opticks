@@ -55,6 +55,9 @@ class Subject;
  */
 class Slot
 {
+   friend class SubjectImpPrivate;
+   friend class SafeSlot;
+
 public:
    /**
     *  Creates an empty Slot object.
@@ -187,8 +190,8 @@ public:
       }
    }
 
-    /**
-   *  Calls the detached method on the observer, if it derives from Observer.
+   /**
+    *  Calls the detached method on the observer, if it derives from Observer.
     *
     *  This method is typically only called by Subject::detach.
     *
@@ -260,14 +263,81 @@ public:
    }
 
 protected:
+   /**
+    *  This class provides an abstract interface that implements the details of
+    *  the slot and hides the type information behind a generic interface.
+    */
    class SlotWrapper
    {
    public:
+      /**
+       *  Calls the method on the Slot.
+       *
+       *  @param   subject
+       *            The Subject that called notify.
+       *
+       *  @param   signal
+       *            The name of the signal the Subject is notifying.
+       *
+       *  @param   data
+       *            The ancillary data the Subject provided to its notification.
+       */
       virtual void update(Subject &subject, const std::string &signal, const boost::any &data) const = 0;
+
+      /**
+       *  Creates a copy of the object.
+       *
+       *  @return  A copy of the object.
+       */
       virtual SlotWrapper* clone() const = 0;
+
+      /**
+       *  Indicates if the supplied object matches this object.
+       *
+       *  @param rhs
+       *             The object to compare with.
+       *
+       *  @return \c true if the two objects match and false otherwise.
+       */
       virtual bool matches(const SlotWrapper &rhs) const = 0;
+
+      /**
+       *  Returns the type information of the concrete type of the object.
+       *
+       *  @return  The type information of the concrete object.
+       */
       virtual const std::type_info &getType() const = 0;
+
+      /**
+       *  Calls the attached method on the observer, if it derives from Observer.
+       *
+       *  This method is typically only called by Subject::attach.
+       *
+       *  @param   subject
+       *            The Subject that the slot is being attached to.
+       *
+       *  @param   signal
+       *            The name of the signal the %Slot is being attached to.
+       *
+       *  @param   slot
+       *            The slot that is being attached.
+       */
       virtual void callAttachMethod(Subject &subject, const std::string &signal, const Slot &slot) = 0;
+
+      /**
+       *  Calls the detached method on the observer, if it derives from Observer.
+       *
+       *  This method is typically only called by Subject::detach.
+       *
+       *  @param   subject
+       *            The Subject that the slot is being detached from.
+       *
+       *  @param   signal
+       *            The name of the signal the %Slot is being detached from.
+       *
+       *  @param   slot
+       *            The slot that is being detached.
+       */
       virtual void callDetachMethod(Subject &subject, const std::string &signal, const Slot &slot) = 0;
    };
 

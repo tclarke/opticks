@@ -13,7 +13,7 @@
 #include "TextObject.h"
 #include "TextObjectImp.h"
 
-class TextObjectAdapter : public TextObject, public TextObjectImp GRAPHICOBJECTEXTENSION_CLASSES
+class TextObjectAdapter : public TextObject, public TextObjectImp TEXTOBJECTADAPTEREXTENSION_CLASSES
 {
 public:
    TextObjectAdapter(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer, LocationType pixelCoord) :

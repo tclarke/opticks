@@ -16,7 +16,7 @@
 #include <string>
 #include <vector>
 
-class DynamicObjectAdapter : public DynamicObject, public DynamicObjectImp
+class DynamicObjectAdapter : public DynamicObject, public DynamicObjectImp DYNAMICOBJECTADAPTEREXTENSION_CLASSES
 {
 public:
    DynamicObjectAdapter()

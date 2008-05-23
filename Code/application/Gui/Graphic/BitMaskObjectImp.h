@@ -40,6 +40,9 @@ private:
    const BitMask *mpUnownedMask;
 };
 
+#define BITMASKOBJECTADAPTEREXTENSION_CLASSES \
+   GRAPHICOBJECTADAPTEREXTENSION_CLASSES
+
 #define BITMASKOBJECTADAPTER_METHODS(impClass) \
    GRAPHICOBJECTADAPTER_METHODS(impClass) \
    void setBitMask(const BitMask *pMask, bool copy) \

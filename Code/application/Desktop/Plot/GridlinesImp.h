@@ -64,6 +64,9 @@ private:
    int mMaxMinorLines;
 };
 
+#define GRIDLINESADAPTEREXTENSION_CLASSES \
+   PLOTOBJECTADAPTEREXTENSION_CLASSES
+
 #define GRIDLINESADAPTER_METHODS(impClass) \
    PLOTOBJECTADAPTER_METHODS(impClass) \
    void enableMinorGridlines(bool bEnable) \

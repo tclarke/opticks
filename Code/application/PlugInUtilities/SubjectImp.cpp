@@ -92,9 +92,9 @@ void Signal::SignalValue::update(Subject &subject, const std::string &signal, co
    }
 }
 
-const list<Slot>& SubjectImp::getSlots(const string &signal)
+const list<SafeSlot>& SubjectImp::getSlots(const string &signal)
 {
-   static list<Slot> emptyList;
+   static list<SafeSlot> emptyList;
    if (signal.empty())
    {
       return emptyList;

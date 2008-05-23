@@ -49,6 +49,9 @@ private:
    OverviewWindow* mpOverview;
 };
 
+#define SPATIALDATAWINDOWADAPTEREXTENSION_CLASSES \
+   WORKSPACEWINDOWADAPTEREXTENSION_CLASSES
+
 #define SPATIALDATAWINDOWADAPTER_METHODS(impClass) \
    WORKSPACEWINDOWADAPTER_METHODS(impClass) \
    SpatialDataView* getSpatialDataView() const \

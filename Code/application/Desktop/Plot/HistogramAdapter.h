@@ -13,7 +13,7 @@
 #include "Histogram.h"
 #include "HistogramImp.h"
 
-class HistogramAdapter : public Histogram, public HistogramImp
+class HistogramAdapter : public Histogram, public HistogramImp HISTOGRAMADAPTEREXTENSION_CLASSES
 {
 public:
    HistogramAdapter(PlotViewImp* pPlot, bool bPrimary);

@@ -13,7 +13,7 @@
 #include "EllipseObject.h"
 #include "EllipseObjectImp.h"
 
-class EllipseObjectAdapter : public EllipseObject, public EllipseObjectImp GRAPHICOBJECTEXTENSION_CLASSES
+class EllipseObjectAdapter : public EllipseObject, public EllipseObjectImp ELLIPSEOBJECTADAPTEREXTENSION_CLASSES
 {
 public:
    EllipseObjectAdapter(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer, LocationType pixelCoord) :

@@ -96,6 +96,9 @@ private:
    } mUpdater;
 };
 
+#define HISTOGRAMWINDOWADAPTEREXTENSION_CLASSES \
+   PLOTWINDOWADAPTEREXTENSION_CLASSES
+
 #define HISTOGRAMWINDOWADAPTER_METHODS(impClass) \
    PLOTWINDOWADAPTER_METHODS(impClass) \
    PlotWidget* createPlot(Layer* pLayer, PlotSet* pPlotSet) \

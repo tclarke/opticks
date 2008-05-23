@@ -102,6 +102,9 @@ private:
    TextObjectImp *mpBottomText;
 };
 
+#define CLASSIFICATIONLAYERADAPTEREXTENSION_CLASSES \
+   ANNOTATIONLAYERADAPTEREXTENSION_CLASSES
+
 #define CLASSIFICATIONLAYERADAPTER_METHODS(impClass) \
    ANNOTATIONLAYERADAPTER_METHODS(impClass) \
    void setClassificationFont(const Font& classificationFont) \

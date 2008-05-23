@@ -13,7 +13,7 @@
 #include "DataElement.h"
 #include "DataElementImp.h"
 
-class DataElementAdapter : public DataElement, public DataElementImp
+class DataElementAdapter : public DataElement, public DataElementImp DATAELEMENTADAPTEREXTENSION_CLASSES
 {
 public:
    DataElementAdapter(const DataDescriptorImp& descriptor, const std::string& id);

@@ -21,13 +21,17 @@
  *  Implementation of the interface for generalized registration of
  *  objects intereseted in mutations of the subclasses of this interface.
  */
-class SubjectAdapter : public Subject, public SubjectImp
+class SubjectAdapter : public Subject, public SubjectImp SUBJECTADAPTEREXTENSION_CLASSES
 {
 public:
-   SubjectAdapter();
-   ~SubjectAdapter();
-
+   /**
+    * @copydoc Subject::attach()
+    */
    bool attach(const std::string &signal, const Slot &slot);
+
+   /**
+    * @copydoc Subject::detach()
+    */
    bool detach(const std::string &signal, const Slot &slot);
 
    /**

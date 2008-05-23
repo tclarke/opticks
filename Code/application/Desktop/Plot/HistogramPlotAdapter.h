@@ -13,7 +13,7 @@
 #include "HistogramPlot.h"
 #include "HistogramPlotImp.h"
 
-class HistogramPlotAdapter : public HistogramPlot, public HistogramPlotImp HISTOGRAMPLOTEXTENSION_CLASSES
+class HistogramPlotAdapter : public HistogramPlot, public HistogramPlotImp HISTOGRAMPLOTADAPTEREXTENSION_CLASSES
 {
 public:
    HistogramPlotAdapter(const std::string& id, const std::string& viewName, QGLContext* pDrawContext = 0,

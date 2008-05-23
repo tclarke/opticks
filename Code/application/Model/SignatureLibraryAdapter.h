@@ -13,7 +13,7 @@
 #include "SignatureLibrary.h"
 #include "SignatureLibraryImp.h"
 
-class SignatureLibraryAdapter : public SignatureLibrary, public SignatureLibraryImp
+class SignatureLibraryAdapter : public SignatureLibrary, public SignatureLibraryImp SIGNATURELIBRARYADAPTEREXTENSION_CLASSES
 {
 public:
    SignatureLibraryAdapter(const DataDescriptorImp& descriptor, const std::string& id);

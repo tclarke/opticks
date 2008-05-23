@@ -73,6 +73,9 @@ private:
    Aspam::ParagraphK mParagraphK;
 };
 
+#define ASPAMADAPTEREXTENSION_CLASSES \
+   SUBJECTADAPTEREXTENSION_CLASSES
+
 /**
  *  This makes it easy to write the adapter class.
  */

@@ -15,7 +15,7 @@
 
 class RasterElement;
 
-class ThresholdLayerAdapter : public ThresholdLayer, public ThresholdLayerImp
+class ThresholdLayerAdapter : public ThresholdLayer, public ThresholdLayerImp THRESHOLDLAYERADAPTEREXTENSION_CLASSES
 {
 public:
    ThresholdLayerAdapter(const std::string& id, const std::string& layerName, RasterElement* pRasterElement);

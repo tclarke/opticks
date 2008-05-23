@@ -13,7 +13,7 @@
 #include "SessionExplorer.h"
 #include "SessionExplorerImp.h"
 
-class SessionExplorerAdapter : public SessionExplorer, public SessionExplorerImp
+class SessionExplorerAdapter : public SessionExplorer, public SessionExplorerImp SESSIONEXPLORERADAPTEREXTENSION_CLASSES
 {
 public:
    SessionExplorerAdapter(const std::string& id, QWidget* pParent = 0);

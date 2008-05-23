@@ -15,7 +15,7 @@
 
 class AnnotationElement;
 
-class AnnotationLayerAdapter : public AnnotationLayer, public AnnotationLayerImp
+class AnnotationLayerAdapter : public AnnotationLayer, public AnnotationLayerImp ANNOTATIONLAYERADAPTEREXTENSION_CLASSES
 {
 public:
    AnnotationLayerAdapter(const std::string& id, const std::string& layerName, AnnotationElement* pAnno);

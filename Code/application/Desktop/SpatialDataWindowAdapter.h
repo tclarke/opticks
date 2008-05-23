@@ -13,7 +13,7 @@
 #include "SpatialDataWindow.h"
 #include "SpatialDataWindowImp.h"
 
-class SpatialDataWindowAdapter : public SpatialDataWindow, public SpatialDataWindowImp
+class SpatialDataWindowAdapter : public SpatialDataWindow, public SpatialDataWindowImp SPATIALDATAWINDOWADAPTEREXTENSION_CLASSES
 {
 public:
    SpatialDataWindowAdapter(const std::string& id, const std::string& windowName, QWidget* parent = 0);

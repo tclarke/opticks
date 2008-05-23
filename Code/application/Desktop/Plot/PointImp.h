@@ -68,6 +68,9 @@ private:
    QColor mColor;
 };
 
+#define POINTADAPTEREXTENSION_CLASSES \
+   PLOTOBJECTADAPTEREXTENSION_CLASSES
+
 #define POINTADAPTER_METHODS(impClass) \
    PLOTOBJECTADAPTER_METHODS(impClass) \
    double getXLocation() const \

@@ -83,8 +83,11 @@ private:
    bool mUpdating;
 };
 
+#define MULTIPOINTOBJECTADAPTEREXTENSION_CLASSES \
+   PIXELOBJECTADAPTEREXTENSION_CLASSES
+
 #define MULTIPOINTOBJECTADAPTER_METHODS(impClass) \
-   GRAPHICOBJECTADAPTER_METHODS(impClass) \
+   PIXELOBJECTADAPTER_METHODS(impClass) \
    const std::vector<LocationType> &getVertices() const \
    { \
       return impClass::getVertices(); \

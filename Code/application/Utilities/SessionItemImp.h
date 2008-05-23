@@ -90,6 +90,9 @@ private:
    mutable bool mIdLocked;
 };
 
+#define SESSIONITEMADAPTEREXTENSION_CLASSES \
+   SERIALIZABLEADAPTEREXTENSION_CLASSES
+
 #define SESSIONITEMACCESSOR_METHODS(impClass) \
    SERIALIZABLEADAPTER_METHODS(impClass) \
    const std::string& getId() const \

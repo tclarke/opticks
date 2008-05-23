@@ -13,7 +13,7 @@
 #include "SignaturePlot.h"
 #include "SignaturePlotImp.h"
 
-class SignaturePlotAdapter : public SignaturePlot, public SignaturePlotImp SIGNATUREPLOTEXTENSION_CLASSES
+class SignaturePlotAdapter : public SignaturePlot, public SignaturePlotImp SIGNATUREPLOTADAPTEREXTENSION_CLASSES
 {
 public:
    SignaturePlotAdapter(const std::string& id, const std::string& viewName, QGLContext* pDrawContext = 0,

@@ -13,7 +13,7 @@
 #include "PlotSet.h"
 #include "PlotSetImp.h"
 
-class PlotSetAdapter : public PlotSet, public PlotSetImp
+class PlotSetAdapter : public PlotSet, public PlotSetImp PLOTSETADAPTEREXTENSION_CLASSES
 {
 public:
    PlotSetAdapter(const std::string& id, const std::string& plotSetName, PlotWindow* pPlotWindow, QWidget* parent = 0);

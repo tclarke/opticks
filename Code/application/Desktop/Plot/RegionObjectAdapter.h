@@ -13,7 +13,7 @@
 #include "RegionObject.h"
 #include "RegionObjectImp.h"
 
-class RegionObjectAdapter : public RegionObject, public RegionObjectImp
+class RegionObjectAdapter : public RegionObject, public RegionObjectImp REGIONOBJECTADAPTEREXTENSION_CLASSES
 {
 public:
    RegionObjectAdapter(PlotViewImp* pPlot, bool bPrimary);

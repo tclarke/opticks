@@ -33,8 +33,11 @@ public:
    bool isKindOf(const std::string& className) const;
 };
 
+#define RECTANGLEOBJECTADAPTEREXTENSION_CLASSES \
+   PIXELOBJECTADAPTEREXTENSION_CLASSES
+
 #define RECTANGLEOBJECTADAPTER_METHODS(impClass) \
-   GRAPHICOBJECTADAPTER_METHODS(impClass)
+   PIXELOBJECTADAPTER_METHODS(impClass)
 
 class RoundedRectangleObjectImp : public RectangleObjectImp
 {
@@ -48,7 +51,10 @@ public:
    bool isKindOf(const std::string& className) const;
 };
 
+#define ROUNDEDRECTANGLEOBJECTADAPTEREXTENSION_CLASSES \
+   RECTANGLEOBJECTADAPTEREXTENSION_CLASSES
+
 #define ROUNDEDRECTANGLEOBJECTADAPTER_METHODS(impClass) \
-   GRAPHICOBJECTADAPTER_METHODS(impClass)
+   RECTANGLEOBJECTADAPTER_METHODS(impClass)
 
 #endif

@@ -13,7 +13,7 @@
 #include "PolygonPlotObject.h"
 #include "PolygonPlotObjectImp.h"
 
-class PolygonPlotObjectAdapter : public PolygonPlotObject, public PolygonPlotObjectImp
+class PolygonPlotObjectAdapter : public PolygonPlotObject, public PolygonPlotObjectImp POLYGONPLOTOBJECTADAPTEREXTENSION_CLASSES
 {
 public:
    PolygonPlotObjectAdapter(PlotViewImp* pPlot, bool bPrimary);

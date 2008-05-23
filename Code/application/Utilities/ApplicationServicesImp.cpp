@@ -83,16 +83,6 @@ bool ApplicationServicesImp::isKindOf(const string& className) const
    return SubjectImp::isKindOf(className);
 }
 
-bool ApplicationServicesImp::attach(const string& signal, const Slot& slot)
-{
-   return SubjectImp::attach(signal, slot);
-}
-
-bool ApplicationServicesImp::detach(const string& signal, const Slot& slot)
-{
-   return SubjectImp::detach(signal, slot);
-}
-
 void ApplicationServicesImp::setBatch()
 {
    mbBatch = true;

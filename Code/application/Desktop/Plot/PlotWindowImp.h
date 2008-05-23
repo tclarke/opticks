@@ -114,6 +114,9 @@ private:
    std::vector<PlotSet*> mPlotSets;
 };
 
+#define PLOTWINDOWADAPTEREXTENSION_CLASSES \
+   DOCKWINDOWADAPTEREXTENSION_CLASSES
+
 #define PLOTWINDOWADAPTER_METHODS(impClass) \
    DOCKWINDOWADAPTER_METHODS(impClass) \
    PlotSet* createPlotSet(const std::string& plotSet) \
