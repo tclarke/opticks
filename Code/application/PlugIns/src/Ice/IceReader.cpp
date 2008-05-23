@@ -942,10 +942,11 @@ bool IceReader::loadCubeStatistics(RasterElement* pElement)
                   // This dimension descriptor doesn't have any active number, so it was subcubed out during import.
                   continue;
                }
-
                statReader.selectHyperslab(H5S_SELECT_SET, &currentRow, &oneValue, &oneValue, NULL);
                auto_ptr<StatisticsMetadata> pValues(statReader.readSelectedData<StatisticsMetadata>());
                Statistics* pCubeStat = pElement->getStatistics(*iter);
+               //set resolution and bad values first because they clear any other
+               //set statistics.
                if (pCubeStat != NULL)
                {
                   pCubeStat->setStatisticsResolution(pValues->mStatResolution);
@@ -990,27 +991,46 @@ bool IceReader::loadCubeStatistics(RasterElement* pElement)
                Statistics* pCubeStat = pElement->getStatistics(loadedBand);
                DO_IF(pCubeStat == NULL, return false);
 
-               //set resolution and bad values first because they clear any other
-               //set statistics.
+               StatisticsValues::binCenterType* pBinCenters =
+                  reinterpret_cast<StatisticsValues::binCenterType *>(pValues->mpBinCenters.p);
+               StatisticsValues::histogramType* pHistogramCounts =
+                  reinterpret_cast<StatisticsValues::histogramType *>(pValues->mpHistogramCounts.p);
+               StatisticsValues::percentileType* pPercentiles =
+                  reinterpret_cast<StatisticsValues::percentileType*>(pValues->mpPercentiles.p);
                if (pValues->mpBinCenters.len != 256 || pValues->mpHistogramCounts.len != 256 ||
-                   pValues->mpPercentiles.len != 1001)
+                  pValues->mpPercentiles.len != 1001)
                {
                   //the data read from the file isn't correct, so don't continue reading
                   //statistics out.
                   return false;
+               }
+               //This code is validating the stored statistics because of a bug that affects version 1 and version 1.1 
+               //Ice files. When these versions are no longer supported by the importer this check can come out.
+               if (currentRow == 0)
+               {
+                  const unsigned int *pCubeHistogramCounts = NULL;
+                  const double *pCubeBinCenters = NULL;
+
+                  pCubeStat->getHistogram(pCubeBinCenters ,pCubeHistogramCounts);
+                  if (pHistogramCounts != NULL && pCubeHistogramCounts != NULL)
+                  {
+                     for (unsigned int i = 0; i < 256; ++i)
+                     {
+                        if (pCubeHistogramCounts[i] !=  pHistogramCounts[i])
+                        {
+                           //the data read from the file isn't correct, so don't continue reading
+                           //statistics out.
+                           return false;
+                        }
+                     }
+                  }
                }
                bool areStatsCalculated = pCubeStat->areStatisticsCalculated();
                pCubeStat->setAverage(pValues->mAverage);
                pCubeStat->setMin(pValues->mMin);
                pCubeStat->setMax(pValues->mMax);
                pCubeStat->setStandardDeviation(pValues->mStandardDeviation);
-               StatisticsValues::binCenterType* pBinCenters =
-                  reinterpret_cast<StatisticsValues::binCenterType *>(pValues->mpBinCenters.p);
-               StatisticsValues::histogramType* pHistogramCounts =
-                  reinterpret_cast<StatisticsValues::histogramType *>(pValues->mpHistogramCounts.p);
                pCubeStat->setHistogram(pBinCenters, pHistogramCounts);
-               StatisticsValues::percentileType* pPercentiles =
-                  reinterpret_cast<StatisticsValues::percentileType*>(pValues->mpPercentiles.p);
                pCubeStat->setPercentiles(pPercentiles);
                areStatsCalculated = pCubeStat->areStatisticsCalculated();
             }

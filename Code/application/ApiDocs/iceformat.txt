@@ -11,11 +11,11 @@ Versions of Ice File:
 <td><b>Major Ice Format Version #</b></td><td><b>Minor Ice Format Version #</b></td><td><b>Versions of Application That Will Export</b><td><b>Versions of Application That Will Import</b></td>
 </tr>
 
-<tr><td>0</td><td>0</td><td>COMET MPR01.03.3686 to COMET MPR03.08.6674</td><td>COMET MPR01.03.3686 to current</td></tr>
-<tr><td>0</td><td>70</td><td>COMET MPR03.09.7404 only</td><td>COMET MPR03.09.7404 to current</td></tr>
-<tr><td>0</td><td>90</td><td>COMET MPR03.10.8013 only</td><td>COMET MPR03.10.8013 to current</td></tr>
-<tr><td>1</td><td>0</td><td>COMET MPR03.11.738 to Opticks 4.0.0</td><td>COMET MPR03.11.738 to current</td></tr>
-<tr><td>1</td><td>10</td><td>Current Version</td><td>Current Version</td></tr>
+<tr><td>0</td><td>0</td><td>COMET MPR01.03.3686 to COMET MPR03.08.6674</td><td>COMET MPR01.03.3686 to Current Version</td></tr>
+<tr><td>0</td><td>70</td><td>COMET MPR03.09.7404 only</td><td>COMET MPR03.09.7404 to Current Version</td></tr>
+<tr><td>0</td><td>90</td><td>COMET MPR03.10.8013 only</td><td>COMET MPR03.10.8013 to Current Version</td></tr>
+<tr><td>1</td><td>0</td><td>COMET MPR03.11.738 to %Opticks 4.0.0</td><td>COMET MPR03.11.738 to Current Version</td></tr>
+<tr><td>1</td><td>10</td><td>%Opticks 4.0.1 to Current Version</td><td>%Opticks 4.0.1 to Current Version</td></tr>
 </table>
 
 The most basic part of the Ice file is the IceFormatDescriptor which identifies an Ice file from any other HDF5 file.
