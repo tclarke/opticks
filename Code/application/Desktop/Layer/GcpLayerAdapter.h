@@ -15,7 +15,7 @@
 
 class GcpList;
 
-class GcpLayerAdapter : public GcpLayer, public GcpLayerImp
+class GcpLayerAdapter : public GcpLayer, public GcpLayerImp GCPLAYERADAPTEREXTENSION_CLASSES
 {
 public:
    GcpLayerAdapter(const std::string& id, const std::string& layerName, GcpList* pGcpList);

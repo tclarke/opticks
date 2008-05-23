@@ -16,7 +16,7 @@
 /**
  * Adapter class for the default Aspam model implementation.
  */
-class AspamAdapter : public Aspam, public AspamImp
+class AspamAdapter : public Aspam, public AspamImp ASPAMADAPTEREXTENSION_CLASSES
 {
 public:
    AspamAdapter() {}

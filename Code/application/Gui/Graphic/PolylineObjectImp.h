@@ -74,12 +74,10 @@ private:
    bool removePath(unsigned int path);
 };
 
-#define POLYLINEOBJECTADAPTER_METHODS(impClass) \
-   GRAPHICOBJECTADAPTER_METHODS(impClass) \
-   const std::vector<LocationType> &getVertices() const \
-   { \
-      return impClass::getVertices(); \
-   }
+#define POLYLINEOBJECTADAPTEREXTENSION_CLASSES \
+   MULTIPOINTOBJECTADAPTEREXTENSION_CLASSES
 
+#define POLYLINEOBJECTADAPTER_METHODS(impClass) \
+   MULTIPOINTOBJECTADAPTER_METHODS(impClass)
 
 #endif

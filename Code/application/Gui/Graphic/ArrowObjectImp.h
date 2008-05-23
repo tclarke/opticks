@@ -26,7 +26,10 @@ public:
    bool isKindOf(const std::string& className) const;
 };
 
+#define ARROWOBJECTADAPTEREXTENSION_CLASSES \
+   LINEOBJECTADAPTEREXTENSION_CLASSES
+
 #define ARROWOBJECTADAPTER_METHODS(impClass) \
-   GRAPHICOBJECTADAPTER_METHODS(impClass)
+   LINEOBJECTADAPTER_METHODS(impClass)
 
 #endif

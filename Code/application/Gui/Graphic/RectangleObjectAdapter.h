@@ -13,7 +13,7 @@
 #include "RectangleObject.h"
 #include "RectangleObjectImp.h"
 
-class RectangleObjectAdapter : public RectangleObject, public RectangleObjectImp GRAPHICOBJECTEXTENSION_CLASSES
+class RectangleObjectAdapter : public RectangleObject, public RectangleObjectImp RECTANGLEOBJECTADAPTEREXTENSION_CLASSES
 {
 public:
    RectangleObjectAdapter(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer,

@@ -15,7 +15,7 @@
 #include "Progress.h"
 #include "ProgressImp.h"
 
-class ProgressAdapter : public Progress, public ProgressImp
+class ProgressAdapter : public Progress, public ProgressImp PROGRESSADAPTEREXTENSION_CLASSES
 {
 public:
    ProgressAdapter() {};
@@ -79,14 +79,7 @@ public:
       ProgressImp::getProgress(text, percent, gran);
    }
 
-   bool attach(const std::string &signal, const Slot &slot)
-   {
-      return ProgressImp::attach(signal, slot);
-   }
-   bool detach(const std::string &signal, const Slot &slot)
-   {
-      return ProgressImp::detach(signal, slot);
-   }
+   PROGRESSADAPTER_METHODS(ProgressImp)
 };
 
 #endif

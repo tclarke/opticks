@@ -148,6 +148,9 @@ signals:
    void valueChanged(AnimationCycle value);
 };
 
+#define ANIMATIONTOOLBARADAPTEREXTENSION_CLASSES \
+   TOOLBARADAPTEREXTENSION_CLASSES
+
 #define ANIMATIONTOOLBARADAPTER_METHODS(impClass) \
    TOOLBARADAPTER_METHODS(impClass) \
    void setAnimationController(AnimationController* pController) \

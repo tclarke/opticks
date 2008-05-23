@@ -13,7 +13,7 @@
 #include "ArcObject.h"
 #include "ArcObjectImp.h"
 
-class ArcObjectAdapter : public ArcObject, public ArcObjectImp GRAPHICOBJECTEXTENSION_CLASSES
+class ArcObjectAdapter : public ArcObject, public ArcObjectImp ARCOBJECTADAPTEREXTENSION_CLASSES
 {
 public:
    ArcObjectAdapter(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer, LocationType pixelCoord) :

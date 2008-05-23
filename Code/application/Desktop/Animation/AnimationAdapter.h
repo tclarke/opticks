@@ -13,7 +13,7 @@
 #include "Animation.h"
 #include "AnimationImp.h"
 
-class AnimationAdapter : public Animation, public AnimationImp
+class AnimationAdapter : public Animation, public AnimationImp ANIMATIONADAPTEREXTENSION_CLASSES
 {
 public:
    AnimationAdapter(FrameType frameType, const std::string& id);

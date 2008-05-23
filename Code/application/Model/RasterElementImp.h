@@ -216,6 +216,9 @@ private:
    Georeference *mpGeoPlugin;
 };
 
+#define RASTERELEMENTADAPTEREXTENSION_CLASSES \
+   DATAELEMENTADAPTEREXTENSION_CLASSES
+
 #define RASTERELEMENTADAPTER_METHODS(impClass) \
    DATAELEMENTADAPTER_METHODS(impClass) \
    double getPixelValue(DimensionDescriptor pColumn, DimensionDescriptor pRow, \

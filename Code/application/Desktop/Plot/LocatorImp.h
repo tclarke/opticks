@@ -72,6 +72,9 @@ private:
    QString mTextY;
 };
 
+#define LOCATORADAPTEREXTENSION_CLASSES \
+   PLOTOBJECTADAPTEREXTENSION_CLASSES
+
 #define LOCATORADAPTER_METHODS(impClass) \
    PLOTOBJECTADAPTER_METHODS(impClass) \
    void setLocation(const LocationType& location, bool updateText = true) \

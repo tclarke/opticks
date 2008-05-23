@@ -15,7 +15,7 @@
 #include "PlotObject.h"
 #include "PlotObjectImp.h"
 
-class PlotObjectAdapter : public PlotObject, public PlotObjectImp
+class PlotObjectAdapter : public PlotObject, public PlotObjectImp PLOTOBJECTADAPTEREXTENSION_CLASSES
 {
 };
 

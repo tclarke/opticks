@@ -21,6 +21,8 @@ bool DeserializeString(FILE* fp, std::string& target);
 bool SerializeStringVector(FILE* fp, std::vector<std::string>& aList);
 bool DeserializeStringVector(FILE* fp, std::vector<std::string>& theList);
 
+#define SERIALIZABLEADAPTEREXTENSION_CLASSES
+
 #define SERIALIZABLEADAPTER_METHODS(impClass) \
    bool toXml(XMLWriter* pXml) const \
    { \

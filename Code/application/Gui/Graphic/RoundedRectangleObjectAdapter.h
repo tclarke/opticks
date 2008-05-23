@@ -13,7 +13,7 @@
 #include "RoundedRectangleObject.h"
 #include "RectangleObjectImp.h"
 
-class RoundedRectangleObjectAdapter : public RoundedRectangleObject, public RoundedRectangleObjectImp GRAPHICOBJECTEXTENSION_CLASSES
+class RoundedRectangleObjectAdapter : public RoundedRectangleObject, public RoundedRectangleObjectImp ROUNDEDRECTANGLEOBJECTADAPTEREXTENSION_CLASSES
 {
 public:
    RoundedRectangleObjectAdapter(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer,

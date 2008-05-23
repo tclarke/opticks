@@ -16,7 +16,7 @@
 #include "GcpList.h"
 #include "GcpListImp.h"
 
-class GcpListAdapter : public GcpList, public GcpListImp
+class GcpListAdapter : public GcpList, public GcpListImp GCPLISTADAPTEREXTENSION_CLASSES
 {
 public:
    GcpListAdapter(const DataDescriptorImp& descriptor, const std::string& id);

@@ -13,7 +13,7 @@
 #include "TiePointList.h"
 #include "TiePointListImp.h"
 
-class TiePointListAdapter : public TiePointList, public TiePointListImp
+class TiePointListAdapter : public TiePointList, public TiePointListImp TIEPOINTLISTADAPTEREXTENSION_CLASSES
 {
 public:
    TiePointListAdapter(const DataDescriptorImp& descriptor, const std::string& id);

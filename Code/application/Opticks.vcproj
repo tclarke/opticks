@@ -931,6 +931,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Interfaces\SafeSlot.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Interfaces\ScaleBarObject.h"
 				>
 			</File>

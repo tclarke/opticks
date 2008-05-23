@@ -15,7 +15,7 @@
 #include "Progress.h"
 #include "ThreadSafeProgressImp.h"
 
-class ThreadSafeProgressAdapter : public Progress, public ThreadSafeProgressImp
+class ThreadSafeProgressAdapter : public Progress, public ThreadSafeProgressImp THREADSAFEPROGRESSADAPTEREXTENSION_CLASSES
 {
 public:
    ThreadSafeProgressAdapter() {};
@@ -76,14 +76,7 @@ public:
       ThreadSafeProgressImp::getProgress(text, percent, gran);
    }
 
-   bool attach(const std::string &signal, const Slot &slot)
-   {
-      return ThreadSafeProgressImp::attach(signal, slot);
-   }
-   bool detach(const std::string &signal, const Slot &slot)
-   {
-      return ThreadSafeProgressImp::detach(signal, slot);
-   }
+   THREADSAFEPROGRESSADAPTER_METHODS(ThreadSafeProgressImp)
 };
 
 #endif

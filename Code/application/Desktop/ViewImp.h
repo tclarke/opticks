@@ -395,7 +395,9 @@ private:
    void drawImage(int width, int height);
 };
 
-#define VIEWEXTENSION_CLASSES \
+#define VIEWADAPTEREXTENSION_CLASSES \
+   SESSIONITEMADAPTEREXTENSION_CLASSES \
+   SUBJECTADAPTEREXTENSION_CLASSES \
    , public ViewExt1
 
 #define VIEWADAPTER_METHODS(impClass) \

@@ -13,7 +13,7 @@
 #include "CurveCollection.h"
 #include "CurveCollectionImp.h"
 
-class CurveCollectionAdapter : public CurveCollection, public CurveCollectionImp
+class CurveCollectionAdapter : public CurveCollection, public CurveCollectionImp CURVECOLLECTIONADAPTEREXTENSION_CLASSES
 {
 public:
    CurveCollectionAdapter(PlotViewImp* pPlot, bool bPrimary);

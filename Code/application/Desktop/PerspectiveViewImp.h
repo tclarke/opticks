@@ -118,6 +118,9 @@ private:
    bool mAllowZoomOnResize;
 };
 
+#define PERSPECTIVEVIEWADAPTEREXTENSION_CLASSES \
+   VIEWADAPTEREXTENSION_CLASSES
+
 #define PERSPECTIVEVIEWADAPTER_METHODS(impClass) \
    VIEWADAPTER_METHODS(impClass) \
    void zoomBy(double dPercent) \

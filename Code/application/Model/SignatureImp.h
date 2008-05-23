@@ -53,6 +53,9 @@ private:
    DataVariant mNullData;
 };
 
+#define SIGNATUREADAPTEREXTENSION_CLASSES \
+   DATAELEMENTADAPTEREXTENSION_CLASSES
+
 #define SIGNATUREADAPTER_METHODS(impClass) \
    DATAELEMENTADAPTER_METHODS(impClass) \
    const DataVariant& getData(std::string name) const \

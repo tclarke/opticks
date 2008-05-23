@@ -47,6 +47,9 @@ private:
    View* mpView;
 };
 
+#define VIEWWINDOWADAPTEREXTENSION_CLASSES \
+   WINDOWADAPTEREXTENSION_CLASSES
+
 #define VIEWWINDOWADAPTER_METHODS(impClass) \
    WINDOWADAPTER_METHODS(impClass) \
    View* createView(const std::string& viewName, const ViewType& viewType) \

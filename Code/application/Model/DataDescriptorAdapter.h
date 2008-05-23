@@ -13,7 +13,7 @@
 #include "DataDescriptor.h"
 #include "DataDescriptorImp.h"
 
-class DataDescriptorAdapter : public DataDescriptor, public DataDescriptorImp
+class DataDescriptorAdapter : public DataDescriptor, public DataDescriptorImp DATADESCRIPTORADAPTEREXTENSION_CLASSES
 {
 public:
    DataDescriptorAdapter(const std::string& name, const std::string& type, DataElement* pParent);

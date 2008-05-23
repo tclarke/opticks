@@ -13,7 +13,7 @@
 #include "LayerList.h"
 #include "LayerListImp.h"
 
-class LayerListAdapter : public LayerList, public LayerListImp
+class LayerListAdapter : public LayerList, public LayerListImp LAYERLISTADAPTEREXTENSION_CLASSES
 {
 public:
    LayerListAdapter();

@@ -13,7 +13,7 @@
 #include "ViewObject.h"
 #include "ViewObjectImp.h"
 
-class ViewObjectAdapter : public ViewObject, public ViewObjectImp GRAPHICOBJECTEXTENSION_CLASSES
+class ViewObjectAdapter : public ViewObject, public ViewObjectImp VIEWOBJECTADAPTEREXTENSION_CLASSES
 {
 public:
    ViewObjectAdapter(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer, LocationType pixelCoord) :

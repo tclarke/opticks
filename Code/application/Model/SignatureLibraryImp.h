@@ -73,6 +73,9 @@ private:
    bool mNeedToResample;
 };
 
+#define SIGNATURELIBRARYADAPTEREXTENSION_CLASSES \
+   SIGNATURESETADAPTEREXTENSION_CLASSES
+
 #define SIGNATURELIBRARYADAPTER_METHODS(impClass) \
    SIGNATURESETADAPTER_METHODS(impClass) \
    const std::vector<double>& getAbscissa() const \

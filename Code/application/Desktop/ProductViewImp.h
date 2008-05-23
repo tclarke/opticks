@@ -137,6 +137,9 @@ private:
    bool mbZoomInitialized;
 };
 
+#define PRODUCTVIEWADAPTEREXTENSION_CLASSES \
+   PERSPECTIVEVIEWADAPTEREXTENSION_CLASSES
+
 #define PRODUCTVIEWADAPTER_METHODS(impClass) \
    PERSPECTIVEVIEWADAPTER_METHODS(impClass) \
    void setPaperSize(double dWidth, double dHeight) \

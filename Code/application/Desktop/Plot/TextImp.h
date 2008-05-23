@@ -65,6 +65,9 @@ private:
    QColor mColor;
 };
 
+#define TEXTADAPTEREXTENSION_CLASSES \
+   PLOTOBJECTADAPTEREXTENSION_CLASSES
+
 #define TEXTADAPTER_METHODS(impClass) \
    PLOTOBJECTADAPTER_METHODS(impClass) \
    double getXLocation() const \

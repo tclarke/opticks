@@ -13,7 +13,7 @@
 #include "PlotGroup.h"
 #include "PlotGroupImp.h"
 
-class PlotGroupAdapter : public PlotGroup, public PlotGroupImp
+class PlotGroupAdapter : public PlotGroup, public PlotGroupImp PLOTGROUPADAPTEREXTENSION_CLASSES
 {
 public:
    PlotGroupAdapter(PlotViewImp* pPlot, bool bPrimary);

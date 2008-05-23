@@ -17,7 +17,7 @@
 
 class GraphicElement;
 
-class GraphicLayerAdapter : public GraphicLayer, public GraphicLayerImp
+class GraphicLayerAdapter : public GraphicLayer, public GraphicLayerImp GRAPHICLAYERADAPTEREXTENSION_CLASSES
 {
 public:
    GraphicLayerAdapter(const std::string& id, const std::string& layerName, GraphicElement* pElement);

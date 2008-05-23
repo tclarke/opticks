@@ -112,6 +112,9 @@ private:
    bool mDirty;
 };
 
+#define POINTSETADAPTEREXTENSION_CLASSES \
+   PLOTOBJECTADAPTEREXTENSION_CLASSES
+
 #define POINTSETADAPTER_METHODS(impClass) \
    PLOTOBJECTADAPTER_METHODS(impClass) \
    virtual Point* addPoint() \

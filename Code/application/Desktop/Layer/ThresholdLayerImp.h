@@ -100,6 +100,9 @@ private:
    static unsigned int msThresholdLayers;
 };
 
+#define THRESHOLDLAYERADAPTEREXTENSION_CLASSES \
+   LAYERADAPTEREXTENSION_CLASSES
+
 #define THRESHOLDLAYERADAPTER_METHODS(impClass) \
    LAYERADAPTER_METHODS(impClass) \
    void setFirstThreshold(double dThreshold) \

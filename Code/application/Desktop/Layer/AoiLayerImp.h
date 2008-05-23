@@ -96,6 +96,9 @@ private:
    static unsigned int msNumLayers;
 };
 
+#define AOILAYERADAPTEREXTENSION_CLASSES \
+   GRAPHICLAYERADAPTEREXTENSION_CLASSES
+
 #define AOILAYERADAPTER_METHODS(impClass) \
    GRAPHICLAYERADAPTER_METHODS(impClass) \
    void setColor(const ColorType& aoiColor) \

@@ -13,7 +13,7 @@
 #include "PolarGridlines.h"
 #include "PolarGridlinesImp.h"
 
-class PolarGridlinesAdapter : public PolarGridlines, public PolarGridlinesImp
+class PolarGridlinesAdapter : public PolarGridlines, public PolarGridlinesImp POLARGRIDLINESADAPTEREXTENSION_CLASSES
 {
 public:
    PolarGridlinesAdapter(PlotViewImp* pPlot, bool bPrimary);

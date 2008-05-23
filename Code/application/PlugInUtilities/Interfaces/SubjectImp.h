@@ -12,7 +12,7 @@
 #ifndef __SUBJECTIMP_H
 #define __SUBJECTIMP_H
 
-#include "Slot.h"
+#include "SafeSlot.h"
 #include "TypesFile.h"
 
 #include <boost/any.hpp>
@@ -67,7 +67,7 @@ public:
     *  @return  A (possibly empty) list containing slots attached to the 
     *           specified signal.
     */
-   const std::list<Slot>& getSlots(const std::string &signal);
+   const std::list<SafeSlot>& getSlots(const std::string &signal);
 
 protected:
    void notify(const std::string &signal, const boost::any &data=boost::any());
@@ -75,6 +75,8 @@ protected:
 private:
    SubjectImpPrivate *mpImpPrivate;
 };
+
+#define SUBJECTADAPTEREXTENSION_CLASSES
 
 #define SUBJECTADAPTER_METHODS(impClass) \
    bool attach(const std::string &signal, const Slot &slot) \
@@ -84,7 +86,6 @@ private:
    bool detach(const std::string &signal, const Slot &slot) \
    { \
       return impClass::detach(signal, slot); \
-   } \
-
+   }
 
 #endif   // __SUBJECTIMP_H

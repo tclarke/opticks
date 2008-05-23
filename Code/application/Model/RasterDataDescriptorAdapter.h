@@ -13,7 +13,7 @@
 #include "RasterDataDescriptor.h"
 #include "RasterDataDescriptorImp.h"
 
-class RasterDataDescriptorAdapter : public RasterDataDescriptor, public RasterDataDescriptorImp
+class RasterDataDescriptorAdapter : public RasterDataDescriptor, public RasterDataDescriptorImp RASTERDATADESCRIPTORADAPTEREXTENSION_CLASSES
 {
 public:
    RasterDataDescriptorAdapter(const std::string& name, const std::string& type, DataElement* pParent);

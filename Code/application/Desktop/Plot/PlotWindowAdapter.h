@@ -13,7 +13,7 @@
 #include "PlotWindow.h"
 #include "PlotWindowImp.h"
 
-class PlotWindowAdapter : public PlotWindow, public PlotWindowImp
+class PlotWindowAdapter : public PlotWindow, public PlotWindowImp PLOTWINDOWADAPTEREXTENSION_CLASSES
 {
 public:
    PlotWindowAdapter(const std::string& id, const std::string& windowName, QWidget* parent = 0);

@@ -13,7 +13,7 @@
 #include "SignatureSet.h"
 #include "SignatureSetImp.h"
 
-class SignatureSetAdapter : public SignatureSet, public SignatureSetImp
+class SignatureSetAdapter : public SignatureSet, public SignatureSetImp SIGNATURESETADAPTEREXTENSION_CLASSES
 {
 public:
    SignatureSetAdapter(const DataDescriptorImp& descriptor, const std::string& id);

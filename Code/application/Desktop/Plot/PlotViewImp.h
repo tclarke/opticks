@@ -159,8 +159,10 @@ private:
    QRegion getObjectRegion(const PlotObject* pObject) const;
 };
 
-#define PLOTVIEWEXTENSION_CLASSES \
-   VIEWEXTENSION_CLASSES, public PlotViewExt1
+#define PLOTVIEWADAPTEREXTENSION_CLASSES \
+   , public PlotViewExt1 /* must remain here to maintain binary compatibility*/ \
+   ORTHOGRAPHICVIEWADAPTEREXTENSION_CLASSES
+   /* all new PlotView extension classes should go here */
 
 #define PLOTVIEWADAPTER_METHODS(impClass) \
    ORTHOGRAPHICVIEWADAPTER_METHODS(impClass) \

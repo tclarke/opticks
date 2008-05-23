@@ -13,7 +13,7 @@
 #include "ToolBar.h"
 #include "ToolBarImp.h"
 
-class ToolBarAdapter : public ToolBar, public ToolBarImp
+class ToolBarAdapter : public ToolBar, public ToolBarImp TOOLBARADAPTEREXTENSION_CLASSES
 {
 public:
    ToolBarAdapter(const std::string& id, const std::string& name, QWidget* parent = 0);

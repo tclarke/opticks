@@ -67,6 +67,9 @@ private:
    int mSymbolSize;   // Symbol radius in screen pixels
 };
 
+#define GCPLAYERADAPTEREXTENSION_CLASSES \
+   LAYERADAPTEREXTENSION_CLASSES
+
 #define GCPLAYERADAPTER_METHODS(impClass) \
    LAYERADAPTER_METHODS(impClass) \
    void setColor(const ColorType& gcpColor) \

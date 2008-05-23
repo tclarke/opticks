@@ -47,6 +47,9 @@ private:
    bool mNotificationEnabled;
 };
 
+#define DATAELEMENTGROUPADAPTEREXTENSION_CLASSES \
+   DATAELEMENTADAPTEREXTENSION_CLASSES
+
 #define DATAELEMENTGROUPADAPTER_METHODS(impClass) \
    DATAELEMENTADAPTER_METHODS(impClass) \
    bool insertElement(DataElement* pElement) \

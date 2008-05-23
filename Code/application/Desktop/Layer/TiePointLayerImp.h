@@ -92,6 +92,9 @@ private:
    static LocationType sAnchor;
 };
 
+#define TIEPOINTLAYERADAPTEREXTENSION_CLASSES \
+   LAYERADAPTEREXTENSION_CLASSES
+
 #define TIEPOINTLAYERADAPTER_METHODS(impClass) \
    LAYERADAPTER_METHODS(impClass) \
    void setColor(const ColorType& colorType) \

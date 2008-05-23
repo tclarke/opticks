@@ -13,7 +13,7 @@
 #include "Any.h"
 #include "AnyImp.h"
 
-class AnyAdapter : public Any, public AnyImp
+class AnyAdapter : public Any, public AnyImp ANYADAPTEREXTENSION_CLASSES
 {
 public:
    AnyAdapter(const std::string& dataType, const DataDescriptorImp& descriptor, const std::string& id);

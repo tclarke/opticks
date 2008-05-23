@@ -15,7 +15,7 @@
 
 class RasterElement;
 
-class PseudocolorLayerAdapter : public PseudocolorLayer, public PseudocolorLayerImp
+class PseudocolorLayerAdapter : public PseudocolorLayer, public PseudocolorLayerImp PSEUDOCOLORLAYERADAPTEREXTENSION_CLASSES
 {
 public:
    PseudocolorLayerAdapter(const std::string& id, const std::string& layerName, RasterElement* pRasterElement);

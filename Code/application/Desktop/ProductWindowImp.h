@@ -36,6 +36,9 @@ public:
    ProductView* getProductView() const;
 };
 
+#define PRODUCTWINDOWADAPTEREXTENSION_CLASSES \
+   WORKSPACEWINDOWADAPTEREXTENSION_CLASSES
+
 #define PRODUCTWINDOWADAPTER_METHODS(impClass) \
    WORKSPACEWINDOWADAPTER_METHODS(impClass) \
    ProductView* getProductView() const \

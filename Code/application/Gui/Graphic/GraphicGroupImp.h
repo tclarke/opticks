@@ -88,6 +88,9 @@ private:
    bool propagateProperty(T method, U value);
 };
 
+#define GRAPHICGROUPADAPTEREXTENSION_CLASSES \
+   GRAPHICOBJECTADAPTEREXTENSION_CLASSES
+
 #define GRAPHICGROUPADAPTER_METHODS(impClass) \
    GRAPHICOBJECTADAPTER_METHODS(impClass) \
    GraphicObject *addObject(GraphicObjectType type, \

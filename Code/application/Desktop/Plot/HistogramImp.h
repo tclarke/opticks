@@ -65,6 +65,9 @@ private:
    QColor mColor;
 };
 
+#define HISTOGRAMADAPTEREXTENSION_CLASSES \
+   PLOTOBJECTADAPTEREXTENSION_CLASSES
+
 #define HISTOGRAMADAPTER_METHODS(impClass) \
    PLOTOBJECTADAPTER_METHODS(impClass) \
    virtual bool setHistogramData(unsigned int binCount, const double* pBinCenters, \

@@ -99,6 +99,9 @@ private:
    const DateTime* getDate(DateTimeImp* dateTime) const;
 };
 
+#define CLASSIFICATIONADAPTEREXTENSION_CLASSES \
+   DYNAMICOBJECTADAPTEREXTENSION_CLASSES
+
 #define CLASSIFICATIONADAPTER_METHODS(impClass) \
    DYNAMICOBJECTADAPTER_METHODS(impClass) \
    const std::string& getLevel() const \

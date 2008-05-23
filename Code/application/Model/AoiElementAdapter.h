@@ -13,7 +13,7 @@
 #include "AoiElement.h"
 #include "AoiElementImp.h"
 
-class AoiElementAdapter : public AoiElement, public AoiElementImp
+class AoiElementAdapter : public AoiElement, public AoiElementImp AOIELEMENTADAPTEREXTENSION_CLASSES
 {
 public:
    AoiElementAdapter(const DataDescriptorImp& descriptor, const std::string& id);

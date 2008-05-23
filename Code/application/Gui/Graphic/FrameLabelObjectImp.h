@@ -78,8 +78,11 @@ private:
    bool getLocked() const;
 };
 
+#define FRAMELABELOBJECTADAPTEREXTENSION_CLASSES \
+   TEXTOBJECTADAPTEREXTENSION_CLASSES
+
 #define FRAMELABELOBJECTADAPTER_METHODS(impClass) \
-   GRAPHICOBJECTADAPTER_METHODS(impClass) \
+   TEXTOBJECTADAPTER_METHODS(impClass) \
    const std::vector<Animation*> &getAnimations() const \
    { \
       return impClass::getAnimations(); \

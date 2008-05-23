@@ -15,7 +15,7 @@
 
 class AoiElement;
 
-class AoiLayerAdapter : public AoiLayer, public AoiLayerImp
+class AoiLayerAdapter : public AoiLayer, public AoiLayerImp AOILAYERADAPTEREXTENSION_CLASSES
 {
 public:
    AoiLayerAdapter(const std::string& id, const std::string& layerName, AoiElement* pAoi);

@@ -36,6 +36,9 @@
  * If you require any special handling for when the Subject has been deleted,
  * You should separately attach to SIGNAL_NAME(Subject, Deleted) with 
  * AttachmentPtr::addSignal().
+ *
+ * When used in conjunction with a SafeSlot, the attachments will additionally be 
+ * automatically detached when the SafeSlot's invalidator object is destroyed.
  */
 template<typename T>
 class AttachmentPtr

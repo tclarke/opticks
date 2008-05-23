@@ -25,4 +25,10 @@ protected:
    FilledObjectImp(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer, LocationType pixelCoord);
 };
 
+#define FILLEDOBJECTADAPTEREXTENSION_CLASSES \
+   GRAPHICOBJECTADAPTEREXTENSION_CLASSES
+
+#define FILLEDOBJECTADAPTER_METHODS \
+   GRAPHICOBJECTADAPTER_METHODS
+
 #endif

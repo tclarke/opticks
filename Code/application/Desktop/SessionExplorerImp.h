@@ -72,6 +72,9 @@ private:
    QAction* mpRenameAction;
 };
 
+#define SESSIONEXPLORERADAPTEREXTENSION_CLASSES \
+   DOCKWINDOWADAPTEREXTENSION_CLASSES
+
 #define SESSIONEXPLORERADAPTER_METHODS(impClass) \
    DOCKWINDOWADAPTER_METHODS(impClass) \
    void setItemViewType(ItemViewType itemView) \

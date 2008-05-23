@@ -13,7 +13,7 @@
 #include "Locator.h"
 #include "LocatorImp.h"
 
-class LocatorAdapter : public Locator, public LocatorImp
+class LocatorAdapter : public Locator, public LocatorImp LOCATORADAPTEREXTENSION_CLASSES
 {
 public:
    LocatorAdapter(PlotViewImp* pPlot, bool bPrimary);

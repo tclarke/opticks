@@ -51,6 +51,9 @@ private:
    DataElementGroupImp mGroup;
 };
 
+#define SIGNATURESETADAPTEREXTENSION_CLASSES \
+   SIGNATUREADAPTEREXTENSION_CLASSES
+
 #define SIGNATURESETADAPTER_METHODS(impClass) \
    SIGNATUREADAPTER_METHODS(impClass) \
    bool insertSignature(Signature* pSignature) \

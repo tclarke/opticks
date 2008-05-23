@@ -75,6 +75,9 @@ private:
    bool mBorder;
 };
 
+#define REGIONOBJECTADAPTEREXTENSION_CLASSES \
+   PLOTOBJECTADAPTEREXTENSION_CLASSES
+
 #define REGIONOBJECTADAPTER_METHODS(impClass) \
    PLOTOBJECTADAPTER_METHODS(impClass) \
    virtual bool isValid() const \

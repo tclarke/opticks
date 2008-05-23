@@ -13,7 +13,7 @@
 #include "CartesianPlot.h"
 #include "CartesianPlotImp.h"
 
-class CartesianPlotAdapter : public CartesianPlot, public CartesianPlotImp CARTESIANPLOTEXTENSION_CLASSES
+class CartesianPlotAdapter : public CartesianPlot, public CartesianPlotImp CARTESIANPLOTADAPTEREXTENSION_CLASSES
 {
 public:
    CartesianPlotAdapter(const std::string& id, const std::string& viewName, QGLContext* pDrawContext = 0,

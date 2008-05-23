@@ -128,6 +128,9 @@ namespace XmlUtilities
    void deserializeDimensionDescriptor(DimensionDescriptor& desc, XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pNode);
 };
 
+#define RASTERFILEDESCRIPTORADAPTEREXTENSION_CLASSES \
+   FILEDESCRIPTORADAPTEREXTENSION_CLASSES
+
 #define RASTERFILEDESCRIPTORADAPTER_METHODS(impClass) \
    FILEDESCRIPTORADAPTER_METHODS(impClass) \
    void setHeaderBytes(unsigned int bytes) \

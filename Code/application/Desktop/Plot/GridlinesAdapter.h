@@ -13,7 +13,7 @@
 #include "Gridlines.h"
 #include "GridlinesImp.h"
 
-class GridlinesAdapter : public Gridlines, public GridlinesImp
+class GridlinesAdapter : public Gridlines, public GridlinesImp GRIDLINESADAPTEREXTENSION_CLASSES
 {
 public:
    GridlinesAdapter(PlotViewImp* pPlot, bool bPrimary);

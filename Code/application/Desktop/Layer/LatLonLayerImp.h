@@ -271,6 +271,9 @@ private:
    LocationType convertPointToLatLon(const GeocoordType& type, const LocationType& point);
 };
 
+#define LATLONLAYERADAPTEREXTENSION_CLASSES \
+   LAYERADAPTEREXTENSION_CLASSES
+
 #define LATLONLAYERADAPTER_METHODS(impClass) \
    LAYERADAPTER_METHODS(impClass) \
    void setColor(const ColorType& latLonColor) \

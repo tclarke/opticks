@@ -14,10 +14,11 @@
 
 #include <string>
 
+class SafeSlot;
 class Slot;
 
 /**
- *  This macro simplifies and standardizes creation signal methods. This
+ *  This macro simplifies and standardizes creation of signal methods. This
  *  macro will create a static method to use when attaching, detaching
  *  and notifying. The full body of the method is created. For example:
  *  @code
@@ -86,8 +87,8 @@ class Slot;
  *  Then, assuming the specific signal is not Subject::Deleted or
  *  Subject::Modified, all slots attached to Subject::Modified
  *  are notified in FIFO order.
- *  
- *  @see    TypeAwareObject, Slot, Signal
+
+ *  @see    TypeAwareObject, Slot, SafeSlot, AutoSlot, Signal
  */
 class Subject : public TypeAwareObject
 {
@@ -112,12 +113,13 @@ public:
     *
     *  @param   slot
     *           An object that contains the object and method to call when the
-    *           specified signal is notified.
+    *           specified signal is notified. This can be a Slot, SafeSlot or
+    *           AutoSlot.
     *
     *  @return   true if the Slot was valid and was not already attached to
     *           the signal on the subject and false otherwise.
     *
-    *  @notify  This method will call the 'attached' method on the object in
+    *  @notify  This method will call Observer::attached on the object in
     *           the slot, if the object inherits Observer.
     */
     virtual bool attach(const std::string& signal, const Slot &slot) = 0;
@@ -133,11 +135,13 @@ public:
     *  @param   slot
     *           The Slot to detach from the specified signal. If the Slot is 
     *           empty, all slots will be detached from the specified signal.
+    *           If the slot was originally attached as a SafeSlot or AutoSlot, 
+    *           it needs to be detached as same type.
     *
     *  @return   true if the Slot was attached to the specified signal on the
     *          subject.
     *
-    *  @notify  This method will call the 'detached' method on the object in
+    *  @notify  This method will call Observer::detached on the object in
     *           the slot, if the object inherits Observer.
     */
    virtual bool detach(const std::string& signal, const Slot &slot) = 0;

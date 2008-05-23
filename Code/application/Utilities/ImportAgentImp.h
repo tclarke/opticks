@@ -66,6 +66,9 @@ private:
    std::vector<DataElement*> mImportedElements;
 };
 
+#define IMPORTAGENTADAPTEREXTENSION_CLASSES \
+   EXECUTABLEAGENTADAPTEREXTENSION_CLASSES
+
 #define IMPORTAGENTADAPTER_METHODS(impClass) \
    EXECUTABLEAGENTADAPTER_METHODS(impClass) \
    void instantiate(const std::string& importerName, const std::vector<ImportDescriptor*>& descriptors, \

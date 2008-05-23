@@ -18,12 +18,13 @@
 #include <string>
 #include <vector>
 
+class SafeSlot;
 class Slot;
 class Subject;
 
 class SubjectImpPrivate
 {
-   typedef std::map<std::string,std::list<Slot> > MapType;
+   typedef std::map<std::string,std::list<SafeSlot> > MapType;
 
 public:
    SubjectImpPrivate();
@@ -31,8 +32,8 @@ public:
    virtual bool attach(Subject &subject, const std::string &signal, const Slot &slot);
    virtual bool detach(Subject &subject, const std::string &signal, const Slot &slot);
    void notify(Subject &subject, const std::string &signal, const std::string &originalSignal, const boost::any &data=boost::any());
-   const std::list<Slot>& getSlots(const std::string & signal);
-   void removeEmptySlots(const std::string &recursion, std::list<Slot> &slotVec);
+   const std::list<SafeSlot>& getSlots(const std::string & signal);
+   void removeEmptySlots(const std::string &recursion, std::list<SafeSlot> &slotVec);
 
 private:
    MapType mSlots;

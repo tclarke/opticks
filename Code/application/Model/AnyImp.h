@@ -41,6 +41,9 @@ private:
    std::string mDataType;
 };
 
+#define ANYADAPTEREXTENSION_CLASSES \
+   DATAELEMENTADAPTEREXTENSION_CLASSES
+
 #define ANYADAPTER_METHODS(impClass) \
    DATAELEMENTADAPTER_METHODS(impClass) \
    void setData(AnyData* pData) \

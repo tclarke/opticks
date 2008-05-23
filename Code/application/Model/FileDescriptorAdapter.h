@@ -13,7 +13,7 @@
 #include "FileDescriptor.h"
 #include "FileDescriptorImp.h"
 
-class FileDescriptorAdapter : public FileDescriptor, public FileDescriptorImp
+class FileDescriptorAdapter : public FileDescriptor, public FileDescriptorImp FILEDESCRIPTORADAPTEREXTENSION_CLASSES
 {
 public:
    FileDescriptorAdapter();

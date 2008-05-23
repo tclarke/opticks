@@ -13,7 +13,7 @@
 #include "AnimationController.h"
 #include "AnimationControllerImp.h"
 
-class AnimationControllerAdapter : public AnimationController, public AnimationControllerImp
+class AnimationControllerAdapter : public AnimationController, public AnimationControllerImp ANIMATIONCONTROLLERADAPTEREXTENSION_CLASSES
 {
 public:
    AnimationControllerAdapter(FrameType frameType, const std::string& id);

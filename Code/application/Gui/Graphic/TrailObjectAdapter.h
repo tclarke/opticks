@@ -13,7 +13,7 @@
 #include "TrailObject.h"
 #include "TrailObjectImp.h"
 
-class TrailObjectAdapter : public TrailObject, public TrailObjectImp GRAPHICOBJECTEXTENSION_CLASSES
+class TrailObjectAdapter : public TrailObject, public TrailObjectImp TRAILOBJECTADAPTEREXTENSION_CLASSES
 {
 public:
    TrailObjectAdapter(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer, LocationType pixelCoord) :

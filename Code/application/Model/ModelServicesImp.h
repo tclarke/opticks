@@ -32,14 +32,7 @@ public:
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
 
-   bool attach(const std::string &signal, const Slot &slot)
-   {
-      return SubjectImp::attach(signal, slot);
-   }
-   bool detach(const std::string &signal, const Slot &slot)
-   {
-      return SubjectImp::detach(signal, slot);
-   }
+   SUBJECTADAPTER_METHODS(SubjectImp)
 
    DataDescriptor* createDataDescriptor(const std::string& name, const std::string& type,
       DataElement* pParent) const;

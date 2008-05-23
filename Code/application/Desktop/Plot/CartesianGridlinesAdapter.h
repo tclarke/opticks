@@ -13,7 +13,7 @@
 #include "CartesianGridlines.h"
 #include "CartesianGridlinesImp.h"
 
-class CartesianGridlinesAdapter : public CartesianGridlines, public CartesianGridlinesImp
+class CartesianGridlinesAdapter : public CartesianGridlines, public CartesianGridlinesImp CARTESIANGRIDLINESADAPTEREXTENSION_CLASSES
 {
 public:
    CartesianGridlinesAdapter(OrientationType orientation, PlotViewImp* pPlot, bool bPrimary);

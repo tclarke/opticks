@@ -13,7 +13,7 @@
 #include "LatLonInsertObject.h"
 #include "LatLonInsertObjectImp.h"
 
-class LatLonInsertObjectAdapter : public LatLonInsertObject, public LatLonInsertObjectImp GRAPHICOBJECTEXTENSION_CLASSES
+class LatLonInsertObjectAdapter : public LatLonInsertObject, public LatLonInsertObjectImp LATLONINSERTOBJECTADAPTEREXTENSION_CLASSES
 {
 public:
    LatLonInsertObjectAdapter(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer,

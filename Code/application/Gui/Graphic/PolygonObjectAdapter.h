@@ -13,7 +13,7 @@
 #include "PolygonObject.h"
 #include "PolygonObjectImp.h"
 
-class PolygonObjectAdapter : public PolygonObject, public PolygonObjectImp GRAPHICOBJECTEXTENSION_CLASSES
+class PolygonObjectAdapter : public PolygonObject, public PolygonObjectImp POLYGONOBJECTADAPTEREXTENSION_CLASSES
 {
 public:
    PolygonObjectAdapter(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer, LocationType pixelCoord) :

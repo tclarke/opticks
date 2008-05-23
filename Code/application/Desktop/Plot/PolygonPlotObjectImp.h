@@ -60,6 +60,9 @@ private:
    static void combineVertexData(GLdouble coords[3], GLdouble* pVertexData[4], GLfloat weight[4], void** pOutData);
 };
 
+#define POLYGONPLOTOBJECTADAPTEREXTENSION_CLASSES \
+   POINTSETADAPTEREXTENSION_CLASSES
+
 #define POLYGONPLOTOBJECTADAPTER_METHODS(impClass) \
    POINTSETADAPTER_METHODS(impClass) \
    ColorType getFillColor() const \

@@ -13,7 +13,7 @@
 #include "Arrow.h"
 #include "ArrowImp.h"
 
-class ArrowAdapter : public Arrow, public ArrowImp
+class ArrowAdapter : public Arrow, public ArrowImp ARROWADAPTEREXTENSION_CLASSES
 {
 public:
    ArrowAdapter(PlotViewImp* pPlot, bool bPrimary);

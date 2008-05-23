@@ -15,7 +15,7 @@
 #include "Classification.h"
 #include "ClassificationImp.h"
 
-class ClassificationAdapter  : public Classification, public ClassificationImp
+class ClassificationAdapter  : public Classification, public ClassificationImp CLASSIFICATIONADAPTEREXTENSION_CLASSES
 {
 public:
    ClassificationAdapter() {}

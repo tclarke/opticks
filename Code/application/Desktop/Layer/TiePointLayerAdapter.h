@@ -13,7 +13,7 @@
 #include "TiePointLayer.h"
 #include "TiePointLayerImp.h"
 
-class TiePointLayerAdapter : public TiePointLayer, public TiePointLayerImp
+class TiePointLayerAdapter : public TiePointLayer, public TiePointLayerImp TIEPOINTLAYERADAPTEREXTENSION_CLASSES
 {
 public:
    TiePointLayerAdapter(const std::string& id, const std::string& layerName, TiePointList* pElement);
