@@ -34,7 +34,7 @@ class WizardItem;
  *  same data type as the original node.  The connected nodes can be retrieved with the
  *  getConnectedNodes() method.
  *
- *  @see     WizardItem
+ *  @see     WizardItem, WizardNodeExt1
  */
 class WizardNode : public Serializable
 {
@@ -125,6 +125,35 @@ protected:
     * of this object.
     */
    virtual ~WizardNode() {}
+};
+
+/**
+ *  Extends capability of the WizardNode interface.
+ *
+ *  This class provides additional capability for the WizardNode interface
+ *  class.  A pointer to this class can be obtained by performing a dynamic
+ *  cast on a pointer to WizardNode or any of its subclasses.
+ *
+ *  @warning A pointer to this class can only be used to call methods contained
+ *           in this extension class and cannot be used to call any methods in
+ *           WizardNode or its subclasses.
+ */
+class WizardNodeExt1
+{
+public:
+   /**
+   *  Gets the item description.
+   *
+   *  @return  The item description.
+   */
+   virtual const std::string& getDescription() const = 0;
+protected:
+   /**
+    * A plug-in cannot create this object, it can only retrieve an already existing
+    * object from WizardItem.  The WizardItem will manage any instances
+    * of this object.
+    */
+   virtual ~WizardNodeExt1() {}
 };
 
 #endif

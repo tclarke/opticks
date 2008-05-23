@@ -24,7 +24,7 @@ class WizardItem;
  *  The implementation class for a wizard node.
  *
  *  A wizard node contains the input or output data for an item executed in a wizard.  A
- *  node has a name, type, and a value.  The node type is a string containing the actual
+ *  node has a name, type, value and a description.  The node type is a string containing the actual
  *  data type.  This is used in conjunction with the value, which is stored as a void
  *  pointer.  The value can then be any data type, which is identified by the string.  The
  *  name is also used to uniquely identify nodes of the same type.
@@ -35,7 +35,7 @@ class WizardItem;
  *  same data type as the original node.  The connected nodes can be retrieved with the
  *  getConnectedNodes() method.
  */
-class WizardNodeImp : public WizardNode, public SubjectAdapter
+class WizardNodeImp : public WizardNode, public SubjectAdapter, public WizardNodeExt1
 {
 public:
    /**
@@ -47,8 +47,10 @@ public:
     *           The node name.
     *  @param   type
     *           The node type.
+    *  @param   description
+    *           The node description.
     */
-   WizardNodeImp(WizardItem* pItem, std::string name, std::string type);
+   WizardNodeImp(WizardItem* pItem, std::string name, std::string type, std::string description);
 
    /**
     *  Destroys the wizard item.
@@ -75,7 +77,7 @@ public:
     *
     *  @see     WizardItemImp::WizardItemChangeType
     */
-   enum WizardNodeChangeTypeEnum { NodeName, NodeType, NodeValue, ConnectedNodeAdded, ConnectedNodeRemoved };
+   enum WizardNodeChangeTypeEnum { NodeName, NodeType, NodeDescription, NodeValue, ConnectedNodeAdded, ConnectedNodeRemoved };
 
    /**
     * @EnumWrapper WizardNodeImp::WizardNodeChangeTypeEnum.
@@ -126,6 +128,21 @@ public:
     *  @see     WizardNodeImp::setType
     */
    const std::string& getType() const;
+
+   /**
+    *  Sets the item description.
+    *
+    *  @param   nodeDescription
+    *           The item description.
+    */
+   void setDescription(const std::string& nodeDescription);
+
+   /**
+    *  Gets the item description.
+    *
+    *  @return  The item description.
+    */
+   const std::string& getDescription() const;
 
    /**
     *  Sets the original node type.
@@ -290,6 +307,7 @@ private:
    static std::string mVersion;
    std::string mName;
    std::string mType;
+   std::string mDescription;
    std::string mOriginalType;
    std::vector<std::string> mValidTypes;
    DataVariant mDeepCopyValue;

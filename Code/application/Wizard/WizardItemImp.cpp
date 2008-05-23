@@ -54,13 +54,22 @@ WizardItemImp& WizardItemImp::operator =(const WizardItemImp& item)
       {
          WizardNode* pExistNode = NULL;
          pExistNode = item.mInputNodes.at(i);
+
          if (pExistNode != NULL)
          {
-            string nodeName = pExistNode->getName().c_str();
-            string nodeType = ((WizardNodeImp*) pExistNode)->getOriginalType().c_str();
+            const string &nodeName = pExistNode->getName();
+            const string &nodeType = static_cast<WizardNodeImp*>(pExistNode)->getOriginalType();
+            string nodeDescription = "";
+
+            WizardNodeExt1* pExistNodeExt1 = dynamic_cast<WizardNodeExt1*>(pExistNode);
+            if (pExistNodeExt1 != NULL)
+            {
+               nodeDescription = pExistNodeExt1->getDescription();
+            }
+
 
             WizardNode* pNode = NULL;
-            pNode = addInputNode(nodeName, nodeType);
+            pNode = addInputNode(nodeName, nodeType, nodeDescription);
             if (pNode != NULL)
             {
                *((WizardNodeImp*) pNode) = *((WizardNodeImp*) pExistNode);
@@ -76,13 +85,22 @@ WizardItemImp& WizardItemImp::operator =(const WizardItemImp& item)
       {
          WizardNode* pExistNode = NULL;
          pExistNode = item.mOutputNodes.at(i);
+         WizardNodeExt1* pExistNodeExt1 = dynamic_cast<WizardNodeExt1*>(pExistNode);
          if (pExistNode != NULL)
          {
-            string nodeName = pExistNode->getName().c_str();
-            string nodeType = ((WizardNodeImp*) pExistNode)->getOriginalType().c_str();
+            const string &nodeName = pExistNode->getName();
+            const string &nodeType = static_cast<WizardNodeImp*>(pExistNode)->getOriginalType();
+            string nodeDescription = "";
+
+            WizardNodeExt1* pExistNodeExt1 = dynamic_cast<WizardNodeExt1*>(pExistNode);
+            if (pExistNodeExt1 != NULL)
+            {
+               nodeDescription = pExistNodeExt1->getDescription();
+            }
+
 
             WizardNode* pNode = NULL;
-            pNode = addOutputNode(nodeName, nodeType);
+            pNode = addOutputNode(nodeName, nodeType, nodeDescription);
             if (pNode != NULL)
             {
                *((WizardNodeImp*) pNode) = *((WizardNodeImp*) pExistNode);
@@ -158,10 +176,10 @@ double WizardItemImp::getYPosition() const
    return mCoord.mY;
 }
 
-WizardNode* WizardItemImp::addInputNode(const string& name, const string& type)
+WizardNode* WizardItemImp::addInputNode(const string& name, const string& type, const string& description)
 {
    WizardNode* pNode = NULL;
-   pNode = new WizardNodeImp(this, name, type);
+   pNode = new WizardNodeImp(this, name, type, description);
    if (pNode != NULL)
    {
       mInputNodes.push_back(pNode);
@@ -293,10 +311,10 @@ void WizardItemImp::clearInputNodes()
    }
 }
 
-WizardNode* WizardItemImp::addOutputNode(const string& name, const string& type)
+WizardNode* WizardItemImp::addOutputNode(const string& name, const string& type, const string& description)
 {
    WizardNode* pNode = NULL;
-   pNode = new WizardNodeImp(this, name, type);
+   pNode = new WizardNodeImp(this, name, type, description);
    if (pNode != NULL)
    {
       mOutputNodes.push_back(pNode);
@@ -731,7 +749,7 @@ bool WizardItemImp::fromXml(DOMNode* document, unsigned int version)
       else if(XMLString::equals(chld->getNodeName(), X("input"))
            || XMLString::equals(chld->getNodeName(), X("output")))
       {
-         WizardNode *pNode(new WizardNodeImp(this, "", ""));
+         WizardNode *pNode(new WizardNodeImp(this, "", "", ""));
          if(pNode->fromXml(chld, version))
          {
             if(XMLString::equals(chld->getNodeName(), X("input")))
