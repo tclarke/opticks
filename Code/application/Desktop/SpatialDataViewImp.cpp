@@ -1828,7 +1828,7 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
       if (geoCanExtrapolate)
       {
          LocationType dataCoord;
-         if (mpPrimaryRasterLayer != NULL)
+         if (mpPrimaryRasterLayer.get() != NULL)
          {
             mpPrimaryRasterLayer->translateWorldToData(dX, dY, dataCoord.mX, dataCoord.mY);
             updateStatusBarGeocoords(pBar, pPrimaryRasterElement, dataCoord);
