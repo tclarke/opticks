@@ -885,3 +885,35 @@ bool RasterUtilities::chipMetadata(
    return true;
 
 }
+
+bool RasterUtilities::isSubcube(const RasterDataDescriptor* pDescriptor, bool checkBands)
+{
+   if (pDescriptor == NULL)
+   {
+      return false;
+   }
+   const RasterFileDescriptor* pFileDescriptor = 
+      dynamic_cast<const RasterFileDescriptor*>(pDescriptor->getFileDescriptor());
+   if (pFileDescriptor == NULL)
+   {
+      return false;
+   }
+   if (checkBands == true)
+   {
+      if (pDescriptor->getRows() == pFileDescriptor->getRows() &&
+         pDescriptor->getColumns() == pFileDescriptor->getColumns() &&
+         pDescriptor->getBands() == pFileDescriptor->getBands())
+      {
+         return false;
+      }
+   }
+   else
+   {
+      if (pDescriptor->getRows() == pFileDescriptor->getRows() &&
+         pDescriptor->getColumns() == pFileDescriptor->getColumns())
+      {
+         return false;
+      }
+   }
+   return true;
+}

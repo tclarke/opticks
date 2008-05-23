@@ -359,7 +359,9 @@ void IceWriter::writeCube(const string& hdfPath,
       }
    }
 
-   if (!calculatedStatistics.empty())
+   if (!calculatedStatistics.empty() && 
+      pOutputFileDescriptor->getRows() == pDataDesc->getRows() &&
+      pOutputFileDescriptor->getColumns() == pDataDesc->getColumns())
    {
       vector<hsize_t> dimensions;
       dimensions.push_back(calculatedStatistics.size());

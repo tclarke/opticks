@@ -15,8 +15,10 @@
 #include "Hdf5Resource.h"
 #include "Hdf5Utilities.h"
 #include "IceReader.h"
+#include "RasterDataDescriptor.h"
 #include "RasterElement.h"
-
+#include "RasterUtilities.h"
+#include "SessionManager.h"
 using namespace std;
 
 IceImporterShell::IceImporterShell(IceUtilities::FileType fileType) :
@@ -157,12 +159,19 @@ bool IceImporterShell::performImport() const
    }
    else
    {
+      const RasterDataDescriptor* pDescriptor =
+         dynamic_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor());
       IceReader reader(file);
-      if (reader.loadCubeStatistics(pElement) == false)
+      if (pDescriptor != NULL && 
+         RasterUtilities::isSubcube(pDescriptor, false) == false &&
+         Service<SessionManager>()->isSessionLoading() == false)
       {
-         if (pProgress != NULL)
+         if (reader.loadCubeStatistics(pElement) == false)
          {
-            pProgress->updateProgress("Unable to load statistics.", 100, WARNING);
+            if (pProgress != NULL)
+            {
+               pProgress->updateProgress("Unable to load statistics.", 100, WARNING);
+            }
          }
       }
    }

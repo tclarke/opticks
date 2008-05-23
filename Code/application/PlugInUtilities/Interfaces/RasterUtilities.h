@@ -49,13 +49,13 @@ namespace RasterUtilities
     * @param count
     *        The number of DimensionDescriptors to generate.
     * @param setOriginalNumbers
-    *        if true, the original numbers will be set from 0 to count-1
+    *        if \c true, the original numbers will be set from 0 to count-1
     *        matching their index location within the vector.
     * @param setActiveNumbers
-    *        if true, the active numbers will be set from 0 to count-1
+    *        if \c true, the active numbers will be set from 0 to count-1
     *        matching their index location within the vector.
     * @param setOnDiskNumbers
-    *        if true, the on-disk numbers will be set from 0 to count-1
+    *        if \c true, the on-disk numbers will be set from 0 to count-1
     *        matching their index location within the vector.
     *
     * @return A vector of size count, containing the requested
@@ -639,9 +639,27 @@ namespace RasterUtilities
    * @param pDescriptor
    *        the descriptor to return the ability to display true true for.
    * 
-   * @return True if the raster image can be displayed in true color and false otherwise.
+   * @return \c True if the raster image can be displayed in true color and \c false otherwise.
    */
    bool canBeDisplayedInTrueColor(const RasterDataDescriptor* pDescriptor);
+
+
+   /**
+   * Returns whether or not raster image is a subcube.
+   *
+   * @param pDescriptor
+   *        the descriptor of the raster image to be checked.
+   * @param checkBands
+   *        If \c true, include the bands in the comparison.  If \c false, don't include the bands
+   * 
+   * @return True if the raster image DimensionDescriptors for Rows, Columns and Bands are equal
+   * to the DimensionDescriptors for the Rows, Columns and Bands of the RasterFileDescriptor 
+   * and the checkBands parameter is true or if the raster image DimensionDescriptors for Rows and 
+   * Columns are equal to the DimensionDescriptors for the Rows and Columns of the RasterFileDescriptor 
+   * and the checkBands parameter is false.
+   */
+   bool isSubcube(const RasterDataDescriptor* pDescriptor, bool checkBands);
+
 
    /**
    * Sets the display bands to true color equivalents.  This method will query 

@@ -25,6 +25,7 @@
 #include "RasterElement.h"
 #include "RasterDataDescriptor.h"
 #include "RasterFileDescriptor.h"
+#include "RasterUtilities.h"
 #include "Sio.h"
 #include "SpecialMetadata.h"
 #include "Statistics.h"
@@ -502,7 +503,10 @@ bool SioImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 
          const RasterDataDescriptor* pDescriptor =
             dynamic_cast<const RasterDataDescriptor*>(pRaster->getDataDescriptor());
-         if (pDescriptor != NULL)
+
+         if (pDescriptor != NULL && 
+            RasterUtilities::isSubcube(pDescriptor, false) == false &&
+            Service<SessionManager>()->isSessionLoading() == false)
          {
             const vector<DimensionDescriptor>& bands = pDescriptor->getBands();
             for (unsigned int i = 0; i < bands.size(); ++i)
