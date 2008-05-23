@@ -43,13 +43,12 @@
 #include "PlotWindowAdapter.h"
 #include "PropertiesSpatialDataView.h"
 #include "PseudocolorLayerImp.h"
-#include "RasterElement.h"
-#include "RasterLayer.h"
-#include "RasterLayerImp.h"
 #include "RasterDataDescriptor.h"
+#include "RasterElement.h"
+#include "RasterLayerImp.h"
 #include "SessionManagerImp.h"
-#include "SpatialDataViewImp.h"
 #include "SpatialDataViewAdapter.h"
+#include "SpatialDataViewImp.h"
 #include "Statistics.h"
 #include "StatusBar.h"
 #include "StringUtilities.h"
@@ -64,11 +63,11 @@
 #include <QtGui/QActionGroup>
 #include <QtGui/QApplication>
 #include <QtGui/QColorDialog>
+#include <QtGui/QHelpEvent>
 #include <QtGui/QInputDialog>
 #include <QtGui/QMenu>
 #include <QtGui/QMessageBox>
 #include <QtGui/QMouseEvent>
-#include <QtGui/QHelpEvent>
 #include <QtGui/QToolTip>
 #include <QtOpenGL/QGLFramebufferObject>
 
@@ -86,10 +85,8 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
       Slot(this, &SpatialDataViewImp::updateContextMenu)),
    mTextureMode(TEXTURE_NEAREST_NEIGHBOR),
    mpLayerList(new LayerListAdapter()),
-   mpPrimaryRasterLayer(NULL),
    mpMeasurementsLayer(NULL),
    mShowMeasurements(true),
-   mpActiveLayer(NULL),
    mpDrawLayer(NULL),
    mpPanTimer(NULL),
    mPanKey(0),
@@ -271,26 +268,6 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
 
 SpatialDataViewImp::~SpatialDataViewImp()
 {
-   // Remove any pixel spectrum plots from the spectrum window
-   Service<DesktopServices> pDesktop;
-
-   PlotWindow* pSpecWnd = static_cast<PlotWindow*>(pDesktop->getWindow("Spectrum Window", PLOT_WINDOW));
-   if (pSpecWnd != NULL)
-   {
-      if (mpLayerList != NULL)
-      {
-         QString strDataset = mpLayerList->getPrimaryRasterElementName();
-         if (strDataset.isEmpty() == false)
-         {
-            PlotSet* pPlotSet = pSpecWnd->getPlotSet(strDataset.toStdString());
-            if (pPlotSet != NULL)
-            {
-               pSpecWnd->deletePlotSet(pPlotSet);
-            }
-         }
-      }
-   }
-
    // Clean up the layers
    if (mpLayerList != NULL)
    {
@@ -400,7 +377,16 @@ void SpatialDataViewImp::elementDeleted(Subject &subject, const string &signal, 
                DataElement* pCurrentElement = pLayer->getDataElement();
                if ((pCurrentElement == pElement) || (pCurrentElement == NULL))
                {
-                  deleteLayer(pLayer);
+                  if (pLayer == mpPrimaryRasterLayer.get())
+                  {
+                     Service<DesktopServices> pDesktop;
+                     pDesktop->deleteView(dynamic_cast<View*>(this));
+                  }
+                  else
+                  {
+                     deleteLayer(pLayer);
+                  }
+
                   break;
                }
             }
@@ -552,27 +538,24 @@ ViewType SpatialDataViewImp::getViewType() const
 bool SpatialDataViewImp::setPrimaryRasterElement(RasterElement* pRasterElement)
 {
    bool bSuccess = false;
-   if (mpLayerList != NULL)
+   if ((mpLayerList != NULL) && (mpPrimaryRasterLayer.get() == NULL))
    {
       bSuccess = mpLayerList->setPrimaryRasterElement(pRasterElement);
       if (bSuccess == true)
       {
-         // Set the primary raster layer if necessary
-         if (mpPrimaryRasterLayer == NULL)
+         // Set the primary raster layer
+         vector<Layer*> layers;
+         mpLayerList->getLayers(RASTER, layers);
+         for (vector<Layer*>::iterator iter = layers.begin(); iter != layers.end(); ++iter)
          {
-            vector<Layer*> layers;
-            mpLayerList->getLayers(RASTER, layers);
-            for (vector<Layer*>::iterator iter = layers.begin(); iter != layers.end(); ++iter)
+            RasterLayer* pRasterLayer = static_cast<RasterLayer*>(*iter);
+            if (pRasterLayer != NULL)
             {
-               RasterLayer* pRasterLayer = static_cast<RasterLayer*>(*iter);
-               if (pRasterLayer != NULL)
+               RasterElement* pCurrentRasterElement = dynamic_cast<RasterElement*>(pRasterLayer->getDataElement());
+               if (pCurrentRasterElement == pRasterElement)
                {
-                  RasterElement* pCurrentRasterElement = dynamic_cast<RasterElement*>(pRasterLayer->getDataElement());
-                  if (pCurrentRasterElement == pRasterElement)
-                  {
-                     mpPrimaryRasterLayer = pRasterLayer;
-                     break;
-                  }
+                  mpPrimaryRasterLayer.reset(pRasterLayer);
+                  break;
                }
             }
          }
@@ -645,10 +628,10 @@ Layer* SpatialDataViewImp::createLayer(const LayerType& layerType, DataElement* 
          if (bSuccess == true)
          {
             // Set the primary raster layer
-            if ((mpPrimaryRasterLayer == NULL) && (pElement == mpLayerList->getPrimaryRasterElement()))
+            if ((mpPrimaryRasterLayer.get() == NULL) && (pElement == mpLayerList->getPrimaryRasterElement()))
             {
-               mpPrimaryRasterLayer = dynamic_cast<RasterLayer*>(pLayer);
-               if (mpPrimaryRasterLayer != NULL)
+               mpPrimaryRasterLayer.reset(dynamic_cast<RasterLayer*>(pLayer));
+               if (mpPrimaryRasterLayer.get() != NULL)
                {
                   UndoLock lock(dynamic_cast<View*>(this));
 
@@ -972,7 +955,7 @@ Layer* SpatialDataViewImp::deriveLayer(const Layer* pLayer, const LayerType& new
 
 Layer* SpatialDataViewImp::convertLayer(Layer* pLayer, const LayerType& newLayerType)
 {
-   if ((pLayer == NULL) || (pLayer == mpPrimaryRasterLayer))
+   if ((pLayer == NULL) || (pLayer == mpPrimaryRasterLayer.get()))
    {
       return NULL;
    }
@@ -1034,12 +1017,12 @@ DataElement* SpatialDataViewImp::getTopMostElement(const string& elementType) co
 void SpatialDataViewImp::setActiveLayer(Layer* pLayer)
 {
    LayerImp* pLayerImp = dynamic_cast<LayerImp*>(pLayer);
-   if (pLayerImp != mpActiveLayer)
+   if (pLayer != mpActiveLayer.get())
    {
       if ((pLayer == NULL) ||
          ((mpLayerList->containsLayer(pLayer) == true) && (pLayerImp->acceptsMouseEvents() == true)))
       {
-         mpActiveLayer = pLayerImp;
+         mpActiveLayer.reset(pLayer);
          emit layerActivated(pLayer);
          notify(SIGNAL_NAME(SpatialDataView, LayerActivated), boost::any(pLayer));
 
@@ -1051,7 +1034,7 @@ void SpatialDataViewImp::setActiveLayer(Layer* pLayer)
 
 Layer* SpatialDataViewImp::getActiveLayer() const
 {
-   return dynamic_cast<Layer*>(mpActiveLayer);
+   return const_cast<Layer*>(mpActiveLayer.get());
 }
 
 bool SpatialDataViewImp::setLayerDisplayIndex(Layer* pLayer, int iIndex)
@@ -2808,25 +2791,25 @@ void SpatialDataViewImp::mousePressEvent(QMouseEvent* pEvent)
          pMouseMode->getName(mouseMode);
       }
 
-      if (mouseMode == "LayerMode")
+      LayerImp* pActiveLayer = dynamic_cast<LayerImp*>(mpActiveLayer.get());
+      if ((mouseMode == "LayerMode") && (pActiveLayer != NULL))
       {
-         if (mpActiveLayer != NULL)
-         {
-            bSuccess = mpActiveLayer->processMousePress(ptMouse,
-               pEvent->button(), pEvent->buttons(), pEvent->modifiers());
-         }
+         bSuccess = pActiveLayer->processMousePress(ptMouse, pEvent->button(), pEvent->buttons(),
+            pEvent->modifiers());
 
-         GraphicLayer* pGraphicLayer = dynamic_cast<GraphicLayer*>(mpActiveLayer);
-         AoiLayer* pAoiLayer = dynamic_cast<AoiLayer*>(mpActiveLayer);
+         GraphicLayerImp* pGraphicLayer = dynamic_cast<GraphicLayerImp*>(mpActiveLayer.get());
+         AoiLayer* pAoiLayer = dynamic_cast<AoiLayer*>(mpActiveLayer.get());
          if (bSuccess == true && pGraphicLayer != NULL && pGraphicLayer->getNumSelectedObjects() == 0 &&
             (pAoiLayer == NULL || pAoiLayer->getMode() == AOI_MOVE))
          {
             // No objects selected, so activate another GraphicLayer
             vector<Layer*> displayedLayers = getDisplayedLayers();
-            for (vector<Layer*>::reverse_iterator iter = displayedLayers.rbegin(); iter != displayedLayers.rend(); ++iter)
+            for (vector<Layer*>::reverse_iterator iter = displayedLayers.rbegin();
+                 iter != displayedLayers.rend();
+                 ++iter)
             {
                GraphicLayerImp* pCurrentLayer = dynamic_cast<GraphicLayerImp*>(*iter);
-               if ((pCurrentLayer != NULL) && (pCurrentLayer != mpActiveLayer))
+               if ((pCurrentLayer != NULL) && (pCurrentLayer != pGraphicLayer))
                {
                   AoiLayerImp* pCurrentAoiLayer = dynamic_cast<AoiLayerImp*>(*iter);
 
@@ -2885,10 +2868,10 @@ void SpatialDataViewImp::mouseMoveEvent(QMouseEvent* pEvent)
          pMouseMode->getName(mouseMode);
       }
 
-      if ((mouseMode == "LayerMode") && (mpActiveLayer != NULL))
+      LayerImp* pActiveLayer = dynamic_cast<LayerImp*>(mpActiveLayer.get());
+      if ((mouseMode == "LayerMode") && (pActiveLayer != NULL))
       {
-         bSuccess = mpActiveLayer->processMouseMove(ptMouse,
-            pEvent->button(), pEvent->buttons(), pEvent->modifiers());
+         bSuccess = pActiveLayer->processMouseMove(ptMouse, pEvent->button(), pEvent->buttons(), pEvent->modifiers());
       }
       else if ((mouseMode == "MeasurementMode") && (mpMeasurementsLayer != NULL) && (mShowMeasurements == true))
       {
@@ -2926,13 +2909,16 @@ void SpatialDataViewImp::mouseReleaseEvent(QMouseEvent* pEvent)
          pMouseMode->getName(mouseMode);
       }
 
-      if ((mouseMode == "LayerMode") && (mpActiveLayer != NULL))
+      LayerImp* pActiveLayer = dynamic_cast<LayerImp*>(mpActiveLayer.get());
+      if ((mouseMode == "LayerMode") && (pActiveLayer != NULL))
       {
-         bSuccess = mpActiveLayer->processMouseRelease(ptMouse, pEvent->button(), pEvent->buttons(), pEvent->modifiers());
+         bSuccess = pActiveLayer->processMouseRelease(ptMouse, pEvent->button(), pEvent->buttons(),
+            pEvent->modifiers());
       }
       else if ((mouseMode == "MeasurementMode") && (mpMeasurementsLayer != NULL) && (mShowMeasurements == true))
       {
-         bSuccess = mpMeasurementsLayer->processMouseRelease(ptMouse, pEvent->button(), pEvent->buttons(), pEvent->modifiers());
+         bSuccess = mpMeasurementsLayer->processMouseRelease(ptMouse, pEvent->button(), pEvent->buttons(),
+            pEvent->modifiers());
       }
 
       if (bSuccess == true)
@@ -2964,9 +2950,10 @@ void SpatialDataViewImp::mouseDoubleClickEvent(QMouseEvent* pEvent)
          pMouseMode->getName(mouseMode);
       }
 
-      if ((mouseMode == "LayerMode") && (mpActiveLayer != NULL))
+      LayerImp* pActiveLayer = dynamic_cast<LayerImp*>(mpActiveLayer.get());
+      if ((mouseMode == "LayerMode") && (pActiveLayer != NULL))
       {
-         bSuccess = mpActiveLayer->processMouseDoubleClick(ptMouse, pEvent->button(), pEvent->buttons(),
+         bSuccess = pActiveLayer->processMouseDoubleClick(ptMouse, pEvent->button(), pEvent->buttons(),
             pEvent->modifiers());
       }
       else if ((mouseMode == "MeasurementMode") && (mpMeasurementsLayer != NULL) && (mShowMeasurements == true))
@@ -3140,7 +3127,7 @@ double SpatialDataViewImp::limitZoomPercentage(double dPercent)
    // calc number scene pixels in view for dPercent based on x and y pixel size
    double xPixelSize = 1.0;
    double yPixelSize = 1.0;
-   if (mpPrimaryRasterLayer != NULL)
+   if (mpPrimaryRasterLayer.get() != NULL)
    {
       xPixelSize = mpPrimaryRasterLayer->getXScaleFactor();
       yPixelSize = mpPrimaryRasterLayer->getYScaleFactor();
@@ -3358,9 +3345,11 @@ void SpatialDataViewImp::updateMouseCursor(const MouseMode* pMouseMode)
       if (strModeName == "LayerMode")
       {
          QCursor mouseCursor = pMouseModeImp->getCursor();
-         if (mpActiveLayer != NULL)
+
+         LayerImp* pActiveLayer = dynamic_cast<LayerImp*>(mpActiveLayer.get());
+         if (pActiveLayer != NULL)
          {
-            mouseCursor = mpActiveLayer->getMouseCursor();
+            mouseCursor = pActiveLayer->getMouseCursor();
          }
 
          setCursor(mouseCursor);
@@ -3444,7 +3433,7 @@ void SpatialDataViewImp::convertLayer()
    }
 
    // Prevent converting the primary raster layer
-   if (pLayer == mpPrimaryRasterLayer)
+   if (pLayer == mpPrimaryRasterLayer.get())
    {
       QMessageBox::critical(this, windowTitle(), "The primary raster layer cannot be converted!");
       return;
@@ -3578,7 +3567,7 @@ void SpatialDataViewImp::deleteLayer()
    }
 
    // Prevent deleting the primary raster layer
-   if (pLayer == mpPrimaryRasterLayer)
+   if (pLayer == mpPrimaryRasterLayer.get())
    {
       QMessageBox::critical(this, windowTitle(), "The primary raster layer cannot be deleted!");
       return;
@@ -3705,7 +3694,7 @@ bool SpatialDataViewImp::toXml(XMLWriter* pXml) const
    pXml->addAttr("minZoom", mMinZoom);
    pXml->addAttr("maxZoom", mMaxZoom);
 
-   if (mpActiveLayer != NULL)
+   if (mpActiveLayer.get() != NULL)
    {
       pXml->addAttr("activeLayerId", mpActiveLayer->getId());
    }
@@ -3728,7 +3717,7 @@ bool SpatialDataViewImp::toXml(XMLWriter* pXml) const
    {
       pXml->pushAddPoint(pXml->addElement("layer"));
       pXml->addAttr("id", (*lit)->getId());
-      if(*lit == mpPrimaryRasterLayer)
+      if(*lit == mpPrimaryRasterLayer.get())
       {
          pXml->addAttr("primary", true);
       }
@@ -3766,12 +3755,14 @@ bool SpatialDataViewImp::fromXml(DOMNode* pDocument, unsigned int version)
 
    if(pElem->hasAttribute(X("activeLayerId")))
    {
-      mpActiveLayer = dynamic_cast<LayerImp*>(SessionManagerImp::instance()->getSessionItem(A(pElem->getAttribute(X("activeLayerId")))));
+      mpActiveLayer.reset(dynamic_cast<Layer*>(
+         SessionManagerImp::instance()->getSessionItem(A(pElem->getAttribute(X("activeLayerId"))))));
    }
    else
    {
-      mpActiveLayer = NULL;
+      mpActiveLayer.reset(NULL);
    }
+
    if(pElem->hasAttribute(X("drawLayerId")))
    {
       mpDrawLayer = dynamic_cast<LayerImp*>(SessionManagerImp::instance()->getSessionItem(A(pElem->getAttribute(X("drawLayerId")))));
@@ -3814,7 +3805,7 @@ bool SpatialDataViewImp::fromXml(DOMNode* pDocument, unsigned int version)
             addLayer(pLayer);
             if(pLayerElement->hasAttribute(X("primary")))
             {
-               mpPrimaryRasterLayer = dynamic_cast<RasterLayer*>(pLayer);
+               mpPrimaryRasterLayer.reset(dynamic_cast<RasterLayer*>(pLayer));
             }
          }
       }

@@ -92,7 +92,9 @@ void WorkspaceWindowImp::viewDeleted(Subject &subject, const string &signal, con
    {
       setView(NULL);
       setWidget(NULL);
-      close();
+
+      Service<DesktopServices> pDesktop;
+      pDesktop->deleteWindow(dynamic_cast<Window*>(this));
    }
 }
 

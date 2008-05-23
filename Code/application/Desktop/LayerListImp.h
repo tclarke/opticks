@@ -12,6 +12,8 @@
 
 #include <QtCore/QObject>
 
+#include "AttachmentPtr.h"
+#include "RasterElement.h"
 #include "SubjectImp.h"
 #include "TypesFile.h"
 
@@ -20,7 +22,6 @@
 
 class Layer;
 class LayerList;
-class RasterElement;
 class DataElement;
 
 class LayerListImp : public QObject, public SubjectImp
@@ -33,8 +34,6 @@ public:
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
-
-   void elementDeleted(Subject &subject, const std::string &signal, const boost::any &v);
 
    bool setPrimaryRasterElement(RasterElement* pRasterElement);
    RasterElement* getPrimaryRasterElement() const;
@@ -79,7 +78,7 @@ signals:
    void layerDeleted(Layer* pLayer);
 
 private:
-   RasterElement* mpRasterElement;
+   AttachmentPtr<RasterElement> mpRasterElement;
    std::vector<Layer*> mLayers;
    std::vector<Layer*> mDisplayedLayers;
 };
