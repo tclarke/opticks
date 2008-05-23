@@ -12,9 +12,10 @@
 
 #include "AttachmentPtr.h"
 #include "ColorType.h"
-#include "PerspectiveViewImp.h"
 #include "Layer.h"
 #include "Observer.h"
+#include "PerspectiveViewImp.h"
+#include "RasterLayer.h"
 #include "SessionExplorer.h"
 #include "SpatialDataView.h"
 #include "TypesFile.h"
@@ -29,7 +30,6 @@ class LayerListAdapter;
 class MeasurementLayerAdapter;
 class MouseMode;
 class RasterElement;
-class RasterLayer;
 class QMenu;
 class QHelpEvent;
 class StatusBar;
@@ -186,10 +186,10 @@ private:
 
    TextureMode mTextureMode;
    LayerListAdapter* mpLayerList;
-   RasterLayer* mpPrimaryRasterLayer;
+   AttachmentPtr<RasterLayer> mpPrimaryRasterLayer;
    MeasurementLayerAdapter* mpMeasurementsLayer;
    bool mShowMeasurements;
-   LayerImp* mpActiveLayer;
+   AttachmentPtr<Layer> mpActiveLayer;
    LayerImp* mpDrawLayer;
    QTimer *mpPanTimer;
    int mPanKey;

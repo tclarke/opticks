@@ -26,7 +26,6 @@
 #include "LayerListAdapter.h"
 #include "ModelServices.h"
 #include "PseudocolorLayerAdapter.h"
-#include "RasterElement.h"
 #include "RasterLayerAdapter.h"
 #include "RasterDataDescriptor.h"
 #include "StringUtilities.h"
@@ -37,17 +36,12 @@
 #include <sstream>
 using namespace std;
 
-LayerListImp::LayerListImp() : mpRasterElement(NULL)
+LayerListImp::LayerListImp()
 {
 }
 
 LayerListImp::~LayerListImp()
 {
-   if (mpRasterElement != NULL)
-   {
-      mpRasterElement->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &LayerListImp::elementDeleted));
-   }
-
    clear();
 }
 
@@ -67,37 +61,26 @@ bool LayerListImp::isKindOf(const string& className) const
    return SubjectImp::isKindOf(className);
 }
 
-void LayerListImp::elementDeleted(Subject &subject, const string &signal, const boost::any &v)
-{
-   if (&subject == mpRasterElement)
-   {
-      mpRasterElement = NULL;
-   }
-}
-
 bool LayerListImp::setPrimaryRasterElement(RasterElement* pRasterElement)
 {
-   if ((mpRasterElement != NULL) || (pRasterElement == NULL))
+   if (pRasterElement != mpRasterElement.get())
    {
-      return false;
+      mpRasterElement.reset(pRasterElement);
+      notify(SIGNAL_NAME(Subject, Modified));
+      return true;
    }
 
-   mpRasterElement = pRasterElement;
-
-   mpRasterElement->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &LayerListImp::elementDeleted));
-   notify(SIGNAL_NAME(Subject, Modified));
-
-   return true;
+   return false;
 }
 
 RasterElement* LayerListImp::getPrimaryRasterElement() const
 {
-   return mpRasterElement;
+   return const_cast<RasterElement*>(mpRasterElement.get());
 }
 
 QString LayerListImp::getPrimaryRasterElementName() const
 {
-   if (mpRasterElement != NULL)
+   if (mpRasterElement.get() != NULL)
    {
       string name = mpRasterElement->getName();
       if (name.empty() == false)
@@ -174,7 +157,7 @@ Layer* LayerListImp::newLayer(const LayerType& layerType, DataElement* pElement,
          string elementType = strModelType.toStdString();
 
          Service<ModelServices> pModel;
-         pElement = pModel->createElement(elementName, elementType, mpRasterElement);
+         pElement = pModel->createElement(elementName, elementType, mpRasterElement.get());
       }
 
       if (pElement == NULL)
@@ -294,7 +277,7 @@ Layer* LayerListImp::newLayer(const LayerType& layerType, DataElement* pElement,
    VERIFYRV_MSG(pLayer != NULL, NULL, msg.c_str());
 
    // get default scale factor
-   if (mpRasterElement != NULL)
+   if (mpRasterElement.get() != NULL)
    {
       double xFactor = 1;
       double yFactor = 1;
@@ -308,7 +291,7 @@ Layer* LayerListImp::newLayer(const LayerType& layerType, DataElement* pElement,
       }
 
       const RasterElement *pRasterElement = dynamic_cast<const RasterElement*>(pElement);
-      if (pRasterElement != NULL && mpRasterElement != pRasterElement)
+      if (pRasterElement != NULL && mpRasterElement.get() != pRasterElement)
       {
          pDescriptor = dynamic_cast<const RasterDataDescriptor*>(pRasterElement->getDataDescriptor());
          if (pDescriptor != NULL)

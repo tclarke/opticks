@@ -1676,9 +1676,16 @@ bool ApplicationWindow::deleteWindow(Window* pWindow)
    }
 
    // Close the widget before removing the window to cancel out if the user does not confirm the close
+   bool deleteWidget = false;
+
    QWidget* pWidget = dynamic_cast<QWidget*>(pWindow);
    if (pWidget != NULL)
    {
+      if (pWidget->testAttribute(Qt::WA_DeleteOnClose) == false)
+      {
+         deleteWidget = true;
+      }
+
       if (pWidget->close() == false)
       {
          return false;
@@ -1691,7 +1698,11 @@ bool ApplicationWindow::deleteWindow(Window* pWindow)
       return false;
    }
 
-   delete pWidget;
+   if (deleteWidget == true)
+   {
+      delete pWidget;
+   }
+
    return true;
 }
 
