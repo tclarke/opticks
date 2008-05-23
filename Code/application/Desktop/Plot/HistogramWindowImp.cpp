@@ -871,7 +871,7 @@ HistogramWindowImp::HistogramUpdater::UpdateMomento::UpdateMomento(HistogramWind
 {
 }
 
-void HistogramWindowImp::HistogramUpdater::UpdateMomento::update()
+void HistogramWindowImp::HistogramUpdater::UpdateMomento::update() const
 {
    RasterLayer *pLayer = mpRasterLayer.get()==NULL?NULL:mpRasterLayer.get()->get();
    if (pLayer == NULL || mpWindow == NULL)

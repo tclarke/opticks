@@ -85,7 +85,7 @@ private:
       public:
          UpdateMomento(HistogramWindowImp *pWindow, RasterLayer* pLayer, RasterChannelType channel);
          bool operator<(const UpdateMomento &rhs) const;
-         void update();
+         void update() const;
       private:
          HistogramWindowImp *mpWindow;
          boost::shared_ptr<AttachmentPtr<RasterLayer> > mpRasterLayer;
