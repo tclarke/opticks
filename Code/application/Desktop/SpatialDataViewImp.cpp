@@ -29,6 +29,7 @@
 #include "DesktopServices.h"
 #include "DimensionDescriptor.h"
 #include "Endian.h"
+#include "Georeference.h"
 #include "glCommon.h"
 #include "GraphicGroupImp.h"
 #include "Icons.h"
@@ -1779,6 +1780,27 @@ bool SpatialDataViewImp::sendLayerBackward(Layer* pLayer)
    return bSuccess;
 }
 
+void SpatialDataViewImp::updateStatusBarGeocoords(StatusBar *pBar, RasterElement *pRaster, LocationType dataCoord)
+{
+   if (pBar == NULL || pRaster == NULL)
+   {
+      return;
+   }
+
+   GeocoordType geocoordType = LatLonLayer::getSettingGeocoordType();
+   DmsFormatType dmsFormat = LatLonLayer::getSettingFormat();
+
+   LatLonLayer* pLatLonLayer = dynamic_cast<LatLonLayer*>(getTopMostLayer(LAT_LONG));
+   if (pLatLonLayer != NULL)
+   {
+      geocoordType = pLatLonLayer->getGeocoordType();
+      dmsFormat = pLatLonLayer->getLatLonFormat();
+   }
+
+   LocationType geoCoord = pRaster->convertPixelToGeocoord(dataCoord);
+   pBar->setGeoCoords(geoCoord, geocoordType, dmsFormat);
+}
+
 void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
 {
    Service<DesktopServices> pDesktop;
@@ -1795,6 +1817,17 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
       return;
    }
 
+   bool geoCanExtrapolate = false;
+   RasterElement *pPrimaryRasterElement = mpLayerList->getPrimaryRasterElement();
+   if (pPrimaryRasterElement)
+   {
+      GeoreferenceExt1 *pGeoExt1 = dynamic_cast<GeoreferenceExt1*>(pPrimaryRasterElement->getGeoreferencePlugin());
+      if (pGeoExt1 != NULL)
+      {
+         geoCanExtrapolate = pGeoExt1->canExtrapolate();
+      }
+   }
+
    pBar->clearValues();
    if (screenCoord.isNull() == false)
    {
@@ -1807,6 +1840,18 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
       double dMaxX = 0.0;
       double dMaxY = 0.0;
       getExtents(dMinX, dMinY, dMaxX, dMaxY);
+
+      bool geoUpdated = false;
+      if (geoCanExtrapolate)
+      {
+         LocationType dataCoord;
+         if (mpPrimaryRasterLayer != NULL)
+         {
+            mpPrimaryRasterLayer->translateWorldToData(dX, dY, dataCoord.mX, dataCoord.mY);
+            updateStatusBarGeocoords(pBar, pPrimaryRasterElement, dataCoord);
+            geoUpdated = true;
+         }
+      }
 
       if ((dX >= dMinX) && (dX <= dMaxX) && (dY >= dMinY) && (dY <= dMaxY))
       {
@@ -1839,7 +1884,6 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
                            (activeColumns.size() > static_cast<unsigned int>(dataCoord.mX)) &&
                            (activeColumns[dataCoord.mX].isValid()))
                         {
-
                            if (pRaster == mpLayerList->getPrimaryRasterElement())
                            {
                               RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(pLayer);
@@ -1848,20 +1892,13 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
                                  continue;
                               }
 
-                              GeocoordType geocoordType = LatLonLayer::getSettingGeocoordType();
-                              DmsFormatType dmsFormat = LatLonLayer::getSettingFormat();
-
-                              LatLonLayer* pLatLonLayer = dynamic_cast<LatLonLayer*>(getTopMostLayer(LAT_LONG));
-                              if (pLatLonLayer != NULL)
+                              if (!geoUpdated)
                               {
-                                 geocoordType = pLatLonLayer->getGeocoordType();
-                                 dmsFormat = pLatLonLayer->getLatLonFormat();
+                                 updateStatusBarGeocoords(pBar, pRaster, dataCoord);
+                                 geoUpdated = true;
                               }
 
-                              LocationType geoCoord = pRaster->convertPixelToGeocoord(dataCoord);
-                              pBar->setGeoCoords(geoCoord, geocoordType, dmsFormat);
-                                      DimensionDescriptor rowDim = activeRows[dataCoord.mY];
-
+                              DimensionDescriptor rowDim = activeRows[dataCoord.mY];
                               DimensionDescriptor columnDim = activeColumns[dataCoord.mX];
 
                               int originalSceneX = columnDim.getOriginalNumber();

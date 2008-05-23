@@ -33,6 +33,8 @@ SampleGeorefGui::SampleGeorefGui(void)
    mpYSpin->setMaximum(180);
    mpYSpin->setValue(5);
 
+   mpExtrapolateCheck = new QCheckBox("Extrapolate", this);
+
    mpAnimatedCheck = new QCheckBox("Animated", this);
    
    QRadioButton *pTranslateButton = new QRadioButton("Translate", this);
@@ -48,11 +50,12 @@ SampleGeorefGui::SampleGeorefGui(void)
    pGrid->addWidget(pYLabel, 1, 0);
    pGrid->addWidget(mpXSpin, 0, 1);
    pGrid->addWidget(mpYSpin, 1, 1);
-   pGrid->addWidget(mpAnimatedCheck, 2, 1);
-   pGrid->addWidget(pTranslateButton, 3, 1);
-   pGrid->addWidget(mpRotateButton, 4, 1);
+   pGrid->addWidget(mpExtrapolateCheck, 2, 1);
+   pGrid->addWidget(mpAnimatedCheck, 3, 1);
+   pGrid->addWidget(pTranslateButton, 4, 1);
+   pGrid->addWidget(mpRotateButton, 5, 1);
 
-   pGrid->setRowStretch(5, 10);
+   pGrid->setRowStretch(6, 10);
    pGrid->setColumnStretch(2, 10);
 
    VERIFYNR(connect(mpAnimatedCheck, SIGNAL(toggled(bool)), pTranslateButton, SLOT(setEnabled(bool))));
@@ -81,4 +84,9 @@ bool SampleGeorefGui::getAnimated() const
 bool SampleGeorefGui::getRotate() const
 {
    return mpRotateButton->isChecked();
+}
+
+bool SampleGeorefGui::getExtrapolate() const
+{
+   return mpExtrapolateCheck->isChecked();
 }

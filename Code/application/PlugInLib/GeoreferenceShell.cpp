@@ -67,3 +67,10 @@ bool GeoreferenceShell::validateGuiInput() const
 {
    return true;
 }
+
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : When we break binary compatibility, this should be \
+reimplemented as a third bool& arg in pixelToGeo* and geoToPixel* (tjohnson)")
+bool GeoreferenceShell::canExtrapolate() const
+{
+   return false;
+}

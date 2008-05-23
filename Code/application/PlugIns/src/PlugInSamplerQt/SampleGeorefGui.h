@@ -28,10 +28,12 @@ public:
    int getYSize() const;
    bool getAnimated() const;
    bool getRotate() const;
+   bool getExtrapolate() const;
 
 private:
    QSpinBox *mpXSpin;
    QSpinBox *mpYSpin;
+   QCheckBox *mpExtrapolateCheck;
    QCheckBox *mpAnimatedCheck;
    QRadioButton *mpRotateButton;
 };

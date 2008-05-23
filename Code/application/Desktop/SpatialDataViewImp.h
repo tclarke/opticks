@@ -32,6 +32,7 @@ class RasterElement;
 class RasterLayer;
 class QMenu;
 class QHelpEvent;
+class StatusBar;
 
 class SpatialDataViewImp : public PerspectiveViewImp, public Observer
 {
@@ -157,6 +158,8 @@ protected:
    virtual LocationType limitPanCenter(LocationType center);
 
    void updateContextMenu(Subject& subject, const std::string& signal, const boost::any& value);
+
+   void updateStatusBarGeocoords(StatusBar *pBar, RasterElement *pRaster, LocationType dataCoord);
 
 protected slots:
    void keyPan();
