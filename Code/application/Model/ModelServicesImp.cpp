@@ -705,13 +705,16 @@ bool ModelServicesImp::destroyElement(DataElement* pElement)
 void ModelServicesImp::clear()
 {
    // Destroy only the top-level elements since they will destroy all child elements
-   vector<DataElement*> elements = getElements(NULL, string());
-   for (vector<DataElement*>::iterator iter = elements.begin(); iter != elements.end(); ++iter)
+   while (mElements.empty() == false)
    {
-      DataElement* pElement = *iter;
-      if (pElement != NULL)
+      for (multimap<Key, DataElement*>::iterator iter = mElements.begin(); iter != mElements.end(); ++iter)
       {
-         destroyElement(pElement);
+         DataElement* pElement = iter->second;
+         if ((pElement != NULL) && (pElement->getParent() == NULL))
+         {
+            destroyElement(pElement);
+            break;
+         }
       }
    }
 
