@@ -94,7 +94,14 @@ void WorkspaceWindowImp::viewDeleted(Subject &subject, const string &signal, con
       setWidget(NULL);
 
       Service<DesktopServices> pDesktop;
-      pDesktop->deleteWindow(dynamic_cast<Window*>(this));
+
+      ApplicationWindow* pAppWindow = dynamic_cast<ApplicationWindow*>(pDesktop->getMainWidget());
+      if (pAppWindow != NULL)
+      {
+         pAppWindow->removeWindow(dynamic_cast<Window*>(this));
+      }
+
+      close();
    }
 }
 
