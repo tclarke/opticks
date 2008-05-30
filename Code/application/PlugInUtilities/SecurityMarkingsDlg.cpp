@@ -401,7 +401,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
          mpCodewordList->addItem(QString::fromStdString((*iter)));
       }
    }
-   else if ((pWidget == NULL) || (pWidget == mpSystemList))
+   if ((pWidget == NULL) || (pWidget == mpSystemList))
    {
       vector<string> systems = UtilityServicesImp::instance()->getSystems();
       mpSystemList->clear();
@@ -410,7 +410,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
          mpSystemList->addItem(QString::fromStdString((*iter)));
       }
    }
-   else if ((pWidget == NULL) || (pWidget == mpCountryCodeList))
+   if ((pWidget == NULL) || (pWidget == mpCountryCodeList))
    {
       vector<string> countryCodes = UtilityServicesImp::instance()->getCountryCodes();
       mpCountryCodeList->clear();
@@ -419,7 +419,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
          mpCountryCodeList->addItem(QString::fromStdString((*iter)));
       }
    }
-   else if ((pWidget == NULL) || (pWidget == mpFileReleasingList))
+   if ((pWidget == NULL) || (pWidget == mpFileReleasingList))
    {
       vector<string> fileReleasing = UtilityServicesImp::instance()->getFileReleasing();
       mpFileReleasingList->clear();
@@ -428,7 +428,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
          mpFileReleasingList->addItem(QString::fromStdString((*iter)));
       }
    }
-   else if ((pWidget == NULL) || (pWidget == mpExemptionList))
+   if ((pWidget == NULL) || (pWidget == mpExemptionList))
    {
       vector<string> exemption = UtilityServicesImp::instance()->getDeclassificationExemptions();
       mpExemptionList->clear();
@@ -437,7 +437,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
          mpExemptionList->addItem(QString::fromStdString((*iter)));
       }
    }
-   else if ((pWidget == NULL) || (pWidget == mpClassReasonCombo))
+   if ((pWidget == NULL) || (pWidget == mpClassReasonCombo))
    {
       vector<string> classReason = UtilityServicesImp::instance()->getClassificationReasons();
       mpClassReasonCombo->clear();
@@ -446,7 +446,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
          mpClassReasonCombo->addItem(QString::fromStdString((*iter)));
       }
    }
-   else if ((pWidget == NULL) || (pWidget == mpDeclassTypeCombo))
+   if ((pWidget == NULL) || (pWidget == mpDeclassTypeCombo))
    {
       vector<string> declassType = UtilityServicesImp::instance()->getDeclassificationTypes();
       mpDeclassTypeCombo->clear();
@@ -455,7 +455,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
          mpDeclassTypeCombo->addItem(QString::fromStdString((*iter)));
       }
    }
-   else if ((pWidget == NULL) || (pWidget == mpFileDowngradeCombo))
+   if ((pWidget == NULL) || (pWidget == mpFileDowngradeCombo))
    {
       vector<string> fileDowngrade = UtilityServicesImp::instance()->getFileDowngrades();
       mpFileDowngradeCombo->clear();
@@ -464,7 +464,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
          mpFileDowngradeCombo->addItem(QString::fromStdString((*iter)));
       }
    }
-   else if ((pWidget == NULL) || (pWidget == mpFileControlCombo))
+   if ((pWidget == NULL) || (pWidget == mpFileControlCombo))
    {
       vector<string> fileControl = UtilityServicesImp::instance()->getFileControls();
       mpFileControlCombo->clear();

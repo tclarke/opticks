@@ -11,6 +11,7 @@
     <FileReleasing data="REL TO" priority="25000"/>
     <FileReleasing data="DSEN" priority="26000"/>
     <FileReleasing data="FISA" priority="27000"/>
+    <DeclassificationExemption data="MR" priority="20000"/>
     <ClassificationReason data="A" priority="20000"/>
     <ClassificationReason data="B" priority="21000"/>
     <ClassificationReason data="C" priority="22000"/>
@@ -18,7 +19,6 @@
     <ClassificationReason data="E" priority="24000"/>
     <ClassificationReason data="F" priority="25000"/>
     <ClassificationReason data="G" priority="26000"/>
-    <DeclassificationExemption data="MR" priority="20000"/>
     <DeclassificationType data="DD" priority="20000"/>
     <DeclassificationType data="DE" priority="21000"/>
     <DeclassificationType data="GD" priority="22000"/>

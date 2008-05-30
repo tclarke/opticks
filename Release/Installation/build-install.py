@@ -368,7 +368,7 @@ class WixBuilder:
 
          version_file_contents = re.sub(r'(PublicVersionNumber\s*?\=\s*?").*?(")', r"\g<1>%s\g<2>" % (display_version), version_file_contents)      
          version_file_contents = re.sub(r'(InternalVersionNumber\s*?\=\s*?").*?(")', r"\g<1>%s\g<2>" % (new_version), version_file_contents)      
-         guid_matcher = re.compile('<\?\s*?define\s*?\w+?Guid\s*?\=\s*?"(?P<guid>.*?)"')
+         guid_matcher = re.compile('<\?\s*?define\s*?\S+?Guid\s*?\=\s*?"(?P<guid>.*?)"')
          currentPos = 0
          while True:
             match_obj = guid_matcher.search(version_file_contents, currentPos)

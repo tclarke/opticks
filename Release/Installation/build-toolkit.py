@@ -188,6 +188,7 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir):
    cp_dir2(s_app, d_app, join("PlugIns","src","PlugInSamplerHdf"), suffixes_to_match=source_suffixes)
    cp_dir2(s_app, d_app, join("PlugIns","src","PlugInSamplerOoModtran"), suffixes_to_match=source_suffixes)
    cp_dir2(s_app, d_app, join("PlugIns","src","Aspam"), suffixes_to_match=source_suffixes)
+   cp_dir2(s_app, d_app, join("PlugIns","src","Tutorial"), suffixes_to_match=source_suffixes)
 
    #Copy the ModuleManager.cpp to the right spot in the Toolkit
    cp_file(join(s_release, "Toolkit", "src", "ModuleManager.cpp"), join(out_dir, "Src"))
@@ -218,7 +219,7 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir):
       "MovieExporter", "Nitf", "NitfCommonTre", "Pca", "Pictures", "Results", 
       "Scripts", "SecondMoment", "ShapeFileExporter", "Sio", "WizardExecutor",
       "WizardItems" ]
-   sample_plugins = ["PlugInSampler", "PlugInSamplerQt", "PlugInSamplerHdf", "ProductionPlugInTester" ]
+   sample_plugins = ["PlugInSampler", "PlugInSamplerQt", "PlugInSamplerHdf", "ProductionPlugInTester", "Tutorial" ]
    if is_windows():
       cp_file2(s_app, d_app, "", "SamplePlugIns.sln")
       cp_file2(s_app, d_app, "PlugInManager", "PlugInModule.def")

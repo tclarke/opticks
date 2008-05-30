@@ -54,10 +54,6 @@ are defined in Opticks-Version.wxi, so include that file now -->
                   <File Name="msvcr80.dll" Id="F__msvcr80_For_imageformats" DiskId="1" Source="$(var.VisualStudioRuntimeDir)\msvcr80.dll" />
                   <File Name="Microsoft.VC80.CRT.manifest" Id="F__VC80_CRT_Manifest_For_imageformats" DiskId="1" Source="$(var.VisualStudioRuntimeDir)\Microsoft.VC80.CRT.manifest" />
                </Component>
-               <Component Id="C__VC80_OpenMP_For_imageformats" Guid="$(var.C__VC80_OpenMP_For_imageformats_Guid)" Win64="$(var.64Bit)">
-                  <File Name="vcomp.dll" Id="F__vcomp_For_imageformats" DiskId="1" KeyPath="yes" Source="$(var.VisualStudioRuntimeDir)\vcomp.dll" />
-                  <File Name="Microsoft.VC80.OpenMP.manifest" Id="F__VC80_OpenMP_Manifest_For_imageformats" DiskId="1" Source="$(var.VisualStudioRuntimeDir)\Microsoft.VC80.OpenMP.manifest" />
-               </Component>
             </Directory>
             <Component Id="C__VC80_CRT_For_Bin" Guid="$(var.C__VC80_CRT_For_Bin_Guid)" Win64="$(var.64Bit)">
                <File Name="msvcp80.dll" Id="F__msvcp80_For_Bin" DiskId="1" KeyPath="yes" Source="$(var.VisualStudioRuntimeDir)\msvcp80.dll" />
@@ -200,10 +196,6 @@ are defined in Opticks-Version.wxi, so include that file now -->
                   <File Name="msvcr80.dll" Id="F__msvcr80_For_ArcProxy" DiskId="1" Source="$(var.VisualStudio32BitRuntimeDir)\msvcr80.dll" />
                   <File Name="Microsoft.VC80.CRT.manifest" Id="F__VC80_CRT_Manifest_For_ArcProxy" DiskId="1" Source="$(var.VisualStudio32BitRuntimeDir)\Microsoft.VC80.CRT.manifest" />
                </Component>
-               <Component Id="C__VC80_OpenMP_For_ArcProxy" Guid="$(var.C__VC80_OpenMP_For_ArcProxy_Guid)" Win64="$(var.64Bit)">
-                  <File Name="vcomp.dll" Id="F__vcomp_For_ArcProxy" DiskId="1" KeyPath="yes" Source="$(var.VisualStudio32BitRuntimeDir)\vcomp.dll" />
-                  <File Name="Microsoft.VC80.OpenMP.manifest" Id="F__VC80_OpenMP_Manifest_For_ArcProxy" DiskId="1" Source="$(var.VisualStudio32BitRuntimeDir)\Microsoft.VC80.OpenMP.manifest" />
-               </Component>
             </Directory>
             <Component Id="C__VC80_CRT_For_PlugIns" Guid="$(var.C__VC80_CRT_For_PlugIns_Guid)" Win64="$(var.64Bit)">
                <File Name="msvcp80.dll" Id="F__msvcp80_For_PlugIns" DiskId="1" KeyPath="yes" Source="$(var.VisualStudioRuntimeDir)\msvcp80.dll" />
@@ -295,21 +287,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
                   <File Name="ClassificationLevels.txt" Id="F__TopSecretLevelFile" DiskId="1" Source="$(sys.SOURCEFILEDIR)\ClassificationLevels-T.txt" />
                </Component>
                <Component Id="C__SecurityMarkings" Guid="$(var.C__SecurityMarkingsGuid)" Win64="no">
-                  <File Name="Authority.txt" Id="F__AuthorityMarkings" DiskId="1" />
-                  <File Name="AuthoritySourceDate.txt" Id="F__AuthoritySourceDateMarkings" DiskId="1" />
-                  <File Name="AuthorityType.txt" Id="F__AuthorityTypeMarkings" DiskId="1" />
-                  <File Name="ClassificationReason.txt" Id="F__ClassificationReasonMarkings" DiskId="1" />
-                  <File Name="Codewords.txt" Id="F__CodewordsMarkings" DiskId="1" />
-                  <File Name="CountryCode-Default.txt" Id="F__CountryCodeMarkings" DiskId="1" />
-                  <File Name="DeclassificationExemption.txt" Id="F__DeclassificationExemptionMarkings" DiskId="1" />
-                  <File Name="DeclassificationType.txt" Id="F__DeclassificationTypeMarkings" DiskId="1" />
-                  <File Name="Description.txt" Id="F__DescriptionMarkings" DiskId="1" />
-                  <File Name="Downgrade.txt" Id="F__DowngradeMarkings" DiskId="1" />
-                  <File Name="FileControls.txt" Id="F__FileControlsMarkings" DiskId="1" />
-                  <File Name="FileDowngrade.txt" Id="F__FileDowngradeMarkings" DiskId="1" />
-                  <File Name="FileReleasing.txt" Id="F__FileReleasingMarkings" DiskId="1" />
-                  <File Name="securitymarkingslist.txt" Id="F__SecurityMarkingsList" DiskId="1" KeyPath="yes" />
-                  <File Name="Systems.txt" Id="F__SystemsMarkings" DiskId="1" />
+                  <File Name="1-SecurityValues.sec" Id="F__SecurityValues" DiskId="1" />
                </Component>
             </Directory>
             <Directory Id="D__Xml" Name="Xml" FileSource="$(var.OpticksCodeDir)\Release\SupportFiles\Xml">
@@ -406,11 +384,9 @@ are defined in Opticks-Version.wxi, so include that file now -->
          <ComponentRef Id="C__VC80_CRT_For_Bin"/>
          <ComponentRef Id="C__VC80_OpenMP_For_Bin"/>
          <ComponentRef Id="C__VC80_CRT_For_imageformats"/>
-         <ComponentRef Id="C__VC80_OpenMP_For_imageformats"/>
          <ComponentRef Id="C__VC80_CRT_For_PlugIns"/>
          <ComponentRef Id="C__VC80_OpenMP_For_PlugIns"/>
          <ComponentRef Id="C__VC80_CRT_For_ArcProxy"/>
-         <ComponentRef Id="C__VC80_OpenMP_For_ArcProxy"/>
          <ComponentRef Id="C__Templates" />
 
          <!-- The Components that make up the help directory -->

@@ -20,7 +20,7 @@ int main(int argc, char** argv)
    // The QApplication will strip its args from argc/argv, so we want to do 
    // this before putting the command-line args into our ArgumentList, or we
    // will try to open the Qt args as data files.
-   OpticksApplication app(argc, argv);
+   QApplication app(argc, argv);
 
    SystemServicesImp::instance()->WriteLogInfo(QString("%1 Startup").arg("Application").toStdString());
    // Register the command line options
