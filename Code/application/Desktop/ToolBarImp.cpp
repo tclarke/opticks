@@ -12,6 +12,8 @@
 #include "ToolBarImp.h"
 #include "AppVerify.h"
 #include "DesktopServicesImp.h"
+#include "ContextMenuAction.h"
+#include "ContextMenuActions.h"
 #include "MenuBarImp.h"
 
 XERCES_CPP_NAMESPACE_USE
@@ -22,9 +24,21 @@ ToolBarImp::ToolBarImp(const string& id, const string& name, QWidget* parent) :
    WindowImp(id, name),
    mpMenuBar(new MenuBarImp(QString::fromStdString(name), this))
 {
+   mpShowAction = new QAction("&Show", this);
+   mpShowAction->setAutoRepeat(false);
+   mpShowAction->setStatusTip("Shows the window");
+
+   mpHideAction = new QAction("&Hide", this);
+   mpHideAction->setAutoRepeat(false);
+   mpHideAction->setStatusTip("Hides the window");
+
    // Initialization
    setIconSize(QSize(16, 16));
    addWidget(mpMenuBar);
+   setContextMenuPolicy(Qt::DefaultContextMenu);
+
+   VERIFYNR(connect(mpShowAction, SIGNAL(triggered()), this, SLOT(show())));
+   VERIFYNR(connect(mpHideAction, SIGNAL(triggered()), this, SLOT(hide())));
 
    // Prevent the menu bar from stretching
    QLayout* pLayout = layout();
@@ -210,4 +224,19 @@ bool ToolBarImp::fromXml(DOMNode* pDocument, unsigned int version)
    setVisible(shown);
 
    return true;
+}
+
+list<ContextMenuAction> ToolBarImp::getContextMenuActions() const
+{
+   list<ContextMenuAction> menuActions = WindowImp::getContextMenuActions();
+   if (isVisible() == true)
+   {
+      menuActions.push_back(ContextMenuAction(mpHideAction, APP_TOOLBAR_HIDE_ACTION));
+   }
+   else
+   {
+      menuActions.push_back(ContextMenuAction(mpShowAction, APP_TOOLBAR_SHOW_ACTION));
+   }
+
+   return menuActions;
 }
