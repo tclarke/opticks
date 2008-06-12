@@ -82,9 +82,6 @@ public:
    QWidget* getWidget() const;
    std::list<ContextMenuAction> getContextMenuActions() const;
 
-   bool toXml(XMLWriter* pXml) const;
-   bool fromXml(DOMNode* pDocument, unsigned int version);
-
 public slots:
    void dock();
    void undock();

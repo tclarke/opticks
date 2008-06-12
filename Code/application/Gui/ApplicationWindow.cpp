@@ -5730,18 +5730,9 @@ bool ApplicationWindow::serialize(SessionItemSerializer &serializer) const
    XMLWriter writer("ApplicationWindow");
    QSize frame = size();
    QPoint location = pos();
-   stringstream buf;
-   writer.pushAddPoint(writer.addElement("Geometry"));
-   buf << location.x() << " " << location.y();
-   writer.addAttr("pos", buf.str());
-   buf.str("");
-   buf << frame.width() << " " << frame.height();
-   writer.addAttr("size", buf.str());
 
-   Qt::WindowStates winStates = windowState();
-   buf.str("");
-   buf << winStates;
-   writer.addAttr("windowStates", buf.str());
+   writer.pushAddPoint(writer.addElement("Geometry"));
+   writer.addText(saveState().toBase64().data());
    writer.popAddPoint();
 
    serializer.serialize(writer);
@@ -5757,16 +5748,11 @@ bool ApplicationWindow::deserialize(SessionItemDeserializer &deserializer)
    DOMElement *pConfig = dynamic_cast<DOMElement*>(findChildNode(pElement, "Geometry"));
    if(pConfig)
    {
-      LocationType pos;
-      LocationType size;
-      XmlReader::StrToLocation(pConfig->getAttribute(X("pos")), pos);
-      XmlReader::StrToLocation(pConfig->getAttribute(X("size")), size);
-      resize(size.mX, size.mY);
-      move(pos.mX, pos.mY);
-      int intState = StringUtilities::fromXmlString<int>(
-         A(pConfig->getAttribute(X("windowStates"))));
-      Qt::WindowStates winStates = static_cast< QFlags<Qt::WindowState> >(intState);
-      setWindowState(winStates);
+      DOMNode *pChld = pConfig->getFirstChild();
+      if (pChld != NULL)
+      {
+         restoreState(QByteArray::fromBase64(A(pChld->getNodeValue())));
+      }
    }
 
    return true;

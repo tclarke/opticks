@@ -47,9 +47,6 @@ public:
    std::vector<QAction*> getItems() const;
    void removeItem(QAction* pAction);
 
-   bool toXml(XMLWriter* pXml) const;
-   bool fromXml(DOMNode* pDocument, unsigned int version);
-
    std::list<ContextMenuAction> getContextMenuActions() const;
 
 signals:

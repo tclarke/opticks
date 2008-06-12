@@ -886,9 +886,6 @@ void SessionManagerImp::getSessionItemsWindow(vector<IndexFileItem> &items) cons
    vector<Window*> windows;
    Service<DesktopServices> pDesktop;
 
-   items.push_back(makeIfiI<SessionItem*>("ApplicationWindow")
-      (static_cast<ApplicationWindow*>(Service<DesktopServices>()->getMainWidget())));
-
    // add each type of window
    int start(static_cast<int>(WORKSPACE_WINDOW));
    int stop(static_cast<int>(TOOLBAR));
@@ -961,6 +958,9 @@ void SessionManagerImp::getSessionItemsWindow(vector<IndexFileItem> &items) cons
          }
       }
    }
+
+   items.push_back(makeIfiI<SessionItem*>("ApplicationWindow")
+      (static_cast<ApplicationWindow*>(Service<DesktopServices>()->getMainWidget())));
 }
 
 SessionManagerImp::IndexFileItem::IndexFileItem(SessionItem *pItem) : mpItem(pItem)
