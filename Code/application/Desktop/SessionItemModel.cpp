@@ -193,10 +193,10 @@ bool SessionItemModel::setData(const QModelIndex& index, const QVariant& value, 
       return false;
    }
    string errorMessage;
-   if(!pItem->rename(newItemName.toStdString(), errorMessage))
+   if (!pItem->rename(newItemName.toStdString(), errorMessage))
    {
       QString msg = QString("Unable to rename \"%1\" to \"%2\"").arg(oldName).arg(newItemName);
-      if(!errorMessage.empty())
+      if (!errorMessage.empty())
       {
          msg += "\n" + QString::fromStdString(errorMessage);
       }
@@ -218,7 +218,15 @@ QVariant SessionItemModel::data(const QModelIndex& index, int role) const
    if (pWrapper != NULL)
    {
       SessionItem* pItem = pWrapper->getSessionItem();
-      if (role == Qt::DecorationRole)
+      if (role == Qt::CheckStateRole)
+      {
+         if (flags(index) & Qt::ItemIsUserCheckable)
+         {
+            Qt::CheckState checkState = pWrapper->getCheckState();
+            return QVariant(checkState);
+         }
+      }
+      else if (role == Qt::DecorationRole)
       {
          if (pItem != NULL)
          {
@@ -355,6 +363,7 @@ SessionItemModel::SessionItemWrapper::SessionItemWrapper(SessionItemModel* pMode
                                                          SessionItemWrapper* pParent) :
    mpModel(pModel),
    mpSessionItem(pItem),
+   mCheckState(Qt::Unchecked),
    mDisplayColor(Qt::black),
    mpParent(pParent)
 {
@@ -368,6 +377,16 @@ SessionItemModel::SessionItemWrapper::~SessionItemWrapper()
 SessionItem* SessionItemModel::SessionItemWrapper::getSessionItem() const
 {
    return mpSessionItem;
+}
+
+void SessionItemModel::SessionItemWrapper::setCheckState(Qt::CheckState checkState)
+{
+   mCheckState = checkState;
+}
+
+Qt::CheckState SessionItemModel::SessionItemWrapper::getCheckState() const
+{
+   return mCheckState;
 }
 
 void SessionItemModel::SessionItemWrapper::setDisplayName(const QString& itemName)

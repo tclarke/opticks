@@ -11,8 +11,8 @@
 #define SESSIONITEMMODEL_H
 
 #include <QtCore/QAbstractItemModel>
-#include <QtGui/QFont>
 #include <QtGui/QColor>
+#include <QtGui/QFont>
 
 #include <boost/any.hpp>
 #include <map>
@@ -45,6 +45,8 @@ protected:
       ~SessionItemWrapper();
 
       SessionItem* getSessionItem() const;
+      void setCheckState(Qt::CheckState checkState);
+      Qt::CheckState getCheckState() const;
       void setDisplayName(const QString& itemName);
       QString getDisplayName() const;
       void setDisplayFont(const QFont& itemFont);
@@ -64,6 +66,7 @@ protected:
    private:
       SessionItemModel* mpModel;
       SessionItem* mpSessionItem;
+      Qt::CheckState mCheckState;
       QString mDisplayName;
       QFont mDisplayFont;
       QColor mDisplayColor;

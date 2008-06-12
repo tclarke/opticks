@@ -26,7 +26,6 @@ public:
    WindowModel(QObject* pParent = 0);
    ~WindowModel();
 
-   Qt::ItemFlags flags(const QModelIndex& index) const;
    Qt::DropActions supportedDropActions() const;
    QStringList mimeTypes() const;
    QMimeData* mimeData(const QModelIndexList& indexes) const;
@@ -41,6 +40,9 @@ private:
    public:
       WindowSourceModel(QObject* pParent = 0);
       ~WindowSourceModel();
+
+      Qt::ItemFlags flags(const QModelIndex& index) const;
+      bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole);
 
       void refreshModel(Subject &subject, const std::string &signal, const boost::any &v);
       void detachModel(Subject &subject, const std::string &signal, const boost::any &v);
