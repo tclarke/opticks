@@ -52,8 +52,8 @@
 #include "Statistics.h"
 #include "StatusBar.h"
 #include "StringUtilities.h"
-#include "TiePointLayerAdapter.h"
 #include "ThresholdLayerImp.h"
+#include "TiePointLayerAdapter.h"
 #include "TypesFile.h"
 #include "Undo.h"
 #include "Units.h"
@@ -415,7 +415,7 @@ void SpatialDataViewImp::elementModified(Subject &subject, const string &signal,
 
 void SpatialDataViewImp::attached(Subject &subject, const string &signal, const Slot &slot)
 {
-   if(dynamic_cast<DataElement*>(&subject) != NULL)
+   if (dynamic_cast<DataElement*>(&subject) != NULL)
    {
       elementModified(subject, signal, boost::any());
    }
@@ -492,6 +492,12 @@ SpatialDataViewImp& SpatialDataViewImp::operator= (const SpatialDataViewImp& spa
                   if (spatialDataView.isLayerDisplayed(pLayer) == false)
                   {
                      hideLayer(pNewLayer);
+                  }
+
+                  // Activate the layer if necessary
+                  if (spatialDataView.getActiveLayer() == pLayer)
+                  {
+                     setActiveLayer(pNewLayer);
                   }
                }
             }
@@ -1262,12 +1268,12 @@ QImage SpatialDataViewImp::getLayerImage(Layer* pLayer, ColorType& transparent, 
    }
 
    QColor clrBackground = getBackgroundColor();
-   if(!transparent.isValid())
+   if (!transparent.isValid())
    {
       vector<ColorType> layerColors = pLayerImp->getColors();
       transparent = ColorType::getUniqueColor(layerColors);
    }
-   if(transparent.isValid())
+   if (transparent.isValid())
    {
       clrBackground = COLORTYPE_TO_QCOLOR(transparent);
    }
@@ -1279,12 +1285,12 @@ QImage SpatialDataViewImp::getLayerImage(Layer* pLayer, ColorType& transparent, 
    glGetDoublev(GL_PROJECTION_MATRIX, projectionMatrix);
    glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
 
-   if(QGLFramebufferObject::hasOpenGLFramebufferObjects())
+   if (QGLFramebufferObject::hasOpenGLFramebufferObjects())
    {
       // Set to draw to an off screen buffer
       makeCurrent();
       int w=width(), h=height();
-      if(bbox[0] > 0 && bbox[0] <= w && bbox[1] > 0 && bbox[1] <= h)
+      if (bbox[0] > 0 && bbox[0] <= w && bbox[1] > 0 && bbox[1] <= h)
       {
          w=bbox[0];
          h=bbox[1];
@@ -2128,7 +2134,7 @@ void SpatialDataViewImp::updateExtents()
    {
       LayerImp *pImp = dynamic_cast<LayerImp*>(*it);
       VERIFYNRV(pImp != NULL);
-      if(pImp->getExtents(x1, y1, x4, y4))
+      if (pImp->getExtents(x1, y1, x4, y4))
       {
          dMinX = min(dMinX, x1);
          dMinY = min(dMinY, y1);
@@ -3713,11 +3719,11 @@ bool SpatialDataViewImp::toXml(XMLWriter* pXml) const
    pXml->addAttr("primary", mpLayerList->getPrimaryRasterElement()->getId());
    vector<Layer*> layers;
    mpLayerList->getLayers(layers);
-   for(vector<Layer*>::const_iterator lit = layers.begin(); lit != layers.end(); ++lit)
+   for (vector<Layer*>::const_iterator lit = layers.begin(); lit != layers.end(); ++lit)
    {
       pXml->pushAddPoint(pXml->addElement("layer"));
       pXml->addAttr("id", (*lit)->getId());
-      if(*lit == mpPrimaryRasterLayer.get())
+      if (*lit == mpPrimaryRasterLayer.get())
       {
          pXml->addAttr("primary", true);
       }
@@ -3753,7 +3759,7 @@ bool SpatialDataViewImp::fromXml(DOMNode* pDocument, unsigned int version)
    setMaximumZoom(StringUtilities::fromXmlString<double>(
       A(pElem->getAttribute(X("maxZoom")))));
 
-   if(pElem->hasAttribute(X("activeLayerId")))
+   if (pElem->hasAttribute(X("activeLayerId")))
    {
       mpActiveLayer.reset(dynamic_cast<Layer*>(
          SessionManagerImp::instance()->getSessionItem(A(pElem->getAttribute(X("activeLayerId"))))));
@@ -3763,7 +3769,7 @@ bool SpatialDataViewImp::fromXml(DOMNode* pDocument, unsigned int version)
       mpActiveLayer.reset(NULL);
    }
 
-   if(pElem->hasAttribute(X("drawLayerId")))
+   if (pElem->hasAttribute(X("drawLayerId")))
    {
       mpDrawLayer = dynamic_cast<LayerImp*>(SessionManagerImp::instance()->getSessionItem(A(pElem->getAttribute(X("drawLayerId")))));
    }
@@ -3772,7 +3778,7 @@ bool SpatialDataViewImp::fromXml(DOMNode* pDocument, unsigned int version)
       mpDrawLayer = NULL;
    }
 
-   if(pElem->hasAttribute(X("measurementLayerId")))
+   if (pElem->hasAttribute(X("measurementLayerId")))
    {
       MeasurementLayerAdapter* pMeasLayer = dynamic_cast<MeasurementLayerAdapter*>(
          SessionManagerImp::instance()->getSessionItem(A(pElem->getAttribute(X("measurementLayerId")))));
@@ -3793,17 +3799,17 @@ bool SpatialDataViewImp::fromXml(DOMNode* pDocument, unsigned int version)
    VERIFY(mpLayerList != NULL);
    mpLayerList->setPrimaryRasterElement(
       dynamic_cast<RasterElement*>(SessionManagerImp::instance()->getSessionItem(A(pElem->getAttribute(X("primary"))))));
-   for(DOMNode *pNode = pElem->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())
+   for (DOMNode *pNode = pElem->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())
    {
-      if(XMLString::equals(pNode->getNodeName(),X("layer")))
+      if (XMLString::equals(pNode->getNodeName(),X("layer")))
       {
          DOMElement *pLayerElement = static_cast<DOMElement*>(pNode);
          Layer *pLayer = dynamic_cast<Layer*>(
             SessionManagerImp::instance()->getSessionItem(A(pLayerElement->getAttribute(X("id")))));
-         if(pLayer != NULL)
+         if (pLayer != NULL)
          {
             addLayer(pLayer);
-            if(pLayerElement->hasAttribute(X("primary")))
+            if (pLayerElement->hasAttribute(X("primary")))
             {
                mpPrimaryRasterLayer.reset(dynamic_cast<RasterLayer*>(pLayer));
             }

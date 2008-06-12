@@ -49,32 +49,6 @@ WindowModel::~WindowModel()
 {
 }
 
-Qt::ItemFlags WindowModel::flags(const QModelIndex& index) const
-{
-   Qt::ItemFlags itemFlags = QSortFilterProxyModel::flags(index);
-   if (index.isValid() == true)
-   {
-      if (dynamic_cast<Layer*>(index.data(Qt::UserRole).value<SessionItem*>()) != NULL)
-      {
-         itemFlags |= Qt::ItemIsDragEnabled;
-      }
-      else if (rowCount(index) > 0)
-      {
-         QModelIndex childIndex = index.child(0, 0);
-         if (childIndex.isValid() == true)
-         {
-            SessionItem* pItem = childIndex.data(Qt::UserRole).value<SessionItem*>();
-            if (dynamic_cast<Layer*>(pItem) != NULL)
-            {
-               itemFlags |= Qt::ItemIsDropEnabled;
-            }
-         }
-      }
-   }
-
-   return itemFlags;
-}
-
 Qt::DropActions WindowModel::supportedDropActions() const
 {
    return Qt::CopyAction | Qt::MoveAction;
@@ -171,7 +145,13 @@ bool WindowModel::dropMimeData(const QMimeData* pData, Qt::DropAction action, in
    }
 
    // Update the layer's display index
-   return pView->setLayerDisplayIndex(pDropLayer, row);
+   bool success = pView->setLayerDisplayIndex(pDropLayer, row);
+   if (success == true)
+   {
+      pView->refresh();
+   }
+
+   return success;
 }
 
 bool WindowModel::lessThan(const QModelIndex& left, const QModelIndex& right) const
@@ -305,6 +285,92 @@ WindowModel::WindowSourceModel::~WindowSourceModel()
    pDesktop->detach(SIGNAL_NAME(DesktopServices, WindowAdded), Slot(this, &WindowSourceModel::addWindow));
    pDesktop->detach(SIGNAL_NAME(DesktopServices, WindowRemoved), Slot(this, &WindowSourceModel::removeWindow));
    pDesktop->detach(SIGNAL_NAME(DesktopServices, WindowActivated), Slot(this, &WindowSourceModel::setCurrentWindow));
+}
+
+Qt::ItemFlags WindowModel::WindowSourceModel::flags(const QModelIndex& index) const
+{
+   Qt::ItemFlags itemFlags = SessionItemModel::flags(index);
+   if (index.isValid() == true)
+   {
+      Layer* pLayer = dynamic_cast<Layer*>(index.data(Qt::UserRole).value<SessionItem*>());
+      if (pLayer != NULL)
+      {
+         itemFlags |= Qt::ItemIsDragEnabled;
+
+         SpatialDataView* pView = dynamic_cast<SpatialDataView*>(pLayer->getView());
+         if (pView != NULL)
+         {
+            itemFlags |= Qt::ItemIsUserCheckable;
+         }
+      }
+      else if (rowCount(index) > 0)
+      {
+         QModelIndex childIndex = index.child(0, 0);
+         if (childIndex.isValid() == true)
+         {
+            SessionItem* pItem = childIndex.data(Qt::UserRole).value<SessionItem*>();
+            if (dynamic_cast<Layer*>(pItem) != NULL)
+            {
+               itemFlags |= Qt::ItemIsDropEnabled;
+            }
+         }
+      }
+   }
+
+   return itemFlags;
+}
+
+bool WindowModel::WindowSourceModel::setData(const QModelIndex& index, const QVariant& value, int role)
+{
+   if (index.isValid() == false)
+   {
+      return false;
+   }
+
+   if (SessionItemModel::setData(index, value, role) == true)
+   {
+      return true;
+   }
+
+   SessionItemWrapper* pWrapper = reinterpret_cast<SessionItemWrapper*>(index.internalPointer());
+   if (pWrapper == NULL)
+   {
+      return false;
+   }
+
+   if (role == Qt::CheckStateRole)
+   {
+      Layer* pLayer = dynamic_cast<Layer*>(pWrapper->getSessionItem());
+      if (pLayer == NULL)
+      {
+         return false;
+      }
+
+      SpatialDataView* pView = dynamic_cast<SpatialDataView*>(pLayer->getView());
+      if (pView == NULL)
+      {
+         return false;
+      }
+
+      Qt::CheckState checkState = static_cast<Qt::CheckState>(value.toInt());
+      if (checkState == Qt::Checked)
+      {
+         pView->showLayer(pLayer);
+      }
+      else
+      {
+         pView->hideLayer(pLayer);
+      }
+
+      pView->refresh();
+   }
+   else
+   {
+      return false;
+   }
+
+   emit dataChanged(index, index);
+   return true;
 }
 
 void WindowModel::WindowSourceModel::addWindow(Subject& subject, const string& signal, const boost::any& value)
@@ -472,14 +538,18 @@ void WindowModel::WindowSourceModel::updateLayerDisplay(Subject& subject, const 
       if (pWrapper != NULL)
       {
          bool bHidden = false;
+         Qt::CheckState checkState = Qt::Checked;
+
          if (signal == "SpatialDataView::LayerHidden")
          {
             bHidden = true;
+            checkState = Qt::Unchecked;
          }
 
          QFont itemFont = pWrapper->getDisplayFont();
          itemFont.setItalic(bHidden);
 
+         pWrapper->setCheckState(checkState);
          pWrapper->setDisplayFont(itemFont);
 
          QModelIndex layerIndex = index(pLayer);
@@ -995,6 +1065,38 @@ WindowModel::WindowSourceModel::addLayerItem(SessionItemWrapper* pViewWrapper, L
                Slot(this, &WindowSourceModel::removeGraphicObject));
          }
       }
+
+      // Initialize the wrapper
+      QFont itemFont = pLayerWrapper->getDisplayFont();
+      bool layerActive = false;
+
+      SpatialDataView* pSpatialDataView = dynamic_cast<SpatialDataView*>(pLayer->getView());
+      if (pSpatialDataView != NULL)
+      {
+         // Font
+         bool layerDisplayed = pSpatialDataView->isLayerDisplayed(pLayer);
+         itemFont.setItalic(!layerDisplayed);
+
+         if (pSpatialDataView->getActiveLayer() == pLayer)
+         {
+            layerActive = true;
+         }
+
+         // Check state
+         pLayerWrapper->setCheckState(layerDisplayed ? Qt::Checked : Qt::Unchecked);
+      }
+
+      ProductView* pProductView = dynamic_cast<ProductView*>(pLayer->getView());
+      if (pProductView != NULL)
+      {
+         if (pProductView->getActiveLayer() == pLayer)
+         {
+            layerActive = true;
+         }
+      }
+
+      itemFont.setBold(layerActive);
+      pLayerWrapper->setDisplayFont(itemFont);
    }
 
    return pLayerWrapper;

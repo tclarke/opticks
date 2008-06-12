@@ -90,6 +90,9 @@ void ViewObjectImp::setView(View* pView)
       if (pSpatialDataViewImp != NULL)
       {
          VERIFYNR(disconnect(pSpatialDataViewImp, SIGNAL(layerModified(Layer*)), this, SLOT(refresh())));
+         VERIFYNR(disconnect(pSpatialDataViewImp, SIGNAL(layerShown(Layer*)), this, SLOT(refresh())));
+         VERIFYNR(disconnect(pSpatialDataViewImp, SIGNAL(layerHidden(Layer*)), this, SLOT(refresh())));
+         VERIFYNR(disconnect(pSpatialDataViewImp, SIGNAL(layerDisplayIndexesChanged()), this, SLOT(refresh())));
       }
 
       View* pOldView = dynamic_cast<View*>(mpView);
@@ -227,6 +230,9 @@ void ViewObjectImp::setView(View* pView)
          if (pSpatialDataViewImp != NULL)
          {
             VERIFYNR(connect(pSpatialDataViewImp, SIGNAL(layerModified(Layer*)), this, SLOT(refresh())));
+            VERIFYNR(connect(pSpatialDataViewImp, SIGNAL(layerShown(Layer*)), this, SLOT(refresh())));
+            VERIFYNR(connect(pSpatialDataViewImp, SIGNAL(layerHidden(Layer*)), this, SLOT(refresh())));
+            VERIFYNR(connect(pSpatialDataViewImp, SIGNAL(layerDisplayIndexesChanged()), this, SLOT(refresh())));
          }
       }
    }
