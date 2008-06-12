@@ -28,7 +28,6 @@
 #include "PlugInManagerServices.h"
 #include "StringUtilities.h"
 #include "UtilityServices.h"
-#include "UtilityServicesImp.h"
 
 #include <string>
 
@@ -392,9 +391,13 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
       populateListFromFile(mpClassLevelCombo, strDefaultDir + "ClassificationLevels.txt", false);
    }
 
+   UtilityServicesExt1* pUtilExt1 = dynamic_cast<UtilityServicesExt1*>(Service<UtilityServices>().get());
+
+   VERIFYNRV(pUtilExt1 != NULL);
+
    if ((pWidget == NULL) || (pWidget == mpCodewordList))
    {
-      vector<string> codewords = UtilityServicesImp::instance()->getCodewords();
+      vector<string> codewords = pUtilExt1->getCodewords();
       mpCodewordList->clear();
       for (vector<string>::iterator iter = codewords.begin(); iter != codewords.end(); ++iter)
       {
@@ -403,7 +406,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
    }
    if ((pWidget == NULL) || (pWidget == mpSystemList))
    {
-      vector<string> systems = UtilityServicesImp::instance()->getSystems();
+      vector<string> systems = pUtilExt1->getSystems();
       mpSystemList->clear();
       for (vector<string>::iterator iter = systems.begin(); iter != systems.end(); ++iter)
       {
@@ -412,7 +415,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
    }
    if ((pWidget == NULL) || (pWidget == mpCountryCodeList))
    {
-      vector<string> countryCodes = UtilityServicesImp::instance()->getCountryCodes();
+      vector<string> countryCodes = pUtilExt1->getCountryCodes();
       mpCountryCodeList->clear();
       for (vector<string>::iterator iter = countryCodes.begin(); iter != countryCodes.end(); ++iter)
       {
@@ -421,7 +424,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
    }
    if ((pWidget == NULL) || (pWidget == mpFileReleasingList))
    {
-      vector<string> fileReleasing = UtilityServicesImp::instance()->getFileReleasing();
+      vector<string> fileReleasing = pUtilExt1->getFileReleasing();
       mpFileReleasingList->clear();
       for (vector<string>::iterator iter = fileReleasing.begin(); iter != fileReleasing.end(); ++iter)
       {
@@ -430,7 +433,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
    }
    if ((pWidget == NULL) || (pWidget == mpExemptionList))
    {
-      vector<string> exemption = UtilityServicesImp::instance()->getDeclassificationExemptions();
+      vector<string> exemption = pUtilExt1->getDeclassificationExemptions();
       mpExemptionList->clear();
       for (vector<string>::iterator iter = exemption.begin(); iter != exemption.end(); ++iter)
       {
@@ -439,7 +442,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
    }
    if ((pWidget == NULL) || (pWidget == mpClassReasonCombo))
    {
-      vector<string> classReason = UtilityServicesImp::instance()->getClassificationReasons();
+      vector<string> classReason = pUtilExt1->getClassificationReasons();
       mpClassReasonCombo->clear();
       for (vector<string>::iterator iter = classReason.begin(); iter != classReason.end(); ++iter)
       {
@@ -448,7 +451,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
    }
    if ((pWidget == NULL) || (pWidget == mpDeclassTypeCombo))
    {
-      vector<string> declassType = UtilityServicesImp::instance()->getDeclassificationTypes();
+      vector<string> declassType = pUtilExt1->getDeclassificationTypes();
       mpDeclassTypeCombo->clear();
       for (vector<string>::iterator iter = declassType.begin(); iter != declassType.end(); ++iter)
       {
@@ -457,7 +460,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
    }
    if ((pWidget == NULL) || (pWidget == mpFileDowngradeCombo))
    {
-      vector<string> fileDowngrade = UtilityServicesImp::instance()->getFileDowngrades();
+      vector<string> fileDowngrade = pUtilExt1->getFileDowngrades();
       mpFileDowngradeCombo->clear();
       for (vector<string>::iterator iter = fileDowngrade.begin(); iter != fileDowngrade.end(); ++iter)
       {
@@ -466,7 +469,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
    }
    if ((pWidget == NULL) || (pWidget == mpFileControlCombo))
    {
-      vector<string> fileControl = UtilityServicesImp::instance()->getFileControls();
+      vector<string> fileControl = pUtilExt1->getFileControls();
       mpFileControlCombo->clear();
       for (vector<string>::iterator iter = fileControl.begin(); iter != fileControl.end(); ++iter)
       {

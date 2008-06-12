@@ -23,7 +23,7 @@
  *  in the Interfaces. These are inherited from Serializable,
  *  and therefore cannot be created with the ObjectFactory.
  *
- *  @see        ObjectFactory
+ *  @see        ObjectFactory, UtilityServicesExt1
  */
 class UtilityServices
 {
@@ -158,6 +158,93 @@ protected:
     * need to destroy it.
     */
    virtual ~UtilityServices() {}
+};
+
+/**
+ *  Extends capability of the UtilityServices interface.
+ *
+ *  This class provides additional capability for the UtilityServices interface
+ *  class.  A pointer to this class can be obtained by performing a dynamic
+ *  cast on a pointer to UtilityServices.
+ *
+ *  @warning A pointer to this class can only be used to call methods contained
+ *           in this extension class and cannot be used to call any methods in
+ *           UtilityServices.
+ *
+ *  @see     Classification, SecurityMarkingsDlg
+ */
+class UtilityServicesExt1
+{
+public:
+
+   /**
+    *  Returns the file control security codes.
+    *
+    *  @return  The file control security codes.
+    */
+   virtual const std::vector<std::string>& getFileControls() const = 0;
+
+   /**
+    *  Returns the file downgrade security codes.
+    *
+    *  @return  The file downgrade security codes.
+    */
+   virtual const std::vector<std::string>& getFileDowngrades() const = 0;
+
+   /**
+    *  Returns the declassification type security codes.
+    *
+    *  @return  The declassification type security codes.
+    */
+   virtual const std::vector<std::string>& getDeclassificationTypes() const = 0;
+
+   /**
+    *  Returns the classification reason security codes.
+    *
+    *  @return  The classification reason security codes.
+    */
+   virtual const std::vector<std::string>& getClassificationReasons() const = 0;
+
+   /**
+    *  Returns the declassification exemptions security codes.
+    *
+    *  @return  The declassification exemptions security codes.
+    */
+   virtual const std::vector<std::string>& getDeclassificationExemptions() const = 0;
+
+   /**
+    *  Returns the file releasing security codes.
+    *
+    *  @return  The file releasing security codes.
+    */
+   virtual const std::vector<std::string>& getFileReleasing() const = 0;
+
+   /**
+    *  Returns the country code security codes.
+    *
+    *  @return  The country code security codes.
+    */
+   virtual const std::vector<std::string>& getCountryCodes() const = 0;
+
+   /**
+    *  Returns the system security codes.
+    *
+    *  @return  The system security codes.
+    */
+   virtual const std::vector<std::string>& getSystems() const = 0;
+
+   /**
+    *  Returns the codeword security codes.
+    *
+    *  @return  The codeword security codes.
+    */
+   virtual const std::vector<std::string>& getCodewords() const = 0;
+protected:
+   /**
+    * This will be cleaned up during application close.  Plug-ins do not
+    * need to destroy it.
+    */
+   virtual ~UtilityServicesExt1() {}
 };
 
 #endif   // _UTILITYSERVICES_H
