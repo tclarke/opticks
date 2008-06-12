@@ -50,6 +50,8 @@ public:
    bool toXml(XMLWriter* pXml) const;
    bool fromXml(DOMNode* pDocument, unsigned int version);
 
+   std::list<ContextMenuAction> getContextMenuActions() const;
+
 signals:
    void visibilityChanged(bool bVisible);
 
@@ -59,6 +61,8 @@ protected:
 
 private:
    MenuBarImp* mpMenuBar;
+   QAction* mpShowAction;
+   QAction* mpHideAction;
 
    WINDOWIMPDROP_METHODS(WindowImp);
 };

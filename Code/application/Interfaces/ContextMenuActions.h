@@ -403,4 +403,16 @@
  */
 #define APP_SPATIALDATAVIEW_SMOOTH_ACTION "APP_SPATIALDATAVIEW_SMOOTH_ACTION"
 
+/**
+ *  Hides the toolbar.\   This action only appears in the context menu
+ *  if the toolbar is shown.
+ */
+#define APP_TOOLBAR_HIDE_ACTION "APP_TOOLBAR_HIDE_ACTION"
+
+/**
+ *  Displays the toolbar.\   This action only appears in the context menu
+ *  if the toolbar is hidden.
+ */
+#define APP_TOOLBAR_SHOW_ACTION "APP_TOOLBAR_SHOW_ACTION"
+
 #endif

@@ -251,4 +251,11 @@
  *    <tr><td>Show layers</td><td>APP_SPATIALDATAVIEW_SHOW_LAYERS_ACTION()</td></tr>
  *    <tr><td>Smooth</td><td>APP_SPATIALDATAVIEW_SMOOTH_ACTION()</td></tr>
  *  </table>
+ *
+ *  \subsection toolbar Toolbar
+ *  <table>
+ *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
+ *    <tr><td>Hide</td><td>APP_TOOLBAR_HIDE_ACTION()</td></tr>
+ *    <tr><td>Show</td><td>APP_TOOLBAR_SHOW_ACTION()</td></tr>
+ *  </table>
  */
