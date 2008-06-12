@@ -189,43 +189,6 @@ void ToolBarImp::hideEvent(QHideEvent* pEvent)
    emit visibilityChanged(false);
 }
 
-
-bool ToolBarImp::toXml(XMLWriter* pXml) const
-{
-   if (!WindowImp::toXml(pXml))
-   {
-      return false;
-   }
-
-   pXml->addAttr("shown", isVisible());
-
-   return true;
-}
-
-bool ToolBarImp::fromXml(DOMNode* pDocument, unsigned int version)
-{
-   if (pDocument == NULL)
-   {
-      return false;
-   }
-
-   if (!WindowImp::fromXml(pDocument, version))
-   {
-      return false;
-   }
-
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
-   if (pElem == NULL)
-   {
-      return false;
-   }
-
-   bool shown = StringUtilities::fromXmlString<bool>(A(pElem->getAttribute(X("shown"))));
-   setVisible(shown);
-
-   return true;
-}
-
 list<ContextMenuAction> ToolBarImp::getContextMenuActions() const
 {
    list<ContextMenuAction> menuActions = WindowImp::getContextMenuActions();
