@@ -110,11 +110,13 @@ AnimationToolBarImp::AnimationToolBarImp(const string& id, QWidget* parent) :
 
    mpFrameSpeedCombo->setValidator(pValidator);
    VERIFYNR(connect(mpFrameSpeedCombo, SIGNAL(activated(const QString&)), this, SLOT(setFrameSpeed(const QString&))));
+   VERIFYNR(connect(mpFrameSpeedCombo, SIGNAL(activated(const QString&)), this, SLOT(setFocus())));
 
    QLineEdit* pSpeedEdit = mpFrameSpeedCombo->lineEdit();
    if (pSpeedEdit != NULL)
    {
       VERIFYNR(connect(pSpeedEdit, SIGNAL(editingFinished()), this, SLOT(setFrameSpeed())));
+      VERIFYNR(connect(pSpeedEdit, SIGNAL(returnPressed()), this, SLOT(setFocus())));
    }
 
    addWidget(mpFrameSpeedCombo);
