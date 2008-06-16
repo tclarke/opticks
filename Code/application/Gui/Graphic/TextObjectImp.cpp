@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <math.h>
-
 #include <QtGui/QImage>
 #include <QtGui/QPainter>
 
@@ -25,8 +23,10 @@
 #include "SpatialDataView.h"
 #include "View.h"
 
-#include <vector>
+#include <math.h>
+
 #include <string>
+#include <vector>
 using namespace std;
 
 TextObjectImp::TextObjectImp(const string& id, GraphicObjectType type, GraphicLayer* pLayer,
@@ -188,10 +188,10 @@ void TextObjectImp::drawTexture() const
    glDisable(GL_TEXTURE_2D);
    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-   if(!mTextureIdStack.empty())
+   if (!mTextureIdStack.empty())
    {
       TextObjectImp *pNonConst = const_cast<TextObjectImp*>(this);
-      if(mTextureId != 0)
+      if (mTextureId != 0)
       {
          glDeleteTextures(1, &mTextureId);
       }
@@ -202,11 +202,6 @@ void TextObjectImp::drawTexture() const
 
 void TextObjectImp::updateTexture()
 {
-   if (mUpdateTexture == false)
-   {
-      return;
-   }
-
    if (mTextureId != 0)
    {
       glDeleteTextures(1, &mTextureId);
@@ -392,11 +387,6 @@ bool TextObjectImp::isKindOf(const string& className) const
 
 void TextObjectImp::updateBoundingBox()
 {
-   if (mUpdateBoundingBox == false)
-   {
-      return;
-   }
-
    // Get the width and height of the bounding box in screen pixels based on the scaled text image size
    int iWidth = 0;
    int iHeight = 0;
@@ -424,7 +414,7 @@ void TextObjectImp::updateBoundingBox()
    LocationType llCorner = getLlCorner();
    LocationType urCorner = getUrCorner();
 
-   // Use the lower left corner as the anchor and compute the data coordinate of the upper left corner
+   // Use the lower left corner as the anchor and compute the data coordinate of the upper right corner
    GraphicLayer* pLayer = getLayer();
    if (pLayer != NULL)
    {
@@ -433,7 +423,7 @@ void TextObjectImp::updateBoundingBox()
       bool bVerticalFlip = false;
       pLayer->isFlipped(llCorner, urCorner, bHorizontalFlip, bVerticalFlip);
 
-      // Compute the upper left coordinate
+      // Compute the upper right coordinate
       PerspectiveView* pView = dynamic_cast<PerspectiveView*>(pLayer->getView());
       if (pView != NULL)
       {
