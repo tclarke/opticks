@@ -23,8 +23,8 @@
 #include <QtGui/QMessageBox>
 #include <QtGui/QSplashScreen>
 #include <QtGui/QToolTip>
-#include <QtGui/QWhatsThis>
 #include <QtGui/QVBoxLayout>
+#include <QtGui/QWhatsThis>
 
 #include "AboutDlg.h"
 #include "AnimationController.h"
@@ -36,10 +36,10 @@
 #include "AoiToolBar.h"
 #include "AppAssert.h"
 #include "AppConfig.h"
+#include "ApplicationServices.h"
 #include "ApplicationWindow.h"
 #include "AppVerify.h"
 #include "AppVersion.h"
-#include "ApplicationServices.h"
 #include "BackgroundPluginWindow.h"
 #include "BatchEditorDlg.h"
 #include "BatchExportDlg.h"
@@ -5149,7 +5149,8 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
       return;
    }
 
-   vector<string> files;
+   mDroppedFilesList.clear();
+
    if (pEvent->mimeData()->hasUrls())
    {
       const QList<QUrl> urls = pEvent->mimeData()->urls();
@@ -5159,7 +5160,7 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
          string filename = url.toLocalFile().toStdString();
          if (filename.empty() == false)
          {
-            files.push_back(filename);
+            mDroppedFilesList.push_back(filename);
          }
       }
    }
@@ -5181,7 +5182,7 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
                break;
             }
          }
-         files.push_back(charArray.data());
+         mDroppedFilesList.push_back(charArray.data());
       }
    }
 
@@ -5193,9 +5194,9 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
    Qt::MouseButton contextMenuButton = Qt::MidButton;
 #endif
 
-   if (files.size() == 1)
+   if (mDroppedFilesList.size() == 1)
    {
-      QString filename = QString::fromStdString(files.front());
+      QString filename = QString::fromStdString(mDroppedFilesList.front());
 
       QFileInfo info(filename);
       if ((info.suffix() == "wiz") || (info.suffix() == "batchwiz"))
@@ -5231,7 +5232,7 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
          else if (info.suffix() == "batchwiz")
          {
             vector<string> batchFile;
-            batchFile.push_back(files.front());
+            batchFile.push_back(mDroppedFilesList.front());
             WizardUtilities::runBatchFiles(batchFile, NULL);
          }
 
@@ -5258,9 +5259,7 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
       }
    }
 
-   ImportAgentExt1::EditType editType = ImportAgentExt1::NEVER_EDIT;
-   bool errorContinue = true;
-   bool displayContinueMessage = true;
+   mDroppedFilesEditType = ImportAgentExt1::NEVER_EDIT;
 
    if (pEvent->mouseButtons() == contextMenuButton)
    {
@@ -5276,15 +5275,15 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
       QAction* pSelectedAction = contextMenu.exec(mapToGlobal(pEvent->pos()));
       if (pSelectedAction == pAlwaysAction)
       {
-         editType = ImportAgentExt1::ALWAYS_EDIT;
+         mDroppedFilesEditType = ImportAgentExt1::ALWAYS_EDIT;
       }
       else if (pSelectedAction == pAsNeededAction)
       {
-         editType = ImportAgentExt1::AS_NEEDED_EDIT;
+         mDroppedFilesEditType = ImportAgentExt1::AS_NEEDED_EDIT;
       }
       else if (pSelectedAction == pNeverAction)
       {
-         editType = ImportAgentExt1::NEVER_EDIT;
+         mDroppedFilesEditType = ImportAgentExt1::NEVER_EDIT;
       }
       else
       {
@@ -5292,50 +5291,7 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
       }
    }
 
-   ProgressResource pProgress("Import files...");
-   for (unsigned int i = 0; i < files.size(); ++i)
-   {
-      ImporterResource importer("Auto Importer", files[i], pProgress.get(), false);
-      importer->setEditType(editType);
-      importer->updateMruFileList(true);
-
-      if (!importer->execute())
-      {
-         if ((editType != ImportAgentExt1::NEVER_EDIT) && (i < files.size() - 1) &&
-            (displayContinueMessage == true))
-         {
-            int continueButton = QMessageBox::question(this, "Import File(s)",
-               "The " + QString::fromStdString(files[i]) + " file could not load.  "
-               "Do you want to continue importing the remaining files?",
-               QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No);
-            if (continueButton == QMessageBox::No)
-            {
-               errorContinue = false;
-            }
-            else if (continueButton == QMessageBox::YesToAll)
-            {
-               displayContinueMessage = false;
-            }
-         }
-
-         if (errorContinue == false)
-         {
-            return;
-         }
-
-         vector<DataElement*> importedDatasets = importer->getImportedElements();
-         if ((importedDatasets.empty() == true) && (pProgress.get() != NULL))
-         {
-            string msg = "Unable to import " + files[i] + ".\n";
-            pProgress->updateProgress(msg, 0, WARNING);
-         }
-      }
-   }
-
-   if (pProgress.get() != NULL)
-   {
-      pProgress->updateProgress("Finished importing", 100, NORMAL);
-   }
+   QTimer::singleShot(0, this, SLOT(importDroppedFiles()));
 }
 
 void ApplicationWindow::removeMenuCommands(const QList<QAction*>& commands)
@@ -5756,4 +5712,60 @@ bool ApplicationWindow::deserialize(SessionItemDeserializer &deserializer)
    }
 
    return true;
+}
+
+void ApplicationWindow::importDroppedFiles()
+{
+   bool errorContinue = true;
+   bool displayContinueMessage = true;
+   ProgressResource pProgress("Import files...");
+   vector<string>::iterator it;
+   for (it=mDroppedFilesList.begin(); it!=mDroppedFilesList.end(); ++it)
+   {
+      if ((*it).empty() == false)
+      {
+         ImporterResource importer("Auto Importer", *it, pProgress.get(), false);
+         importer->setEditType(mDroppedFilesEditType);
+         importer->updateMruFileList(true);
+
+         if (!importer->execute())
+         {
+            if ((mDroppedFilesEditType != ImportAgentExt1::NEVER_EDIT) && (it != mDroppedFilesList.end()-1) &&
+               (displayContinueMessage == true))
+            {
+               int continueButton = QMessageBox::question(this, "Import File(s)",
+                  "The " + QString::fromStdString(*it) + " file could not load.  "
+                  "Do you want to continue importing the remaining files?",
+                  QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No);
+               if (continueButton == QMessageBox::No)
+               {
+                  errorContinue = false;
+               }
+               else if (continueButton == QMessageBox::YesToAll)
+               {
+                  displayContinueMessage = false;
+               }
+            }
+
+            if (errorContinue == false)
+            {
+               return;
+            }
+
+            vector<DataElement*> importedDatasets = importer->getImportedElements();
+            if ((importedDatasets.empty() == true) && (pProgress.get() != NULL))
+            {
+               string msg = "Unable to import " + *it + ".\n";
+               pProgress->updateProgress(msg, 0, WARNING);
+            }
+         }
+      }
+   }
+
+   if (pProgress.get() != NULL)
+   {
+      pProgress->updateProgress("Finished importing", 100, NORMAL);
+   }
+
+   mDroppedFilesList.clear();
 }
