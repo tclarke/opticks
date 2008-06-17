@@ -178,7 +178,17 @@ void EastArrowObjectImp::orient()
    }
 
    LocationType geocoordStart = pRaster->convertPixelToGeocoord(pixelStart);
-   LocationType geocoordEnd = LocationType(geocoordStart.mX, geocoordStart.mY + 0.001);
+   LocationType oneRightPixel(pixelStart.mX, pixelStart.mY + 1.0);
+   LocationType oneRightGeo = pRaster->convertPixelToGeocoord(oneRightPixel);
+   double degLonPerPixel = abs(oneRightGeo.mY - geocoordStart.mY);
+
+   // degLonPerPixel can be extremely small for high spatial resolution data. This can result
+   // in unreliable orientation of the arrow, especially when the scene coordinate and Lat/Lon
+   // coordinate systems are closely aligned. We'll avoid this problem by insuring that a value
+   // of at least 0.001 degree (roughly 100 meters between points) is used for the calculation.
+   degLonPerPixel = max(0.001, degLonPerPixel);
+
+   LocationType geocoordEnd = LocationType(geocoordStart.mX, geocoordStart.mY + degLonPerPixel);
    LocationType pixelEnd = pRaster->convertGeocoordToPixel(geocoordEnd);
 
    double dDeltaX = pixelEnd.mX - pixelStart.mX;
