@@ -907,6 +907,10 @@ void HistogramThread::calculateHistogram(T* pData, ComplexComponent component)
             {
                bin = HISTOGRAM_SIZE - 1;
             }
+            else if (bin < 0)
+            {
+               bin = 0;
+            }
 
             binCounts[bin]++;
             mCount++;
