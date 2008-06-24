@@ -173,13 +173,15 @@ void ImportDlg::accept()
       // Invoke the Options dialog if no valid data sets are selected
       string errorMessage;
       if (ImportAgentImp::validateImportDescriptors(mDescriptors, dynamic_cast<Importer*>(mpImporter),
-         errorMessage) < mDescriptors.size())
+         errorMessage) == 0)
       {
          if (invokeOptionsDialog() == false)
          {
             return;
          }
 
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove this check when the import options dialog prevents \
+   clicking the OK button when one or more imported data sets is invalid, not just the selected data set (dsulgrov)")
          if (ImportAgentImp::validateImportDescriptors(mDescriptors, dynamic_cast<Importer*>(mpImporter),
             errorMessage) == 0)
          {
