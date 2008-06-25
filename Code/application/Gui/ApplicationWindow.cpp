@@ -389,12 +389,14 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
 
    m_pFlip_Horiz_Action = new QAction(pIcons->mFlipHoriz, "Flip &Horizontally", this);
    m_pFlip_Horiz_Action->setAutoRepeat(false);
+   m_pFlip_Horiz_Action->setShortcut(QKeySequence(Qt::Key_H));
    m_pFlip_Horiz_Action->setToolTip("Flip Horizontally");
    m_pFlip_Horiz_Action->setStatusTip("Flips the data set from left to right");
    VERIFYNR(connect(m_pFlip_Horiz_Action, SIGNAL(triggered()), this, SLOT(flipHoriz())));
 
    m_pFlip_Vert_Action = new QAction(pIcons->mFlipVert, "Flip &Vertically", this);
    m_pFlip_Vert_Action->setAutoRepeat(false);
+   m_pFlip_Vert_Action->setShortcut(QKeySequence(Qt::Key_V));
    m_pFlip_Vert_Action->setToolTip("Flip Vertically");
    m_pFlip_Vert_Action->setStatusTip("Flips the data set from top to bottom");
    VERIFYNR(connect(m_pFlip_Vert_Action, SIGNAL(triggered()), this, SLOT(flipVert())));
@@ -413,17 +415,20 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
 
    m_pReset_Action = new QAction(pIcons->mReset, "R&eset", this);
    m_pReset_Action->setAutoRepeat(false);
+   m_pReset_Action->setShortcut(QKeySequence(Qt::Key_W));
    m_pReset_Action->setToolTip("Reset");
    m_pReset_Action->setStatusTip("Returns the data set to its original orientation");
    VERIFYNR(connect(m_pReset_Action, SIGNAL(triggered()), this, SLOT(reset())));
 
    // Zoom
    m_pZoom_In_Action = new QAction(pIcons->mZoomIn, "&In", this);
+   m_pZoom_In_Action->setShortcut(QKeySequence(Qt::Key_Z));
    m_pZoom_In_Action->setToolTip("Zoom In");
    m_pZoom_In_Action->setStatusTip("Increases the zoom level in the active view about the window center");
    VERIFYNR(connect(m_pZoom_In_Action, SIGNAL(triggered()), this, SLOT(zoomIn())));
 
    m_pZoom_Out_Action = new QAction(pIcons->mZoomOut, "&Out", this);
+   m_pZoom_Out_Action->setShortcut(QKeySequence("Shift+Z"));
    m_pZoom_Out_Action->setToolTip("Zoom Out");
    m_pZoom_Out_Action->setStatusTip("Decreases the zoom level in the active view about the window center");
    VERIFYNR(connect(m_pZoom_Out_Action, SIGNAL(triggered()), this, SLOT(zoomOut())));
@@ -496,6 +501,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
 
    m_pZoom_To_Fit_Action = new QAction(pIcons->mZoomToFit, "To &Fit", this);
    m_pZoom_To_Fit_Action->setAutoRepeat(false);
+   m_pZoom_To_Fit_Action->setShortcut(QKeySequence(Qt::Key_E));
    m_pZoom_To_Fit_Action->setToolTip("Zoom to Fit");
    m_pZoom_To_Fit_Action->setStatusTip("Zooms the active view to the maximum extent of the data");
    VERIFYNR(connect(m_pZoom_To_Fit_Action, SIGNAL(triggered()), this, SLOT(zoomToFit())));
@@ -3093,26 +3099,38 @@ void ApplicationWindow::reset()
 
 void ApplicationWindow::zoomIn()
 {
-   PerspectiveView* pView = dynamic_cast<PerspectiveView*>(getCurrentWorkspaceWindowView());
+   PerspectiveViewImp* pView = dynamic_cast<PerspectiveViewImp*>(getCurrentWorkspaceWindowView());
    if (pView != NULL)
    {
-      double dZoom = pView->getZoomPercentage();
-      dZoom *= 1.25;
+      if (pView->isInsetEnabled() == true)
+      {
+         pView->zoomInset(true);
+      }
+      else
+      {
+         double dZoom = pView->getZoomPercentage() * 1.25;
+         pView->zoomTo(dZoom);
+      }
 
-      pView->zoomTo(dZoom);
       pView->refresh();
    }
 }
 
 void ApplicationWindow::zoomOut()
 {
-   PerspectiveView* pView = dynamic_cast<PerspectiveView*>(getCurrentWorkspaceWindowView());
+   PerspectiveViewImp* pView = dynamic_cast<PerspectiveViewImp*>(getCurrentWorkspaceWindowView());
    if (pView != NULL)
    {
-      double dZoom = pView->getZoomPercentage();
-      dZoom /= 1.25;
+      if (pView->isInsetEnabled() == true)
+      {
+         pView->zoomInset(false);
+      }
+      else
+      {
+         double dZoom = pView->getZoomPercentage() / 1.25;
+         pView->zoomTo(dZoom);
+      }
 
-      pView->zoomTo(dZoom);
       pView->refresh();
    }
 }

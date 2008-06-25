@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <math.h>
-
 #include <QtCore/QDateTime>
 #include <QtCore/QEvent>
 #include <QtGui/QLayout>
@@ -17,9 +15,9 @@
 #include <QtGui/QWidgetAction>
 
 #include "Animation.h"
-#include "AnimationImp.h"
 #include "AnimationController.h"
 #include "AnimationControllerImp.h"
+#include "AnimationImp.h"
 #include "AnimationToolBar.h"
 #include "AnimationToolBarImp.h"
 #include "AppAssert.h"
@@ -29,7 +27,10 @@
 #include "PixmapGrid.h"
 #include "StringUtilities.h"
 
+#include <math.h>
+
 #include <boost/rational.hpp>
+
 #include <string>
 using namespace std;
 
@@ -77,6 +78,7 @@ AnimationToolBarImp::AnimationToolBarImp(const string& id, QWidget* parent) :
 
    mpPlayPauseAction = addAction(pIcons->mAnimationPlayForward, QString(), this, SLOT(playPause()));
    mpPlayPauseAction->setAutoRepeat(false);
+   mpPlayPauseAction->setShortcut(QKeySequence(Qt::Key_Space));
    mpPlayPauseAction->setToolTip("Play");
    pDesktop->initializeAction(mpPlayPauseAction, shortcutContext);
 
@@ -122,12 +124,12 @@ AnimationToolBarImp::AnimationToolBarImp(const string& id, QWidget* parent) :
    addWidget(mpFrameSpeedCombo);
 
    mpStepBackwardAction = addAction(pIcons->mAnimationAdvanceBackward, QString(), this, SLOT(stepBackward()));
-   mpStepBackwardAction->setAutoRepeat(false);
+   mpStepBackwardAction->setAutoRepeat(true);
    mpStepBackwardAction->setToolTip("Step backward");
    pDesktop->initializeAction(mpStepBackwardAction, shortcutContext);
 
    mpStepForwardAction = addAction(pIcons->mAnimationAdvanceForward, QString(), this, SLOT(stepForward()));
-   mpStepForwardAction->setAutoRepeat(false);
+   mpStepForwardAction->setAutoRepeat(true);
    mpStepForwardAction->setToolTip("Step forward");
    pDesktop->initializeAction(mpStepForwardAction, shortcutContext);
 

@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <math.h>
-
 #include "Animation.h"
 #include "AnimationController.h"
 #include "AnimationServices.h"
@@ -70,6 +68,8 @@
 #include <QtGui/QMouseEvent>
 #include <QtGui/QToolTip>
 #include <QtOpenGL/QGLFramebufferObject>
+
+#include <math.h>
 
 #include <boost/bind.hpp>
 
@@ -201,6 +201,63 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
    pMeasurementsAction->setAutoRepeat(false);
    pDesktop->initializeAction(pMeasurementsAction, shortcutContext);
 
+   // Keyboard shortcut actions
+   QAction* pGrayAction = new QAction("Set Gray Band", this);
+   pGrayAction->setAutoRepeat(false);
+   pGrayAction->setShortcut(QKeySequence(Qt::Key_X));
+   pGrayAction->setShortcutContext(Qt::WidgetShortcut);
+   pDesktop->initializeAction(pGrayAction, shortcutContext);
+   addAction(pGrayAction);
+
+   QAction* pRedAction = new QAction("Set Red Band", this);
+   pRedAction->setAutoRepeat(false);
+   pRedAction->setShortcut(QKeySequence(Qt::Key_R));
+   pRedAction->setShortcutContext(Qt::WidgetShortcut);
+   pDesktop->initializeAction(pRedAction, shortcutContext);
+   addAction(pRedAction);
+
+   QAction* pGreenAction = new QAction("Set Green Band", this);
+   pGreenAction->setAutoRepeat(false);
+   pGreenAction->setShortcut(QKeySequence(Qt::Key_G));
+   pGreenAction->setShortcutContext(Qt::WidgetShortcut);
+   pDesktop->initializeAction(pGreenAction, shortcutContext);
+   addAction(pGreenAction);
+
+   QAction* pBlueAction = new QAction("Set Blue Band", this);
+   pBlueAction->setAutoRepeat(false);
+   pBlueAction->setShortcut(QKeySequence(Qt::Key_B));
+   pBlueAction->setShortcutContext(Qt::WidgetShortcut);
+   pDesktop->initializeAction(pBlueAction, shortcutContext);
+   addAction(pBlueAction);
+
+   QAction* pGrayscaleAction = new QAction("Set Grayscale Mode", this);
+   pGrayscaleAction->setAutoRepeat(false);
+   pGrayscaleAction->setShortcut(QKeySequence(Qt::Key_O));
+   pGrayscaleAction->setShortcutContext(Qt::WidgetShortcut);
+   pDesktop->initializeAction(pGrayscaleAction, shortcutContext);
+   addAction(pGrayscaleAction);
+
+   QAction* pRgbAction = new QAction("Set RGB Mode", this);
+   pRgbAction->setAutoRepeat(false);
+   pRgbAction->setShortcut(QKeySequence(Qt::Key_T));
+   pRgbAction->setShortcutContext(Qt::WidgetShortcut);
+   pDesktop->initializeAction(pRgbAction, shortcutContext);
+   addAction(pRgbAction);
+
+   QAction* pNextBandAction = new QAction("Next Grayscale Band", this);
+   pNextBandAction->setAutoRepeat(false);
+   pNextBandAction->setShortcut(QKeySequence(Qt::Key_PageUp));
+   pNextBandAction->setShortcutContext(Qt::WidgetShortcut);
+   pDesktop->initializeAction(pNextBandAction, shortcutContext);
+   addAction(pNextBandAction);
+
+   QAction* pPreviousBandAction = new QAction("Previous Grayscale Band", this);
+   pPreviousBandAction->setAutoRepeat(false);
+   pPreviousBandAction->setShortcut(QKeySequence(Qt::Key_PageDown));
+   pPreviousBandAction->setShortcutContext(Qt::WidgetShortcut);
+   pDesktop->initializeAction(pPreviousBandAction, shortcutContext);
+   addAction(pPreviousBandAction);
+
    // Initialization
    if (mpMeasurementsLayer != NULL)
    {
@@ -245,6 +302,14 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
       this, SLOT(updateSmoothingAction(const TextureMode&))));
    VERIFYNR(connect(pColorAction, SIGNAL(triggered()), this, SLOT(changeBkgColor())));
    VERIFYNR(connect(pMeasurementsAction, SIGNAL(triggered()), this, SLOT(displayMeasurementProperties())));
+   VERIFYNR(connect(pGrayAction, SIGNAL(triggered()), this, SLOT(setGrayBand())));
+   VERIFYNR(connect(pRedAction, SIGNAL(triggered()), this, SLOT(setRedBand())));
+   VERIFYNR(connect(pGreenAction, SIGNAL(triggered()), this, SLOT(setGreenBand())));
+   VERIFYNR(connect(pBlueAction, SIGNAL(triggered()), this, SLOT(setBlueBand())));
+   VERIFYNR(connect(pGrayscaleAction, SIGNAL(triggered()), this, SLOT(setGrayscaleMode())));
+   VERIFYNR(connect(pRgbAction, SIGNAL(triggered()), this, SLOT(setRgbMode())));
+   VERIFYNR(connect(pNextBandAction, SIGNAL(triggered()), this, SLOT(nextBand())));
+   VERIFYNR(connect(pPreviousBandAction, SIGNAL(triggered()), this, SLOT(previousBand())));
 
    if (mpLayerList != NULL)
    {
@@ -2096,7 +2161,7 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
 void SpatialDataViewImp::updateExtents()
 {
    vector<Layer*> layers;
-   switch(mPanLimit)
+   switch (mPanLimit)
    {
    case NO_LIMIT:       // fall through
    case MAX_EXTENTS:
@@ -2411,7 +2476,7 @@ void SpatialDataViewImp::toolTipEvent(QHelpEvent* pEvent)
    if (pRaster != NULL && pRaster->isGeoreferenced())
    {
       LocationType dataCoord(dX, dY);
-      
+
       Layer *pLayer = pLayerList->getLayer(RASTER, pRaster);
       if (pLayer != NULL)
       {
@@ -2500,221 +2565,31 @@ void SpatialDataViewImp::keyPressEvent(QKeyEvent* pEvent)
    {
       PerspectiveViewImp::keyPressEvent(pEvent);
 
-      RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(getTopMostLayer(RASTER));
-      RasterChannelType colorToChange = BLUE;
-
-      switch (pEvent->key())
+      if (pEvent->key() == Qt::Key_Delete)
       {
-         case Qt::Key_R:
-            colorToChange = RED;
-            // Intentional fall through to set the displayed bands
-
-         case Qt::Key_G:
-            if (colorToChange == BLUE)
-            {
-               colorToChange = GREEN;
-            }
-            // Intentional fall through to set the displayed bands
-
-         case Qt::Key_X:
-            if (colorToChange == BLUE)
-            {
-               colorToChange = GRAY;
-            }
-            // Intentional fall through to set the displayed bands
-
-         case Qt::Key_B:
-            if (pRasterLayer != NULL)
-            {
-               if (sKeyboardNumber > 0)
-               {
-                  sKeyboardNumber--;
-               }
-
-               DataElement* pElement = pRasterLayer->getDataElement();
-               if (pElement != NULL)
-               {
-                  const RasterDataDescriptor* pDescriptor =
-                     dynamic_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor());
-                  if (pDescriptor != NULL)
-                  {
-                     const vector<DimensionDescriptor>& activeBands = pDescriptor->getBands();
-                     for (unsigned int i = 0; i < activeBands.size(); ++i)
-                     {
-                        DimensionDescriptor bandDim = activeBands[i];
-                        if (bandDim.isValid())
-                        {
-                           unsigned int currentNumber = bandDim.getOriginalNumber();
-                           if (currentNumber == sKeyboardNumber)
-                           {
-                              pRasterLayer->setDisplayedBand(colorToChange, bandDim);
-                              break;
-                           }
-                        }
-                     }
-                  }
-               }
-            }
-
-            sKeyboardNumber = 0;
-            break;
-
-         case Qt::Key_T:
-            if (pRasterLayer != NULL)
-            {
-               pRasterLayer->setDisplayMode(RGB_MODE);
-            }
-
-            sKeyboardNumber = 0;
-            break;
-
-         case Qt::Key_O:
-            if (pRasterLayer != NULL)
-            {
-               pRasterLayer->setDisplayMode(GRAYSCALE_MODE);
-            }
-
-            sKeyboardNumber = 0;
-            break;
-
-         case Qt::Key_PageUp:
-            if (pRasterLayer != NULL)
-            {
-               DisplayMode eDisplayMode = pRasterLayer->getDisplayMode();
-               if (eDisplayMode == GRAYSCALE_MODE)
-               {
-                  DataElement* pElement = pRasterLayer->getDataElement();
-                  if (pElement != NULL)
-                  {
-                     const RasterDataDescriptor* pDescriptor =
-                        dynamic_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor());
-                     if (pDescriptor != NULL)
-                     {
-                        DimensionDescriptor currentBand = pRasterLayer->getDisplayedBand(GRAY);
-                        DimensionDescriptor newBand;
-
-                        const vector<DimensionDescriptor>& activeBands = pDescriptor->getBands();
-                        if (currentBand.isValid() == false)
-                        {
-                           if (activeBands.empty() == false)
-                           {
-                              newBand = activeBands.front();
-                           }
-                        }
-                        else
-                        {
-                           bool bFound = false;
-
-                           vector<DimensionDescriptor>::const_iterator iter;
-                           for (iter = activeBands.begin(); iter != activeBands.end(); ++iter)
-                           {
-                              DimensionDescriptor activeBand = *iter;
-                              if (bFound == true)
-                              {
-                                 newBand = activeBand;
-                                 break;
-                              }
-
-                              if (activeBand == currentBand)
-                              {
-                                 bFound = true;
-                              }
-                           }
-                        }
-
-                        pRasterLayer->setDisplayedBand(GRAY, newBand);
-                     }
-                  }
-               }
-            }
-
-            break;
-
-         case Qt::Key_PageDown:
-            if (pRasterLayer != NULL)
-            {
-               DisplayMode eDisplayMode = pRasterLayer->getDisplayMode();
-               if (eDisplayMode == GRAYSCALE_MODE)
-               {
-                  DataElement* pElement = pRasterLayer->getDataElement();
-                  if (pElement != NULL)
-                  {
-                     const RasterDataDescriptor* pDescriptor =
-                        dynamic_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor());
-                     if (pDescriptor != NULL)
-                     {
-                        DimensionDescriptor currentBand = pRasterLayer->getDisplayedBand(GRAY);
-                        DimensionDescriptor newBand;
-
-                        const vector<DimensionDescriptor>& activeBands = pDescriptor->getBands();
-                        if (currentBand.isValid() == false)
-                        {
-                           if (activeBands.empty() == false)
-                           {
-                              newBand = activeBands.back();
-                           }
-                        }
-                        else
-                        {
-                           bool bFound = false;
-
-                           vector<DimensionDescriptor>::const_reverse_iterator iter;
-                           for (iter = activeBands.rbegin(); iter != activeBands.rend(); ++iter)
-                           {
-                              DimensionDescriptor activeBand = *iter;
-                              if (bFound == true)
-                              {
-                                 newBand = activeBand;
-                                 break;
-                              }
-
-                              if (activeBand == currentBand)
-                              {
-                                 bFound = true;
-                              }
-                           }
-                        }
-
-                        pRasterLayer->setDisplayedBand(GRAY, newBand);
-                     }
-                  }
-               }
-            }
-
-            break;
-
-         case Qt::Key_Delete:
+         const MouseMode* pMouseMode = getCurrentMouseMode();
+         if (pMouseMode != NULL)
          {
-            const MouseMode* pMouseMode = getCurrentMouseMode();
-            if (pMouseMode != NULL)
+            GraphicLayerImp* pLayer = NULL;
+
+            string mouseMode = "";
+            pMouseMode->getName(mouseMode);
+            if (mouseMode == "LayerMode")
             {
-               GraphicLayerImp* pLayer = NULL;
-
-               string mouseMode = "";
-               pMouseMode->getName(mouseMode);
-               if (mouseMode == "LayerMode")
-               {
-                  pLayer = dynamic_cast<GraphicLayerImp*>(getActiveLayer());
-               }
-               else if (mouseMode == "MeasurementMode")
-               {
-                  pLayer = dynamic_cast<GraphicLayerImp*> (getMeasurementsLayer());
-               }
-
-               if (pLayer != NULL)
-               {
-                  pLayer->deleteSelectedObjects();
-               }
+               pLayer = dynamic_cast<GraphicLayerImp*>(getActiveLayer());
+            }
+            else if (mouseMode == "MeasurementMode")
+            {
+               pLayer = dynamic_cast<GraphicLayerImp*> (getMeasurementsLayer());
             }
 
-            break;
+            if (pLayer != NULL)
+            {
+               pLayer->deleteSelectedObjects();
+               refresh();
+            }
          }
-
-         default:
-            return;
       }
-
-      refresh();
    }
 }
 
@@ -2754,7 +2629,7 @@ void SpatialDataViewImp::keyPan()
       distance = SpatialDataView::getSettingSlowPanSpeed();
    }
 
-   switch(mPanKey)
+   switch (mPanKey)
    {
       case Qt::Key_Up:
          ViewImp::pan(QPoint(0, 0), QPoint(0, distance));
@@ -3818,4 +3693,192 @@ bool SpatialDataViewImp::fromXml(DOMNode* pDocument, unsigned int version)
    }
 
    return true;
+}
+
+void SpatialDataViewImp::setGrayBand()
+{
+   setBand(GRAY);
+}
+
+void SpatialDataViewImp::setRedBand()
+{
+   setBand(RED);
+}
+
+void SpatialDataViewImp::setGreenBand()
+{
+   setBand(GREEN);
+}
+
+void SpatialDataViewImp::setBlueBand()
+{
+   setBand(BLUE);
+}
+
+void SpatialDataViewImp::setBand(RasterChannelType channel)
+{
+   RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(getTopMostLayer(RASTER));
+   if (pRasterLayer != NULL)
+   {
+      if (sKeyboardNumber > 0)
+      {
+         sKeyboardNumber--;
+      }
+
+      DataElement* pElement = pRasterLayer->getDataElement();
+      if (pElement != NULL)
+      {
+         const RasterDataDescriptor* pDescriptor =
+            dynamic_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor());
+         if (pDescriptor != NULL)
+         {
+            const vector<DimensionDescriptor>& activeBands = pDescriptor->getBands();
+            for (unsigned int i = 0; i < activeBands.size(); ++i)
+            {
+               DimensionDescriptor bandDim = activeBands[i];
+               if (bandDim.isValid())
+               {
+                  unsigned int currentNumber = bandDim.getOriginalNumber();
+                  if (currentNumber == sKeyboardNumber)
+                  {
+                     pRasterLayer->setDisplayedBand(channel, bandDim);
+                     break;
+                  }
+               }
+            }
+         }
+      }
+   }
+
+   sKeyboardNumber = 0;
+}
+
+void SpatialDataViewImp::setGrayscaleMode()
+{
+   RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(getTopMostLayer(RASTER));
+   if (pRasterLayer != NULL)
+   {
+      pRasterLayer->setDisplayMode(GRAYSCALE_MODE);
+   }
+
+   sKeyboardNumber = 0;
+}
+
+void SpatialDataViewImp::setRgbMode()
+{
+   RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(getTopMostLayer(RASTER));
+   if (pRasterLayer != NULL)
+   {
+      pRasterLayer->setDisplayMode(RGB_MODE);
+   }
+
+   sKeyboardNumber = 0;
+}
+
+void SpatialDataViewImp::nextBand()
+{
+   RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(getTopMostLayer(RASTER));
+   if ((pRasterLayer == NULL) || (pRasterLayer->getDisplayMode() == RGB_MODE))
+   {
+      return;
+   }
+
+   DataElement* pElement = pRasterLayer->getDataElement();
+   if (pElement == NULL)
+   {
+      return;
+   }
+
+   const RasterDataDescriptor* pDescriptor = dynamic_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor());
+   if (pDescriptor == NULL)
+   {
+      return;
+   }
+
+   DimensionDescriptor currentBand = pRasterLayer->getDisplayedBand(GRAY);
+   DimensionDescriptor newBand;
+
+   const vector<DimensionDescriptor>& activeBands = pDescriptor->getBands();
+   if (currentBand.isValid() == false)
+   {
+      if (activeBands.empty() == false)
+      {
+         newBand = activeBands.front();
+      }
+   }
+   else
+   {
+      bool bFound = false;
+      for (vector<DimensionDescriptor>::const_iterator iter = activeBands.begin(); iter != activeBands.end(); ++iter)
+      {
+         DimensionDescriptor activeBand = *iter;
+         if (bFound == true)
+         {
+            newBand = activeBand;
+            break;
+         }
+
+         if (activeBand == currentBand)
+         {
+            bFound = true;
+         }
+      }
+   }
+
+   pRasterLayer->setDisplayedBand(GRAY, newBand);
+}
+
+void SpatialDataViewImp::previousBand()
+{
+   RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(getTopMostLayer(RASTER));
+   if ((pRasterLayer == NULL) || (pRasterLayer->getDisplayMode() == RGB_MODE))
+   {
+      return;
+   }
+
+   DataElement* pElement = pRasterLayer->getDataElement();
+   if (pElement == NULL)
+   {
+      return;
+   }
+
+   const RasterDataDescriptor* pDescriptor = dynamic_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor());
+   if (pDescriptor == NULL)
+   {
+      return;
+   }
+
+   DimensionDescriptor currentBand = pRasterLayer->getDisplayedBand(GRAY);
+   DimensionDescriptor newBand;
+
+   const vector<DimensionDescriptor>& activeBands = pDescriptor->getBands();
+   if (currentBand.isValid() == false)
+   {
+      if (activeBands.empty() == false)
+      {
+         newBand = activeBands.back();
+      }
+   }
+   else
+   {
+      bool bFound = false;
+
+      vector<DimensionDescriptor>::const_reverse_iterator iter;
+      for (iter = activeBands.rbegin(); iter != activeBands.rend(); ++iter)
+      {
+         DimensionDescriptor activeBand = *iter;
+         if (bFound == true)
+         {
+            newBand = activeBand;
+            break;
+         }
+
+         if (activeBand == currentBand)
+         {
+            bFound = true;
+         }
+      }
+   }
+
+   pRasterLayer->setDisplayedBand(GRAY, newBand);
 }
