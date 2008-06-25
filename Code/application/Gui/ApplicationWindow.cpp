@@ -1445,6 +1445,7 @@ bool ApplicationWindow::addWindow(Window* pWindow)
    {
       pDockWindow->setObjectName(QString::fromStdString(pDockWindow->getName()));
       addDockWidget(Qt::BottomDockWidgetArea, pDockWindow);
+      pDockWindow->restoreState();
    }
 
    ToolBarImp* pToolBar = dynamic_cast<ToolBarImp*>(pWindow);
@@ -1673,6 +1674,13 @@ bool ApplicationWindow::deleteWindow(Window* pWindow)
    if (isDefaultWindow(pWindow) == true)
    {
       return false;
+   }
+
+   // if dock window, save geometry
+   DockWindowImp* pDockWindow = dynamic_cast<DockWindowImp*>(pWindow);
+   if (pDockWindow != NULL)
+   {
+      pDockWindow->saveState();
    }
 
    // Close the widget before removing the window to cancel out if the user does not confirm the close

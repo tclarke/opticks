@@ -82,6 +82,9 @@ public:
    QWidget* getWidget() const;
    std::list<ContextMenuAction> getContextMenuActions() const;
 
+   void saveState() const;
+   void restoreState();
+
 public slots:
    void dock();
    void undock();
