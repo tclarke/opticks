@@ -240,3 +240,48 @@ void DockWindowImp::contextMenuEvent(QContextMenuEvent* pEvent)
 
    QDockWidget::contextMenuEvent(pEvent);
 }
+
+void DockWindowImp::saveState() const
+{
+   string dockName = getName();
+   if (dockName.empty() == false)
+   {
+      Service<ConfigurationSettings> pSettings;
+      string settingPathBase = "DockWindow/" + dockName;
+      Service<DesktopServices> pDesktop;
+      DockWindow* pDockWindow = dynamic_cast<DockWindow*>(const_cast<DockWindowImp*>(this));
+      int iArea = static_cast<int>(pDesktop->getDockWindowArea(*pDockWindow));
+      pSettings->setSetting(settingPathBase + "/DockArea", iArea);
+
+      QByteArray dockState = saveGeometry().toBase64();
+      string stateData = dockState.data();
+      pSettings->setSetting(settingPathBase + "/Geometry", stateData);
+   }
+}
+
+void DockWindowImp::restoreState()
+{
+   string dockName = getName();
+   if (dockName.empty() == false)
+   {
+      Service<ConfigurationSettings> pSettings;
+      string settingPathBase = "DockWindow/" + dockName;
+
+      DataVariant dockArea = pSettings->getSetting(settingPathBase + "/DockArea");
+      if (dockArea.isValid() && dockArea.getTypeName() == "int")
+      {
+         int iArea = dv_cast<int>(dockArea);
+         DockWindowAreaType eDockArea = static_cast<DockWindowAreaTypeEnum>(iArea);
+         Service<DesktopServices> pDesktop;
+         pDesktop->setDockWindowArea(dynamic_cast<DockWindow*>(this), eDockArea);
+      }
+
+      DataVariant dockGeom = pSettings->getSetting(settingPathBase + "/Geometry");
+      if (dockGeom.isValid() && dockGeom.getTypeName() == "string")
+      {
+         string stateData = dv_cast<string>(dockGeom);
+         QByteArray dockState(stateData.c_str(), stateData.size());
+         restoreGeometry(QByteArray::fromBase64(dockState));
+      }
+   }
+}
