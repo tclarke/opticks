@@ -206,6 +206,17 @@ private:
    QAction* mpOriginUL;
    QAction* mpOriginLL;
    QAction* mpSmoothAction;
+
+private slots:
+   void setGrayBand();
+   void setRedBand();
+   void setGreenBand();
+   void setBlueBand();
+   void setBand(RasterChannelType channel);
+   void setGrayscaleMode();
+   void setRgbMode();
+   void nextBand();
+   void previousBand();
 };
 
 #define SPATIALDATAVIEWADAPTEREXTENSION_CLASSES \

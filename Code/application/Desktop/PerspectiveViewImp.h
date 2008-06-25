@@ -116,6 +116,11 @@ private:
    Qt::KeyboardModifiers mCurrentModifiers;
    bool mDisplayContextMenu;
    bool mAllowZoomOnResize;
+
+private slots:
+   void zoomInsetFactor();
+   void zoomToEnabledInset();
+   void togglePixelCoordinates();
 };
 
 #define PERSPECTIVEVIEWADAPTEREXTENSION_CLASSES \

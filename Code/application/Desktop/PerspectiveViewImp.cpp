@@ -7,30 +7,30 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <math.h>
-
 #include <QtGui/QCursor>
 #include <QtGui/QKeyEvent>
 
-#include "PerspectiveViewImp.h"
+#include "AppConfig.h"
 #include "ApplicationWindow.h"
 #include "ConfigurationSettings.h"
-#include "AppConfig.h"
 #include "DataVariant.h"
 #include "DesktopServices.h"
 #include "GeocoordLinkFunctor.h"
 #include "GlContextSave.h"
 #include "MouseModeImp.h"
 #include "PerspectiveView.h"
+#include "PerspectiveViewImp.h"
 #include "SessionItemSerializer.h"
 #include "StatusBar.h"
 #include "Undo.h"
 #include "ViewUndo.h"
 #include "xmlreader.h"
 
-#include <boost/bind.hpp>
-#include <sstream>
+#include <math.h>
 
+#include <boost/bind.hpp>
+
+#include <sstream>
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
 
@@ -52,6 +52,31 @@ PerspectiveViewImp::PerspectiveViewImp(const string& id, const string& viewName,
    mDisplayContextMenu(true),
    mAllowZoomOnResize(false)
 {
+   // Keyboard shortcut actions
+   Service<DesktopServices> pDesktop;
+   string shortcutContext = "View";
+
+   QAction* pInsetFactorAction = new QAction("Zoom Inset Factor", this);
+   pInsetFactorAction->setAutoRepeat(false);
+   pInsetFactorAction->setShortcut(QKeySequence(Qt::Key_F));
+   pInsetFactorAction->setShortcutContext(Qt::WidgetShortcut);
+   pDesktop->initializeAction(pInsetFactorAction, shortcutContext + "/Zoom");
+   addAction(pInsetFactorAction);
+
+   QAction* pZoomInsetAction = new QAction("Zoom to Inset", this);
+   pZoomInsetAction->setAutoRepeat(false);
+   pZoomInsetAction->setShortcut(QKeySequence(Qt::Key_C));
+   pZoomInsetAction->setShortcutContext(Qt::WidgetShortcut);
+   pDesktop->initializeAction(pZoomInsetAction, shortcutContext + "/Zoom");
+   addAction(pZoomInsetAction);
+
+   QAction* pToggleCoordinatesAction = new QAction("Toggle Pixel Coordinates", this);
+   pToggleCoordinatesAction->setAutoRepeat(false);
+   pToggleCoordinatesAction->setShortcut(QKeySequence(Qt::Key_N));
+   pToggleCoordinatesAction->setShortcutContext(Qt::WidgetShortcut);
+   pDesktop->initializeAction(pToggleCoordinatesAction, shortcutContext);
+   addAction(pToggleCoordinatesAction);
+
    // Initialization
    if (getDataOrigin() == UPPER_LEFT)
    {
@@ -59,7 +84,10 @@ PerspectiveViewImp::PerspectiveViewImp(const string& id, const string& viewName,
    }
 
    // Connections
-   connect(this, SIGNAL(originChanged(const DataOrigin&)), this, SLOT(flipVertical()));
+   VERIFYNR(connect(this, SIGNAL(originChanged(const DataOrigin&)), this, SLOT(flipVertical())));
+   VERIFYNR(connect(pInsetFactorAction, SIGNAL(triggered()), this, SLOT(zoomInsetFactor())));
+   VERIFYNR(connect(pZoomInsetAction, SIGNAL(triggered()), this, SLOT(zoomToEnabledInset())));
+   VERIFYNR(connect(pToggleCoordinatesAction, SIGNAL(triggered()), this, SLOT(togglePixelCoordinates())));
 }
 
 PerspectiveViewImp::~PerspectiveViewImp()
@@ -692,20 +720,6 @@ void PerspectiveViewImp::keyPressEvent(QKeyEvent* e)
             updateGL();
             break;
 
-         case Qt::Key_Z:
-            if (isInsetEnabled() == false)
-            {
-               zoomBy(-25.0);
-               updateGL();
-            }
-            else
-            {
-               zoomInset(false); // zoom out
-               updateGL();
-            }
-
-            break;
-
          default:
             return;
       }
@@ -727,26 +741,6 @@ void PerspectiveViewImp::keyPressEvent(QKeyEvent* e)
             sKeyboardNumber = (e->key() - Qt::Key_0) + sKeyboardNumber * 10;
             break;
 
-         case Qt::Key_V:
-            flipVertical();
-            updateGL();
-            break;
-
-         case Qt::Key_H:
-            flipHorizontal();
-            updateGL();
-            break;
-
-         case Qt::Key_W:
-            resetOrientation();
-            updateGL();
-            break;
-
-         case Qt::Key_E:
-            zoomExtents();
-            updateGL();
-            break;
-
          case Qt::Key_Up:
             ViewImp::pan(QPoint(0, 0), QPoint(0, 10));
             updateGL();
@@ -764,42 +758,6 @@ void PerspectiveViewImp::keyPressEvent(QKeyEvent* e)
 
          case Qt::Key_Right:
             ViewImp::pan(QPoint(0, 0), QPoint(10, 0));
-            updateGL();
-            break;
-
-         case Qt::Key_Z:
-            if (isInsetEnabled() == false)
-            {
-               zoomBy(25.0);
-               updateGL();
-            }
-            else
-            {
-               if (sKeyboardNumber != 0)
-               {
-                  zoomInsetTo(sKeyboardNumber);
-                  sKeyboardNumber = 0;
-               }
-               else
-               {
-                  zoomInset(true); // zoom in
-                  updateGL();
-               }
-            }
-
-            break;
-
-         case Qt::Key_C:
-            if (isInsetEnabled() == true)
-            {
-               zoomToInset();
-               updateGL();
-            }
-
-            break;
-
-         case Qt::Key_N:
-            toggleShowCoordinates();
             updateGL();
             break;
 
@@ -1408,4 +1366,32 @@ bool PerspectiveViewImp::fromXml(DOMNode* pDocument, unsigned int version)
 
    updateMatrices();
    return true;
+}
+
+void PerspectiveViewImp::zoomInsetFactor()
+{
+   if ((isInsetEnabled() == false) || (sKeyboardNumber == 0))
+   {
+      return;
+   }
+
+   zoomInsetTo(sKeyboardNumber);
+   sKeyboardNumber = 0;
+
+   refresh();
+}
+
+void PerspectiveViewImp::zoomToEnabledInset()
+{
+   if (isInsetEnabled() == true)
+   {
+      zoomToInset();
+      refresh();
+   }
+}
+
+void PerspectiveViewImp::togglePixelCoordinates()
+{
+   toggleShowCoordinates();
+   refresh();
 }
