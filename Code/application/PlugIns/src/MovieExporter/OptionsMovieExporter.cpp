@@ -7,11 +7,11 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include "AnimationController.h"
 #include "LabeledSection.h"
 #include "OptionsMovieExporter.h"
 #include "SessionManager.h"
 
-#include <avcodec.h>
 #include <QtCore/QStringList>
 #include <QtGui/QBitmap>
 #include <QtGui/QCheckBox>
@@ -28,7 +28,12 @@
 #include <QtGui/QSpinBox>
 #include <QtGui/QVBoxLayout>
 
+#include <avcodec.h>
+#include <boost/rational.hpp>
+#include <limits>
 #include <string>
+using boost::rational;
+using boost::rational_cast;
 using namespace std;
 
 namespace
@@ -212,7 +217,7 @@ namespace
 OptionsMovieExporter::OptionsMovieExporter() :
    LabeledSectionGroup(NULL), mCurrentResolutionX(0), mCurrentResolutionY(0)
 {
-   if(defaultFramerateItems.isEmpty())
+   if (defaultFramerateItems.isEmpty())
    {
       defaultFramerateItems << "Custom..."
                             << " 1.00fps - 1/1"
@@ -257,7 +262,8 @@ OptionsMovieExporter::OptionsMovieExporter() :
 
    LabeledSection *pResolutionSection = new LabeledSection(pResolutionLayoutWidget, "Output Resolution Options", this);
 
-   setResolution(OptionsMovieExporter::getSettingWidth(), OptionsMovieExporter::getSettingHeight());
+   setResolution(0, 0);
+   mpUseViewResolution->setChecked(true);
 
    // Bitrate/Framerate section
    QWidget *pRateLayoutWidget = new QWidget(this);
@@ -305,16 +311,25 @@ OptionsMovieExporter::OptionsMovieExporter() :
    LabeledSection *pRateSection = new LabeledSection(pRateLayoutWidget, "Bitrate and Framerate Options", this);
 
    setBitrate(OptionsMovieExporter::getSettingBitrate());
+   setFramerate(boost::rational<int>(1, 1));
 
-   try
-   {
-      setFramerate(boost::rational<int>(OptionsMovieExporter::getSettingFramerateNum(),
-                                        OptionsMovieExporter::getSettingFramerateDen()));
-   }
-   catch (const boost::bad_rational&)
-   {
-      setFramerate(boost::rational<int>(1, 1));
-   }
+   // subset options
+   QWidget *pSubsetLayoutWidget = new QWidget(this);
+   mpStartLabel = new QLabel("Start Time:", pSubsetLayoutWidget);
+   mpStopLabel = new QLabel("Stop Time:", pSubsetLayoutWidget);
+   mpStart = new QDoubleSpinBox(pSubsetLayoutWidget);
+   mpStart->setRange(0.0, 0.0);
+   mpStop = new QDoubleSpinBox(pSubsetLayoutWidget);
+   mpStop->setRange(0.0, 0.0);
+   QGridLayout *pSubsetLayout = new QGridLayout(pSubsetLayoutWidget);
+   pSubsetLayout->setMargin(0);
+   pSubsetLayout->setSpacing(5);
+   pSubsetLayout->addWidget(mpStartLabel, 0, 0);
+   pSubsetLayout->addWidget(mpStart, 0, 1);
+   pSubsetLayout->addWidget(mpStopLabel, 0, 2);
+   pSubsetLayout->addWidget(mpStop, 0, 3);
+   pSubsetLayout->setColumnStretch(5, 10);
+   LabeledSection *pSubsetSection = new LabeledSection(pSubsetLayoutWidget, "Export Subset Options", this);
 
    // Advanced Options
    QWidget *pAdvancedLayoutWidget = new QWidget(this);
@@ -443,10 +458,11 @@ OptionsMovieExporter::OptionsMovieExporter() :
    // Initialization
    addSection(pResolutionSection);
    addSection(pRateSection);
+   addSection(pSubsetSection);
    addSection(pAdvancedSection);
    addSection(mpSettingsSection);
    addStretch(10);
-   setSizeHint(300, 275);
+   setSizeHint(400, 350);
 }
 
 OptionsMovieExporter::~OptionsMovieExporter()
@@ -459,13 +475,7 @@ void OptionsMovieExporter::applyChanges()
 {
    if (mpSettingsSection->isHidden() || mpSaveSettings->isChecked())
    {
-      unsigned int width=0, height=0;
-      getResolution(width, height);
-      OptionsMovieExporter::setSettingWidth(width);
-      OptionsMovieExporter::setSettingHeight(height);
       OptionsMovieExporter::setSettingBitrate(mpBitrate->value());
-      OptionsMovieExporter::setSettingFramerateNum(mpFramerateNum->value());
-      OptionsMovieExporter::setSettingFramerateDen(mpFramerateDen->value());
       OptionsMovieExporter::setSettingMeMethod(getMeMethod());
       OptionsMovieExporter::setSettingGopSize(getGopSize());
       OptionsMovieExporter::setSettingQCompress(getQCompress());
@@ -488,7 +498,7 @@ void OptionsMovieExporter::setPromptUserToSaveSettings(bool prompt)
 
 void OptionsMovieExporter::getResolution(unsigned int &width, unsigned int &height) const
 {
-   if(mpUseViewResolution->isChecked())
+   if (mpUseViewResolution->isChecked())
    {
       width = height = 0;
    }
@@ -501,7 +511,7 @@ void OptionsMovieExporter::getResolution(unsigned int &width, unsigned int &heig
 
 void OptionsMovieExporter::setResolution(unsigned int width, unsigned int height)
 {
-   if(width == 0 && height == 0)
+   if (width == 0 && height == 0)
    {
       mpUseViewResolution->setChecked(true);
       return;
@@ -511,7 +521,7 @@ void OptionsMovieExporter::setResolution(unsigned int width, unsigned int height
    const QValidator *pValidY = mpResolutionY->validator();
    int pos1 = 0;
    int pos2 = 0;
-   if((pValidX == NULL || pValidX->validate(QString::number(width), pos1) == QValidator::Acceptable) &&
+   if ((pValidX == NULL || pValidX->validate(QString::number(width), pos1) == QValidator::Acceptable) &&
       (pValidY == NULL || pValidY->validate(QString::number(height), pos2) == QValidator::Acceptable))
    {
       mpResolutionX->setText(QString::number(width));
@@ -529,10 +539,36 @@ unsigned int OptionsMovieExporter::getBitrate() const
 
 void OptionsMovieExporter::setBitrate(unsigned int bitrate)
 {
-   if((bitrate >= static_cast<unsigned int>(mpBitrate->minimum())) &&
+   if ((bitrate >= static_cast<unsigned int>(mpBitrate->minimum())) &&
       (bitrate <= static_cast<unsigned int>(mpBitrate->maximum())))
    {
       mpBitrate->setValue(bitrate);
+   }
+}
+
+double OptionsMovieExporter::getStart() const
+{
+   return mpStart->value();
+}
+
+void OptionsMovieExporter::setStart(double start)
+{
+   if (start >= mpStart->minimum() && start <= mpStart->maximum())
+   {
+      mpStart->setValue(start);
+   }
+}
+
+double OptionsMovieExporter::getStop() const
+{
+   return mpStop->value();
+}
+
+void OptionsMovieExporter::setStop(double stop)
+{
+   if (stop >= mpStop->minimum() && stop <= mpStop->maximum())
+   {
+      mpStop->setValue(stop);
    }
 }
 
@@ -545,19 +581,19 @@ void OptionsMovieExporter::setFramerate(boost::rational<int> frameRate)
 {
    int num = frameRate.numerator();
    int den = frameRate.denominator();
-   if((num >= static_cast<int>(mpFramerateNum->minimum())) &&
+   if ((num >= static_cast<int>(mpFramerateNum->minimum())) &&
       (den >= static_cast<int>(mpFramerateDen->minimum())) &&
       (frameRate <= boost::rational<int>(60, 1)))
    {
       int idx = mpFramerateList->findText(QString("%1/%2").arg(num).arg(den), Qt::MatchEndsWith);
-      if(idx != -1)
+      if (idx != -1)
       {
          mpFramerateList->setCurrentIndex(idx);
       }
       else
       {
          idx = mpFramerateList->findText("Custom...");
-         if(idx != -1)
+         if (idx != -1)
          {
             mpFramerateList->setCurrentIndex(idx);
             mpFramerateNum->setValue(num);
@@ -570,16 +606,15 @@ void OptionsMovieExporter::setFramerate(boost::rational<int> frameRate)
 void OptionsMovieExporter::setFramerates(std::vector<boost::rational<int> > frameRates)
 {
    mpFramerateList->clear();
-   for(std::vector<boost::rational<int> >::iterator frit = frameRates.begin();
-       frit != frameRates.end();
-       ++frit)
+   for (std::vector<boost::rational<int> >::iterator frit = frameRates.begin();
+       frit != frameRates.end(); ++frit)
    {
       mpFramerateList->addItem(QString("%1fps - %2/%3")
          .arg(boost::rational_cast<double>(*frit), 0, 'f', 2)
          .arg(frit->numerator())
          .arg(frit->denominator()));
    }
-   if(mpFramerateList->count() == 0)
+   if (mpFramerateList->count() == 0)
    {
       mpFramerateList->addItems(defaultFramerateItems);
    }
@@ -594,7 +629,7 @@ string OptionsMovieExporter::getMeMethod() const
 void OptionsMovieExporter::setMeMethod(const string &method)
 {
    int idx = mpMeMethod->findText(QString::fromStdString(method));
-   if(idx > -1)
+   if (idx > -1)
    {
       mpMeMethod->setCurrentIndex(idx);
    }
@@ -606,7 +641,7 @@ int OptionsMovieExporter::getGopSize() const
 
 void OptionsMovieExporter::setGopSize(int size)
 {
-   if(size >= mpGopSize->minimum() && size <= mpGopSize->maximum())
+   if (size >= mpGopSize->minimum() && size <= mpGopSize->maximum())
    {
       mpGopSize->setValue(size);
    }
@@ -619,7 +654,7 @@ float OptionsMovieExporter::getQCompress() const
 
 void OptionsMovieExporter::setQCompress(float val)
 {
-   if(val >= mpQCompress->minimum() && val <= mpQCompress->maximum())
+   if (val >= mpQCompress->minimum() && val <= mpQCompress->maximum())
    {
       mpQCompress->setValue(val);
    }
@@ -632,7 +667,7 @@ float OptionsMovieExporter::getQBlur() const
 
 void OptionsMovieExporter::setQBlur(float val)
 {
-   if(val >= mpQBlur->minimum() && val <= mpQBlur->maximum())
+   if (val >= mpQBlur->minimum() && val <= mpQBlur->maximum())
    {
       mpQBlur->setValue(val);
    }
@@ -645,7 +680,7 @@ int OptionsMovieExporter::getQMinimum() const
 
 void OptionsMovieExporter::setQMinimum(int val)
 {
-   if(val >= mpQMinimum->minimum() && val <= mpQMinimum->maximum())
+   if (val >= mpQMinimum->minimum() && val <= mpQMinimum->maximum())
    {
       mpQMinimum->setValue(val);
    }
@@ -658,7 +693,7 @@ int OptionsMovieExporter::getQMaximum() const
 
 void OptionsMovieExporter::setQMaximum(int val)
 {
-   if(val >= mpQMaximum->minimum() && val <= mpQMaximum->maximum())
+   if (val >= mpQMaximum->minimum() && val <= mpQMaximum->maximum())
    {
       mpQMaximum->setValue(val);
    }
@@ -671,7 +706,7 @@ int OptionsMovieExporter::getQDiffMaximum() const
 
 void OptionsMovieExporter::setQDiffMaximum(int val)
 {
-   if(val >= mpQDiffMaximum->minimum() && val <= mpQDiffMaximum->maximum())
+   if (val >= mpQDiffMaximum->minimum() && val <= mpQDiffMaximum->maximum())
    {
       mpQDiffMaximum->setValue(val);
    }
@@ -684,7 +719,7 @@ int OptionsMovieExporter::getMaxBFrames() const
 
 void OptionsMovieExporter::setMaxBFrames(int val)
 {
-   if(val >= mpMaxBFrames->minimum() && val <= mpMaxBFrames->maximum())
+   if (val >= mpMaxBFrames->minimum() && val <= mpMaxBFrames->maximum())
    {
       mpMaxBFrames->setValue(val);
    }
@@ -697,7 +732,7 @@ float OptionsMovieExporter::getBQuantFactor() const
 
 void OptionsMovieExporter::setBQuantFactor(float val)
 {
-   if(val >= mpBQuantFactor->minimum() && val <= mpBQuantFactor->maximum())
+   if (val >= mpBQuantFactor->minimum() && val <= mpBQuantFactor->maximum())
    {
       mpBQuantFactor->setValue(val);
    }
@@ -710,7 +745,7 @@ float OptionsMovieExporter::getBQuantOffset() const
 
 void OptionsMovieExporter::setBQuantOffset(float val)
 {
-   if(val >= mpBQuantOffset->minimum() && val <= mpBQuantOffset->maximum())
+   if (val >= mpBQuantOffset->minimum() && val <= mpBQuantOffset->maximum())
    {
       mpBQuantOffset->setValue(val);
    }
@@ -723,7 +758,7 @@ int OptionsMovieExporter::getDiaSize() const
 
 void OptionsMovieExporter::setDiaSize(int val)
 {
-   if(val >= mpDiaSize->minimum() && val <= mpDiaSize->maximum())
+   if (val >= mpDiaSize->minimum() && val <= mpDiaSize->maximum())
    {
       mpDiaSize->setValue(val);
    }
@@ -732,16 +767,47 @@ void OptionsMovieExporter::setDiaSize(int val)
 int OptionsMovieExporter::getFlags() const
 {
    int flags=0;
-   if(mpQScale->isChecked()) flags |= CODEC_FLAG_QSCALE;
-   if(mpQPel->isChecked()) flags |= CODEC_FLAG_QPEL;
-   if(mpGmc->isChecked()) flags |= CODEC_FLAG_GMC;
-   if(mpNormalizeAqp->isChecked()) flags |= CODEC_FLAG_NORMALIZE_AQP;
-   if(mpTrellis->isChecked()) flags |= CODEC_FLAG_TRELLIS_QUANT;
-   if(mpAcPred->isChecked()) flags |= CODEC_FLAG_AC_PRED;
-   if(mpCbpRd->isChecked()) flags |= CODEC_FLAG_CBP_RD;
-   if(mpQpRd->isChecked()) flags |= CODEC_FLAG_QP_RD;
-   if(mpObmc->isChecked()) flags |= CODEC_FLAG_OBMC;
-   if(mpClosedGop->isChecked()) flags |= CODEC_FLAG_CLOSED_GOP;
+   if (mpQScale->isChecked())
+   {
+      flags |= CODEC_FLAG_QSCALE;
+   }
+   if (mpQPel->isChecked())
+   {
+      flags |= CODEC_FLAG_QPEL;
+   }
+   if (mpGmc->isChecked())
+   {
+      flags |= CODEC_FLAG_GMC;
+   }
+   if (mpNormalizeAqp->isChecked())
+   {
+      flags |= CODEC_FLAG_NORMALIZE_AQP;
+   }
+   if (mpTrellis->isChecked())
+   {
+      flags |= CODEC_FLAG_TRELLIS_QUANT;
+   }
+   if (mpAcPred->isChecked())
+   {
+      flags |= CODEC_FLAG_AC_PRED;
+   }
+   if (mpCbpRd->isChecked())
+   {
+      flags |= CODEC_FLAG_CBP_RD;
+   }
+   if (mpQpRd->isChecked())
+   {
+      flags |= CODEC_FLAG_QP_RD;
+   }
+   if (mpObmc->isChecked())
+   {
+      flags |= CODEC_FLAG_OBMC;
+   }
+   if (mpClosedGop->isChecked())
+   {
+      flags |= CODEC_FLAG_CLOSED_GOP;
+   }
+
    return flags;
 }
 
@@ -769,23 +835,23 @@ void OptionsMovieExporter::setUseViewResolution(bool v)
 
 void OptionsMovieExporter::checkResolutionX(bool ignoreAspectRatio)
 {
-   if(mpUseViewResolution->isChecked())
+   if (mpUseViewResolution->isChecked())
    {
       return;
    }
    unsigned int val = mpResolutionX->text().toUInt();
-   if((val % 2) != 0)
+   if ((val % 2) != 0)
    {
       mpResolutionX->setText(QString::number(val + 1));
    }
-   if(!ignoreAspectRatio && mpResolutionAspectLock->isChecked())
+   if (!ignoreAspectRatio && mpResolutionAspectLock->isChecked())
    {
       unsigned int newY = val;
-      if(mCurrentResolutionY > 0 && mCurrentResolutionX > 0)
+      if (mCurrentResolutionY > 0 && mCurrentResolutionX > 0)
       {
          newY = (val * mCurrentResolutionY) / static_cast<double>(mCurrentResolutionX);
       }
-      if((newY % 2) != 0)
+      if ((newY % 2) != 0)
       {
          newY++;
       }
@@ -796,23 +862,23 @@ void OptionsMovieExporter::checkResolutionX(bool ignoreAspectRatio)
 
 void OptionsMovieExporter::checkResolutionY(bool ignoreAspectRatio)
 {
-   if(mpUseViewResolution->isChecked())
+   if (mpUseViewResolution->isChecked())
    {
       return;
    }
    unsigned int val = mpResolutionY->text().toUInt();
-   if((val % 2) != 0)
+   if ((val % 2) != 0)
    {
       mpResolutionY->setText(QString::number(val + 1));
    }
-   if(!ignoreAspectRatio && mpResolutionAspectLock->isChecked())
+   if (!ignoreAspectRatio && mpResolutionAspectLock->isChecked())
    {
       unsigned int newX = val;
-      if(mCurrentResolutionX > 0 && mCurrentResolutionY > 0)
+      if (mCurrentResolutionX > 0 && mCurrentResolutionY > 0)
       {
          newX = (val * mCurrentResolutionX) / static_cast<double>(mCurrentResolutionY);
       }
-      if((newX % 2) != 0)
+      if ((newX % 2) != 0)
       {
          newX++;
       }
@@ -824,7 +890,7 @@ void OptionsMovieExporter::checkResolutionY(bool ignoreAspectRatio)
 void OptionsMovieExporter::aspectLockToggled(bool state)
 {
    mpResolutionAspectLock->setIcon(state ? *mpLockIcon : *mpUnlockIcon);
-   if(state)
+   if (state)
    {
       getResolution(mCurrentResolutionX, mCurrentResolutionY);
    }
@@ -838,15 +904,15 @@ void OptionsMovieExporter::updateBitrate(int value)
 void OptionsMovieExporter::frameRateListChanged(const QString &value)
 {
    QStringList rationalAndDecimal = value.split(" - ");
-   if(value == "Custom...")
+   if (value == "Custom...")
    {
       mpFramerateNum->setEnabled(true);
       mpFramerateDen->setEnabled(true);
    }
-   else if(rationalAndDecimal.size() == 2)
+   else if (rationalAndDecimal.size() == 2)
    {
       QStringList split = rationalAndDecimal[1].split("/");
-      if(split.size() == 2)
+      if (split.size() == 2)
       {
          mpFramerateNum->setValue(split[0].toInt());
          mpFramerateDen->setValue(split[1].toInt());
@@ -854,4 +920,58 @@ void OptionsMovieExporter::frameRateListChanged(const QString &value)
          mpFramerateDen->setEnabled(false);
       }
    }
+}
+
+void OptionsMovieExporter::setFrameType(FrameType eType)
+{
+   switch (eType)
+   {
+   case FRAME_ID:
+      mpStartLabel->setText("Start Frame");
+      mpStart->setToolTip("First frame to export, 1-based frame number");
+      mpStart->setSingleStep(1.0);
+      mpStart->setDecimals(0);
+      mpStopLabel->setText("Stop Frame");
+      mpStop->setToolTip("Last frame to export, 1-based frame number");
+      mpStop->setSingleStep(1.0);
+      mpStop->setDecimals(0);
+      break;
+   case FRAME_TIME:
+      mpStartLabel->setText("Start Time");
+      mpStart->setToolTip("Time of first frame to export");
+      mpStart->setSingleStep(0.001);
+      mpStart->setDecimals(3);
+      mpStopLabel->setText("Stop Time");
+      mpStop->setToolTip("Time of last frame to export");
+      mpStop->setSingleStep(0.001);
+      mpStop->setDecimals(3);
+      break;
+   }
+}
+
+bool OptionsMovieExporter::initialize(AnimationController* pController)
+{
+   if (pController == NULL)
+   {
+      return false;
+   }
+
+   FrameType eType = pController->getFrameType();
+   setFrameType(eType);
+   double start = pController->getStartFrame();
+   double stop = pController->getStopFrame();
+   if (eType == FRAME_ID) // values are frame numbers so add 1 so first frame is 1 and not 0
+   {
+      ++start;
+      ++stop;
+   }
+   mpStart->setRange(start, stop);
+   setStart(start);
+   mpStop->setRange(start, stop);
+   setStop(stop);
+
+   rational<int> frameRate = pController->getMinimumFrameRate();
+   setFramerate(frameRate);
+
+   return true;
 }
