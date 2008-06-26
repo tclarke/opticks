@@ -733,6 +733,7 @@ void AnimationControllerImp::runAnimations()
          VERIFYNR(pActiveController != NULL);
          pActiveController->advance();
          QApplication::processEvents();
+         QApplication::processEvents(QEventLoop::DeferredDeletion);
          if (mppActiveController != mRunningControllers.end() && pActiveController == *mppActiveController)
          {
             ++mppActiveController;
