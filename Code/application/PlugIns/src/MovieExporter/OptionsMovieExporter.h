@@ -17,6 +17,7 @@
 #include <boost/rational.hpp>
 #include <QtCore/QMetaType>
 
+class AnimationController;
 class LabeledSection;
 class QCheckBox;
 class QComboBox;
@@ -38,15 +39,12 @@ class OptionsMovieExporter : public LabeledSectionGroup
 public:
    OptionsMovieExporter();
    ~OptionsMovieExporter();
+   bool initialize(AnimationController* pController);
 
-   SETTING(Width, MovieExporter, unsigned int, 0);
-   SETTING(Height, MovieExporter, unsigned int, 0);
    /**
     * The video stream bitrate in kbps
     */
    SETTING(Bitrate, MovieExporter, unsigned int, 0);
-   SETTING(FramerateNum, MovieExporter, int, 0);
-   SETTING(FramerateDen, MovieExporter, int, 0);
    SETTING(MeMethod, MovieExporter, std::string, std::string());
    SETTING(GopSize, MovieExporter, int, 0);
    SETTING(QCompress, MovieExporter, float, 0.0);
@@ -66,7 +64,12 @@ public:
    void getResolution(unsigned int &width, unsigned int &height) const;
    void setResolution(unsigned int width, unsigned int height);
 
+   double getStart() const;
+   void setStart(double start);
+   double getStop() const;
+   void setStop(double stop);
    unsigned int getBitrate() const;
+   void setFrameType(FrameType eType);
    void setBitrate(unsigned int bitrate);
    boost::rational<int> getFramerate() const;
    void setFramerate(boost::rational<int> frameRate);
@@ -172,6 +175,10 @@ private:
 
    QSlider *mpBitrate;
    QLabel *mpBitrateValue;
+   QLabel *mpStartLabel;
+   QDoubleSpinBox *mpStart;
+   QDoubleSpinBox *mpStop;
+   QLabel *mpStopLabel;
    QSpinBox *mpFramerateNum;
    QSpinBox *mpFramerateDen;
    QComboBox *mpFramerateList;
