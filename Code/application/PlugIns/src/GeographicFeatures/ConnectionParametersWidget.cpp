@@ -8,9 +8,9 @@
  */
 
 #include "AppConfig.h"
+#include "AppVerify.h"
 #include "ConfigurationSettings.h"
 #include "ConnectionParametersWidget.h"
-#include "AppVerify.h"
 #include "Filename.h"
 #include "IconImages.h"
 #include "ShapeFileImporter.h"
@@ -188,7 +188,6 @@ void ConnectionParametersWidget::setConnectionParameters(const ArcProxyLib::Conn
       mpFilenameEdit->setText(filename);
 
       mpShpButton->setChecked(true);
-      mpUseArcCheck->setChecked(connection.getConnectionType() == ArcProxyLib::SHP_CONNECTION);
    }
 }
 
