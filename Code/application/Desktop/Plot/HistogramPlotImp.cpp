@@ -1036,7 +1036,9 @@ void HistogramPlotImp::mousePressEvent(QMouseEvent* pEvent)
                }
                else
                {
-                  if (fabs(upperLimit - dXValue) < fabs(lowerLimit - dXValue))
+                  tmpLowerLimit = max(minValue, lowerLimit);
+                  tmpUpperLimit = min(maxValue, upperLimit);
+                  if (fabs(tmpUpperLimit - dXValue) < fabs(tmpLowerLimit - dXValue))
                   {
                      meSelectedValue = UPPER_VALUE;
                      upperLimit = dXValue;
