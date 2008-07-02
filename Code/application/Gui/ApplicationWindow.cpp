@@ -3663,35 +3663,47 @@ void ApplicationWindow::updateWizardCommands()
    removeMenuCommands(mWizardCommands);
    mWizardCommands.clear();
 
-   // Get the wizard directory from the options
-   QString strWizardDir;
+   // Get the wizard directories
+   QStringList wizardDirs;
+
+   const Filename* pSupportFilesPath = ConfigurationSettings::getSettingSupportFilesPath();
+   if (pSupportFilesPath != NULL)
+   {
+      QString wizardDir = QString::fromStdString(pSupportFilesPath->getFullPathAndName() + "/Wizards");
+      wizardDirs.append(wizardDir);
+   }
+
    const Filename* pWizardPath = ConfigurationSettings::getSettingWizardPath();
    if (pWizardPath != NULL)
    {
-      strWizardDir = QString::fromStdString(pWizardPath->getFullPathAndName());
+      QString wizardDir = QString::fromStdString(pWizardPath->getFullPathAndName());
+      wizardDirs.append(wizardDir);
    }
-   if (strWizardDir.isEmpty())
+
+   if (wizardDirs.isEmpty())
    {
-      strWizardDir = QDir::currentPath();
+      wizardDirs.append(QDir::currentPath());
    }
 
    // Get the wizard filenames
-   QDir dirWizards = QDir(strWizardDir, "*.wiz");
    QStringList strlWizardFiles;
-   int i = 0;
-
-   int iCount = 0;
-   iCount = dirWizards.count();
-   for (i = 0; i < iCount; i++)
+   for (int i = 0; i < wizardDirs.count(); ++i)
    {
-      QString strFilename = strWizardDir + "/";
-      strFilename += dirWizards[i];
-      strlWizardFiles.append(strFilename);
+      QString wizardDir = wizardDirs[i];
+      if (wizardDir.isEmpty() == false)
+      {
+         QDir dirWizards = QDir(wizardDir, "*.wiz");
+         for (unsigned int j = 0; j < dirWizards.count(); ++j)
+         {
+            QString strFilename = wizardDir + "/";
+            strFilename += dirWizards[j];
+            strlWizardFiles.append(strFilename);
+         }
+      }
    }
 
    // Add the commands to the menus
-   iCount = strlWizardFiles.count();
-   for (i = 0; i < iCount; i++)
+   for (int i = 0; i < strlWizardFiles.count(); ++i)
    {
       QString strFilename = strlWizardFiles[i];
 
