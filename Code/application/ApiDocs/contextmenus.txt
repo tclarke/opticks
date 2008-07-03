@@ -258,4 +258,10 @@
  *    <tr><td>Hide</td><td>APP_TOOLBAR_HIDE_ACTION()</td></tr>
  *    <tr><td>Show</td><td>APP_TOOLBAR_SHOW_ACTION()</td></tr>
  *  </table>
+ *
+ *  \subsection workspacewindow Workspace Window
+ *  <table>
+ *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
+ *    <tr><td>Activate</td><td>APP_WORKSPACEWINDOW_ACTIVATE_ACTION()</td></tr>
+ *  </table>
  */

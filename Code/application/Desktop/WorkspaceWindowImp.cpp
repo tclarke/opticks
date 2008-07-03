@@ -12,7 +12,7 @@
 #include <QtGui/QMessageBox>
 
 #include "ApplicationWindow.h"
-#include "WorkspaceWindowImp.h"
+#include "ContextMenuActions.h"
 #include "DesktopServices.h"
 #include "OverviewWindow.h"
 #include "ProductView.h"
@@ -21,6 +21,7 @@
 #include "ViewImp.h"
 #include "Workspace.h"
 #include "WorkspaceWindow.h"
+#include "WorkspaceWindowImp.h"
 #include "xmlreader.h"
 
 #include <algorithm>
@@ -40,6 +41,12 @@ WorkspaceWindowImp::WorkspaceWindowImp(const string& id, const string& windowNam
    setWindowTitle(QString::fromStdString(windowName));
    setAttribute(Qt::WA_DeleteOnClose);
    setFocusPolicy(Qt::StrongFocus);
+
+   mpActiveAction = new QAction("Activate", this);
+   mpActiveAction->setStatusTip("Display the window on top of all other workspace windows.");
+   mpActiveAction->setAutoRepeat(false);
+
+   VERIFYNR(connect(mpActiveAction, SIGNAL(triggered()), this, SLOT(activate())));
 }
 
 WorkspaceWindowImp::~WorkspaceWindowImp()
@@ -49,6 +56,12 @@ WorkspaceWindowImp::~WorkspaceWindowImp()
 list<ContextMenuAction> WorkspaceWindowImp::getContextMenuActions() const
 {
    list<ContextMenuAction> menuActions = ViewWindowImp::getContextMenuActions();
+
+   Service<DesktopServices> pDesktop;
+   if (this != dynamic_cast<WorkspaceWindowImp*>(pDesktop->getCurrentWorkspaceWindow()))
+   {
+      menuActions.push_back(ContextMenuAction(mpActiveAction, APP_WORKSPACEWINDOW_ACTIVATE_ACTION));
+   }
 
    View* pView = getView();
    if (pView != NULL)
@@ -374,4 +387,11 @@ bool WorkspaceWindowImp::fromXml(DOMNode* pDocument, unsigned int version)
    }
 
    return true;
+}
+
+void WorkspaceWindowImp::activate()
+{
+   Service<DesktopServices> pDesktop;
+
+   pDesktop->setCurrentWorkspaceWindow(dynamic_cast<WorkspaceWindow*>(this));
 }
