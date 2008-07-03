@@ -415,4 +415,9 @@
  */
 #define APP_TOOLBAR_SHOW_ACTION "APP_TOOLBAR_SHOW_ACTION"
 
+/**
+ *  Display the window on top of all other workspace windows.
+ */
+#define APP_WORKSPACEWINDOW_ACTIVATE_ACTION "APP_WORKSPACEWINDOW_ACTIVATE_ACTION"
+
 #endif

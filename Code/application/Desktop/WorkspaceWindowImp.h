@@ -57,12 +57,17 @@ public:
    bool toXml(XMLWriter* pXml) const;
    bool fromXml(DOMNode* pDocument, unsigned int version);
 
+protected slots:
+   void activate();
+
 protected:
    AttachmentPtr<ApplicationServices> mpApplicationServices;
    virtual void closeEvent(QCloseEvent* pEvent);
 
 private:
    bool mSessionClosedReceived;
+
+   QAction* mpActiveAction;
 
    WINDOWIMPDROP_METHODS(ViewWindowImp);
 };
