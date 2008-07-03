@@ -72,6 +72,9 @@ public:
    void freezeFilter(ImageFilterDescriptor *pDescriptor, bool toggle = true);
    unsigned int readTiles(double xCoord, double yCoord, GLsizei width, GLsizei height, std::vector<float>& values);
 
+   static void setMaxTextureSize(GLint maxSize=0);
+   static GLint getMaxTextureSize();
+
 protected:
    void initializeGrayscale();
    void initializeColormap(const std::vector<ColorType>& colorMap);
@@ -118,6 +121,8 @@ private:
 
    // Member variable to keep track of whether or not there was a band change
    unsigned int mPreviousBand;
+
+   static GLint mMaxTextureSize;
 };
 
 #endif

@@ -362,7 +362,7 @@ void GpuTile::applyFilters()
 
 unsigned int GpuTile::readFilterBuffer(GLint xCoord, GLint yCoord, GLsizei width, GLsizei height, GLvoid *pPixels)
 {
-   unsigned int numElements = width * height;
+   unsigned int numElements = 0;
 
    // read back the filtered results buffer
 
@@ -372,7 +372,9 @@ unsigned int GpuTile::readFilterBuffer(GLint xCoord, GLint yCoord, GLsizei width
       GLenum textureFormat = mpOutputColorBuffer->getTextureFormat();
       GLenum dataType = mpOutputColorBuffer->getDataType();
       unsigned int alpha = mpOutputColorBuffer->getAlpha();
-      
+
+      numElements = width * height * ImageUtilities::getNumColorChannels(textureFormat);
+
       // switch to the filtered buffers color buffer with the filtered results
       Service<GpuResourceManager> pResourceManager;
 
