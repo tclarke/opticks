@@ -28,6 +28,9 @@ public:
 
    DataElement* copy(const std::string& name, DataElement* pParent) const;
 
+   virtual bool serialize(SessionItemSerializer& serializer) const;
+   virtual bool deserialize(SessionItemDeserializer& deserializer);
+
    bool toXml(XMLWriter* pXml) const;
    bool fromXml(DOMNode* pDocument, unsigned int version);
    const std::string& getObjectType() const;

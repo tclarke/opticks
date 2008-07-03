@@ -16,7 +16,7 @@
 #include <string>
 #include <vector>
 
-class SessionItemDeserializerImp : public SessionItemDeserializer
+class SessionItemDeserializerImp : public SessionItemDeserializer, public SessionItemDeserializerExt1
 {
 public:
    SessionItemDeserializerImp(const std::string &filename, const std::vector<int64_t> &blockSizes);
@@ -27,6 +27,7 @@ public:
    XERCES_CPP_NAMESPACE_QUALIFIER DOMElement *deserialize(XmlReader &reader, const char *pRootElementName);
    void nextBlock();
    std::vector<int64_t> getBlockSizes() const;
+   int getCurrentBlock() const;
 
 private:
    void ensureFileIsClosed();
