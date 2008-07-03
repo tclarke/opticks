@@ -262,6 +262,7 @@ ObjectFactoryImp* ObjectFactoryImp::instance()
       CreateObjectMap.insert(ObjectMapType::value_type("SettableSessionItem", (void*(*)())CreateSettableSessionItem));
       CreateObjectMap.insert(ObjectMapType::value_type("ExecutableAgent", (void*(*)())CreateExecutableAgent));
       CreateObjectMap.insert(ObjectMapType::value_type("ExecutableAgentCommon", (void*(*)())CreateExecutableAgent));
+      CreateObjectMap.insert(ObjectMapType::value_type("ExecutableAgentCommon1", (void*(*)())CreateExecutableAgent));
       CreateObjectMap.insert(ObjectMapType::value_type("ImportAgent", (void*(*)())CreateImportAgent));
       CreateObjectMap.insert(ObjectMapType::value_type("ImportAgentCommon", (void*(*)())CreateImportAgent));
       CreateObjectMap.insert(ObjectMapType::value_type("ExportAgent", (void*(*)())CreateExportAgent));
@@ -314,6 +315,7 @@ ObjectFactoryImp* ObjectFactoryImp::instance()
       DestroyObjectMap.insert(ObjectMapType2::value_type("SettableSessionItem", (void(*)(void*))DestroySettableSessionItem));
       DestroyObjectMap.insert(ObjectMapType2::value_type("ExecutableAgent", (void(*)(void*))DestroyExecutableAgent));
       DestroyObjectMap.insert(ObjectMapType2::value_type("ExecutableAgentCommon", (void(*)(void*))DestroyExecutableAgent));
+      DestroyObjectMap.insert(ObjectMapType2::value_type("ExecutableAgentCommon1", (void(*)(void*))DestroyExecutableAgent));
       DestroyObjectMap.insert(ObjectMapType2::value_type("ImportAgent", (void(*)(void*))DestroyImportAgent));
       DestroyObjectMap.insert(ObjectMapType2::value_type("ImportAgentCommon", (void(*)(void*))DestroyImportAgent));
       DestroyObjectMap.insert(ObjectMapType2::value_type("ExportAgent", (void(*)(void*))DestroyExportAgent));

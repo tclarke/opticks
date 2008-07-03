@@ -44,7 +44,8 @@ public:
    virtual const PlugIn* getPlugIn() const;
    virtual PlugIn* getPlugIn();
    virtual PlugIn* releasePlugIn();
-
+   virtual void setAutoArg(bool bAutoArg);
+   virtual bool getAutoArg() const;
 protected:
    void checkInstantiate() const;
 
@@ -87,6 +88,7 @@ private:
    Progress* mpProgress;
    bool mProgressDialog;
    PlugInResource mPlugIn;
+   bool mAutoInArg;
 };
 
 #define EXECUTABLEAGENTADAPTER_METHODS(impClass) \
@@ -155,6 +157,14 @@ private:
    PlugIn* releasePlugIn() \
    { \
       return impClass::releasePlugIn(); \
+   } \
+   void setAutoArg(bool bAutoArg) \
+   { \
+      impClass::setAutoArg(bAutoArg); \
+   } \
+   bool getAutoArg() const \
+   { \
+      return impClass::getAutoArg(); \
    }
 
 #endif

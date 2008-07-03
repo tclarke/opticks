@@ -13,7 +13,7 @@
 #include "ExecutableAgent.h"
 #include "ExecutableAgentImp.h"
 
-class ExecutableAgentAdapter : public ExecutableAgentCommon, public ExecutableAgentImp
+class ExecutableAgentAdapter : public ExecutableAgentCommon1, public ExecutableAgentImp
 {
 public:
    virtual ~ExecutableAgentAdapter()
