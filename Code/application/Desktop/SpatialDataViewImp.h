@@ -117,6 +117,8 @@ public:
    bool toXml(XMLWriter* pXml) const;
    bool fromXml(DOMNode* pDocument, unsigned int version);
 
+   bool linkView(View *pView, LinkType type);
+
 public slots:
    void setTextureMode(const TextureMode& textureMode);
    bool showLayer(Layer* pLayer);
