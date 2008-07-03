@@ -119,9 +119,9 @@ public:
  *  the actual helper methods when working with instances of
  *  Executable plug-ins.
  *
- *  @see ExecutableAgent, Executable.
+ *  @see ExecutableAgent, Executable, ExecutableAgentExt1, ExecutableAgentExt2
  */
-class ExecutableResource : public FactoryResource<ExecutableAgentCommon>
+class ExecutableResource : public FactoryResource<ExecutableAgentCommon1>
 {
 public:
    /**
@@ -134,7 +134,7 @@ public:
     */
    explicit ExecutableResource(Progress* pProgress = NULL, bool batch = true)
    {
-      ExecutableAgentCommon* pAgent = get();
+      ExecutableAgentCommon1* pAgent = get();
       if (pAgent != NULL)
       {
          pAgent->instantiate(pProgress, batch);
@@ -152,11 +152,11 @@ public:
    explicit ExecutableResource(const std::string& plugInName, const std::string& menuCommand = std::string(),
       Progress* pProgress = NULL, bool batch = true)
    {
-      ExecutableAgentCommon* pAgent = get();
+      ExecutableAgentCommon1* pAgent = get();
       if (pAgent != NULL)
       {
          pAgent->instantiate(plugInName, menuCommand, pProgress, batch);
-      }
+      } 
    }
 
    /**
@@ -170,7 +170,7 @@ public:
    explicit ExecutableResource(PlugIn* pPlugIn, const std::string& menuCommand = std::string(),
       Progress* pProgress = NULL, bool batch = true)
    {
-      ExecutableAgentCommon* pAgent = get();
+      ExecutableAgentCommon1* pAgent = get();
       if (pAgent != NULL)
       {
          pAgent->instantiate(pPlugIn, menuCommand, pProgress, batch);
@@ -243,7 +243,7 @@ public:
    /**
     * @copydoc ImportAgent::instantiate(const std::string&,const std::vector<ImportDescriptor*>&,Progress*,bool)
     * @par ImportAgent
-    * This class simply allocates and controls the 
+    * This class simply allocates and controls the              
     * lifecycle of a ImportAgent object.  You can
     * use -> to access any of the methods available
     * on ImportAgent.

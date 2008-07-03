@@ -36,7 +36,8 @@ ExecutableAgentImp::ExecutableAgentImp() :
    mpInArgList(NULL),
    mpOutArgList(NULL),
    mpProgress(NULL),
-   mProgressDialog(false)
+   mProgressDialog(false),
+   mAutoInArg(true)
 {
 }
 
@@ -221,8 +222,7 @@ bool ExecutableAgentImp::executePlugIn()
 
    bool bSuccess = false;
    clearArgLists(false, true);
-
-   PlugInArgList &inArgList = getPopulatedInArgList();
+   PlugInArgList &inArgList = (mAutoInArg ? getPopulatedInArgList() : getInArgList());
    PlugInArgList &outArgList = getOutArgList();
    { // scope the lifetime of the lock
       SessionSaveLock lock;
@@ -246,6 +246,20 @@ bool ExecutableAgentImp::executePlugIn()
       else
       {
          //plug-in doesn't support the batch or interactive mode requested
+         string errorMessage;
+         if (mBatch == true)
+         {
+            errorMessage = "The " + pPlugIn->getName() + " plug-in does not support batch mode!";
+         }
+         else
+         {
+            errorMessage = "The " + pPlugIn->getName() + " plug-in does not support interactive mode!";
+         }
+
+         if (mpProgress != NULL) 
+         { 
+            mpProgress->updateProgress(errorMessage, 0, ERRORS);
+         }
          bSuccess = false;
       }
    }
@@ -629,4 +643,14 @@ void ExecutableAgentImp::populateArgValues(PlugInArgList *pArgList)
 bool ExecutableAgentImp::isBatch() const
 {
    return mBatch;
+}
+
+void ExecutableAgentImp::setAutoArg(bool bAutoArg)
+{
+   mAutoInArg = bAutoArg;
+}
+
+bool ExecutableAgentImp::getAutoArg() const
+{
+   return mAutoInArg;
 }
