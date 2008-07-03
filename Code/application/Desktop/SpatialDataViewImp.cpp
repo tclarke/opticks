@@ -3882,3 +3882,32 @@ void SpatialDataViewImp::previousBand()
 
    pRasterLayer->setDisplayedBand(GRAY, newBand);
 }
+
+bool SpatialDataViewImp::linkView(View *pView, LinkType type)
+{   
+   if (type != NO_LINK && getViewLinkType(pView) == NO_LINK)
+   {
+      SpatialDataView* pSourceView = dynamic_cast<SpatialDataView*>(pView);
+      if (pSourceView != NULL)
+      {
+         if (pSourceView->getMaximumZoom() != 0 || pSourceView->getMinimumZoom() != 0 || pSourceView->getPanLimit() != NO_LIMIT)
+         {
+            int buttonPressed;
+            buttonPressed = QMessageBox::information(this, QString::fromStdString(this->getDisplayName()), 
+               "Zoom/Pan limits will be disabled for this " + QString::fromStdString(pSourceView->getDisplayName()) + " view. Do you want to continue linking the views?", 
+               QMessageBox::Ok, QMessageBox::Cancel);
+
+            if (buttonPressed == QMessageBox::Cancel)
+            {
+               return false;
+            }
+         }
+            
+         pSourceView->setMaximumZoom(0);
+         pSourceView->setMinimumZoom(0);
+         pSourceView->setPanLimit(NO_LIMIT);
+      }
+   }
+
+   return ViewImp::linkView(pView, type);
+}
