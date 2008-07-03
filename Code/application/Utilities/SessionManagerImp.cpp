@@ -1125,7 +1125,7 @@ vector<SessionManagerImp::IndexFileItem> SessionManagerImp::readIndexFile(const 
                      }
                   }
                }
-               if (item.mType.empty() == false && item.mId.empty() == false && item.mBlockSizes.empty() == false)
+               if (item.mType.empty() == false && item.mId.empty() == false)
                {
                   items.push_back(item);
                }
@@ -1248,11 +1248,8 @@ pair<SessionManager::SerializationStatus,vector<pair<SessionItem*, string> > > S
          }
          else
          {
-            (*ppItem).mBlockSizes = itemSerializer.getBlockSizes();
-            if ((*ppItem).mBlockSizes.empty() == false)
-            {
-               successItems.push_back(*ppItem);
-            }
+            ppItem->mBlockSizes = itemSerializer.getBlockSizes();
+            successItems.push_back(*ppItem);
          }
       }
       mIsSaveLoad = false;

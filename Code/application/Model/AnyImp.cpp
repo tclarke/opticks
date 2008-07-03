@@ -10,6 +10,8 @@
 #include "AnyData.h"
 #include "AnyImp.h"
 #include "DataElement.h"
+#include "SessionItemDeserializer.h"
+#include "SessionItemSerializer.h"
 #include "Slot.h"
 
 XERCES_CPP_NAMESPACE_USE
@@ -88,6 +90,36 @@ DataElement* AnyImp::copy(const string& name, DataElement* pParent) const
    }
 
    return pElement;
+}
+
+bool AnyImp::serialize(SessionItemSerializer &serializer) const
+{
+   if(!DataElementImp::serialize(serializer))
+   {
+      return false;
+   }
+   AnyDataExt1 *pExt1 = dynamic_cast<AnyDataExt1*>(mpData);
+   if(pExt1 != NULL)
+   {
+      serializer.endBlock();
+      return pExt1->serialize(serializer);
+   }
+   return true;
+}
+
+bool AnyImp::deserialize(SessionItemDeserializer &deserializer)
+{
+   if(!DataElementImp::deserialize(deserializer))
+   {
+      return false;
+   }
+   AnyDataExt1 *pExt1 = dynamic_cast<AnyDataExt1*>(mpData);
+   if(pExt1 != NULL)
+   {
+      deserializer.nextBlock();
+      return pExt1->deserialize(deserializer);
+   }
+   return true;
 }
 
 bool AnyImp::toXml(XMLWriter* pXml) const

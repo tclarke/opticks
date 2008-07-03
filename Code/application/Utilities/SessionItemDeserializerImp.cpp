@@ -116,3 +116,8 @@ std::vector<int64_t> SessionItemDeserializerImp::getBlockSizes() const
 {
    return mBlockSizes;
 }
+
+int SessionItemDeserializerImp::getCurrentBlock() const
+{
+   return mCurrentBlock;
+}
