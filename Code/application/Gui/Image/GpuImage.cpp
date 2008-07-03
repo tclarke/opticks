@@ -24,6 +24,8 @@
 using namespace mta;
 using namespace std;
 
+GLint GpuImage::mMaxTextureSize = 0;
+
 GpuImage::GpuImage() :
    mGrayscaleProgram(0),
    mColormapProgram(0),
@@ -1041,6 +1043,25 @@ void GpuImage::initializeRgb()
    }
 }
 
+void GpuImage::setMaxTextureSize(GLint maxSize)
+{
+   mMaxTextureSize = 2048;
+   glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
+   if (maxSize > 0 && maxSize < mMaxTextureSize)
+   {
+      mMaxTextureSize = maxSize;
+   }
+}
+
+GLint GpuImage::getMaxTextureSize()
+{
+   if (mMaxTextureSize == 0)
+   {
+      glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
+   }
+   return mMaxTextureSize;
+}
+
 void GpuImage::calculateTileSize(EncodingType dataType, const unsigned int imageWidth, const unsigned int imageHeight,
                                  int& tileWidth, int& tileHeight) const
 {
@@ -1048,9 +1069,8 @@ void GpuImage::calculateTileSize(EncodingType dataType, const unsigned int image
    tileWidth = imageWidth;
    tileHeight = imageHeight;
 
-   // Retrieve the current maximum texture size allowed for the system
-   GLint maxTextureSize = 2048;
-   glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+   // Retrieve the current maximum texture size allowed
+   GLint maxTextureSize = getMaxTextureSize();
 
    // Update the maximum texture size to include the internal data format
    unsigned int bytesPerElement = RasterUtilities::bytesInEncoding(dataType);
@@ -1350,6 +1370,7 @@ unsigned int GpuImage::readTiles(double xCoord, double yCoord, GLsizei width, GL
    getTilesToRead(x1Coord, y1Coord, width, height, tiles, tileLocations);
 
    vector<GLsizei> tileWidths;
+   vector<GLsizei> tileHeights;
    vector<GLsizei> sourceOffsets;
    vector<GLsizei> destinationOffsets;
    vector<float> dataVector;
@@ -1403,6 +1424,7 @@ unsigned int GpuImage::readTiles(double xCoord, double yCoord, GLsizei width, GL
    float *pValueData = &values[0];
 
    tileWidths.reserve(numTiles);
+   tileHeights.reserve(numTiles);
    sourceOffsets.reserve(numTiles);
    destinationOffsets.reserve(numTiles);
 
@@ -1419,7 +1441,7 @@ unsigned int GpuImage::readTiles(double xCoord, double yCoord, GLsizei width, GL
          dataVector.resize(width * height * numChannels);
       }
    }
-   
+
    if (dataVector.capacity() != 0)
    {
       pValueData = &dataVector[0];
@@ -1430,14 +1452,11 @@ unsigned int GpuImage::readTiles(double xCoord, double yCoord, GLsizei width, GL
    // read the tiles
    while (tileIter != tiles.end())
    {
-      numElements += readTile(*tileIter, tileLocations.at(tileNum), x1Coord, y1Coord, 
-                              calculatedWidth, calculatedHeight, pValueData);
-      
-      sourceOffsets.push_back(counter);
+      calculatedWidth = width;
+      calculatedHeight = height;
 
-      // move the pointer to the next position in the array
-      counter += (calculatedWidth * calculatedHeight);
-      pValueData += counter;
+      unsigned int tileElements = readTile(*tileIter, tileLocations.at(tileNum), x1Coord, y1Coord, 
+                              calculatedWidth, calculatedHeight, pValueData);
 
       // set the initial offsets for the tiles
       if (tileNum == 0)
@@ -1447,74 +1466,80 @@ unsigned int GpuImage::readTiles(double xCoord, double yCoord, GLsizei width, GL
       else
       {
          // check to see if current tile is on the same row as the previous tile
-         if (tileLocations.at(tileNum).mX == tileLocations.at(tileNum-1).mX)
+         if (tileLocations.at(tileNum).mY == tileLocations.at(tileNum-1).mY)
          {
             destinationOffsets.push_back(tileWidths.at(tileNum-1) + destinationOffsets.at(tileNum-1));
          }
          else
          {
-            destinationOffsets.push_back(counter);
+            destinationOffsets.push_back(numElements);
          }
       }
-      tileWidths.push_back(calculatedWidth);
+
+      sourceOffsets.push_back(numElements);
+      numElements += tileElements;
+
+      // move the pointer to the next position in the array
+      pValueData += tileElements;
+
+      tileWidths.push_back(calculatedWidth * numChannels);
+      tileHeights.push_back(calculatedHeight);
+
       tileNum++;
       tileIter++;
    }
 
-    // Reorder the data into the destination vector to be row order
+   // Reorder the data into the destination vector to be row order
    if (dataVector.empty() == false)
    {
       pValueData = &values[0];
-      unsigned int numElementsCopied = 0;
-      while (numElementsCopied < numElements)
+      for (tileNum = 0; tileNum < numTiles; tileNum++)
       {
-         for (tileNum = 0; tileNum < numTiles; tileNum++)
+         for (int row=0; row<tileHeights[tileNum]; ++row)
          {
             memcpy((pValueData + destinationOffsets[tileNum]), &dataVector[sourceOffsets[tileNum]], 
                      (sizeof(float) * tileWidths[tileNum]));
 
             // set source and destination offsets for next pass
             sourceOffsets[tileNum] += tileWidths[tileNum];
-            destinationOffsets[tileNum] += tileWidths[tileNum];
-
-            numElementsCopied += tileWidths[tileNum];
+            destinationOffsets[tileNum] += width * numChannels;
          }
       }
-   }
 
-   // get scale factor
-   if (mInfo.mRawType[0] != FLT4BYTES)
-   {
-      float scaleFactor = 1.0;
-      switch(mInfo.mRawType[0])
+      // get scale factor
+      if (mInfo.mRawType[0] != FLT4BYTES)
       {
-      case INT1SBYTE:
-         scaleFactor = static_cast<float>(numeric_limits<char>::max());
-         break;
-      case INT1UBYTE:
-         scaleFactor = static_cast<float>(numeric_limits<unsigned char>::max());
-         break;
-      case INT2SBYTES:
-         scaleFactor = static_cast<float>(numeric_limits<short>::max());
-         break;
-      case INT2UBYTES:
-         scaleFactor = static_cast<float>(numeric_limits<unsigned short>::max());
-         break;
-      case INT4SBYTES:
-         scaleFactor = static_cast<float>(numeric_limits<int>::max());
-         break;
-      case INT4UBYTES:
-         scaleFactor = static_cast<float>(numeric_limits<unsigned int>::max());
-         break;
-      default:
-         scaleFactor = 1.0;
-         break;
-      }
+         float scaleFactor = 1.0;
+         switch(mInfo.mRawType[0])
+         {
+         case INT1SBYTE:
+            scaleFactor = static_cast<float>(numeric_limits<char>::max());
+            break;
+         case INT1UBYTE:
+            scaleFactor = static_cast<float>(numeric_limits<unsigned char>::max());
+            break;
+         case INT2SBYTES:
+            scaleFactor = static_cast<float>(numeric_limits<short>::max());
+            break;
+         case INT2UBYTES:
+            scaleFactor = static_cast<float>(numeric_limits<unsigned short>::max());
+            break;
+         case INT4SBYTES:
+            scaleFactor = static_cast<float>(numeric_limits<int>::max());
+            break;
+         case INT4UBYTES:
+            scaleFactor = static_cast<float>(numeric_limits<unsigned int>::max());
+            break;
+         default:
+            scaleFactor = 1.0;
+            break;
+         }
 
-      // scale the filtered results
-      for (unsigned int ii = 0; ii < numElements; ii++)
-      {
-         pValueData[ii] *= scaleFactor;
+         // scale the filtered results
+         for (unsigned int element = 0; element < numElements; element++)
+         {
+            pValueData[element] *= scaleFactor;
+         }
       }
    }
 
@@ -1546,10 +1571,11 @@ void GpuImage::getTilesToRead(int xCoord, int yCoord, GLsizei width, GLsizei hei
    {
       tileGeomSize = (*tileIter)->getGeomSize();
 
-      inTile = ((xCoord >= colNum*tileGeomSize.mX) && (xCoord < (colNum+1)*tileGeomSize.mX) &&
-                (yCoord >= rowNum*tileGeomSize.mY) && (yCoord < (rowNum+1)*tileGeomSize.mY)) ||
-               ((x2Coord >= colNum*tileGeomSize.mX) && (x2Coord < (colNum+1)*tileGeomSize.mX) &&
-                (y2Coord >= rowNum*tileGeomSize.mY) && (y2Coord < (rowNum+1)*tileGeomSize.mY));
+      inTile = 
+         (colNum+1)*tileGeomSize.mX >= xCoord &&
+         colNum*tileGeomSize.mX < x2Coord &&
+         (rowNum+1)*tileGeomSize.mY >= yCoord &&
+         rowNum*tileGeomSize.mY < y2Coord;
 
       if (inTile)
       {
@@ -1562,15 +1588,15 @@ void GpuImage::getTilesToRead(int xCoord, int yCoord, GLsizei width, GLsizei hei
       currentWidth += static_cast<int>(tileGeomSize.mX);
       if (currentWidth >= imageWidth)
       {
-         rowNum++;
+         ++rowNum;
          colNum = 0;
          currentWidth = 0;
       }
       else
       {
-         colNum++;
+         ++colNum;
       }
-      tileIter++;
+      ++tileIter;
    }
 }
 
@@ -1603,7 +1629,8 @@ unsigned int GpuImage::readTile(Tile *pTile, const LocationType &tileLocation, i
    }
    else
    {
-      calculatedXCoord = x1Coord - x1TileCoord;
+      calculatedWidth = static_cast<GLsizei>(geomSize.mX + 0.5);
+      calculatedXCoord = 0;
    }
 
    // compute the height and y coorddinate of the chip of data to be read
@@ -1618,7 +1645,8 @@ unsigned int GpuImage::readTile(Tile *pTile, const LocationType &tileLocation, i
    }
    else
    {
-      calculatedYCoord = y1Coord - y1TileCoord;
+      calculatedHeight = static_cast<GLsizei>(geomSize.mY + 0.5);
+      calculatedYCoord = 0;
    }
 
    GpuTile *pGpuTile = static_cast<GpuTile*>(pTile);
