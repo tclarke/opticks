@@ -67,6 +67,7 @@ AnimationControllerImp::AnimationControllerImp(FrameType frameType, const string
    mpPlayAction(NULL),
    mpPauseAction(NULL),
    mpStopAction(NULL),
+   mpChangeDirectionAction(NULL),
    mpStepBackwardAction(NULL),
    mpStepForwardAction(NULL)
 {
@@ -79,6 +80,9 @@ AnimationControllerImp::AnimationControllerImp(FrameType frameType, const string
 
    mpStopAction = new QAction("Stop", this);
    mpStopAction->setAutoRepeat(false);
+
+   mpChangeDirectionAction = new QAction("Change Direction", this);
+   mpChangeDirectionAction->setAutoRepeat(false);
 
    mpStepBackwardAction = new QAction("Step Backward", this);
    mpStepBackwardAction->setAutoRepeat(false);
@@ -93,17 +97,19 @@ AnimationControllerImp::AnimationControllerImp(FrameType frameType, const string
       mpPlayAction->setIcon(pIcons->mAnimationPlayForward);
       mpPauseAction->setIcon(pIcons->mAnimationPause);
       mpStopAction->setIcon(pIcons->mAnimationStop);
+      mpChangeDirectionAction->setIcon(pIcons->mAnimationChangeDirection);
       mpStepBackwardAction->setIcon(pIcons->mAnimationAdvanceBackward);
       mpStepForwardAction->setIcon(pIcons->mAnimationAdvanceForward);
       setIcon(QIcon(pIcons->mAnimation));
    }
 
    // Connections
-   connect(mpPlayAction, SIGNAL(triggered()), this, SLOT(play()));
-   connect(mpPauseAction, SIGNAL(triggered()), this, SLOT(pause()));
-   connect(mpStopAction, SIGNAL(triggered()), this, SLOT(stop()));
-   connect(mpStepBackwardAction, SIGNAL(triggered()), this, SLOT(stepBackward()));
-   connect(mpStepForwardAction, SIGNAL(triggered()), this, SLOT(stepForward()));
+   VERIFYNR(connect(mpPlayAction, SIGNAL(triggered()), this, SLOT(play())));
+   VERIFYNR(connect(mpPauseAction, SIGNAL(triggered()), this, SLOT(pause())));
+   VERIFYNR(connect(mpStopAction, SIGNAL(triggered()), this, SLOT(stop())));
+   VERIFYNR(connect(mpChangeDirectionAction, SIGNAL(triggered()), this, SLOT(changeDirection())));
+   VERIFYNR(connect(mpStepBackwardAction, SIGNAL(triggered()), this, SLOT(stepBackward())));
+   VERIFYNR(connect(mpStepForwardAction, SIGNAL(triggered()), this, SLOT(stepForward())));
 }
 
 AnimationControllerImp::~AnimationControllerImp()
@@ -153,6 +159,8 @@ list<ContextMenuAction> AnimationControllerImp::getContextMenuActions() const
    }
    else
    {
+      menuActions.push_front(ContextMenuAction(mpChangeDirectionAction, 
+                             APP_ANIMATIONCONTROLLER_CHANGE_DIRECTION_ACTION));
       menuActions.push_front(ContextMenuAction(mpStopAction, APP_ANIMATIONCONTROLLER_STOP_ACTION));
       menuActions.push_front(ContextMenuAction(mpPauseAction, APP_ANIMATIONCONTROLLER_PAUSE_ACTION));
    }
@@ -449,6 +457,28 @@ void AnimationControllerImp::pause()
       {
          setAnimationState(PAUSE_BACKWARD);
       }
+   }
+}
+
+void AnimationControllerImp::changeDirection()
+{
+   AnimationState previousState = getAnimationState();
+
+   if (previousState == PLAY_FORWARD)
+   {
+      setAnimationState(PLAY_BACKWARD);
+   } 
+   else if (previousState == PAUSE_FORWARD)
+   {
+      setAnimationState(PAUSE_BACKWARD);
+   } 
+   else if (previousState == PLAY_BACKWARD)
+   {
+      setAnimationState(PLAY_FORWARD);
+   } 
+   else if (previousState == PAUSE_BACKWARD)
+   {
+      setAnimationState(PAUSE_FORWARD);
    }
 }
 

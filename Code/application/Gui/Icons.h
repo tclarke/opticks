@@ -314,14 +314,17 @@ public:
    QPixmap mSaveHistogram;
 
    // Animation toolbar
-   QPixmap mAnimationFastForward;
+   QPixmap mAnimationSpeedUp;
    QPixmap mAnimationPlayBackward;
    QPixmap mAnimationAdvanceBackward;
    QPixmap mAnimationPlayForward;
    QPixmap mAnimationAdvanceForward;
    QPixmap mAnimationPause;
    QPixmap mAnimationStop;
-   QPixmap mAnimationFastRewind;
+   QPixmap mAnimationSlowDown;
+   QPixmap mAnimationBackwardDirection;
+   QPixmap mAnimationForwardDirection;
+   QPixmap mAnimationChangeDirection;
    
    QPixmap mPlayOnce;
    QPixmap mBouncePlay;
