@@ -753,7 +753,7 @@ void HistogramWindowImp::activateLayer(PlotWidget* pPlot)
 
 void HistogramWindowImp::showEvent(QShowEvent * pEvent)
 {
-   QWidget::showEvent(pEvent);
+   PlotWindowImp::showEvent(pEvent);
    mUpdater.update();
 }
 

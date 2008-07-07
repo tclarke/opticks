@@ -11,10 +11,11 @@
 
 #include "ToolBarImp.h"
 #include "AppVerify.h"
-#include "DesktopServicesImp.h"
 #include "ContextMenuAction.h"
 #include "ContextMenuActions.h"
+#include "DesktopServicesImp.h"
 #include "MenuBarImp.h"
+#include "ToolBar.h"
 
 XERCES_CPP_NAMESPACE_USE
 using namespace std;
@@ -181,12 +182,14 @@ void ToolBarImp::showEvent(QShowEvent* pEvent)
 {
    QToolBar::showEvent(pEvent);
    emit visibilityChanged(true);
+   notify(SIGNAL_NAME(ToolBar, Shown));
 }
 
 void ToolBarImp::hideEvent(QHideEvent* pEvent)
 {
    QToolBar::hideEvent(pEvent);
    emit visibilityChanged(false);
+   notify(SIGNAL_NAME(ToolBar, Hidden));
 }
 
 list<ContextMenuAction> ToolBarImp::getContextMenuActions() const
@@ -202,4 +205,9 @@ list<ContextMenuAction> ToolBarImp::getContextMenuActions() const
    }
 
    return menuActions;
+}
+
+bool ToolBarImp::isShown() const
+{
+   return isVisible();
 }
