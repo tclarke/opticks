@@ -86,6 +86,7 @@
  *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
  *    <tr><td>Pause</td><td>APP_ANIMATIONCONTROLLER_PAUSE_ACTION()</td></tr>
  *    <tr><td>Play</td><td>APP_ANIMATIONCONTROLLER_PLAY_ACTION()</td></tr>
+ *    <tr><td>Change direction</td><td>APP_ANIMATIONCONTROLLER_CHANGE_DIRECTION_ACTION()</td></tr>
  *    <tr><td>%Step backward</td><td>APP_ANIMATIONCONTROLLER_STEP_BACKWARD_ACTION()</td></tr>
  *    <tr><td>%Step forward</td><td>APP_ANIMATIONCONTROLLER_STEP_FORWARD_ACTION()</td></tr>
  *    <tr><td>Stop</td><td>APP_ANIMATIONCONTROLLER_STOP_ACTION()</td></tr>
