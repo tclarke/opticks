@@ -186,6 +186,11 @@ void DockWindowImp::undocked(bool isUndocked)
    }
 }
 
+bool DockWindowImp::isShown() const
+{
+   return isVisible();
+}
+
 bool DockWindowImp::event(QEvent* pEvent)
 {
    if (pEvent != NULL)

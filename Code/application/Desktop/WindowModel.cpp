@@ -13,6 +13,7 @@
 #include "ClassificationLayer.h"
 #include "DataElement.h"
 #include "DesktopServices.h"
+#include "DockWindow.h"
 #include "GraphicElement.h"
 #include "GraphicGroup.h"
 #include "GraphicGroupImp.h"
@@ -315,6 +316,18 @@ Qt::ItemFlags WindowModel::WindowSourceModel::flags(const QModelIndex& index) co
             }
          }
       }
+
+      ToolBar* pToolbar = dynamic_cast<ToolBar*>(index.data(Qt::UserRole).value<SessionItem*>());
+      if (pToolbar != NULL)
+      {
+         itemFlags |= Qt::ItemIsUserCheckable;
+      }
+
+      DockWindow* pDock = dynamic_cast<DockWindow*>(index.data(Qt::UserRole).value<SessionItem*>());
+      if (pDock != NULL)
+      {
+         itemFlags |= Qt::ItemIsUserCheckable;
+      }
    }
 
    return itemFlags;
@@ -340,29 +353,64 @@ bool WindowModel::WindowSourceModel::setData(const QModelIndex& index, const QVa
 
    if (role == Qt::CheckStateRole)
    {
-      Layer* pLayer = dynamic_cast<Layer*>(pWrapper->getSessionItem());
-      if (pLayer == NULL)
-      {
-         return false;
-      }
-
-      SpatialDataView* pView = dynamic_cast<SpatialDataView*>(pLayer->getView());
-      if (pView == NULL)
-      {
-         return false;
-      }
-
+      bool checkboxClicked = false;
       Qt::CheckState checkState = static_cast<Qt::CheckState>(value.toInt());
-      if (checkState == Qt::Checked)
+
+      Layer* pLayer = dynamic_cast<Layer*>(pWrapper->getSessionItem());
+      if (pLayer != NULL)
       {
-         pView->showLayer(pLayer);
-      }
-      else
-      {
-         pView->hideLayer(pLayer);
+         SpatialDataView* pView = dynamic_cast<SpatialDataView*>(pLayer->getView());
+         if (pView == NULL)
+         {
+            return false;
+         }
+
+         checkboxClicked = true;
+         if (checkState == Qt::Checked)
+         {
+            pView->showLayer(pLayer);
+         }
+         else
+         {
+            pView->hideLayer(pLayer);
+         }
+
+         pView->refresh();
       }
 
-      pView->refresh();
+      ToolBarExt1* pToolbarExt1 = dynamic_cast<ToolBarExt1*>(pWrapper->getSessionItem());
+      if (pToolbarExt1 != NULL)
+      {
+         checkboxClicked = true;
+         if (checkState == Qt::Checked)
+         {
+            pToolbarExt1->show();
+         }
+         else
+         {
+            pToolbarExt1->hide();
+         }
+      }
+      
+      
+      DockWindow* pDock = dynamic_cast<DockWindow*>(pWrapper->getSessionItem());
+      if (pDock != NULL)
+      {
+         checkboxClicked = true;
+         if (checkState == Qt::Checked)
+         {
+            pDock->show();
+         }
+         else
+         {
+            pDock->hide();
+         }
+      }
+
+      if (checkboxClicked == false)
+      {
+         return false;
+      }
    }
    else
    {
@@ -554,6 +602,65 @@ void WindowModel::WindowSourceModel::updateLayerDisplay(Subject& subject, const 
 
          QModelIndex layerIndex = index(pLayer);
          emit dataChanged(layerIndex, layerIndex);
+      }
+   }
+}
+
+void WindowModel::WindowSourceModel::updateToolbarDisplay(Subject& subject, const std::string& signal, const boost::any& value)
+{
+   ToolBar* pToolbar = dynamic_cast<ToolBar*>(&subject);
+   if (pToolbar != NULL)
+   {
+      SessionItemWrapper* pWrapper = getWrapper(pToolbar);
+      if (pWrapper != NULL)
+      {
+
+         bool bHidden = false;
+         Qt::CheckState checkState = Qt::Checked;
+
+         if (signal == "ToolBar::Hidden")
+         {
+            bHidden = true;
+            checkState = Qt::Unchecked;
+         }
+
+         QFont itemFont = pWrapper->getDisplayFont();
+         itemFont.setItalic(bHidden);
+
+         pWrapper->setCheckState(checkState);
+         pWrapper->setDisplayFont(itemFont);
+
+         QModelIndex toolbarIndex = index(pToolbar);
+         emit dataChanged(toolbarIndex, toolbarIndex);
+      }
+   }
+}
+
+void WindowModel::WindowSourceModel::updateDockDisplay(Subject& subject, const std::string& signal, const boost::any& value)
+{
+   DockWindow* pPlot = dynamic_cast<DockWindow*>(&subject);
+   if (pPlot != NULL)
+   {
+      SessionItemWrapper* pWrapper = getWrapper(pPlot);
+      if (pWrapper != NULL)
+      {
+         bool bHidden = false;
+         Qt::CheckState checkState = Qt::Checked;
+
+         if (signal == "DockWindow::Hidden")
+         {
+            bHidden = true;
+            checkState = Qt::Unchecked;
+         }
+
+         QFont itemFont = pWrapper->getDisplayFont();
+         itemFont.setItalic(bHidden);
+
+         pWrapper->setCheckState(checkState);
+         pWrapper->setDisplayFont(itemFont);
+
+         QModelIndex plotIndex = index(pPlot);
+         emit dataChanged(plotIndex, plotIndex);
       }
    }
 }
@@ -766,6 +873,52 @@ WindowModel::WindowSourceModel::SessionItemWrapper* WindowModel::WindowSourceMod
          }
       }
 
+      ToolBar* pToolbar = dynamic_cast<ToolBar*>(pWindow);
+      if (pToolbar != NULL)
+      {
+         // Check if the toolbar is hidden before it was added to the parent.
+         ToolBarExt1* pToolbarExt1 = dynamic_cast<ToolBarExt1*>(pToolbar);
+         if (pToolbarExt1 != NULL)
+         {
+            QFont itemFont = pWindowWrapper->getDisplayFont();
+            bool toolbarDisplayed = pToolbarExt1->isShown();
+
+            itemFont.setItalic(!toolbarDisplayed);
+
+            pWindowWrapper->setDisplayFont(itemFont);
+
+            // Check state
+            pWindowWrapper->setCheckState(toolbarDisplayed ? Qt::Checked : Qt::Unchecked);
+         }
+
+         // Connections
+         pToolbar->attach(SIGNAL_NAME(ToolBar, Shown), Slot(this, &WindowSourceModel::updateToolbarDisplay));
+         pToolbar->attach(SIGNAL_NAME(ToolBar, Hidden), Slot(this, &WindowSourceModel::updateToolbarDisplay));
+      }
+
+      DockWindow* pDockWindow = dynamic_cast<DockWindow*>(pWindow);
+      if (pDockWindow != NULL)
+      {
+         // Check if the dock window was hidden before it was added to the parent.
+         DockWindowExt1* pDockExt1 = dynamic_cast<DockWindowExt1*>(pDockWindow);
+         if (pDockExt1 != NULL)
+         {
+            QFont itemFont = pWindowWrapper->getDisplayFont();
+            bool dockWindowDisplayed = pDockExt1->isShown();
+
+            itemFont.setItalic(!dockWindowDisplayed);
+
+            pWindowWrapper->setDisplayFont(itemFont);
+
+            // Check state
+            pWindowWrapper->setCheckState(dockWindowDisplayed ? Qt::Checked : Qt::Unchecked);
+         }
+
+         // Connections
+         pDockWindow->attach(SIGNAL_NAME(DockWindow, Shown), Slot(this, &WindowSourceModel::updateDockDisplay));
+         pDockWindow->attach(SIGNAL_NAME(DockWindow, Hidden), Slot(this, &WindowSourceModel::updateDockDisplay));
+      }
+
       PlotWindow* pPlotWindow = dynamic_cast<PlotWindow*>(pWindow);
       if (pPlotWindow != NULL)
       {
@@ -814,6 +967,21 @@ void WindowModel::WindowSourceModel::removeWindowItem(Window* pWindow)
          removeViewItem(pWindowWrapper, pView);
       }
    }
+
+   ToolBar* pToolBar = dynamic_cast<ToolBar*>(pWindow);
+   if (pToolBar != NULL)
+   {
+      pToolBar->detach(SIGNAL_NAME(ToolBar, Shown), Slot(this, &WindowSourceModel::updateToolbarDisplay));
+      pToolBar->detach(SIGNAL_NAME(ToolBar, Hidden), Slot(this, &WindowSourceModel::updateToolbarDisplay));
+   }
+
+   DockWindow* pDockWindow = dynamic_cast<DockWindow*>(pWindow);
+   if (pDockWindow != NULL)
+   {
+      pDockWindow->detach(SIGNAL_NAME(DockWindow, Shown), Slot(this, &WindowSourceModel::updateDockDisplay));
+      pDockWindow->detach(SIGNAL_NAME(DockWindow, Hidden), Slot(this, &WindowSourceModel::updateDockDisplay));
+   }
+
 
    PlotWindow* pPlotWindow = dynamic_cast<PlotWindow*>(pWindow);
    if (pPlotWindow != NULL)

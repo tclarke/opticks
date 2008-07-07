@@ -164,4 +164,33 @@ protected:
    virtual ~DockWindow() {}
 };
 
+/**
+ *  Extends capability of the DockWindow interface.
+ *
+ *  This class provides additional capability for the DockWindow interface class.
+ *  A pointer to this class can be obtained by performing a dynamic cast on a
+ *  pointer to DockWindow or any of its subclasses.
+ *
+ *  @warning A pointer to this class can only be used to call methods contained
+ *           in this extension class and cannot be used to call any methods in
+ *           DockWindow or its subclasses.
+ */
+class DockWindowExt1
+{
+public:
+   /**
+    *  Returns the current visiblity state of the dock window.
+    *
+    *  @return  Returns \c true if the dock window is shown or \c false
+    *           if the dock window is hidden.
+    */
+   virtual bool isShown() const = 0;
+
+protected:
+    /**
+    * This should be destroyed by calling DesktopServices::deleteWindow.
+    */
+   virtual ~DockWindowExt1() {}
+};
+
 #endif

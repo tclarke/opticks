@@ -55,6 +55,8 @@ private:
       void removeLayer(Subject& subject, const std::string& signal, const boost::any& value);
       void updateLayerOrder(Subject& subject, const std::string& signal, const boost::any& value);
       void updateLayerDisplay(Subject& subject, const std::string& signal, const boost::any& value);
+      void updateToolbarDisplay(Subject& subject, const std::string& signal, const boost::any& value);
+      void updateDockDisplay(Subject& subject, const std::string& signal, const boost::any& value);
       void activateLayer(Subject& subject, const std::string& signal, const boost::any& value);
       void addGraphicObject(Subject& subject, const std::string& signal, const boost::any& value);
       void removeGraphicObject(Subject& subject, const std::string& signal, const boost::any& value);
