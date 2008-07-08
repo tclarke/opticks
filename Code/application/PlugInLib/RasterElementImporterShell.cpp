@@ -710,19 +710,6 @@ bool RasterElementImporterShell::performImport() const
             mpProgress->updateProgress(buffer, 100, WARNING);
          }
       }
-
-      if (mUsingMemoryMappedPager)
-      {
-         if(!checkAbortOrError("", pStep.get(), false))
-         {
-            return false;
-         }
-         DynamicObject* pMetadata = pDescriptor->getMetadata();
-         if (pMetadata != NULL)
-         {
-            pMetadata->setAttribute("Is_Original_File_Raw_Data", true);
-         }
-      }
    }
 
    pStep->finalize(Message::Success);
