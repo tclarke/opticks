@@ -529,8 +529,11 @@ void AnimationToolBarImp::updateFrameSpeed(double speed)
             break;
          }
       }
+
+      mpFrameSpeedCombo->blockSignals(true);
       mpFrameSpeedCombo->insertItem(i, strSpeed);
       mpFrameSpeedCombo->setCurrentIndex(i);
+      mpFrameSpeedCombo->blockSignals(false);
    }
    updateFrameRange();
 }
