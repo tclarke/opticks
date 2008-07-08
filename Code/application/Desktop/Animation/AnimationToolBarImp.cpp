@@ -32,6 +32,7 @@
 #include <boost/rational.hpp>
 
 #include <string>
+
 using namespace std;
 
 AnimationToolBarImp::WheelEventSlider::WheelEventSlider(
@@ -101,23 +102,19 @@ AnimationToolBarImp::AnimationToolBarImp(const string& id, QWidget* parent) :
    pDesktop->initializeAction(mpSlowDownAction, shortcutContext);
 
    mpFrameSpeedCombo = new QComboBox(this);
-   mpFrameSpeedCombo->addItem("0.1");
-   mpFrameSpeedCombo->addItem("0.25");
-   mpFrameSpeedCombo->addItem("0.5");
-   mpFrameSpeedCombo->addItem("0.75");
-   mpFrameSpeedCombo->addItem("1");
-   mpFrameSpeedCombo->addItem("2");
-   mpFrameSpeedCombo->addItem("5");
-   mpFrameSpeedCombo->addItem("10");
-   mpFrameSpeedCombo->addItem("30");
-   mpFrameSpeedCombo->addItem("60");
+
+   vector<double> frameSpeeds = AnimationToolBar::getSettingFrameSpeeds();
+   for (vector<double>::iterator iter = frameSpeeds.begin(); iter != frameSpeeds.end(); ++iter)
+   {
+      mpFrameSpeedCombo->addItem(QString::number(*iter, 'g', 3));
+   }
    mpFrameSpeedCombo->setInsertPolicy(QComboBox::NoInsert);
    mpFrameSpeedCombo->setToolTip("Speed (X)");
    mpFrameSpeedCombo->setEditable(true);
    mpFrameSpeedCombo->setCompleter(NULL);
    QDoubleValidator* pValidator = new QDoubleValidator(mpFrameSpeedCombo);
-   pValidator->setDecimals(2);
-
+   pValidator->setDecimals(3);
+   pValidator->setBottom(0.0);
    mpFrameSpeedCombo->setValidator(pValidator);
    VERIFYNR(connect(mpFrameSpeedCombo, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(setFrameSpeed(const QString&))));
    VERIFYNR(connect(mpFrameSpeedCombo, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(setFocus())));
@@ -495,8 +492,27 @@ void AnimationToolBarImp::updateCurrentFrame(double frameValue)
    mpTimestampLabel->setText(strFrameText);
 }
 
+void AnimationToolBarImp::cleanUpItems()
+{
+   vector<double> frameSpeeds = AnimationToolBar::getSettingFrameSpeeds();
+
+   if (AnimationToolBar::getSettingFrameSpeeds().size() != mpFrameSpeedCombo->count())
+   {
+      for (int i = 0; i <= mpFrameSpeedCombo->count(); ++i)
+      {
+         if (std::find(frameSpeeds.begin(), frameSpeeds.end(), 
+             mpFrameSpeedCombo->itemText(i).toDouble()) == frameSpeeds.end())
+         {
+            mpFrameSpeedCombo->removeItem(i);
+            break;
+         }
+      }
+   }
+}
+
 void AnimationToolBarImp::updateFrameSpeed(double speed)
 {
+   cleanUpItems();
    QString strSpeed = QString::number(speed);
    int index = mpFrameSpeedCombo->findText(strSpeed);
    if (index != -1)
@@ -505,9 +521,17 @@ void AnimationToolBarImp::updateFrameSpeed(double speed)
    }
    else
    {
-      mpFrameSpeedCombo->setEditText(strSpeed);
+      int i;
+      for (i = 0; i < mpFrameSpeedCombo->count(); ++i)
+      {
+         if (mpFrameSpeedCombo->itemText(i).toDouble() > speed)
+         {
+            break;
+         }
+      }
+      mpFrameSpeedCombo->insertItem(i, strSpeed);
+      mpFrameSpeedCombo->setCurrentIndex(i);
    }
-
    updateFrameRange();
 }
 
@@ -685,8 +709,7 @@ bool AnimationToolBarImp::getHideTimestamp() const
    return mHideTimestamp;
 }
 
-AnimationCycleGrid::AnimationCycleGrid(QWidget* pParent)
-: PixmapGrid(pParent)
+AnimationCycleGrid::AnimationCycleGrid(QWidget* pParent): PixmapGrid(pParent)
 {
    setNumRows(1);
    setNumColumns(3);

@@ -10,6 +10,7 @@
 #ifndef ANIMATIONCONTROLLER_H
 #define ANIMATIONCONTROLLER_H
 
+#include "ConfigurationSettings.h"
 #include "SessionItem.h"
 #include "Subject.h"
 #include "TypesFile.h"
@@ -62,6 +63,7 @@ class Animation;
 class AnimationController : public SessionItem, public Subject
 {
 public:
+   SETTING(FrameSpeedSelection, AnimationController, double, 0)
    /**
     *  Emitted with boost::any<std::string> when the controller is renamed.
     *

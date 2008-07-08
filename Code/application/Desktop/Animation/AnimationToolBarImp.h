@@ -46,6 +46,8 @@ public:
    void setHideTimestamp(bool hideTimestamp);
    bool getHideTimestamp() const;
 
+   void cleanUpItems();
+
 protected slots:
    // animation control buttons
    void speedUp();

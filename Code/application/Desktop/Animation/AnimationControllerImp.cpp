@@ -59,7 +59,7 @@ AnimationControllerImp::AnimationControllerImp(FrameType frameType, const string
    mEffectiveCurrentTime(0.0),
    mFrequency(60),
    mMinimumFrameRate(1, mFrequency),
-   mInterval(1.0 / mFrequency),
+   mInterval(AnimationController::getSettingFrameSpeedSelection() / mFrequency),
    mState(STOP),
    mCycle(PLAY_ONCE),
    mStartTime(0.0),
@@ -327,6 +327,7 @@ void AnimationControllerImp::setIntervalMultiplier(double multiplier)
    double dInterval = multiplier / mFrequency;
    if (dInterval != mInterval)
    {
+      AnimationController::setSettingFrameSpeedSelection(multiplier); 
       mInterval = dInterval;
       emit intervalMultiplierChanged(multiplier);
       notify(SIGNAL_NAME(AnimationController, IntervalMultiplierChanged), boost::any(multiplier));
@@ -1056,6 +1057,7 @@ bool AnimationControllerImp::deserialize(SessionItemDeserializer &deserializer)
    }
    setCurrentFrame(mCurrentFrame);
 
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Should this be moved into the tool bar? (mconsidine)")
    if(pRoot->hasAttribute(X("selected")))
    {
       AnimationToolBar* pToolBar = static_cast<AnimationToolBar*>(Service<DesktopServices>()->getWindow("Animation", TOOLBAR));

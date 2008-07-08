@@ -9,6 +9,7 @@
 #ifndef ANIMATIONTOOLBAR_H
 #define ANIMATIONTOOLBAR_H
 
+#include "ConfigurationSettings.h"
 #include "ToolBar.h"
 #include "TypesFile.h"
 
@@ -37,6 +38,7 @@ class SpatialDataView;
 class AnimationToolBar : public ToolBar
 {
 public:
+   SETTING(FrameSpeeds, AnimationToolBar, std::vector<double>, std::vector<double>())
    /**
     *  Emitted with any<AnimationController*> when the current animation
     *  controller is changed.
