@@ -7,7 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "AppVersion.h"
 #include "Scriptor.h"
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
@@ -20,8 +19,9 @@ Scriptor::Scriptor()
 {
    // Initialization
    setName("Sample Scriptor");
-   setCreator("Ball Aerospace & Technologies Corp.");
-   setCopyright(APP_COPYRIGHT);
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setDescription("Provides command line utilities to execute IDL commands.");
    setFileExtensions("Sample Scripting Files (*.scr)");
    setProductionStatus(false);

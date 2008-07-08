@@ -20,8 +20,9 @@ LogContextMenuActions::LogContextMenuActions() :
    mpLogAction(NULL)
 {
    AlgorithmShell::setName("Log Context Menu Actions");
-   setCreator("Ball Aerospace & Technologies Corp.");
-   setCopyright("Copyright 2007, BATC");
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setDescription("Toggles logging of context menu actions in the message log");
    setDescriptorId("{C9CC7DC0-3CF0-4D48-BA70-366F124A86C1}");
    executeOnStartup(true);

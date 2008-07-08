@@ -7,6 +7,10 @@ This tutorial demonstrates an important part of most %Opticks plug-ins; accessin
 We'll build a plug-in which calculates some basic statistics over band 1 of a data cube.
 We'll see how to use DataAccessor and switchOnEncoding.h.
 
+If you would like to run this tutorial as you follow along with the code, see \ref RunningTutorial.
+If you would like to build and experiment with this tutorial as you follow along with the code, see \ref howto_buildtutorials.
+If you are running this tutorial in Opticks, you will need to select "Tutorial 3" from the Tutorial toolbar to execute it.
+
 \dontinclude Tutorial/Tutorial3.cpp
 \skip namespace
 \until };

@@ -12,7 +12,6 @@
 #include <QtGui/QVBoxLayout>
 
 #include "ApplicationServices.h"
-#include "AppVersion.h"
 #include "ConfigurationSettings.h"
 #include "DataVariant.h"
 #include "DesktopServices.h"
@@ -30,8 +29,9 @@ ModelessPlugIn::ModelessPlugIn() :
    mSessionClosed(true)    // Reset this when execute() runs
 {
    setName("Modeless Dialog");
-   setCreator("Ball Aerospace & Technologies Corp.");
-   setCopyright(APP_COPYRIGHT);
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setDescription("Demonstrates creation and cleanup of a modeless dialog in a viewer plug-in.");
    setDescriptorId("{616CAF5A-300D-4c65-9BB1-455CAF5571A1}");
    setShortDescription("Modeless dialog in a plug-in");

@@ -27,8 +27,9 @@ AnimationTimingTestPlugIn::AnimationTimingTestPlugIn() :
    mpDialog(NULL)
 {
    setName("Animation Timing Test Dialog");
-   setCreator("The Opticks Team");
-   setCopyright("Copyright 2008");
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setDescription("Measures the animation frame rate.");
    setShortDescription("Measures the animation frame rate.");
    setDescriptorId("{65FB5539-B7EB-402a-9B7C-1F19F660F02D}");

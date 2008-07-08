@@ -15,7 +15,6 @@
 
 #include "Classification.h"
 #include "AppVerify.h"
-#include "AppVersion.h"
 #include "DimensionDescriptor.h"
 #include "DynamicObject.h"
 #include "Hdf4Utilities.h"
@@ -38,8 +37,9 @@ using namespace std;
 SampleHdf4Importer::SampleHdf4Importer()
 {
    setName("Sample MODIS HDF4-EOS Importer");
-   setCreator("Ball Aerospace & Technologies Corp.");
-   setCopyright(APP_COPYRIGHT);
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setExtensions("MODIS Files (*.hdf *.HDF)");
    setDescriptorId("{1B1B1D52-B1DA-4247-92DF-324FE7EF8722}");
    setProductionStatus(false);

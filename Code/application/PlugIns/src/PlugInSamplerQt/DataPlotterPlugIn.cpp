@@ -7,7 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "AppVersion.h"
 #include "DataPlotterDlg.h"
 #include "DataPlotterPlugIn.h"
 #include "DataVariant.h"
@@ -22,8 +21,9 @@ DataPlotterPlugIn::DataPlotterPlugIn() :
    mInteractive(true)
 {
    AlgorithmShell::setName("Data Plotter");
-   setCreator("Ball Aerospace & Technologies, Corp.");
-   setCopyright(APP_COPYRIGHT);
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setDescription("Demonstrates use of portions of the PlotWindow API.");
    setMenuLocation("[Demo]\\Data Plotter");
    setDescriptorId("{69DD0E12-8D6B-4e23-A742-469447E4EC2F}");

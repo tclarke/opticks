@@ -48,10 +48,10 @@ Tutorial4::Tutorial4()
 {
    setDescriptorId("{F58F8F9A-6D2D-4EB1-9FD8-FD6D2E6ECB49}");
    setName("Tutorial 4");
-   setVersion("1.0");
    setDescription("Using AOIs.");
-   setCreator("The Opticks Team");
-   setCopyright("Copyright 2008");
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setProductionStatus(false);
    setType("Sample");
    setSubtype("Statistics");

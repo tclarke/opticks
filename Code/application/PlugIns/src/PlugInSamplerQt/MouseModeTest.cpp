@@ -10,7 +10,6 @@
 #include <QtGui/QMessageBox>
 
 #include "AppVerify.h"
-#include "AppVersion.h"
 #include "DesktopServices.h"
 #include "MouseModeTest.h"
 #include "MouseModeTestGui.h"
@@ -20,9 +19,9 @@ MouseModeTest::MouseModeTest() :
    mpGui(NULL)
 {
    ViewerShell::setName("Mouse Mode Test");
-   setCreator("Ball Aerospace & Technologies Corp.");
-   setCopyright(APP_COPYRIGHT);
-   setVersion(APP_VERSION_NUMBER);
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setProductionStatus(false);
    setDescription("Verifies MPR2 Requirement 215.");
    setShortDescription("Verifies MPR2 Requirement 215.");

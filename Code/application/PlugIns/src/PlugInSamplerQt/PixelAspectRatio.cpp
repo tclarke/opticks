@@ -8,7 +8,6 @@
  */
 #include <QtGui/QApplication>
 #include <QtGui/QMessageBox>
-#include "AppVersion.h"
 #include "DesktopServices.h"
 #include "MessageLogResource.h"
 #include "ModelServices.h"
@@ -19,9 +18,9 @@
 
 PixelAspectRatio::PixelAspectRatio()
 {
-   setCreator("Ball Aerospace & Technologies Corp.");
-   setCopyright("Copyright (c) 2007 BATC");
-   setVersion(APP_VERSION_NUMBER);
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setProductionStatus(false);
    ViewerShell::setName( "Pixel Aspect Ratio Test" );
    setDescription( "Verifies MPR1 Requirement 180." );

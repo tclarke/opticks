@@ -17,6 +17,7 @@ import traceback
 import re
 import zipfile
 import shutil
+import tarfile
 
 def run_wix(input_files, wix_path, variables, extensions, culture, suppress_warnings, output_path, output_name = None):
    """Run Wix to generate a .msi from a .wxs file.
@@ -215,8 +216,26 @@ class HelpGenerator(WixDirectoryGenerator):
    def file_id(self, path, filename):
       return "F__Help_%s" % (self.get_path_identifier(os.path.join(path, filename)))
 
-class WixBuilder:
-   def __init__(self, wix_path, opticks_code_dir, opticks_dependencies_dir, opticks_release_dir):
+class CommonBuilder:
+   def __init__(self, opticks_code_dir):
+      self.opticks_code_dir = opticks_code_dir
+
+   def require_code_dir(self):
+      if self.opticks_code_dir == None:
+         if os.environ.has_key("OPTICKS_CODE_DIR"):
+            self.opticks_code_dir = os.environ["OPTICKS_CODE_DIR"] 
+         else:
+            print "ERROR: The path to the Opticks source code was not provided, see -c or --code-dir"
+            return 1001
+
+      if not(os.path.exists(self.opticks_code_dir)):
+         print "ERROR: The path to the Opticks source code does not exist %s, see -c or --code-dir" % (self.opticks_code_dir)
+         return 1004
+
+      return 0
+
+class WixBuilder(CommonBuilder):
+   def __init__(self, wix_path, opticks_code_dir, opticks_dependencies_dir, opticks_release_dir, package_dir):
       """Construct a Wix Builder object
       @param wix_path: See L{run_wix}.
       @type wix_path: L{str}
@@ -226,14 +245,16 @@ class WixBuilder:
       @type opticks_dependencies_dir: L{str}
       @param opticks_release_dir: The path to the Release folder checkout of the Opticks trunk.
       @type opticks_release_dir: L{str}
+      @param package_dir: The path where the installer packages should be placed.
+      @type package_dir: L{str}
 
       """
-      
+      CommonBuilder.__init__(self, opticks_code_dir)
       self.wix_path = wix_path
-      self.opticks_code_dir = opticks_code_dir
       self.opticks_dependencies_dir = opticks_dependencies_dir
       self.opticks_release_dir = opticks_release_dir
       self.output_dir = os.path.abspath("WixOutput")
+      self.package_dir = package_dir
 
    def generate_installer(self, is_64_bit):
       """Generate either the Opticks-32bit.msi to the Wix32Output folder or Opticks-64bit.msi to the Wix64Output folder.
@@ -252,16 +273,9 @@ class WixBuilder:
          print "ERROR: The path to Windows Installer XML Toolset, %s is invalid" % (self.wix_path)
          return 1
 
-      if self.opticks_code_dir == None:
-         if os.environ.has_key("OPTICKS_CODE_DIR"):
-            self.opticks_code_dir = os.environ["OPTICKS_CODE_DIR"] 
-         else:
-            print "ERROR: The path to the Opticks source code was not provided, see -c or --code-dir"
-            return 1001
-
-      if not(os.path.exists(self.opticks_code_dir)):
-         print "ERROR: The path to the Opticks source code does not exist %s, see -c or --code-dir" % (self.opticks_code_dir)
-         print 1004
+      ret_code = self.require_code_dir()
+      if ret_code != 0:
+         return ret_code
 
       if self.opticks_dependencies_dir == None:
          if os.environ.has_key("OPTICKSDEPENDENCIES"):
@@ -321,7 +335,7 @@ class WixBuilder:
       print self.output_dir
       install_variables["OpticksClassificationDir"] = self.output_dir
       
-      return run_wix(["Opticks.wxs", "Opticks-Help.wxs", "Opticks-UI.wxs"],
+      installer_created = run_wix(["Opticks.wxs", "Opticks-Help.wxs", "Opticks-UI.wxs"],
            self.wix_path,
            install_variables,
            ["WixUtilExtension"], 
@@ -329,6 +343,22 @@ class WixBuilder:
            ["1076"],
            output_path,
            msi_name)
+
+      if installer_created != 0:
+         return installer_created
+
+      if self.package_dir != None and os.path.exists(self.package_dir):
+         if is_64_bit:
+            platform = "64Bit"
+         else:
+            platform = "32Bit"
+         zip_name = "opticks-%s-windows-%s.zip" % (version_number, platform)
+         zip = zipfile.ZipFile(os.path.abspath(os.path.join(self.package_dir, zip_name)), "w", zipfile.ZIP_DEFLATED)
+         zip.write(os.path.abspath(os.path.join(output_path, msi_name + ".msi")), msi_name + ".msi")
+         zip.write(os.path.abspath(os.path.join("DownloadDocs", "%sMsi" % (platform), "INSTALLING.txt")), "INSTALLING.txt")
+         zip.close()
+
+      return 0
 
    def generate_classification_file(self, output_file, linecount):
       class_file = open("ClassificationLevels-T.txt", "r")
@@ -358,10 +388,21 @@ class WixBuilder:
 
       """
       try:
-         if new_version.find("/") != -1:
-            (new_version, display_version) = new_version.split("/")
+         if new_version == "current":
+            ret_code = self.require_code_dir()
+            if ret_code != 0:
+               return ret_code
+            sys.path.append(self.opticks_code_dir)
+            import commonutils
+            new_version = "1.0.0"
+            display_version = commonutils.get_app_version_only(self.opticks_code_dir)
+            print "Setting version number as if --update-version=%s/%s was called." % (new_version, display_version)
          else:
-            display_version = new_version
+            if new_version.find("/") != -1:
+               (new_version, display_version) = new_version.split("/")
+            else:
+               display_version = new_version
+
          version_file = open("Opticks-Version.wxi", "r")
          version_file_contents = version_file.read()
          version_file.close()
@@ -482,17 +523,27 @@ def generate_uuid():
    os.remove("create-guid-output.txt")
    return guid
 
-class PackageBuilder:
-   def __init__(self, opticks_code_dir, opticks_dependencies_dir, opticks_release_dir):
+class PackageBuilder(CommonBuilder):
+   def __init__(self, opticks_code_dir, opticks_dependencies_dir, opticks_release_dir, package_dir):
+      CommonBuilder.__init__(self, opticks_code_dir)
       self.output_dir = os.path.abspath("PackageOutput")
-      self.opticks_code_dir = opticks_code_dir
       self.opticks_dependencies_dir = opticks_dependencies_dir
       self.opticks_release_dir = opticks_release_dir
+      self.package_dir = package_dir
 
    def clean(self):
       shutil.rmtree(self.output_dir, True)
 
    def update_version(self, new_version):
+      if new_version == "current":
+         ret_code = self.require_code_dir()
+         if ret_code != 0:
+            return ret_code
+         sys.path.append(self.opticks_code_dir)
+         import commonutils
+         new_version = commonutils.get_app_version_only(self.opticks_code_dir)
+         print "Setting version number as if --update-version=%s was called." % (new_version)
+      
       pkginfo_file = open("pkginfo", "r")
       pkginfo = pkginfo_file.read()
       pkginfo_file.close()
@@ -505,6 +556,16 @@ class PackageBuilder:
             "that uses the new version number.  Please commit the pkginfo "\
             "change to Subversion."
       return 0
+
+   def get_data_from_pkginfo(self, param):
+      pkginfo_file = open("pkginfo", "r")
+      pkginfo = pkginfo_file.read()
+      pkginfo_file.close()
+      parammatch = re.search(param + r"=(.+?)\n", pkginfo)
+      if parammatch != None:
+         value = parammatch.group(1)
+         return value
+      return ""
 
    def generate_installer(self):
       """Generate the Opticks Solaris package to the PackageOutput folder.
@@ -549,7 +610,59 @@ class PackageBuilder:
       variables["OpticksHelpDir"] = self.get_help() 
       variables["OpticksReleaseDir"] = os.path.abspath(self.opticks_release_dir)
       variables["currentDir"] = os.path.abspath(".")
-      return run_pkgmk(variables, self.output_dir)
+      pkg_success = run_pkgmk(variables, self.output_dir)
+      if pkg_success != 0:
+         return pkg_success
+
+      version = self.get_data_from_pkginfo("VERSION") 
+      pkgname = self.get_data_from_pkginfo("PKG")
+      output_pkg_name = "opticks-%s-sol10-sparc.pkg" % (version)
+
+      pkgtrans_args = list()
+      pkgtrans_args.append("pkgtrans")
+      pkgtrans_args.append("-s")
+      pkgtrans_args.append(self.output_dir)
+      pkgtrans_args.append(output_pkg_name)
+      pkgtrans_args.append(pkgname)
+      
+      pkgtrans = subprocess.Popen(pkgtrans_args)
+      retcode = pkgtrans.wait()
+      if retcode != 0:
+         return retcode
+      
+      if self.package_dir != None and os.path.exists(self.package_dir):
+         tar_input = os.path.abspath(os.path.join(self.output_dir, "tar-input"))
+         if os.path.exists(tar_input):
+            shutil.rmtree(tar_input, True) 
+         os.makedirs(tar_input)
+         shutil.copy2(os.path.abspath(os.path.join(self.output_dir, output_pkg_name)), os.path.join(tar_input, output_pkg_name))
+         shutil.copy2(os.path.abspath(os.path.join("DownloadDocs", "SolPackage", "INSTALLING.txt")), os.path.join(tar_input, "INSTALLING.txt"))
+
+         tar_args = list()
+         tar_args.append("tar")
+         tar_args.append("-cvf")
+         tar_args.append("-")
+         tar_args.append(".")
+         tar = subprocess.Popen(tar_args, stdout=subprocess.PIPE, cwd=tar_input)
+
+         output_tar_bz2 = os.path.abspath(os.path.join(self.package_dir, "opticks-%s-sol10-sparc.tar.bz2" % (version))) 
+         output_handle = open(output_tar_bz2, "wb")
+         bzip2_args = list()
+         bzip2_args.append("bzip2")
+         bzip2_args.append("-c")
+         bzip2 = subprocess.Popen(bzip2_args, stdin=tar.stdout, stdout=output_handle)
+
+         tar_ret = tar.wait()
+         bzip_ret = bzip2.wait()
+         output_handle.close()
+         if tar_ret != 0:
+            return tar_ret
+         if bzip_ret != 0:
+            return bzip_ret
+         
+         shutil.rmtree(tar_input, True) 
+
+      return 0
 
    def get_dependencies(self, output_path):
       dependencies_output = os.path.join(output_path, "Dependencies")
@@ -666,12 +779,18 @@ def parse_args():
          "following format major.minor.build/display version, i.e. 1.0.0/4.New "\
          "In this case, the msi version number will be 1.0.0, but the user will only "\
          "see 4.New as a version number."
+      package_default_output = "WixOutput"
+      package_format = ".zip's"
    else:
       update_version_help = " This version should be major.minor.  You can include text in this version number but the string must be less than 256 characters."
+      package_default_output = "PackageOutput"
+      package_format = ".tar.bz2's"
    parser.add_option("--update-version", action="store", dest="version",
          default=None, help="Update the appropriate files and then exit.  This "\
          "will cause the next run of this script to generate a " + package_name + 
-         " with the provided version." + update_version_help)
+         " with the provided version." + update_version_help + " You can use the special version of 'current' which will query the application version #.")
+   parser.add_option("--package-dir", action="store", dest="package_dir",
+         default=None, help="This is the directory where the resulting installers should be placed, this directory must already exist.  If this is not provided they will be placed under %s.  Setting this causes the creation of the %s that can be uploaded to the https://opticks.ballforge.net/ website." % (package_default_output, package_format))
          
    (options, args) = parser.parse_args()
    
@@ -688,10 +807,10 @@ def main():
 
    if is_windows():
       builder = WixBuilder(options.wix_path, options.opticks_code_dir,
-               options.opticks_dependencies_dir, options.opticks_release_dir)
+               options.opticks_dependencies_dir, options.opticks_release_dir, options.package_dir)
    else:
       builder = PackageBuilder(options.opticks_code_dir,
-               options.opticks_dependencies_dir, options.opticks_release_dir)
+               options.opticks_dependencies_dir, options.opticks_release_dir, options.package_dir)
 
    if options.clean_output:
       builder.clean()

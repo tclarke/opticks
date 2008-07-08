@@ -26,10 +26,10 @@ Tutorial2::Tutorial2()
 {
    setDescriptorId("{1F6316EB-8A03-4034-8B3D-31FADB7AF727}");
    setName("Tutorial 2");
-   setVersion("1.0");
    setDescription("Using resources and services.");
-   setCreator("The Opticks Team");
-   setCopyright("Copyright 2008");
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setProductionStatus(false);
    setType("Sample");
    setMenuLocation("[Tutorial]/Tutorial 2");

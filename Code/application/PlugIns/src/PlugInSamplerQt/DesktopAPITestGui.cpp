@@ -23,7 +23,6 @@
 #include "DesktopAPITestProperties.h"
 #include "DesktopServices.h"
 #include "Histogram.h"
-#include "IconImages.h"
 #include "LabeledSection.h"
 #include "LabeledSectionGroup.h"
 #include "PlotSet.h"
@@ -37,6 +36,57 @@ using namespace std;
 #define APP_DESKTOPAPITESTGUI_FIRST_TEST_ACTION "APP_DESKTOPAPITESTGUI_FIRST_TEST_ACTION"
 #define APP_DESKTOPAPITESTGUI_SECOND_TEST_ACTION "APP_DESKTOPAPITESTGUI_SECOND_TEST_ACTION"
 #define APP_DESKTOPAPITESTGUI_THIRD_TEST_ACTION "APP_DESKTOPAPITESTGUI_THIRD_TEST_ACTION"
+
+namespace
+{
+const char* const OpenIcon[]={
+   "16 16 5 1",
+   "# c #000000",
+   "c c #808000",
+   ". c #c0c0c0",
+   "b c #ffff00",
+   "a c #ffffff",
+   "................",
+   "..........###...",
+   ".........#...#.#",
+   "..............##",
+   "..###........###",
+   ".#aba#######....",
+   ".#babababab#....",
+   ".#ababababa#....",
+   ".#baba##########",
+   ".#aba#ccccccccc#",
+   ".#ba#ccccccccc#.",
+   ".#a#ccccccccc#..",
+   ".##ccccccccc#...",
+   ".###########....",
+   "................",
+   "................"};
+
+const char* const PrintIcon[]={
+   "16 16 5 1",
+   "# c #000000",
+   "b c #808080",
+   ". c #c0c0c0",
+   "c c #ffff00",
+   "a c #ffffff",
+   "................",
+   ".....#########..",
+   "....#aaaaaaaa#..",
+   "....#a#####a#...",
+   "...#aaaaaaaa#...",
+   "...#a#####a####.",
+   "..#aaaaaaaa#.#.#",
+   ".##########.#.##",
+   "#..........#.#.#",
+   "#############..#",
+   "#......bbb..#.#.",
+   "#......ccc..###.",
+   "#############.#.",
+   ".#.........#.#..",
+   "..###########...",
+   "................"};
+};
 
 DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
    QDialog(pParent),
@@ -383,7 +433,7 @@ void DesktopAPITestGui::addBrowseButton(bool bAdd)
    {
       if (mpOpenAction == NULL)
       {
-         QPixmap browsePixmap(IconImages::OpenIcon);
+         QPixmap browsePixmap(OpenIcon);
          browsePixmap.setMask(browsePixmap.createHeuristicMask());
          QIcon browseIcon(browsePixmap);
 
@@ -413,7 +463,7 @@ void DesktopAPITestGui::addPrintButton(bool bAdd)
    {
       if (mpPrintAction == NULL)
       {
-         QPixmap printPixmap(IconImages::PrintIcon);
+         QPixmap printPixmap(PrintIcon);
          printPixmap.setMask(printPixmap.createHeuristicMask());
          QIcon printIcon(printPixmap);
 

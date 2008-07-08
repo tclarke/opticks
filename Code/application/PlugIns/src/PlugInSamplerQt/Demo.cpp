@@ -9,7 +9,6 @@
 
 #include "ColorType.h"
 #include "AppVerify.h"
-#include "AppVersion.h"
 #include "Demo.h"
 #include "DemoGuiImp.h"
 #include "DemoAlgorithm.h"
@@ -247,8 +246,9 @@ Demo::Demo() :
    mpDemoGui(NULL)
 {
    setName("Demo");
-   setCreator("Ball Aerospace & Technologies Corp.");
-   setCopyright(APP_COPYRIGHT);
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setShortDescription("Demo");
    setDescription("Demo Plugin, showing a dynamic colormap");
    setMenuLocation("[Demo]\\Dynamic Colormap");

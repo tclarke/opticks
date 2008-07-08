@@ -73,6 +73,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\howto_buildtutorials.txt"
+				>
+			</File>
+			<File
 				RelativePath=".\howto_importer.txt"
 				>
 			</File>

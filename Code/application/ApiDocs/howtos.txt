@@ -15,6 +15,8 @@ Start with the first and work your way through the tutorial as each successive s
   -# \subpage howto_tutorial2
   -# \subpage howto_tutorial3
   -# \subpage howto_tutorial4
+  
+Please see \subpage howto_buildtutorials for information on how to build and run these tutorials with Opticks.
  
 \section howto_list Other HOWTOs
 These HOWTOs provide more in-depth examples on specific topics.

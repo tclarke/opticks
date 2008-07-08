@@ -16,7 +16,6 @@
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "RasterLayer.h"
-#include "AppVersion.h"
 #include "SampleGeoref.h"
 #include "SessionItemDeserializer.h"
 #include "SessionItemSerializer.h"
@@ -42,8 +41,9 @@ SampleGeoref::SampleGeoref() :
    mpGui(NULL)
 {
    setName("SampleGeoref");
-   setCreator("Ball Aerospace & Technologies, Corp.");
-   setCopyright(APP_COPYRIGHT);
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setDescription("Simple Georeference plugin");
    setProductionStatus(false);
    setDescriptorId("{57B86486-3B3B-465a-B74F-53A17290D982}");

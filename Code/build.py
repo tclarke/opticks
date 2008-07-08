@@ -9,7 +9,9 @@ import traceback
 import shutil
 import xml.dom.minidom
 import datetime
+import time
 import zipfile
+import calendar
 import codecs
 import re
 import commonutils
@@ -32,84 +34,101 @@ class Builder:
         else:
             self.mode = "release"
 
-    def set_version_number(self, version_number):
-        if version_number == "current":
-            self.update_version_number = False
-        elif version_number == "from-svn":
-            self.update_version_number = True
+    def __get_app_version_only(self):
+        return commonutils.get_app_version_only(".")
 
-    def get_current_app_version(self):
-       app_version_path = os.path.join("application", "PlugInUtilities", "AppVersion.h") 
-       if not(os.path.exists(app_version_path)):
-          return "Unknown"
-       app_version = open(app_version_path, "rt")
-       version_info = app_version.read()
-       app_version.close()
-
-       build_revision_path = os.path.join("application", "Utilities", "BuildRevision.h")
-       if not(os.path.exists(build_revision_path)):
-          return "Unknown"
-       build_revision_file = open(build_revision_path, "rt")
-       revision_info = build_revision_file.read()
-       build_revision_file.close()
-
-       version_number_match = re.search(r'APP_VERSION_NUMBER +?"(.*?)"', version_info)
-       if version_number_match != None:
-          version_number = version_number_match.group(1)
-          build_revision_match = re.search(r'BUILD_REVISION +?"(.*?)"', revision_info)
-          if build_revision_match != None:
-             build_revision = build_revision_match.group(1) 
-
-             return version_number + " Build " + build_revision
-
-       return "Unknown"
-
-    def update_app_version_number(self):
-        if not self.update_version_number:
-            return
-
-        #get version # from last commit revision of working copy
-        process = subprocess.Popen(["svnversion","-c", "-n", "."], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
-        (stdout, stderr) = process.communicate()
-        if process.returncode == None:
-            #An unusual error occurred
-            raise ScriptException("Problem running svnversion", 1300)
-        
-        version_number = stdout.split(":")[1]
-        if version_number.endswith("S"):
-            version_number = version_number[:-1]
-        if version_number.endswith("M"):
-            version_number = version_number[:-1]
-            
-        print "Setting Version # of Opticks to", version_number
-        todays_date = datetime.date.today()
-        field_replace = {
-           'APP_VERSION_NUMBER':'"OpticksAutoBuild%s"' % version_number,
-           'APP_RELEASE_DATE_YEAR':todays_date.year,
-           'APP_RELEASE_DATE_MONTH':todays_date.month,
-           'APP_RELEASE_DATE_DAY':todays_date.day}
-
+    def __update_app_version_h(self, fields_to_replace):
         app_version = open(os.path.join("application", "PlugInUtilities", "AppVersion.h"), "rt")
         version_info = app_version.readlines()
         app_version.close()
         app_version = open(os.path.join("application", "PlugInUtilities", "AppVersion.h"), "wt")
         for vline in version_info:
-           fields = vline.strip().split()
-           if len(fields) >= 3 and fields[0] == '#define' and fields[1] in field_replace:
-              app_version.write('#define %s %s\n' % (fields[1], field_replace[fields[1]]))
-           else:
-              app_version.write(vline)
+            fields = vline.strip().split()
+            if len(fields) >= 3 and fields[0] == '#define' and fields[1] in fields_to_replace:
+                app_version.write('#define %s %s\n' % (fields[1], fields_to_replace[fields[1]]))
+            else:
+                app_version.write(vline)
         app_version.close()
 
         #update modification time to force compilation to occur
         #even in incremental mode
         os.utime(os.path.join("application", "Utilities", "ConfigurationSettingsImp.cpp"), None)
-                
+       
+       
+    def get_current_app_version(self):
+        # Try to update the build revision, since it might be stale
+        update_build_rev = subprocess.Popen(["update-build-revision.py"], shell=True)
+        update_build_rev.wait()
+
+        # Read the current build revision directly from the file.
+        build_revision_path = os.path.join("application", "Utilities", "BuildRevision.h")
+        if not(os.path.exists(build_revision_path)):
+            return "Unknown"
+        build_revision_file = open(build_revision_path, "rt")
+        revision_info = build_revision_file.read()
+        build_revision_file.close()
+
+        # Read the app version directly from the file
+        version_number = self.__get_app_version_only()
+        if version_number != None:
+            build_revision_match = re.search(r'BUILD_REVISION +?"(.*?)"', revision_info)
+            if build_revision_match != None:
+                build_revision = build_revision_match.group(1) 
+
+            # Concat the version number and build revision
+            return version_number + " Build " + build_revision
+
+        return "Unknown"
+
+    def update_app_version_number(self, scheme, new_version, release_date):
+        if scheme == None or scheme == "none":
+            return
+
+        # Read the app version directly from the file
+        version_number = self.__get_app_version_only()
+        if version_number == None:
+            raise ScriptException("Could not determine the current app version while attempting to update the app version", 1500)
+        print "Original version # of Opticks was", version_number
+        version_number = commonutils.update_app_version(version_number, scheme, new_version)
+        print "Setting version # of Opticks to", version_number
+
+        # Update AppVersion.h
+        fields_to_replace = dict()
+        fields_to_replace["APP_VERSION_NUMBER"] = '"' + version_number + '"'
+        if scheme == "production":
+            fields_to_replace["APP_IS_PRODUCTION_RELEASE"] = "true"
+            print "Making Opticks a production release"
+        else:
+            fields_to_replace["APP_IS_PRODUCTION_RELEASE"] = "false"
+            print "Making Opticks a not for production release"
+
+        date_obj = None
+        if scheme == "nightly" or release_date == "today":
+            date_obj = datetime.date.today()
+        elif release_date != None:
+            print release_date
+            date_obj = None
+            try:
+                date_tuple = time.strptime(release_date, "%Y-%m-%d")
+                date_obj = datetime.date(*date_tuple[0:3])
+            except:
+                print "ERROR: The release date is not in the proper format, use YYYY-MM-DD."
+
+        if date_obj != None:
+            fields_to_replace["APP_RELEASE_DATE_YEAR"] = str(date_obj.year)
+            fields_to_replace["APP_RELEASE_DATE_MONTH"] = str(date_obj.month)
+            fields_to_replace["APP_RELEASE_DATE_DAY"] = str(date_obj.day)
+            print "Updating the release date to %s" % (date_obj.isoformat())
+        else:
+            print "The release date has not been updated"
+
+        self.__update_app_version_h(fields_to_replace)
+
     def populate_environ_for_dependencies(self, env):
         env["OPTICKSDEPENDENCIES"] = self.depend_path
         if self.arcsdk_path:
             env["ARCSDK"] = self.arcsdk_path
-        
+
     def build_executable(self, clean_build_first, build_opticks, concurrency):
         #No return code, throw exception or ScriptException
         if build_opticks == "none":
@@ -126,9 +145,6 @@ class Builder:
             
         print_env(buildenv)
         sys.stdout.flush()
-
-        #Update version #
-        self.update_app_version_number()
 
         if clean_build_first:                
             echo("Cleaning Opticks first")
@@ -396,7 +412,7 @@ class SolarisBuilder(Builder):
         #Build Opticks Core
         self.run_scons(os.path.abspath("application"), self.build_debug_mode, concurrency, env, clean, ["core"])
         #Build PlugIns
-        self.run_scons(os.path.abspath("application/PlugIns/src"), self.build_debug_mode, concurrency, env, clean, ["ignore=PlugInSamplerOoModtran"])
+        self.run_scons(os.path.abspath("application/PlugIns/src"), self.build_debug_mode, concurrency, env, clean, [])
         if build_opticks != "core":
             self.run_scons(os.path.abspath("application"), self.build_debug_mode, concurrency, env, clean, ["arcproxy"])
             
@@ -541,11 +557,13 @@ def main():
     if not os.path.exists(vs_path):
        vs_path = "C:\\Program Files\\Microsoft Visual Studio 8"
     options.add_option("--visualstudio", dest="visualstudio", action="store", type="string", default=vs_path)
-    options.add_option("-m", "--mode", dest="mode", action="store", type="choice", choices=["debug", "release"], default="release")
-    options.add_option("--arch", dest="arch", action="store", type="choice", choices=["32","64"], default="64")
+    options.add_option("-m", "--mode", dest="mode", action="store", type="choice", choices=["debug", "release"], default="release", help="Use debug or release.")
+    options.add_option("--arch", dest="arch", action="store", type="choice", choices=["32","64"], default="64", help="Use 32 or 64.")
     options.add_option("--clean", dest="clean", action="store_true", default=False)
-    options.add_option("--build-opticks", dest="buildOpticks", action="store", type="choice", choices=["all","core","none"], default="none")
-    options.add_option("--version-number", dest="version_number", action="store", type="choice", choices=["current", "from-svn"], default="current")
+    options.add_option("--build-opticks", dest="buildOpticks", action="store", type="choice", choices=["all","core","none"], default="none", help="Use all, core or none.")
+    options.add_option("--update-version", dest="update_version_scheme", action="store", type="choice", choices=["milestone", "nightly", "none", "production", "rc", "unofficial"], default="none", help="Use milestone, nightly, production, rc, unofficial or none.  When using milestone, production, or rc you will need to use --new-version to provide the complete version # and --release-date to set the release date.  Using production will mark the application as production, all others will mark the application as not for production.  The unofficial and nightly will mutate the existing version #, so --new-version is not required.")
+    options.add_option("--new-version", dest="new_version", action="store", type="string", default=None)
+    options.add_option("--release-date", dest="release_date", action="store", type="string", default=None, help="Use YYYY-MM-DD or the special value, today")
     options.add_option("--prep",dest="prep",action="store_true",default=False)
     options.add_option("--dependent-libraries",dest="dependent_libraries_dir",action="store",default="Release")
     options.add_option("--defaultDir",dest="defaultDir",action="store",default=None)
@@ -582,7 +600,8 @@ def main():
         if builder == None:
            raise ScriptException("Unable to create builder for platform", 1030)
 
-        builder.set_version_number(options.version_number)
+        builder.update_app_version_number(options.update_version_scheme, options.new_version, options.release_date)
+
         builder.build_executable(options.clean, options.buildOpticks, options.concurrency)
             
         if options.buildDoxygen:

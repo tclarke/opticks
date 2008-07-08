@@ -18,22 +18,25 @@ def main():
         if len(build_rev_split) == 3:
             existing_build_rev = build_rev_split[2]
             existing_build_rev = existing_build_rev[1:-1]
-        
-    process = subprocess.Popen(["svnversion", "-c", "-n", "."], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
-    (stdout, stderr) = process.communicate()
-    if process.returncode != 0:
-        print "Problem running svnversion"
-        return 1000
-    version_line_split = stdout.split(":")
-    if len(version_line_split) != 2:
-        print "Unexpected output from svnversion"
-        return 1001
-    version_number = version_line_split[1]
-    if version_number.endswith("S"):
-        print "Switched working copy not currently supported"
-        return 1002
-    if version_number.endswith("M"):
-        version_number = version_number[:-1] + "*"
+
+    if os.path.exists(".svn") or os.path.exists("_svn"):
+       process = subprocess.Popen(["svnversion", "-c", "-n", "."], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+       (stdout, stderr) = process.communicate()
+       if process.returncode != 0:
+           print "Problem running svnversion"
+           return 1000
+       version_line_split = stdout.split(":")
+       if len(version_line_split) != 2:
+           print "Unexpected output from svnversion"
+           return 1001
+       version_number = version_line_split[1]
+       if version_number.endswith("S"):
+           print "Switched working copy not currently supported"
+           return 1002
+       if version_number.endswith("M"):
+           version_number = version_number[:-1] + "*"
+    else:
+       version_number = "NoRev"
     if existing_build_rev != version_number:
         build_rev_handle = open(build_rev_file, "w")
         build_rev_handle.write('#define BUILD_REVISION "%s"' % (version_number))
