@@ -7,7 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "AppVersion.h"
 #include "DummyCustomImporter.h"
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
@@ -16,9 +15,9 @@ using namespace std;
 
 DummyCustomImporter::DummyCustomImporter()
 {
-   setCreator("Ball Aerospace & Technologies Corp.");
-   setCopyright("Copyright (c) 2007 BATC");
-   setVersion(APP_VERSION_NUMBER);
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setProductionStatus(false);
    setName("Dummy Custom Importer");
    setDescription("DummyCustomImporter");

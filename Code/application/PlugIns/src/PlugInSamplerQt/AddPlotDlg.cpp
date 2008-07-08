@@ -17,7 +17,6 @@
 #include "AoiElement.h"
 #include "Arrow.h"
 #include "ApplicationServices.h"
-#include "AppVersion.h"
 #include "BitMask.h"
 #include "DesktopServices.h"
 #include "DimensionDescriptor.h"
@@ -25,6 +24,7 @@
 #include "LayerList.h"
 #include "ModelServices.h"
 #include "ObjectFactory.h"
+#include "PlotManager.h"
 #include "PlotView.h"
 #include "PlotWidget.h"
 #include "Point.h"
@@ -582,7 +582,7 @@ void AddPlotDlg::accept()
    QString strName = getName();
    if (strName.isEmpty() == true)
    {
-      QMessageBox::critical(this, APP_NAME, "Please enter a name for the plot!");
+      QMessageBox::critical(this, PLOT_MANAGER_NAME, "Please enter a name for the plot!");
       return;
    }
 

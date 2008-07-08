@@ -53,10 +53,6 @@
 		Value="$(OPTICKSDEPENDENCIES)\minizip"
 	/>
 	<UserMacro
-		Name="OOMODTRAN"
-		Value="$(OPTICKSDEPENDENCIES)\OoModtran"
-	/>
-	<UserMacro
 		Name="XQILLA"
 		Value="$(OPTICKSDEPENDENCIES)\xqilla"
 	/>

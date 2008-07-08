@@ -91,7 +91,7 @@ def cp_dir(source_dir, destination_dir, suffixes_to_match = [], exclude_matches 
             
             shutil.copy2(source_file, dst_path)
       
-def copyWindowsBuild(opticks_code_dir,dest_dir,libs,plugins,is_32_bit,is_debug):
+def copyWindowsBuild(opticks_code_dir,sdk_dest_dir,win_debug_dest_dir,libs,plugins,is_32_bit,is_debug):
    if is_32_bit:
       arch = "Win32"
    else:
@@ -104,24 +104,24 @@ def copyWindowsBuild(opticks_code_dir,dest_dir,libs,plugins,is_32_bit,is_debug):
 
    executables = ["Opticks","OpticksBatch"]
    for the_exec in executables:
-      cp_file2(opticks_code_dir, dest_dir, join(binaries_dir,"Bin"), the_exec+".exe")
+      cp_file2(opticks_code_dir, sdk_dest_dir, join(binaries_dir,"Bin"), the_exec+".exe")
 
    for the_lib in libs:
-      cp_file2(opticks_code_dir, dest_dir, join(binaries_dir,"Lib"), the_lib + ".lib")
+      cp_file2(opticks_code_dir, sdk_dest_dir, join(binaries_dir,"Lib"), the_lib + ".lib")
 
    for the_plugin in plugins:
-      cp_file2(opticks_code_dir, dest_dir, join(binaries_dir,"PlugIns"), the_plugin + ".dll")
+      cp_file2(opticks_code_dir, sdk_dest_dir, join(binaries_dir,"PlugIns"), the_plugin + ".dll")
 
-   cp_dir2(opticks_code_dir, dest_dir, join(binaries_dir,"PlugIns","ArcProxy"), suffixes_to_match = [".dll", ".exe"])
+   cp_dir2(opticks_code_dir, sdk_dest_dir, join(binaries_dir,"PlugIns","ArcProxy"), suffixes_to_match = [".dll", ".exe"])
 
    if is_debug:
       #Copy the pdbs for the libs
       all_pdbs = executables + libs + plugins
       for the_file in all_pdbs:
          pdbs_dir = join(binaries_dir,"pdbs") 
-         cp_file2(opticks_code_dir, dest_dir, pdbs_dir, the_file + ".pdb") 
+         cp_file2(opticks_code_dir, win_debug_dest_dir, pdbs_dir, the_file + ".pdb") 
 
-def copyDirIntoZip(zip_file, parent_src_dir, the_dir, prefix_dir):
+def copyDirIntoZip(zip_file, parent_src_dir, the_dir, prefix_dir, keep_the_dir=True):
    src_dir = join(parent_src_dir, the_dir)
    for root, dirs, files in os.walk(src_dir):
       try:
@@ -132,7 +132,10 @@ def copyDirIntoZip(zip_file, parent_src_dir, the_dir, prefix_dir):
          dirs.remove("_svn")
       except:
          pass
-      the_zip_dir = root[len(parent_src_dir)+1:]
+      if keep_the_dir:
+         the_zip_dir = root[len(parent_src_dir)+1:]
+      else:
+         the_zip_dir = root[len(parent_src_dir) + len(the_dir) + 1:]
       for the_file in files:
          source_file = join(root,the_file)
          linked_file = commonutils.isSubversionSoftLink(source_file)
@@ -140,7 +143,7 @@ def copyDirIntoZip(zip_file, parent_src_dir, the_dir, prefix_dir):
             source_file = linked_file
          zip_file.write(source_file, join(prefix_dir,the_zip_dir,the_file))
          
-def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir):
+def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir, package_dir):
    if opticks_dependencies_dir == None:
       if os.environ.has_key("OPTICKSDEPENDENCIES"):
          opticks_dependencies_dir = os.environ["OPTICKSDEPENDENCIES"]
@@ -151,13 +154,18 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir):
    if not(os.path.exists(opticks_dependencies_dir)):
       print "ERROR: The path to the Opticks dependencies does not exist %s, see -d"
 
-   out_dir = os.path.abspath(join("Toolkit", "Temp"))
+   out_dir = os.path.abspath(join("Toolkit", "SDK-Temp"))
+   win_debug_dir = os.path.abspath(join("Toolkit", "WinDebug-Temp"))
    if os.path.exists(out_dir):
       shutil.rmtree(out_dir, False)
+
+   if os.path.exists(win_debug_dir):
+      shutil.rmtree(win_debug_dir, False)
       
    ##### Create all the output directories
    os.makedirs(out_dir)
 
+   cp_file3("README-sdk.txt", os.path.join(out_dir, "README.txt"))
    s_app = os.path.abspath(os.path.join(opticks_code_dir, "application"))
    s_release = os.path.abspath(os.path.join(opticks_code_dir, "Release"))
    d_app = join(out_dir,"Application")
@@ -172,7 +180,6 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir):
       compile_settings_suffix = [".py"]
    cp_dir2(s_app, d_app, "CompileSettings", suffixes_to_match=compile_settings_suffix)
    cp_dir2(s_app, d_app, "PlugInLib", suffixes_to_match=interface_suffixes)
-   cp_file2(s_app, d_app, "", "Building Sample PlugIns.txt")
    cp_dir2(s_app, d_app, "HdfPlugInLib", suffixes_to_match=interface_suffixes)
    cp_dir2(s_app, d_app, "NitfPlugInLib", suffixes_to_match=interface_suffixes)
    
@@ -186,21 +193,40 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir):
    cp_dir2(s_app, d_app, join("PlugIns","src","PlugInSamplerQt"), suffixes_to_match=source_suffixes)
    cp_dir2(s_app, d_app, join("PlugIns","src","PlugInSampler"), suffixes_to_match=source_suffixes)
    cp_dir2(s_app, d_app, join("PlugIns","src","PlugInSamplerHdf"), suffixes_to_match=source_suffixes)
-   cp_dir2(s_app, d_app, join("PlugIns","src","PlugInSamplerOoModtran"), suffixes_to_match=source_suffixes)
-   cp_dir2(s_app, d_app, join("PlugIns","src","Aspam"), suffixes_to_match=source_suffixes)
    cp_dir2(s_app, d_app, join("PlugIns","src","Tutorial"), suffixes_to_match=source_suffixes)
 
    #Copy the ModuleManager.cpp to the right spot in the Toolkit
    cp_file(join(s_release, "Toolkit", "src", "ModuleManager.cpp"), join(out_dir, "Src"))
 
+   win_debug_code_dir = os.path.join(win_debug_dir, "Code")
+   if is_windows():
+      svn_export_code_args = list()
+      svn_export_code_args.append("svn")
+      svn_export_code_args.append("export")
+      svn_export_code_args.append("-r")
+      svn_export_code_args.append("BASE")
+      svn_export_code_args.append(os.path.abspath(opticks_code_dir))
+      svn_export_code_args.append(win_debug_code_dir)
+      svn_export_code = subprocess.Popen(svn_export_code_args)
+      retcode = svn_export_code.wait()
+      if retcode != 0:
+         print "ERROR: Unable to export code."
+
+      cp_file3("README-pdb-source.txt", os.path.join(win_debug_dir, "README.txt"))
+
+
    #Copy dependencies
-   zip = zipfile.ZipFile(join(out_dir,"Dependencies.zip"), "w", zipfile.ZIP_DEFLATED)
-   copyDirIntoZip(zip, opticks_dependencies_dir,"pthreads","Dependencies") 
-   copyDirIntoZip(zip, opticks_dependencies_dir,"Boost","Dependencies")
-   copyDirIntoZip(zip, opticks_dependencies_dir,"Xerces","Dependencies")
-   copyDirIntoZip(zip, opticks_dependencies_dir,"Hdf5","Dependencies")
-   copyDirIntoZip(zip, opticks_dependencies_dir,"Hdf4","Dependencies")
-   zip.close()
+   svn_export_dependencies_args = list()
+   svn_export_dependencies_args.append("svn")
+   svn_export_dependencies_args.append("export")
+   svn_export_dependencies_args.append("-r")
+   svn_export_dependencies_args.append("BASE")
+   svn_export_dependencies_args.append(os.path.abspath(opticks_dependencies_dir))
+   svn_export_dependencies_args.append(join(out_dir, "Dependencies"))
+   svn_export_dependencies = subprocess.Popen(svn_export_dependencies_args)
+   retcode = svn_export_dependencies.wait()
+   if retcode != 0:
+      print "ERROR: Unable to export dependencies"
 
    ##### Run Doxygen to generate the html documentation
    retcode = subprocess.Popen([join(opticks_code_dir,"build.py"), "--build-doxygen"], shell=True).wait()
@@ -223,12 +249,11 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir):
    if is_windows():
       cp_file2(s_app, d_app, "", "SamplePlugIns.sln")
       cp_file2(s_app, d_app, "PlugInManager", "PlugInModule.def")
-      cp_dir2(s_app, d_app, join("PlugIns","src","PlugInSamplerQt","windows"), suffixes_to_match=source_suffixes)
 
       plugins = plugins + sample_plugins
       #Win32 Build
-      copyWindowsBuild(opticks_code_dir,out_dir,libs,plugins,True,False)
-      copyWindowsBuild(opticks_code_dir,out_dir,libs,plugins,True,True)
+      copyWindowsBuild(opticks_code_dir,out_dir,win_debug_code_dir, libs,plugins,True,False)
+      copyWindowsBuild(opticks_code_dir,out_dir,win_debug_code_dir,libs,plugins,True,True)
 
       dp_list = commonutils.get_dependencies(opticks_dependencies_dir,"Windows",True,"Win32")
       commonutils.copy_dependencies(dp_list, join(out_dir,"Build","Binaries-win32-debug","Bin"))
@@ -236,8 +261,8 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir):
       commonutils.copy_dependencies(dp_list, join(out_dir,"Build","Binaries-win32-release","Bin"))
 
       #Win64 Build
-      copyWindowsBuild(opticks_code_dir,out_dir,libs,plugins,False,False)
-      copyWindowsBuild(opticks_code_dir,out_dir,libs,plugins,False,True)
+      copyWindowsBuild(opticks_code_dir,out_dir,win_debug_code_dir,libs,plugins,False,False)
+      copyWindowsBuild(opticks_code_dir,out_dir,win_debug_code_dir,libs,plugins,False,True)
       dp_list = commonutils.get_dependencies(opticks_dependencies_dir,"Windows",True,"x64")
       commonutils.copy_dependencies(dp_list, join(out_dir,"Build","Binaries-x64-debug","Bin"))
       dp_list = commonutils.get_dependencies(opticks_dependencies_dir,"Windows",False,"x64")
@@ -253,7 +278,39 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir):
       
       for the_plugin in sample_plugins:
          cp_file2(opticks_code_dir, out_dir, join(binaries_dir,"PlugIns"), "%s.so" % (the_plugin))
-      
+
+   if package_dir != None and os.path.exists(package_dir):
+      if is_windows():
+         zip = zipfile.ZipFile(join(package_dir,"opticks-sdk-%s-windows.zip" % (commonutils.get_app_version_only(opticks_code_dir))), "w", zipfile.ZIP_DEFLATED)
+         copyDirIntoZip(zip, os.path.abspath("Toolkit"), "SDK-Temp", ".", False)
+         zip.close()
+
+         zip = zipfile.ZipFile(join(package_dir,"opticks-pdb-sourcecode-%s-windows.zip" % (commonutils.get_app_version_only(opticks_code_dir))), "w", zipfile.ZIP_DEFLATED)
+         copyDirIntoZip(zip, os.path.abspath("Toolkit"), "WinDebug-Temp", ".", False)
+         zip.close()
+      else:
+         tar_args = list()
+         tar_args.append("tar")
+         tar_args.append("-cvf")
+         tar_args.append("-")
+         tar_args.append(".")
+         tar = subprocess.Popen(tar_args, stdout=subprocess.PIPE, cwd=out_dir)
+
+         output_tar_bz2 = os.path.abspath(os.path.join(package_dir, "opticks-sdk-%s-sol10-sparc.tar.bz2" % (commonutils.get_app_version_only(opticks_code_dir)))) 
+         output_handle = open(output_tar_bz2, "wb")
+         bzip2_args = list()
+         bzip2_args.append("bzip2")
+         bzip2_args.append("-c")
+         bzip2 = subprocess.Popen(bzip2_args, stdin=tar.stdout, stdout=output_handle)
+
+         tar_ret = tar.wait()
+         bzip_ret = bzip2.wait()
+         output_handle.close()
+         if tar_ret != 0:
+            return tar_ret
+         if bzip_ret != 0:
+            return bzip_ret
+
 def is_windows():
    """Determine if this script is executing on the Windows operating system.
    @return: Return True if script is executed on Windows, False otherwise.
@@ -273,6 +330,7 @@ def parse_args():
    parser.add_option("-c", "--code-dir", action="store", dest="opticks_code_dir",
          default=None, help="The path to the checkout of the Code folder from the Opticks trunk.")
    parser.add_option("-d", action="store", dest="dependencies", default=None, help="The path to Opticks dependencies")   
+   parser.add_option("--package-dir", action="store", dest="package_dir", default=None, help="The directory where the toolkit output should be stored.  This directory must already exist.")
 
    #Parse the optional arguments, plus any additional arguments present
    #after optional arguments
@@ -297,5 +355,5 @@ if __name__ == "__main__":
    sys.path.append(args.opticks_code_dir)
    import commonutils
    
-   retcode = create_toolkit_zip(args.opticks_code_dir, args.dependencies) 
+   retcode = create_toolkit_zip(args.opticks_code_dir, args.dependencies, args.package_dir) 
    sys.exit(retcode)

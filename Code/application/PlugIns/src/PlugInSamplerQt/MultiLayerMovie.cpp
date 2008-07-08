@@ -10,7 +10,6 @@
 #include "Animation.h"
 #include "AnimationController.h"
 #include "AnimationServices.h"
-#include "AppVersion.h"
 #include "DataAccessor.h"
 #include "DataAccessorImpl.h"
 #include "DesktopServices.h"
@@ -33,9 +32,9 @@ MultiLayerMovie::MultiLayerMovie() :
    mpWindow(NULL),
    mpLayer1(NULL), mpLayer2(NULL), mpLayer3(NULL)
 {
-   setCreator("Ball Aerospace & Technologies Corp.");
-   setCopyright("Copyright (c) 2007 BATC");
-   setVersion(APP_VERSION_NUMBER);
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setProductionStatus(false);
    setMenuLocation("[Demo]\\Multi-Layer Movie");
    setName("Multi-Layer Movie");

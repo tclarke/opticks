@@ -7,7 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "AppVersion.h"
 #include "DataAccessor.h"
 #include "DataAccessorImpl.h"
 #include "DimensionDescriptor.h"
@@ -22,9 +21,9 @@
 
 DummyCustomAlgorithm::DummyCustomAlgorithm()
 {
-   setCreator("Ball Aerospace & Technologies Corp.");
-   setCopyright("Copyright (c) 2007 BATC");
-   setVersion(APP_VERSION_NUMBER);
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setProductionStatus(false);
    setName("Dummy Custom Algorithm");
    setDescription("DummyCustomAlgorithm");

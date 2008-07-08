@@ -8,7 +8,6 @@
  */
 #include <QtGui/QApplication>
 #include <QtGui/QMessageBox>
-#include "AppVersion.h"
 #include "DesktopServices.h"
 #include "MessageLogResource.h"
 #include "MenuAndToolBarTest.h"
@@ -18,9 +17,9 @@
 
 MenuAndToolBarTest::MenuAndToolBarTest()
 {
-   setCreator("Ball Aerospace & Technologies Corp.");
-   setCopyright("Copyright (c) 2007 BATC");
-   setVersion(APP_VERSION_NUMBER);
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setProductionStatus(false);
    ViewerShell::setName( "Menu And ToolBar Test" );
    setDescription( "Verifies MPR2 Requirements 6, 115, 259, and 260." );

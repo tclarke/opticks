@@ -28,8 +28,9 @@ using namespace std;
 RasterTimingTest::RasterTimingTest()
 {
    AlgorithmShell::setName("Raster Timing Test");
-   setCreator("Ball Aerospace & Technologies, Corp.");
-   setCopyright("Copyright © 2007, BATC");
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setDescription("Runs a test to see how many frames per second a raster layer can be updated.");
    setProductionStatus(false);
    setDescriptorId("{8BCBD0E4-8EFD-49b6-AC65-8D59C1049A94}");

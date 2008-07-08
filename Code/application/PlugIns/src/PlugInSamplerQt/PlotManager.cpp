@@ -10,7 +10,6 @@
 #include <QtGui/QBitmap>
 #include <QtGui/QMenu>
 
-#include "AppVersion.h"
 #include "PlotManager.h"
 #include "DesktopServices.h"
 #include "DockWindow.h"
@@ -56,9 +55,10 @@ static const char* const PlotManagerIcon[] =
 PlotManager::PlotManager() :
    mpWindowAction(NULL)
 {
-   AlgorithmShell::setName("Plot Manager");
-   setCreator("Ball Aerospace & Technologies, Corp.");
-   setCopyright(APP_COPYRIGHT);
+   AlgorithmShell::setName(PLOT_MANAGER_NAME);
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setDescription("Provides access to plot windows and their plots.");
    setProductionStatus(false);
    setDescriptorId("{2204D4DE-7F7E-455f-B4AB-CD730A9AA0A2}");
@@ -90,7 +90,7 @@ PlotManager::~PlotManager()
       }
    }
 
-   Window* pWindow = mpDesktop->getWindow("Plot Manager", DOCK_WINDOW);
+   Window* pWindow = mpDesktop->getWindow(PLOT_MANAGER_NAME, DOCK_WINDOW);
    if (pWindow != NULL)
    {
       pWindow->detach(SIGNAL_NAME(DockWindow, Shown), Slot(this, &PlotManager::windowShown));
@@ -101,7 +101,7 @@ PlotManager::~PlotManager()
 
 void PlotManager::windowHidden(Subject& subject, const std::string &signal, const boost::any& v)
 {
-   DockWindow* pWindow = static_cast<DockWindow*>(mpDesktop->getWindow("Plot Manager", DOCK_WINDOW));
+   DockWindow* pWindow = static_cast<DockWindow*>(mpDesktop->getWindow(PLOT_MANAGER_NAME, DOCK_WINDOW));
    if (pWindow != NULL)
    {
       if ((dynamic_cast<DockWindow*>(&subject) == pWindow) && (mpWindowAction != NULL))
@@ -113,7 +113,7 @@ void PlotManager::windowHidden(Subject& subject, const std::string &signal, cons
 
 void PlotManager::windowShown(Subject& subject, const std::string &signal, const boost::any& v)
 {
-   DockWindow* pWindow = static_cast<DockWindow*>(mpDesktop->getWindow("Plot Manager", DOCK_WINDOW));
+   DockWindow* pWindow = static_cast<DockWindow*>(mpDesktop->getWindow(PLOT_MANAGER_NAME, DOCK_WINDOW));
    if (pWindow != NULL)
    {
       if ((dynamic_cast<DockWindow*>(&subject) == pWindow) && (mpWindowAction != NULL))
@@ -181,7 +181,7 @@ bool PlotManager::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
          mpWindowAction->setAutoRepeat(false);
          mpWindowAction->setIcon(windowIcon);
          mpWindowAction->setCheckable(true);
-         mpWindowAction->setToolTip("Plot Manager");
+         mpWindowAction->setToolTip(PLOT_MANAGER_NAME);
          mpWindowAction->setStatusTip("Toggles the display of the Plot Manager window");
          connect(mpWindowAction, SIGNAL(triggered(bool)), this, SLOT(displayPlotManager(bool)));
 
@@ -199,10 +199,10 @@ bool PlotManager::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    if (mpWindowAction != NULL)
    {
       bool created = true;
-      DockWindow* pWindow  = static_cast<DockWindow*>(mpDesktop->createWindow("Plot Manager", DOCK_WINDOW));
+      DockWindow* pWindow  = static_cast<DockWindow*>(mpDesktop->createWindow(PLOT_MANAGER_NAME, DOCK_WINDOW));
       if (pWindow == NULL)
       {
-         pWindow  = static_cast<DockWindow*>(mpDesktop->getWindow("Plot Manager", DOCK_WINDOW));
+         pWindow  = static_cast<DockWindow*>(mpDesktop->getWindow(PLOT_MANAGER_NAME, DOCK_WINDOW));
          created = false;
       }
       if (pWindow != NULL)
@@ -232,7 +232,7 @@ bool PlotManager::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 
 void PlotManager::displayPlotManager(bool bDisplay)
 {
-   DockWindow* pWindow = static_cast<DockWindow*>(mpDesktop->getWindow("Plot Manager", DOCK_WINDOW));
+   DockWindow* pWindow = static_cast<DockWindow*>(mpDesktop->getWindow(PLOT_MANAGER_NAME, DOCK_WINDOW));
    if (pWindow != NULL)
    {
       if (bDisplay == true)

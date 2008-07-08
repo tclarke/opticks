@@ -12,7 +12,6 @@
 
 #include <QtGui/QWidget>
 
-#include "AppVersion.h"
 #include "ConfigurationSettings.h"
 
 class QCheckBox;
@@ -59,19 +58,19 @@ public:
 
    static const std::string& getCreator()
    {
-      static std::string var = "Ball Aerospace & Technologies Corp.";
+      static std::string var = "Opticks Community";
       return var;
    }
 
    static const std::string& getCopyright()
    {
-      static std::string var = APP_COPYRIGHT_MSG;
+      static std::string var = "Copyright (C) 2008, Ball Aerospace & Technologies Corp.";
       return var;
    }
 
    static const std::string& getVersion()
    {
-      static std::string var = APP_VERSION_NUMBER;
+      static std::string var = "Sample";
       return var;
    }
 

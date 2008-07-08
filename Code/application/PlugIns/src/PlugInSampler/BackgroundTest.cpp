@@ -7,12 +7,10 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "AppVersion.h"
 #include "BackgroundTest.h"
 #include "bthread.h"
 #include "AppConfig.h"
 #include "AppVerify.h"
-#include "AppVersion.h"
 #include "DesktopServices.h"
 #include "MessageLogResource.h"
 #include "ModuleManager.h"
@@ -38,9 +36,9 @@ BackgroundTest::BackgroundTest() :
       mpProgress(NULL),
       mpWorkerThread(NULL)
 {
-   setCreator("Ball Aerospace & Technologies Corp.");
-   setCopyright(APP_COPYRIGHT);
-   setVersion(APP_VERSION_NUMBER);
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setName("Background Execution Test");
    setDescription("Demonstrates creation and cleanup of a background execution plug-in.");
    setShortDescription("Background execution demonstration and test");

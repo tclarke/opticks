@@ -3,8 +3,57 @@ from os.path import join
 import os.path
 import shutil
 import os
+import re
+import datetime
 
-__all__ = ["get_dependencies"]
+__all__ = ["get_dependencies", "get_app_version_only"]
+
+def update_app_version(old_version, scheme, new_version):
+    version_number = old_version
+    if new_version != None:
+        version_number = new_version 
+
+    if scheme == "nightly" or scheme == "unofficial":
+        #strip off any suffix from the version #
+        version_parts = version_number.split(".")
+        for count in range(0, len(version_parts) - 1):
+            if not(version_parts[count].isdigit()):
+                raise ScriptException("The current app version # is improperly formatted.", 1700)
+        last_part = version_parts[-1]
+        match_obj = re.match("^\d+(\D*)", last_part)
+        if match_obj == None:
+            raise ScriptException("The current app version # is improperly formatted.", 1800)
+        version_parts[-1] = last_part[:match_obj.start(1)]
+        version_number = ".".join(version_parts)
+
+        #append on the appropriate suffix to the version #
+        if scheme == "unofficial":
+            version_number = version_number + "Unofficial"
+        elif scheme == "nightly":
+            todays_date = datetime.date.today()
+            today_str = todays_date.strftime("%Y%m%d")              
+            if len(today_str) != 8:
+                raise ScriptException("This platform does not properly pad month and days to 2 digits when using strftime.  Please update this script to address this problem", 1600)
+            version_number = version_number + "Nightly%s" % (today_str)
+    elif new_version == None:
+        print "You need to use --new-version to provide the version # when using the production, rc, or milestone scheme"
+
+    return version_number
+   
+def get_app_version_only(opticks_code_folder):
+    app_version_path = os.path.join(opticks_code_folder, "application", "PlugInUtilities", "AppVersion.h") 
+    if not(os.path.exists(app_version_path)):
+        return None 
+    app_version = open(app_version_path, "rt")
+    version_info = app_version.read()
+    app_version.close()
+
+    version_number_match = re.search(r'APP_VERSION_NUMBER +?"(.*?)"', version_info)
+    if version_number_match != None:
+        version_number = version_number_match.group(1)
+        return version_number
+
+    return None 
 
 def isSubversionSoftLink(srcname):
    the_file = None
@@ -66,7 +115,6 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
       dp_list.append([join(dp,"Qt/plugins/solaris-sparc/imageformats/libqsvg.so"),"imageformats"])
       dp_list.append([join(dp,"Qt/plugins/solaris-sparc/imageformats/libqtiff.so"),"imageformats"])
       dp_list.append([join(dp,"ossim/lib/solaris-sparc/libossim.so.1"),"."])
-      dp_list.append([join(dp,"OoModtran/lib/solaris-sparc/libOoModtran.so"),"."])
       dp_list.append([join(dp,"ehs/lib/solaris-sparc/libehs.so.0"),"."])
    elif platform == "Windows":
       temp_list = list()

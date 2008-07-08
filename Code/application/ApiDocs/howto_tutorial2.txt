@@ -14,6 +14,10 @@ We've already seen a Service used in \ref howto_tutorial1 "Tutorial 1".
 Look at the Service reference documentation for a list of available services.
 In this tutorial we'll explore a couple of the more often used resource types, message log resources and plug-in resources.
 
+If you would like to run this tutorial as you follow along with the code, see \ref RunningTutorial.
+If you would like to build and experiment with this tutorial as you follow along with the code, see \ref howto_buildtutorials.
+If you are running this tutorial in Opticks, you will need to select "Tutorial 2" from the Tutorial toolbar to execute it.
+
 \section message_log Message Log Resources
 The %Opticks message log can contain two types of entries, steps and messages.
 A message is often used for stand alone error reporting and debugging.

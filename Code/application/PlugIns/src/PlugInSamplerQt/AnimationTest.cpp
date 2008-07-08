@@ -27,7 +27,6 @@
 #include "AnimationServices.h"
 #include "AnimationTest.h"
 #include "AnimationToolBar.h"
-#include "AppVersion.h"
 #include "DesktopServices.h"
 #include "Executable.h"
 
@@ -45,8 +44,9 @@ AnimationTestPlugIn::AnimationTestPlugIn() :
    mpDialog(NULL)
 {
    setName("AnimationTest Dialog");
-   setCreator("Ball Aerospace & Technologies Corp.");
-   setCopyright(APP_COPYRIGHT);
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setDescription("Tests various Animation-related functionality.");
    setShortDescription("Tests various Animation-related functionality.");
    setDescriptorId("{6FA89EF4-6029-47db-B883-E02A3F23B2D0}");

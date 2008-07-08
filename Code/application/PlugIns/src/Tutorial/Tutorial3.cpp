@@ -40,10 +40,10 @@ Tutorial3::Tutorial3()
 {
    setDescriptorId("{2073076C-2676-45B9-AA7B-A2607104655C}");
    setName("Tutorial 3");
-   setVersion("1.0");
    setDescription("Accessing cube data.");
-   setCreator("The Opticks Team");
-   setCopyright("Copyright 2008");
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setProductionStatus(false);
    setType("Sample");
    setSubtype("Statistics");

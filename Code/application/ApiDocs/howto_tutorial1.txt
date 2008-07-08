@@ -7,6 +7,10 @@ This first plug-in is a simple "Hello world" example.
 It does very little interesting but is a framework for a plug-in.
 It demonstrates a basic executable plug-in framework, use of PlugInArgList, and use of Progress.
 
+If you would like to run this tutorial as you follow along with the code, see \ref RunningTutorial.
+If you would like to build and experiment with this tutorial as you follow along with the code, see \ref howto_buildtutorials.
+If you are running this tutorial in Opticks, you will need to select "Tutorial 1" from the Tutorial toolbar to execute it.
+
 \section header_file The Header File
 A plug-in is a C++ class which implements the PlugIn interface.
 %Opticks provides a number of shell classes with a default implementation of much of the interface.
@@ -94,18 +98,6 @@ Normally, we should always set the progress to 100\% before returning successful
 The progress dialog may close when the plug-in finishes executing to make sure the "Automatically close on process completion" option is not checked in "Tools->Options->Session->General->Progress Dialog".
 \until }
 Finally, indicate that the plug-in successfully executed.
-
-\section missing_pieces The Missing Pieces
-There are a few additional pieces which are needed to make the plug-in appear in %Opticks.
-They will be discussed later in the tutorial.
-
-\section executing Executing the Plug-in
-You can build and run the tutorial plug-in by opening the %SamplePlugIns.sln solution file in Microsoft Visual Studio 2005 and building the %Tutorial project.
-See \ref howto_buildenvironment for information on setting up a build environment for a new plug-in.
-Alternately, a pre-built tutorial binary is available in the %Opticks SDK in the \c Build/Binaries-win32-release/PlugIns directory. (or the  appropriate directory for your %Opticks platform)
-Copy the \c Tutorial.dll (or \c Tutorial.so) file into the \c PlugIns directory in your %Opticks installation directory then restart %Opticks.
-If the %Tutorial toolbar does not show up, right-click on another toolbar and select %Tutorial.
-Select "Tutorial 1" from the Tutorial toolbar.
 
 \example Tutorial/Tutorial1.h
 Declaration file for \ref howto_tutorial1 "Tutorial 1".

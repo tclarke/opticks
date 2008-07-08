@@ -8,7 +8,6 @@
  */
 
 #include "AppVerify.h"
-#include "AppVersion.h"
 #include "Filename.h"
 #include "ImportDescriptor.h"
 #include "ObjectResource.h"
@@ -93,9 +92,9 @@ int SampleRasterPager::getSupportedRequestVersion() const
 SampleRasterElementImporter::SampleRasterElementImporter()
 {
    setName("Sample RasterElement Importer");
-   setCreator("Ball Aerospace & Technologies Corp.");
-   setCopyright(APP_COPYRIGHT);
-   setVersion(APP_VERSION_NUMBER);
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setExtensions("Sample Files (*.sample)");
    setDescription("Import sample data. It's really a static in-memory array that simulates an importer.");
    setSubtype("Sample");

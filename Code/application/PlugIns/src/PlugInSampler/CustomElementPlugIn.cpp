@@ -7,7 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "AppVersion.h"
 #include "CustomElementData.h"
 #include "CustomElementPlugIn.h"
 #include "ModelServices.h"
@@ -23,9 +22,9 @@ XERCES_CPP_NAMESPACE_USE
 CustomElementPlugIn::CustomElementPlugIn()
 {
    setName("Custom Data Element Plug-In");
-   setCreator("Ball Aerospace & Technologies Corp.");
-   setCopyright(APP_COPYRIGHT);
-   setVersion(APP_VERSION_NUMBER);
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setDescription("Adds a custom element type to the data model that can be used in conjunction "
       "with an Any element.  This plug-in executes on application startup so that the module will "
       "remain loaded, which preserves the memory of all CustomElementData instances.");
