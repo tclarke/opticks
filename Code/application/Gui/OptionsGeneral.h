@@ -10,8 +10,12 @@
 #ifndef OPTIONSGENERAL_H
 #define OPTIONSGENERAL_H
 
+#include <QtGui/QListWidget>
 #include <QtGui/QWidget>
+
 #include "AppVersion.h"
+
+#include <vector>
 
 class QCheckBox;
 class QSpinBox;
@@ -79,10 +83,17 @@ public:
       return var;
    }
 
+protected slots:
+   void addFrameSpeed();
+   void removeFrameSpeed();
+   void editFrameSpeedFinished(QListWidgetItem *pCurrentItem);
+
 private:
-   QSpinBox* mpBufferSpin;
-   QSpinBox* mpThreadSpin;
-   QCheckBox* mpProgressClose;
+   QSpinBox *mpBufferSpin;
+   QSpinBox *mpThreadSpin;
+   QCheckBox *mpProgressClose;
+   QListWidget *mpFrameSpeedList;
+   std::vector<double> mFrameSpeeds;
 };
 
 #endif
