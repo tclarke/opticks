@@ -152,13 +152,15 @@ void OptionsGeneral::editFrameSpeedFinished(QListWidgetItem *pCurrentItem)
 
 void OptionsGeneral::removeFrameSpeed()
 {
-
-   if(mpFrameSpeedList->currentItem()->text().toDouble() > 0.0)  
+   if (mpFrameSpeedList->count() > 0)
    {
-      mFrameSpeeds.erase(std::find(mFrameSpeeds.begin(), mFrameSpeeds.end(), 
-                         mpFrameSpeedList->currentItem()->text().toDouble()));
+      if(mpFrameSpeedList->currentItem()->text().toDouble() > 0.0)  
+      {
+         mFrameSpeeds.erase(std::find(mFrameSpeeds.begin(), mFrameSpeeds.end(), 
+                            mpFrameSpeedList->currentItem()->text().toDouble()));
+         mpFrameSpeedList->takeItem(mpFrameSpeedList->row(mpFrameSpeedList->currentItem()));
+      }
    }
-   mpFrameSpeedList->takeItem(mpFrameSpeedList->row(mpFrameSpeedList->currentItem()));
 }
 
 OptionsGeneral::~OptionsGeneral()
