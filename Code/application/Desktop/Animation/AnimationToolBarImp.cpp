@@ -498,7 +498,7 @@ void AnimationToolBarImp::cleanUpItems()
 
    if (AnimationToolBar::getSettingFrameSpeeds().size() != mpFrameSpeedCombo->count())
    {
-      for (int i = 0; i <= mpFrameSpeedCombo->count(); ++i)
+      for (int i = 0; i < mpFrameSpeedCombo->count(); ++i)
       {
          if (std::find(frameSpeeds.begin(), frameSpeeds.end(), 
              mpFrameSpeedCombo->itemText(i).toDouble()) == frameSpeeds.end())

@@ -64,7 +64,7 @@ OptionsGeneral::OptionsGeneral() :
 
    // Animation
    mpFrameSpeedList = new QListWidget(this);
-   QLabel* pFrameSpeedLabel = new QLabel("Frame Speeds:", this);
+   QLabel* pFrameSpeedLabel = new QLabel("Default Frame Speeds:", this);
    mFrameSpeeds = AnimationToolBar::getSettingFrameSpeeds();
    for (vector<double>::iterator iter = mFrameSpeeds.begin(); iter < mFrameSpeeds.end(); ++iter)
    {
@@ -132,7 +132,7 @@ void OptionsGeneral::editFrameSpeedFinished(QListWidgetItem *pCurrentItem)
    vector<double>::iterator iter; 
 
    iter = std::find(mFrameSpeeds.begin(), mFrameSpeeds.end(), pCurrentItem->text().toDouble());
-   if (iter == mFrameSpeeds.end() && pCurrentItem->text().toDouble() != 0.0)  
+   if (iter == mFrameSpeeds.end() && pCurrentItem->text().toDouble() > 0.0)  
    {
       mFrameSpeeds.push_back(pCurrentItem->text().toDouble());
 
@@ -153,7 +153,7 @@ void OptionsGeneral::editFrameSpeedFinished(QListWidgetItem *pCurrentItem)
 void OptionsGeneral::removeFrameSpeed()
 {
 
-   if(mpFrameSpeedList->currentItem()->text().toDouble() != 0.0)  
+   if(mpFrameSpeedList->currentItem()->text().toDouble() > 0.0)  
    {
       mFrameSpeeds.erase(std::find(mFrameSpeeds.begin(), mFrameSpeeds.end(), 
                          mpFrameSpeedList->currentItem()->text().toDouble()));
