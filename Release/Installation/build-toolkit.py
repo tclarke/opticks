@@ -164,6 +164,7 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir, package_dir):
       
    ##### Create all the output directories
    os.makedirs(out_dir)
+   os.makedirs(win_debug_dir)
 
    cp_file3("README-sdk.txt", os.path.join(out_dir, "README.txt"))
    s_app = os.path.abspath(os.path.join(opticks_code_dir, "application"))
