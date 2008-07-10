@@ -1044,7 +1044,6 @@ bool EnviExporter::exportDataFile() const
             pDataRequest->setInterleaveFormat(BIP);
             pDataRequest->setRows(exportRows.front(), exportRows.back(), 1);
             pDataRequest->setColumns(exportColumns.front(), exportColumns.back(), exportColumns.size());
-            pDataRequest->setBands(exportBands.front(), exportBands.back(), exportBands.size());
 
             DataAccessor dataAccessor = mpRaster->getDataAccessor(pDataRequest.release());
             if (dataAccessor.isValid() == false)
@@ -1113,7 +1112,6 @@ bool EnviExporter::exportDataFile() const
             pDataRequest->setInterleaveFormat(BIP);
             pDataRequest->setRows(exportRows.front(), exportRows.back(), 1);
             pDataRequest->setColumns(exportColumns.front(), exportColumns.back(), 1);
-            pDataRequest->setBands(exportBands.front(), exportBands.back(), exportBands.size());
 
             DataAccessor dataAccessor = mpRaster->getDataAccessor(pDataRequest.release());
             if (dataAccessor.isValid() == false)
@@ -1188,7 +1186,6 @@ bool EnviExporter::exportDataFile() const
          pDataRequest->setInterleaveFormat(BIP);
          pDataRequest->setRows(exportRows.front(), exportRows.back(), 1);
          pDataRequest->setColumns(exportColumns.front(), exportColumns.back(), 1);
-         pDataRequest->setBands(exportBands.front(), exportBands.back(), 1);
 
          DataAccessor dataAccessor = mpRaster->getDataAccessor(pDataRequest.release());
          if (dataAccessor.isValid() == false)
