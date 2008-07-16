@@ -1614,40 +1614,15 @@ unsigned int GpuImage::readTile(Tile *pTile, const LocationType &tileLocation, i
 
    // convert coordinates since each tile's image buffer has coordinates
    // starting at (0,0)
-   int calculatedXCoord = 0;
-   int calculatedYCoord = 0;
 
-   // compute the width and x coordinate of the chip of data to be read
-   if (x1TileCoord <= x1Coord && x2TileCoord < x2Coord)
-   {
-      calculatedWidth = x2TileCoord - x1Coord;
-      calculatedXCoord = x1Coord - x1TileCoord;
-   }
-   else if (x1TileCoord > x1Coord && x2TileCoord >= x2Coord)
-   {
-      calculatedWidth = x2Coord - x1TileCoord;
-   }
-   else
-   {
-      calculatedWidth = static_cast<GLsizei>(geomSize.mX + 0.5);
-      calculatedXCoord = 0;
-   }
+   int left = max(x1Coord, x1TileCoord);
+   int top = max(y1Coord, y1TileCoord);
 
-   // compute the height and y coorddinate of the chip of data to be read
-   if (y1TileCoord <= y1Coord && y2TileCoord < y2Coord)
-   {
-      calculatedHeight = y2TileCoord - y1Coord;
-      calculatedYCoord = y1Coord - y1TileCoord;
-   }
-   else if (y1TileCoord > y1Coord && y2TileCoord >= y2Coord)
-   {
-      calculatedHeight = y2Coord - y1TileCoord;
-   }
-   else
-   {
-      calculatedHeight = static_cast<GLsizei>(geomSize.mY + 0.5);
-      calculatedYCoord = 0;
-   }
+   int calculatedXCoord = left - x1TileCoord;
+   int calculatedYCoord = top - y1TileCoord;
+
+   calculatedWidth = min(x2Coord, x2TileCoord) - left;
+   calculatedHeight = min(y2Coord, y2TileCoord) - top;
 
    GpuTile *pGpuTile = static_cast<GpuTile*>(pTile);
    return (pGpuTile->readFilterBuffer(calculatedXCoord, calculatedYCoord, calculatedWidth, calculatedHeight, pValues));
