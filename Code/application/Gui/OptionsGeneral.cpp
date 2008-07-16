@@ -129,6 +129,7 @@ void OptionsGeneral::editFrameSpeedFinished(QListWidgetItem *pCurrentItem)
    {
       return;
    }
+   mpFrameSpeedList->closePersistentEditor(pCurrentItem);
    vector<double>::iterator iter; 
 
    iter = std::find(mFrameSpeeds.begin(), mFrameSpeeds.end(), pCurrentItem->text().toDouble());
@@ -147,12 +148,11 @@ void OptionsGeneral::editFrameSpeedFinished(QListWidgetItem *pCurrentItem)
    {
       mpFrameSpeedList->takeItem(mpFrameSpeedList->row(pCurrentItem));
    }
-   mpFrameSpeedList->closePersistentEditor(pCurrentItem);
 }
 
 void OptionsGeneral::removeFrameSpeed()
 {
-   if (mpFrameSpeedList->count() > 0)
+   if (mpFrameSpeedList->count() > 0 && mpFrameSpeedList->currentItem() != NULL)
    {
       if(mpFrameSpeedList->currentItem()->text().toDouble() > 0.0)  
       {
