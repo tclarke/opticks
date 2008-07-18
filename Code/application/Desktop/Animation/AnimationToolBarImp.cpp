@@ -459,6 +459,9 @@ void AnimationToolBarImp::updateFrameRange()
 
    // Update the slider value
    updateCurrentFrame(currentFrame);
+
+   // Make sure the toolbar updates its size with the label width changing
+   adjustSize();
 }
 
 void AnimationToolBarImp::updateCurrentFrame(double frameValue)
