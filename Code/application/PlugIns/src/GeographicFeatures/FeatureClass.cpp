@@ -204,6 +204,21 @@ pair<LocationType, LocationType> FeatureClass::getClipping() const
       break;
    }
 
+   // make sure first location is most southwest point and second is most northeast point
+   double tmpDbl(0.0);
+   if (clipping.first.mX > clipping.second.mX)
+   {
+      tmpDbl = clipping.first.mX;
+      clipping.first.mX = clipping.second.mX;
+      clipping.second.mX = tmpDbl;
+   }
+   if (clipping.first.mY > clipping.second.mY)
+   {
+      tmpDbl = clipping.first.mY;
+      clipping.first.mY = clipping.second.mY;
+      clipping.second.mY = tmpDbl;
+   }
+
    return clipping;
 }
 
