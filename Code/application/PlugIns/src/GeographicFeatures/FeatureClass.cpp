@@ -178,19 +178,19 @@ pair<LocationType, LocationType> FeatureClass::getClipping() const
                   LocationType ul = pGrandParent->convertPixelToGeocoord(LocationType(0, pDesc->getRowCount()));
                   LocationType ur = pGrandParent->convertPixelToGeocoord(LocationType(pDesc->getColumnCount(), pDesc->getRowCount()));
 
-                  clipping.first.mX = min(ll.mX, ur.mX);
+                  clipping.first.mX = min(ll.mX, ul.mX);
                   clipping.first.mX = min(clipping.first.mX, lr.mX);
                   clipping.first.mX = min(clipping.first.mX, ur.mX);
 
-                  clipping.first.mY = min(ll.mY, ur.mY);
+                  clipping.first.mY = min(ll.mY, ul.mY);
                   clipping.first.mY = min(clipping.first.mY, lr.mY);
                   clipping.first.mY = min(clipping.first.mY, ur.mY);
 
-                  clipping.second.mX = max(ll.mX, ur.mX);
+                  clipping.second.mX = max(ll.mX, ul.mX);
                   clipping.second.mX = max(clipping.second.mX, lr.mX);
                   clipping.second.mX = max(clipping.second.mX, ur.mX);
 
-                  clipping.second.mY = max(ll.mY, ur.mY);
+                  clipping.second.mY = max(ll.mY, ul.mY);
                   clipping.second.mY = max(clipping.second.mY, lr.mY);
                   clipping.second.mY = max(clipping.second.mY, ur.mY);
                }
