@@ -1020,6 +1020,11 @@ void HistogramPlotImp::mousePressEvent(QMouseEvent* pEvent)
             double minValue = 0.0;
             double maxValue = 0.0;
             getDataMinMax(minValue, maxValue);
+            LocationType llCorner;
+            LocationType ulCorner;
+            LocationType urCorner;
+            LocationType lrCorner;
+            getVisibleCorners(llCorner, ulCorner, urCorner, lrCorner);
 
             PassArea ePassArea = getLayerPassArea();
             QColor regionColor = getLayerColor();
@@ -1036,8 +1041,8 @@ void HistogramPlotImp::mousePressEvent(QMouseEvent* pEvent)
                }
                else
                {
-                  tmpLowerLimit = max(minValue, lowerLimit);
-                  tmpUpperLimit = min(maxValue, upperLimit);
+                  tmpLowerLimit = max(llCorner.mX, lowerLimit);
+                  tmpUpperLimit = min(lrCorner.mX, upperLimit);
                   if (fabs(tmpUpperLimit - dXValue) < fabs(tmpLowerLimit - dXValue))
                   {
                      meSelectedValue = UPPER_VALUE;
@@ -1063,7 +1068,22 @@ void HistogramPlotImp::mousePressEvent(QMouseEvent* pEvent)
                   meSelectedValue = LOWER_VALUE;
                   lowerLimit = dXValue;
                }
-               else // MIDDLE or OUTSIDE
+               else if (ePassArea == MIDDLE)
+               {
+                  tmpLowerLimit = max(llCorner.mX, lowerLimit);
+                  tmpUpperLimit = min(lrCorner.mX, upperLimit);
+                  if (fabs(tmpUpperLimit - dXValue) < fabs(tmpLowerLimit - dXValue))
+                  {
+                     meSelectedValue = UPPER_VALUE;
+                     upperLimit = dXValue;
+                  }
+                  else
+                  {
+                     meSelectedValue = LOWER_VALUE;
+                     lowerLimit = dXValue;
+                  }
+               }
+               else // OUTSIDE
                {
                   if (lowerLimit < minValue)
                   {
