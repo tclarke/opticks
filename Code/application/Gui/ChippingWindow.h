@@ -39,6 +39,7 @@ protected:
    SpatialDataView* createChipView() const;
    void createView();
    void createFile();
+   bool eventFilter(QObject* pObject, QEvent* pEvent);
 
 protected slots:
    void accept();
