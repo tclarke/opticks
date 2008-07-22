@@ -7,8 +7,8 @@ See the \ref main "SDK documentation" if you need information on specific classe
 The Related Pages section lists protocol and file format descriptions, and other reference documentation not specific to a class or method.
 The sample plug-ins are working examples and test plug-ins which provide concrete examples without narrative explanation.
 
-The Opticks SDK contains the tutorial and sample plug-ins that are referenced in this Tutorial.
-You can download the Opticks SDK from the <a href="https://opticks.ballforge.net/servlets/ProjectProcess?tab=1">Downloads</a> page of the https://opticks.ballforge.net/ website.
+The %Opticks SDK contains the tutorial and sample plug-ins that are referenced in this Tutorial.
+You can download the %Opticks SDK from the <a href="https://opticks.ballforge.net/servlets/ProjectProcess?tab=1">Downloads</a> page of the https://opticks.ballforge.net/ website.
 
 \section tutorial The Opticks Tutorial
 This group of HOWTOs provides a tutorial to help you get started writing plug-ins.
@@ -18,7 +18,7 @@ Start with the first and work your way through the tutorial as each successive s
   -# \subpage howto_tutorial3
   -# \subpage howto_tutorial4
   
-Please see \subpage howto_buildtutorials for information on how to build and run these tutorials with Opticks.
+Please see \subpage howto_buildtutorials for information on how to build and run these tutorials with %Opticks.
  
 \section howto_list Other HOWTOs
 These HOWTOs provide more in-depth examples on specific topics.

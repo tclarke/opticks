@@ -1,11 +1,11 @@
 /** \page specialmetadata Special Metadata
  * This describes the contents of the DynamicObject returned by
- * RasterElement::getMetadata() that are treated special by the Opticks Core.  Currently
- * none of the metadata listed below is required to be present for Opticks to work
+ * RasterElement::getMetadata() that are treated special by the %Opticks Core.  Currently
+ * none of the metadata listed below is required to be present for %Opticks to work
  * properly.
  *
  * The list below describes the hierarchy of the metadata that will be treated
- * special by Opticks if present:
+ * special by %Opticks if present:
  *
  * - #SPECIAL_METADATA_NAME
  *   - #ROW_METADATA_NAME

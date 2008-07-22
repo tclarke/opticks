@@ -9,7 +9,7 @@ It demonstrates a basic executable plug-in framework, use of PlugInArgList, and 
 
 If you would like to run this tutorial as you follow along with the code, see \ref RunningTutorial.
 If you would like to build and experiment with this tutorial as you follow along with the code, see \ref howto_buildtutorials.
-If you are running this tutorial in Opticks, you will need to select "Tutorial 1" from the Tutorial toolbar to execute it.
+If you are running this tutorial in %Opticks, you will need to select "Tutorial 1" from the Tutorial toolbar to execute it.
 
 \section header_file The Header File
 A plug-in is a C++ class which implements the PlugIn interface.
