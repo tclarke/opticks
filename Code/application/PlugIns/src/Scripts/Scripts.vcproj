@@ -65,6 +65,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				Version=""
+				AdditionalDependencies="advapi32.lib"
 				AdditionalLibraryDirectories=""
 				IgnoreDefaultLibraryNames=""
 			/>
@@ -142,6 +143,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				Version=""
+				AdditionalDependencies="advapi32.lib"
 				AdditionalLibraryDirectories=""
 				IgnoreDefaultLibraryNames=""
 			/>
@@ -219,6 +221,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				Version=""
+				AdditionalDependencies="advapi32.lib"
 				AdditionalLibraryDirectories=""
 			/>
 			<Tool
@@ -294,6 +297,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				Version=""
+				AdditionalDependencies="advapi32.lib"
 				AdditionalLibraryDirectories=""
 			/>
 			<Tool
