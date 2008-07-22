@@ -33,12 +33,7 @@ GpuResourceManager::~GpuResourceManager()
    {
       // deallocate texture memory for generated texture object id
       glDeleteTextures(1, &(*textureIter));
-
-      // remove texture object id from vector of texture object ids
-      mTextures.erase(textureIter);
-      break;
-     
-      textureIter++;
+      ++textureIter;
    }
 #endif
 }
