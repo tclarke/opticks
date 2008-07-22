@@ -138,16 +138,17 @@ public:
     * copy of the DataVariant. Since a deep copy is performed, this method can
     * be much slower than adoptAttributeByPath(), especially when dealing with DynamicObject values.
     *
-    * @param path
-    *        The path of names within names for the DynamicObjects,
-    *        separated by '/'.
+    *  @param   path
+    *           The path of names within names for the DynamicObjects,
+    *           separated by '/'.  A slash in the name can be represented by
+    *           escaping the slash with another slash (e.g. '//').  If the path
+    *           ends in a single slash, it will be ignored.
+    *  @param   value
+    *           The value to set into the DynamicObject.
     *
-    * @param value
-    *        The value to set into the DynamicObject.
-    *
-    * @return True if the operation was a success, false otherwise.
-    *         This method will fail if there exists a non-DynamicObject
-    *         as an intermediate path.
+    *  @return  True if the operation was a success, false otherwise.
+    *           This method will fail if there exists a non-DynamicObject
+    *           as an intermediate path.
     *
     *  @notify  This method will notify Subject::signalModified.
     *
@@ -162,16 +163,20 @@ public:
     * copy of the DataVariant. Since no deep copy is performed, this method can
     * be much faster than setAttributeByPath(), especially when dealing with DynamicObject values.
     *
-    * @param path
-    *        The path of names within names for the DynamicObjects,
-    *        separated by '/'.
+    *  @param   path
+    *           The path of names within names for the DynamicObjects,
+    *           separated by '/'.  A slash in the name can be represented by
+    *           escaping the slash with another slash (e.g. '//').  If the path
+    *           ends in a single slash, it will be ignored.
     *  @param   value
-    *        The value to set into the DynamicObject. On return, this will contain the value previously stored in the DynamicObject.
-    *        If the value did not previously exist in the DynamicObject, then this will contain an invalid DataVariant.
+    *           The value to set into the DynamicObject. On return, this will
+    *           contain the value previously stored in the DynamicObject.  If
+    *           the value did not previously exist in the DynamicObject, then
+    *           this will contain an invalid DataVariant.
     *
-    * @return True if the operation was a success, false otherwise.
-    *         This method will fail if there exists a non-DynamicObject
-    *         as an intermediate path.
+    *  @return  True if the operation was a success, false otherwise.
+    *           This method will fail if there exists a non-DynamicObject
+    *           as an intermediate path.
     *
     *  @notify  This method will notify Subject::signalModified.
     *
@@ -260,9 +265,11 @@ public:
     * Get the value within the DynamicObject hierarchy
     * as described in the path.
     *
-    * @param path
-    *        The path of names within names for the DynamicObject,
-    *        separated by '/'.
+    *  @param   path
+    *           The path of names within names for the DynamicObjects,
+    *           separated by '/'.  A slash in the name can be represented by
+    *           escaping the slash with another slash (e.g. '//').  If the path
+    *           ends in a single slash, it will be ignored.
     *
     *  @return  A variant holding the attributes value. The variant will be
     *           empty if the attribute did not exist.
@@ -273,9 +280,11 @@ public:
     * Get the value within the DynamicObject hierarchy
     * as described in the path.
     *
-    * @param path
-    *        The path of names within names for the DynamicObject,
-    *        separated by '/'.
+    *  @param   path
+    *           The path of names within names for the DynamicObjects,
+    *           separated by '/'.  A slash in the name can be represented by
+    *           escaping the slash with another slash (e.g. '//').  If the path
+    *           ends in a single slash, it will be ignored.
     *
     *  @return  A variant holding the attributes value. The variant will be
     *           empty if the attribute did not exist.
@@ -362,16 +371,18 @@ public:
    /**
     * Removes an attribute from the object.
     *
-    * @param path
-    *        The path of names within names for the DynamicObject,
-    *        separated by '/'.
+    *  @param   path
+    *           The path of names within names for the DynamicObjects,
+    *           separated by '/'.  A slash in the name can be represented by
+    *           escaping the slash with another slash (e.g. '//').  If the path
+    *           ends in a single slash, it will be ignored.
     *
-    * @return  True if the attribute was was successfully removed from the object,
-    *          otherwise false.
+    *  @return  True if the attribute was was successfully removed from the object,
+    *           otherwise false.
     *
-    * @notify This method will notify Subject::signalModified.
+    *  @notify  This method will notify Subject::signalModified.
     *
-    * @see     clear()
+    *  @see     clear()
     */
    virtual bool removeAttributeByPath(const std::string& path) = 0;
 
