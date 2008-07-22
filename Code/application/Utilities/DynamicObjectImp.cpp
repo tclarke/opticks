@@ -261,8 +261,7 @@ bool DynamicObjectImp::setAttributeByPath(QStringList pathComponents, DataVarian
 
 bool DynamicObjectImp::setAttributeByPath(const std::string& path, DataVariant &value, bool swap)
 {
-   QString qpath = QString::fromStdString(path);
-   QStringList pathComponents = qpath.split("/", QString::SkipEmptyParts);
+   QStringList pathComponents = getPathComponents(path);
    return setAttributeByPath(pathComponents, value, swap);
 }
 
@@ -277,6 +276,59 @@ bool DynamicObjectImp::setAttributeByPath(const std::string pComponents[], DataV
    }
 
    return setAttributeByPath(pathComponents, value, swap);
+}
+
+QStringList DynamicObjectImp::getPathComponents(const string& path) const
+{
+   if (path.empty() == true)
+   {
+      return QStringList();
+   }
+
+   QString qpath = QString::fromStdString(path);
+   QStringList pathComponents;
+
+   int startPos = 0;
+   int pos = qpath.indexOf("/", startPos);
+
+   while (pos != -1)
+   {
+      int newStartPos = pos + 1;
+      if (pos < qpath.length() - 1)
+      {
+         if (qpath.at(newStartPos) == '/')
+         {
+            newStartPos++;
+         }
+         else
+         {
+            QString component = qpath.mid(startPos, pos - startPos);
+            if (component.isEmpty() == false)
+            {
+               component.replace("//", "/");
+               pathComponents.append(component);
+            }
+
+            startPos = newStartPos;
+         }
+      }
+      else
+      {
+         // The path ends in a single slash, so just remove it
+         qpath.truncate(pos);
+      }
+
+      pos = qpath.indexOf("/", newStartPos);
+   }
+
+   QString attribute = qpath.mid(startPos);
+   if (attribute.isEmpty() == false)
+   {
+      attribute.replace("//", "/");
+      pathComponents.append(attribute);
+   }
+
+   return pathComponents;
 }
 
 const DataVariant &DynamicObjectImp::getAttribute(const std::string &name) const
@@ -339,8 +391,7 @@ DataVariant &DynamicObjectImp::getAttributeByPath(QStringList pathComponents)
 
 const DataVariant &DynamicObjectImp::getAttributeByPath(const string &path) const
 {
-   QString qpath = QString::fromStdString(path);
-   QStringList pathComponents = qpath.split("/", QString::SkipEmptyParts);
+   QStringList pathComponents = getPathComponents(path);
    return getAttributeByPath(pathComponents);
 }
 
@@ -417,8 +468,7 @@ bool DynamicObjectImp::removeAttributeByPath(const string pComponents[])
 
 bool DynamicObjectImp::removeAttributeByPath(const string& path)
 {
-   QString qpath = QString::fromStdString(path);
-   QStringList pathComponents = qpath.split("/", QString::SkipEmptyParts);
+   QStringList pathComponents = getPathComponents(path);
    return removeAttributeByPath(pathComponents);
 }
 

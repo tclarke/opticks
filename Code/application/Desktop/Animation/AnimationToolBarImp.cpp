@@ -81,7 +81,7 @@ AnimationToolBarImp::AnimationToolBarImp(const string& id, QWidget* parent) :
    mpPlayPauseAction = addAction(pIcons->mAnimationPlayForward, QString(), this, SLOT(playPause()));
    mpPlayPauseAction->setAutoRepeat(false);
    mpPlayPauseAction->setShortcut(QKeySequence(Qt::Key_Space));
-   mpPlayPauseAction->setToolTip("Play");
+   mpPlayPauseAction->setToolTip("Play//Pause");
    pDesktop->initializeAction(mpPlayPauseAction, shortcutContext);
 
    mpStepBackwardAction = addAction(pIcons->mAnimationAdvanceBackward, QString(), this, SLOT(stepBackward()));

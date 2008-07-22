@@ -68,6 +68,8 @@ protected:
    virtual bool setAttributeByPath(const std::string pComponents[], DataVariant& value, bool swap);
    virtual bool setAttributeByPath(QStringList pathComponents, DataVariant &value, bool swap);
 
+   QStringList getPathComponents(const std::string& path) const;
+
    /**
    * Determines if the parameter is a child (or grandchild, or the same instance)
    * @param pObject
