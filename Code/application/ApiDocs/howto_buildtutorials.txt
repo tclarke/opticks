@@ -1,8 +1,8 @@
 /** \page howto_buildtutorials Building and Running Tutorial plug-ins
 
-The SDK includes tutorial plug-ins to help first-time developers understand how to create plug-ins for Opticks.
+The SDK includes tutorial plug-ins to help first-time developers understand how to create plug-ins for %Opticks.
 The SDK also includes other sample plug-ins that more advanced developers can use as reference.
-This document will describe how to build those plug-ins and then run them with an installation of Opticks.
+This document will describe how to build those plug-ins and then run them with an installation of %Opticks.
 This document assumes that the SDK was unzipped to a location known as SDK_HOME.
 For example, this means you are browing SDK_HOME/doc/html/index.html currently in your web browser.
 Wherever you see the word SDK_HOME, please expand that to be the directory where unzipped this SDK.
@@ -48,7 +48,7 @@ If you are using the commercial licensed edition of Qt, you will need to build Q
 You can find more details about this on the opticks website at https://opticks.ballforge.net/servlets/ProjectProcess?tab=5 .
 </li>
 <li>
-If you are using the open-source edition of Qt, you can download a pre-built binary provided by the Opticks project from https://opticks.ballforge.net/files/documents/8/112/Qt-4.3.4-opensource.zip .
+If you are using the open-source edition of Qt, you can download a pre-built binary provided by the %Opticks project from https://opticks.ballforge.net/files/documents/8/112/Qt-4.3.4-opensource.zip .
 </li>
 <li>Once you have downloaded this .zip, please rename the file to Qt-4.3.4.zip and place it in SDK_HOME/Dependencies/packages/ folder.</li>
 <li>
@@ -92,22 +92,22 @@ scons RELEASE="yes"
 
 \section RunningTutorial Running Tutorials With Opticks
 
-You do not need to have completed \ref GettingTutorialDependencies, \ref BuildingTutorialWindows or \ref BuildingTutorialSolaris before starting this step.  The SDK includes pre-built binaries of all of the tutorials and sample plug-ins.  If you do build the tutorial and sample plug-ins they will simply overwrite the pre-built binaries.  You will need to have downloaded and installed Opticks (https://opticks.ballforge.net/servlets/ProjectProcess?tab=1) before you can run the tutorials or sample plug-ins.
+You do not need to have completed \ref GettingTutorialDependencies, \ref BuildingTutorialWindows or \ref BuildingTutorialSolaris before starting this step.  The SDK includes pre-built binaries of all of the tutorials and sample plug-ins.  If you do build the tutorial and sample plug-ins they will simply overwrite the pre-built binaries.  You will need to have downloaded and installed %Opticks (https://opticks.ballforge.net/servlets/ProjectProcess?tab=1) before you can run the tutorials or sample plug-ins.
  
 <ol>
 <li>Preparing to run on Windows
 
-Copy the pre-built tutorial and sample plug-ins (PlugInSampler.dll, PlugInSamplerHdf.dll, PlugInSamplerQt.dll, Tutorial.dll) from the appropriate SDK_HOME\\Build\\Binaries-YY-ZZ folder\\PlugIns to your Opticks installation's plug-in folder.
-If you want to run Opticks 32-bit, you will copy them from the SDK_HOME\\Build\\Binaries-Win32-release\\PlugIns folder to the "PlugIns" folder where you installed 32-bit Opticks (i.e. C:\\Program Files\\Opticks\\4.2.0\\PlugIns).
-If you want to run Opticks 64-bit, you will copy them from the SDK_HOME\\Build\\Binaries-x64-release\\PlugIns folder to the "PlugIns" folder where you installed 64-bit Opticks (i.e. C:\\Program Files\\Opticks\\4.2.0\\PlugIns).
+Copy the pre-built tutorial and sample plug-ins (PlugInSampler.dll, PlugInSamplerHdf.dll, PlugInSamplerQt.dll, Tutorial.dll) from the appropriate SDK_HOME\\Build\\Binaries-YY-ZZ folder\\PlugIns to your %Opticks installation's plug-in folder.
+If you want to run %Opticks 32-bit, you will copy them from the SDK_HOME\\Build\\Binaries-Win32-release\\PlugIns folder to the "PlugIns" folder where you installed 32-bit %Opticks (i.e. C:\\Program Files\\%Opticks\\4.2.0\\PlugIns).
+If you want to run %Opticks 64-bit, you will copy them from the SDK_HOME\\Build\\Binaries-x64-release\\PlugIns folder to the "PlugIns" folder where you installed 64-bit %Opticks (i.e. C:\\Program Files\\%Opticks\\4.2.0\\PlugIns).
 </li>
 <li>Preparing to run on Solaris
 
-Copy the pre-built tutorial and sample plug-ins (PlugInSampler.so, PlugInSamplerHdf.so, PlugInSamplerQt.so, Tutorial.so) from the SDK_HOME/Build/Binaries-solaris-sparc-release/PlugIns to the "PlugIns" folder where you installed Opticks (i.e. /opt/Opticks/4.2.0/PlugIns).
+Copy the pre-built tutorial and sample plug-ins (PlugInSampler.so, PlugInSamplerHdf.so, PlugInSamplerQt.so, Tutorial.so) from the SDK_HOME/Build/Binaries-solaris-sparc-release/PlugIns to the "PlugIns" folder where you installed %Opticks (i.e. /opt/Opticks/4.2.0/PlugIns).
 </li>
-<li>Running Opticks
+<li>Running %Opticks
 
-Start Opticks as you would normally.
+Start %Opticks as you would normally.
 You may need to right-click on the menu bar and click on the toolbar name in order to make it appear.
 The toolbars you would need to make visible are "Demo", "Tests" and "Tutorial."
 If you cannot find those toolbars please double-check the above steps.
