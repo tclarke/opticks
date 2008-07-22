@@ -7,6 +7,7 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtCore/QEvent>
 #include <QtCore/QFileInfo>
 #include <QtGui/QGroupBox>
 #include <QtGui/QLayout>
@@ -44,6 +45,7 @@ ChippingWindow::ChippingWindow(SpatialDataView* pView, QWidget* parent) :
 {
    // View widget
    SpatialDataView* pChipView = createChipView();
+   pChipView->getWidget()->installEventFilter(this);
    mpChippingWidget = new ChippingWidget(pChipView, this);
 
    // Chip mode
@@ -422,4 +424,17 @@ void ChippingWindow::accept()
 
    // Close the dialog
    QDialog::accept();
+}
+
+bool ChippingWindow::eventFilter(QObject* pObject, QEvent* pEvent)
+{
+   if (pEvent != NULL)
+   {
+      if (pEvent->type() == QEvent::ContextMenu)
+      {
+         return true;
+      }
+   }
+
+   return QDialog::eventFilter(pObject, pEvent);
 }
