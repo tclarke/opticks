@@ -407,6 +407,19 @@ bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
    AVFrame *pTmpPicture = alloc_picture(PIX_FMT_RGBA32, pCodecContext->width, pCodecContext->height);
    QImage image(pTmpPicture->data[0], pCodecContext->width, pCodecContext->height, QImage::Format_ARGB32);
    FrameType eType = pController->getFrameType();
+
+   // For frame id based animation, each band of the data set fills one second of animation. 
+   // If the requested frame rate for export is 15 fps, then each band is replicated 15 times. The execution
+   // loop uses a pseudo time value, video_pts, to walk through the animation. The interval between 
+   // exported frames is the inverse of the frame rate, e.g., for 15 fps the interval is 0.06667.
+   // To fully export the last requested frame, we need to add just under an extra pseudo second to
+   // the end time - stopExport. If we added a full extra second, we would export one video frame of the band past
+   // the last requested frame - could cause crash if the last request frame was the last band.
+   if (eType == FRAME_ID)
+   {
+      stopExport += 0.99;
+   }
+
    for (double video_pts = startExport; video_pts <= stopExport; video_pts += interval)
    {
       if (mAbort)
