@@ -131,6 +131,18 @@ SpatialDataView* ChippingWindow::createChipView() const
    pChipView = (SpatialDataView*) (mpView->copy());
    if (pChipView != NULL)
    {
+      vector<std::pair<View*,LinkType> > linkedViews;
+      pChipView->getLinkedViews(linkedViews);
+      for (unsigned int i = 0; i < linkedViews.size(); ++i)
+      {
+         if (linkedViews[i].second == NO_LINK)
+         {
+            continue;
+         }
+
+         pChipView->unlinkView(linkedViews[i].first);
+      }
+
       LayerList* pLayerList = NULL;
       pLayerList = pChipView->getLayerList();
       if (pLayerList != NULL)
