@@ -10,10 +10,9 @@
 #include <QtGui/QImage>
 #include <QtGui/QPainter>
 
-#include "glCommon.h"
-#include "TextObjectImp.h"
 #include "DrawUtil.h"
 #include "Endian.h"
+#include "glCommon.h"
 #include "GraphicLayer.h"
 #include "GraphicLayerImp.h"
 #include "MipMappedTextures.h"
@@ -21,6 +20,7 @@
 #include "OrthographicView.h"
 #include "ProductView.h"
 #include "SpatialDataView.h"
+#include "TextObjectImp.h"
 #include "View.h"
 
 #include <math.h>
@@ -47,7 +47,7 @@ TextObjectImp::TextObjectImp(const string& id, GraphicObjectType type, GraphicLa
 
 TextObjectImp::~TextObjectImp()
 {
-   while(!mTextureIdStack.empty())
+   while (!mTextureIdStack.empty())
    {
       // this does not attempt to delete any textures
       // except the top level texture since the GLContext
@@ -418,11 +418,6 @@ void TextObjectImp::updateBoundingBox()
    GraphicLayer* pLayer = getLayer();
    if (pLayer != NULL)
    {
-      // Determine if the scene is flipped
-      bool bHorizontalFlip = false;
-      bool bVerticalFlip = false;
-      pLayer->isFlipped(llCorner, urCorner, bHorizontalFlip, bVerticalFlip);
-
       // Compute the upper right coordinate
       PerspectiveView* pView = dynamic_cast<PerspectiveView*>(pLayer->getView());
       if (pView != NULL)
@@ -431,26 +426,8 @@ void TextObjectImp::updateBoundingBox()
          double xScale = zoomFactor / pLayer->getXScaleFactor();
          double yScale = zoomFactor / pLayer->getYScaleFactor();
 
-         if ((bHorizontalFlip == false) && (bVerticalFlip == false))
-         {
-            urCorner.mX = llCorner.mX + (iWidth * xScale);
-            urCorner.mY = llCorner.mY + (iHeight * yScale);
-         }
-         else if ((bHorizontalFlip == true) && (bVerticalFlip == false))
-         {
-            urCorner.mX = llCorner.mX - (iWidth * xScale);
-            urCorner.mY = llCorner.mY + (iHeight * yScale);
-         }
-         else if ((bHorizontalFlip == true) && (bVerticalFlip == true))
-         {
-            urCorner.mX = llCorner.mX - (iWidth * xScale);
-            urCorner.mY = llCorner.mY - (iHeight * yScale);
-         }
-         else if ((bHorizontalFlip == false) && (bVerticalFlip == true))
-         {
-            urCorner.mX = llCorner.mX + (iWidth * xScale);
-            urCorner.mY = llCorner.mY - (iHeight * yScale);
-         }
+         urCorner.mX = llCorner.mX + (iWidth * xScale);
+         urCorner.mY = llCorner.mY + (iHeight * yScale);
       }
 
       if (dynamic_cast<OrthographicView*>(pLayer->getView()) != NULL)
@@ -458,23 +435,7 @@ void TextObjectImp::updateBoundingBox()
          double dScreenX = 0.0;
          double dScreenY = 0.0;
          pLayer->translateDataToScreen(llCorner.mX, llCorner.mY, dScreenX, dScreenY);
-
-         if ((bHorizontalFlip == false) && (bVerticalFlip == false))
-         {
-            pLayer->translateScreenToData(dScreenX + iWidth, dScreenY + iHeight, urCorner.mX, urCorner.mY);
-         }
-         else if ((bHorizontalFlip == true) && (bVerticalFlip == false))
-         {
-            pLayer->translateScreenToData(dScreenX - iWidth, dScreenY + iHeight, urCorner.mX, urCorner.mY);
-         }
-         else if ((bHorizontalFlip == true) && (bVerticalFlip == true))
-         {
-            pLayer->translateScreenToData(dScreenX - iWidth, dScreenY - iHeight, urCorner.mX, urCorner.mY);
-         }
-         else if ((bHorizontalFlip == false) && (bVerticalFlip == true))
-         {
-            pLayer->translateScreenToData(dScreenX + iWidth, dScreenY - iHeight, urCorner.mX, urCorner.mY);
-         }
+         pLayer->translateScreenToData(dScreenX + iWidth, dScreenY + iHeight, urCorner.mX, urCorner.mY);
       }
    }
    else
