@@ -88,7 +88,7 @@ void* CachedPage::getRawData()
 
 unsigned int CachedPage::getNumRows()
 {
-   unsigned int rowOffset = mpCacheUnit->getStartRow().getActiveNumber() - mStartRow.getActiveNumber();
+   unsigned int rowOffset = mStartRow.getActiveNumber() - mpCacheUnit->getStartRow().getActiveNumber();
    return mpCacheUnit->getConcurrentRows() - rowOffset;
 }
 
