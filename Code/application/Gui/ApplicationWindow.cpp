@@ -4780,6 +4780,10 @@ void ApplicationWindow::enableToolBars(bool bEnable)
 
 void ApplicationWindow::saveConfiguration() const
 {
+   // save dock window states
+   vector<Window*> dockWindows = getWindows(DOCK_WINDOW); 
+   vector<Window*>::iterator it; 
+
    ConfigurationSettings* pConfig = ConfigurationSettingsImp::instance();
    if (pConfig == NULL)
    {
@@ -4787,6 +4791,15 @@ void ApplicationWindow::saveConfiguration() const
    }
 
    // Dock window and toolbar configuration
+   for (it=dockWindows.begin(); it!=dockWindows.end(); ++it) 
+   { 
+      DockWindowImp* pDock = dynamic_cast<DockWindowImp*>(*it); 
+      if (pDock != NULL) 
+      { 
+         pDock->saveState(); 
+      } 
+   } 
+
    QByteArray windowConfiguration = saveState().toBase64();
 
    QString strConfiguration(windowConfiguration);
