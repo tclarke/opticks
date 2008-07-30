@@ -241,6 +241,12 @@ vector<ImageFilterDescriptorImp*> ImageFilterManager::deserialize(const string& 
       if (pDomDoc != NULL)
       {
          pRoot = pDomDoc->getDocumentElement();
+
+         if (pRoot == NULL)
+         {
+            return filterDescriptors;
+         }
+
          for(DOMNode *pNode = pRoot->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())
          {
             if (XMLString::equals(pNode->getNodeName(),X("filter")))
