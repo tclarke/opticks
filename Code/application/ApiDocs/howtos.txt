@@ -34,9 +34,9 @@ If you are just starting out, you should look at the tutorial first.
   -# \subpage howto_customdataelement "Creating a custom DataElement"
   -# \subpage howto_optionswidget "Creating a custom options widget"
   -# \subpage howto_propertieswidget "Creating a custom properties widget"
+  -# \subpage howto_customdraganddrop
   -# \subpage howto_undo "Using undo and creating undoable steps"
   -# \subpage howto_xml "Reading and writing data with the XML utilities"
-  -# \subpage howto_sessionstate "Saving and restoring session state"
   -# \subpage howto_sessionsave
   -# \subpage contextmenus
   -# \subpage pluginbranding

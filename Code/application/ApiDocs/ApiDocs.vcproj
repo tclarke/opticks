@@ -77,6 +77,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\howto_customdraganddrop.txt"
+				>
+			</File>
+			<File
 				RelativePath=".\howto_importer.txt"
 				>
 			</File>
