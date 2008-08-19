@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "LocatorImp.h"
 #include "glCommon.h"
+#include "LocatorImp.h"
 #include "PlotViewImp.h"
 
 #include <sstream>
@@ -28,6 +28,10 @@ LocatorImp::LocatorImp(PlotViewImp* pPlot, bool bPrimary) :
    mLineWidth(1),
    mLineStyle(SOLID_LINE)
 {
+   // Initialization
+   updateExtents();
+
+   // Connections
    if (pPlot != NULL)
    {
       connect(pPlot, SIGNAL(displayAreaChanged()), this, SLOT(updateExtents()));
