@@ -8,18 +8,17 @@
  */
 
 #include <QtGui/QAction>
+#include <QtGui/QApplication>
 #include <QtGui/QMenu>
 #include <QtGui/QMessageBox>
-#include <QtGui/QApplication>
 
-#include "glCommon.h"
 #include "Animation.h"
-#include "RasterLayerImp.h"
 #include "AppConfig.h"
 #include "ContextMenuAction.h"
 #include "ContextMenuActions.h"
 #include "DataAccessorImpl.h"
 #include "DesktopServices.h"
+#include "glCommon.h"
 #include "Image.h"
 #include "ImageFilterDescriptor.h"
 #include "ImageFilterDescriptorImp.h"
@@ -29,6 +28,7 @@
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "RasterLayerAdapter.h"
+#include "RasterLayerImp.h"
 #include "RasterLayerUndo.h"
 #include "RasterUtilities.h"
 #include "SessionItemDeserializer.h"
@@ -47,9 +47,9 @@
 #include "GpuImage.h"
 #endif
 
+#include <algorithm>
 #include <boost/tuple/tuple.hpp>
 
-#include <algorithm>
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
 
@@ -131,7 +131,6 @@ RasterLayerImp::RasterLayerImp(const string& id, const string& layerName, DataEl
 
    // Initialize the layer to the initial displayed bands and display mode
    reset();
-
    addPropertiesPage(PropertiesRasterLayer::getName());
 
    // Connections
@@ -2948,7 +2947,7 @@ double RasterLayerImp::rawToPercentile(double value, const double* pdPercentiles
 
 bool RasterLayerImp::toXml(XMLWriter* pXml) const
 {
-   if(!LayerImp::toXml(pXml))
+   if (!LayerImp::toXml(pXml))
    {
       return false;
    }
@@ -2995,7 +2994,7 @@ bool RasterLayerImp::toXml(XMLWriter* pXml) const
    if (mEnabledFilters.size() > 0)
    {
       pXml->pushAddPoint(pXml->addElement("ImageFilters"));
-      for(vector<ImageFilterDescriptor*>::const_iterator fit = mEnabledFilters.begin();
+      for (vector<ImageFilterDescriptor*>::const_iterator fit = mEnabledFilters.begin();
                fit != mEnabledFilters.end(); ++fit)
       {
          pXml->addAttr("name", (*fit)->getName(), pXml->addElement("filter"));
@@ -3013,7 +3012,7 @@ bool RasterLayerImp::toXml(XMLWriter* pXml) const
 
 bool RasterLayerImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   if(!LayerImp::fromXml(pDocument, version))
+   if (!LayerImp::fromXml(pDocument, version))
    {
       return false;
    }
@@ -3031,16 +3030,16 @@ bool RasterLayerImp::fromXml(DOMNode* pDocument, unsigned int version)
    enableFastContrastStretch(StringUtilities::fromXmlString<bool>(
       A(pDocElmnt->getAttribute(X("enableFastStretch")))));
    mpAnimation = NULL;
-   if(pDocElmnt->hasAttribute(X("animationId")))
+   if (pDocElmnt->hasAttribute(X("animationId")))
    {
       setAnimation(dynamic_cast<Animation*>(
          SessionManagerImp::instance()->getSessionItem(
             A(pDocElmnt->getAttribute(X("animationId"))))));
    }
-   for(DOMNode *pNode = pDocElmnt->getFirstChild();
+   for (DOMNode *pNode = pDocElmnt->getFirstChild();
                 pNode != NULL; pNode = pNode->getNextSibling())
    {
-      if(XMLString::equals(pNode->getNodeName(),X("ChannelInfo")))
+      if (XMLString::equals(pNode->getNodeName(),X("ChannelInfo")))
       {
          DOMElement *pElmnt = static_cast<DOMElement*>(pNode);
          DimensionDescriptor band;
@@ -3048,14 +3047,14 @@ bool RasterLayerImp::fromXml(DOMNode* pDocument, unsigned int version)
          RegionUnits stretchUnits;
          double stretchValueMin = 0.0;
          double stretchValueMax = 0.0;
-         if(!xmlToChannel(pElmnt, pDataElement, stretchUnits,
+         if (!xmlToChannel(pElmnt, pDataElement, stretchUnits,
                           band, stretchValueMin, stretchValueMax))
          {
             return false;
          }
          RasterChannelType channel = StringUtilities::fromXmlString<RasterChannelType>(
             A(pElmnt->getAttribute(X("channel"))));
-         if(!channel.isValid())
+         if (!channel.isValid())
          {
             return false;
          }
@@ -3063,13 +3062,21 @@ bool RasterLayerImp::fromXml(DOMNode* pDocument, unsigned int version)
          setStretchUnits(channel, stretchUnits);
          setStretchValues(channel, stretchValueMin, stretchValueMax);
       }
-      else if(XMLString::equals(pNode->getNodeName(),X("ImageFilters")))
+   }
+
+   // have to restore display channels before restoring useGpuImage attribute
+   enableGpuImage(StringUtilities::fromXmlString<bool>(A(pDocElmnt->getAttribute(X("useGpuImage")))));
+
+   // Must restore the filters after the GPU image attribute to correctly enable them
+   for (DOMNode* pNode = pDocElmnt->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())
+   {
+      if (XMLString::equals(pNode->getNodeName(), X("ImageFilters")))
       {
          vector<string> filters;
-         for(DOMNode *pFiltNode = pNode->getFirstChild();
+         for (DOMNode *pFiltNode = pNode->getFirstChild();
                       pFiltNode != NULL; pFiltNode = pFiltNode->getNextSibling())
          {
-            if(XMLString::equals(pFiltNode->getNodeName(),X("filter")))
+            if (XMLString::equals(pFiltNode->getNodeName(),X("filter")))
             {
                string name = A(static_cast<DOMElement*>(pFiltNode)->getAttribute(X("name")));
                if (name.empty() == false)
@@ -3082,10 +3089,6 @@ bool RasterLayerImp::fromXml(DOMNode* pDocument, unsigned int version)
       }
    }
 
-   // have to restore display channels before restoring useGpuImage attribute
-   enableGpuImage(StringUtilities::fromXmlString<bool>(
-      A(pDocElmnt->getAttribute(X("useGpuImage")))));
-
    mbRegenerate = true;
    emit extentsModified();
    notify(SIGNAL_NAME(Layer, ExtentsModified));
@@ -3095,12 +3098,12 @@ bool RasterLayerImp::fromXml(DOMNode* pDocument, unsigned int version)
 
 bool RasterLayerImp::serialize(SessionItemSerializer &serializer) const
 {
-   if(!LayerImp::serialize(serializer))
+   if (!LayerImp::serialize(serializer))
    {
       return false;
    }
    string colorMapData;
-   if(!mColorMap.saveToBuffer(colorMapData))
+   if (!mColorMap.saveToBuffer(colorMapData))
    {
       return false;
    }
@@ -3110,14 +3113,14 @@ bool RasterLayerImp::serialize(SessionItemSerializer &serializer) const
 
 bool RasterLayerImp::deserialize(SessionItemDeserializer &deserializer)
 {
-   if(!LayerImp::deserialize(deserializer))
+   if (!LayerImp::deserialize(deserializer))
    {
       return false;
    }
    deserializer.nextBlock();
    string colorMapData;
    colorMapData.resize(deserializer.getBlockSizes()[1]);
-   if(!deserializer.deserialize(const_cast<char*>(colorMapData.c_str()), colorMapData.size()))
+   if (!deserializer.deserialize(const_cast<char*>(colorMapData.c_str()), colorMapData.size()))
    {
       return false;
    }
@@ -3164,12 +3167,12 @@ bool RasterLayerImp::xmlToChannel(DOMNode* pDocument, RasterElement*& pElem,
                   RegionUnits &units, DimensionDescriptor &descriptor, double &minValue, double &maxValue)
 {
    DOMElement *pElement = static_cast<DOMElement*>(pDocument);
-   if(pElement->hasAttribute(X("stretchUnits")))
+   if (pElement->hasAttribute(X("stretchUnits")))
    {
       units = StringUtilities::fromXmlString<RegionUnits>(
          A(pElement->getAttribute(X("stretchUnits"))));
    }
-   if(pElement->hasAttribute(X("rasterElementId")))
+   if (pElement->hasAttribute(X("rasterElementId")))
    {
       pElem = dynamic_cast<RasterElement*>(SessionManagerImp::instance()->getSessionItem(
          A(pElement->getAttribute(X("rasterElementId")))));
@@ -3178,35 +3181,35 @@ bool RasterLayerImp::xmlToChannel(DOMNode* pDocument, RasterElement*& pElem,
    {
       pElem = NULL;
    }
-   for(DOMNode *pNode = pElement->getFirstChild();
+   for (DOMNode *pNode = pElement->getFirstChild();
                 pNode != NULL; pNode = pNode->getNextSibling())
    {
-      if(XMLString::equals(pNode->getNodeName(),X("DimensionDescriptor")))
+      if (XMLString::equals(pNode->getNodeName(),X("DimensionDescriptor")))
       {
          DimensionDescriptor dd;
          DOMElement *pElmnt = static_cast<DOMElement*>(pNode);
-         if(pElmnt->hasAttribute(X("originalNumber")))
+         if (pElmnt->hasAttribute(X("originalNumber")))
          {
             dd.setOriginalNumber(StringUtilities::fromXmlString<unsigned int>(
                A(pElmnt->getAttribute(X("originalNumber")))));
          }
-         if(pElmnt->hasAttribute(X("onDiskNumber")))
+         if (pElmnt->hasAttribute(X("onDiskNumber")))
          {
             dd.setOnDiskNumber(StringUtilities::fromXmlString<unsigned int>(
                A(pElmnt->getAttribute(X("onDiskNumber")))));
          }
-         if(pElmnt->hasAttribute(X("activeNumber")))
+         if (pElmnt->hasAttribute(X("activeNumber")))
          {
             dd.setActiveNumber(StringUtilities::fromXmlString<unsigned int>(
                A(pElmnt->getAttribute(X("activeNumber")))));
          }
          descriptor = dd;
       }
-      else if(XMLString::equals(pNode->getNodeName(),X("stretchValues")))
+      else if (XMLString::equals(pNode->getNodeName(),X("stretchValues")))
       {
          vector<double> values;
          XmlReader::StrToVector<double, XmlReader::StringStreamAssigner<double> >(values, pNode->getTextContent());
-         if(values.size() != 2)
+         if (values.size() != 2)
          {
             return false;
          }
@@ -3312,7 +3315,7 @@ void RasterLayerImp::applyFastContrastStretch(RasterChannelType element)
    double biases[3] = {0.0,0.0,0.0};
    double scales[3] = {0.0,0.0,0.0};
    double fullscales[3] = {0.0,0.0,0.0};
-   switch(element)
+   switch (element)
    {
    case GRAY:
       biases[0] = biases[1] = biases[2] = bias; 
@@ -3373,7 +3376,7 @@ void RasterLayerImp::applyFastContrastStretch(RasterChannelType element)
          remainingScale /= 2.0;
       }
    }
-   switch(element)
+   switch (element)
    {
    case GRAY:
       scales[0] = scales[1] = scales[2] = remainingScale-1.0; break;
