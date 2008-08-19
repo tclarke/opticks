@@ -2191,7 +2191,7 @@ void GraphicLayerImp::layerActivated(bool activated)
 {
    if (activated == false)
    {
-      completeInsertion(false);
+      completeInsertion();
       deselectAllObjects();
    }
 }
