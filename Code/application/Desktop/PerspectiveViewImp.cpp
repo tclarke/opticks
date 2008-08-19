@@ -1170,6 +1170,9 @@ void PerspectiveViewImp::drawInset()
    // Prevent undo actions from being registered
    UndoLock lock(dynamic_cast<View*>(this));
 
+   // Prevent signals from being emitted
+   blockSignals(true);
+
    // View contents
    zoomAboutPoint(insetLocation, zoomMultiplier * 100.0);
 
@@ -1268,6 +1271,9 @@ void PerspectiveViewImp::drawInset()
    glMatrixMode(GL_MODELVIEW);
    glLoadMatrixd(modelMatrix);
    glViewport(viewPort[0], viewPort[1], viewPort[2], viewPort[3]);
+
+   // Restore signals
+   blockSignals(false);
 
    // Relink the views
    iter = linkedViews.begin();
