@@ -238,7 +238,7 @@ bool MemoryMappedPager::execute(PlugInArgList *pInputArgList,
                const Filename *pFilename = *iter;
                VERIFY(pFilename != NULL);
                mMatrices.push_back(new MemoryMappedMatrix(pFilename->getFullPathAndName(),
-                  pFileDescriptor->getHeaderBytes() + pFileDescriptor->getPrelineBytes() + pFileDescriptor->getPostbandBytes(),
+                  pFileDescriptor->getHeaderBytes() + pFileDescriptor->getPrelineBytes() + pFileDescriptor->getPrebandBytes(),
                   pFileDescriptor->getInterleaveFormat(),
                   pDescriptor->getBytesPerElement(),
                   pFileDescriptor->getRowCount(),
