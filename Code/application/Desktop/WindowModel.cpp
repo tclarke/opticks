@@ -211,8 +211,10 @@ WindowModel::WindowSourceModel::WindowSourceModel(QObject* pParent) :
    // Connections
    Service<DesktopServices> pDesktop;
    refreshModel(*pDesktop.get(), "", boost::any());
-   SessionManagerImp::instance()->attach(SIGNAL_NAME(SessionManagerImp, SessionRestored), Slot(this, &WindowSourceModel::refreshModel));
-   SessionManagerImp::instance()->attach(SIGNAL_NAME(SessionManagerImp, AboutToRestore), Slot(this, &WindowSourceModel::detachModel));
+   SessionManagerImp::instance()->attach(SIGNAL_NAME(SessionManager, SessionRestored),
+      Slot(this, &WindowSourceModel::refreshModel));
+   SessionManagerImp::instance()->attach(SIGNAL_NAME(SessionManager, AboutToRestore),
+      Slot(this, &WindowSourceModel::detachModel));
 }
 
 void WindowModel::WindowSourceModel::detachModel(Subject &subject, const string &signal, const boost::any &v)

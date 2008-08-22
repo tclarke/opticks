@@ -92,7 +92,6 @@ public:
 
    void setName(const std::string& viewName);
    virtual ViewType getViewType() const = 0;
-   unsigned int getViewId() const;
 
    void setClassification(const Classification* pClassification);
    QString getClassificationText() const;
@@ -337,7 +336,6 @@ protected:
 private:
    static const QGLWidget* mpShareWidget;
 
-   unsigned int mId;
    QColor mBackgroundColor;
    QString mClassificationText;
    QFont mClassificationFont;

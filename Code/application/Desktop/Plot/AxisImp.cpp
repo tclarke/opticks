@@ -526,5 +526,9 @@ bool AxisImp::fromXml(DOMNode* pDocument, unsigned int version)
    mMaxMajorTicks = StringUtilities::fromXmlString<int>(A(pElmnt->getAttribute(X("maxMajorTicks"))));
    mMaxMinorTicks = StringUtilities::fromXmlString<int>(A(pElmnt->getAttribute(X("maxMinorTicks"))));
    mScaleDraw.setLabelFormat(A(pElmnt->getAttribute(X("scaleDrawLabelFormat"))));
+
+   updateScale();
+   updateSize();
+
    return true;
 }

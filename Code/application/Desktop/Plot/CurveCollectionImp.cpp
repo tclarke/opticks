@@ -477,7 +477,7 @@ bool CurveCollectionImp::toXml(XMLWriter* pXml) const
    {
       const CurveImp* pCurve = dynamic_cast<CurveImp*>(*it);
       pXml->pushAddPoint(pXml->addElement("Curve"));
-      if(pCurve != NULL || !pCurve->toXml(pXml))
+      if (pCurve == NULL || !pCurve->toXml(pXml))
       {
          return false;
       }

@@ -265,6 +265,9 @@ void PlotWidgetImp::initialize(PlotViewImp *pPlotView, const string& plotName, P
       mpAnnotationToolBar->setAnnotationLayer(pAnnotationLayer);
    }
 
+   const MouseMode* pMouseMode = mpPlot->getCurrentMouseMode();
+   enableAnnotationToolBar(pMouseMode);
+
    QString strClassificationText = mpPlot->getClassificationText();
    if (strClassificationText.isEmpty() == false)
    {

@@ -61,6 +61,7 @@ bool SignatureImp::toXml(XMLWriter* pXml) const
       pXml->pushAddPoint(pXml->addElement("data"));
       pXml->addAttr("name", datum->first);
       pXml->pushAddPoint(pXml->addElement("value"));
+      pXml->addAttr("type", datum->second.getTypeName());
       if(!datum->second.toXml(pXml))
       {
          return false;
@@ -83,7 +84,54 @@ bool SignatureImp::toXml(XMLWriter* pXml) const
 
 bool SignatureImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   return false;
+   if ((pDocument == NULL) || (DataElementImp::fromXml(pDocument, version) == false))
+   {
+      return false;
+   }
+
+   mData.clear();
+   mUnits.clear();
+
+   DOMElement* pElement = static_cast<DOMElement*>(pDocument);
+   for (DOMNode* pChild = pElement->getFirstChild(); pChild != NULL; pChild = pChild->getNextSibling())
+   {
+      if (XMLString::equals(pChild->getNodeName(), X("data")))
+      {
+         DOMElement* pDataElement = static_cast<DOMElement*>(pChild);
+
+         string name = A(pDataElement->getAttribute(X("name")));
+         if (name.empty() == true)
+         {
+            return false;
+         }
+
+         for (DOMNode* pGChild = pChild->getFirstChild(); pGChild != NULL; pGChild = pGChild->getNextSibling())
+         {
+            if (XMLString::equals(pGChild->getNodeName(), X("value")))
+            {
+               DataVariant value;
+               if (value.fromXml(pGChild, version) == false)
+               {
+                  return false;
+               }
+
+               mData[name] = value;
+            }
+            else if (XMLString::equals(pGChild->getNodeName(), X("units")))
+            {
+               boost::shared_ptr<UnitsImp> pNewUnits(new UnitsImp);
+               if (pNewUnits->fromXml(pGChild, version) == false)
+               {
+                  return false;
+               }
+
+               mUnits[name] = pNewUnits;
+            }
+         }
+      }
+   }
+
+   return true;
 }
 
 const string& SignatureImp::getObjectType() const

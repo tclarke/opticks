@@ -748,7 +748,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    mpSessionExplorer->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &ApplicationWindow::windowRemoved));
    mpSessionExplorer->attach(SIGNAL_NAME(SessionExplorer, AboutToShowSessionItemContextMenu), 
       Slot(this, &ApplicationWindow::updateContextMenu));
-   SessionManagerImp::instance()->attach(SIGNAL_NAME(SessionManagerImp, SessionRestored),
+   SessionManagerImp::instance()->attach(SIGNAL_NAME(SessionManager, SessionRestored),
       Slot(this, &ApplicationWindow::sessionLoaded));
 
    // Histogram window

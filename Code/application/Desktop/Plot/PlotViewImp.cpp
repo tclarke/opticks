@@ -2163,7 +2163,17 @@ bool PlotViewImp::toXml(XMLWriter* pXml) const
          const PlotObjectImp* pObject = dynamic_cast<PlotObjectImp*>(*it);
          if (pObject != NULL)
          {
-            pObject->toXml(pXml);
+            pXml->pushAddPoint(pXml->addElement("PlotObject"));
+            bool success = pObject->toXml(pXml);
+            DOMNode* pNode = pXml->popAddPoint();
+
+            if (success == false)
+            {
+               if (pNode != NULL)
+               {
+                  pXml->removeChild(pNode);
+               }
+            }
          }
       }
       pXml->popAddPoint();
@@ -2224,9 +2234,8 @@ bool PlotViewImp::fromXml(DOMNode* pDocument, unsigned int version)
             pGChld != NULL;
             pGChld = pGChld->getNextSibling())
          {
-            if (pGChld->getNodeType() == DOMNode::ELEMENT_NODE)
+            if (XMLString::equals(pGChld->getNodeName(), X("PlotObject")))
             {
-               string name = A(pGChld->getNodeName());
                pElem = static_cast<DOMElement*>(pGChld);
                string typeStr = A(pElem->getAttribute(X("type")));
                PlotObjectType eType = StringUtilities::fromXmlString<PlotObjectType>(typeStr);
