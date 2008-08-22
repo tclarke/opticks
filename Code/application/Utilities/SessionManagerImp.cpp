@@ -1021,7 +1021,7 @@ bool SessionManagerImp::open(const string &filename, Progress *pProgress)
       {
          pProgress->updateProgress("Restoring base services...", 1, NORMAL);
       }
-      notify(SIGNAL_NAME(SessionManagerImp, AboutToRestore));
+      notify(SIGNAL_NAME(SessionManager, AboutToRestore));
       ApplicationWindow *pAppWindow = static_cast<ApplicationWindow*>(Service<DesktopServices>()->getMainWidget());
       if(NN(pAppWindow))
       {
@@ -1056,7 +1056,7 @@ bool SessionManagerImp::open(const string &filename, Progress *pProgress)
       Service<DesktopServices>()->showMessageBox("Session Load Failure", "The session load failed: \n" + e.mMessage, 
          "Ok");
    }
-   notify(SIGNAL_NAME(SessionManagerImp, SessionRestored));
+   notify(SIGNAL_NAME(SessionManager, SessionRestored));
    return success;
 }
 

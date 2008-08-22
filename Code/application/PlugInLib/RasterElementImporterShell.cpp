@@ -7,9 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "RasterElementImporterShell.h"
-#include "AppVerify.h"
 #include "AppConfig.h"
+#include "AppVerify.h"
 #include "Classification.h"
 #include "DataAccessorImpl.h"
 #include "DataRequest.h"
@@ -18,16 +17,18 @@
 #include "FileResource.h"
 #include "GcpList.h"
 #include "MessageLogResource.h"
+#include "ObjectResource.h"
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInResource.h"
 #include "Progress.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
+#include "RasterElementImporterShell.h"
 #include "RasterFileDescriptor.h"
 #include "RasterLayer.h"
 #include "RasterUtilities.h"
-#include "ObjectResource.h"
+#include "SessionManager.h"
 #include "SpatialDataView.h"
 #include "SpatialDataWindow.h"
 #include "StringUtilities.h"
@@ -35,7 +36,6 @@
 #include "UtilityServices.h"
 
 #include <limits>
-
 using namespace std;
 
 RasterElementImporterShell::RasterElementImporterShell() :
@@ -1005,7 +1005,15 @@ bool RasterElementImporterShell::copyData(const RasterElement *pSrcElement) cons
    vector<DimensionDescriptor> selectedBands = getSelectedDims(pSrcDescriptor->getBands(), 
       pChipDescriptor->getBands());
  
-   bool success = RasterUtilities::chipMetadata(mpRasterElement->getMetadata(), selectedRows, selectedColumns, selectedBands);
+   bool success = true;
+
+   Service<SessionManager> pSessionManager;
+   if (pSessionManager->isSessionLoading() == false)
+   {
+      success = RasterUtilities::chipMetadata(mpRasterElement->getMetadata(), selectedRows, selectedColumns,
+         selectedBands);
+   }
+
    success = success && pSrcElement->copyDataToChip(mpRasterElement, selectedRows, 
       selectedColumns, selectedBands, mAborted, mpProgress);
 

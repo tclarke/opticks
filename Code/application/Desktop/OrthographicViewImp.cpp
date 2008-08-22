@@ -418,10 +418,10 @@ bool OrthographicViewImp::toXml(XMLWriter* pXml) const
       return false;
    }
    stringstream buf;
-   buf << mDisplayMinX << "" << mDisplayMinY;
+   buf << mDisplayMinX << " " << mDisplayMinY;
    pXml->addAttr("displayMin", buf.str().c_str());
    buf.str("");
-   buf << mDisplayMaxX << "" << mDisplayMaxY;
+   buf << mDisplayMaxX << " " << mDisplayMaxY;
    pXml->addAttr("displayMax", buf.str().c_str());
    pXml->addAttr("lockRatio", mLockRatio);
    return true;
@@ -458,9 +458,9 @@ bool OrthographicViewImp::fromXml(DOMNode* pDocument, unsigned int version)
       mDisplayMaxY = locXY.mY;
    }
 
-   mLockRatio = StringUtilities::fromXmlString<bool>(
-      A(pElem->getAttribute(X("lockRatio"))));
+   mLockRatio = StringUtilities::fromXmlString<bool>(A(pElem->getAttribute(X("lockRatio"))));
 
+   updateMatrices();
    return true;
 }
 

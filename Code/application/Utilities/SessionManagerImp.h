@@ -29,16 +29,6 @@ public:
     */
    SIGNAL_METHOD(SessionManagerImp, NameChanged)
 
-   /**
-    *  Emitted with a null boost::any when the session has finished restoring itself.
-    */
-   SIGNAL_METHOD(SessionManagerImp, SessionRestored)
-
-   /**
-    *  Emitted with a null boost::any just prior to restoring a session.
-    */
-   SIGNAL_METHOD(SessionManagerImp, AboutToRestore)
-
    static SessionManagerImp* instance();
    static void destroy();
 

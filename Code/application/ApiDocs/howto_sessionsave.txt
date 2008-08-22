@@ -31,9 +31,20 @@ A developer may lock the SessionManager using a SessionSaveLock resource which i
 Session restoration is a two phase process.
 All session items are first created and then deserialized.
 This ensures that any SessionItem storing another SessionItem ID can retrieve a pointer to the second SessionItem during deserialization.
+Deserialization of SessionItems is ordered by SessionItem type however the exact order is subject to change and changes will be documented.
+SessionItems are restored in the following order:
+ - Application window
+ - ModelServices
+ - Animations
+ - DataElements
+ - PlugIns
+ - Windows and Views
+
+The restoration order of individual objects within these object categories is undefined.
+If a plugin requires restored data from a Window or View object, delayed intialization can be performed by connecting to the SessionManager::signalSessionRestored() signal.
+
+During session restore, no plugins are executed including execute-on-startup plugins.
+A plugin should assume that deserialize() will be called without a corresponding execute().
 
 The session will be closed before loading a saved session and a plugin should properly handle cleanup tasks during session close.
-
-During session restore, no PlugIns are executed including execute on startup PlugIns.
-A PlugIns should assume that deserialize() will be called without a corresponding execute().
 */

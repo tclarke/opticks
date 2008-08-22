@@ -876,7 +876,7 @@ bool PointSetImp::toXml(XMLWriter* pXml) const
    {
       pXml->pushAddPoint(pXml->addElement("Point"));
       const PointImp* pPoint = dynamic_cast<PointImp*>(*it);
-      if (pPoint != NULL || !pPoint->toXml(pXml))
+      if (pPoint == NULL || !pPoint->toXml(pXml))
       {
          return false;
       }

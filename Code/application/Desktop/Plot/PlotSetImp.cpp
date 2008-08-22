@@ -715,7 +715,7 @@ bool PlotSetImp::deserialize(SessionItemDeserializer &deserializer)
 
 bool PlotSetImp::toXml(XMLWriter* pXml) const
 {
-   if(!SessionItemImp::toXml(pXml))
+   if (pXml == NULL || !SessionItemImp::toXml(pXml))
    {
       return false;
    }
@@ -724,6 +724,11 @@ bool PlotSetImp::toXml(XMLWriter* pXml) const
    if (mpPlotWindow != NULL)
    {
       pXml->addAttr("plotWindowId", mpPlotWindow->getId());
+   }
+
+   if (mpAssociatedView != NULL)
+   {
+      pXml->addAttr("associatedViewId", mpAssociatedView->getId());
    }
 
    vector<PlotWidget*> widgets = getPlots();
@@ -763,6 +768,13 @@ bool PlotSetImp::fromXml(DOMNode* pDocument, unsigned int version)
          mpPlotWindow->attach(SIGNAL_NAME(DockWindow, AboutToShowContextMenu),
             Slot(this, &PlotSetImp::updateContextMenu));
       }
+   }
+
+   if (pElem->hasAttribute(X("associatedViewId")))
+   {
+      View* pView = dynamic_cast<View*>(
+         SessionManagerImp::instance()->getSessionItem(A(pElem->getAttribute(X("associatedViewId")))));
+      setAssociatedView(pView);
    }
 
    for (DOMNode *pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())

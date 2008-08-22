@@ -225,11 +225,6 @@ void ViewImp::setName(const string& viewName)
    }
 }
 
-unsigned int ViewImp::getViewId() const
-{
-   return mId;
-}
-
 void ViewImp::setClassification(const Classification* pClassification)
 {
    QString strClassification;
