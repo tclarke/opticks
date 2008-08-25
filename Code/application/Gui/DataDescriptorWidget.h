@@ -31,8 +31,7 @@ public:
    DataDescriptorWidget(QWidget* parent = 0);
    ~DataDescriptorWidget();
 
-   void setDataDescriptor(DataDescriptor* pDescriptor);
-   void setDataDescriptor(const DataDescriptor* pDescriptor);
+   void setDataDescriptor(DataDescriptor* pDescriptor, bool editAll);
 
    void setValidProcessingLocations(const std::vector<ProcessingLocation>& locations);
 
@@ -58,7 +57,7 @@ protected slots:
    void setDisplayBandsToTrueColor();
 
 private:
-   bool mReadOnly;
+   bool mEditAll;
    bool mModified;
    DataDescriptor* mpDescriptor;
 

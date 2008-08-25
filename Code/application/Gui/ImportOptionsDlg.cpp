@@ -444,8 +444,8 @@ void ImportOptionsDlg::setCurrentDataset(ImportDescriptor* pImportDescriptor)
       }
    }
 
-   // Data descriptor page
-   mpDataPage->setDataDescriptor(mpEditDescriptor);
+   // Data descriptor page - enable editing for all fields
+   mpDataPage->setDataDescriptor(mpEditDescriptor, true);
 
    // File descriptor page
    bool bValidFile = true;
