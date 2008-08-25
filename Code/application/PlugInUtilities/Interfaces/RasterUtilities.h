@@ -25,6 +25,7 @@
 #endif
 
 #include <limits>
+#include <string>
 #include <vector>
 
 class DataDescriptor;
@@ -34,6 +35,7 @@ class FileDescriptor;
 class RasterDataDescriptor;
 class RasterDataDescriptor;
 class RasterElement;
+class RasterFileDescriptor;
 
 /**
  * This namespace contains a number of convenience functions
@@ -855,6 +857,24 @@ namespace RasterUtilities
             return 0;
       }
    }
+
+   /**
+    *  Calculate size of data file.
+    *
+    *  This function will calculate the size of the file described in
+    *  the given RasterFileDescriptor. For a BSQ multiple file data set, it will
+    *  calculate the required size for an individual file, not the total
+    *  of all the files. 
+    *
+    *  @param pDescriptor
+    *         The RasterFileDescriptor to use in calculation of file size.
+    *
+    *  @return The calculated file size. For BSQ multiple files, it will return
+    *          calculated size that each of the files should require.
+    *          Will return -1 if errors occurred during calculation, e.g.
+    *          if pDescriptor is NULL.
+    */
+   int64_t calculateFileSize(const RasterFileDescriptor* pDescriptor);
 }
 
 #endif

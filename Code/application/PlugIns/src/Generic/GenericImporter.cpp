@@ -18,6 +18,7 @@
 #include "ObjectResource.h"
 #include "RasterDataDescriptor.h"
 #include "RasterFileDescriptor.h"
+#include "RasterUtilities.h"
 
 #include <sstream>
 #include <string>
@@ -102,9 +103,9 @@ bool GenericImporter::validate(const DataDescriptor* pDescriptor, std::string& e
       return false;
    }
 
-   uint64_t numRows = pFileDescriptor->getRowCount();
-   uint64_t numColumns = pFileDescriptor->getColumnCount();
-   uint64_t numBands = pFileDescriptor->getBandCount();
+   unsigned int numRows = pFileDescriptor->getRowCount();
+   unsigned int numColumns = pFileDescriptor->getColumnCount();
+   unsigned int numBands = pFileDescriptor->getBandCount();
    unsigned int bitsPerElement = pFileDescriptor->getBitsPerElement();
 
    if (numRows == 0 && numColumns == 0 && numBands == 0 && bitsPerElement == 0)
@@ -135,23 +136,17 @@ bool GenericImporter::validate(const DataDescriptor* pDescriptor, std::string& e
       return false;
    }
 
-   unsigned int headerBytes = pFileDescriptor->getHeaderBytes();
-   unsigned int prelineBytes = pFileDescriptor->getPrelineBytes();
-   unsigned int postlineBytes = pFileDescriptor->getPostlineBytes();
-   unsigned int prebandBytes = pFileDescriptor->getPrebandBytes();
-   unsigned int postbandBytes = pFileDescriptor->getPostbandBytes();
-   unsigned int trailerBytes = pFileDescriptor->getTrailerBytes();
-
+   // check required size against file size/s
+   int64_t requiredSize = RasterUtilities::calculateFileSize(pFileDescriptor);
+   if (requiredSize < 0)
+   {
+      errorMessage = "Unable to determine data file size due to problem in RasterFileDescriptor.";
+      return false;
+   }
 
    const vector<const Filename*>& bandFiles = pFileDescriptor->getBandFiles();
-
-   // check required size against file size/s
    if (bandFiles.empty() == true)
    {
-      // calculate required file size
-      int64_t requiredSize = static_cast<int64_t>(headerBytes) +
-         (numRows * ((numBands * numColumns * bitsPerElement / 8) + prelineBytes + postlineBytes)) +
-         (numBands * (prebandBytes + postbandBytes)) + trailerBytes;
       LargeFileResource file;
       if (file.open(filename.getFullPathAndName(), O_RDONLY | O_BINARY, S_IREAD) == false)
       {
@@ -166,10 +161,6 @@ bool GenericImporter::validate(const DataDescriptor* pDescriptor, std::string& e
    }
    else
    {
-      // calculate required file size for each band file
-      int64_t requiredSize = static_cast<int64_t>(headerBytes) +
-         (numRows * (numColumns * bitsPerElement / 8 + prelineBytes + postlineBytes)) +
-         prebandBytes + postbandBytes + trailerBytes;
       vector<const Filename*>::const_iterator bandIt;
       int band(1);
       for (bandIt = bandFiles.begin(); bandIt!=bandFiles.end(); ++bandIt)

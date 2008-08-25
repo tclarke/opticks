@@ -212,20 +212,15 @@ bool RasterElementImporterShell::validateBasic(const DataDescriptor* pDescriptor
       return false;
    }
 
-   // Processing location restrictions
-   ProcessingLocation processingLocation = pRasterDescriptor->getProcessingLocation();
-   if (processingLocation != IN_MEMORY)
-   {
-      // Invalid preband and postband bytes
-      unsigned int prebandBytes = pFileDescriptor->getPrebandBytes();
-      unsigned int postbandBytes = pFileDescriptor->getPostbandBytes();
-      InterleaveFormatType interleave = pFileDescriptor->getInterleaveFormat();
+   // Invalid pre-band and post-band bytes
+   unsigned int prebandBytes = pFileDescriptor->getPrebandBytes();
+   unsigned int postbandBytes = pFileDescriptor->getPostbandBytes();
+   InterleaveFormatType interleave = pFileDescriptor->getInterleaveFormat();
 
-      if (((prebandBytes != 0) || (postbandBytes != 0)) && (interleave != BSQ))
-      {
-         errorMessage = "Non-BSQ formatted data cannot have preband bytes and postband bytes!";
-         return false;
-      }
+   if (((prebandBytes != 0) || (postbandBytes != 0)) && (interleave != BSQ))
+   {
+      errorMessage = "Non-BSQ formatted data cannot have pre-band bytes and post-band bytes!";
+      return false;
    }
 
    // Multiple band file restrictions
@@ -277,8 +272,7 @@ bool RasterElementImporterShell::validateBasic(const DataDescriptor* pDescriptor
       }
 
       // Non-BSQ data
-      InterleaveFormatType fileInterleave = pFileDescriptor->getInterleaveFormat();
-      if (fileInterleave != BSQ)
+      if (interleave != BSQ)
       {
          errorMessage = "Cannot load non-BSQ data in multiple files!";
          return false;
@@ -286,6 +280,7 @@ bool RasterElementImporterShell::validateBasic(const DataDescriptor* pDescriptor
    }
 
    // Valid memory
+   ProcessingLocation processingLocation = pRasterDescriptor->getProcessingLocation();
    if (processingLocation == IN_MEMORY)
    {
       unsigned int bytesPerElement = pRasterDescriptor->getBytesPerElement();
