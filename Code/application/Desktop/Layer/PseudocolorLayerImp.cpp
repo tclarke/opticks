@@ -13,6 +13,7 @@
 #include "AppVerify.h"
 #include "DataAccessorImpl.h"
 #include "DrawUtil.h"
+#include "Icons.h"
 #include "Image.h"
 #include "ModelServices.h"
 #include "PropertiesPseudocolorLayer.h"
@@ -66,6 +67,13 @@ PseudocolorLayerImp::PseudocolorLayerImp(const string& id, const string& layerNa
 
    setSymbol(PseudocolorLayer::getSettingMarkerSymbol());
    addPropertiesPage(PropertiesPseudocolorLayer::getName());
+
+   // Setting up the icon.
+   Icons* pIcons = Icons::instance();
+   if (pIcons != NULL)
+   {
+      setIcon(pIcons->mPseudocolorLayer);
+   }
 
    VERIFYNR(connect(this, SIGNAL(modified()), this, SLOT(invalidateImage())));
 }
