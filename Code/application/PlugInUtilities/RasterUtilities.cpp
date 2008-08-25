@@ -917,3 +917,96 @@ bool RasterUtilities::isSubcube(const RasterDataDescriptor* pDescriptor, bool ch
    }
    return true;
 }
+
+int64_t RasterUtilities::calculateFileSize(const RasterFileDescriptor* pDescriptor)
+{
+   int64_t fileSize(-1);
+   if (pDescriptor == NULL)
+   {
+      return fileSize;
+   }
+
+   int64_t numRows = pDescriptor->getRowCount();
+   int64_t numColumns = pDescriptor->getColumnCount();
+   int64_t numBands = pDescriptor->getBandCount();
+   int64_t bitsPerElement = pDescriptor->getBitsPerElement();
+   int64_t headerBytes = pDescriptor->getHeaderBytes();
+   int64_t prelineBytes = pDescriptor->getPrelineBytes();
+   int64_t postlineBytes = pDescriptor->getPostlineBytes();
+   int64_t prebandBytes = pDescriptor->getPrebandBytes();
+   int64_t postbandBytes = pDescriptor->getPostbandBytes();
+   int64_t trailerBytes = pDescriptor->getTrailerBytes();
+   InterleaveFormatType interleave = pDescriptor->getInterleaveFormat();
+
+   // File size calculation
+   /*
+      The total number of pre-line, post-line, pre-band and post-band bytes depends
+      on the interleave format. Symbols: B1 = Band 1, R1 = Row 1, C1 = Column 1
+
+      BSQ               BIL               BIP
+      -------           -------           -------
+      Header            Header            Header
+      Preband           Preline           Preline
+      Preline           R1 B1 C1          R1 C1 B1
+      B1 R1 C1          ...               ...   
+      ...               R1 B1 Cn          R1 C1 Bn
+      B1 R1 Cn          ...               ...   
+      Postline          R1 Bn C1          R1 Cn Bn
+      ...               ...               Postline
+      Preline           R1 Bn Cn           ...
+      B1 Rn C1          Postline          Preline
+      ...               ...               Rn C1 B1
+      B1 Rn Cn          Preline           ...
+      Postline          Rn B1 C1          Rn Cn Bn
+      Postband          ...               Postline
+      ...               Rn Bn Cn          Trailer
+      Preband           Postline
+      Preline           Trailer  
+      Bn Rn C1
+      ...
+      Bn Rn Cn
+      Postline
+      Postband
+      Trailer
+
+      NOTE: 
+      Pre/Post Band bytes are not used with BIL & BIP data - it would be a tremendous waste of space.
+   */
+
+   int64_t columnSize = bitsPerElement / 8;
+   int64_t rowSize(0);
+   int64_t bandSize(0);
+
+   switch (interleave)
+   {
+   case BSQ:
+      {
+         const vector<const Filename*>& bandFiles = pDescriptor->getBandFiles();
+         if (bandFiles.empty() == false)  // then data in multiple files
+         {
+            numBands = 1;                 // one band per file
+         }
+      }
+      rowSize = prelineBytes + (numColumns * columnSize) + postlineBytes;
+      bandSize = prebandBytes + (numRows * rowSize) + postbandBytes;
+      fileSize = headerBytes + (numBands * bandSize) + trailerBytes;
+      break;
+
+   case BIL:
+      bandSize = numColumns * columnSize;
+      rowSize = prelineBytes + (numBands * bandSize) + postlineBytes;
+      fileSize = headerBytes + (numRows * rowSize) + trailerBytes;
+      break;
+
+   case BIP:
+      columnSize *= numBands;
+      rowSize = prelineBytes + (numColumns * columnSize) + postlineBytes;
+      fileSize = headerBytes + (numRows * rowSize) + trailerBytes;
+      break;
+
+   default:
+      break;
+   }
+
+   return fileSize;
+}

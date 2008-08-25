@@ -11,16 +11,16 @@
 #include <QtCore/QStringList>
 
 #include "AppVersion.h"
-#include "EnviImporter.h"
 #include "Classification.h"
 #include "DimensionDescriptor.h"
 #include "DynamicObject.h"
 #include "Endian.h"
+#include "EnviImporter.h"
 #include "FileFinder.h"
+#include "FileResource.h"
 #include "GeoPoint.h"
 #include "ImportDescriptor.h"
 #include "ModelServices.h"
-#include "ObjectFactory.h"
 #include "ObjectResource.h"
 #include "RasterDataDescriptor.h"
 #include "RasterFileDescriptor.h"
@@ -62,7 +62,7 @@ EnviImporter::EnviImporter()
    setCreator("Ball Aerospace & Technologies Corp.");
    setCopyright(APP_COPYRIGHT);
    setVersion(APP_VERSION_NUMBER);
-   setExtensions("ENVI Header Files (*.hdr)");
+   setExtensions("ENVI Header Files (*.hdr);;ENVI Data Files (*.bsq *.bil *.bip *.dat *.cub *.img)");
    setDescriptorId("{811F49A2-3930-4a43-AC69-5A08DAEC93B8}");
    allowMultipleInstances(true);
    setProductionStatus(APP_IS_PRODUCTION_RELEASE);
@@ -77,10 +77,11 @@ EnviImporter::~EnviImporter()
 vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filename)
 {
    string headerFile = filename;
-
+   string dataFile;
    bool bSuccess = parseHeader(headerFile);
    if (bSuccess == false)
    {
+      dataFile = filename;           // was passed data file name instead of header file name
       headerFile = findHeaderFile(headerFile);
       if (headerFile.empty() == false)
       {
@@ -92,7 +93,11 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
    vector<ImportDescriptor*> descriptors;
    if (bSuccess == true)
    {
-      string dataFile = findDataFile(headerFile);
+      if (dataFile.empty() == true)  // was passed header file name and now need to find the data file name
+      {
+         dataFile = findDataFile(headerFile);
+      }
+
       if (dataFile.empty() == false)
       {
          ImportDescriptor* pImportDescriptor = mpModel->createImportDescriptor(dataFile, "RasterElement", NULL);
@@ -186,15 +191,7 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
                            EnviField* pChild = pField->mChildren[i];
                            if (pChild != NULL)
                            {
-                              if (pChild->mTag == "filename")
-                              {
-                                 // Filename
-                                 if (pChild->mValue.empty() == false)
-                                 {
-                                    pFileDescriptor->setFilename(pChild->mValue);
-                                 }
-                              }
-                              else if (pChild->mTag == "classification")
+                              if (pChild->mTag == "classification")
                               {
                                  // Classification
                                  FactoryResource<Classification> pClassification;
@@ -861,27 +858,6 @@ string EnviImporter::findDataFile(const string& headerPath)
             return attempt;
          }
       }
-
-      // Check any extension
-      FactoryResource<FileFinder> pFileFinder;
-      if (pFileFinder.get() != NULL)
-      {
-         FactoryResource<Filename> pFileName;
-         VERIFYRV(pFileName.get() != NULL, string());
-         pFileName->setFullPathAndName(temp);
-         if (pFileFinder->findFile(pFileName->getPath(), pFileName->getTitle() + ".*") == true)
-         {
-            while (pFileFinder->findNextFile() != NULL)
-            {
-               string dataFile = "";
-               pFileFinder->getFullPath(dataFile);
-               if (dataFile != headerPath)
-               {
-                  return dataFile;
-               }
-            }
-         }
-      }
    }
 
    return "";
@@ -912,6 +888,67 @@ bool EnviImporter::validate(const DataDescriptor* pDescriptor, string& errorMess
       return false;
    }
 
+   const RasterFileDescriptor* pFileDescriptor = 
+      dynamic_cast<const RasterFileDescriptor*>(pDescriptor->getFileDescriptor());
+   if (pFileDescriptor == NULL)
+   {
+      errorMessage = "The file descriptor is invalid!";
+      return false;
+   }
+   const Filename& filename = pFileDescriptor->getFilename();
+   if (filename.getFullPathAndName().empty() == true)
+   {
+      errorMessage = "The data filename is invalid!";
+      return false;
+   }
+
+   unsigned int numRows = pFileDescriptor->getRowCount();
+   unsigned int numColumns = pFileDescriptor->getColumnCount();
+   unsigned int numBands = pFileDescriptor->getBandCount();
+   unsigned int bitsPerElement = pFileDescriptor->getBitsPerElement();
+
+   if (numRows == 0)
+   {
+      errorMessage = "The number of rows is invalid!";
+      return false;
+   }
+   if (numColumns == 0)
+   {
+      errorMessage = "The number of columns is invalid!";
+      return false;
+   }
+   if (numBands == 0)
+   {
+      errorMessage = "The number of bands is invalid!";
+      return false;
+   }
+   if (bitsPerElement == 0)
+   {
+      errorMessage = "The number of bits per element is invalid!";
+      return false;
+   }
+
+   // check required size against file size/s
+   int64_t requiredSize = RasterUtilities::calculateFileSize(pFileDescriptor);
+   if (requiredSize < 0)
+   {
+      errorMessage = "Unable to determine data file size due to problem in RasterFileDescriptor.";
+      return false;
+   }
+
+   LargeFileResource file;
+   if (file.open(filename.getFullPathAndName(), O_RDONLY | O_BINARY, S_IREAD) == false)
+   {
+      errorMessage = "The data file: " + string(filename) + " does not exist!";
+      return false;
+   }
+   if (file.fileLength() < requiredSize)
+   {
+      errorMessage = "The size of the data file does not match the parameters in the header file!";
+      return false;
+   }
+
+   // check metadata
    const DynamicObject* pMetadata = pRasterDesc->getMetadata();
    if (pMetadata != NULL)
    {
