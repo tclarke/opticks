@@ -353,6 +353,11 @@ public:
    QPixmap mGcpPlus;
    QPixmap mGcpBlank;
 
+   // Layers
+   QPixmap mRasterLayer;
+   QPixmap mThresholdLayer;
+   QPixmap mPseudocolorLayer;
+
 private:
    static Icons* singleton;
 };

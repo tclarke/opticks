@@ -19,6 +19,7 @@
 #include "DataAccessorImpl.h"
 #include "DesktopServices.h"
 #include "glCommon.h"
+#include "Icons.h"
 #include "Image.h"
 #include "ImageFilterDescriptor.h"
 #include "ImageFilterDescriptorImp.h"
@@ -132,6 +133,13 @@ RasterLayerImp::RasterLayerImp(const string& id, const string& layerName, DataEl
    // Initialize the layer to the initial displayed bands and display mode
    reset();
    addPropertiesPage(PropertiesRasterLayer::getName());
+
+   // Setting up the icon.
+   Icons* pIcons = Icons::instance();
+   if (pIcons != NULL)
+   {
+      setIcon(pIcons->mRasterLayer);
+   }
 
    // Connections
    connect(this, SIGNAL(gpuImageEnabled(bool)), this, SIGNAL(modified()));

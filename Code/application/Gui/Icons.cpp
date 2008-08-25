@@ -735,6 +735,13 @@ Icons::Icons()
 
    mGcpBlank = QPixmap(IconImages::GcpBlankIcon);
    mGcpBlank.setMask(mGcpBlank.createMaskFromColor(Qt::white));
+
+   // Layers
+   mRasterLayer = QPixmap(IconImages::RasterLayerIcon);
+
+   mThresholdLayer = QPixmap(IconImages::ThresholdLayerIcon);
+
+   mPseudocolorLayer = QPixmap(IconImages::PseudocolorLayerIcon);
 }
 
 Icons::~Icons()
