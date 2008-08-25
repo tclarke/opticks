@@ -252,7 +252,7 @@ bool ImageObjectImp::setImageData(const QImage& image, ColorType transparent)
       {
          QRgb sourcePixel = image.pixel(j, i);
          *pDestPixel = (qRed(sourcePixel)) + (qGreen(sourcePixel) << 8) +
-            (qBlue(sourcePixel) << 16);
+            (qBlue(sourcePixel) << 16) + (qAlpha(sourcePixel) << 24);
 
          if (colorDepth < 32)
          {
@@ -369,20 +369,12 @@ ImageObjectImp::ImageData::ImageData(const unsigned int* pData, int iWidth, int 
          }
       }
    }
-   else
+   else if (Endian::getSystemEndian() == BIG_ENDIAN)
    {
       for (i = 0; i < pixelCount; i++)
       {
-         if (Endian::getSystemEndian() == LITTLE_ENDIAN)
-         {
-            mpData.get()[i] |= 0xff000000;
-         }
-         else
-         {
-            mpData.get()[i] |= 0xff;
-            mpData.get()[i] = ((mpData.get()[i]&0xff00) << 16) | (mpData.get()[i]&0xff0000) |
-               ((mpData.get()[i]&0xff000000) >> 16) | (mpData.get()[i] & 0xff);
-         }
+         mpData.get()[i] = ((mpData.get()[i]&0xff00) << 16) | (mpData.get()[i]&0xff0000) |
+            ((mpData.get()[i]&0xff000000) >> 16) | (mpData.get()[i] & 0xff);
       }
    }
 }
