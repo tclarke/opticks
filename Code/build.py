@@ -37,6 +37,44 @@ class Builder:
     def __get_app_version_only(self):
         return commonutils.get_app_version_only(".")
 
+    def build_doxygen(self, artifactsDir):
+        current_app_version = self.get_current_app_version()
+        docPath = os.path.abspath(os.path.join("Build", "DoxygenOutput"))
+        if os.path.exists(docPath):
+           shutil.rmtree(docPath, True) #delete any already generated documentation
+        os.makedirs(docPath)
+        doxygen_cmd = self.getDoxygenPath() 
+        config_dir = os.path.abspath(os.path.join("application", "ApiDocs")) 
+        args = [os.path.join(config_dir, "application.dox")]
+        env = os.environ
+        env["SOURCE"] = os.path.abspath("application")
+        env["VERSION"] = current_app_version 
+        env["OUTPUT_DIR"] = docPath
+        env["CONFIG_DIR"] = config_dir 
+        graphviz_dir = os.path.abspath(os.path.join(self.depend_path, "graphviz", "app")) 
+        env["DOT_DIR"] = os.path.join(graphviz_dir, "bin")
+        if sys.platform.startswith("sunos"):
+            env["GVBINDIR"] = os.path.join(graphviz_dir, "lib", "graphviz")
+            new_value = os.path.join(graphviz_dir, "lib") 
+            if env.has_key("LD_LIBRARY_PATH_32"):
+               new_value = new_value + ":" + env["LD_LIBRARY_PATH_32"]
+            env["LD_LIBRARY_PATH_32"] = new_value
+        retCode = self.run_app(doxygen_cmd, ".", None, None, ".", env, args)
+        if retCode != 0:
+            raise ScriptException("Unable to run doxygen generation script", retCode)
+        print "Done generating doxygen"
+        if artifactsDir != None:
+           print "Zipping doxygen"
+           htmlPath = os.path.join(docPath, "html")
+           zip_name = "doxygen.zip"
+           zip_path = os.path.abspath(join(artifactsDir, zip_name))
+           the_zip = zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED)
+           for cur_dir, dirs, files in os.walk(htmlPath):
+               arc_dir = cur_dir[len(htmlPath):]
+               for the_file in files:
+                   the_zip.write(join(cur_dir,the_file),join(arc_dir,the_file))
+           the_zip.close()
+
     def __update_app_version_h(self, fields_to_replace):
         app_version = open(os.path.join("application", "PlugInUtilities", "AppVersion.h"), "rt")
         version_info = app_version.readlines()
@@ -57,7 +95,10 @@ class Builder:
        
     def get_current_app_version(self):
         # Try to update the build revision, since it might be stale
-        update_build_rev = subprocess.Popen(["update-build-revision.py"], shell=True)
+        command_prefix = "./"
+        if sys.platform.startswith("win"):
+            command_prefix = ""
+        update_build_rev = subprocess.Popen(["python", "%supdate-build-revision.py" % (command_prefix)], shell=False)
         update_build_rev.wait()
 
         # Read the current build revision directly from the file.
@@ -234,34 +275,6 @@ class WindowsBuilder(Builder):
         Builder.__init__(self, dependencies, arcsdk, build_in_debug)
         self.vs_path = visualstudio
     
-    def build_doxygen(self, artifactsDir):
-        current_app_version = self.get_current_app_version()
-        docPath = os.path.abspath(r"Release\Toolkit\doc")
-        htmlPath = os.path.join(docPath, "html")
-        if os.path.exists(htmlPath):
-           shutil.rmtree(htmlPath, True) #delete any already generated documentation
-        doxygen_cmd = os.path.join(docPath, "doxygen.exe")
-        if os.path.exists(doxygen_cmd):
-           args = ["application.dox"]
-           env = os.environ
-           env["SOURCE"] = "..\..\..\Application"
-           env["VERSION"] = current_app_version 
-           retCode = self.run_app(doxygen_cmd, docPath, None, None, ".", env, args)
-           if retCode != 0:
-               raise ScriptException("Unable to run doxygen generation script", retCode)
-           print "Done generating doxygen"
-           if artifactsDir != None:
-              print "Zipping doxygen"
-              leadingPath = docPath.split("\\")
-              zip_name = "doxygen.zip"
-              zip_path = os.path.abspath(join(artifactsDir, zip_name))
-              the_zip = zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED)
-              for cur_dir, dirs, files in os.walk(htmlPath):
-                  root = os.path.join(cur_dir.split("\\")[len(leadingPath):])[0]
-                  for the_file in files:
-                      the_zip.write(join(cur_dir,the_file),join(root,the_file))
-              the_zip.close()
-        
     def compile_code(self, env, clean, build_opticks, concurrency):
         solution_file = os.path.abspath("Application\\Opticks.sln")
         self.build_in_visual_studio(solution_file, self.build_debug_mode, self.is_64_bit, concurrency, self.vs_path, env, clean)
@@ -274,6 +287,9 @@ class WindowsBuilder(Builder):
 
     def getZipName(self):
         return "Binaries-%s-%s.zip" % (self.platform, self.mode)
+
+    def getDoxygenPath(self):
+        return os.path.join(self.depend_path, "doxygen", "bin", "doxygen.exe")
     
     def set_opticks_defaults(self, build_dir):
         config_defaults_dir = os.path.abspath(join(self.getBinariesDir(build_dir), "DefaultSettings"))
@@ -405,8 +421,8 @@ class SolarisBuilder(Builder):
     def __init__(self, dependencies, arcsdk, build_in_debug):
         Builder.__init__(self, dependencies, arcsdk, build_in_debug)
     
-    def build_doxygen(self, artifactsDir):
-        pass
+    def getDoxygenPath(self):
+        return os.path.join(self.depend_path, "doxygen", "bin", "doxygen")
         
     def compile_code(self, env, clean, build_opticks, concurrency):
         #Build Opticks Core

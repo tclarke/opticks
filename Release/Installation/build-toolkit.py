@@ -231,14 +231,11 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir, package_dir):
       print "ERROR: Unable to export dependencies"
 
    ##### Run Doxygen to generate the html documentation
-   retcode = subprocess.Popen([join(opticks_code_dir,"build.py"), "--build-doxygen"], shell=True).wait()
+   print "Running Doxygen"
+   retcode = subprocess.Popen(["python", join(os.path.abspath(opticks_code_dir),"build.py"), "--build-doxygen", "-d", opticks_dependencies_dir], shell=False).wait()
    if retcode != 0:
       print "ERROR: Error occurred while building on-line help"
-   if is_windows():
-      #TODO - Get doxygen running on Solaris, currently it doesn't run
-      cp_dir2(join(s_release, "Toolkit", "doc"), join(out_dir, "doc"), "html")
-   else:
-      print "WARNING: You must currently run this script on Windows to generate the doxygen and then copy the output over to this system."
+   cp_dir2(join(opticks_code_dir, "Build", "DoxygenOutput"), join(out_dir, "doc"), "html")
  
    plugins_file = None
    libs = ["PlugInLib", "PlugInUtilities", "HdfPlugInLib", "NitfPlugInLib"]
