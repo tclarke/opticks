@@ -64,6 +64,7 @@ class AnimationController : public SessionItem, public Subject
 {
 public:
    SETTING(FrameSpeedSelection, AnimationController, double, 0)
+   SETTING(AnimationCycleSelection, AnimationController, AnimationCycle, PLAY_ONCE)
    /**
     *  Emitted with boost::any<std::string> when the controller is renamed.
     *
