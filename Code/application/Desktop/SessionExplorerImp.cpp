@@ -423,52 +423,6 @@ void SessionExplorerImp::updateData(SessionItem* pItem)
    }
 }
 
-bool SessionExplorerImp::event(QEvent* pEvent)
-{
-   bool bSuccess = DockWindowImp::event(pEvent);
-   if (pEvent != NULL)
-   {
-      if (pEvent->type() == QEvent::Polish)
-      {
-         // Window model
-         WindowModel* pWindowModel = new WindowModel(this);
-         mpWindowTree->setModel(pWindowModel);
-
-         // Animation model
-         AnimationModel* pAnimationModel = new AnimationModel(this);
-
-         QSortFilterProxyModel* pAnimationProxyModel = new QSortFilterProxyModel(this);
-         pAnimationProxyModel->setSourceModel(pAnimationModel);
-         pAnimationProxyModel->setDynamicSortFilter(true);
-
-         mpAnimationTree->setModel(pAnimationProxyModel);
-
-         // Element model
-         ElementModel* pElementModel = new ElementModel(this);
-
-         QSortFilterProxyModel* pElementProxyModel = new QSortFilterProxyModel(this);
-         pElementProxyModel->setSourceModel(pElementModel);
-         pElementProxyModel->setDynamicSortFilter(true);
-
-         mpElementTree->setModel(pElementProxyModel);
-
-         // Plug-in model
-         PlugInModel* pPlugInModel = new PlugInModel(this);
-
-         QSortFilterProxyModel* pPlugInProxyModel = new QSortFilterProxyModel(this);
-         pPlugInProxyModel->setSourceModel(pPlugInModel);
-         pPlugInProxyModel->setDynamicSortFilter(true);
-
-         mpPlugInTree->setModel(pPlugInProxyModel);
-
-         // Attach to the dock window
-         attach(SIGNAL_NAME(DockWindow, AboutToShowContextMenu), Slot(this, &SessionExplorerImp::updateContextMenu));
-      }
-   }
-
-   return bSuccess;
-}
-
 bool SessionExplorerImp::eventFilter(QObject* pObject, QEvent* pEvent)
 {
    if ((pObject != NULL) && (pEvent != NULL))
@@ -742,4 +696,54 @@ void SessionExplorerImp::renameItem()
          QMessageBox::critical(pView, windowTitle(), "The selected session item cannot be renamed.");
       }
    }
+}
+
+void SessionExplorerImp::initialize()
+{
+   // Window model
+   if (mpWindowTree->model() == NULL)
+   {
+      WindowModel* pWindowModel = new WindowModel(this);
+      mpWindowTree->setModel(pWindowModel);
+   }
+
+   // Animation model
+   if (mpAnimationTree->model() == NULL)
+   {
+      AnimationModel* pAnimationModel = new AnimationModel(this);
+
+      QSortFilterProxyModel* pAnimationProxyModel = new QSortFilterProxyModel(this);
+      pAnimationProxyModel->setSourceModel(pAnimationModel);
+      pAnimationProxyModel->setDynamicSortFilter(true);
+
+      mpAnimationTree->setModel(pAnimationProxyModel);
+   }
+
+   // Element model
+   if (mpElementTree->model() == NULL)
+   {
+      ElementModel* pElementModel = new ElementModel(this);
+
+      QSortFilterProxyModel* pElementProxyModel = new QSortFilterProxyModel(this);
+      pElementProxyModel->setSourceModel(pElementModel);
+      pElementProxyModel->setDynamicSortFilter(true);
+
+      mpElementTree->setModel(pElementProxyModel);
+   }
+
+   // Plug-in model
+   if (mpPlugInTree->model() == NULL)
+   {
+      PlugInModel* pPlugInModel = new PlugInModel(this);
+
+      QSortFilterProxyModel* pPlugInProxyModel = new QSortFilterProxyModel(this);
+      pPlugInProxyModel->setSourceModel(pPlugInModel);
+      pPlugInProxyModel->setDynamicSortFilter(true);
+
+      mpPlugInTree->setModel(pPlugInProxyModel);
+   }
+
+   // Attach to the dock window not wrapped in VERIFY. It will return false after the
+   // first call to initialize.
+   attach(SIGNAL_NAME(DockWindow, AboutToShowContextMenu), Slot(this, &SessionExplorerImp::updateContextMenu));
 }

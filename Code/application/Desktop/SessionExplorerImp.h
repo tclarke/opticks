@@ -41,11 +41,11 @@ public:
    void expandSessionItem(SessionItem* pItem);
    void collapseSessionItem(SessionItem* pItem);
    bool isSessionItemExpanded(SessionItem* pItem) const;
+   void initialize();
 
    void updateData(SessionItem* pItem);
 
 protected:
-   bool event(QEvent* pEvent);
    bool eventFilter(QObject* pObject, QEvent* pEvent);
 
    void updateContextMenu(Subject& subject, const std::string& signal, const boost::any& value);
