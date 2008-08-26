@@ -17,6 +17,7 @@
 #include "Animation.h"
 #include "AnimationController.h"
 #include "AnimationControllerImp.h"
+#include "AnimationCycleButton.h"
 #include "AnimationImp.h"
 #include "AnimationToolBar.h"
 #include "AnimationToolBarImp.h"
@@ -713,79 +714,4 @@ void AnimationToolBarImp::setHideTimestamp(bool hideTimestamp)
 bool AnimationToolBarImp::getHideTimestamp() const
 {
    return mHideTimestamp;
-}
-
-AnimationCycleGrid::AnimationCycleGrid(QWidget* pParent): PixmapGrid(pParent)
-{
-   setNumRows(1);
-   setNumColumns(3);
-
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
-   setPixmap(0, 0, pIcons->mPlayOnce,
-      QString::fromStdString(StringUtilities::toXmlString(PLAY_ONCE)),
-      QString::fromStdString(StringUtilities::toDisplayString(PLAY_ONCE)));
-   setPixmap(0, 1, pIcons->mBouncePlay,
-      QString::fromStdString(StringUtilities::toXmlString(BOUNCE)),
-      QString::fromStdString(StringUtilities::toDisplayString(BOUNCE)));
-   setPixmap(0, 2, pIcons->mRepeatPlay,
-      QString::fromStdString(StringUtilities::toXmlString(REPEAT)),
-      QString::fromStdString(StringUtilities::toDisplayString(REPEAT)));
-
-   // Set the current symbol
-   setSelectedPixmap(QString::fromStdString(StringUtilities::toXmlString(PLAY_ONCE)));
-
-   VERIFYNR(connect(this, SIGNAL(pixmapSelected(const QString&)), this, SLOT(translateChange(const QString&))));
-}
-
-void AnimationCycleGrid::setCurrentValue(AnimationCycle value)
-{
-   QString strValue = QString::fromStdString(StringUtilities::toXmlString(value));
-   setSelectedPixmap(strValue);
-}
-
-AnimationCycle AnimationCycleGrid::getCurrentValue() const
-{
-   AnimationCycle retValue;
-   string curText = getSelectedPixmapIdentifier().toStdString();
-   if (!curText.empty())
-   {
-      retValue = StringUtilities::fromXmlString<AnimationCycle>(curText);
-   }
-   return retValue;
-}
-
-void AnimationCycleGrid::translateChange(const QString& strText)
-{
-   AnimationCycle curType = StringUtilities::fromXmlString<AnimationCycle>(strText.toStdString());
-   emit valueChanged(curType);
-}
-
-AnimationCycleButton::AnimationCycleButton(QWidget* pParent) : 
-   PixmapGridButton(pParent)
-{
-   setSyncIcon(true);
-   AnimationCycleGrid* pGrid = new AnimationCycleGrid(this);
-   setPixmapGrid(pGrid);
-   VERIFYNR(connect(pGrid, SIGNAL(valueChanged(AnimationCycle)), this, SIGNAL(valueChanged(AnimationCycle))));
-}
-
-void AnimationCycleButton::setCurrentValue(AnimationCycle value)
-{
-   AnimationCycleGrid* pGrid = dynamic_cast<AnimationCycleGrid*>(getPixmapGrid());
-   if (pGrid != NULL)
-   {
-      pGrid->setCurrentValue(value);
-   }
-}
-
-AnimationCycle AnimationCycleButton::getCurrentValue() const
-{
-   AnimationCycle retValue;
-   AnimationCycleGrid* pGrid = dynamic_cast<AnimationCycleGrid*>(getPixmapGrid());
-   if (pGrid != NULL)
-   {
-      retValue = pGrid->getCurrentValue();
-   }
-   return retValue;
 }

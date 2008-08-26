@@ -7,47 +7,49 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef OPTIONSGENERAL_H
-#define OPTIONSGENERAL_H
+#ifndef OPTIONSANIMATION_H
+#define OPTIONSANIMATION_H
 
+#include <QtGui/QListWidget>
 #include <QtGui/QWidget>
 
 #include "AppVersion.h"
 
-class QCheckBox;
-class QSpinBox;
+#include <vector>
 
-class OptionsGeneral : public QWidget
+class AnimationCycleButton;
+
+class OptionsAnimation : public QWidget
 {
    Q_OBJECT
 
 public:
-   OptionsGeneral();
-   ~OptionsGeneral();
+   OptionsAnimation();
+   ~OptionsAnimation();
 
    void applyChanges();
 
    static const std::string& getName()
    {
-      static std::string var = "General Options";
+      static std::string var = "Animation Options";
       return var;
    }
 
    static const std::string& getOptionName()
    {
-      static std::string var = "Session/General";
+      static std::string var = "Animation";
       return var;
    }
 
    static const std::string& getDescription()
    {
-      static std::string var = "Widget to display general options for the application";
+      static std::string var = "Widget to display animation related options for the application";
       return var;
    }
 
    static const std::string& getShortDescription()
    {
-      static std::string var = "Widget to display general options for the application";
+      static std::string var = "Widget to display animation related options for the application";
       return var;
    }
 
@@ -76,14 +78,19 @@ public:
 
    static const std::string& getDescriptorId()
    {
-      static std::string var = "{028D6D49-3F98-4432-8FF2-68E33AA0DF00}";
+      static std::string var = "{F764406C-7726-4ed7-A823-BA7B803EB075}";
       return var;
    }
 
+protected slots:
+   void addFrameSpeed();
+   void removeFrameSpeed();
+   void editFrameSpeedFinished(QListWidgetItem *pCurrentItem);
+
 private:
-   QSpinBox *mpBufferSpin;
-   QSpinBox *mpThreadSpin;
-   QCheckBox *mpProgressClose;
+   AnimationCycleButton *mpCycle;
+   QListWidget *mpFrameSpeedList;
+   std::vector<double> mFrameSpeeds;
 };
 
-#endif
+#endif 

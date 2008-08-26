@@ -120,36 +120,6 @@ private:
    bool mHideTimestamp;
 };
 
-class AnimationCycleGrid : public PixmapGrid
-{
-   Q_OBJECT
-
-public:
-   AnimationCycleGrid(QWidget* pParent);
-   void setCurrentValue(AnimationCycle value);
-   AnimationCycle getCurrentValue() const;
-
-signals: 
-   void valueChanged(AnimationCycle value);
-
-private slots:
-   void translateChange(const QString&);
-};
-
-class AnimationCycleButton : public PixmapGridButton
-{
-   Q_OBJECT
-
-public:
-   AnimationCycleButton(QWidget* pParent);
-
-   void setCurrentValue(AnimationCycle value);
-   AnimationCycle getCurrentValue() const;
-
-signals:
-   void valueChanged(AnimationCycle value);
-};
-
 #define ANIMATIONTOOLBARADAPTEREXTENSION_CLASSES \
    TOOLBARADAPTEREXTENSION_CLASSES
 

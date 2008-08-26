@@ -61,7 +61,7 @@ AnimationControllerImp::AnimationControllerImp(FrameType frameType, const string
    mMinimumFrameRate(1, mFrequency),
    mInterval(AnimationController::getSettingFrameSpeedSelection() / mFrequency),
    mState(STOP),
-   mCycle(PLAY_ONCE),
+   mCycle(AnimationController::getSettingAnimationCycleSelection()),
    mStartTime(0.0),
    mCanDropFrames(true),
    mpPlayAction(NULL),
