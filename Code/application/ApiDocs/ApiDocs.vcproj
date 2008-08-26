@@ -145,11 +145,11 @@
 			Name="Doxygen Configuration"
 			>
 			<File
-				RelativePath="..\..\Release\Toolkit\doc\application.dox"
+				RelativePath=".\application.dox"
 				>
 			</File>
 			<File
-				RelativePath="..\..\Release\Toolkit\doc\trailer.txt"
+				RelativePath=".\trailer.html"
 				>
 			</File>
 		</Filter>
@@ -157,7 +157,7 @@
 			Name="Generated Doxygen"
 			>
 			<File
-				RelativePath="..\..\Release\Toolkit\doc\html\index.html"
+				RelativePath="$(OPTICKS_CODE_DIR)\Build\DoxygenOutput\html\index.html"
 				>
 			</File>
 		</Filter>
