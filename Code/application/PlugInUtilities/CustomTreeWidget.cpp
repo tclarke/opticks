@@ -317,10 +317,11 @@ void CustomTreeWidget::activateCellWidget(QTreeWidgetItem* pItem, int iColumn)
 
             if (eType == BROWSE_DIR_EDIT)
             {
-               QCompleter *pCompleter = new QCompleter(this);
+               QCompleter* pCompleter = new QCompleter(this);
                pCompleter->setModel(new QDirModel(QStringList(), QDir::NoDotAndDotDot | QDir::Dirs | QDir::Drives,
                   QDir::DirsFirst, pCompleter));
                mpEdit->setCompleter(pCompleter);
+
                if (mpBrowse == NULL)
                {
                   QPixmap pixOpen(IconImages::OpenIcon);
@@ -328,11 +329,9 @@ void CustomTreeWidget::activateCellWidget(QTreeWidgetItem* pItem, int iColumn)
                   QIcon icnBrowse(pixOpen);
 
                   mpBrowse = new QPushButton(icnBrowse, QString(), viewport());
-                  if (mpBrowse != NULL)
-                  {
-                     mpBrowse->setFixedWidth(25);
-                     VERIFYNR(connect(mpBrowse, SIGNAL(clicked()), this, SLOT(browse())));
-                  }
+                  mpBrowse->setFixedWidth(25);
+                  mpBrowse->installEventFilter(this);
+                  VERIFYNR(connect(mpBrowse, SIGNAL(clicked()), this, SLOT(browse())));
                }
 
                if (mpBrowse != NULL)
@@ -937,6 +936,13 @@ bool CustomTreeWidget::eventFilter(QObject* pObject, QEvent* pEvent)
                }
             }
          }
+         else if (pObject == mpBrowse)
+         {
+            if (pFocusWidget != mpEdit)
+            {
+               closeActiveCellWidget(true);
+            }
+         }
          else if (pObject == mpCombo)
          {
             if ((pFocusWidget != mpCombo) && (pFocusWidget != mpCombo->view()))
@@ -1264,6 +1270,10 @@ void CustomTreeWidget::browse()
       return;
    }
 
+   // Remove the event filter on the browse button to prevent the focus
+   // out event from being sent when the browse dialog is invoked
+   mpBrowse->removeEventFilter(this);
+
    QModelIndex cellIndex = currentIndex();
    int iColumn = cellIndex.column();
 
@@ -1290,6 +1300,8 @@ void CustomTreeWidget::browse()
          mpEdit->setFocus();
       }
    }
+
+   mpBrowse->installEventFilter(this);
 }
 
 void CustomTreeWidget::acceptEditText()
