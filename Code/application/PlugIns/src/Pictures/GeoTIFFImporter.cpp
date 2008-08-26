@@ -27,19 +27,24 @@
 #include "ModelServices.h"
 #include "ObjectFactory.h"
 #include "ObjectResource.h"
+#include "OptionsTiffImporter.h"
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
 #include "PlugInResource.h"
+#include "QuickbirdIsd.h"
 #include "RasterDataDescriptor.h"
 #include "RasterFileDescriptor.h"
 #include "RasterUtilities.h"
 #include "SpatialDataView.h"
 
 #include <errno.h>
+#include <QtCore/QFileInfo>
+#include <QtCore/QString>
+#include <QtCore/QVariant>
 using namespace std;
 
-GeoTIFFImporter::GeoTIFFImporter()
+GeoTIFFImporter::GeoTIFFImporter() : mImportOptionsWidget(NULL)
 {
    setName("GeoTIFF Importer");
    setCreator("Ball Aerospace & Technologies Corp.");
@@ -523,6 +528,138 @@ bool GeoTIFFImporter::validateDefaultOnDiskReadOnly(const DataDescriptor* pDescr
    }
 
    return true;
+}
+
+bool GeoTIFFImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
+{
+   if (pInArgList == NULL)
+   {
+      return false;
+   }
+
+   // Create a message log step
+   StepResource pStep("Execute GeoTIFF Importer", "app", "76793666-5219-499f-9d2c-8accc11b32fc", "Execute failed");
+
+   // Extract the input args
+   bool bSuccess = parseInputArgList(pInArgList);
+   if (!bSuccess)
+   {
+      return false;
+   }
+
+   // Update the log and progress with the start of the import
+   Progress *pProgress = getProgress();
+   if (pProgress != NULL)
+   {
+      pProgress->updateProgress("GeoTIFF Importer Started", 1, NORMAL);
+   }
+
+   loadIsdMetadata(getRasterElement()->getDataDescriptor());
+   if (!performImport())
+   {
+      return false;
+   }
+
+   // Create the view
+   if (!isBatch() && !Service<SessionManager>()->isSessionLoading())
+   {
+      SpatialDataView *pView = createView();
+      if (pView == NULL)
+      {
+         pStep->finalize(Message::Failure, "The view could not be created.");
+         return false;
+      }
+
+      // Add the view to the output arg list
+      if (pOutArgList != NULL)
+      {
+         pOutArgList->setPlugInArgValue("View", pView);
+      }
+   }
+
+   if (pProgress != NULL)
+   {
+      pProgress->updateProgress("GeoTIFF Import Complete.", 100, NORMAL);
+   }
+
+   pStep->finalize(Message::Success);
+   return true;
+}
+
+QWidget *GeoTIFFImporter::getImportOptionsWidget(DataDescriptor *pDescriptor)
+{
+   if (mImportOptionsWidget.get() == NULL)
+   {
+      QString initialDirectory;
+      QString isdFilename;
+      const FileDescriptor *pFileDescriptor = (pDescriptor == NULL) ? NULL : pDescriptor->getFileDescriptor();
+      if (pFileDescriptor != NULL)
+      {
+         initialDirectory = QString::fromStdString(pFileDescriptor->getFilename().getPath());
+         QFileInfo tiffInfo(QString::fromStdString(pFileDescriptor->getFilename().getFullPathAndName()));
+         QFileInfo isdInfo(tiffInfo.absolutePath() + "/" + tiffInfo.completeBaseName() + ".xml");
+         if (isdInfo.exists())
+         {
+            isdFilename = isdInfo.absoluteFilePath();
+         }
+      }
+      mImportOptionsWidget.reset(new OptionsTiffImporter(initialDirectory));
+      mImportOptionsWidget->setFilename(isdFilename);
+   }
+   return mImportOptionsWidget.get();
+}
+
+void GeoTIFFImporter::loadIsdMetadata(DataDescriptor *pDescriptor)
+{
+   QString isdFilename;
+   if (mImportOptionsWidget.get() != NULL)
+   {
+      isdFilename = mImportOptionsWidget->getFilename();
+   }
+   else
+   {
+      const FileDescriptor *pFileDescriptor = (pDescriptor == NULL) ? NULL : pDescriptor->getFileDescriptor();
+      if (pFileDescriptor != NULL)
+      {
+         QFileInfo tiffInfo(QString::fromStdString(pFileDescriptor->getFilename().getFullPathAndName()));
+         QFileInfo isdInfo(tiffInfo.absolutePath() + "/" + tiffInfo.completeBaseName() + ".xml");
+         if (isdInfo.exists())
+         {
+            isdFilename = isdInfo.absoluteFilePath();
+         }
+      }
+   }
+   if (isdFilename.isEmpty())
+   {
+      // don't load any ISD metadata
+      return;
+   }
+   StepResource pStep("Load ISD Metadata", "app", "06b70af8-7ba5-43d6-8a92-826731da7a81");
+   QFileInfo isdInfo(isdFilename);
+   if (!isdInfo.isFile() || !isdInfo.exists())
+   {
+      string message = "ISD metadata file " + isdFilename.toStdString() + " does not exist.\nMetadata will not be loaded.";
+      if (getProgress() != NULL)
+      {
+         getProgress()->updateProgress(message, 0, WARNING);
+      }
+      pStep->finalize(Message::Failure, message);
+      return;
+   }
+   QuickbirdIsd isd(isdFilename.toStdString());
+   if (!isd.copyToMetadata(pDescriptor->getMetadata()))
+   {
+      string message = "Unable to parse ISD metadata file " + isdFilename.toStdString() + ".\nMetadata will not be loaded.";
+      if (getProgress() != NULL)
+      {
+         getProgress()->updateProgress(message, 0, WARNING);
+      }
+      pStep->finalize(Message::Failure, message);
+   }
+   else
+   {
+      pStep->finalize(Message::Success);
+   }
 }
 
 bool GeoTIFFImporter::createRasterPager(RasterElement *pRasterElement) const
