@@ -1182,6 +1182,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
 
    m_pNo_View_Mode_Action->setChecked(true);
 
+   mpSessionExplorer->initialize();
    qApp->installEventFilter(this);
 
    /////////////////
