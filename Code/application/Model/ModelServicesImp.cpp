@@ -669,16 +669,16 @@ bool ModelServicesImp::destroyElement(DataElement* pElement)
    AttachmentPtr<DataElement> pParent(pElement);
 
    // Destroy the element's children
-   vector<DataElement*> children = getElements(pElement, string());
-
-   vector<DataElement*>::iterator iter;
-   for (iter = children.begin(); iter != children.end(); ++iter)
+   vector<DataElement*> children = getElements(pParent.get(), string());
+   while ((pParent.get() != NULL) && (children.empty() == false))
    {
-      DataElement* pChild = *iter;
+      DataElement* pChild = children.front();
       if (pChild != NULL)
       {
          destroyElement(pChild);
       }
+
+      children = getElements(pParent.get(), string());
    }
 
    // Check if the parent element was destroyed as a result of destroying its children
