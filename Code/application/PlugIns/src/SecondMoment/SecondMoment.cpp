@@ -9,10 +9,10 @@
 
 #include <QtCore/QFile>
 
-#include "AppVersion.h"
 #include "AoiElement.h"
-#include "BitMask.h"
+#include "AppVersion.h"
 #include "AppVerify.h"
+#include "BitMask.h"
 #include "DataAccessorImpl.h"
 #include "DataDescriptor.h"
 #include "DesktopServices.h"
@@ -23,7 +23,6 @@
 #include "ObjectFactory.h"
 #include "ObjectResource.h"
 #include "PlugInArgList.h"
-#include "RasterElement.h"
 #include "RasterDataDescriptor.h"
 #include "RasterUtilities.h"
 #include "SecondMoment.h"
@@ -37,18 +36,18 @@
 using namespace std;
 
 const string SecondMomentAlgorithm::mExpectedFileHeader = "Second Moment Matrix File v1.1\n";
-static bool **CopySelectedPixels(const bool **pSelectedPixels, int xsize, int ysize);
-static void DeleteSelectedPixels(bool **pSelectedPixels);
+static bool** CopySelectedPixels(const bool** pSelectedPixels, int xsize, int ysize);
+static void DeleteSelectedPixels(bool** pSelectedPixels);
 
 template<class T>
-T *GetRowPtr (T *raw, int numCols, int numBands, int row, int col)
+T* GetRowPtr (T* raw, int numCols, int numBands, int row, int col)
 {
    return raw + numBands * (row *numCols + col);
 }
 
 template<class T>
-void ComputeFactoredSmm(T *pData, RasterElement* pRaster, double *pMatrix,
-                        Progress *pProgress, const bool *pAbortFlag,
+void ComputeFactoredSmm(T* pData, RasterElement* pRaster, double* pMatrix,
+                        Progress* pProgress, const bool* pAbortFlag,
                         int rowFactor, int columnFactor)
 {
    if (pRaster == NULL)
@@ -66,34 +65,34 @@ void ComputeFactoredSmm(T *pData, RasterElement* pRaster, double *pMatrix,
       return;
    }
 
-   unsigned int NumRows = pDescriptor->getRowCount();
-   unsigned int NumCols = pDescriptor->getColumnCount();
-   unsigned int NumBands = pDescriptor->getBandCount();
+   unsigned int numRows = pDescriptor->getRowCount();
+   unsigned int numCols = pDescriptor->getColumnCount();
+   unsigned int numBands = pDescriptor->getBandCount();
 
-   if(rowFactor < 1)
+   if (rowFactor < 1)
    {
       rowFactor = 1;
    }
-   if(columnFactor < 1)
+   if (columnFactor < 1)
    {
       columnFactor = 1;
    }
 
-   memset(pMatrix, 0, sizeof(double) * NumBands * NumBands);
+   memset(pMatrix, 0, sizeof(double) * numBands * numBands);
 
    FactoryResource<DataRequest> pRequest;
    pRequest->setInterleaveFormat(BIP);
 
    DataAccessor accessor = pRaster->getDataAccessor(pRequest.release());
-   T *pDataColumn=NULL;
-   for(row = 0; row < NumRows;)
+   T* pDataColumn(NULL);
+   for (row = 0; row < numRows;)
    {
-      if(pProgress != NULL)
+      if (pProgress != NULL)
       {
-         if((pAbortFlag == NULL) || !(*pAbortFlag))
+         if ((pAbortFlag == NULL) || !(*pAbortFlag))
          {
-            int iPercent = (100 * row) / NumRows;
-            if(iPercent == 100)
+            int iPercent = (100 * row) / numRows;
+            if (iPercent == 100)
             {
                iPercent = 99;
             }
@@ -107,23 +106,23 @@ void ComputeFactoredSmm(T *pData, RasterElement* pRaster, double *pMatrix,
       }
       VERIFYNRV(accessor.isValid());
       pData = static_cast<T*>(accessor->getRow());
-      for(col = 0; col < NumCols; col += columnFactor)
+      for (col = 0; col < numCols; col += columnFactor)
       {
-         lCount++;
-         pDataColumn = pData + col * NumBands;
+         ++lCount;
+         pDataColumn = pData + col * numBands;
          double* pMatrixRow = pMatrix;
          double* pMatrixColumn = NULL;
          T* pRowIndexBand = pDataColumn;
          T* pColIndexBand = pDataColumn;
          double* pStop = NULL;
-         for(band = 0; band < NumBands; band++,
-                                        pRowIndexBand++,
+         for (band = 0; band < numBands; ++band,
+                                        ++pRowIndexBand,
                                         pColIndexBand = pRowIndexBand,
-                                        pMatrixRow += (NumBands + 1))
+                                        pMatrixRow += (numBands + 1))
          {
             pMatrixColumn = pMatrixRow;
-            pStop = &pMatrixColumn[NumBands-band];
-            while(pMatrixColumn != pStop)
+            pStop = &pMatrixColumn[numBands-band];
+            while (pMatrixColumn != pStop)
             {
                *pMatrixColumn += (*pRowIndexBand) * (*pColIndexBand);
                ++pMatrixColumn;
@@ -131,36 +130,36 @@ void ComputeFactoredSmm(T *pData, RasterElement* pRaster, double *pMatrix,
             }
          }
       }
-      for(i = 0; i< static_cast<unsigned int>(rowFactor); i++)
+      for (i = 0; i< static_cast<unsigned int>(rowFactor); ++i)
       {
-         row++;
-         if(row < NumRows)
+         ++row;
+         if(row < numRows)
          {
             accessor->nextRow();
          }
       }
    }
 
-   for(i = 0; i < NumBands; i++)
+   for (i = 0; i < numBands; ++i)
    {
-      int index = i * NumBands + i;
-      for(j = i; j < NumBands; j++, index++)
+      int index = i * numBands + i;
+      for (j = i; j < numBands; ++j, ++index)
       {
          pMatrix[index] /= lCount;
       }
    }
 
-   for(i = 0; i < NumBands; i++)
+   for (i = 0; i < numBands; ++i)
    {
-      for(j = i; j < NumBands; j++)
+      for (j = i; j < numBands; ++j)
       {
-         pMatrix[j * NumBands + i] = pMatrix[i * NumBands + j];
+         pMatrix[j * numBands + i] = pMatrix[i * numBands + j];
       }
    }
 
-   if(pProgress != NULL)
+   if (pProgress != NULL)
    {
-      if((pAbortFlag == NULL) || !(*pAbortFlag))
+      if ((pAbortFlag == NULL) || !(*pAbortFlag))
       {
          pProgress->updateProgress("Second Moment Matrix Complete", 99, NORMAL);
       }
@@ -173,13 +172,13 @@ void ComputeFactoredSmm(T *pData, RasterElement* pRaster, double *pMatrix,
 
 struct MaskInput
 {
-   double *pMatrix;
+   double* pMatrix;
    int numRows;
    int numCols;
    int numBands;
-   Progress *pProgress;
-   const bool *pAbortFlag;
-   const bool **pSelectedPixels;
+   Progress* pProgress;
+   const bool* pAbortFlag;
+   const bool** pSelectedPixels;
    int boundingBoxX1;
    int boundingBoxY1;
    int boundingBoxX2;
@@ -187,7 +186,7 @@ struct MaskInput
 };
 
 template<class T>
-void ComputeMaskedSmm(T *pData, MaskInput *pInput, RasterElement* pRaster)
+void ComputeMaskedSmm(T* pData, MaskInput* pInput, RasterElement* pRaster)
 {
    if (pRaster == NULL)
    {
@@ -199,15 +198,15 @@ void ComputeMaskedSmm(T *pData, MaskInput *pInput, RasterElement* pRaster)
    {
       return;
    }
-   int NumRows = pDescriptor->getRowCount();
-   int NumCols = pDescriptor->getColumnCount();
-   int NumBands = pDescriptor->getBandCount();
+   int numRows = pDescriptor->getRowCount();
+   int numCols = pDescriptor->getColumnCount();
+   int numBands = pDescriptor->getBandCount();
    int i = 0, j = 0;
    int lRow = 0, lColumn = 0;
    //int lLocalIndex;
    int lCount = 0;
-   T *pBand1 = NULL;
-   T *pBand2 = NULL;
+   T* pBand1 = NULL;
+   T* pBand2 = NULL;
    int boundingBoxXSize = pInput->boundingBoxX2 - pInput->boundingBoxX1 + 1;
    int boundingBoxYSize = pInput->boundingBoxY2 - pInput->boundingBoxY1 + 1;
 
@@ -220,12 +219,12 @@ void ComputeMaskedSmm(T *pData, MaskInput *pInput, RasterElement* pRaster)
    pRequest->setColumns(pDescriptor->getActiveColumn(pInput->boundingBoxX1), 
       pDescriptor->getActiveColumn(pInput->boundingBoxX2));
    DataAccessor accessor = pRaster->getDataAccessor(pRequest.release());
-   for(j = 0; j < boundingBoxYSize; j++)
+   for (j = 0; j < boundingBoxYSize; ++j)
    {
       VERIFYNRV(accessor.isValid());
-      if(pInput->pProgress != NULL)
+      if (pInput->pProgress != NULL)
       {
-         if((pInput->pAbortFlag == NULL) || !(*pInput->pAbortFlag))
+         if ((pInput->pAbortFlag == NULL) || !(*pInput->pAbortFlag))
          {
             int iPercent = (100 * j) / boundingBoxYSize;
             if(iPercent == 100)
@@ -240,23 +239,23 @@ void ComputeMaskedSmm(T *pData, MaskInput *pInput, RasterElement* pRaster)
             break;
          }
       }
-      for(i = 0; i < boundingBoxXSize; i++)
+      for (i = 0; i < boundingBoxXSize; ++i)
       {
-         if(pInput->pSelectedPixels[j][i])
+         if (pInput->pSelectedPixels[j][i])
          {
-            lCount++;
+            ++lCount;
             pData = static_cast<T*>(accessor->getColumn());
             pBand2 = pData;
-            for(lRow = 0; lRow < pInput->numBands; lRow++)
+            for (lRow = 0; lRow < pInput->numBands; ++lRow)
             {
                pBand1 = pBand2;
                int index = lRow * pInput->numBands + lRow;
-               for(lColumn = lRow; lColumn < pInput->numBands; lColumn++, index++)
+               for (lColumn = lRow; lColumn < pInput->numBands; ++lColumn, ++index)
                {
                   pInput->pMatrix[index] += (*pBand1) * (*pBand2);
-                  pBand1++;
+                  ++pBand1;
                }
-               pBand2++;
+               ++pBand2;
             }
          }
          accessor->nextColumn();
@@ -264,26 +263,26 @@ void ComputeMaskedSmm(T *pData, MaskInput *pInput, RasterElement* pRaster)
       accessor->nextRow();
    }
 
-   for(i = 0; i < pInput->numBands; i++)
+   for (i = 0; i < pInput->numBands; ++i)
    {
       int index = i * pInput->numBands + i;
-      for(j = i; j < pInput->numBands; j++, index++)
+      for (j = i; j < pInput->numBands; ++j, ++index)
       {
          pInput->pMatrix[index] /= lCount;
       }
    }
 
-   for(i = 0; i < pInput->numBands; i++)
+   for (i = 0; i < pInput->numBands; ++i)
    {
-      for(j = i; j < pInput->numBands; j++)
+      for (j = i; j < pInput->numBands; ++j)
       {
          pInput->pMatrix[j * pInput->numBands + i] = pInput->pMatrix[i * pInput->numBands + j];
       }
    }
 
-   if(pInput->pProgress != NULL)
+   if (pInput->pProgress != NULL)
    {
-      if((pInput->pAbortFlag == NULL) || !(*pInput->pAbortFlag))
+      if ((pInput->pAbortFlag == NULL) || !(*pInput->pAbortFlag))
       {
          pInput->pProgress->updateProgress("Second Moment Matrix Complete", 99, NORMAL);
       }
@@ -304,7 +303,7 @@ bool SecondMoment::canRunInteractive() const
    return true;
 }
 
-bool SecondMoment::populateBatchInputArgList(PlugInArgList *pArgList)
+bool SecondMoment::populateBatchInputArgList(PlugInArgList* pArgList)
 {
    static int lRowFactor = 1;
    static int lColumnFactor = 1;
@@ -325,7 +324,7 @@ bool SecondMoment::populateBatchInputArgList(PlugInArgList *pArgList)
    return true;
 }
 
-bool SecondMoment::populateInteractiveInputArgList(PlugInArgList *pArgList)
+bool SecondMoment::populateInteractiveInputArgList(PlugInArgList* pArgList)
 {
    VERIFY(pArgList != NULL);
    VERIFY(pArgList->addArg<Progress>(ProgressArg(), NULL));
@@ -334,11 +333,15 @@ bool SecondMoment::populateInteractiveInputArgList(PlugInArgList *pArgList)
    VERIFY(pArgList->addArg<bool>("Recalculate", &recalc, "If true, the second moment matrix will be recalculated. If false, the plug-in "
                                     "will decide if the matrix needs to be recalculated. If a matrix exists in memory, it is used. "
                                     "If there exists a matrix on disk, it will be loaded. Finally, the matrix will be calculated."));
+   bool computeInverse(true);
+   VERIFY(pArgList->addArg<bool>("ComputeInverse", &computeInverse, "If true, the "
+      "inverse of the second moment matrix will be calculated. If false, the inverse "
+      "will not be calculated."));
 
    return true;
 }
 
-bool SecondMoment::populateDefaultOutputArgList(PlugInArgList *pArgList)
+bool SecondMoment::populateDefaultOutputArgList(PlugInArgList* pArgList)
 {
    VERIFY(pArgList != NULL);
    VERIFY(pArgList->addArg<RasterElement>("Second Moment Matrix"));
@@ -346,11 +349,11 @@ bool SecondMoment::populateDefaultOutputArgList(PlugInArgList *pArgList)
    return true;
 }
 
-bool SecondMoment::parseInputArgList(PlugInArgList *pArgList)
+bool SecondMoment::parseInputArgList(PlugInArgList* pArgList)
 {
-   Filename *pSmmFilename = NULL;
+   Filename* pSmmFilename = NULL;
 
-   Progress *pProgress = pArgList->getPlugInArgValue<Progress>(ProgressArg());
+   Progress* pProgress = pArgList->getPlugInArgValue<Progress>(ProgressArg());
    if (pProgress == NULL)
    {
       return false;
@@ -360,7 +363,7 @@ bool SecondMoment::parseInputArgList(PlugInArgList *pArgList)
    if (mpRasterElement == NULL)
    {
       string msg = "The raster element input value is invalid!";
-      if(pProgress != NULL) pProgress->updateProgress(msg, 0, ERRORS);
+      if (pProgress != NULL) pProgress->updateProgress(msg, 0, ERRORS);
       return false;
    }
 
@@ -368,23 +371,24 @@ bool SecondMoment::parseInputArgList(PlugInArgList *pArgList)
 
    const RasterDataDescriptor* pDescriptor = dynamic_cast<const RasterDataDescriptor*>
       (mpRasterElement->getDataDescriptor());
-   if(pDescriptor == NULL)
+   if (pDescriptor == NULL)
    {
       string msg = "The sensor data input value is invalid!";
-      if(pProgress != NULL) pProgress->updateProgress(msg, 0, ERRORS);
+      if (pProgress != NULL) pProgress->updateProgress(msg, 0, ERRORS);
       return false;
    }
    eDataType = pDescriptor->getDataType();
 
-   if((eDataType == INT4SCOMPLEX) || (eDataType == FLT8COMPLEX))
+   if ((eDataType == INT4SCOMPLEX) || (eDataType == FLT8COMPLEX))
    {
       string msg = "Complex data is not supported!";
-      if(pProgress != NULL) pProgress->updateProgress(msg, 0, ERRORS);
+      if (pProgress != NULL) pProgress->updateProgress(msg, 0, ERRORS);
       return false;
    }
    VERIFY(pArgList->getPlugInArgValue("Recalculate", mInput.mRecalculate));
+   VERIFY(pArgList->getPlugInArgValue("ComputeInverse", mInput.mComputeInverse));
 
-   if(!isInteractive())
+   if (!isInteractive())
    {
       VERIFY(pArgList->getPlugInArgValue<int>("Row Factor", mInput.mRowFactor));
       VERIFY(pArgList->getPlugInArgValue<int>("Column Factor", mInput.mColumnFactor));
@@ -402,13 +406,30 @@ bool SecondMoment::setActualValuesInOutputArgList(PlugInArgList *pArgList)
 {
    VERIFY(mpSecondMomentAlg != NULL);
    VERIFY(pArgList != NULL);
-   return pArgList->setPlugInArgValue<RasterElement>("Second Moment Matrix", 
-                        mpSecondMomentAlg->getSecondMomentElement()) &&
-          pArgList->setPlugInArgValue<RasterElement>("Inverse Second Moment Matrix", 
-                        mpSecondMomentAlg->getInverseSecondMomentElement());
+   bool success(false);
+   RasterElement* pElement = mpSecondMomentAlg->getSecondMomentElement();
+   if (pElement != NULL)
+   {
+      success = pArgList->setPlugInArgValue<RasterElement>("Second Moment Matrix", pElement);
+   }
+
+   if (success && mInput.mComputeInverse)
+   {
+      pElement = mpSecondMomentAlg->getInverseSecondMomentElement();
+      if (pElement != NULL)
+      {
+         success = pArgList->setPlugInArgValue<RasterElement>("Inverse Second Moment Matrix", pElement);
+      }
+      else
+      {
+         success = false;
+      }
+   }
+
+   return success;
 }
 
-QDialog *SecondMoment::getGui(void *pAlgData)
+QDialog* SecondMoment::getGui(void* pAlgData)
 {
    if(isInteractive() && (mpSecondMomentAlg != NULL))
    {
@@ -432,12 +453,12 @@ void SecondMoment::propagateAbort()
 
 bool SecondMoment::extractFromGui()
 {
-   if(mpSecondMomentGui != NULL)
+   if (mpSecondMomentGui != NULL)
    {
       mInput.mRowFactor = mpSecondMomentGui->getRowFactor();
       mInput.mColumnFactor = mpSecondMomentGui->getColumnFactor();
       mInput.mpAoi = mpSecondMomentGui->getAoi();
-      if(!mpSecondMomentGui->getUseExisting())
+      if (!mpSecondMomentGui->getUseExisting())
       {
          mpModelServices->destroyElement(mpModelServices->getElement("Second Moment Matrix",
             TypeConverter::toString<RasterElement>(), mpRasterElement));
@@ -494,22 +515,22 @@ bool SecondMomentAlgorithm::processAll()
    mpStep = pStep.get();
 
    const RasterDataDescriptor* pDescriptor = NULL;
-   const char *pCubeName = NULL;
-   void *pData = NULL;
-   unsigned int numRows = 0;
-   unsigned int numColumns = 0;
-   unsigned int numBands = 0;
+   const char* pCubeName = NULL;
+   void* pData = NULL;
+   unsigned int numRows(0);
+   unsigned int numColumns(0);
+   unsigned int numBands(0);
    EncodingType eType = UNKNOWN;
 
-   RasterElement *pRasterElement = getRasterElement();
-   if(pRasterElement == NULL)
+   RasterElement* pRasterElement = getRasterElement();
+   if (pRasterElement == NULL)
    {
       reportProgress(ERRORS, 0, "No data set provided");
       return false;
    }
 
    pDescriptor = dynamic_cast<const RasterDataDescriptor*>(pRasterElement->getDataDescriptor());
-   if(pDescriptor == NULL)
+   if (pDescriptor == NULL)
    {
       reportProgress(ERRORS, 0, "Could not access data descriptor");
       return false;
@@ -530,152 +551,186 @@ bool SecondMomentAlgorithm::processAll()
       pRequest->setInterleaveFormat(BIP);
       DataAccessor accessor = pRasterElement->getDataAccessor(pRequest.release());
       
-      if(!accessor.isValid())
+      if (!accessor.isValid())
       {
          reportProgress(ERRORS, 0, "Could not access data");
          return false;
       }
    }
-   ModelResource<RasterElement> pElement(static_cast<RasterElement*>(mpModelServices->getElement("Second Moment Matrix",
-      TypeConverter::toString<RasterElement>(), pRasterElement)));
-   ModelResource<RasterElement> pInvElement(static_cast<RasterElement*>(mpModelServices->getElement("Inverse Second Moment Matrix",
+   ModelResource<RasterElement> pSmmElement(static_cast<RasterElement*>(mpModelServices->getElement(
+      "Second Moment Matrix", TypeConverter::toString<RasterElement>(), pRasterElement)));
+   ModelResource<RasterElement> pInvSmmElement(static_cast<RasterElement*>(
+      mpModelServices->getElement("Inverse Second Moment Matrix",
       TypeConverter::toString<RasterElement>(), pRasterElement)));
 
-   if (mInput.mRecalculate == true)
+   if (mInput.mRecalculate == true || pSmmElement.get() == NULL)
    {
-      // Recalculation requested
-      if (pElement.get() != NULL)
+      // Recalculation requested so destroy current elements if they exist or
+      // if pSmmElement.get() is NULL, have to generate Smm so need to destroy any current inverse 
+      if (pSmmElement.get() != NULL)
       {
-         VERIFY(mpModelServices->destroyElement(pElement.release()));
+         VERIFY(mpModelServices->destroyElement(pSmmElement.release()));
       }
 
-      if (pInvElement.get() != NULL)
+      if (pInvSmmElement.get() != NULL)
       {
-         VERIFY(mpModelServices->destroyElement(pInvElement.release()));
+         VERIFY(mpModelServices->destroyElement(pInvSmmElement.release()));
       }
    }
-   else
+
+   if (pSmmElement.get() == NULL)
    {
-      if (pElement.get() != NULL || pInvElement.get() != NULL)
+      pSmmElement = ModelResource<RasterElement>(RasterUtilities::createRasterElement(
+         "Second Moment Matrix", numBands, numBands, FLT8BYTES, true, pRasterElement));
+      if (pSmmElement.get() == NULL)
       {
-         // recalculation not requested and the data is already calculated...just return it.
-         double *pResultsData = NULL, *pInvResultsData = NULL;
-         if(pElement.get() == NULL)
+         reportProgress(ERRORS, 0, "Error creating Second Moment matrix.");
+         return false;
+      }
+
+      bool loadedFromFile(false);
+      if (mLoadIfExists && mInput.mRecalculate == false)  // try to load smm from file
+      {
+         loadedFromFile = readMatrixFromDisk(mSmmFile, pSmmElement.get());
+      }
+
+      if (loadedFromFile == false)                        // need to compute smm
+      {
+         eType = pDescriptor->getDataType();
+
+         // check that entire data block of element is in memory
+         VERIFY(pSmmElement->getRawData() != NULL);
+         if (mInput.mpAoi == NULL)
          {
-            pElement = ModelResource<RasterElement>(RasterUtilities::createRasterElement(
-               "Second Moment Matrix", numBands, numBands, FLT8BYTES, true, pRasterElement));
-            pResultsData = reinterpret_cast<double*>(pElement->getRawData());
-            pInvResultsData = reinterpret_cast<double*>(pInvElement->getRawData());
-            VERIFY(MatrixFunctions::invertSquareMatrix1D(pResultsData, pInvResultsData, numBands));
-         }
-         else if(pInvElement.get() == NULL)
-         {
-            pInvElement = ModelResource<RasterElement>(RasterUtilities::createRasterElement(
-               "Inverse Second Moment Matrix", numBands, numBands, FLT8BYTES, true, pRasterElement)); 
-            pResultsData = reinterpret_cast<double*>(pElement->getRawData());
-            pInvResultsData = reinterpret_cast<double*>(pInvElement->getRawData());
-            VERIFY(MatrixFunctions::invertSquareMatrix1D(pInvResultsData, pResultsData, numBands));
+            switchOnEncoding(eType, ComputeFactoredSmm, pData, pRasterElement, 
+               static_cast<double*>(pSmmElement->getRawData()), getProgress(), 
+               &mAbortFlag, mInput.mRowFactor, mInput.mColumnFactor);
          }
          else
          {
-            pResultsData = reinterpret_cast<double*>(pElement->getRawData());
-            pInvResultsData = reinterpret_cast<double*>(pInvElement->getRawData());
+            const BitMask *pMask = mInput.mpAoi->getSelectedPoints();
+            if (pMask == NULL)
+            {
+               reportProgress(ERRORS, 0, "Error getting mask from AOI");
+               return false;
+            }
+            else // pMask != NULL
+            {
+               int x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+               pMask->getBoundingBox(x1, y1, x2, y2);
+               const bool** pSelectedPixels = const_cast<BitMask*>(pMask)->getRegion(x1, y1, x2, y2);
+               if(pSelectedPixels == NULL)
+               {
+                  reportProgress(ERRORS, 0, "Error getting selected pixels from AOI");
+                  return false;
+               }
+               else // pSelectedPixels != NULL
+               {
+                  MaskInput input;
+                  input.pMatrix = static_cast<double*>(pSmmElement->getRawData());
+                  input.numRows = numRows;
+                  input.numCols = numColumns;
+                  input.numBands = numBands;
+                  input.pProgress = getProgress();
+                  input.pAbortFlag = &mAbortFlag;
+                  input.pSelectedPixels = pSelectedPixels;
+                  input.boundingBoxX1 = x1;
+                  input.boundingBoxX2 = x2;
+                  input.boundingBoxY1 = y1;
+                  input.boundingBoxY2 = y2;
+
+                  switchOnEncoding(eType, ComputeMaskedSmm, pData, &input, pRasterElement);
+               }
+            }
          }
-         mpNewRasterElement = pElement.release();
-         mpNewInvRasterElement = pInvElement.release();
-         writeMatrixToDisk(mSmmFile, pResultsData, numBands);
-         reportProgress(NORMAL, 100, "Second Moment Matrix Complete");
-         pStep->finalize(Message::Success);
-         return true;
+
+         if (mAbortFlag)
+         {
+            reportProgress(ABORT, 0, "Aborted creation of Second Moment Matrix");
+            return false;
+         }
+
+         writeMatrixToDisk(mSmmFile, pSmmElement.get());
       }
-   }
-
-   pElement = ModelResource<RasterElement>(RasterUtilities::createRasterElement(
-      "Second Moment Matrix", numBands, numBands, FLT8BYTES, true, pRasterElement));
-   pInvElement = ModelResource<RasterElement>(RasterUtilities::createRasterElement(
-      "Inverse Second Moment Matrix", numBands, numBands, FLT8BYTES, true, pRasterElement)); 
-   VERIFY(pElement.get() != NULL && pInvElement.get() != NULL);
-
-   double *pResultsData = reinterpret_cast<double*>(pElement->getRawData());
-   double *pInvResultsData = reinterpret_cast<double*>(pInvElement->getRawData());
-
-   if(pResultsData == NULL || pInvResultsData == NULL)
-   {
-      reportProgress(ERRORS, 0, "Error allocating memory for results");
-      return false;
-   }
-
-   QFile smmFile(QString::fromStdString(mSmmFile));
-   // load the results only if recalculation was not requested
-   if(!mInput.mRecalculate && mLoadIfExists &&
-      smmFile.exists() && readMatrixFromDisk(mSmmFile, pResultsData, numBands))
-   {
-      VERIFY(MatrixFunctions::invertSquareMatrix1D(pInvResultsData, pResultsData, numBands));
-      mpNewRasterElement = pElement.release();
-      mpNewInvRasterElement = pInvElement.release();
    }
    else
    {
-      eType = pDescriptor->getDataType();
-
-      if(mInput.mpAoi == NULL)
+      // check that existing smm is right size and data type
+      const RasterDataDescriptor* pDesc = static_cast<const RasterDataDescriptor*>(
+         pSmmElement->getDataDescriptor());
+      VERIFY(pDesc != NULL);
+      unsigned int rows = pDesc->getRowCount();
+      unsigned int cols = pDesc->getColumnCount();
+      EncodingType dataType = pDesc->getDataType();
+      if (rows != numBands || cols != numBands)
       {
-         switchOnEncoding(eType, ComputeFactoredSmm, pData, pRasterElement, pResultsData, 
-            getProgress(), &mAbortFlag, mInput.mRowFactor, mInput.mColumnFactor);
-      }
-      else
-      {
-         const BitMask *pMask = mInput.mpAoi->getSelectedPoints();
-         if(pMask == NULL)
-         {
-            reportProgress(ERRORS, 0, "Error getting mask from AOI");
-            return false;
-         }
-         else // pMask != NULL
-         {
-            int x1 = 0, y1 = 0, x2 = 0, y2 = 0;
-            pMask->getBoundingBox(x1, y1, x2, y2);
-            const bool **pSelectedPixels = const_cast<BitMask*>(pMask)->getRegion(x1, y1, x2, y2);
-            if(pSelectedPixels == NULL)
-            {
-               reportProgress(ERRORS, 0, "Error getting selected pixels from AOI");
-               return false;
-            }
-            else // pSelectedPixels != NULL
-            {
-               MaskInput input;
-               input.pMatrix = pResultsData;
-               input.numRows = numRows;
-               input.numCols = numColumns;
-               input.numBands = numBands;
-               input.pProgress = getProgress();
-               input.pAbortFlag = &mAbortFlag;
-               input.pSelectedPixels = pSelectedPixels;
-               input.boundingBoxX1 = x1;
-               input.boundingBoxX2 = x2;
-               input.boundingBoxY1 = y1;
-               input.boundingBoxY2 = y2;
-
-               switchOnEncoding(eType, ComputeMaskedSmm, pData, &input, pRasterElement);
-            }
-         }
-      }
-
-      if(mAbortFlag)
-      {
-         reportProgress(ABORT, 0, "Aborted creation of Second Moment Matrix");
+         reportProgress(ERRORS, 0, "Dimensions of existing Second Moment matrix do "
+            "not match current data set.");
          return false;
       }
+      if (dataType != FLT8BYTES)
+      {
+         reportProgress(ERRORS, 0, "Existing Second Moment matrix has wrong data type.");
+         return false;
+      }
+   }
+
+   if (mInput.mComputeInverse)
+   {
+      bool validInverse(false);
+      if (pInvSmmElement.get() == NULL)
+      {
+         pInvSmmElement = ModelResource<RasterElement>(RasterUtilities::createRasterElement(
+            "Inverse Second Moment Matrix", numBands, numBands, FLT8BYTES, true, pRasterElement));
+         if (pInvSmmElement.get() == NULL)
+         {
+            reportProgress(ERRORS, 0, "Error creating inverse Second Moment matrix.");
+            return false;
+         }
+         VERIFY(pSmmElement->getRawData() != NULL);
+         VERIFY(pInvSmmElement->getRawData() != NULL);
+         validInverse = MatrixFunctions::invertSquareMatrix1D(
+            static_cast<double*>(pInvSmmElement->getRawData()), 
+            static_cast<double*>(pSmmElement->getRawData()), numBands);
+      }
       else
       {
-         VERIFY(MatrixFunctions::invertSquareMatrix1D(pInvResultsData, pResultsData, numBands));
+         // check that existing inverse is right size and data type
+         const RasterDataDescriptor* pDesc = static_cast<const RasterDataDescriptor*>(
+            pInvSmmElement->getDataDescriptor());
+         VERIFY(pDesc != NULL);
+         unsigned int rows = pDesc->getRowCount();
+         unsigned int cols = pDesc->getColumnCount();
+         EncodingType dataType = pDesc->getDataType();
+         if (rows != numBands || cols != numBands)
+         {
+            reportProgress(ERRORS, 0, "Dimensions of the existing inverse of Second Moment matrix "
+               "do not match current data set.");
+            return false;
+         }
+         if (dataType != FLT8BYTES)
+         {
+            reportProgress(ERRORS, 0, "Existing inverse of Second Moment matrix has wrong data type.");
+            return false;
+         }
+         validInverse = true;
       }
 
-      mpNewRasterElement = pElement.release();
-      mpNewInvRasterElement = pInvElement.release();
-
-      writeMatrixToDisk(mSmmFile, pResultsData, numBands);
+      if (validInverse)
+      {
+         // store to be added to the output arg list
+         mpNewInvRasterElement = pInvSmmElement.release();
+      }
+      else
+      {
+         reportProgress(ERRORS, 0, "Could not compute the inverse of the Second Moment matrix.");
+         return false;
+      }
    }
+
+   // store smm to be added to the output arg list
+   mpNewRasterElement = pSmmElement.release();
+
    pStep->finalize(Message::Success);
    reportProgress(NORMAL, 100, "Second Moment Matrix Complete");
 
@@ -687,34 +742,44 @@ bool SecondMomentAlgorithm::postprocess()
    return true;
 }
 
-void SecondMomentAlgorithm::setFile(const Filename *pSmmFile, bool loadIfExists)
+void SecondMomentAlgorithm::setFile(const Filename* pSmmFile, bool loadIfExists)
 {
-   if(pSmmFile != NULL)
+   if (pSmmFile != NULL)
    {
       mSmmFile = pSmmFile->getFullPathAndName();
    }
    mLoadIfExists = loadIfExists;
 }
 
-RasterElement *SecondMomentAlgorithm::getSecondMomentElement() const
+RasterElement* SecondMomentAlgorithm::getSecondMomentElement() const
 {
    return mpNewRasterElement;
 }
 
-RasterElement *SecondMomentAlgorithm::getInverseSecondMomentElement() const
+RasterElement* SecondMomentAlgorithm::getInverseSecondMomentElement() const
 {
    return mpNewInvRasterElement;
 }
 
-bool SecondMomentAlgorithm::readMatrixFromDisk(string filename, double *pData, int numBands) const
+bool SecondMomentAlgorithm::readMatrixFromDisk(string filename, RasterElement* pElement) const
 {
-   if(filename.empty())
+   if (filename.empty() || pElement == NULL)
    {
       return false;
    }
    StepResource pStep("Read second moment matrix from disk", "app", "2FE4BD92-4F9E-4e14-A51A-07E497E6EAA6",
                         "Unable to read SecondMoment matrix from disk");
    pStep->addProperty("Filename", filename);
+
+   const RasterDataDescriptor* pDesc = static_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor());
+   VERIFY(pDesc != NULL);
+   unsigned int numRows = pDesc->getRowCount();
+   unsigned int numCols = pDesc->getColumnCount();
+   VERIFY(numRows == numCols);  // should be a square matrix
+   FactoryResource<DataRequest> pRequest;
+   pRequest->setWritable(true);
+   DataAccessor accessor = pElement->getDataAccessor(pRequest.release());
+   VERIFY(accessor.isValid());
 
    FileResource pFile(filename.c_str(), "rt");
    if (pFile.get() == NULL)
@@ -734,40 +799,43 @@ bool SecondMomentAlgorithm::readMatrixFromDisk(string filename, double *pData, i
       return false;
    }
 
-   int lnumBands = 0;
-   int numFieldsRead = fscanf(pFile, "%d\n", &lnumBands);
-   if(numFieldsRead != 1)
+   unsigned int numBands = 0;
+   int numFieldsRead = fscanf(pFile, "%d\n", &numBands);
+   if (numFieldsRead != 1)
    {
       reportProgress(ERRORS, 0, "Unable to read number of bands in SecondMoment matrix from disk");
       return false;
    }
    else
    {
-      pStep->addProperty("Cube Bands", numBands);
-      pStep->addProperty("File Bands", lnumBands);
-      if(lnumBands != numBands)
+      pStep->addProperty("Cube Bands", numRows);  // second moment matrix rows and cols are equal to num bands
+      pStep->addProperty("File Bands", numBands);
+      if (numBands != numRows)
       {
          reportProgress(ERRORS, 0, "Mismatch between number of bands in cube and in SMM file.");
          return false;
       }
-      for(int i = 0; i < numBands; i++)
+
+      double* pData(NULL);
+      for (unsigned int row = 0; row < numRows; ++row)
       {
-         for(int j = 0; j < numBands; j++)
+         int iPercent = row * 100 / numRows;
+         reportProgress(NORMAL, iPercent, progressMessage);
+
+         VERIFY(accessor.isValid())
+         for (unsigned int col = 0; col < numCols; ++col)
          {
-            numFieldsRead = fscanf(pFile, "%lg ", &(pData[i * numBands + j]));
-            if(numFieldsRead != 1)
+            pData = static_cast<double*>(accessor->getColumn());
+            numFieldsRead = fscanf(pFile, "%lg ", pData);
+            if (numFieldsRead != 1)
             {
-               pStep->addProperty("Row", i + 1);
+               pStep->addProperty("Row", row + 1);
                reportProgress(ERRORS, 0, "Unable to read SecondMoment matrix from disk");
                return false;
             }
+            accessor->nextColumn();
          }
-         int iPercent = 100 * (i + 1) / numBands;
-         if(iPercent == 100)
-         {
-            iPercent = 99;
-         }
-         reportProgress(NORMAL, iPercent, progressMessage);
+         accessor->nextRow();
       }
       reportProgress(NORMAL, 100, "SecondMoment matrix successfully read from disk");
    }
@@ -777,9 +845,9 @@ bool SecondMomentAlgorithm::readMatrixFromDisk(string filename, double *pData, i
    return true;
 }
 
-bool SecondMomentAlgorithm::writeMatrixToDisk(string filename, const double *pData, int numBands) const
+bool SecondMomentAlgorithm::writeMatrixToDisk(string filename, const RasterElement* pElement) const
 {
-   if(filename.empty())
+   if (filename.empty() || pElement == NULL)
    {
       return false;
    }
@@ -788,21 +856,37 @@ bool SecondMomentAlgorithm::writeMatrixToDisk(string filename, const double *pDa
                         "Unable to save SecondMoment matrix to disk");
    pStep->addProperty("Filename", filename);
 
+   const RasterDataDescriptor* pDesc = static_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor());
+   VERIFY(pDesc != NULL);
+   unsigned int numRows = pDesc->getRowCount();
+   unsigned int numCols = pDesc->getColumnCount();
+   VERIFY(numRows == numCols);  // should be a square matrix
+   FactoryResource<DataRequest> pRequest;
+   DataAccessor accessor = pElement->getDataAccessor(pRequest.release());
+   VERIFY(accessor.isValid());
+
    FileResource pFile(filename.c_str(), "wt");
-   if(pFile.get() == NULL)
+   if (pFile.get() == NULL)
    {
       reportProgress(WARNING, 100, "Unable to save SecondMoment matrix to disk");
       return false;
    }
    fprintf(pFile, "%s", mExpectedFileHeader.c_str());
-   fprintf(pFile, "%d\n", numBands);
-   for(int i = 0; i < numBands; i++)
+   fprintf(pFile, "%d\n", numRows);
+   for (unsigned int i = 0; i < numRows; ++i)
    {
-      for(int j = 0; j < numBands; j++)
+      if (accessor.isValid() == false)
       {
-         fprintf(pFile, "%.15e ", pData[i * numBands + j]);
+         // need to close and destroy the file
+         return false;
+      }
+      for (unsigned int j = 0; j < numCols; ++j)
+      {
+         fprintf(pFile, "%.15e ", *static_cast<double*>(accessor->getColumn()));
+         accessor->nextColumn();
       }
       fprintf(pFile, "\n");
+      accessor->nextRow();
    }
 
    reportProgress(NORMAL, 100, "SecondMoment matrix saved to disk as " + filename);;
@@ -811,17 +895,17 @@ bool SecondMomentAlgorithm::writeMatrixToDisk(string filename, const double *pDa
    return true;
 }
 
-SecondMomentAlgorithm::SecondMomentAlgorithm(RasterElement *pRasterElement, Progress *pProgress, bool interactive) :
+SecondMomentAlgorithm::SecondMomentAlgorithm(RasterElement* pRasterElement, Progress* pProgress, bool interactive) :
    AlgorithmPattern(pRasterElement, pProgress, interactive, NULL),
    mpNewRasterElement(NULL),
    mpNewInvRasterElement(NULL),
    mAbortFlag(false),
    mLoadIfExists(true)
 {
-   if(pRasterElement != NULL)
+   if (pRasterElement != NULL)
    {
       mSmmFile = pRasterElement->getFilename();
-      if(!mSmmFile.empty())
+      if (!mSmmFile.empty())
       {
          mSmmFile += ".smm";
       }
@@ -840,7 +924,7 @@ bool SecondMomentAlgorithm::doAbort()
    return true;
 }
 
-bool SecondMomentAlgorithm::initialize(void *pAlgorithmData)
+bool SecondMomentAlgorithm::initialize(void* pAlgorithmData)
 {
    if(pAlgorithmData != NULL)
    {

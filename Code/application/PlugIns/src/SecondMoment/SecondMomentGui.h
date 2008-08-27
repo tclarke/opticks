@@ -29,11 +29,11 @@ class SecondMomentGui : public QDialog
    Q_OBJECT
 
 public:
-   SecondMomentGui(RasterElement *pElement, int rowFactor, int columnFactor,
-      bool forceRecalculate, bool elementExists, QWidget *pParent = 0);
+   SecondMomentGui(RasterElement* pElement, int rowFactor, int columnFactor,
+      bool forceRecalculate, bool elementExists, QWidget* pParent = 0);
    int getRowFactor() const;
    int getColumnFactor() const;
-   AoiElement *getAoi() const;
+   AoiElement* getAoi() const;
    QString getFilename() const;
    bool getUseExisting() const;
    bool getUseFile() const;
@@ -46,22 +46,22 @@ private:
    bool mElementExists;
    QFileInfo mSmmFile;
 
-   QGroupBox *mpCalculationMethodGroup;
-   QRadioButton *mpUseMatrix;
-   QRadioButton *mpUseFile;
-   QRadioButton *mpUseSkipFactors;
-   QRadioButton *mpUseAoi;
+   QGroupBox* mpCalculationMethodGroup;
+   QRadioButton* mpUseMatrix;
+   QRadioButton* mpUseFile;
+   QRadioButton* mpUseSkipFactors;
+   QRadioButton* mpUseAoi;
 
-   QLabel *mpRowSkipLabel;
-   QLabel *mpColumnSkipLabel;
-   QSpinBox *mpRowSkip;
-   QSpinBox *mpColumnSkip;
-   QComboBox *mpAoi;
+   QLabel* mpRowSkipLabel;
+   QLabel* mpColumnSkipLabel;
+   QSpinBox* mpRowSkip;
+   QSpinBox* mpColumnSkip;
+   QComboBox* mpAoi;
 
-   QLabel *mpFileLabel;
-   FileBrowser *mpFile;
+   QLabel* mpFileLabel;
+   FileBrowser* mpFile;
 
-   QLabel *mpMessage;
+   QLabel* mpMessage;
 };
 
 #endif

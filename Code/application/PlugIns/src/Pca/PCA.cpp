@@ -1766,8 +1766,10 @@ bool PCA::m_GetStatistics(vector<string> aoiList)
             VERIFY(secondMoment->getPlugIn() != NULL);
 
             bool recalculate = true;
+            bool computeInverse(false);
             secondMoment->getInArgList().setPlugInArgValue(DataElementArg(), mpRaster);
             secondMoment->getInArgList().setPlugInArgValue("Recalculate", &recalculate);
+            secondMoment->getInArgList().setPlugInArgValue("ComputeInverse", &computeInverse);
             if (mb_UseAoi == true)
             {
                AoiElement *pAoi = getAoiElement(m_ROIname.toStdString());
