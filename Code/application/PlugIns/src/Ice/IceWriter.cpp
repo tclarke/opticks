@@ -606,6 +606,12 @@ void IceWriter::writeBipCubeData(const string& hdfPath,
    {
       for (unsigned int chunkNumber = 0; chunkNumber < numChunks; ++chunkNumber)
       {
+         if (pProgress != NULL)
+         {
+            pProgress->updateProgress("Exporting cube...",
+               (chunkNumber*100)/numChunks, NORMAL);
+         }
+
          unsigned int startChunkRow = chunkNumber * rowsInChunk;
          unsigned int endChunkRow = (chunkNumber + 1) * rowsInChunk;
          if (endChunkRow > rows.size())
@@ -638,11 +644,6 @@ void IceWriter::writeBipCubeData(const string& hdfPath,
          status = H5Dwrite(*dataId, *hdfEncoding, *mspaceId, *dspaceId, H5P_DEFAULT, pWriteBuffer);
          ICEVERIFY(status >= 0);
 
-         if (pProgress != NULL)
-         {
-            pProgress->updateProgress("Exporting cube...",
-               static_cast<int>(((chunkNumber+1.0)/numChunks)*100.0), NORMAL);
-         }
          abortIfNecessary();
       }
    }
@@ -650,6 +651,12 @@ void IceWriter::writeBipCubeData(const string& hdfPath,
    {
       for (unsigned int chunkNumber = 0; chunkNumber < numChunks; ++chunkNumber)
       {
+         if (pProgress != NULL)
+         {
+            pProgress->updateProgress("Exporting cube...",
+               (chunkNumber*100)/numChunks, NORMAL);
+         }
+
          unsigned int startChunkRow = chunkNumber * rowsInChunk;
          unsigned int endChunkRow = (chunkNumber + 1) * rowsInChunk;
          if (endChunkRow > rows.size())
@@ -692,11 +699,6 @@ void IceWriter::writeBipCubeData(const string& hdfPath,
          status = H5Dwrite(*dataId, *hdfEncoding, *mspaceId, *dspaceId, H5P_DEFAULT, pWriteBuffer);
          ICEVERIFY(status >= 0);
 
-         if (pProgress != NULL)
-         {
-            pProgress->updateProgress("Exporting cube...",
-               static_cast<int>(((chunkNumber+1.0)/numChunks)*100.0), NORMAL);
-         }
          abortIfNecessary();
       }
    }
@@ -787,6 +789,12 @@ void IceWriter::writeBsqCubeData(const string& hdfPath,
 
       for (unsigned int chunkNumber = 0; chunkNumber < numChunks; ++chunkNumber)
       {
+         if (pProgress != NULL)
+         {
+            pProgress->updateProgress("Exporting cube...",
+               ((bandCount * numChunks + chunkNumber)*100)/(bands.size() * numChunks), NORMAL);
+         }
+
          unsigned int startChunkRow = chunkNumber * rowsInChunk;
          unsigned int endChunkRow = (chunkNumber + 1) * rowsInChunk;
          if (endChunkRow > rows.size())
@@ -824,12 +832,6 @@ void IceWriter::writeBsqCubeData(const string& hdfPath,
          status = H5Dwrite(*dataId, *hdfEncoding, memorySpace, *dSpaceId, H5P_DEFAULT, pWriteBuffer);
          ICEVERIFY(status >= 0);
 
-         if (pProgress != NULL)
-         {
-            double numer = (chunkNumber+1) * (bandCount+1);
-            double denom = static_cast<double>(bands.size() * numChunks);
-            pProgress->updateProgress("Exporting cube...", static_cast<int>((numer/denom)*100.0), NORMAL);
-         }
          abortIfNecessary();
       }
    }
