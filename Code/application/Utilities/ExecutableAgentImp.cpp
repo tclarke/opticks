@@ -22,7 +22,6 @@
 #include "SessionResource.h"
 #include "SpatialDataView.h"
 #include "Testable.h"
-#include "UtilityServices.h"
 #include "WorkspaceWindow.h"
 
 #include <string>
@@ -36,6 +35,7 @@ ExecutableAgentImp::ExecutableAgentImp() :
    mpInArgList(NULL),
    mpOutArgList(NULL),
    mpProgress(NULL),
+   mPlugInProgress(false),
    mProgressDialog(false),
    mAutoInArg(true)
 {
@@ -80,6 +80,7 @@ void ExecutableAgentImp::instantiate(const string& plugInName, const string& men
       if (pPlugInManager.get() != NULL)
       {
          mpProgress = pPlugInManager->getProgress(getPlugIn());
+         mPlugInProgress = true;
       }
    }
 }
@@ -104,6 +105,7 @@ void ExecutableAgentImp::instantiate(PlugIn* pPlugIn, const string& menuCommand,
       if (pPlugInManager.get() != NULL)
       {
          mpProgress = pPlugInManager->getProgress(getPlugIn());
+         mPlugInProgress = true;
       }
    }
 }
@@ -112,12 +114,6 @@ void ExecutableAgentImp::setPlugIn(const string& plugInName)
 {
    checkInstantiate();
    clearArgLists();
-   if (mpProgress != NULL)
-   {
-      Service<UtilityServices> pServices;
-      pServices->destroyProgress(mpProgress);
-      mpProgress = NULL; 
-   }
 
    // Free the existing plug-in
    mPlugIn = PlugInResource();
@@ -127,10 +123,11 @@ void ExecutableAgentImp::setPlugIn(const string& plugInName)
       PlugInResource plugIn(plugInName);
       mPlugIn = plugIn;
 
-      Service<PlugInManagerServices> pPlugInManager;
-      if (pPlugInManager.get() != NULL)
+      if ((mpProgress == NULL) || (mPlugInProgress == true))
       {
+         Service<PlugInManagerServices> pPlugInManager;
          mpProgress = pPlugInManager->getProgress(getPlugIn());
+         mPlugInProgress = true;
       }
    }
 }
@@ -139,12 +136,6 @@ void ExecutableAgentImp::setPlugIn(PlugIn* pPlugIn)
 {
    checkInstantiate();
    clearArgLists();
-   if (mpProgress != NULL)
-   {
-      Service<UtilityServices> pServices;
-      pServices->destroyProgress(mpProgress);
-      mpProgress = NULL; 
-   }
 
    // Free the existing plug-in
    mPlugIn = PlugInResource();
@@ -154,10 +145,11 @@ void ExecutableAgentImp::setPlugIn(PlugIn* pPlugIn)
       PlugInResource plugIn(pPlugIn);
       mPlugIn = plugIn;
 
-      Service<PlugInManagerServices> pPlugInManager;
-      if (pPlugInManager.get() != NULL)
+      if ((mpProgress == NULL) || (mPlugInProgress == true))
       {
+         Service<PlugInManagerServices> pPlugInManager;
          mpProgress = pPlugInManager->getProgress(getPlugIn());
+         mPlugInProgress = true;
       }
    }
 }

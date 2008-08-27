@@ -111,9 +111,8 @@ Progress* UtilityServicesImp::getProgress(bool threadSafe)
 
 void UtilityServicesImp::destroyProgress(Progress* mx)
 {
-   map<Progress*, ProgressImp*>::iterator itr;
-   itr = mProgs.find(mx);
-   if (itr != mProgs.begin() && itr != mProgs.end())
+   map<Progress*, ProgressImp*>::iterator itr = mProgs.find(mx);
+   if (itr != mProgs.end())
    {
       delete itr->second;
       mProgs.erase(itr);

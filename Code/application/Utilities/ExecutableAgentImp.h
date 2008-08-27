@@ -86,6 +86,7 @@ private:
    PlugInArgList* mpOutArgList;
    std::string mMenuCommand;
    Progress* mpProgress;
+   bool mPlugInProgress;
    bool mProgressDialog;
    PlugInResource mPlugIn;
    bool mAutoInArg;
