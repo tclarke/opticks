@@ -396,10 +396,6 @@
 					/>
 				</FileConfiguration>
 			</File>
-			<File
-				RelativePath=".\SkipFactors.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="moc"

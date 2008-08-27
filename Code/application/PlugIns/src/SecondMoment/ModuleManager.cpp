@@ -31,11 +31,11 @@
 // These static variables are used to describe the Module.  Set 
 // these according to how you want the Module configured.  
 //
-const char *ModuleManager::mspName = "SecondMoment";
-const char *ModuleManager::mspVersion = "0.1";
-const char *ModuleManager::mspDescription = "Second Moment Matrix";
-const char *ModuleManager::mspValidationKey = "none";
-const char *ModuleManager::mspUniqueId = "{6AB11EC1-578A-4870-9661-4D3C00FD84EB}";
+const char* ModuleManager::mspName = "SecondMoment";
+const char* ModuleManager::mspVersion = "0.1";
+const char* ModuleManager::mspDescription = "Second Moment Matrix";
+const char* ModuleManager::mspValidationKey = "none";
+const char* ModuleManager::mspUniqueId = "{6AB11EC1-578A-4870-9661-4D3C00FD84EB}";
 
 unsigned int ModuleManager::getTotalPlugIns()
 {
