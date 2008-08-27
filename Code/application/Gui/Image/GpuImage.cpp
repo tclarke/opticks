@@ -215,19 +215,57 @@ int roundOffTarget(double target)
 }
 
 template<typename In>
+float getScale()
+{
+   return 1.0f;
+}
+
+template<>
+float getScale<unsigned char>()
+{
+   return static_cast<float>(numeric_limits<unsigned char>::max());
+}
+
+template<>
+float getScale<signed char>()
+{
+   return static_cast<float>(numeric_limits<unsigned char>::max());
+}
+
+template<>
+float getScale<unsigned short>()
+{
+   return static_cast<float>(numeric_limits<unsigned short>::max());
+}
+
+template<>
+float getScale<signed short>()
+{
+   return static_cast<float>(numeric_limits<unsigned short>::max());
+}
+
+template<typename In>
+In getOffset()
+{
+   return 0;
+}
+
+template<>
+signed char getOffset<signed char>()
+{
+   return numeric_limits<signed char>::min();
+}
+
+template<>
+signed short getOffset<signed short>()
+{
+   return numeric_limits<signed short>::min();
+}
+
+template<typename In>
 In getFromSource(In src)
 {
-   return src - numeric_limits<In>::min();
-}
-
-double getFromSource(float src)
-{
-   return static_cast<double> (src);
-}
-
-double getFromSource(double src)
-{
-   return src;
+   return src - getOffset<In>();
 }
 
 class GpuTileProcessor
@@ -273,8 +311,8 @@ private:
             pTarget += channelMinus1;
             for (unsigned int x1 = 0; x1 < tileSizeX; x1++)
             {
-               In source = getFromSource(*static_cast<In*>(da->getColumn()));
-               *pTarget = static_cast<Out>(source);
+               In source = *static_cast<In*>(da->getColumn());
+               *pTarget = static_cast<Out>(getFromSource(source));
                pTarget += channelStep;
                if (roundOffTarget(source) == singleBadValue)
                {
@@ -301,8 +339,8 @@ private:
                pTarget += channelMinus1;
                for (unsigned int x1 = 0; x1 < tileSizeX; x1++)
                {
-                  In source = getFromSource(*static_cast<In*>(da->getColumn()));
-                  *pTarget = static_cast<Out>(source);
+                  In source = *static_cast<In*>(da->getColumn());
+                  *pTarget = static_cast<Out>(getFromSource(source));
                   int tempInt = roundOffTarget(source);
 
                   pTarget += channelStep;
@@ -1191,15 +1229,15 @@ void GpuImage::setCgParameterValues()
 
                if ((dataType == INT1UBYTE) || (dataType == INT1SBYTE))
                {
-                  cgGLSetParameter1f(mCgParameters.at(i), static_cast<float>(numeric_limits<unsigned char>::max()));
+                  cgGLSetParameter1f(mCgParameters.at(i), getScale<unsigned char>());
                }
                else if ((dataType == INT2UBYTES) || (dataType == INT2SBYTES))
                {
-                  cgGLSetParameter1f(mCgParameters.at(i), static_cast<float>(numeric_limits<unsigned short>::max()));
+                  cgGLSetParameter1f(mCgParameters.at(i), getScale<unsigned short>());
                }
                else
                {
-                  cgGLSetParameter1f(mCgParameters.at(i), static_cast<float>(1.0));
+                  cgGLSetParameter1f(mCgParameters.at(i), getScale<float>());
                }
             }
             else if ((strcmp(pParameterName, "lowerValue") == 0) || (strcmp(pParameterName, "redLowerValue") == 0))
@@ -1251,11 +1289,11 @@ float GpuImage::getTextureStretchValue(float rawValue, EncodingType dataType) co
    {
       if (dataType == INT1SBYTE)
       {
-         stretchValue -= numeric_limits<signed char>::min();
+         stretchValue -= getOffset<signed char>();
       }
       else if (dataType == INT2SBYTES)
       {
-         stretchValue -= numeric_limits<signed short>::min();
+         stretchValue -= getOffset<signed short>();
       }
    }
 
@@ -1507,39 +1545,51 @@ unsigned int GpuImage::readTiles(double xCoord, double yCoord, GLsizei width, GL
       }
 
       // get scale factor
-      if (mInfo.mRawType[0] != FLT4BYTES)
+      float scaleFactor = 1.0f/3.0f;
+      float offset = 0.0;
+      switch(mInfo.mRawType[0])
       {
-         float scaleFactor = 1.0;
-         switch(mInfo.mRawType[0])
-         {
-         case INT1SBYTE:
-            scaleFactor = static_cast<float>(numeric_limits<char>::max());
-            break;
-         case INT1UBYTE:
-            scaleFactor = static_cast<float>(numeric_limits<unsigned char>::max());
-            break;
-         case INT2SBYTES:
-            scaleFactor = static_cast<float>(numeric_limits<short>::max());
-            break;
-         case INT2UBYTES:
-            scaleFactor = static_cast<float>(numeric_limits<unsigned short>::max());
-            break;
-         case INT4SBYTES:
-            scaleFactor = static_cast<float>(numeric_limits<int>::max());
-            break;
-         case INT4UBYTES:
-            scaleFactor = static_cast<float>(numeric_limits<unsigned int>::max());
-            break;
-         default:
-            scaleFactor = 1.0;
-            break;
-         }
+      case INT1SBYTE:
+         scaleFactor = getScale<signed char>() / 3.0f;
+         offset = static_cast<float>(getOffset<signed char>());
+         break;
+      case INT1UBYTE:
+         scaleFactor = getScale<unsigned char>() / 3.0f;
+         offset = static_cast<float>(getOffset<unsigned char>());
+         break;
+      case INT2SBYTES:
+         scaleFactor = getScale<signed short>() / 3.0f;
+         offset = static_cast<float>(getOffset<signed short>());
+         break;
+      case INT2UBYTES:
+         scaleFactor = getScale<unsigned short>() / 3.0f;
+         offset = static_cast<float>(getOffset<unsigned short>());
+         break;
+      case INT4SBYTES:
+         scaleFactor = getScale<signed int>() / 3.0f;
+         offset = static_cast<float>(getOffset<signed int>());
+         break;
+      case INT4UBYTES:
+         scaleFactor = getScale<unsigned int>() / 3.0f;
+         offset = static_cast<float>(getOffset<unsigned int>());
+         break;
+      case FLT4BYTES:
+         scaleFactor = getScale<float>() / 3.0f;
+         offset = static_cast<float>(getOffset<float>());
+         break;
+      case FLT8BYTES:
+         scaleFactor = getScale<double>() / 3.0f;
+         offset = static_cast<float>(getOffset<double>());
+         break;
+      default:
+         break;
+      }
 
-         // scale the filtered results
-         for (unsigned int element = 0; element < numElements; element++)
-         {
-            pValueData[element] *= scaleFactor;
-         }
+      // scale the filtered results
+      for (unsigned int element = 0; element < numElements; element++)
+      {
+         pValueData[element] *= scaleFactor;
+         pValueData[element] += offset;
       }
    }
 
