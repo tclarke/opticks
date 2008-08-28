@@ -35,7 +35,7 @@
 #include "RasterUtilities.h"
 #include "SessionItemDeserializer.h"
 #include "SessionItemSerializer.h"
-#include "SessionManagerImp.h"
+#include "SessionManager.h"
 #include "StatisticsImp.h"
 #include "xmlwriter.h"
 
@@ -1263,15 +1263,6 @@ bool RasterElementImp::deserialize(SessionItemDeserializer &deserializer)
             mStatistics[bandDesc] = pStatistics;
          }
       }
-      if(pRoot->hasAttribute(X("geoPlugin")))
-      {
-         mpGeoPlugin = dynamic_cast<Georeference*>(
-            SessionManagerImp::instance()->getSessionItem(A(pRoot->getAttribute(X("geoPlugin")))));
-      }
-      else
-      {
-         mpGeoPlugin = NULL;
-      }
 
       if(deserializer.getBlockSizes().size() > 1)
       {
@@ -1327,6 +1318,18 @@ bool RasterElementImp::deserialize(SessionItemDeserializer &deserializer)
          {
             return false;
          }
+      }
+
+      // Restore the georeference plug-in last so that the georeference plug-in will not be destroyed
+      // before it is restored if loading the data fails
+      if (pRoot->hasAttribute(X("geoPlugin")))
+      {
+         Service<SessionManager> pManager;
+         mpGeoPlugin = dynamic_cast<Georeference*>(pManager->getSessionItem(A(pRoot->getAttribute(X("geoPlugin")))));
+      }
+      else
+      {
+         mpGeoPlugin = NULL;
       }
    }
    catch(const XmlReader::DomParseException&)
