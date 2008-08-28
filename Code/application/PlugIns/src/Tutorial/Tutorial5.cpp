@@ -167,7 +167,7 @@ bool Tutorial5::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
    {
       if (pProgress != NULL)
       {
-         pProgress->updateProgress("Calculating statistics", row * 100 / pDesc->getRowCount(), NORMAL);
+         pProgress->updateProgress("Calculating result", row * 100 / pDesc->getRowCount(), NORMAL);
       }
       if (isAborted())
       {
