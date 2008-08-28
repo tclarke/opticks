@@ -17,6 +17,7 @@ Start with the first and work your way through the tutorial as each successive s
   -# \subpage howto_tutorial2
   -# \subpage howto_tutorial3
   -# \subpage howto_tutorial4
+  -# \subpage howto_tutorial5
   
 Please see \subpage howto_buildtutorials for information on how to build and run these tutorials with %Opticks.
  
