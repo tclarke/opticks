@@ -325,6 +325,10 @@
 				RelativePath=".\Tutorial4.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\Tutorial5.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -344,6 +348,10 @@
 			</File>
 			<File
 				RelativePath=".\Tutorial4.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Tutorial5.h"
 				>
 			</File>
 		</Filter>

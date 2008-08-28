@@ -12,6 +12,7 @@
 #include "Tutorial2.h"
 #include "Tutorial3.h"
 #include "Tutorial4.h"
+#include "Tutorial5.h"
 
 // Information about the module
 const char *ModuleManager::mspName = "Tutorial"; // module name
@@ -23,7 +24,7 @@ const char *ModuleManager::mspUniqueId = "{D0879A4B-AD8F-4C48-8911-2F175FD8A104}
 // Number of plug-ins in the module
 unsigned int ModuleManager::getTotalPlugIns()
 {
-   return 4;
+   return 5;
 }
 
 // Factory for all the plug-ins in the module
@@ -43,6 +44,9 @@ PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
          break;
       case 3:
          pPlugIn = new Tutorial4();
+         break;
+      case 4:
+         pPlugIn = new Tutorial5();
          break;
       default:
          break;
