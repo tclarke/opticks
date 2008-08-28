@@ -159,7 +159,7 @@ void ViewObjectImp::setView(View* pView)
                         DataElement* pCopyElement = pCopyLayer->getDataElement();
                         if (pCopyElement != NULL)
                         {
-                           string newName = layerName;
+                           string newName = pOriginalLayer->getDataElement()->getName();
                            if (pParentView != NULL)
                            {
                               newName += " - " + pParentView->getName();
