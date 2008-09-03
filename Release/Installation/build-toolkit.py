@@ -235,7 +235,7 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir, package_dir):
    retcode = subprocess.Popen(["python", join(os.path.abspath(opticks_code_dir),"build.py"), "--build-doxygen", "-d", opticks_dependencies_dir], shell=False).wait()
    if retcode != 0:
       print "ERROR: Error occurred while building on-line help"
-   cp_dir2(join(opticks_code_dir, "Build", "DoxygenOutput"), join(out_dir, "doc"), "html")
+   cp_dir2(join(opticks_code_dir, "Build", "DoxygenOutput"), join(out_dir, "doc"), "html", recursive_copy = True) 
  
    plugins_file = None
    libs = ["PlugInLib", "PlugInUtilities", "HdfPlugInLib", "NitfPlugInLib"]
