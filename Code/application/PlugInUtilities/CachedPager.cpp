@@ -29,6 +29,12 @@ CachedPager::CachedPager() :
    // Do nothing
 }
 
+CachedPager::CachedPager(const size_t cacheSize) :
+   mpMutex(new mta::DMutex), mpRaster(NULL), mBytesPerBand(0), mColumnCount(0), mBandCount(0), mRowCount(0), mCache(static_cast<const int>(cacheSize))
+{
+   // Do nothing
+}
+
 CachedPager::~CachedPager()
 {
 }

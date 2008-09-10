@@ -69,6 +69,19 @@ public:
    CachedPager();
 
    /**
+    * Creates a CachedPager PlugIn.
+    *
+    * Sets cache size to cacheSize bytes. Sets writable flag to false.
+    *
+    * Subclasses need to override private pure virtual methods to
+    * open the file and get a block from that file.
+    *
+    * @param cacheSize
+    *        Number of bytes in the page cache.
+    */
+   CachedPager(const size_t cacheSize);
+
+   /**
     * Destructor
     */
    ~CachedPager();
