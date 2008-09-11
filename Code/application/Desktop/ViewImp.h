@@ -216,6 +216,7 @@ signals:
    void originChanged(const DataOrigin& dataOrigin);
    void crossHairDisplayed(bool bDisplayed);
    void mouseModeAdded(const MouseMode* pMouseMode);
+   void mouseModeRemoved(const MouseMode* pMouseMode);
    void mouseModeChanged(const MouseMode* pMouseMode);
    void mouseModeEnabled(const MouseMode* pMouseMode, bool bEnable);
    void extentsChanged(double dMinX, double dMinY, double dMaxX, double dMaxY);
