@@ -28,7 +28,7 @@
 #include "CurveAdapter.h"
 #include "CurveCollectionAdapter.h"
 #include "DataDescriptorAdapter.h"
-#include "DesktopServicesImp.h"
+#include "DesktopServices.h"
 #include "GraphicGroupImp.h"
 #include "HistogramAdapter.h"
 #include "Icons.h"
@@ -984,6 +984,10 @@ void PlotViewImp::mousePressEvent(QMouseEvent* e)
          setCursor(Qt::BlankCursor);
          updateGL();
       }
+      else if (strMouseMode == "PanMode")
+      {
+         setCursor(Qt::ClosedHandCursor);
+      }
       else if (strMouseMode == "SelectionMode")
       {
          if ((e->modifiers() != Qt::ShiftModifier) && (e->modifiers() != Qt::ControlModifier))
@@ -1102,14 +1106,11 @@ void PlotViewImp::mouseMoveEvent(QMouseEvent* e)
       }
       else if (strMouseMode == "PanMode")
       {
-         DesktopServicesImp* pDesktop = DesktopServicesImp::instance();
-         if (pDesktop != NULL)
+         Service<DesktopServices> pDesktop;
+         if (pDesktop->getPanMode() == PAN_INSTANT)
          {
-            if (pDesktop->getPanMode() == PAN_INSTANT)
-            {
-               ViewImp::pan(ptMouse, mMouseCurrent);
-               updateGL();
-            }
+            ViewImp::pan(ptMouse, mMouseCurrent);
+            updateGL();
          }
       }
       else if (strMouseMode == "SelectionMode")
@@ -1211,14 +1212,20 @@ void PlotViewImp::mouseReleaseEvent(QMouseEvent* e)
       }
       else if (strMouseMode == "PanMode")
       {
-         DesktopServicesImp* pDesktop = DesktopServicesImp::instance();
-         if (pDesktop != NULL)
+         Service<DesktopServices> pDesktop;
+         if (pDesktop->getPanMode() == PAN_DELAY)
          {
-            if (pDesktop->getPanMode() == PAN_DELAY)
-            {
-               ViewImp::pan(ptMouse, mMouseStart);
-            }
+            ViewImp::pan(ptMouse, mMouseStart);
          }
+
+         // Restore the cursor
+         QCursor mouseCursor(Qt::OpenHandCursor);
+         if (pMouseMode != NULL)
+         {
+            mouseCursor = pMouseMode->getCursor();
+         }
+
+         setCursor(mouseCursor);
       }
       else if (strMouseMode == "SelectionMode")
       {
