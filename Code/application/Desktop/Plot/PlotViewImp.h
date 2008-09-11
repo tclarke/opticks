@@ -11,6 +11,7 @@
 #define PLOTVIEWIMP_H
 
 #include <QtGui/QAction>
+#include <QtGui/QMenu>
 
 #include "PolygonPlotObjectAdapter.h"
 #include "OrthographicViewImp.h"
@@ -126,6 +127,8 @@ protected:
 
 protected slots:
    void setMouseMode(QAction* pAction);
+   void addMouseModeAction(const MouseMode* pMouseMode);
+   void removeMouseModeAction(const MouseMode* pMouseMode);
    void enableMouseModeAction(const MouseMode* pMouseMode, bool bEnable);
    void updateMouseModeAction(const MouseMode* pMouseMode);
    void updateExtents();
@@ -133,6 +136,7 @@ protected slots:
    virtual void setSecurityMarkings();
 
 private:
+   QMenu* mpMouseModeMenu;
    QActionGroup* mpMouseModeGroup;
    QAction* mpObjectSelectAction;
    QAction* mpPanAction;

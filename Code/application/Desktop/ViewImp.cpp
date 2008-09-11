@@ -319,6 +319,7 @@ bool ViewImp::removeMouseMode(const MouseMode* pMouseMode)
          }
 
          mMouseModes.erase(pMouseMode);
+         emit mouseModeRemoved(pMouseMode);
          return true;
       }
    }
