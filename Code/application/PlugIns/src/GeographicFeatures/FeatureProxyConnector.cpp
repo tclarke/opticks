@@ -30,6 +30,8 @@
 #include <Windows.h>
 #endif
 
+const int CONNECTION_TIMEOUT = 5000;
+
 FeatureProxyConnector *FeatureProxyConnector::instance()
 {
    Service<PlugInManagerServices> pPlugInManager;
@@ -78,6 +80,11 @@ bool FeatureProxyConnector::initialize()
    pid = GetCurrentProcessId();
 #endif
 
+   mpConnectionTimer = new QTimer(this);
+   mpConnectionTimer->setSingleShot(true);
+   mpConnectionTimer->setInterval(CONNECTION_TIMEOUT);
+   VERIFYNR(connect(mpConnectionTimer, SIGNAL(timeout()), this, SLOT(abortConnection())));
+
    if(mpProcess->state() != QProcess::NotRunning)
    {
       terminate();
@@ -115,6 +122,13 @@ bool FeatureProxyConnector::initialize()
    mStream << APP_VERSION_NUMBER << endl;
 
    return true;
+}
+
+void FeatureProxyConnector::abortConnection()
+{
+   mResponses.enqueue("ERROR ArcProxy could not connect.");
+   mLastReplyIsError = true;
+   mPendingCommand = NO_COMMAND; 
 }
 
 bool FeatureProxyConnector::processReply()
@@ -242,12 +256,15 @@ bool FeatureProxyConnector::openDataSource(const ArcProxyLib::ConnectionParamete
    mLastReplyIsError = false;
    mStream << "OPEN " << QString::fromStdString(connParams.toString()) << endl;
    mPendingCommand = OPEN_DATA_SOURCE;
+   VERIFY(mpConnectionTimer != NULL);
+   mpConnectionTimer->start();
 
    // run the event loop until we get some sort of a reply
    while(mPendingCommand == OPEN_DATA_SOURCE)
    {
       QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
    }
+   mpConnectionTimer->stop();
    if(mLastReplyIsError)
    {
       errorMessage = mResponses.dequeue().toStdString();
@@ -272,11 +289,14 @@ bool FeatureProxyConnector::closeDataSource(const std::string &handle, std::stri
       mLastReplyIsError = false;
       mStream << "CLOSE " << QString::fromStdString(handle) << endl;
       mPendingCommand = CLOSE_DATA_SOURCE;
+      VERIFY(mpConnectionTimer != NULL);
+      mpConnectionTimer->start();
 
       while(mPendingCommand == CLOSE_DATA_SOURCE)
       {
          QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
       }
+      mpConnectionTimer->stop();
       if(mLastReplyIsError)
       {
          errorMessage = mResponses.dequeue().toStdString();
@@ -303,11 +323,14 @@ bool FeatureProxyConnector::getFeatureClassProperties(
    mLastReplyIsError = false;
    mStream << "GETFEATURECLASSPROPERTIES " << QString::fromStdString(handle) << endl;
    mPendingCommand = GET_FEATURE_CLASS_PROPERTIES;
+   VERIFY(mpConnectionTimer != NULL);
+   mpConnectionTimer->start();
 
    while(mPendingCommand == GET_FEATURE_CLASS_PROPERTIES)
    {
       QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
    }
+   mpConnectionTimer->stop();
 
    if(mLastReplyIsError)
    {

@@ -21,6 +21,7 @@
 #include <QtCore/QQueue>
 #include <QtCore/QString>
 #include <QtCore/QTextStream>
+#include <QtCore/QTimer>
 #include <string>
 #include <vector>
 
@@ -115,7 +116,7 @@ signals:
 
 private slots:
    bool processReply();
-
+   void abortConnection();
    void proxyExited();
 
 private:
@@ -136,6 +137,7 @@ private:
    QTextStream mStream;
    QTcpServer *mpServer;
    QTcpSocket *mpSocket;
+   QTimer *mpConnectionTimer;
 
    QQueue<QString> mResponses;
    QString mPartialResponse;
