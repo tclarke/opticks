@@ -12,8 +12,6 @@
 
 #include "ExporterShell.h"
 #include "MessageLogResource.h"
-#include "PlugInManagerServices.h"
-#include "UtilityServices.h"
 
 #pragma warning(push, 1)
 #pragma warning(disable: 4244)
@@ -21,6 +19,7 @@
 #include "avutil.h"
 #pragma warning(pop)
 
+#include <boost/rational.hpp>
 #include <memory>
 
 class OptionsMovieExporter;
@@ -38,19 +37,6 @@ public:
    MovieExporter();
    virtual ~MovieExporter();
 
-   bool setBatch()
-   {
-      mIsBatch = true;
-      return true;
-   }
-   bool setInteractive()
-   {
-      mIsBatch = false;
-      return true;
-   }
-   bool hasAbort() { return true; }
-   bool abort() { return (mAbort = true); }
-
    bool getInputSpecification(PlugInArgList*& pInArgList);
    bool getOutputSpecification(PlugInArgList*& pOutArgList);
    bool execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList);
@@ -67,14 +53,11 @@ protected:
 
    virtual AVOutputFormat *getOutputFormat() const = 0;
 
-   Service<PlugInManagerServices> mpPlugInManager;
-   Service<UtilityServices> mpUtility;
+   boost::rational<int> convertToValidFrameRate(const boost::rational<int>& frameRate) const;
 
 private:
    void log_error(const std::string &msg);
 
-   bool mIsBatch;
-   bool mAbort;
    Progress *mpProgress;
    StepResource mpStep;
    AVFrame *mpPicture;

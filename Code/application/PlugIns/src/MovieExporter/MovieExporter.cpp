@@ -11,25 +11,18 @@
 #include "AppConfig.h"
 #include "AppVerify.h"
 #include "AppVersion.h"
-#include "DataDescriptor.h"
-#include "DesktopServices.h"
 #include "FileDescriptor.h"
-#include "MessageLogResource.h"
 #include "MovieExporter.h"
 #include "OptionsMovieExporter.h"
-#include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
-#include "SpatialDataView.h"
+#include "Progress.h"
 #include "StringUtilities.h"
-#include "UtilityServices.h" 
+#include "View.h"
 
 #include <QtCore/QString>
-#include <QtGui/QApplication>
-#include <QtGui/QComboBox>
 #include <QtGui/QImage>
 
-#include <boost/rational.hpp>
 #include <string>
 #include <vector>
 #include <stdio.h>
@@ -94,8 +87,6 @@ extern "C" static void av_log_callback(void *pPtr, int level, const char *pFmt, 
 }
 
 MovieExporter::MovieExporter() :
-   mIsBatch(true),
-   mAbort(false),
    mpStep(NULL),
    mpPicture(NULL),
    mpVideoOutbuf(NULL),
@@ -112,6 +103,7 @@ MovieExporter::MovieExporter() :
    setSubtype(TypeConverter::toString<View>());
    setDescriptorId("{99F399A8-B003-4fdc-99A0-F45261144FF4}");
    allowMultipleInstances(true);
+   setAbortSupported(true);
 }
 
 MovieExporter::~MovieExporter()
@@ -120,7 +112,8 @@ MovieExporter::~MovieExporter()
 
 bool MovieExporter::getInputSpecification(PlugInArgList*& pInArgList)
 {
-   pInArgList = mpPlugInManager->getPlugInArgList();
+   Service<PlugInManagerServices> pPlugInManager;
+   pInArgList = pPlugInManager->getPlugInArgList();
 
    VERIFY(pInArgList != NULL);
    VERIFY(pInArgList->addArg<Progress>(ProgressArg(), NULL));
@@ -283,6 +276,21 @@ bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
          if (framerate == 0)
          {
             framerate = pController->getMinimumFrameRate();
+
+            // Validate the framerate
+            boost::rational<int> validFrameRate = convertToValidFrameRate(framerate);
+            if (validFrameRate != framerate)
+            {
+               QString msg = QString("The current animation frame rate (%1/%2 fps) can not be represented in the "
+                                     "selected movie format. The %3/%4 fps frame rate is being used instead.")
+                                    .arg(framerate.numerator())
+                                    .arg(framerate.denominator())
+                                    .arg(validFrameRate.numerator())
+                                    .arg(validFrameRate.denominator());
+               mpProgress->updateProgress(msg.toStdString(), 0, WARNING);
+
+               framerate = validFrameRate;
+            }
          }
          if (framerate == 0)
          {
@@ -397,9 +405,8 @@ bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
    // calculate time interval
    if ((framerate < pController->getMinimumFrameRate()) && (mpProgress != NULL))
    {
-      mpProgress->updateProgress("The selected output framerate may not\n"
-                                 "encode all the frames in the movie. Frames\n"
-                                 "may be dropped.", 0, WARNING);
+      mpProgress->updateProgress("The selected output frame rate may not encode all the frames in the movie.  "
+                                 "Frames may be dropped.", 0, WARNING);
    }
    double interval = rational_cast<double>(1 / framerate);
 
@@ -422,7 +429,7 @@ bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
 
    for (double video_pts = startExport; video_pts <= stopExport; video_pts += interval)
    {
-      if (mAbort)
+      if (isAborted() == true)
       {
          if (mpProgress != NULL)
          {
@@ -499,78 +506,48 @@ ValidationResultType MovieExporter::validate(const PlugInArgList* pArgList, stri
    }
 
    /* validate the framerate */
-   AVOutputFormat *pOutFormat = getOutputFormat();
-   VERIFYRV(pOutFormat, VALIDATE_FAILURE);
-   AVCodec *pCodec = avcodec_find_encoder(pOutFormat->video_codec);
-   VERIFYRV(pCodec, VALIDATE_FAILURE);
-   if (pCodec->supported_framerates != NULL)
-   {
-      boost::rational<int> actualFrameRate;
-      boost::rational<int> expectedFrameRate;
+   boost::rational<int> expectedFrameRate;
 
-      // first, get the framerate from the arg list
-      // next, try the option widget
-      // next, get from the animation controller
-      // finally, default to the config settings
-      int framerateNum, framerateDen;
-      if (pArgList->getPlugInArgValue("Framerate Numerator", framerateNum) &&
-         pArgList->getPlugInArgValue("Framerate Denominator", framerateDen))
+   // first, get the framerate from the arg list
+   // next, try the option widget
+   // next, get from the animation controller
+   // finally, default to the config settings
+   int framerateNum, framerateDen;
+   if (pArgList->getPlugInArgValue("Framerate Numerator", framerateNum) &&
+      pArgList->getPlugInArgValue("Framerate Denominator", framerateDen))
+   {
+      expectedFrameRate.assign(framerateNum, framerateDen);
+   }
+   if (expectedFrameRate == 0)
+   {
+      if (mpOptionWidget.get() != NULL)
       {
-         expectedFrameRate.assign(framerateNum, framerateDen);
+         expectedFrameRate = mpOptionWidget->getFramerate();
       }
       if (expectedFrameRate == 0)
       {
-         if (mpOptionWidget.get() != NULL)
-         {
-            expectedFrameRate = mpOptionWidget->getFramerate();
-         }
-         if (expectedFrameRate == 0)
-         {
-            expectedFrameRate = pController->getMinimumFrameRate();
-         }
-         if (expectedFrameRate == 0)
-         {
-            errorMessage = "No framerate specified";
-            return VALIDATE_FAILURE;
-         }
+         expectedFrameRate = pController->getMinimumFrameRate();
       }
+      if (expectedFrameRate == 0)
+      {
+         errorMessage = "No framerate specified";
+         return VALIDATE_FAILURE;
+      }
+   }
 
-      try
-      {
-         for (int idx = 0;; idx++)
-         {
-            boost::rational<int> frameRate(pCodec->supported_framerates[idx].num,
-                                           pCodec->supported_framerates[idx].den);
-            if (frameRate == 0)
-            {
-               break;
-            }
-            if ((frameRate == expectedFrameRate) || // the expected FR matches a valid FR
-               (actualFrameRate == 0) ||           // we havn't saved a FR so pick something valid
-               // the diff between the expected and current FR is closer than the stored FR
-               ((frameRate - expectedFrameRate) < (actualFrameRate - expectedFrameRate)) ||
-               // the current FR is greater than the expected and the stored is less than the expected
-               ((actualFrameRate - expectedFrameRate) < 0 && (frameRate - expectedFrameRate) > 0))
-            {
-               actualFrameRate = frameRate;
-            }
-         }
-      }
-      catch(const boost::bad_rational&)
-      {
-         // intentionally left blank
-      }
+   boost::rational<int> actualFrameRate = convertToValidFrameRate(expectedFrameRate);
+   if (actualFrameRate != 0)
+   {
       if (actualFrameRate < pController->getMinimumFrameRate())
       {
-         errorMessage = "The selected output framerate may not encode all the frames in the movie. "
+         errorMessage = "The selected output frame rate may not encode all the frames in the movie.  "
                         "Frames may be dropped.";
          result = VALIDATE_INFO;
       }
       if (actualFrameRate != expectedFrameRate)
       {
-         QString msg = QString("The frame rate attached to the animation (%1/%2 fps) can not be\n"
-                               "represented in the selected movie format. %3/%4 fps is being used instead.\n"
-                               "The frame rate stored in the file may be changed using the options dialog.")
+         QString msg = QString("The current animation frame rate (%1/%2 fps) can not be represented in the "
+                               "selected movie format. The %3/%4 fps frame rate will be used instead.")
                               .arg(expectedFrameRate.numerator())
                               .arg(expectedFrameRate.denominator())
                               .arg(actualFrameRate.numerator())
@@ -583,6 +560,7 @@ ValidationResultType MovieExporter::validate(const PlugInArgList* pArgList, stri
          result = VALIDATE_INFO;
       }
    }
+
    return result;
 }
 
@@ -829,4 +807,45 @@ void MovieExporter::close_video(AVFormatContext *pFormat, AVStream *pVideoStream
    avcodec_close(pVideoStream->codec);
    mpPicture = NULL;
    mpVideoOutbuf = NULL;
+}
+
+boost::rational<int> MovieExporter::convertToValidFrameRate(const boost::rational<int>& frameRate) const
+{
+   boost::rational<int> validFrameRate;
+   try
+   {
+      AVOutputFormat* pOutFormat = getOutputFormat();
+      VERIFY(pOutFormat != NULL);
+      AVCodec* pCodec = avcodec_find_encoder(pOutFormat->video_codec);
+      VERIFY(pCodec != NULL);
+
+      if (pCodec->supported_framerates != NULL)
+      {
+         for (int idx = 0; ; ++idx)
+         {
+            boost::rational<int> supportedFrameRate(pCodec->supported_framerates[idx].num,
+                                                    pCodec->supported_framerates[idx].den);
+            if (supportedFrameRate == 0)
+            {
+               break;
+            }
+
+            if ((supportedFrameRate == frameRate) || // The frame rate matches a supported frame rate
+               (validFrameRate == 0) ||              // A valid frame rate has not yet been set
+               // The difference between supported FR and the FR is closer than the valid FR difference
+               ((supportedFrameRate - frameRate) < (validFrameRate - frameRate)) ||
+               // The supported FR is greater than the FR and the valid FR is less than the FR
+               ((validFrameRate - frameRate) < 0 && (supportedFrameRate - frameRate) > 0))
+            {
+               validFrameRate = supportedFrameRate;
+            }
+         }
+      }
+   }
+   catch (const boost::bad_rational&)
+   {
+      // Intentionally left blank
+   }
+
+   return validFrameRate;
 }
