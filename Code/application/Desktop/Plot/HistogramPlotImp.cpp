@@ -375,19 +375,21 @@ HistogramPlotImp::HistogramPlotImp(const string& id, const string& viewName, QGL
       setMouseMode(pLocateMode);
    }
 
-   QList<QAction*> actionList = actions();
-   for (int i = 0; i < actionList.count(); ++i)
+   list<ContextMenuAction> actionList = getContextMenuActions();
+   for (list<ContextMenuAction>::iterator iter = actionList.begin(); iter != actionList.end(); ++iter)
    {
-      QAction* pAction = actionList[i];
-      if (pAction != NULL)
+      ContextMenuAction action = *iter;
+      if (action.mpAction != NULL)
       {
-         QMenu* pMenu = pAction->menu();
+         QMenu* pMenu = action.mpAction->menu();
          if (pMenu != NULL)
          {
             QList<QAction*> menuActions = pMenu->actions();
-            for (int j = 0; j < menuActions.count(); ++j)
+
+            int i = 0;
+            for (i = 0; i < menuActions.count(); ++i)
             {
-               QAction* pMenuAction = menuActions[j];
+               QAction* pMenuAction = menuActions[i];
                if (pMenuAction != NULL)
                {
                   QString strActionText = pMenuAction->text();
@@ -395,8 +397,14 @@ HistogramPlotImp::HistogramPlotImp(const string& id, const string& viewName, QGL
                   {
                      pMenuAction->setText("&Set Value");
                      pMenuAction->setStatusTip("Sets a threshold or contrast stretch value");
+                     break;
                   }
                }
+            }
+
+            if (i < menuActions.count())
+            {
+               break;
             }
          }
       }
