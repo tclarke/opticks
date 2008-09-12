@@ -811,7 +811,7 @@ void MovieExporter::close_video(AVFormatContext *pFormat, AVStream *pVideoStream
 
 boost::rational<int> MovieExporter::convertToValidFrameRate(const boost::rational<int>& frameRate) const
 {
-   boost::rational<int> validFrameRate = frameRate;
+   boost::rational<int> validFrameRate;
    try
    {
       AVOutputFormat* pOutFormat = getOutputFormat();
@@ -840,6 +840,10 @@ boost::rational<int> MovieExporter::convertToValidFrameRate(const boost::rationa
                validFrameRate = supportedFrameRate;
             }
          }
+      }
+      else
+      {
+         validFrameRate = frameRate;
       }
    }
    catch (const boost::bad_rational&)
