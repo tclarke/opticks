@@ -944,7 +944,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    ///////////
 
    // Create the submenus
-   QMenu* pToolbarsMenu = createPopupMenu();
+   mpToolbarsMenu = new QMenu ("Toolbars", m_pView);
    QMenu* pPanMenu = new QMenu("Pan &Mode", m_pView);
    QMenu* pRotateMenu = new QMenu("Rot&ate", m_pView);
    QMenu* pZoomMenu = new QMenu("&Zoom", m_pView);
@@ -992,7 +992,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
 
    // View menu
    mpMenuBar->insertCommand(pStatus_Bar_Action, m_pView, viewContext);
-   mpMenuBar->insertMenu(pToolbarsMenu, m_pView);
+   mpMenuBar->insertMenu(mpToolbarsMenu, m_pView);
    m_pView->addSeparator();
    mpMenuBar->insertCommand(m_pPan_Action, m_pView, mouseModeContext);
    mpMenuBar->insertMenu(pPanMenu, m_pView);
@@ -1007,25 +1007,6 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    mpMenuBar->insertCommand(mpClearMarkingsAction, m_pView, viewContext);
    mpMenuBar->insertCommand(mpTakeSnapshotAction, m_pView, viewContext);
    mpMenuBar->insertCommand(pPropertiesAction, m_pView, viewContext);
-
-   // Toolbars popup menu
-   pToolbarsMenu->setTitle("Toolbars");
-
-   QList<QAction*> menuActions = pToolbarsMenu->actions();
-   for (int i = 0; i < menuActions.count(); ++i)
-   {
-      QAction* pAction = menuActions[i];
-      if (pAction != NULL)
-      {
-         QString strName = pAction->text();
-         if ((pAction->isSeparator() == true) || (strName == mpSessionExplorer->windowTitle()) ||
-            (strName == m_pHistogram->windowTitle()) || (strName == m_pMessage_Log->windowTitle()) ||
-            (strName == m_pBackground_Plugins->windowTitle()) || (strName == m_pScripting->windowTitle()))
-         {
-            pToolbarsMenu->removeAction(pAction);
-         }
-      }
-   }
 
    // Pan Mode popup menu
    string panContext = viewContext + string("/") + pPanMenu->menuAction()->toolTip().toStdString();;
@@ -1214,6 +1195,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    VERIFYNR(connect(m_pScripting_Wnd_Action, SIGNAL(triggered(bool)), m_pScripting, SLOT(setVisible(bool))));
    VERIFYNR(connect(m_pScripting, SIGNAL(visibilityChanged(bool)), m_pScripting_Wnd_Action, SLOT(setChecked(bool))));
    VERIFYNR(connect(mpWorkspace, SIGNAL(windowActivated(QWidget*)), this, SLOT(updateActiveWindow(QWidget*))));
+   VERIFYNR(connect(mpToolbarsMenu, SIGNAL(aboutToShow()), this, SLOT(showToolbarsMenu())));
 
    Service<DesktopServices> pDesktop;
    attach(SIGNAL_NAME(ApplicationWindow, WindowAdded),
@@ -5820,4 +5802,20 @@ void ApplicationWindow::importDroppedFiles()
    }
 
    mDroppedFilesList.clear();
+}
+
+void ApplicationWindow::showToolbarsMenu()
+{
+   mpToolbarsMenu->clear();
+
+   vector<Window*> windows = getWindows(TOOLBAR);
+   vector<Window*>::iterator winIt;
+   for (winIt = windows.begin(); winIt != windows.end(); ++winIt)
+   {
+      QToolBar* pToolbar = dynamic_cast<QToolBar*>(*winIt);
+      if (pToolbar != NULL)
+      {
+         mpToolbarsMenu->addAction(pToolbar->toggleViewAction());
+      }
+   }
 }

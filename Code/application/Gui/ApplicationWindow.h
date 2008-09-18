@@ -293,6 +293,7 @@ private:
    QMenu* m_pSession;
    QMenu* m_pEdit;
    QMenu* m_pView;
+   QMenu* mpToolbarsMenu;
    QMenu* m_pLayout;
    QMenu* m_pTools;
    QMenu* m_pWindow;
@@ -463,6 +464,7 @@ private slots:
    void windowMenuActivated(QAction* pAction);
    void updateUndoActions(const std::string& oldId, const std::string& newId);
    void importDroppedFiles();
+   void showToolbarsMenu();
 };
 
 #endif
