@@ -173,7 +173,6 @@ void TiePointLayerImp::draw()
 
    int viewableBounds[4] = {INT_MIN, INT_MIN, INT_MAX, INT_MAX};
    DrawUtil::restrictToViewport(viewableBounds[0], viewableBounds[1], viewableBounds[2], viewableBounds[3]);
-//   DrawUtil::restrictToViewport(ulVisStartColumn, ulVisStartRow, ulVisEndColumn, ulVisEndRow); // leave for reference
 
    int visibleCount = drawSymbols(points, sceneSymbolSize, viewableBounds);
    if (mLabelsEnabled && visibleCount < labelTolerance)

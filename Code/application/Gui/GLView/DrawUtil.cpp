@@ -483,22 +483,6 @@ bool DrawUtil::unProjectToZero(double xPixel, double yPixel, const double modelM
    return success;
 }
 
-void DrawUtil::restrictToViewport(unsigned int &ulStartColumn, unsigned int &ulStartRow,
-                                  unsigned int &ulEndColumn, unsigned int &ulEndRow)
-{
-   unsigned int intMax = INT_MAX;
-   int zero = 0;
-   int iStartColumn = min(ulStartColumn, intMax);
-   int iStartRow = min(ulStartRow, intMax);
-   int iEndColumn = min(ulEndColumn, intMax);
-   int iEndRow = min(ulEndRow, intMax);
-   restrictToViewport(iStartColumn, iStartRow, iEndColumn, iEndRow);
-   ulStartColumn = max(zero, iStartColumn);
-   ulStartRow = max(zero, iStartRow);
-   ulEndColumn = max(zero, iEndColumn);
-   ulEndRow = max(zero, iEndRow);
-}
-
 void DrawUtil::restrictToViewport(int &ulStartColumn, int &ulStartRow,
                                   int &ulEndColumn, int &ulEndRow)
 {

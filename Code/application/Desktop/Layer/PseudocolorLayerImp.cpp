@@ -163,23 +163,21 @@ vector<ColorType> PseudocolorLayerImp::getColors() const
 }
 
 template<class T>
-void drawPseudocolorMarkers(T*pData, int uiStopColumn, int uiStopRow, 
-                            int uiVisStartColumn, int uiVisStartRow, 
-                            int uiVisEndColumn, int uiVisEndRow, 
-                            SymbolType eSymbol, QColor clrMarker, 
+void drawPseudocolorMarkers(T* pData, int stopColumn, int stopRow, int visStartColumn, int visStartRow,
+                            int visEndColumn, int visEndRow, SymbolType eSymbol, QColor clrMarker, 
                             double value, int row = -1)
 {
    if (row < 0) // in memory so process all rows
    {
-      PixelOper<T> oper(pData, uiStopRow+1, uiStopColumn+1, (T)value);
-      SymbolRegionDrawer::drawMarkers(0, 0, uiStopColumn, uiStopRow, uiVisStartColumn, uiVisStartRow, uiVisEndColumn,
-         uiVisEndRow, eSymbol, clrMarker, oper);
+      PixelOper<T> oper(pData, stopRow + 1, stopColumn + 1, static_cast<T>(value));
+      SymbolRegionDrawer::drawMarkers(0, 0, stopColumn, stopRow, visStartColumn, visStartRow, visEndColumn,
+         visEndRow, eSymbol, clrMarker, oper);
    }
    else // on disk so being processed one row at a time
    {
-      PixelOper<T> oper(pData, 1, 0, (T)value);
-      SymbolRegionDrawer::drawMarkers(0, row, uiStopColumn, row, uiVisStartColumn, uiVisStartRow, uiVisEndColumn,
-         uiVisEndRow, eSymbol, clrMarker, oper);
+      PixelOper<T> oper(pData, 1, 0, static_cast<T>(value));
+      SymbolRegionDrawer::drawMarkers(0, row, stopColumn, row, visStartColumn, visStartRow, visEndColumn,
+         visEndRow, eSymbol, clrMarker, oper);
    }
 }
 
@@ -200,8 +198,8 @@ void PseudocolorLayerImp::draw()
          DataAccessor accessor(NULL,NULL);
          bool usingRawData = false;
 
-         unsigned int ulColumns = 0;
-         unsigned int ulRows = 0;
+         int columns = 0;
+         int rows = 0;
          EncodingType eType;
          void *pData = NULL;
 
@@ -209,8 +207,8 @@ void PseudocolorLayerImp::draw()
             dynamic_cast<const RasterDataDescriptor*>(pRasterElement->getDataDescriptor());
          if (pDescriptor != NULL)
          {
-            ulColumns = pDescriptor->getColumnCount();
-            ulRows = pDescriptor->getRowCount();
+            columns = static_cast<int>(pDescriptor->getColumnCount());
+            rows = static_cast<int>(pDescriptor->getRowCount());
             eType = pDescriptor->getDataType();
          }
 
@@ -230,39 +228,35 @@ void PseudocolorLayerImp::draw()
 
          SymbolType eSymbol = getSymbol();
 
-         unsigned int ulVisStartColumn = 0;
-         unsigned int ulVisEndColumn = ulColumns - 1;
-         unsigned int ulVisStartRow = 0;
-         unsigned int ulVisEndRow = ulRows - 1;
-         DrawUtil::restrictToViewport(ulVisStartColumn, ulVisStartRow, ulVisEndColumn, ulVisEndRow);
+         int visStartColumn = 0;
+         int visEndColumn = columns - 1;
+         int visStartRow = 0;
+         int visEndRow = rows - 1;
+         DrawUtil::restrictToViewport(visStartColumn, visStartRow, visEndColumn, visEndRow);
 
-         QMap<int, PseudocolorClass*>::Iterator iter;
-         iter = mClasses.begin();
+         QMap<int, PseudocolorClass*>::Iterator iter = mClasses.begin();
          while (iter != mClasses.end())
          {
             PseudocolorClass* pClass = iter.value();
             if (pClass != NULL)
             {
-
                if (pClass->isDisplayed())
                {
                   QColor clrMarker = pClass->getColor();
 
                   if (usingRawData) // all data in memory
                   {
-                     switchOnEncoding(eType, drawPseudocolorMarkers, pData, ulColumns - 1, ulRows - 1, 
-                                        ulVisStartColumn, ulVisStartRow, ulVisEndColumn,
-                                        ulVisEndRow, eSymbol, clrMarker, pClass->getValue());
+                     switchOnEncoding(eType, drawPseudocolorMarkers, pData, columns - 1, rows - 1, visStartColumn,
+                        visStartRow, visEndColumn, visEndRow, eSymbol, clrMarker, pClass->getValue());
                   }
                   else
                   {
-                     for (unsigned int row=0; row<ulRows; row++)
+                     for (int row = 0; row < rows; ++row)
                      {
                         if (!accessor.isValid()) break;
                         pData = accessor->getColumn();
-                        switchOnEncoding(eType, drawPseudocolorMarkers, pData, ulColumns - 1, row, 
-                                           ulVisStartColumn, row, ulVisEndColumn,
-                                           row, eSymbol, clrMarker, pClass->getValue(), row);
+                        switchOnEncoding(eType, drawPseudocolorMarkers, pData, columns - 1, row, visStartColumn,
+                           row, visEndColumn, row, eSymbol, clrMarker, pClass->getValue(), row);
                         accessor->nextRow();
                      }
                      accessor->toPixel(0,0);

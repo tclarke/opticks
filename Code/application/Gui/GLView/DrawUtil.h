@@ -205,9 +205,6 @@ bool unProjectToZero(double xPixel, double yPixel, const double modelMatrix[16],
                      const double projectionMatrix[16], const int viewport[4],
                      double *xCoord, double *yCoord);
 
-void restrictToViewport(unsigned int &ulStartColumn, unsigned int &ulStartRow,
-                        unsigned int &ulEndColumn, unsigned int &ulEndRow);
-
 void restrictToViewport(int &ulStartColumn, int &ulStartRow,
                         int &ulEndColumn, int &ulEndRow);
 

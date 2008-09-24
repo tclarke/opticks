@@ -1359,13 +1359,13 @@ vector<Tile*> Image::getTilesToDraw()
    // determine which tiles we need to draw to refresh the
    // glview. This ensures that we don't draw tiles that are
    // entirely outside the view area.
-   unsigned int ulVisStartColumn = 0;
-   unsigned int ulVisEndColumn = mInfo.mImageSizeX - 1;
-   unsigned int ulVisStartRow = 0;
-   unsigned int ulVisEndRow = mInfo.mImageSizeY - 1;
-   DrawUtil::restrictToViewport(ulVisStartColumn, ulVisStartRow, ulVisEndColumn, ulVisEndRow);
-   mDrawCenter.mX = (ulVisStartColumn+ulVisEndColumn)/2;
-   mDrawCenter.mY = (ulVisStartRow+ulVisEndRow)/2;
+   int visStartColumn = 0;
+   int visEndColumn = mInfo.mImageSizeX - 1;
+   int visStartRow = 0;
+   int visEndRow = mInfo.mImageSizeY - 1;
+   DrawUtil::restrictToViewport(visStartColumn, visStartRow, visEndColumn, visEndRow);
+   mDrawCenter.mX = (visStartColumn + visEndColumn) / 2;
+   mDrawCenter.mY = (visStartRow + visEndRow) / 2;
 
    vector<Tile*> tilesToDraw;
    tilesToDraw.reserve(numTiles);
@@ -1375,13 +1375,12 @@ vector<Tile*> Image::getTilesToDraw()
       Tile* pTile = mpTiles->at(ii);
       if (pTile != NULL)
       {
-         unsigned int left = (ii % mNumTilesX) * mInfo.mTileSizeX;
-         unsigned int right = left + mInfo.mTileSizeX;
-         unsigned int bottom = (ii / mNumTilesX) * mInfo.mTileSizeY;
-         unsigned int top = bottom + mInfo.mTileSizeY;
+         int left = (ii % mNumTilesX) * mInfo.mTileSizeX;
+         int right = left + mInfo.mTileSizeX;
+         int bottom = (ii / mNumTilesX) * mInfo.mTileSizeY;
+         int top = bottom + mInfo.mTileSizeY;
 
-         if ((left <= ulVisEndColumn) && (right >= ulVisStartColumn) &&
-            (bottom <= ulVisEndRow) && (top >= ulVisStartRow))
+         if ((left <= visEndColumn) && (right >= visStartColumn) && (bottom <= visEndRow) && (top >= visStartRow))
          {
             tilesToDraw.push_back(pTile);
          }
