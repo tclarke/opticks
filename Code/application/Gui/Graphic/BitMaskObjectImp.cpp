@@ -56,7 +56,6 @@ BitMaskObjectImp::~BitMaskObjectImp()
 
 void BitMaskObjectImp::draw(double zoomFactor) const
 {
-
    // Draw the pixels as a bitmask
    const BitMask *pMask = getMask();
    if (pMask == NULL)
@@ -64,11 +63,10 @@ void BitMaskObjectImp::draw(double zoomFactor) const
       return;
    }
 
-   unsigned int ulStartColumn, ulEndColumn, ulStartRow, ulEndRow;
-   pMask->getBoundingBox((int&) ulStartColumn, (int&) ulStartRow, (int&) ulEndColumn,
-      (int&) ulEndRow);
-   
-   LocationType textPosition(ulStartColumn, ulStartRow);
+   int startColumn, endColumn, startRow, endRow;
+   pMask->getBoundingBox(startColumn, startRow, endColumn, endRow);
+
+   LocationType textPosition(startColumn, startRow);
 
    RasterElement* pRaster = NULL;
 
@@ -96,51 +94,47 @@ void BitMaskObjectImp::draw(double zoomFactor) const
       return;
    }
 
-   unsigned int ulRows = pDescriptor->getRowCount();
-   unsigned int ulColumns = pDescriptor->getColumnCount();
+   int rows = static_cast<int>(pDescriptor->getRowCount());
+   int columns = static_cast<int>(pDescriptor->getColumnCount());
 
-   bool bOutside = pMask->getPixel(ulStartColumn - 1, ulStartRow - 1);
+   bool bOutside = pMask->getPixel(startColumn - 1, startRow - 1);
    if (bOutside == true)
    {
-      ulStartColumn = 0;
-      ulStartRow = 0;
-      ulEndColumn = ulColumns - 1;
-      ulEndRow = ulRows - 1;
+      startColumn = 0;
+      startRow = 0;
+      endColumn = columns - 1;
+      endRow = rows - 1;
    }
-   else
+   else if (pMask->getCount() == 0)
    {
-      int iCount = 0;
-      iCount = pMask->getCount();
-      if (iCount == 0)
-      {
-         return;
-      }
+      return;
    }
 
-   if (ulStartColumn > ulColumns)
+   if (startColumn > columns)
    {
-      ulStartColumn = ulColumns - 1;
+      startColumn = columns - 1;
    }
 
-   if (ulStartRow > ulRows)
+   if (startRow > rows)
    {
-      ulStartRow = ulRows - 1;
+      startRow = rows - 1;
    }
 
-   if (ulEndColumn > ulColumns)
+   if (endColumn > columns)
    {
-      ulEndColumn = ulColumns - 1;
-   }
-   if (ulEndRow > ulRows)
-   {
-      ulEndRow = ulRows - 1;
+      endColumn = columns - 1;
    }
 
-   unsigned int ulVisStartColumn = ulStartColumn;
-   unsigned int ulVisEndColumn = ulEndColumn;
-   unsigned int ulVisStartRow = ulStartRow;
-   unsigned int ulVisEndRow = ulEndRow;
-   DrawUtil::restrictToViewport(ulVisStartColumn, ulVisStartRow, ulVisEndColumn, ulVisEndRow);
+   if (endRow > rows)
+   {
+      endRow = rows - 1;
+   }
+
+   int visStartColumn = startColumn;
+   int visEndColumn = endColumn;
+   int visStartRow = startRow;
+   int visEndRow = endRow;
+   DrawUtil::restrictToViewport(visStartColumn, visStartRow, visEndColumn, visEndRow);
 
    PixelOper oper(*pMask);
 
@@ -148,10 +142,8 @@ void BitMaskObjectImp::draw(double zoomFactor) const
    QColor qcolor(color.mRed, color.mGreen, color.mBlue);
    SymbolType symbol = getPixelSymbol();
 
-   SymbolRegionDrawer::drawMarkers(ulStartColumn, ulStartRow, ulEndColumn, ulEndRow, 
-      ulVisStartColumn, ulVisStartRow, ulVisEndColumn, ulVisEndRow, 
-      symbol, qcolor, oper);
-      
+   SymbolRegionDrawer::drawMarkers(startColumn, startRow, endColumn, endRow, visStartColumn, visStartRow,
+      visEndColumn, visEndRow, symbol, qcolor, oper);
 }
 
 bool BitMaskObjectImp::hit(LocationType pixelCoord) const
