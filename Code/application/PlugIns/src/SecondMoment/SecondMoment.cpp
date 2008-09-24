@@ -565,17 +565,11 @@ bool SecondMomentAlgorithm::processAll()
 
    if (mInput.mRecalculate == true || pSmmElement.get() == NULL)
    {
-      // Recalculation requested so destroy current elements if they exist or
-      // if pSmmElement.get() is NULL, have to generate Smm so need to destroy any current inverse 
-      if (pSmmElement.get() != NULL)
-      {
-         VERIFY(mpModelServices->destroyElement(pSmmElement.release()));
-      }
-
-      if (pInvSmmElement.get() != NULL)
-      {
-         VERIFY(mpModelServices->destroyElement(pInvSmmElement.release()));
-      }
+      // Recalculation requested so destroy current elements or if smm doesn't exist need to
+      // destroy any existing inverse. Existing element destroyed when ModelResource assigned
+      // new object (NULL in this case)
+      pSmmElement = ModelResource<RasterElement>(static_cast<RasterElement*>(NULL));
+      pInvSmmElement = ModelResource<RasterElement>(static_cast<RasterElement*>(NULL));
    }
 
    if (pSmmElement.get() == NULL)
