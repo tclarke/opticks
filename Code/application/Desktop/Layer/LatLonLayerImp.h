@@ -15,9 +15,9 @@
 
 #include "ColorType.h"
 #include "EnumWrapper.h"
+#include "FontImp.h"
 #include "LayerImp.h"
 #include "LocationType.h"
-#include "FontImp.h"
 #include "TypesFile.h"
 
 #include <string>
@@ -265,10 +265,19 @@ private:
     * @EnumWrapper LatLonLayerImp::BorderTypeEnum.
     */
    typedef EnumWrapper<BorderTypeEnum> BorderType;
-   BorderType getNearestBorder(const LocationType& location) const;
-   void drawLabel(const LocationType& location, bool bScreenCoords, const std::string& text,
-      const BorderType& borderType);
+   BorderType getNearestBorder(const LocationType& location, 
+      const std::vector<LocationType>& box) const;
+   void drawLabel(const LocationType& location, const LocationType& textOffset, 
+      const std::string& text, const BorderType& borderType, const double modelMatrix[16],
+      const double projectionMatrix[16], const int viewPort[4], bool adjustForRotation);
    LocationType convertPointToLatLon(const GeocoordType& type, const LocationType& point);
+   void clipToView(std::vector<LocationType>& vertices, const std::vector<LocationType>& clipBox,
+      const double modelMatrix[16], const double projectionMatrix[16], const int viewPort[4]);
+   void adjustBorderBox(std::vector<LocationType>& box, LocationType point1, LocationType point2,
+      bool latitudeLine);
+   bool isCloseTo(const LocationType& point1, const LocationType& point2, const double tolerance);
+   std::vector<LocationType> findVisibleLineSegment(const LocationType pixel1, 
+      const LocationType pixel2, const std::vector<LocationType>& box);
 };
 
 #define LATLONLAYERADAPTEREXTENSION_CLASSES \
