@@ -2403,7 +2403,7 @@ void ApplicationWindow::openSession(const QString& filename)
       else
       {
          SessionSaveType eSave = SessionManager::getSettingQueryForSave();
-         int buttonVal = static_cast<int>(eSave);
+         int buttonVal = (eSave == SESSION_AUTO_SAVE ? QMessageBox::Yes : QMessageBox::No);
          if (eSave == SESSION_QUERY_SAVE)
          {
             buttonVal = QMessageBox::question(this, "Save Session", 
@@ -2437,7 +2437,7 @@ void ApplicationWindow::openSession(const QString& filename)
 bool ApplicationWindow::newSession()
 {
    SessionSaveType eSave = SessionManager::getSettingQueryForSave();
-   int buttonVal = static_cast<int>(eSave);
+   int buttonVal = (eSave == SESSION_AUTO_SAVE ? QMessageBox::Yes : QMessageBox::No);
    if (eSave == SESSION_QUERY_SAVE)
    {
          buttonVal = QMessageBox::question(this, "Close Session", 
@@ -4876,7 +4876,7 @@ void ApplicationWindow::closeEvent(QCloseEvent* e)
 
    // Close the session
    SessionSaveType eSave = SessionManager::getSettingQueryForSave();
-   int button = (eSave==SESSION_AUTO_SAVE?0:1);
+   int button = (eSave == SESSION_AUTO_SAVE ? QMessageBox::Yes : QMessageBox::No);
    if (eSave == SESSION_QUERY_SAVE)
    {
          button = QMessageBox::question(this, "Close Session", 
