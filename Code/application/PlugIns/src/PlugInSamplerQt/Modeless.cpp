@@ -42,7 +42,11 @@ ModelessPlugIn::ModelessPlugIn() :
 ModelessPlugIn::~ModelessPlugIn()
 {
    Service<ApplicationServices> pApp;
+   pApp->detach(SIGNAL_NAME(ApplicationServices, ApplicationClosed), Slot(this, &ModelessPlugIn::aboutToClose));
    pApp->detach(SIGNAL_NAME(ApplicationServices, SessionClosed), Slot(this, &ModelessPlugIn::sessionClosed));
+
+   Service<ConfigurationSettings> pConfig;
+   pConfig->detach(SIGNAL_NAME(ConfigurationSettings, AboutToSave), Slot(this, &ModelessPlugIn::updateConfigSettings));
 
    VERIFYNR(mSessionClosed);
 }
