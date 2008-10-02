@@ -31,9 +31,7 @@
 #include <math.h>
 
 #include <boost/rational.hpp>
-
 #include <string>
-
 using namespace std;
 
 AnimationToolBarImp::WheelEventSlider::WheelEventSlider(
@@ -209,7 +207,6 @@ bool AnimationToolBarImp::isKindOf(const string& className) const
 
    return ToolBarImp::isKindOf(className);
 }
-
 
 void AnimationToolBarImp::speedUp()
 {
@@ -516,7 +513,9 @@ void AnimationToolBarImp::cleanUpItems()
 
 void AnimationToolBarImp::updateFrameSpeed(double speed)
 {
+   mpFrameSpeedCombo->blockSignals(true);
    cleanUpItems();
+
    QString strSpeed = QString::number(speed);
    int index = mpFrameSpeedCombo->findText(strSpeed);
    if (index != -1)
@@ -534,12 +533,12 @@ void AnimationToolBarImp::updateFrameSpeed(double speed)
          }
       }
 
-      mpFrameSpeedCombo->blockSignals(true);
       mpFrameSpeedCombo->insertItem(i, strSpeed);
       mpFrameSpeedCombo->setCurrentIndex(i);
-      mpFrameSpeedCombo->blockSignals(false);
    }
+
    updateFrameRange();
+   mpFrameSpeedCombo->blockSignals(false);
 }
 
 void AnimationToolBarImp::updateAnimationCycle(AnimationCycle cycle)
