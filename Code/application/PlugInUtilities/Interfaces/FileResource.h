@@ -308,7 +308,7 @@ public:
    #if defined(WIN_API)
       return _eof(mHandle);
    #else
-      return (tell() >= fileLength());
+      return (tell() >= fileLength() ? 1 : 0);
    #endif
    }
 
