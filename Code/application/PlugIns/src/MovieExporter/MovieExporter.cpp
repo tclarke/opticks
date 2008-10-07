@@ -275,7 +275,7 @@ bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
          }
          if (framerate == 0)
          {
-            framerate = pController->getMinimumFrameRate();
+            framerate = pController->getMinimumFrameRate() * pController->getIntervalMultiplier();
 
             // Validate the framerate
             boost::rational<int> validFrameRate = convertToValidFrameRate(framerate);
@@ -403,12 +403,14 @@ bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
    av_write_header(pFormat);
 
    // calculate time interval
-   if ((framerate < pController->getMinimumFrameRate()) && (mpProgress != NULL))
+   double frameSpeed = pController->getIntervalMultiplier();
+   if ((framerate < pController->getMinimumFrameRate() * frameSpeed) && (mpProgress != NULL))
    {
       mpProgress->updateProgress("The selected output frame rate may not encode all the frames in the movie.  "
                                  "Frames may be dropped.", 0, WARNING);
    }
-   double interval = rational_cast<double>(1 / framerate);
+
+   double interval = rational_cast<double>(frameSpeed / framerate);
 
    // export the frames
    AVFrame *pTmpPicture = alloc_picture(PIX_FMT_RGBA32, pCodecContext->width, pCodecContext->height);
@@ -526,7 +528,7 @@ ValidationResultType MovieExporter::validate(const PlugInArgList* pArgList, stri
       }
       if (expectedFrameRate == 0)
       {
-         expectedFrameRate = pController->getMinimumFrameRate();
+         expectedFrameRate = pController->getMinimumFrameRate() * pController->getIntervalMultiplier();
       }
       if (expectedFrameRate == 0)
       {
@@ -538,7 +540,7 @@ ValidationResultType MovieExporter::validate(const PlugInArgList* pArgList, stri
    boost::rational<int> actualFrameRate = convertToValidFrameRate(expectedFrameRate);
    if (actualFrameRate != 0)
    {
-      if (actualFrameRate < pController->getMinimumFrameRate())
+      if (actualFrameRate < pController->getMinimumFrameRate() * pController->getIntervalMultiplier())
       {
          errorMessage = "The selected output frame rate may not encode all the frames in the movie.  "
                         "Frames may be dropped.";
@@ -564,7 +566,7 @@ ValidationResultType MovieExporter::validate(const PlugInArgList* pArgList, stri
    return result;
 }
 
-QWidget *MovieExporter::getExportOptionsWidget(const PlugInArgList *pInArgList)
+QWidget* MovieExporter::getExportOptionsWidget(const PlugInArgList* pInArgList)
 {
    if (mpOptionWidget.get() == NULL)
    {
@@ -572,22 +574,9 @@ QWidget *MovieExporter::getExportOptionsWidget(const PlugInArgList *pInArgList)
       VERIFYRV(mpOptionWidget.get() != NULL, NULL);
       mpOptionWidget->setPromptUserToSaveSettings(true);
 
-      View *pView = pInArgList->getPlugInArgValue<View>(ExportItemArg());
-      if (pView != NULL)
-      {
-         QWidget *pWidget = pView->getWidget();
-         mpOptionWidget->setResolution(pWidget->width(), pWidget->height());
-
-         AnimationController *pController = pView->getAnimationController();
-         if (pController != NULL)
-         {
-            mpOptionWidget->initialize(pController);
-         }
-      }
-
-      AVOutputFormat *pOutFormat = getOutputFormat();
+      AVOutputFormat* pOutFormat = getOutputFormat();
       VERIFYRV(pOutFormat, NULL);
-      AVCodec *pCodec = avcodec_find_encoder(pOutFormat->video_codec);
+      AVCodec* pCodec = avcodec_find_encoder(pOutFormat->video_codec);
       VERIFYRV(pCodec, NULL);
       if (pCodec->supported_framerates != NULL)
       {
@@ -602,16 +591,55 @@ QWidget *MovieExporter::getExportOptionsWidget(const PlugInArgList *pInArgList)
                {
                   break;
                }
+
                frameRates.push_back(frameRate);
             }
          }
-         catch(const boost::bad_rational&)
+         catch (const boost::bad_rational&)
          {
             // intentionally left blank
          }
+
          mpOptionWidget->setFramerates(frameRates);
       }
+
+      View* pView = pInArgList->getPlugInArgValue<View>(ExportItemArg());
+      if (pView != NULL)
+      {
+         QWidget* pWidget = pView->getWidget();
+         if (pWidget != NULL)
+         {
+            mpOptionWidget->setResolution(pWidget->width(), pWidget->height());
+         }
+
+         AnimationController* pController = pView->getAnimationController();
+         if (pController != NULL)
+         {
+            // Frame type
+            FrameType eType = pController->getFrameType();
+            mpOptionWidget->setFrameType(eType);
+
+            // Start and stop values
+            double start = pController->getStartFrame();
+            double stop = pController->getStopFrame();
+            if (eType == FRAME_ID) // values are frame numbers so add 1 so first frame is 1 and not 0
+            {
+               ++start;
+               ++stop;
+            }
+
+            mpOptionWidget->setRange(start, stop);
+            mpOptionWidget->setStart(start);
+            mpOptionWidget->setStop(stop);
+
+            // Frame rate
+            rational<int> frameRate = pController->getMinimumFrameRate() * pController->getIntervalMultiplier();
+            frameRate = convertToValidFrameRate(frameRate);
+            mpOptionWidget->setFramerate(frameRate);
+         }
+      }
    }
+
    return mpOptionWidget.get();
 }
 

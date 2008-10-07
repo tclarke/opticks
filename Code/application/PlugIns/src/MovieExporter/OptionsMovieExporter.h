@@ -39,7 +39,6 @@ class OptionsMovieExporter : public LabeledSectionGroup
 public:
    OptionsMovieExporter();
    ~OptionsMovieExporter();
-   bool initialize(AnimationController* pController);
 
    /**
     * The video stream bitrate in kbps
@@ -64,6 +63,7 @@ public:
    void getResolution(unsigned int &width, unsigned int &height) const;
    void setResolution(unsigned int width, unsigned int height);
 
+   void setRange(double start, double stop);
    double getStart() const;
    void setStart(double start);
    double getStop() const;
