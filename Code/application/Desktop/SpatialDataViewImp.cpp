@@ -1018,6 +1018,10 @@ Layer* SpatialDataViewImp::deriveLayer(const Layer* pLayer, const LayerType& new
    Layer* pNewLayer = createLayer(newLayerType, pElement, strLayerName);
    if (pNewLayer != NULL)
    {
+      pNewLayer->setXOffset(pLayer->getXOffset());
+      pNewLayer->setYOffset(pLayer->getYOffset());
+      pNewLayer->setXScaleFactor(pLayer->getXScaleFactor());
+      pNewLayer->setYScaleFactor(pLayer->getYScaleFactor());
       updateGL();
    }
 
