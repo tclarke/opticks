@@ -546,6 +546,12 @@ void OptionsMovieExporter::setBitrate(unsigned int bitrate)
    }
 }
 
+void OptionsMovieExporter::setRange(double start, double stop)
+{
+   mpStart->setRange(start, stop);
+   mpStop->setRange(start, stop);
+}
+
 double OptionsMovieExporter::getStart() const
 {
    return mpStart->value();
@@ -581,9 +587,7 @@ void OptionsMovieExporter::setFramerate(boost::rational<int> frameRate)
 {
    int num = frameRate.numerator();
    int den = frameRate.denominator();
-   if ((num >= static_cast<int>(mpFramerateNum->minimum())) &&
-      (den >= static_cast<int>(mpFramerateDen->minimum())) &&
-      (frameRate <= boost::rational<int>(60, 1)))
+   if ((num >= static_cast<int>(mpFramerateNum->minimum())) && (den >= static_cast<int>(mpFramerateDen->minimum())))
    {
       int idx = mpFramerateList->findText(QString("%1/%2").arg(num).arg(den), Qt::MatchEndsWith);
       if (idx != -1)
@@ -947,31 +951,4 @@ void OptionsMovieExporter::setFrameType(FrameType eType)
       mpStop->setDecimals(3);
       break;
    }
-}
-
-bool OptionsMovieExporter::initialize(AnimationController* pController)
-{
-   if (pController == NULL)
-   {
-      return false;
-   }
-
-   FrameType eType = pController->getFrameType();
-   setFrameType(eType);
-   double start = pController->getStartFrame();
-   double stop = pController->getStopFrame();
-   if (eType == FRAME_ID) // values are frame numbers so add 1 so first frame is 1 and not 0
-   {
-      ++start;
-      ++stop;
-   }
-   mpStart->setRange(start, stop);
-   setStart(start);
-   mpStop->setRange(start, stop);
-   setStop(stop);
-
-   rational<int> frameRate = pController->getMinimumFrameRate();
-   setFramerate(frameRate);
-
-   return true;
 }
