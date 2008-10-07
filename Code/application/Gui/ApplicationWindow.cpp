@@ -2548,6 +2548,16 @@ bool ApplicationWindow::saveSession()
          progress.updateProgress("Session saving is temporarily locked.", 0, ERRORS);
          return false;
       }
+      Service<MessageLogMgr> pLogMgr;
+      MessageLog *pLog = pLogMgr->getLog();
+      if (pLog != NULL && status.first == SessionManager::SUCCESS)
+      {
+         pLog->createMessage("Session saved: " + mSessionFilename,"app","7AD6D0B4-08E4-4556-A20D-2595B797B4F3");
+      }
+      else if(pLog != NULL && status.first == SessionManager::PARTIAL_SUCCESS)
+      {
+         pLog->createMessage("Session saved. Not all session items were successfully loaded: " + mSessionFilename,"app","C85E14F3-69B0-4495-AD91-F3E1B7013A8E");
+      }
       return true;
    }
    return false;
