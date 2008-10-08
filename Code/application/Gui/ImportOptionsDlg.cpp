@@ -85,6 +85,7 @@ ImportOptionsDlg::ImportOptionsDlg(Importer* pImporter, const vector<ImportDescr
    mpDatasetTree->setSelectionMode(QAbstractItemView::SingleSelection);
    mpDatasetTree->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
    mpDatasetTree->setTextElideMode(Qt::ElideLeft);
+   mpDatasetTree->setMinimumWidth(225);
    mpDatasetTree->header()->hide();
 
    QPushButton* pImportAllButton = new QPushButton("Import All", pDatasetWidget);
