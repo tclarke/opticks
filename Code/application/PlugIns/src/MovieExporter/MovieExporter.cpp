@@ -350,15 +350,10 @@ bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
       pMsg->addProperty("Stop "+valueType, QString::number(stopExport).toStdString());
    }
 
-   AVFormatContext *pFormat = av_alloc_format_context();
-   VERIFY(pFormat);
-   pFormat->oformat = pOutFormat;
+   AvFormatContextResource pFormat(pOutFormat);
+   VERIFY(pFormat != NULL);
    snprintf(pFormat->filename, sizeof(pFormat->filename), "%s", filename.c_str());
-   AVStream *pVideoStream = NULL;
-   if (pOutFormat->video_codec != CODEC_ID_NONE)
-   {
-      pVideoStream = add_video_stream(pFormat, pOutFormat->video_codec);
-   }
+   AvStreamResource pVideoStream(pFormat, pOutFormat->video_codec);
    if (pVideoStream == NULL)
    {
       log_error("Unable to create video stream.");
@@ -433,6 +428,13 @@ bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
    {
       if (isAborted() == true)
       {
+         // reset resources to close output file so it can be deleted
+         pVideoStream = AvStreamResource();
+         pFormat = AvFormatContextResource(NULL);
+         mpPicture = NULL;
+         mpVideoOutbuf = NULL;
+         remove(filename.c_str());
+
          if (mpProgress != NULL)
          {
             mpProgress->updateProgress("Export aborted", 0, ABORT);
@@ -458,6 +460,12 @@ bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
          pCodecContext->height);
       if (!write_video_frame(pFormat, pVideoStream))
       {
+         // reset resources to close output file so it can be deleted
+         pVideoStream = AvStreamResource();
+         pFormat = AvFormatContextResource(NULL);
+         mpPicture = NULL;
+         mpVideoOutbuf = NULL;
+         remove(filename.c_str());
          string msg = "Can't write frame.";
          log_error(msg.c_str());
          return false;
@@ -467,16 +475,8 @@ bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
    {
       write_video_frame(pFormat, pVideoStream);
    }
-   av_write_trailer(pFormat);
-   close_video(pFormat, pVideoStream);
 
-   for (int i = 0; i < pFormat->nb_streams; i++)
-   {
-      av_freep(&pFormat->streams[i]->codec);
-      av_freep(&pFormat->streams[i]);
-   }
-   url_fclose(&pFormat->pb);
-   av_free(pFormat);
+   av_write_trailer(pFormat);
 
    if (mpProgress != NULL)
    {
@@ -690,38 +690,6 @@ bool MovieExporter::setAvCodecOptions(AVCodecContext *pContext, PlugInArgList *p
    return true;
 }
 
-AVStream *MovieExporter::add_video_stream(AVFormatContext *pFormat, CodecID codec_id)
-{
-   AVStream *pVideoStream = av_new_stream(pFormat, 0);
-   VERIFYRV(pVideoStream, NULL);
-
-   AVCodecContext *pCodecContext = pVideoStream->codec;
-   pCodecContext->codec_id = codec_id;
-   pCodecContext->codec_type = CODEC_TYPE_VIDEO;
-
-   pCodecContext->gop_size = 12; /* emit one intra frame every twelve frames at most */
-   pCodecContext->pix_fmt = PIX_FMT_YUV420P;
-   if (pFormat->oformat->flags & AVFMT_GLOBALHEADER)
-   {
-      pCodecContext->flags |= CODEC_FLAG_GLOBAL_HEADER;
-   }
-   if (pCodecContext->codec_id == CODEC_ID_MPEG1VIDEO)
-   {
-      /* needed to avoid using macroblocks in which some coeffs overflow
-      this doesnt happen with normal video, it just happens here as the
-      motion of the chroma plane doesnt match the luma plane */
-      pCodecContext->mb_decision=2;
-   }
-   // some formats want stream headers to be seperate
-   string format = pFormat->oformat->name;
-   if (format == "mp4" || format == "mov" || format == "3gp")
-   {
-      pCodecContext->flags |= CODEC_FLAG_GLOBAL_HEADER;
-   }
-
-   return pVideoStream;
-}
-
 bool MovieExporter::open_video(AVFormatContext *pFormat, AVStream *pVideoStream)
 {
    VERIFY(pFormat && pVideoStream);
@@ -827,14 +795,6 @@ bool MovieExporter::write_video_frame(AVFormatContext *pFormat, AVStream *pVideo
    }
    ++mFrameCount;
    return true;
-}
-
-void MovieExporter::close_video(AVFormatContext *pFormat, AVStream *pVideoStream)
-{
-   VERIFYNRV(pFormat && pVideoStream);
-   avcodec_close(pVideoStream->codec);
-   mpPicture = NULL;
-   mpVideoOutbuf = NULL;
 }
 
 boost::rational<int> MovieExporter::convertToValidFrameRate(const boost::rational<int>& frameRate) const
