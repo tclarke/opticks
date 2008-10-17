@@ -78,7 +78,6 @@
 #include "LatLonLayer.h"
 #include "Layer.h"
 #include "LayerList.h"
-#include "LayerListImp.h"
 #include "LinkDlg.h"
 #include "MeasurementToolBar.h"
 #include "MenuBarImp.h"
@@ -1391,26 +1390,6 @@ bool ApplicationWindow::addWindow(Window* pWindow)
       // Set the current mouse mode in the new window
       QAction* pMouseModeAction = m_pView_Mode_Group->checkedAction();
       setMouseMode(pMouseModeAction);
-   }
-
-   SpatialDataWindow* pSpatialDataWindow = dynamic_cast<SpatialDataWindow*>(pWindow);
-   if (pSpatialDataWindow != NULL)
-   {
-      SpatialDataViewImp* pView = dynamic_cast<SpatialDataViewImp*>(pSpatialDataWindow->getSpatialDataView());
-      if ((pView != NULL) && (m_pHistogram != NULL))
-      {
-         VERIFYNR(connect(pView, SIGNAL(layerActivated(Layer*)), static_cast<HistogramWindowImp*>(m_pHistogram),
-            SLOT(setCurrentPlot(Layer*))));
-
-         LayerListImp* pLayerList = dynamic_cast<LayerListImp*>(pView->getLayerList());
-         if (pLayerList != NULL)
-         {
-            VERIFYNR(connect(pLayerList, SIGNAL(layerAdded(Layer*)), static_cast<HistogramWindowImp*>(m_pHistogram),
-               SLOT(createPlot(Layer*))));
-            VERIFYNR(connect(pLayerList, SIGNAL(layerDeleted(Layer*)), static_cast<HistogramWindowImp*>(m_pHistogram),
-               SLOT(deletePlot(Layer*))));
-         }
-      }
    }
 
    ViewWindow* pViewWindow = dynamic_cast<ViewWindow*>(pWindow);
