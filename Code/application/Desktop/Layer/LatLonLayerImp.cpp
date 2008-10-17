@@ -150,7 +150,8 @@ void LatLonLayerImp::draw()
    LocationType start, stop, stepSize;
    int xCount, yCount;
    int i, j;
-   LocationType stepValues[stepCount+1];
+   vector<LocationType> stepValues;
+   stepValues.reserve(stepCount+2);
    LocationType geoVertex, pixelVertex;
    LocationType geoDraw;
    bool haveX = false, haveY = false;
@@ -248,14 +249,14 @@ void LatLonLayerImp::draw()
    }
    else
    {
-      tickSpacing.mY = computeSpacing (mMaxCoord.mY - mMinCoord.mY);
+      tickSpacing.mY = computeSpacing(mMaxCoord.mY - mMinCoord.mY);
    }
 
-   start.mX = ceil (mMinCoord.mX / tickSpacing.mX) * tickSpacing.mX;
-   start.mY = ceil (mMinCoord.mY / tickSpacing.mY) * tickSpacing.mY;
+   start.mX = floor(mMinCoord.mX / tickSpacing.mX) * tickSpacing.mX;
+   start.mY = floor(mMinCoord.mY / tickSpacing.mY) * tickSpacing.mY;
 
-   stop.mX = floor (mMaxCoord.mX / tickSpacing.mX) * tickSpacing.mX;
-   stop.mY = floor (mMaxCoord.mY / tickSpacing.mY) * tickSpacing.mY;
+   stop.mX = ceil(mMaxCoord.mX / tickSpacing.mX) * tickSpacing.mX;
+   stop.mY = ceil(mMaxCoord.mY / tickSpacing.mY) * tickSpacing.mY;
 
    stepSize.mX = (mMaxCoord.mX - mMinCoord.mX) / (double)(stepCount-1);
    stepSize.mY = (mMaxCoord.mY - mMinCoord.mY) / (double)(stepCount-1);
@@ -278,11 +279,17 @@ void LatLonLayerImp::draw()
       bool isInData = false;
       LocationType oldVertex;
 
-      for (j=0; j<stepCount; j++)
+      // extend values by 1 step on each side
+      stepValues.push_back(LocationType(mMinCoord.mX - stepSize.mX, mMinCoord.mY - stepSize.mY));
+      for (j = 0; j < stepCount; ++j)
       {
-         stepValues[j].mX = mMinCoord.mX + (double)j * stepSize.mX;
-         stepValues[j].mY = mMinCoord.mY + (double)j * stepSize.mY;
+         stepValues.push_back(LocationType(mMinCoord.mX + static_cast<double>(j) * stepSize.mX, 
+            mMinCoord.mY + static_cast<double>(j) * stepSize.mY));
       }
+      stepValues.push_back(LocationType(mMinCoord.mX + static_cast<double>(stepCount) * stepSize.mX, 
+         mMinCoord.mY + static_cast<double>(stepCount) * stepSize.mY));
+
+      int numSteps = static_cast<int>(stepValues.size());
 
       vector<LocationType> borderBox(mBoundingBox);
       BorderType nearestBorder;
@@ -298,9 +305,9 @@ void LatLonLayerImp::draw()
          {
             onOff = false;
             isInData = false;
-            geoVertex.mX = start.mX + (double)i * tickSpacing.mX;
+            geoVertex.mX = start.mX + static_cast<double>(i) * tickSpacing.mX;
             vertices.clear();
-            vertices.reserve(stepCount);
+            vertices.reserve(numSteps);
 
             string xLabel = "";
             if (mGeocoordType == GEOCOORD_LATLON)
@@ -321,7 +328,7 @@ void LatLonLayerImp::draw()
             // find left most location in data
             int left(-1);
             isInData = false;
-            while (!isInData)
+            while (!isInData && left < numSteps - 1)
             {
                ++left;
                geoVertex.mY = stepValues[left].mY;
@@ -332,132 +339,135 @@ void LatLonLayerImp::draw()
                isInData = DrawUtil::isWithin(pixelVertex, &(*mBoundingBox.begin()), 4);
             }
 
-            // save left most vertex in data
-            vertices.push_back(pixelVertex);
-
-            // find right most location in data
-            int right(stepCount);
-            isInData = false;
-            while (!isInData)
+            if (isInData)
             {
-               --right;
-               geoVertex.mY = stepValues[right].mY;
-               LocationType geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
-               pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-               pixelVertex.mX += 0.5;
-               pixelVertex.mY += 0.5;
-               isInData = DrawUtil::isWithin(pixelVertex, &(*mBoundingBox.begin()), 4);
-            }
-            
-            if (left > 0) // left most not at edge so need to get that pixel location
-            {
-               LocationType leftEdge;
-               leftEdge.mX = geoVertex.mX;
-               leftEdge.mY = stepValues[left-1].mY;
-               LocationType geoDraw = convertPointToLatLon(mGeocoordType, leftEdge);
-               pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-               pixelVertex.mX += 0.5;
-               pixelVertex.mY += 0.5;
-               pixelVertex = adjustSegment(pixelVertex, vertices.front(), mBoundingBox);
-               vertices.insert(vertices.begin(), pixelVertex);
-            }
-
-            // add rest of locations in data
-            for (int loc = left+1; loc <= right; ++loc)
-            {
-               geoVertex.mY = stepValues[loc].mY;
-               LocationType geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
-               pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-               pixelVertex.mX += 0.5;
-               pixelVertex.mY += 0.5;
+               // save left most vertex in data
                vertices.push_back(pixelVertex);
-            }
 
-            if (right < stepCount - 1)  // right most not at edge so need to get that pixel location
-            {
-               LocationType rightEdge;
-               rightEdge.mX = geoVertex.mX;
-               rightEdge.mY = stepValues[right + 1].mY;
-               LocationType geoDraw = convertPointToLatLon(mGeocoordType, rightEdge);
-               pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-               pixelVertex.mX += 0.5;
-               pixelVertex.mY += 0.5;
-               pixelVertex = adjustSegment(pixelVertex, vertices.back(), mBoundingBox);
-               vertices.push_back(pixelVertex);
-            }
+               // find right most location in data
+               int right(numSteps);
+               isInData = false;
+               while (!isInData)
+               {
+                  --right;
+                  geoVertex.mY = stepValues[right].mY;
+                  LocationType geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
+                  pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
+                  pixelVertex.mX += 0.5;
+                  pixelVertex.mY += 0.5;
+                  isInData = DrawUtil::isWithin(pixelVertex, &(*mBoundingBox.begin()), 4);
+               }
 
-            // now draw the grid line
-            if (vertices.empty() == false)
-            {
-               startLabel = vertices.front();
-               endLabel = vertices.back();
-            }
-            if (bProductView)
-            {
-               clipToView(vertices, viewportBox, modelMatrix, projectionMatrix, viewPort);
-            }
+               if (left > 0) // left most not at edge so need to get that pixel location
+               {
+                  LocationType leftEdge;
+                  leftEdge.mX = geoVertex.mX;
+                  leftEdge.mY = stepValues[left-1].mY;
+                  LocationType geoDraw = convertPointToLatLon(mGeocoordType, leftEdge);
+                  pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
+                  pixelVertex.mX += 0.5;
+                  pixelVertex.mY += 0.5;
+                  pixelVertex = adjustSegment(pixelVertex, vertices.front(), mBoundingBox);
+                  vertices.insert(vertices.begin(), pixelVertex);
+               }
 
-            if (vertices.empty() == false)
-            {
-               adjustForRotation = true;
-               borderBox = mBoundingBox;
-               labelLoc = startLabel;
+               // add rest of locations in data
+               for (int loc = left+1; loc <= right; ++loc)
+               {
+                  geoVertex.mY = stepValues[loc].mY;
+                  LocationType geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
+                  pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
+                  pixelVertex.mX += 0.5;
+                  pixelVertex.mY += 0.5;
+                  vertices.push_back(pixelVertex);
+               }
+
+               if (right < numSteps - 1)  // right most not at edge so need to get that pixel location
+               {
+                  LocationType rightEdge;
+                  rightEdge.mX = geoVertex.mX;
+                  rightEdge.mY = stepValues[right + 1].mY;
+                  LocationType geoDraw = convertPointToLatLon(mGeocoordType, rightEdge);
+                  pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
+                  pixelVertex.mX += 0.5;
+                  pixelVertex.mY += 0.5;
+                  pixelVertex = adjustSegment(pixelVertex, vertices.back(), mBoundingBox);
+                  vertices.push_back(pixelVertex);
+               }
+
+               // now draw the grid line
+               if (vertices.empty() == false)
+               {
+                  startLabel = vertices.front();
+                  endLabel = vertices.back();
+               }
                if (bProductView)
                {
-                  clippedLabel = vertices.front();
-                  DrawUtil::unProjectToZero(clippedLabel.mX, clippedLabel.mY, modelMatrix,
-                     projectionMatrix, viewPort, &clippedLabel.mX, &clippedLabel.mY);
-
-                  // if the original vertex has changed, then the label will be at edge
-                  // of the viewport (grid line clipped to the view) and not at edge
-                  // of data coordinates. Need to determine the nearest view border using
-                  // screen coords and not use the view's rotation in figuring the
-                  // label offset. Considered not changed if < 0.5 pixel distance between points.
-                  if (!isCloseTo(startLabel, clippedLabel, 0.5))
-                  {
-                     labelLoc = vertices.front();
-                     borderBox = viewportBox;
-                     startLabel = clippedLabel;
-
-                     // nearest border will be determined using screen coordinates and
-                     // viewport not data coordinates and mBoundingBox, so turn off 
-                     // rotation and origin corrections in drawLabel.
-                     adjustForRotation = false;
-                  }
+                  clipToView(vertices, viewportBox, modelMatrix, projectionMatrix, viewPort);
                }
-               nearestBorder = getNearestBorder(labelLoc, borderBox);
-               drawLabel(startLabel, textOffset, xLabel, nearestBorder, modelMatrix,
-                  projectionMatrix, viewPort, adjustForRotation);
-               glLineWidth(1);
-               glLineWidth(mWidth);
-               glBegin (GL_LINE_STRIP);
-               vector<LocationType>::iterator it;
-               for (it = vertices.begin(); it != vertices.end(); ++it)
+
+               if (vertices.empty() == false)
                {
-                  glVertex2f(it->mX, it->mY);
-               }
-               glEnd();
-
-               borderBox = mBoundingBox;
-               labelLoc = endLabel;
-               adjustForRotation = true;
-               if (bProductView)
-               {
-                  clippedLabel = vertices.back();
-                  DrawUtil::unProjectToZero(clippedLabel.mX, clippedLabel.mY, modelMatrix,
-                     projectionMatrix, viewPort, &clippedLabel.mX, &clippedLabel.mY);
-
-                  if (!isCloseTo(endLabel, clippedLabel, 0.5))
+                  adjustForRotation = true;
+                  borderBox = mBoundingBox;
+                  labelLoc = startLabel;
+                  if (bProductView)
                   {
-                     labelLoc = vertices.back();
-                     borderBox = viewportBox;
-                     endLabel = clippedLabel;
-                     adjustForRotation = false;
+                     clippedLabel = vertices.front();
+                     DrawUtil::unProjectToZero(clippedLabel.mX, clippedLabel.mY, modelMatrix,
+                        projectionMatrix, viewPort, &clippedLabel.mX, &clippedLabel.mY);
+
+                     // if the original vertex has changed, then the label will be at edge
+                     // of the viewport (grid line clipped to the view) and not at edge
+                     // of data coordinates. Need to determine the nearest view border using
+                     // screen coords and not use the view's rotation in figuring the
+                     // label offset. Considered not changed if < 0.5 pixel distance between points.
+                     if (!isCloseTo(startLabel, clippedLabel, 0.25))
+                     {
+                        labelLoc = vertices.front();
+                        borderBox = viewportBox;
+                        startLabel = clippedLabel;
+
+                        // nearest border will be determined using screen coordinates and
+                        // viewport not data coordinates and mBoundingBox, so turn off 
+                        // rotation and origin corrections in drawLabel.
+                        adjustForRotation = false;
+                     }
                   }
+                  nearestBorder = getNearestBorder(labelLoc, borderBox);
+                  drawLabel(startLabel, textOffset, xLabel, nearestBorder, modelMatrix,
+                     projectionMatrix, viewPort, adjustForRotation);
+                  glLineWidth(1);
+                  glLineWidth(mWidth);
+                  glBegin (GL_LINE_STRIP);
+                  vector<LocationType>::iterator it;
+                  for (it = vertices.begin(); it != vertices.end(); ++it)
+                  {
+                     glVertex2f(it->mX, it->mY);
+                  }
+                  glEnd();
+
+                  borderBox = mBoundingBox;
+                  labelLoc = endLabel;
+                  adjustForRotation = true;
+                  if (bProductView)
+                  {
+                     clippedLabel = vertices.back();
+                     DrawUtil::unProjectToZero(clippedLabel.mX, clippedLabel.mY, modelMatrix,
+                        projectionMatrix, viewPort, &clippedLabel.mX, &clippedLabel.mY);
+
+                     if (!isCloseTo(endLabel, clippedLabel, 0.25))
+                     {
+                        labelLoc = vertices.back();
+                        borderBox = viewportBox;
+                        endLabel = clippedLabel;
+                        adjustForRotation = false;
+                     }
+                  }
+                  nearestBorder = getNearestBorder(labelLoc, borderBox);
+                  drawLabel(endLabel, textOffset, xLabel, nearestBorder, modelMatrix,
+                     projectionMatrix, viewPort, adjustForRotation);
                }
-               nearestBorder = getNearestBorder(labelLoc, borderBox);
-               drawLabel(endLabel, textOffset, xLabel, nearestBorder, modelMatrix,
-                  projectionMatrix, viewPort, adjustForRotation);
             }
          }
       }
@@ -470,7 +480,7 @@ void LatLonLayerImp::draw()
             isInData = false;
             geoVertex.mY = start.mY + (double)i * tickSpacing.mY;
             vertices.clear();
-            vertices.reserve(stepCount);
+            vertices.reserve(numSteps);
 
             string yLabel = "";
             if (mGeocoordType == GEOCOORD_LATLON)
@@ -491,7 +501,7 @@ void LatLonLayerImp::draw()
             // find bottom most location in data
             int bottom(-1);
             isInData = false;
-            while (!isInData)
+            while (!isInData && bottom < numSteps - 1)
             {
                ++bottom;
                geoVertex.mX = stepValues[bottom].mX;
@@ -502,123 +512,126 @@ void LatLonLayerImp::draw()
                isInData = DrawUtil::isWithin(pixelVertex, &(*mBoundingBox.begin()), 4);
             }
 
-            // save bottom most vertex in data
-            vertices.push_back(pixelVertex);
-
-            // find top most location in data
-            int top(stepCount);
-            isInData = false;
-            while (!isInData)
+            if (isInData)
             {
-               --top;
-               geoVertex.mX = stepValues[top].mX;
-               LocationType geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
-               pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-               pixelVertex.mX += 0.5;
-               pixelVertex.mY += 0.5;
-               isInData = DrawUtil::isWithin(pixelVertex, &(*mBoundingBox.begin()), 4);
-            }
-
-            if (bottom > 0) // bottom most not at edge so need to get that pixel location
-            {
-               LocationType bottomEdge;
-               bottomEdge.mX = stepValues[bottom-1].mX;
-               bottomEdge.mY = geoVertex.mY;
-               LocationType geoDraw = convertPointToLatLon(mGeocoordType, bottomEdge);
-               pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-               pixelVertex.mX += 0.5;
-               pixelVertex.mY += 0.5;
-               pixelVertex = adjustSegment(pixelVertex, vertices.front(), mBoundingBox);
-               vertices.insert(vertices.begin(), pixelVertex);
-            }
-
-            // add rest of locations in data
-            for (int loc = bottom + 1; loc <= top; ++loc)
-            {
-               geoVertex.mX = stepValues[loc].mX;
-               LocationType geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
-               pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-               pixelVertex.mX += 0.5;
-               pixelVertex.mY += 0.5;
+               // save bottom most vertex in data
                vertices.push_back(pixelVertex);
-            }
 
-            if (top < stepCount - 1)  // top most not at edge so need to get that pixel location
-            {
-               LocationType topEdge;
-               topEdge.mX = stepValues[top + 1].mX;
-               topEdge.mY = geoVertex.mY;
-               LocationType geoDraw = convertPointToLatLon(mGeocoordType, topEdge);
-               pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-               pixelVertex.mX += 0.5;
-               pixelVertex.mY += 0.5;
-               pixelVertex = adjustSegment(pixelVertex, vertices.back(), mBoundingBox);
-               vertices.push_back(pixelVertex);
-            }
+               // find top most location in data
+               int top(numSteps);
+               isInData = false;
+               while (!isInData)
+               {
+                  --top;
+                  geoVertex.mX = stepValues[top].mX;
+                  LocationType geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
+                  pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
+                  pixelVertex.mX += 0.5;
+                  pixelVertex.mY += 0.5;
+                  isInData = DrawUtil::isWithin(pixelVertex, &(*mBoundingBox.begin()), 4);
+               }
 
-            // now draw the grid line
-            if (vertices.empty() == false)
-            {
-               startLabel = vertices.front();
-               endLabel = vertices.back();
-            }
-            if (bProductView)
-            {
-               clipToView(vertices, viewportBox, modelMatrix, projectionMatrix, viewPort);
-            }
+               if (bottom > 0) // bottom most not at edge so need to get that pixel location
+               {
+                  LocationType bottomEdge;
+                  bottomEdge.mX = stepValues[bottom-1].mX;
+                  bottomEdge.mY = geoVertex.mY;
+                  LocationType geoDraw = convertPointToLatLon(mGeocoordType, bottomEdge);
+                  pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
+                  pixelVertex.mX += 0.5;
+                  pixelVertex.mY += 0.5;
+                  pixelVertex = adjustSegment(pixelVertex, vertices.front(), mBoundingBox);
+                  vertices.insert(vertices.begin(), pixelVertex);
+               }
 
-            if (vertices.empty() == false)  // check again in case none visible in product view
-            {
-               adjustForRotation = true;
-               borderBox = mBoundingBox;
-               labelLoc = startLabel;
+               // add rest of locations in data
+               for (int loc = bottom + 1; loc <= top; ++loc)
+               {
+                  geoVertex.mX = stepValues[loc].mX;
+                  LocationType geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
+                  pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
+                  pixelVertex.mX += 0.5;
+                  pixelVertex.mY += 0.5;
+                  vertices.push_back(pixelVertex);
+               }
+
+               if (top < numSteps - 1)  // top most not at edge so need to get that pixel location
+               {
+                  LocationType topEdge;
+                  topEdge.mX = stepValues[top + 1].mX;
+                  topEdge.mY = geoVertex.mY;
+                  LocationType geoDraw = convertPointToLatLon(mGeocoordType, topEdge);
+                  pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
+                  pixelVertex.mX += 0.5;
+                  pixelVertex.mY += 0.5;
+                  pixelVertex = adjustSegment(pixelVertex, vertices.back(), mBoundingBox);
+                  vertices.push_back(pixelVertex);
+               }
+
+               // now draw the grid line
+               if (vertices.empty() == false)
+               {
+                  startLabel = vertices.front();
+                  endLabel = vertices.back();
+               }
                if (bProductView)
                {
-                  clippedLabel = vertices.front();
-                  DrawUtil::unProjectToZero(clippedLabel.mX, clippedLabel.mY, modelMatrix,
-                     projectionMatrix, viewPort, &clippedLabel.mX, &clippedLabel.mY);
-
-                  if (!isCloseTo(startLabel, clippedLabel, 0.5))
-                  {
-                     labelLoc = vertices.front();
-                     borderBox = viewportBox;
-                     startLabel = clippedLabel;
-                     adjustForRotation = false;
-                  }
+                  clipToView(vertices, viewportBox, modelMatrix, projectionMatrix, viewPort);
                }
-               nearestBorder = getNearestBorder(labelLoc, borderBox);
-               drawLabel(startLabel, textOffset, yLabel, nearestBorder, modelMatrix,
-                  projectionMatrix, viewPort, adjustForRotation);
-               glLineWidth(1);
-               glLineWidth(mWidth);
-               glBegin (GL_LINE_STRIP);
-               vector<LocationType>::iterator it;
-               for (it = vertices.begin(); it != vertices.end(); ++it)
+
+               if (vertices.empty() == false)  // check again in case none visible in product view
                {
-                  glVertex2f(it->mX, it->mY);
-               }
-               glEnd();
-
-               borderBox = mBoundingBox;
-               labelLoc = endLabel;
-               adjustForRotation = true;
-               if (bProductView)
-               {
-                  clippedLabel = vertices.back();
-                  DrawUtil::unProjectToZero(clippedLabel.mX, clippedLabel.mY, modelMatrix,
-                     projectionMatrix, viewPort, &clippedLabel.mX, &clippedLabel.mY);
-
-                  if (!isCloseTo(endLabel, clippedLabel, 0.5))
+                  adjustForRotation = true;
+                  borderBox = mBoundingBox;
+                  labelLoc = startLabel;
+                  if (bProductView)
                   {
-                     labelLoc = vertices.back();
-                     borderBox = viewportBox;
-                     endLabel = clippedLabel;
-                     adjustForRotation = false;
+                     clippedLabel = vertices.front();
+                     DrawUtil::unProjectToZero(clippedLabel.mX, clippedLabel.mY, modelMatrix,
+                        projectionMatrix, viewPort, &clippedLabel.mX, &clippedLabel.mY);
+
+                     if (!isCloseTo(startLabel, clippedLabel, 0.25))
+                     {
+                        labelLoc = vertices.front();
+                        borderBox = viewportBox;
+                        startLabel = clippedLabel;
+                        adjustForRotation = false;
+                     }
                   }
+                  nearestBorder = getNearestBorder(labelLoc, borderBox);
+                  drawLabel(startLabel, textOffset, yLabel, nearestBorder, modelMatrix,
+                     projectionMatrix, viewPort, adjustForRotation);
+                  glLineWidth(1);
+                  glLineWidth(mWidth);
+                  glBegin (GL_LINE_STRIP);
+                  vector<LocationType>::iterator it;
+                  for (it = vertices.begin(); it != vertices.end(); ++it)
+                  {
+                     glVertex2f(it->mX, it->mY);
+                  }
+                  glEnd();
+
+                  borderBox = mBoundingBox;
+                  labelLoc = endLabel;
+                  adjustForRotation = true;
+                  if (bProductView)
+                  {
+                     clippedLabel = vertices.back();
+                     DrawUtil::unProjectToZero(clippedLabel.mX, clippedLabel.mY, modelMatrix,
+                        projectionMatrix, viewPort, &clippedLabel.mX, &clippedLabel.mY);
+
+                     if (!isCloseTo(endLabel, clippedLabel, 0.25))
+                     {
+                        labelLoc = vertices.back();
+                        borderBox = viewportBox;
+                        endLabel = clippedLabel;
+                        adjustForRotation = false;
+                     }
+                  }
+                  nearestBorder = getNearestBorder(labelLoc, borderBox);
+                  drawLabel(endLabel, textOffset, yLabel, nearestBorder, modelMatrix,
+                     projectionMatrix, viewPort, adjustForRotation);
                }
-               nearestBorder = getNearestBorder(labelLoc, borderBox);
-               drawLabel(endLabel, textOffset, yLabel, nearestBorder, modelMatrix,
-                  projectionMatrix, viewPort, adjustForRotation);
             }
          }
       }
@@ -1806,6 +1819,7 @@ void LatLonLayerImp::clipToView(vector<LocationType>& vertices, const vector<Loc
       {
          secondClosestPoint = closestPoint;
          closestPoint = index;
+         closest = distance;
       }
       inClipBox = DrawUtil::isWithin(pixel, &(*clipBox.begin()), 4);
       if (inClipBox)
@@ -2048,6 +2062,16 @@ vector<LocationType> LatLonLayerImp::findVisibleLineSegment(const LocationType p
                }
             }
          }
+      }
+   }
+
+   // check that line is not being extrapolated - x end points within original segment
+   if (line.empty() == false)
+   {
+      if (DrawUtil::isBetween(line.front().mX, pixel1.mX, pixel2.mX) == false ||
+         DrawUtil::isBetween(line.back().mX, pixel1.mX, pixel2.mX) == false)
+      {
+         line.clear();
       }
    }
 
