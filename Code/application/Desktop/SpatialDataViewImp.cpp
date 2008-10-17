@@ -30,6 +30,8 @@
 #include "Georeference.h"
 #include "glCommon.h"
 #include "GraphicGroupImp.h"
+#include "HistogramWindow.h"
+#include "HistogramWindowImp.h"
 #include "Icons.h"
 #include "LatLonLayer.h"
 #include "LayerListAdapter.h"
@@ -328,6 +330,15 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
    {
       VERIFYNR(connect(this, SIGNAL(mouseModeAdded(const MouseMode*)),
          pAppWindow, SLOT(addMouseModeToGroup(const MouseMode*))));
+   }
+
+   HistogramWindowImp* pHistWindow =
+      dynamic_cast<HistogramWindowImp*>(pDesktop->getWindow("Histogram Window", PLOT_WINDOW));
+   if (pHistWindow != NULL)
+   {
+      VERIFYNR(connect(this, SIGNAL(layerAdded(Layer*)), pHistWindow, SLOT(createPlot(Layer*))));
+      VERIFYNR(connect(this, SIGNAL(layerActivated(Layer*)), pHistWindow, SLOT(setCurrentPlot(Layer*))));
+      VERIFYNR(connect(this, SIGNAL(layerDeleted(Layer*)), pHistWindow, SLOT(deletePlot(Layer*))));
    }
 }
 
@@ -1049,6 +1060,17 @@ Layer* SpatialDataViewImp::convertLayer(Layer* pLayer, const LayerType& newLayer
    {
       // Delete the original layer
       deleteLayer(pLayer);
+
+      // Create a histogram plot if necessary because it may not have been created
+      // if it already existed when the new layer was created
+      Service<DesktopServices> pDesktop;
+
+      HistogramWindow* pHistWindow =
+         dynamic_cast<HistogramWindow*>(pDesktop->getWindow("Histogram Window", PLOT_WINDOW));
+      if (pHistWindow != NULL)
+      {
+         pHistWindow->createPlot(pNewLayer);
+      }
    }
 
    return pNewLayer;
