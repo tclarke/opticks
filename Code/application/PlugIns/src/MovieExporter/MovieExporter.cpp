@@ -219,6 +219,7 @@ bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
       }
       pMsg->addProperty("Format", pOutFormat->long_name);
 
+      bool resolutionFromInputArgs(false);
       if (!pInArgList->getPlugInArgValue("Resolution X", resolutionX) ||
          !pInArgList->getPlugInArgValue("Resolution Y", resolutionY))
       {
@@ -226,6 +227,10 @@ bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
          {
             mpOptionWidget->getResolution(resolutionX, resolutionY);
          }
+      }
+      else
+      {
+         resolutionFromInputArgs = true;
       }
 
       if (resolutionX <= 0 || resolutionY <= 0)
@@ -235,6 +240,7 @@ bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
          {
             resolutionX = pWidget->width();
             resolutionY = pWidget->height();
+            resolutionFromInputArgs = false;
          }
          else
          {
@@ -243,11 +249,24 @@ bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
          }
       }
 
-      if ((resolutionX % 2) != 0 || (resolutionY % 2) != 0)
+      if (resolutionFromInputArgs && ((resolutionX % 2) != 0 || (resolutionY % 2) != 0))
       {
-         log_error("Resolution must be a multiple of 2");
+         stringstream msg;
+         msg << "The export resolution must be even numbers. The input arguments were X resolution of "
+             << resolutionX << " and Y resolution of " << resolutionY << ".";
+         log_error(msg.str());
          return false;
       }
+
+      if ((resolutionX % 2) != 0)
+      {
+         ++resolutionX;
+      }
+      if ((resolutionY % 2) != 0)
+      {
+         ++resolutionY;
+      }
+
       pMsg->addProperty("Resolution", QString("%1 x %2").arg(resolutionX).arg(resolutionY).toStdString());
 
       int framerateNum, framerateDen;
