@@ -507,7 +507,6 @@ public:
       std::string::size_type eolLoc = tmp.find('\n');
       if(eolLoc == std::string::npos)
       {
-         seek(pos, SEEK_SET);
          if(pError != NULL)
          {
             *pError = false;
