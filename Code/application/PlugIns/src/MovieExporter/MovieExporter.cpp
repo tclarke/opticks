@@ -23,6 +23,7 @@
 #include <QtCore/QString>
 #include <QtGui/QImage>
 
+#include <sstream>
 #include <string>
 #include <vector>
 #include <stdio.h>
