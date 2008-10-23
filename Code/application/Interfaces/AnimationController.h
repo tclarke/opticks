@@ -79,10 +79,9 @@ public:
    SIGNAL_METHOD(AnimationController, AnimationAdded)
 
    /**
-    *  Emitted with boost::any<const AnimationFrame*> when the current frame
-    *  changes.
+    *  Emitted with boost::any<double> when the current frame changes.
     *
-    *  @see     AnimationFrame
+    *  @see getCurrentFrame()
     */
    SIGNAL_METHOD(AnimationController, FrameChanged)
 
