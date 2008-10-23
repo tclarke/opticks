@@ -168,9 +168,11 @@ void WizardView::itemModified(Subject &subject, const string &signal, const boos
       {
          if (*peChange == WizardItemImp::ItemName)
          {
+            pCanvasItem->setVisible(false);     // Force a redraw of the item
             pCanvasItem->updateDimensions();
             updateConnectionPosition(pCanvasItem, false);
             expandCanvasToItem(pCanvasItem);
+            pCanvasItem->setVisible(true);
          }
          else if (*peChange == WizardItemImp::ItemPosition)
          {
