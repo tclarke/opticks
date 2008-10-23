@@ -274,7 +274,6 @@ bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
       // first, get the framerate from the arg list
       // next, try the option widget
       // next, get from the animation controller
-      // finally, default to the config settings
       if (pInArgList->getPlugInArgValue("Framerate Numerator", framerateNum) &&
          pInArgList->getPlugInArgValue("Framerate Denominator", framerateDen))
       {
@@ -293,31 +292,33 @@ bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
          {
             framerate = mpOptionWidget->getFramerate();
          }
-         if (framerate == 0)
+         else
          {
             framerate = pController->getMinimumFrameRate() * pController->getIntervalMultiplier();
-
-            // Validate the framerate
-            boost::rational<int> validFrameRate = convertToValidFrameRate(framerate);
-            if (validFrameRate != framerate)
-            {
-               QString msg = QString("The current animation frame rate (%1/%2 fps) can not be represented in the "
-                                     "selected movie format. The %3/%4 fps frame rate is being used instead.")
-                                    .arg(framerate.numerator())
-                                    .arg(framerate.denominator())
-                                    .arg(validFrameRate.numerator())
-                                    .arg(validFrameRate.denominator());
-               mpProgress->updateProgress(msg.toStdString(), 0, WARNING);
-
-               framerate = validFrameRate;
-            }
-         }
-         if (framerate == 0)
-         {
-            log_error("No framerate specified");
-            return false;
          }
       }
+
+      if (framerate == 0)
+      {
+         log_error("No framerate specified");
+         return false;
+      }
+
+      // Validate the framerate
+      boost::rational<int> validFrameRate = convertToValidFrameRate(framerate);
+      if (validFrameRate != framerate)
+      {
+         QString msg = QString("The selected animation frame rate (%1/%2 fps) can not be represented in the "
+                               "selected movie format. A frame rate of %3/%4 fps is being used instead.")
+                              .arg(framerate.numerator())
+                              .arg(framerate.denominator())
+                              .arg(validFrameRate.numerator())
+                              .arg(validFrameRate.denominator());
+         mpProgress->updateProgress(msg.toStdString(), 0, WARNING);
+
+         framerate = validFrameRate;
+      }
+
       pMsg->addProperty("Framerate",
          QString("%1/%2").arg(framerate.numerator()).arg(framerate.denominator()).toStdString());
 
@@ -568,12 +569,12 @@ ValidationResultType MovieExporter::validate(const PlugInArgList* pArgList, stri
       }
       if (actualFrameRate != expectedFrameRate)
       {
-         QString msg = QString("The current animation frame rate (%1/%2 fps) can not be represented in the "
-                               "selected movie format. The %3/%4 fps frame rate will be used instead.")
-                              .arg(expectedFrameRate.numerator())
-                              .arg(expectedFrameRate.denominator())
-                              .arg(actualFrameRate.numerator())
-                              .arg(actualFrameRate.denominator());
+         QString msg = QString("The selected animation frame rate (%1/%2 fps) can not be represented in the "
+            "selected movie format. A frame rate of %3/%4 fps is being used instead.")
+            .arg(expectedFrameRate.numerator())
+            .arg(expectedFrameRate.denominator())
+            .arg(actualFrameRate.numerator())
+            .arg(actualFrameRate.denominator());
          if (!errorMessage.empty())
          {
             errorMessage += "\n\n";

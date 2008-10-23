@@ -164,7 +164,7 @@ protected:
 
    virtual AVOutputFormat *getOutputFormat() const = 0;
 
-   boost::rational<int> convertToValidFrameRate(const boost::rational<int>& frameRate) const;
+   virtual boost::rational<int> convertToValidFrameRate(const boost::rational<int>& frameRate) const;
 
 private:
    void log_error(const std::string &msg);
