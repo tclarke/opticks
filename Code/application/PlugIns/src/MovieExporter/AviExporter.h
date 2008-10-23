@@ -12,6 +12,8 @@
 
 #include "MovieExporter.h"
 
+#include <boost/rational.hpp>
+
 /**
  *  Avi/wmv Exporter
  *
@@ -25,6 +27,7 @@ public:
 
 protected:
    virtual AVOutputFormat *getOutputFormat() const;
+   virtual boost::rational<int> convertToValidFrameRate(const boost::rational<int>& frameRate) const;
 };
 
 #endif
