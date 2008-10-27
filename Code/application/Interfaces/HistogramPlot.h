@@ -141,4 +141,53 @@ protected:
    virtual ~HistogramPlot() {}
 };
 
+/**
+ *  Extends capability of the HistogramPlot interface.
+ *
+ *  This class provides additional capability for the HistogramPlot interface
+ *  class.  A pointer to this class can be obtained by performing a dynamic cast
+ *  on a HistogramPlot pointer.
+ *
+ *  @warning A pointer to this class can only be used to call methods contained
+ *           in this extension class and cannot be used to call any methods in
+ *           HistogramPlot.
+ */
+class HistogramPlotExt1
+{
+public:
+   /**
+    *  Toggles the capability of the plot to update its zoom when the histogram
+    *  data changes.
+    *
+    *  This method toggles the capability to automatically zoom RasterLayer
+    *  plots to the extents of the histogram data when the displayed band
+    *  changes.  This capability is only available for plots displaying
+    *  RasterLayer histograms.
+    *
+    *  @param   enable
+    *           Set this value to \c true to automatically zoom a RasterLayer
+    *           plot when the displayed band changes.  Set this value to
+    *           \c false to not modify the zoom level when the displayed band
+    *           changes.
+    */
+   virtual void enableAutoZoom(bool enable) = 0;
+
+   /**
+    *  Queries whether the plot updates its zoom when the histogram data
+    *  changes.
+    *
+    *  @return  Returns \c true if a RasterLayer plot automatically zooms to
+    *           the extents of the histogram data when the displayed band
+    *           Returns \c false if the zoom level is not modified when the
+    *           displayed band changes.
+    */
+   virtual bool isAutoZoomEnabled() const = 0;
+
+protected:
+   /**
+    *  This object should be destroyed by calling DesktopServices::deleteView().
+    */
+   virtual ~HistogramPlotExt1() {}
+};
+
 #endif

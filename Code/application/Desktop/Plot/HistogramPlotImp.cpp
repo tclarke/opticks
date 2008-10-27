@@ -20,7 +20,6 @@
 #include "AppAssert.h"
 #include "AppVerify.h"
 #include "AppVersion.h"
-#include "HistogramPlotImp.h"
 #include "BandBadValuesDlg.h"
 #include "ClassificationAdapter.h"
 #include "ColormapEditor.h"
@@ -30,11 +29,11 @@
 #include "DesktopServices.h"
 #include "DimensionDescriptor.h"
 #include "HistogramAdapter.h"
+#include "HistogramPlotImp.h"
 #include "HistogramPlotAdapter.h"
 #include "Icons.h"
 #include "LocatorAdapter.h"
 #include "MouseMode.h"
-#include "PlotWindowAdapter.h"
 #include "PropertiesHistogramPlot.h"
 #include "RasterDataDescriptor.h"
 #include "RasterFileDescriptor.h"
@@ -71,6 +70,7 @@ HistogramPlotImp::HistogramPlotImp(const string& id, const string& viewName, QGL
    mRasterChannelType(GRAY),
    mpLayer(NULL),
    mpElement(NULL),
+   mAutoZoom(true),
    mpBelowAction(NULL),
    mpAboveAction(NULL),
    mpBetweenAction(NULL),
@@ -101,6 +101,8 @@ HistogramPlotImp::HistogramPlotImp(const string& id, const string& viewName, QGL
    mpBadValuesAction(NULL),
    mpThresholdSeparatorAction(NULL),
    mpRasterSeparatorAction(NULL),
+   mpAutoZoomAction(NULL),
+   mpRasterMenusSeparatorAction(NULL),
    mpSamplingAction(NULL),
    mpEndSeparatorAction(NULL)
 {
@@ -340,6 +342,16 @@ HistogramPlotImp::HistogramPlotImp(const string& id, const string& viewName, QGL
    mpRasterSeparatorAction = new QAction(this);
    mpRasterSeparatorAction->setSeparator(true);
 
+   mpAutoZoomAction = new QAction("Auto Zoom", this);
+   mpAutoZoomAction->setAutoRepeat(false);
+   mpAutoZoomAction->setCheckable(true);
+   mpAutoZoomAction->setChecked(true);
+   VERIFYNR(connect(mpAutoZoomAction, SIGNAL(triggered(bool)), this, SLOT(enableAutoZoom(bool))));
+   pDesktop->initializeAction(mpAutoZoomAction, shortcutContext);
+
+   mpRasterMenusSeparatorAction = new QAction(this);
+   mpRasterMenusSeparatorAction->setSeparator(true);
+
    mpSamplingAction = new QAction("Set S&patial Sampling...", this);
    mpSamplingAction->setAutoRepeat(false);
    VERIFYNR(connect(mpSamplingAction, SIGNAL(triggered()), this, SLOT(setResolution())));
@@ -485,6 +497,17 @@ list<ContextMenuAction> HistogramPlotImp::getContextMenuActions() const
          rasterSeparatorAction.mBuddyId = beforeId;
          menuActions.push_back(rasterSeparatorAction);
       }
+
+      ContextMenuAction autoZoomAction(mpAutoZoomAction, APP_HISTOGRAMPLOT_AUTO_ZOOM_ACTION);
+      autoZoomAction.mBuddyType = ContextMenuAction::BEFORE;
+      autoZoomAction.mBuddyId = beforeId;
+      menuActions.push_back(autoZoomAction);
+
+      ContextMenuAction rasterMenusSeparatorAction(mpRasterMenusSeparatorAction,
+         APP_HISTOGRAMPLOT_RASTER_MENUS_SEPARATOR_ACTION);
+      rasterMenusSeparatorAction.mBuddyType = ContextMenuAction::BEFORE;
+      rasterMenusSeparatorAction.mBuddyId = beforeId;
+      menuActions.push_back(rasterMenusSeparatorAction);
 
       ContextMenuAction colorMapAction(mpColorMapMenu->menuAction(), APP_HISTOGRAMPLOT_COLOR_MAP_MENU_ACTION);
       colorMapAction.mBuddyType = ContextMenuAction::BEFORE;
@@ -945,6 +968,21 @@ QColor HistogramPlotImp::getHistogramColor() const
    }
 
    return clrHistogram;
+}
+
+void HistogramPlotImp::enableAutoZoom(bool enable)
+{
+   mAutoZoom = enable;
+   mpAutoZoomAction->setChecked(mAutoZoom);
+
+   if (mAutoZoom == true)
+   {
+      connect(this, SIGNAL(extentsChanged(double, double, double, double)), this, SLOT(zoomExtents()));
+   }
+   else
+   {
+      disconnect(this, SIGNAL(extentsChanged(double, double, double, double)), this, SLOT(zoomExtents()));
+   }
 }
 
 void HistogramPlotImp::setHistogramColor(const QColor& clrHistogram)
@@ -2680,6 +2718,11 @@ void HistogramPlotImp::updateHistogramRegionExtents()
    }
 
    refresh();
+}
+
+bool HistogramPlotImp::isAutoZoomEnabled() const
+{
+   return mAutoZoom;
 }
 
 RasterChannelType HistogramPlotImp::getRasterChannelType() const
