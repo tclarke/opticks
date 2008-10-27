@@ -10,6 +10,8 @@
 #ifndef HISTOGRAMWINDOWIMP_H
 #define HISTOGRAMWINDOWIMP_H
 
+#include <QtGui/QAction>
+
 #include "AttachmentPtr.h"
 #include "PlotWindowImp.h"
 #include "RasterLayer.h"
@@ -67,10 +69,12 @@ protected slots:
    void setCurrentPlot(const DisplayMode& displayMode);
    void activateLayer(PlotWidget* pPlot);
    void updatePlotInfo(RasterChannelType channel);
+   void syncAutoZoom();
 
 private:
    AttachmentPtr<SessionExplorer> mpExplorer;
    bool mDisplayModeChanging;
+   QAction* mpSyncAutoZoomAction;
 
    class HistogramUpdater
    {

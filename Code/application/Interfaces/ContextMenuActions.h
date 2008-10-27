@@ -117,7 +117,13 @@
  */
 #define APP_GRAPHICLAYER_OBJECT_DELETE_SEPARATOR_ACTION "APP_GRAPHICLAYER_OBJECT_DELETE_SEPARATOR_ACTION"
 
- /**
+/**
+ *  Toggles the setting that automatically zooms the plot to the extents of the
+ *  histogram data when the displayed band of a RasterLayer changes.
+ */
+#define APP_HISTOGRAMPLOT_AUTO_ZOOM_ACTION "APP_HISTOGRAMPLOT_AUTO_ZOOM_ACTION"
+
+/**
  *  Invokes a dialog for users to filter data values out of the displayed
  *  histogram.
  */
@@ -157,7 +163,14 @@
 
 /**
  *  Default menu separator that is used when the histogram of a RasterLayer is
- *  displayed.
+ *  displayed.\   This separator appears before the raster layer submenus and
+ *  after the auto-zoom action(s).
+ */
+#define APP_HISTOGRAMPLOT_RASTER_MENUS_SEPARATOR_ACTION "APP_HISTOGRAMPLOT_RASTER_MENUS_SEPARATOR_ACTION"
+
+/**
+ *  Default menu separator that is used when the histogram of a RasterLayer is
+ *  displayed.\   This separator appears before the auto-zoom action(s).
  */
 #define APP_HISTOGRAMPLOT_RASTER_SEPARATOR_ACTION "APP_HISTOGRAMPLOT_RASTER_SEPARATOR_ACTION"
 
@@ -176,6 +189,12 @@
  *  Changes the contrast stretch type of a RasterLayer.
  */
 #define APP_HISTOGRAMPLOT_STRETCH_TYPE_MENU_ACTION "APP_HISTOGRAMPLOT_STRETCH_TYPE_MENU_ACTION"
+
+/**
+ *  Sets the auto-zoom setting of the red, green, and blue histogram plots of a
+ *  RasterLayer to that of the current RasterLayer histogram plot.
+ */
+#define APP_HISTOGRAMPLOT_SYNCHRONIZE_AUTO_ZOOM_ACTION "APP_HISTOGRAMPLOT_SYNCHRONIZE_AUTO_ZOOM_ACTION"
 
 /**
  *  Default menu separator that is used when the histogram of a ThresholdLayer
