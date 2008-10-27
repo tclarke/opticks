@@ -280,11 +280,9 @@ OptionsMovieExporter::OptionsMovieExporter() :
    QLabel *pFramerateLabel = new QLabel("Frame Rate", pRateLayoutWidget);
    mpFramerateNum = new QSpinBox(pRateLayoutWidget);
    mpFramerateNum->setRange(1, 100000);
-   mpFramerateNum->setSingleStep(10);
    QLabel *pFramerateSlash = new QLabel("frames /", pRateLayoutWidget);
    mpFramerateDen = new QSpinBox(pRateLayoutWidget);
    mpFramerateDen->setRange(1, 100000);
-   mpFramerateDen->setSingleStep(10);
    QLabel *pFramerateUnits = new QLabel("s", pRateLayoutWidget);
    mpFramerateList = new QComboBox(pRateLayoutWidget);
 
