@@ -423,6 +423,19 @@ void SessionExplorerImp::updateData(SessionItem* pItem)
    }
 }
 
+bool SessionExplorerImp::event(QEvent* pEvent)
+{
+   bool success = DockWindowImp::event(pEvent);
+   if ((pEvent != NULL) && (pEvent->type() == QEvent::Polish))
+   {
+      // To ensure that objects add and remove actions from the correct menu (SessionExplorer or selected
+      // SessionItem(s)), attach to the dock window just before the window is shown to make it the last slot connected
+      attach(SIGNAL_NAME(DockWindow, AboutToShowContextMenu), Slot(this, &SessionExplorerImp::updateContextMenu));
+   }
+
+   return success;
+}
+
 bool SessionExplorerImp::eventFilter(QObject* pObject, QEvent* pEvent)
 {
    if ((pObject != NULL) && (pEvent != NULL))
@@ -742,8 +755,4 @@ void SessionExplorerImp::initialize()
 
       mpPlugInTree->setModel(pPlugInProxyModel);
    }
-
-   // Attach to the dock window not wrapped in VERIFY. It will return false after the
-   // first call to initialize.
-   attach(SIGNAL_NAME(DockWindow, AboutToShowContextMenu), Slot(this, &SessionExplorerImp::updateContextMenu));
 }
