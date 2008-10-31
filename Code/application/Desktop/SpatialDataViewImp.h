@@ -182,6 +182,7 @@ protected slots:
    void updateSmoothingAction(const TextureMode& textureMode);
    void changeBkgColor();
    void displayMeasurementProperties();
+   void setAoiMode();
 
 private:
    AttachmentPtr<SessionExplorer> mpExplorer;
