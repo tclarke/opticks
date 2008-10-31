@@ -15,6 +15,7 @@
 #include "AoiElementImp.h"
 #include "AoiLayer.h"
 #include "AoiLayerImp.h"
+#include "AoiToolBar.h"
 #include "AppAssert.h"
 #include "AppConfig.h"
 #include "ApplicationWindow.h"
@@ -142,6 +143,7 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
       pDesktop->initializeAction(mpTiePointAction, newLayerContext);
 
       pNewLayerMenu->addActions(pGroup->actions());
+      VERIFYNR(connect(mpAoiAction, SIGNAL(triggered()), this, SLOT(setAoiMode())));
       connect(pGroup, SIGNAL(triggered(QAction*)), this, SLOT(createLayer(QAction*)));
    }
 
@@ -3936,4 +3938,15 @@ bool SpatialDataViewImp::linkView(View *pView, LinkType type)
    }
 
    return ViewImp::linkView(pView, type);
+}
+
+void SpatialDataViewImp::setAoiMode()
+{
+  Service<DesktopServices> pDesktop;
+  AoiToolBar* pToolbar = static_cast<AoiToolBar*>(pDesktop->getWindow("AOI", TOOLBAR));
+
+  if (pToolbar != NULL)
+  {
+     pToolbar->setSelectionTool(pToolbar->getSelectionTool(), DRAW);
+  } 
 }
