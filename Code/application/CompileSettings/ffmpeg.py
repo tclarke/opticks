@@ -13,7 +13,7 @@ def generate(env):
     if not path:
        SCons.Warnings.warn(FfmpegFound,"Could not detect ffmpeg")
     else:
-       env.AppendUnique(CXXFLAGS="-I%s -I%s/libavcodec -I%s/libavformat -I%s/libavutil" % (path,path,path,path),
+       env.AppendUnique(CXXFLAGS=["-I%s" % (path), "-I%s/libavcodec" % (path), "-I%s/libavformat" % (path), "-I%s/libavutil" % (path)],
                         LIBPATH=['%s/libavcodec' % path,
                                  '%s/libavformat' % path,
                                  '%s/libavutil' % path],
