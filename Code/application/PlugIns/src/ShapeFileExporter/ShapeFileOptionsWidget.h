@@ -1,16 +1,14 @@
 /*
- * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
- * and is subject to the terms and conditions of the
- * GNU Lesser General Public License Version 2.1
- * The license text is available from   
- * http://www.gnu.org/licenses/lgpl.html
- */
+* The information in this file is
+* Copyright(c) 2008 Ball Aerospace & Technologies Corporation
+* and is subject to the terms and conditions of the
+* GNU Lesser General Public License Version 2.1
+* The license text is available from   
+* http://www.gnu.org/licenses/lgpl.html
+*/
 
-
-
-#ifndef SHAPEFILEDLG_H
-#define SHAPEFILEDLG_H
+#ifndef SHAPEFILEOPTIONSWIDGET_H
+#define SHAPEFILEOPTIONSWIDGET_H
 
 #include <QtCore/QMap>
 #include <QtGui/QDialog>
@@ -18,18 +16,23 @@
 #include <QtGui/QLabel>
 #include <QtGui/QLineEdit>
 #include <QtGui/QTreeWidgetItem>
+#include <QtGui/QWidget>
 
+#include <vector>
+
+class AoiElement;
 class CustomTreeWidget;
 class Feature;
+class RasterElement;
 class ShapeFile;
 
-class ShapeFileDlg : public QDialog
+class ShapeFileOptionsWidget : public QWidget
 {
    Q_OBJECT
 
 public:
-   ShapeFileDlg(ShapeFile* pShapeFile, QWidget* parent = 0);
-   ~ShapeFileDlg();
+   ShapeFileOptionsWidget(ShapeFile* pShapefile, const std::vector<AoiElement*>& aois, RasterElement* pRaster);
+   ~ShapeFileOptionsWidget();
 
 protected:
    int getColumn(const QString& strField) const;
@@ -47,10 +50,11 @@ protected slots:
    void removeField(const QString& strName);
    void setFieldValue(QTreeWidgetItem* pItem, int iColumn);
    void updateFieldValues();
-   void save();
 
 private:
    ShapeFile* mpShapeFile;
+   std::vector<AoiElement*> mAois;
+   RasterElement* mpGeoref;
    QLineEdit* mpFilePathEdit;
    QLineEdit* mpBaseNameEdit;
    QLabel* mpShpFileLabel;
@@ -60,5 +64,4 @@ private:
    CustomTreeWidget* mpFeatureTree;
    QMap<QTreeWidgetItem*, Feature*> mFeatures;
 };
-
 #endif

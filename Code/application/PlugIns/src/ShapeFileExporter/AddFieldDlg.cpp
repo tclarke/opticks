@@ -93,7 +93,7 @@ QString AddFieldDlg::getFieldType() const
 
 void AddFieldDlg::accept()
 {
-   if(getFieldName().isEmpty())
+   if (getFieldName().isEmpty())
    {
       QMessageBox::critical(this, windowTitle(), "Please enter a valid field name!");
       return;

@@ -14,18 +14,14 @@
 #include <QtGui/QPushButton>
 
 #include "AddFeatureDlg.h"
-#include "DataElement.h"
+#include "AoiElement.h"
 #include "DesktopServices.h"
-#include "LayerList.h"
 #include "ModelServices.h"
-#include "RasterElement.h"
-#include "SpatialDataView.h"
-#include "SpatialDataWindow.h"
 
 #include <string>
 using namespace std;
 
-AddFeatureDlg::AddFeatureDlg(QWidget* parent) :
+AddFeatureDlg::AddFeatureDlg(const vector<AoiElement*>& aois, QWidget* parent) :
    QDialog(parent)
 {
    // Element list
@@ -80,32 +76,11 @@ AddFeatureDlg::AddFeatureDlg(QWidget* parent) :
    setModal(true);
    resize(400, 225);
 
-   // Get the current data set filename from desktop services
-   RasterElement* pRasterElement = NULL;
-
-   Service<DesktopServices> pDesktop;
-
-   SpatialDataWindow *pWindow = dynamic_cast<SpatialDataWindow*>(pDesktop->getCurrentWorkspaceWindow());
-   if(pWindow != NULL)
+   // Populate the list with AOI elements
+   vector<AoiElement*>::const_iterator it;
+   for (it = aois.begin(); it != aois.end(); ++it)
    {
-      SpatialDataView* pView = pWindow->getSpatialDataView();
-      if(pView != NULL)
-      {
-         LayerList* pLayerList = pView->getLayerList();
-         if (pLayerList != NULL)
-         {
-            pRasterElement = pLayerList->getPrimaryRasterElement();
-         }
-      }
-   }
-
-   // Populate the list with AOIs
-   Service<ModelServices> pModel;
-
-   vector<DataElement*> elements = pModel->getElements(pRasterElement, "AoiElement");
-   for (unsigned int i = 0; i < elements.size(); i++)
-   {
-      DataElement* pElement = elements[i];
+      AoiElement* pElement = *it;
       if (pElement != NULL)
       {
          QString strName;
@@ -135,21 +110,21 @@ AddFeatureDlg::~AddFeatureDlg()
 {
 }
 
-vector<DataElement*> AddFeatureDlg::getDataElements() const
+vector<AoiElement*> AddFeatureDlg::getAoiElements() const
 {
-   vector<DataElement*> elements;
+   vector<AoiElement*> elements;
 
-   for (QMap<QTreeWidgetItem*, DataElement*>::const_iterator iter = mElements.begin();
+   for (QMap<QTreeWidgetItem*, AoiElement*>::const_iterator iter = mElements.begin();
                                                              iter != mElements.end();
                                                              ++iter)
    {
       QTreeWidgetItem* pItem = iter.key();
-      if(pItem != NULL)
+      if (pItem != NULL)
       {
-         if(mpElementTree->isItemSelected(pItem))
+         if (mpElementTree->isItemSelected(pItem))
          {
-            DataElement* pElement = iter.value();
-            if(pElement != NULL)
+            AoiElement* pElement = iter.value();
+            if (pElement != NULL)
             {
                elements.push_back(pElement);
             }
@@ -162,7 +137,7 @@ vector<DataElement*> AddFeatureDlg::getDataElements() const
 
 void AddFeatureDlg::accept()
 {
-   if (getDataElements().empty() == true)
+   if (getAoiElements().empty() == true)
    {
       QMessageBox::critical(this, windowTitle(), "Please select at least one element for a feature!");
       return;

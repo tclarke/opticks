@@ -21,8 +21,9 @@
 #include <vector>
 
 class DataElement;
-class Progress;
 class Feature;
+class Progress;
+class RasterElement;
 
 class ShapeFile: public Observer
 {
@@ -40,7 +41,7 @@ public:
    void setShape(ShapeType eShape);
    ShapeType getShape() const;
 
-   std::vector<Feature*> addFeatures(DataElement* pElement, std::string& message = std::string());
+   std::vector<Feature*> addFeatures(DataElement* pElement, RasterElement* pGeoref, std::string& message = std::string());
    bool removeFeature(Feature* pFeature);
    const std::vector<Feature*>& getFeatures() const;
    unsigned int getNumFeatures() const;
