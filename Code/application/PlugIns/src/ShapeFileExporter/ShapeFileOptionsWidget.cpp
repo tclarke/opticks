@@ -1,11 +1,11 @@
 /*
- * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
- * and is subject to the terms and conditions of the
- * GNU Lesser General Public License Version 2.1
- * The license text is available from   
- * http://www.gnu.org/licenses/lgpl.html
- */
+* The information in this file is
+* Copyright(c) 2008 Ball Aerospace & Technologies Corporation
+* and is subject to the terms and conditions of the
+* GNU Lesser General Public License Version 2.1
+* The license text is available from   
+* http://www.gnu.org/licenses/lgpl.html
+*/
 
 #include <QtCore/QFileInfo>
 #include <QtGui/QApplication>
@@ -18,24 +18,25 @@
 #include <QtGui/QPixmap>
 #include <QtGui/QPushButton>
 
-#include "ShapeFileDlg.h"
 #include "AddFeatureDlg.h"
 #include "AddFieldDlg.h"
+#include "AoiElement.h"
 #include "CustomTreeWidget.h"
 #include "DataElement.h"
 #include "DataVariant.h"
 #include "Feature.h"
 #include "IconImages.h"
+#include "RasterElement.h"
 #include "ShapeFile.h"
+#include "ShapeFileOptionsWidget.h"
 
 #include <string>
 using namespace std;
 
-ShapeFileDlg::ShapeFileDlg(ShapeFile* pShapeFile, QWidget* parent) :
-   QDialog(parent)
+ShapeFileOptionsWidget::ShapeFileOptionsWidget(ShapeFile* pShapefile, const vector<AoiElement*>& aois, 
+                                               RasterElement* pRaster) :
+   QWidget(NULL), mpShapeFile(pShapefile), mAois(aois), mpGeoref(pRaster)
 {
-   mpShapeFile = pShapeFile;
-
    // Filenames
    QLabel* pFilePathLabel = new QLabel("File Path:", this);
    QLabel* pBaseNameLabel = new QLabel("Base Name:", this);
@@ -112,16 +113,6 @@ ShapeFileDlg::ShapeFileDlg(ShapeFile* pShapeFile, QWidget* parent) :
    QPushButton* pAddFieldButton = new QPushButton("Add Field", this);
    QPushButton* pRemoveFieldButton = new QPushButton("Remove Field", this);
 
-   // Horizontal line
-   QFrame* pHLine = new QFrame(this);
-   pHLine->setFrameStyle(QFrame::HLine | QFrame::Sunken);
-
-   // Dialog buttons
-   QPushButton* pSaveButton = new QPushButton("&Save", this);
-   QPushButton* pOkButton = new QPushButton("&OK", this);
-   QPushButton* pCancelButton = new QPushButton("&Cancel", this);
-   pOkButton->setDefault(true);
-
    // Layout
    QHBoxLayout* pFilePathLayout = new QHBoxLayout();
    pFilePathLayout->setMargin(0);
@@ -148,14 +139,6 @@ ShapeFileDlg::ShapeFileDlg(ShapeFile* pShapeFile, QWidget* parent) :
    pButtonLayout->addWidget(pAddFieldButton);
    pButtonLayout->addWidget(pRemoveFieldButton);
 
-   QHBoxLayout* pLayout = new QHBoxLayout();
-   pLayout->setMargin(0);
-   pLayout->setSpacing(5);
-   pLayout->addWidget(pSaveButton);
-   pLayout->addStretch(10);
-   pLayout->addWidget(pOkButton);
-   pLayout->addWidget(pCancelButton);
-
    QGridLayout* pGrid = new QGridLayout(this);
    pGrid->setMargin(10);
    pGrid->setSpacing(5);
@@ -174,22 +157,17 @@ ShapeFileDlg::ShapeFileDlg(ShapeFile* pShapeFile, QWidget* parent) :
    pGrid->addWidget(mpFeatureTree, 7, 0, 1, 2);
    pGrid->setColumnMinimumWidth(2, 2);
    pGrid->addLayout(pButtonLayout, 7, 3);
-   pGrid->addWidget(pHLine, 8, 0, 1, 4);
-   pGrid->setRowMinimumHeight(8, 12);
-   pGrid->addLayout(pLayout, 9, 0, 1, 4);
    pGrid->setRowStretch(7, 10);
    pGrid->setColumnStretch(1, 10);
 
    // Initialization
    setWindowTitle("Shape File");
-   setModal(true);
-   resize(525, 325);
 
-   if(mpShapeFile != NULL)
+   if (mpShapeFile != NULL)
    {
       // Filename
       const string& filename = mpShapeFile->getFilename();
-      if(!filename.empty())
+      if (!filename.empty())
       {
          QFileInfo fileInfo(QString::fromStdString(filename));
          mpFilePathEdit->setText(fileInfo.absolutePath());
@@ -220,13 +198,13 @@ ShapeFileDlg::ShapeFileDlg(ShapeFile* pShapeFile, QWidget* parent) :
 
       // Features
       const vector<Feature*>& features = mpShapeFile->getFeatures();
-      for(unsigned int i = 0; i < features.size(); i++)
+      for (unsigned int i = 0; i < features.size(); i++)
       {
          Feature* pFeature = features[i];
-         if(pFeature != NULL)
+         if (pFeature != NULL)
          {
             QTreeWidgetItem* pItem = new QTreeWidgetItem(mpFeatureTree);
-            if(pItem != NULL)
+            if (pItem != NULL)
             {
                pItem->setText(0, QString::number(i + 1));
                mFeatures.insert(pItem, pFeature);
@@ -249,29 +227,26 @@ ShapeFileDlg::ShapeFileDlg(ShapeFile* pShapeFile, QWidget* parent) :
    connect(pAddFieldButton, SIGNAL(clicked()), this, SLOT(addField()));
    connect(pRemoveFieldButton, SIGNAL(clicked()), this, SLOT(removeField()));
    connect(mpFeatureTree, SIGNAL(cellTextChanged(QTreeWidgetItem*, int)), this, SLOT(setFieldValue(QTreeWidgetItem*, int)));
-   connect(pSaveButton, SIGNAL(clicked()), this, SLOT(save()));
-   connect(pOkButton, SIGNAL(clicked()), this, SLOT(accept()));
-   connect(pCancelButton, SIGNAL(clicked()), this, SLOT(reject()));
 }
 
-ShapeFileDlg::~ShapeFileDlg()
+ShapeFileOptionsWidget::~ShapeFileOptionsWidget()
 {
 }
 
-int ShapeFileDlg::getColumn(const QString& strField) const
+int ShapeFileOptionsWidget::getColumn(const QString& strField) const
 {
-   if(strField.isEmpty())
+   if (strField.isEmpty())
    {
       return -1;
    }
 
    QTreeWidgetItem* pHeaderItem = mpFeatureTree->headerItem();
-   if(pHeaderItem != NULL)
+   if (pHeaderItem != NULL)
    {
-      for(int i = 0; i < pHeaderItem->columnCount(); i++)
+      for (int i = 0; i < pHeaderItem->columnCount(); i++)
       {
          QString strColumn = pHeaderItem->text(i);
-         if(strColumn == strField)
+         if (strColumn == strField)
          {
             return i;
          }
@@ -281,22 +256,22 @@ int ShapeFileDlg::getColumn(const QString& strField) const
    return -1;
 }
 
-void ShapeFileDlg::updateFilenames()
+void ShapeFileOptionsWidget::updateFilenames()
 {
    QString strDirectory = mpFilePathEdit->text();
    QString strBaseName = mpBaseNameEdit->text();
 
    QString strFilename;
-   
-   if(!strDirectory.isEmpty() && !strBaseName.isEmpty())
+
+   if (!strDirectory.isEmpty() && !strBaseName.isEmpty())
    {
       strFilename = strDirectory + "/" + strBaseName;
-      if(!strFilename.isEmpty())
+      if (!strFilename.isEmpty())
       {
          mpShpFileLabel->setText(strFilename + ".shp");
          mpShxFileLabel->setText(strFilename + ".shx");
          mpDbfFileLabel->setText(strFilename + ".dbf");
-         if(mpShapeFile != NULL)
+         if (mpShapeFile != NULL)
          {
             string filename = strFilename.toStdString();
             mpShapeFile->setFilename(filename);
@@ -305,38 +280,38 @@ void ShapeFileDlg::updateFilenames()
    }
 }
 
-void ShapeFileDlg::browse()
+void ShapeFileOptionsWidget::browse()
 {
    QString strCurrentDir = mpFilePathEdit->text();
 
    QString strDirectory = QFileDialog::getExistingDirectory(this, "Select Shape File Directory", strCurrentDir);
-   if(!strDirectory.isEmpty())
+   if (!strDirectory.isEmpty())
    {
       mpFilePathEdit->setText(strDirectory);
    }
 }
 
-void ShapeFileDlg::setShape(const QString& strShape)
+void ShapeFileOptionsWidget::setShape(const QString& strShape)
 {
-   if(mpShapeFile == NULL)
+   if (mpShapeFile == NULL)
    {
       return;
    }
 
    ShapeType eShape;
-   if(strShape == "Point")
+   if (strShape == "Point")
    {
       eShape = POINT_SHAPE;
    }
-   else if(strShape == "Polyline")
+   else if (strShape == "Polyline")
    {
       eShape = POLYLINE_SHAPE;
    }
-   else if(strShape == "Polygon")
+   else if (strShape == "Polygon")
    {
       eShape = POLYGON_SHAPE;
    }
-   else if(strShape == "Multi-Point")
+   else if (strShape == "Multi-Point")
    {
       eShape = MULTIPOINT_SHAPE;
    }
@@ -346,9 +321,9 @@ void ShapeFileDlg::setShape(const QString& strShape)
    }
 
    ShapeType eCurrentShape = mpShapeFile->getShape();
-   if((eCurrentShape != POINT_SHAPE) && (eShape == POINT_SHAPE))
+   if ((eCurrentShape != POINT_SHAPE) && (eShape == POINT_SHAPE))
    {
-      if(mpFeatureTree->topLevelItemCount() > 0)
+      if (mpFeatureTree->topLevelItemCount() > 0)
       {
          QMessageBox::warning(this, windowTitle(), "Changing to the Point shape may cause a loss of data "
             "since only the first point in a feature will be used.");
@@ -358,31 +333,31 @@ void ShapeFileDlg::setShape(const QString& strShape)
    mpShapeFile->setShape(eShape);
 }
 
-void ShapeFileDlg::addFeature()
+void ShapeFileOptionsWidget::addFeature()
 {
-   AddFeatureDlg dlg(this);
+   AddFeatureDlg dlg(mAois, this);
 
-   if(dlg.exec() == QDialog::Accepted)
+   if (dlg.exec() == QDialog::Accepted)
    {
-      vector<DataElement*> elements = dlg.getDataElements();
-      for (vector<DataElement*>::iterator iter = elements.begin(); iter != elements.end(); ++iter)
+      vector<AoiElement*> elements = dlg.getAoiElements();
+      for (vector<AoiElement*>::iterator iter = elements.begin(); iter != elements.end(); ++iter)
       {
-         DataElement* pElement = *iter;
+         AoiElement* pElement = *iter;
          if (pElement != NULL)
          {
             string message = "";
-            vector<Feature*> features = mpShapeFile->addFeatures(pElement, message);
+            vector<Feature*> features = mpShapeFile->addFeatures(pElement, mpGeoref, message);
 
-            for(unsigned int i = 0; i < features.size(); i++)
+            for (unsigned int i = 0; i < features.size(); i++)
             {
                Feature* pFeature = NULL;
                pFeature = features[i];
-               if(pFeature != NULL)
+               if (pFeature != NULL)
                {
                   int iFeatures = mpFeatureTree->topLevelItemCount();
 
                   QTreeWidgetItem* pItem = new QTreeWidgetItem(mpFeatureTree);
-                  if(pItem != NULL)
+                  if (pItem != NULL)
                   {
                      pItem->setText(0, QString::number(iFeatures + 1));
                      mFeatures.insert(pItem, pFeature);
@@ -390,7 +365,7 @@ void ShapeFileDlg::addFeature()
                }
             }
 
-            if(!message.empty())
+            if (!message.empty())
             {
                QMessageBox::warning(this, windowTitle(), QString::fromStdString(message));
             }
@@ -401,7 +376,7 @@ void ShapeFileDlg::addFeature()
    }
 }
 
-void ShapeFileDlg::removeFeature()
+void ShapeFileOptionsWidget::removeFeature()
 {
    int iFeatureNumber = 0;
    QTreeWidgetItem* pItem = NULL;
@@ -412,19 +387,19 @@ void ShapeFileDlg::removeFeature()
       pItem = items.front();
    }
 
-   if(pItem != NULL)
+   if (pItem != NULL)
    {
       QMap<QTreeWidgetItem*, Feature*>::iterator iter = mFeatures.find(pItem);
-      if(iter != mFeatures.end())
+      if (iter != mFeatures.end())
       {
          Feature* pFeature = iter.value();
-         if(pFeature != NULL)
+         if (pFeature != NULL)
          {
             mpShapeFile->removeFeature(pFeature);
          }
 
          QString strFeatureNumber = pItem->text(0);
-         if(!strFeatureNumber.isEmpty())
+         if (!strFeatureNumber.isEmpty())
          {
             iFeatureNumber = strFeatureNumber.toInt();
          }
@@ -440,25 +415,25 @@ void ShapeFileDlg::removeFeature()
    }
 
    // Update the numbers on the remaining feature items to account for the removed feature
-   if(iFeatureNumber == 0)
+   if (iFeatureNumber == 0)
    {
       return;
    }
 
-   for(QMap<QTreeWidgetItem*, Feature*>::iterator iter = mFeatures.begin(); iter != mFeatures.end(); ++iter)
+   for (QMap<QTreeWidgetItem*, Feature*>::iterator iter = mFeatures.begin(); iter != mFeatures.end(); ++iter)
    {
       QTreeWidgetItem* pItem = iter.key();
-      if(pItem != NULL)
+      if (pItem != NULL)
       {
          int iFeature = 0;
 
          QString strFeatureNumber = pItem->text(0);
-         if(!strFeatureNumber.isEmpty())
+         if (!strFeatureNumber.isEmpty())
          {
             iFeature = strFeatureNumber.toInt();
          }
 
-         if(iFeature > iFeatureNumber)
+         if (iFeature > iFeatureNumber)
          {
             iFeature--;
             pItem->setText(0, QString::number(iFeature));
@@ -467,9 +442,9 @@ void ShapeFileDlg::removeFeature()
    }
 }
 
-void ShapeFileDlg::clearFeatures()
+void ShapeFileOptionsWidget::clearFeatures()
 {
-   if(mpShapeFile != NULL)
+   if (mpShapeFile != NULL)
    {
       mpShapeFile->removeAllFeatures();
    }
@@ -478,11 +453,11 @@ void ShapeFileDlg::clearFeatures()
    mFeatures.clear();
 }
 
-void ShapeFileDlg::addField()
+void ShapeFileOptionsWidget::addField()
 {
    AddFieldDlg dlg(this);
 
-   if(dlg.exec() == QDialog::Accepted)
+   if (dlg.exec() == QDialog::Accepted)
    {
       QString strFieldName = dlg.getFieldName();
       QString strFieldType = dlg.getFieldType();
@@ -490,29 +465,29 @@ void ShapeFileDlg::addField()
    }
 }
 
-void ShapeFileDlg::addField(const QString& strName, const QString& strType)
+void ShapeFileOptionsWidget::addField(const QString& strName, const QString& strType)
 {
-   if(!strName.isEmpty() && !strType.isEmpty())
+   if (!strName.isEmpty() && !strType.isEmpty())
    {
       int iNumColumns = mpFeatureTree->columnCount();
       mpFeatureTree->setColumnCount(iNumColumns + 1);
 
       QTreeWidgetItem* pHeaderItem = mpFeatureTree->headerItem();
-      if(pHeaderItem != NULL)
+      if (pHeaderItem != NULL)
       {
          pHeaderItem->setText(iNumColumns, strName);
       }
 
-      for(QTreeWidgetItemIterator iter(mpFeatureTree); *iter != NULL; ++iter)
+      for (QTreeWidgetItemIterator iter(mpFeatureTree); *iter != NULL; ++iter)
       {
          QTreeWidgetItem* pItem = *iter;
-         if(pItem != NULL)
+         if (pItem != NULL)
          {
             mpFeatureTree->setCellWidgetType(pItem, iNumColumns, CustomTreeWidget::LINE_EDIT);
          }
       }
 
-      if(mpShapeFile != NULL)
+      if (mpShapeFile != NULL)
       {
          string name = strName.toStdString();
          string type = strType.toStdString();
@@ -521,24 +496,24 @@ void ShapeFileDlg::addField(const QString& strName, const QString& strType)
    }
 }
 
-void ShapeFileDlg::removeField()
+void ShapeFileOptionsWidget::removeField()
 {
    QStringList fieldNames;
 
    QTreeWidgetItem* pHeaderItem = mpFeatureTree->headerItem();
-   if(pHeaderItem != NULL)
+   if (pHeaderItem != NULL)
    {
-      for(int i = 0; i < pHeaderItem->columnCount(); i++)
+      for (int i = 0; i < pHeaderItem->columnCount(); i++)
       {
          QString strColumn = pHeaderItem->text(i);
-         if(!strColumn.isEmpty())
+         if (!strColumn.isEmpty())
          {
             fieldNames.append(strColumn);
          }
       }
    }
 
-   if(fieldNames.empty())
+   if (fieldNames.empty())
    {
       QMessageBox::critical(this, windowTitle(), "None of the current fields can be removed!");
       return;
@@ -547,73 +522,73 @@ void ShapeFileDlg::removeField()
    bool bRemove = false;
 
    QString strFieldName = QInputDialog::getItem(this, "Remove Field", "Field Name:", fieldNames, 0, false, &bRemove);
-   if(bRemove)
+   if (bRemove)
    {
       removeField(strFieldName);
    }
 }
 
-void ShapeFileDlg::removeField(const QString& strName)
+void ShapeFileOptionsWidget::removeField(const QString& strName)
 {
-   if(strName.isEmpty())
+   if (strName.isEmpty())
    {
       return;
    }
 
    int iColumn = getColumn(strName);
-   if(iColumn != -1)
+   if (iColumn != -1)
    {
       QHeaderView* pHeader = mpFeatureTree->header();
-      if(pHeader != NULL)
+      if (pHeader != NULL)
       {
          pHeader->hideSection(iColumn);
       }
    }
 
-   if(mpShapeFile != NULL)
+   if (mpShapeFile != NULL)
    {
       string name = strName.toStdString();
       mpShapeFile->removeField(name);
    }
 }
 
-void ShapeFileDlg::setFieldValue(QTreeWidgetItem* pItem, int iColumn)
+void ShapeFileOptionsWidget::setFieldValue(QTreeWidgetItem* pItem, int iColumn)
 {
-   if((pItem == NULL) || (mpShapeFile == NULL))
+   if ((pItem == NULL) || (mpShapeFile == NULL))
    {
       return;
    }
 
-   for(QMap<QTreeWidgetItem*, Feature*>::iterator iter = mFeatures.find(pItem); iter != mFeatures.end(); ++iter)
+   for (QMap<QTreeWidgetItem*, Feature*>::iterator iter = mFeatures.find(pItem); iter != mFeatures.end(); ++iter)
    {
       Feature *pFeature = iter.value();
-      if(pFeature != NULL)
+      if (pFeature != NULL)
       {
          QString strFieldName;
          QString strValue = pItem->text(iColumn);
 
          QTreeWidgetItem* pHeaderItem = mpFeatureTree->headerItem();
-         if(pHeaderItem != NULL)
+         if (pHeaderItem != NULL)
          {
             strFieldName = pHeaderItem->text(iColumn);
          }
 
-         if(!strFieldName.isEmpty() && !strValue.isEmpty())
+         if (!strFieldName.isEmpty() && !strValue.isEmpty())
          {
             string name = strFieldName.toStdString();
             string type = mpShapeFile->getFieldType(name);
 
-            if(type == "int")
+            if (type == "int")
             {
                int iValue = strValue.toInt();
                pFeature->setFieldValue(name, iValue);
             }
-            else if(type == "double")
+            else if (type == "double")
             {
                double dValue = strValue.toDouble();
                pFeature->setFieldValue(name, dValue);
             }
-            else if(type == "string")
+            else if (type == "string")
             {
                string value = strValue.toStdString();
                pFeature->setFieldValue(name, value);
@@ -623,21 +598,21 @@ void ShapeFileDlg::setFieldValue(QTreeWidgetItem* pItem, int iColumn)
    }
 }
 
-void ShapeFileDlg::updateFieldValues()
+void ShapeFileOptionsWidget::updateFieldValues()
 {
-   for(QMap<QTreeWidgetItem*, Feature*>::iterator iter = mFeatures.begin(); iter != mFeatures.end(); ++iter)
+   for (QMap<QTreeWidgetItem*, Feature*>::iterator iter = mFeatures.begin(); iter != mFeatures.end(); ++iter)
    {
       QTreeWidgetItem* pItem = iter.key();
       Feature* pFeature = iter.value();
 
-      if((pItem != NULL) && (pFeature != NULL))
+      if ((pItem != NULL) && (pFeature != NULL))
       {
          vector<string> fieldNames = pFeature->getFieldNames();
 
-         for(vector<string>::iterator fieldIter = fieldNames.begin(); fieldIter != fieldNames.end(); ++fieldIter)
+         for (vector<string>::iterator fieldIter = fieldNames.begin(); fieldIter != fieldNames.end(); ++fieldIter)
          {
             string name = *fieldIter;
-            if(!name.empty())
+            if (!name.empty())
             {
                string type = pFeature->getFieldType(name);
                QString strValue;
@@ -646,31 +621,18 @@ void ShapeFileDlg::updateFieldValues()
                strValue = QString::fromStdString(var.toDisplayString());
 
                int iColumn = getColumn(QString::fromLatin1(name.c_str()));
-               if(iColumn == -1)
+               if (iColumn == -1)
                {
                   addField(QString::fromLatin1(name.c_str()), QString::fromLatin1(type.c_str()));
                   iColumn = getColumn(QString::fromLatin1(name.c_str()));
                }
 
-               if(iColumn != -1)
+               if (iColumn != -1)
                {
                   pItem->setText(iColumn, strValue);
                }
             }
          }
-      }
-   }
-}
-
-void ShapeFileDlg::save()
-{
-   if(mpShapeFile != NULL)
-   {
-      string errorMessage = "";
-
-      if(!mpShapeFile->save(NULL, errorMessage) && !errorMessage.empty())
-      {
-         QMessageBox::critical(this, windowTitle(), QString::fromStdString(errorMessage));
       }
    }
 }

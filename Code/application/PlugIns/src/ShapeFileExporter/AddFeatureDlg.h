@@ -17,24 +17,24 @@
 
 #include <vector>
 
-class DataElement;
+class AoiElement;
 
 class AddFeatureDlg : public QDialog
 {
    Q_OBJECT
 
 public:
-   AddFeatureDlg(QWidget* parent = 0);
+   AddFeatureDlg(const std::vector<AoiElement*>& aois, QWidget* parent = 0);
    ~AddFeatureDlg();
 
-   std::vector<DataElement*> getDataElements() const;
+   std::vector<AoiElement*> getAoiElements() const;
 
 protected:
    void accept();
 
 private:
    QTreeWidget* mpElementTree;
-   QMap<QTreeWidgetItem*, DataElement*> mElements;
+   QMap<QTreeWidgetItem*, AoiElement*> mElements;
 };
 
 #endif

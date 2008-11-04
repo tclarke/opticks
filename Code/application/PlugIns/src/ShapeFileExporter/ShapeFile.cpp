@@ -61,13 +61,13 @@ void ShapeFile::attached(Subject &subject, const string &signal, const Slot &slo
 void ShapeFile::shapeAttached(Subject &subject, const string &signal, const boost::any &v)
 {
    Feature* pFeature = dynamic_cast<Feature*>(&subject);
-   if(pFeature != NULL)
+   if (pFeature != NULL)
    {
-      for(map<string, string>::iterator iter = mFields.begin(); iter != mFields.end(); ++iter)
+      for (map<string, string>::iterator iter = mFields.begin(); iter != mFields.end(); ++iter)
       {
          string name = iter->first;
          string type = iter->second;
-         if(!name.empty() && !type.empty())
+         if (!name.empty() && !type.empty())
          {
             pFeature->addField(name, type);
          }
@@ -78,16 +78,16 @@ void ShapeFile::shapeAttached(Subject &subject, const string &signal, const boos
 void ShapeFile::shapeModified(Subject &subject, const string &signal, const boost::any &v)
 {
    Feature* pFeature = dynamic_cast<Feature*>(&subject);
-   if(pFeature != NULL)
+   if (pFeature != NULL)
    {
       vector<string> fieldNames = pFeature->getFieldNames();
 
-      for(vector<string>::iterator iter = fieldNames.begin(); iter != fieldNames.end(); ++iter)
+      for (vector<string>::iterator iter = fieldNames.begin(); iter != fieldNames.end(); ++iter)
       {
          string name = *iter;
-         if(!name.empty())
+         if (!name.empty())
          {
-            if(!hasField(name))
+            if (!hasField(name))
             {
                string type = pFeature->getFieldType(name);
                addField(name, type);
@@ -117,25 +117,18 @@ ShapeType ShapeFile::getShape() const
    return mShape;
 }
 
-vector<Feature*> ShapeFile::addFeatures(DataElement* pElement, string& message)
+vector<Feature*> ShapeFile::addFeatures(DataElement* pElement, RasterElement* pGeoref, string& message)
 {
    vector<Feature*> features;
    message.clear();
 
-   if(pElement == NULL)
+   if (pElement == NULL)
    {
       message = "Features cannot be added because the data element is invalid!";
       return features;
    }
 
-   // Get a corresponding georeferenced RasterElement from the incoming element
-   RasterElement* pGeoref = dynamic_cast<RasterElement*>(pElement);
    if (pGeoref == NULL || !pGeoref->isGeoreferenced())
-   {
-      pGeoref = dynamic_cast<RasterElement*>(pElement->getParent());
-   }
-
-   if(pGeoref == NULL || !pGeoref->isGeoreferenced())
    {
       message = "No georeferencing information can be found.";
       return features;
@@ -145,27 +138,27 @@ vector<Feature*> ShapeFile::addFeatures(DataElement* pElement, string& message)
    string elementName = pElement->getName();
 
    AoiElement *pAoi = dynamic_cast<AoiElement*>(pElement);
-   if(pAoi != NULL)
+   if (pAoi != NULL)
    {
-      if(mShape == POINT_SHAPE)
+      if (mShape == POINT_SHAPE)
       {      
          const BitMask* pMask = pAoi->getSelectedPoints();
-         if((pMask != NULL) && (pMask->getCount() > 0))
+         if ((pMask != NULL) && (pMask->getCount() > 0))
          {
             // Add features for each selected pixel
             int startColumn=0, endColumn=0, startRow=0, endRow=0;
             pMask->getBoundingBox(startColumn, startRow, endColumn, endRow);
 
             LocationType pixel;
-            for(int i = startColumn; i <= endColumn; i++)
+            for (int i = startColumn; i <= endColumn; i++)
             {
-               for(int j = startRow; j <= endRow; j++)
+               for (int j = startRow; j <= endRow; j++)
                {
-                  if(pMask->getPixel(i, j))
+                  if (pMask->getPixel(i, j))
                   {
                      // Add the feature
                      Feature* pFeature = new Feature(mShape);
-                     if(pFeature != NULL)
+                     if (pFeature != NULL)
                      {
                         features.push_back(pFeature);
                         mFeatures.push_back(pFeature);
@@ -178,14 +171,13 @@ vector<Feature*> ShapeFile::addFeatures(DataElement* pElement, string& message)
                         pFeature->addField("Name", string());
                         pFeature->addField("Pixel", string());
 
-                        if(!elementName.empty())
+                        if (!elementName.empty())
                         {
                            pFeature->setFieldValue("Name", elementName);
                         }
 
                         string pixelName = "";
-                        //pAoi->getPixelName(pixel, pixelName);
-                        if(!pixelName.empty())
+                        if (!pixelName.empty())
                         {
                            pFeature->setFieldValue("Pixel", pixelName);
                         }
@@ -226,19 +218,19 @@ vector<Feature*> ShapeFile::addFeatures(DataElement* pElement, string& message)
             }
             const std::vector<LocationType> &vertices = pObj->getVertices();
             Feature *pFeature = new Feature(mShape);
-            if(pFeature != NULL)
+            if (pFeature != NULL)
             {
                features.push_back(pFeature);
                mFeatures.push_back(pFeature);
                pFeature->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &ShapeFile::shapeModified));
 
                pFeature->addField("Name", string());
-               if(!elementName.empty())
+               if (!elementName.empty())
                {
                   pFeature->setFieldValue("Name", elementName);
                }
 
-               for(unsigned int i = 0; i < vertices.size(); ++i)
+               for (unsigned int i = 0; i < vertices.size(); ++i)
                {
                   LocationType geo = pGeoref->convertPixelToGeocoord(vertices[i]);
                   pFeature->addVertex(geo.mY, geo.mX);
@@ -273,19 +265,19 @@ vector<Feature*> ShapeFile::addFeatures(DataElement* pElement, string& message)
             }
             const std::vector<LocationType> &vertices = pObj->getVertices();
             Feature *pFeature = new Feature(mShape);
-            if(pFeature != NULL)
+            if (pFeature != NULL)
             {
                features.push_back(pFeature);
                mFeatures.push_back(pFeature);
                pFeature->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &ShapeFile::shapeModified));
 
                pFeature->addField("Name", string());
-               if(!elementName.empty())
+               if (!elementName.empty())
                {
                   pFeature->setFieldValue("Name", elementName);
                }
 
-               for(unsigned int i = 0; i < vertices.size(); ++i)
+               for (unsigned int i = 0; i < vertices.size(); ++i)
                {
                   LocationType geo = pGeoref->convertPixelToGeocoord(vertices[i]);
                   pFeature->addVertex(geo.mY, geo.mX);
@@ -293,15 +285,15 @@ vector<Feature*> ShapeFile::addFeatures(DataElement* pElement, string& message)
             }
          }
       }
-      else if(mShape == MULTIPOINT_SHAPE)
+      else if (mShape == MULTIPOINT_SHAPE)
       {
          const BitMask* pMask = pAoi->getSelectedPoints();
 
-         if((pMask != NULL) && (pMask->getCount() > 0))
+         if ((pMask != NULL) && (pMask->getCount() > 0))
          {
             // Add the feature
             Feature* pFeature = new Feature(mShape);
-            if(pFeature != NULL)
+            if (pFeature != NULL)
             {
                features.push_back(pFeature);
                mFeatures.push_back(pFeature);
@@ -309,7 +301,7 @@ vector<Feature*> ShapeFile::addFeatures(DataElement* pElement, string& message)
 
                // Fields
                pFeature->addField("Name", string());
-               if(!elementName.empty())
+               if (!elementName.empty())
                {
                   pFeature->setFieldValue("Name", elementName);
                }
@@ -319,11 +311,11 @@ vector<Feature*> ShapeFile::addFeatures(DataElement* pElement, string& message)
                pMask->getBoundingBox(startColumn, startRow, endColumn, endRow);
 
                LocationType pixel;
-               for(int i = startColumn; i <= endColumn; i++)
+               for (int i = startColumn; i <= endColumn; i++)
                {
-                  for(int j = startRow; j <= endRow; j++)
+                  for (int j = startRow; j <= endRow; j++)
                   {
-                     if(pMask->getPixel(i, j))
+                     if (pMask->getPixel(i, j))
                      {
                         pixel.mX = i + 0.5;
                         pixel.mY = j + 0.5;
@@ -343,7 +335,7 @@ vector<Feature*> ShapeFile::addFeatures(DataElement* pElement, string& message)
       }
    }
 
-   if(features.empty())
+   if (features.empty())
    {
       message = elementName + " has no selected points, so no features can be added.";
    }
@@ -353,15 +345,15 @@ vector<Feature*> ShapeFile::addFeatures(DataElement* pElement, string& message)
 
 bool ShapeFile::removeFeature(Feature* pFeature)
 {
-   if(pFeature == NULL)
+   if (pFeature == NULL)
    {
       return false;
    }
 
-   for(vector<Feature*>::iterator iter = mFeatures.begin(); iter != mFeatures.end(); ++iter)
+   for (vector<Feature*>::iterator iter = mFeatures.begin(); iter != mFeatures.end(); ++iter)
    {
       Feature* pCurrentFeature = *iter;
-      if(pCurrentFeature == pFeature)
+      if (pCurrentFeature == pFeature)
       {
          mFeatures.erase(iter);
          pFeature->detach(SIGNAL_NAME(Subject, Modified), Slot(this, &ShapeFile::shapeModified));
@@ -385,10 +377,10 @@ unsigned int ShapeFile::getNumFeatures() const
 
 void ShapeFile::removeAllFeatures()
 {
-   for(vector<Feature*>::iterator iter = mFeatures.begin(); iter != mFeatures.end(); ++iter)
+   for (vector<Feature*>::iterator iter = mFeatures.begin(); iter != mFeatures.end(); ++iter)
    {
       Feature* pFeature = *iter;
-      if(pFeature != NULL)
+      if (pFeature != NULL)
       {
          pFeature->detach(SIGNAL_NAME(Subject, Modified), Slot(this, &ShapeFile::shapeModified));
          delete pFeature;
@@ -400,17 +392,17 @@ void ShapeFile::removeAllFeatures()
 
 bool ShapeFile::addField(const string& name, const string& type)
 {
-   if(hasField(name))
+   if (hasField(name))
    {
       return false;
    }
 
    mFields[name] = type;
 
-   for(vector<Feature*>::iterator iter = mFeatures.begin(); iter != mFeatures.end(); ++iter)
+   for (vector<Feature*>::iterator iter = mFeatures.begin(); iter != mFeatures.end(); ++iter)
    {
       Feature* pFeature = *iter;
-      if(pFeature != NULL)
+      if (pFeature != NULL)
       {
          pFeature->addField(name, type);
       }
@@ -421,17 +413,17 @@ bool ShapeFile::addField(const string& name, const string& type)
 
 bool ShapeFile::removeField(const string& name)
 {
-   if(!hasField(name))
+   if (!hasField(name))
    {
       return false;
    }
 
    mFields.erase(name);
 
-   for(vector<Feature*>::iterator iter = mFeatures.begin(); iter != mFeatures.end(); ++iter)
+   for (vector<Feature*>::iterator iter = mFeatures.begin(); iter != mFeatures.end(); ++iter)
    {
       Feature* pFeature = *iter;
-      if(pFeature != NULL)
+      if (pFeature != NULL)
       {
          pFeature->removeField(name);
       }
@@ -449,10 +441,10 @@ vector<string> ShapeFile::getFieldNames() const
 {
    vector<string> fieldNames;
 
-   for(map<string, string>::const_iterator iter = mFields.begin(); iter != mFields.end(); ++iter)
+   for (map<string, string>::const_iterator iter = mFields.begin(); iter != mFields.end(); ++iter)
    {
       string name = iter->first;
-      if(!name.empty())
+      if (!name.empty())
       {
          fieldNames.push_back(name);
       }
@@ -466,7 +458,7 @@ string ShapeFile::getFieldType(const string& name) const
    string type = "";
 
    map<string, string>::const_iterator iter = mFields.find(name);
-   if(iter != mFields.end())
+   if (iter != mFields.end())
    {
       type = iter->second;
    }
@@ -477,7 +469,7 @@ string ShapeFile::getFieldType(const string& name) const
 bool ShapeFile::hasField(const string& name) const
 {
    map<string, string>::const_iterator iter = mFields.find(name);
-   if(iter != mFields.end())
+   if (iter != mFields.end())
    {
       return true;
    }
@@ -489,10 +481,10 @@ void ShapeFile::removeAllFields()
 {
    mFields.clear();
 
-   for(vector<Feature*>::iterator iter = mFeatures.begin(); iter != mFeatures.end(); ++iter)
+   for (vector<Feature*>::iterator iter = mFeatures.begin(); iter != mFeatures.end(); ++iter)
    {
       Feature* pFeature = *iter;
-      if(pFeature != NULL)
+      if (pFeature != NULL)
       {
          pFeature->clearFields();
       }
@@ -504,10 +496,10 @@ bool ShapeFile::save(Progress* pProgress, string& errorMessage)
    errorMessage.clear();
    int iFeatures = mFeatures.size();
 
-   if(iFeatures == 0)
+   if (iFeatures == 0)
    {
       errorMessage = "There are no features to save!";
-      if(pProgress != NULL)
+      if (pProgress != NULL)
       {
          pProgress->updateProgress(errorMessage, 0, ERRORS);
       }
@@ -520,28 +512,28 @@ bool ShapeFile::save(Progress* pProgress, string& errorMessage)
    DBFHandle pAttributeFile = NULL;
 
    int iType = -1;
-   if(mShape == POINT_SHAPE)
+   if (mShape == POINT_SHAPE)
    {
       iType = SHPT_POINT;
    }
-   else if(mShape == POLYLINE_SHAPE)
+   else if (mShape == POLYLINE_SHAPE)
    {
       iType = SHPT_ARC;
    }
-   else if(mShape == POLYGON_SHAPE)
+   else if (mShape == POLYGON_SHAPE)
    {
       iType = SHPT_POLYGON;
    }
-   else if(mShape == MULTIPOINT_SHAPE)
+   else if (mShape == MULTIPOINT_SHAPE)
    {
       iType = SHPT_MULTIPOINT;
    }
 
    pShapeFile = SHPCreate(mFilename.c_str(), iType);
-   if(pShapeFile == NULL)
+   if (pShapeFile == NULL)
    {
       errorMessage = "Cannot create the SHP and SHX files!";
-      if(pProgress != NULL)
+      if (pProgress != NULL)
       {
          pProgress->updateProgress(errorMessage, 0, ERRORS);
       }
@@ -550,12 +542,12 @@ bool ShapeFile::save(Progress* pProgress, string& errorMessage)
    }
 
    pAttributeFile = DBFCreate(mFilename.c_str());
-   if(pAttributeFile == NULL)
+   if (pAttributeFile == NULL)
    {
       SHPClose(pShapeFile);
 
       errorMessage = "Cannot create the DBF file!";
-      if(pProgress != NULL)
+      if (pProgress != NULL)
       {
          pProgress->updateProgress(errorMessage, 0, ERRORS);
       }
@@ -568,9 +560,9 @@ bool ShapeFile::save(Progress* pProgress, string& errorMessage)
    int iFields = mFields.size();
    int i = 0;
 
-   for(map<string, string>::iterator iter = mFields.begin(); iter != mFields.end(); ++iter, ++i)
+   for (map<string, string>::iterator iter = mFields.begin(); iter != mFields.end(); ++iter, ++i)
    {
-      if(pProgress != NULL)
+      if (pProgress != NULL)
       {
          pProgress->updateProgress("Writing fields...", i * 33 / iFields, NORMAL);
       }
@@ -578,31 +570,31 @@ bool ShapeFile::save(Progress* pProgress, string& errorMessage)
       string name = iter->first;
       string type = iter->second;
 
-      if(!name.empty())
+      if (!name.empty())
       {
          DBFFieldType eFieldType = FTInvalid;
          int iWidth = 0;
          int iDecimalPlaces = 0;
 
-         if((type == "char") || (type == "short") || (type == "int"))
+         if ((type == "char") || (type == "short") || (type == "int"))
          {
             eFieldType = FTInteger;
             iWidth = 18;
          }
-         else if((type == "float") || (type == "double"))
+         else if ((type == "float") || (type == "double"))
          {
             eFieldType = FTDouble;
             iWidth = 19;
             iDecimalPlaces = 8;
          }
-         else if(type == "string")
+         else if (type == "string")
          {
             eFieldType = FTString;
             iWidth = 254;
          }
 
          int iFieldId = DBFAddField(pAttributeFile, name.c_str(), eFieldType, iWidth, iDecimalPlaces);
-         if(iFieldId != -1)
+         if (iFieldId != -1)
          {
             fieldIds[name] = iFieldId;
          }
@@ -610,15 +602,15 @@ bool ShapeFile::save(Progress* pProgress, string& errorMessage)
    }
 
    // Save the features and attributes
-   for(i = 0; i < iFeatures; i++)
+   for (i = 0; i < iFeatures; i++)
    {
-      if(pProgress != NULL)
+      if (pProgress != NULL)
       {
          pProgress->updateProgress("Writing features...", 33 + (i * 67 / iFeatures), NORMAL);
       }
 
       Feature* pFeature = mFeatures[i];
-      if(pFeature != NULL)
+      if (pFeature != NULL)
       {
          // Features
          const vector<Feature::FeatureVertex>& vertices = pFeature->getVertices();
@@ -628,7 +620,7 @@ bool ShapeFile::save(Progress* pProgress, string& errorMessage)
          vector<double> dY(iVertices);
          vector<double> dZ(iVertices);
 
-         for(int j = 0; j < iVertices; j++)
+         for (int j = 0; j < iVertices; j++)
          {
             Feature::FeatureVertex vertex = vertices[j];
             dX[j] = vertex.mX;
@@ -636,17 +628,17 @@ bool ShapeFile::save(Progress* pProgress, string& errorMessage)
             dZ[j] = vertex.mZ;
          }
 
-         if(mShape == POLYGON_SHAPE)
+         if (mShape == POLYGON_SHAPE)
          {
             // make sure there are no collinear segments by calculating
             // the area of the triangle defined by each point triplet
             // if the area is 0, the points are collinear so we remove the
             // middle point and continue
-            for(int a = 0; a < (iVertices - 2); a++)
+            for (int a = 0; a < (iVertices - 2); a++)
             {
                int b = a+1, c = a+2;
                double area = dX[a] * (dY[b] - dY[c]) + dX[b] * (dY[c] - dY[a]) + dX[c] * (dY[a] - dY[b]);
-               if(fabs(area) < 1e-15) // equals zero
+               if (fabs(area) < 1e-15) // equals zero
                {
                   dX.erase(dX.begin() + b);
                   dY.erase(dY.begin() + b);
@@ -659,7 +651,7 @@ bool ShapeFile::save(Progress* pProgress, string& errorMessage)
 
          SHPObject* pObject = SHPCreateObject(iType, i, 0, NULL, NULL, iVertices,
                                               &dX.front(), &dY.front(), &dZ.front(), NULL);
-         if(pObject != NULL)
+         if (pObject != NULL)
          {
             SHPRewindObject(pShapeFile, pObject);
             SHPWriteObject(pShapeFile, -1, pObject);
@@ -667,28 +659,28 @@ bool ShapeFile::save(Progress* pProgress, string& errorMessage)
          }
 
          // Attributes
-         for(map<string, int>::iterator iter = fieldIds.begin(); iter != fieldIds.end(); ++iter)
+         for (map<string, int>::iterator iter = fieldIds.begin(); iter != fieldIds.end(); ++iter)
          {
             string name = iter->first;
             int iFieldId = iter->second;
 
-            if(!name.empty())
+            if (!name.empty())
             {
                const DataVariant &var = pFeature->getFieldValue(name);
-               if(var.isValid())
+               if (var.isValid())
                {
                   string fieldType = pFeature->getFieldType(name);
                   if (fieldType == var.getTypeName())
                   {
-                     if(fieldType == "int")
+                     if (fieldType == "int")
                      {
                         DBFWriteIntegerAttribute(pAttributeFile, i, iFieldId, dv_cast<int>(var));
                      }
-                     else if(fieldType == "double")
+                     else if (fieldType == "double")
                      {
                         DBFWriteDoubleAttribute(pAttributeFile, i, iFieldId, dv_cast<double>(var));
                      }
-                     else if(fieldType == "string")
+                     else if (fieldType == "string")
                      {
                         DBFWriteStringAttribute(pAttributeFile, i, iFieldId, dv_cast<string>(var).c_str());
                      }
@@ -710,7 +702,7 @@ bool ShapeFile::save(Progress* pProgress, string& errorMessage)
    ofstream prjFile(prjFilename.c_str());
    prjFile << prjFileContents;
    prjFile.close();
-   if(pProgress != NULL)
+   if (pProgress != NULL)
    {
       pProgress->updateProgress("Shape files saved!", 100, NORMAL);
    }
@@ -720,12 +712,12 @@ bool ShapeFile::save(Progress* pProgress, string& errorMessage)
 
 void ShapeFile::cleanup()
 {
-   if(mpAttributeFile != NULL)
+   if (mpAttributeFile != NULL)
    {
       DBFClose(mpAttributeFile);
       mpAttributeFile = NULL;
    }
-   if(mpShapeFile != NULL)
+   if (mpShapeFile != NULL)
    {
       SHPClose(mpShapeFile);
       mpShapeFile = NULL;

@@ -10,10 +10,18 @@
 #ifndef SHAPEFILEEXPORTER_H
 #define SHAPEFILEEXPORTER_H
 
+#include <QtGui/QWidget>
+
 #include "ExporterShell.h"
 #include "PlugInManagerServices.h"
+#include "ShapeFile.h"
 
 #include <string>
+
+class AoiElement;
+class LayerList;
+class RasterElement;
+class ShapeFileOptionsWidget;
 
 class ShapeFileExporter : public ExporterShell
 {
@@ -23,13 +31,17 @@ public:
 
    bool getInputSpecification(PlugInArgList*& pArgList);
    bool getOutputSpecification(PlugInArgList*& pArgList);
-   bool setBatch();
-   bool setInteractive();
    bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
+   QWidget* getExportOptionsWidget(const PlugInArgList* pInArgList);
 
 private:
-   bool mbInteractive;
    Service<PlugInManagerServices> mpPlugInManager;
+   std::auto_ptr<ShapeFileOptionsWidget> mpOptionsWidget;
+   ShapeFile mShapefile;
+   AoiElement* mpAoi;
+   RasterElement* mpGeoref;
+   LayerList* mpLayers;
+   bool extractInputs(const PlugInArgList* pInArgList, std::string& message);
 };
 
 #endif   // SHAPEFILEEXPORTER_H
