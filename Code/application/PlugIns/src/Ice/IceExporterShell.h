@@ -17,6 +17,7 @@
 #include <string>
 
 class IceWriter;
+class OptionsIceExporter;
 class PlugInArgList;
 class Progress;
 class RasterElement;
@@ -31,6 +32,7 @@ public:
    bool abort();
    bool getInputSpecification(PlugInArgList*& pArgList);
    bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
+   QWidget* getExportOptionsWidget(const PlugInArgList* pInArgList);
 
 protected:
    Progress *mpProgress;
@@ -47,6 +49,7 @@ private:
    Service<PlugInManagerServices> mpPlugInMgr;
    IceWriter* mpWriter;
    const IceUtilities::FileType mFileType;
+   std::auto_ptr<OptionsIceExporter> mpOptionsWidget;
 };
 
 #endif

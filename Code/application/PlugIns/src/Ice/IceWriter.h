@@ -10,6 +10,7 @@
 #ifndef ICE_WRITER_H
 #define ICE_WRITER_H
 
+#include "EnumWrapper.h"
 #include "Hdf5Resource.h"
 #include "IceUtilities.h"
 
@@ -24,9 +25,22 @@ class RasterElement;
 class RasterFileDescriptor;
 class Progress;
 
+enum IceCompressionTypeEnum
+{
+   NONE,
+   GZIP,
+   SHUFFLE_AND_GZIP
+};
+
+typedef EnumWrapper<IceCompressionTypeEnum> IceCompressionType;
+
 class IceWriter
 {
 public:
+   SETTING(CompressionType, IceWriter, std::string, std::string());
+   SETTING(GzipCompressionLevel, IceWriter, int, 0);
+   SETTING(ChunkSize, IceWriter, int, 0);
+
    IceWriter(hid_t fileHandle, IceUtilities::FileType fileType);
    void writeFileHeader();
    void writeCube(const std::string& hdfPath, RasterElement* pCube,
@@ -34,6 +48,13 @@ public:
    void writeLayer(const std::string& hdfPath, const std::string& datasetPath,
       const Layer* pLayer, Progress* pProgress);
    void abort();
+   void setChunkSize(int chunkSize);
+   void setCompressionType(IceCompressionType type);
+   void setGzipCompressionLevel(int level);
+
+   int getChunkSize() const;
+   IceCompressionType getCompressionType() const;
+   int getGzipCompressionLevel() const;
 
 private:
    void writeBipCubeData(const std::string& hdfPath,
@@ -65,6 +86,9 @@ private:
    hid_t mFileHandle;
    bool mAborted;
    IceUtilities::FileType mFileType;
+   int mChunkSize;
+   IceCompressionType mCompressionType;
+   int mGzipCompressionLevel;
 };
 
 #endif

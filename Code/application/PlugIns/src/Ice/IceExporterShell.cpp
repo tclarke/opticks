@@ -11,6 +11,7 @@
 #include "IceExporterShell.h"
 #include "IceUtilities.h"
 #include "IceWriter.h"
+#include "OptionsIceExporter.h"
 #include "PlugInArgList.h"
 #include "Progress.h"
 #include "RasterDataDescriptor.h"
@@ -79,6 +80,22 @@ bool IceExporterShell::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
 
       IceWriter writer(*fileResource, mFileType);
       mpWriter = &writer;
+      if (mpOptionsWidget.get() != NULL)
+      {
+         writer.setChunkSize(mpOptionsWidget->getChunkSize() * 1024 * 1024);
+         writer.setCompressionType(mpOptionsWidget->getCompressionType());
+         writer.setGzipCompressionLevel(mpOptionsWidget->getGzipCompressionLevel());
+      }
+      if ((pRasterDescriptor->getDataType() == INT4SCOMPLEX || pRasterDescriptor->getDataType() == FLT8COMPLEX)
+       && (writer.getCompressionType() == GZIP || writer.getCompressionType() == SHUFFLE_AND_GZIP))
+      {
+         std::string msgtxt = "Compression not supported with complex data types, data will not be compressed.";
+         MessageResource msg(msgtxt, "app", "{7B050EE4-D025-43b2-AD8F-DF8E28FA8551}");
+         if (mpProgress != NULL)
+         {
+            mpProgress->updateProgress(msgtxt, 1, WARNING);
+         }
+      }
 
       writer.writeFileHeader();
       abortIfNecessary();
@@ -139,6 +156,17 @@ bool IceExporterShell::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
    }
 
    return true;
+}
+
+QWidget* IceExporterShell::getExportOptionsWidget(const PlugInArgList*)
+{
+   if (mpOptionsWidget.get() == NULL)
+   {
+      mpOptionsWidget.reset(new OptionsIceExporter());
+      mpOptionsWidget->setSaveSettings(false);
+   }
+
+   return mpOptionsWidget.get();
 }
 
 void IceExporterShell::parseInputArgs(PlugInArgList* pInArgList)

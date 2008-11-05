@@ -30,6 +30,7 @@
 #include "Statistics.h"
 #include "StatisticsReaderWriter.h"
 #include "StringUtilities.h"
+#include "StringUtilitiesMacros.h"
 #include "TypesFile.h"
 #include "Units.h"
 #include "xmlwriter.h"
@@ -66,10 +67,19 @@ namespace
    }
 };
 
+BEGIN_ENUM_MAPPING(IceCompressionType)
+ADD_ENUM_MAPPING(NONE, "None", "none")
+ADD_ENUM_MAPPING(GZIP, "GZIP", "gzip")
+ADD_ENUM_MAPPING(SHUFFLE_AND_GZIP, "Shuffle+GZIP", "shuffle_gzip")
+END_ENUM_MAPPING()
+
 IceWriter::IceWriter(hid_t fileHandle, IceUtilities::FileType fileType) :
    mFileHandle(fileHandle),
    mAborted(false),
-   mFileType(fileType)
+   mFileType(fileType),
+   mChunkSize(std::max(IceWriter::getSettingChunkSize(), 1) * 1024 * 1024), // convert from MB to bytes
+   mCompressionType(StringUtilities::fromXmlString<IceCompressionType>(IceWriter::getSettingCompressionType())),
+   mGzipCompressionLevel(std::max(std::min(IceWriter::getSettingGzipCompressionLevel(), 9), 0))
 {
 }
 
@@ -558,7 +568,7 @@ void IceWriter::writeBipCubeData(const string& hdfPath,
    compSpace[2] = dimSpace[2] = bands.size();
 
    unsigned int rowSize = cols.size() * bands.size() * bpe;
-   unsigned int rowsInChunk = (1024*1024)/rowSize; // determine number of rows that fit into a 1MB chunk
+   unsigned int rowsInChunk = mChunkSize/rowSize; // determine number of rows that fit into a chunk
    if (rowsInChunk > rows.size())
    {
       rowsInChunk = rows.size();
@@ -735,12 +745,12 @@ void IceWriter::writeBsqCubeData(const string& hdfPath,
    dimSpace[1] = rows.size();
    dimSpace[2] = cols.size();
 
-   // compress in 1024x1024 chunks
+   // compress in chunks
    compSpace[0] = counts[0] = 1; //only try to fit 1 band into a chunk
    compSpace[2] = counts[2] = cols.size();
 
    unsigned int rowSize = cols.size() * bpe;
-   unsigned int rowsInChunk = (1024*1024)/rowSize; // determine number of rows that fit into a 1MB chunk
+   unsigned int rowsInChunk = mChunkSize/rowSize; // determine number of rows that fit into a chunk
    if (rowsInChunk > rows.size())
    {
       rowsInChunk = rows.size();
@@ -900,6 +910,20 @@ void IceWriter::createDatasetForCube(hsize_t dimSpace[3],
       plist = H5Pcreate(H5P_DATASET_CREATE);
       herr_t status = H5Pset_chunk(plist, 3, chunkSpace);
       ICEVERIFY(status >= 0);
+      switch(mCompressionType)
+      {
+      case SHUFFLE_AND_GZIP:
+         status = H5Pset_shuffle(plist);
+         ICEVERIFY(status >= 0);
+         // fall through
+      case GZIP:
+         status = H5Pset_deflate(plist, mGzipCompressionLevel);
+         ICEVERIFY(status >= 0);
+         break;
+      case NONE:
+      default:
+         break;
+      }
    }
 
    Hdf5DataSpaceResource dspaceId(H5Screate_simple(3, dimSpace, NULL));
@@ -987,6 +1011,36 @@ void IceWriter::writeLayerProperties(const string& hdfPath,
 void IceWriter::abort()
 {
    mAborted = true;
+}
+
+void IceWriter::setChunkSize(int chunkSize)
+{
+   mChunkSize = chunkSize;
+}
+
+void IceWriter::setCompressionType(IceCompressionType type)
+{
+   mCompressionType = type;
+}
+
+void IceWriter::setGzipCompressionLevel(int level)
+{
+   mGzipCompressionLevel = level;
+}
+
+int IceWriter::getChunkSize() const
+{
+   return mChunkSize;
+}
+
+IceCompressionType IceWriter::getCompressionType() const
+{
+   return mCompressionType;
+}
+
+int IceWriter::getGzipCompressionLevel() const
+{
+   return mGzipCompressionLevel;
 }
 
 void IceWriter::abortIfNecessary()
