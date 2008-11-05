@@ -13,6 +13,7 @@
 #include "EnumWrapper.h"
 #include "Hdf5Resource.h"
 #include "IceUtilities.h"
+#include "StringUtilities.h"
 
 #include <hdf5.h>
 #include <string>
@@ -90,5 +91,17 @@ private:
    IceCompressionType mCompressionType;
    int mGzipCompressionLevel;
 };
+
+namespace StringUtilities
+{
+   template<>
+   std::string toDisplayString(const IceCompressionType& value, bool* pError);
+   template<>
+   std::string toXmlString(const IceCompressionType& value, bool* pError);
+   template<>
+   IceCompressionType fromDisplayString<IceCompressionType>(std::string valueText, bool* pError);
+   template<>
+   IceCompressionType fromXmlString<IceCompressionType>(std::string valueText, bool* pError);
+}
 
 #endif
