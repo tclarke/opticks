@@ -62,6 +62,7 @@ PropertiesMeasurementLayer::PropertiesMeasurementLayer() :
    // Connections
    VERIFYNR(connect(mpObjectsList, SIGNAL(itemSelectionChanged()), this, SLOT(updateProperties())));
    VERIFYNR(mPropertiesModifier.attachSignal(mpPropertiesWidget, SIGNAL(modified())));
+   VERIFYNR(mNameModifier.attachSignal(mpObjectsList, SIGNAL(itemChanged(QListWidgetItem*))));
 }
 
 PropertiesMeasurementLayer::~PropertiesMeasurementLayer()
@@ -93,6 +94,7 @@ bool PropertiesMeasurementLayer::initialize(SessionItem* pSessionItem)
          if (pItem != NULL)
          {
             mObjects[pItem] = pObject;
+            pItem->setFlags(pItem->flags() | Qt::ItemIsEditable);
             if (mpMeasurementLayer->isObjectSelected(pObject) == true)
             {
                pItem->setSelected(true);
@@ -104,6 +106,7 @@ bool PropertiesMeasurementLayer::initialize(SessionItem* pSessionItem)
    VERIFY(mpPropertiesWidget->initialize(objects));
    mpLockCheck->setChecked(mpMeasurementLayer->getLayerLocked());
    mPropertiesModifier.setModified(false);
+   mNameModifier.setModified(false);
    updateProperties();
 
    VERIFYNR(connect(mpObjectsList, SIGNAL(itemSelectionChanged()), this, SLOT(updateProperties())));
@@ -120,13 +123,31 @@ bool PropertiesMeasurementLayer::applyChanges()
    string actionText = "Set " + getName();
    UndoGroup group(mpMeasurementLayer->getView(), actionText);
 
+   for (int i = 0; i < mpObjectsList->count(); ++i)
+   {
+      QListWidgetItem* pItem = mpObjectsList->item(i);
+      if (pItem != NULL)
+      {
+         map<QListWidgetItem*, GraphicObject*>::iterator iter = mObjects.find(pItem);
+         if (iter != mObjects.end())
+         {
+            GraphicObject* pObject = iter->second;
+            if (pObject != NULL)
+            {
+               pObject->setName(pItem->text().toStdString());
+            }
+         }
+      }
+   }
+   mNameModifier.setModified(false);
+
    bool bSuccess = mpPropertiesWidget->applyChanges();
    if (bSuccess == true)
    {
       mpMeasurementLayer->setLayerLocked(mpLockCheck->isChecked());
       mPropertiesModifier.setModified(false);
       mpMeasurementLayer->getView()->refresh();
-   }
+   } 
 
    return bSuccess;
 }
@@ -191,7 +212,7 @@ void PropertiesMeasurementLayer::updateProperties()
       return;
    }
 
-   if (mPropertiesModifier.isModified() == true)
+   if (mPropertiesModifier.isModified() == true || mNameModifier.isModified() == true)
    {
       if (QMessageBox::warning(this, "Properties", "Do you want to apply the changes to the currently "
          "selected object(s)?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
@@ -199,10 +220,31 @@ void PropertiesMeasurementLayer::updateProperties()
          if (!applyChanges()) // warn user if an error occurred
          {
             QMessageBox::warning(this, APP_NAME, "A problem occurred and "
-               "one or more of the property changes may not have been applied");
+               "one or more of the property changes may not have been applied"); 
+         }
+      }
+      else
+      {    
+         for (int i = 0; i < mpObjectsList->count(); ++i)
+         {
+            QListWidgetItem* pItem = mpObjectsList->item(i);
+            if (pItem != NULL)
+            {
+               map<QListWidgetItem*, GraphicObject*>::iterator iter = mObjects.find(pItem);
+               if (iter != mObjects.end())
+               {
+                  GraphicObject* pObject = iter->second;
+                  if (pObject != NULL)
+                  {
+                     pItem->setText(QString::fromStdString(pObject->getName()));
+                  }
+               }
+            }
          }
       }
    }
+
+
 
    QList<QListWidgetItem*> selectedObjects = mpObjectsList->selectedItems();
    if (selectedObjects.empty() == false)
@@ -234,4 +276,5 @@ void PropertiesMeasurementLayer::updateProperties()
    }
 
    mPropertiesModifier.setModified(false);
+   mNameModifier.setModified(false);
 }
