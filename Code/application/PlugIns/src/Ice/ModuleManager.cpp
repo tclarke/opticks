@@ -29,6 +29,8 @@
 #include "IceRasterElementExporter.h"
 #include "IceRasterElementImporter.h"
 #include "ModuleManager.h"
+#include "OptionQWidgetWrapper.h"
+#include "OptionsIceExporter.h"
 
 //
 // These static variables are used to describe the Module.  Set 
@@ -42,7 +44,7 @@ const char *ModuleManager::mspUniqueId = "{2FAC8CEC-0140-4eb0-B587-D2959BDDDF08}
 
 unsigned int ModuleManager::getTotalPlugIns()
 {
-   return 4;
+   return 5;
 }
 
 PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
@@ -62,6 +64,9 @@ PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
          break;
       case 3:
          pPlugIn = new IcePseudocolorLayerImporter;
+         break;
+      case 4:
+         pPlugIn = new OptionQWidgetWrapper<OptionsIceExporter>;
          break;
       default:
          break;
