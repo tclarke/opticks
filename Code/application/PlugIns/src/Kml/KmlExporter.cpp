@@ -94,7 +94,8 @@ bool KmlExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
          progress.report("Primary raster layer is not geo-referenced.", 0, ERRORS, true);
          return false;
       }
-      success = kml.addLayer(pLayer, pElement, pView, pView->getLayerList()->getNumLayers());
+      Layer* pPrimaryLayer = pView->getLayerList()->getLayer(RASTER, pElement);
+      success = kml.addLayer(pLayer, pPrimaryLayer, pView, pView->getLayerList()->getNumLayers());
    }
    if(!success)
    {
