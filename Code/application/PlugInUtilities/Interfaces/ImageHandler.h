@@ -63,9 +63,11 @@ public:
     * @param band
     *        If pItem is a RasterLayer, change to this active band before grabbing the image.
     *        If pItem is not a RasterLayer or band is negative, this is ignored.
+    * @param pBbox
+    *        If this is not NULL, the bounding box as returned by SpatialDataView::getLayerImage() will be returned in this out param.
     * @return True if the image was successfully generated, false otherwise.
     */
-   static bool getSessionItemImage(SessionItem *pItem, QBuffer &buffer, const QString &format, int band);
+   static bool getSessionItemImage(SessionItem *pItem, QBuffer &buffer, const QString &format, int band, int* pBbox = NULL);
 
 protected:
    /**

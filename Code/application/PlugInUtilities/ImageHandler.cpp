@@ -23,6 +23,7 @@
 #include <QtGui/QColor>
 #include <QtGui/QImage>
 #include <QtGui/QImageWriter>
+#include <QtGui/QPainter>
 #include <QtGui/QWidget>
 
 // The encoded image size can not excede this number of bytes.
@@ -86,7 +87,7 @@ MuHttpServer::Response ImageHandler::getRequest(const QString &uri, const QStrin
    return r;
 }
 
-bool ImageHandler::getSessionItemImage(SessionItem *pItem, QBuffer &buffer, const QString &format, int band)
+bool ImageHandler::getSessionItemImage(SessionItem *pItem, QBuffer &buffer, const QString &format, int band, int* pBbox)
 {
    if(format.isEmpty())
    {
@@ -114,13 +115,42 @@ bool ImageHandler::getSessionItemImage(SessionItem *pItem, QBuffer &buffer, cons
             pRasterLayer->setDisplayedBand(GRAY, bandDesc);
             pRasterLayer->setDisplayMode(GRAYSCALE_MODE);
          }
-         QSize sz = pSDView->getWidget()->size();
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This generates reasonably sized exports. Ideally, we should export tiles but that requires changes to the app draw code. (tclarke)")
-         sz.scale(1024, 768, Qt::KeepAspectRatio);
          int bbox[4] = {0,0,0,0};
          QColor t = Qt::transparent;
-         ColorType transparent = QCOLOR_TO_COLORTYPE(t);
+         ColorType realTransparent = QCOLOR_TO_COLORTYPE(t);
+         {
+            QImage dummyImage;
+            int dummyBbox[4] = {0,0,0,0};
+            pSDView->getLayerImage(pLayer, dummyImage, realTransparent, dummyBbox);
+         }
+         ColorType transparent(255, 255, 254);
          success = pSDView->getLayerImage(pLayer, image, transparent, bbox);
+         if (pBbox != NULL)
+         {
+            memcpy(pBbox, bbox, sizeof(bbox));
+         }
+         QImage alphaChannel(image.size(), QImage::Format_Indexed8);
+         if (image.hasAlphaChannel())
+         {
+            alphaChannel = image.alphaChannel();
+         }
+         else
+         {
+            alphaChannel.fill(0xff);
+         }
+         QRgb realTransColor = COLORTYPE_TO_QCOLOR(realTransparent).rgb();
+         QRgb transColor = COLORTYPE_TO_QCOLOR(transparent).rgb();
+         for (int y = 0; y < image.height(); y++)
+         {
+            for (int x = 0; x < image.width(); x++)
+            {
+               if (image.pixel(x, y) == transColor || image.pixel(x, y) == realTransColor)
+               {
+                  alphaChannel.setPixel(x, y, 0x00);
+               }
+            }
+         }
+         image.setAlphaChannel(alphaChannel);
          if(mode.isValid())
          {
             pRasterLayer->setDisplayedBand(GRAY, cur);

@@ -146,6 +146,7 @@ bool Kml::addView(SpatialDataView *pView)
    {
       return false;
    }
+   Layer* pPrimaryLayer = pView->getLayerList()->getLayer(RASTER, pElement);
    mXml.pushAddPoint(mXml.addElement("Folder"));
    string name = pView->getDisplayName();
    if(name.empty())
@@ -160,7 +161,11 @@ bool Kml::addView(SpatialDataView *pView)
    int totalLayers = pView->getLayerList()->getNumLayers();
    for(vector<Layer*>::const_iterator layer = layers.begin(); layer != layers.end(); ++layer)
    {
-      if(!addLayer(*layer, pElement, pView, totalLayers))
+      if(!pView->isLayerDisplayed(*layer))
+      {
+         continue;
+      }
+      if(!addLayer(*layer, pPrimaryLayer, pView, totalLayers))
       {
          return false;
       }
@@ -170,7 +175,7 @@ bool Kml::addView(SpatialDataView *pView)
    return true;
 }
 
-bool Kml::addLayer(Layer *pLayer, RasterElement *pGeoElement, SpatialDataView *pView, int totalLayers)
+bool Kml::addLayer(Layer *pLayer, Layer *pGeoLayer, SpatialDataView *pView, int totalLayers)
 {
    if(pLayer == NULL)
    {
@@ -183,7 +188,7 @@ bool Kml::addLayer(Layer *pLayer, RasterElement *pGeoElement, SpatialDataView *p
    case GRAPHIC_LAYER:
       // These are polygonal layers
       generatePolygonalLayer(dynamic_cast<GraphicLayer*>(pLayer),
-         pView->isLayerDisplayed(pLayer), totalLayers - pView->getLayerDisplayIndex(pLayer), pGeoElement);
+         pView->isLayerDisplayed(pLayer), totalLayers - pView->getLayerDisplayIndex(pLayer), pGeoLayer);
       break;
    case RASTER:
       {
@@ -195,7 +200,7 @@ bool Kml::addLayer(Layer *pLayer, RasterElement *pGeoElement, SpatialDataView *p
             int order = totalLayers - pView->getLayerDisplayIndex(pLayer) - 1;
             if(pView->getAnimationController() == NULL)
             {
-               generateGroundOverlayLayer(pLayer, layerIsDisplayed, order, pGeoElement, -1);
+               generateGroundOverlayLayer(pLayer, layerIsDisplayed, order, pGeoLayer, -1);
             }
             else
             {
@@ -204,7 +209,7 @@ bool Kml::addLayer(Layer *pLayer, RasterElement *pGeoElement, SpatialDataView *p
                vector<DimensionDescriptor> frames = static_cast<RasterDataDescriptor*>(pRasterElement->getDataDescriptor())->getBands();
                for(vector<DimensionDescriptor>::const_iterator frame = frames.begin(); frame != frames.end(); ++frame)
                {
-                  generateGroundOverlayLayer(pLayer, layerIsDisplayed, order, pGeoElement, frame->getActiveNumber());
+                  generateGroundOverlayLayer(pLayer, layerIsDisplayed, order, pGeoLayer, frame->getActiveNumber());
                }
                mXml.popAddPoint();
             }
@@ -214,27 +219,49 @@ bool Kml::addLayer(Layer *pLayer, RasterElement *pGeoElement, SpatialDataView *p
    case PSEUDOCOLOR:
    case THRESHOLD:
       // These are image layers
-      generateGroundOverlayLayer(pLayer, pView->isLayerDisplayed(pLayer), totalLayers - pView->getLayerDisplayIndex(pLayer), pGeoElement);
+      generateGroundOverlayLayer(pLayer, pView->isLayerDisplayed(pLayer), totalLayers - pView->getLayerDisplayIndex(pLayer), pGeoLayer);
       break;
    case CONTOUR_MAP:
    case LAT_LONG:
    case TIEPOINT_LAYER:
    default:
       // These are unsupported layers
-      return false;
+      return true;
    }
    return true;
 }
 
-void Kml::generateBoundingBox(RasterElement *pGeoElement)
+void Kml::generateBoundingBox(Layer *pGeoLayer, int bbox[4])
 {
+   VERIFYNRV(pGeoLayer != NULL);
+   double dbbox[4];
+   pGeoLayer->translateScreenToData(bbox[0], bbox[1], dbbox[0], dbbox[1]);
+   pGeoLayer->translateScreenToData(bbox[2], bbox[3], dbbox[2], dbbox[3]);
+   if (dbbox[0] > dbbox[2])
+   {
+      std::swap(dbbox[0], dbbox[2]);
+   }
+   if (dbbox[1] > dbbox[3])
+   {
+      std::swap(dbbox[1], dbbox[3]);
+   }
+
+   RasterElement* pGeoElement = dynamic_cast<RasterElement*>(pGeoLayer->getDataElement());
+   VERIFYNRV(pGeoElement != NULL);
    RasterDataDescriptor *pDesc = static_cast<RasterDataDescriptor*>(pGeoElement->getDataDescriptor());
    unsigned int elementWidth = pDesc->getColumnCount();
    unsigned int elementHeight = pDesc->getRowCount();
    mXml.pushAddPoint(mXml.addElement("LatLonAltBox"));
    vector<LocationType> corners;
-   corners.push_back(LocationType(0, 0));
-   corners.push_back(LocationType(elementWidth, elementHeight));
+   corners.push_back(LocationType(dbbox[0], dbbox[1]));
+   if (bbox[2] == bbox[0] && bbox[3] == bbox[1])
+   {
+      corners.push_back(LocationType(elementWidth, elementHeight));
+   }
+   else
+   {
+      corners.push_back(LocationType(dbbox[2], dbbox[3]));
+   }
    vector<LocationType> geoCorners = pGeoElement->convertPixelsToGeocoords(corners);
    mXml.addText(geoCorners[0].mX, mXml.addElement("north"));
    mXml.addText(geoCorners[1].mX, mXml.addElement("south"));
@@ -251,12 +278,14 @@ void Kml::generateBoundingBox(RasterElement *pGeoElement)
    mXml.popAddPoint(); // LatLonBox
 }
 
-void Kml::generatePolygonalLayer(GraphicLayer *pGraphicLayer, bool visible, int order, RasterElement *pGeoElement)
+void Kml::generatePolygonalLayer(GraphicLayer *pGraphicLayer, bool visible, int order, Layer *pGeoLayer)
 {
+   VERIFYNRV(pGeoLayer != NULL);
    if(pGraphicLayer == NULL)
    {
       return;
    }
+   RasterElement* pGeoElement = dynamic_cast<RasterElement*>(pGeoLayer->getDataElement());
    mXml.pushAddPoint(mXml.addElement("Folder"));
    string name = pGraphicLayer->getDisplayName();
    if(name.empty())
@@ -401,8 +430,9 @@ void Kml::generatePolygonalLayer(GraphicLayer *pGraphicLayer, bool visible, int 
    mXml.popAddPoint(); // Folder
 }
 
-void Kml::generateGroundOverlayLayer(Layer *pLayer, bool visible, int order, RasterElement *pGeoElement, int frame)
+void Kml::generateGroundOverlayLayer(Layer *pLayer, bool visible, int order, Layer *pGeoLayer, int frame)
 {
+   VERIFYNRV(pGeoLayer != NULL && pLayer != NULL);
    mXml.pushAddPoint(mXml.addElement("GroundOverlay"));
    string name = pLayer->getDisplayName();
    if(name.empty())
@@ -418,6 +448,7 @@ void Kml::generateGroundOverlayLayer(Layer *pLayer, bool visible, int order, Ras
    mXml.addText(visible ? "1" : "0", mXml.addElement("visibility"));
    mXml.addText(QString::number(order).toAscii().data(), mXml.addElement("drawOrder"));
    QString layerId = QString::fromStdString(pLayer->getId());
+   int bbox[4] = {0,0,0,0};
    if(mExportImages)
    {
       QByteArray bytes(5 * 1024 * 1024, '\0');
@@ -433,7 +464,7 @@ void Kml::generateGroundOverlayLayer(Layer *pLayer, bool visible, int order, Ras
          mXml.popAddPoint();
       }
       fileName += ".png";
-      if(ImageHandler::getSessionItemImage(pLayer, buffer, "PNG", frame))
+      if(ImageHandler::getSessionItemImage(pLayer, buffer, "PNG", frame, bbox))
       {
          mImages[fileName] = bytes;
          mXml.pushAddPoint(mXml.addElement("Icon"));
@@ -458,7 +489,7 @@ void Kml::generateGroundOverlayLayer(Layer *pLayer, bool visible, int order, Ras
       mXml.addText(imageUrl.toStdString(), mXml.addElement("href"));
       mXml.popAddPoint();
    }
-   generateBoundingBox(pGeoElement);
+   generateBoundingBox(pGeoLayer, bbox);
    mXml.popAddPoint(); // GroundOverlay
 }
 
