@@ -574,9 +574,10 @@ bool RasterElementImporterShell::validateDefaultOnDiskReadOnly(const DataDescrip
       // Interleave conversions
       InterleaveFormatType dataInterleave = pRasterDescriptor->getInterleaveFormat();
       InterleaveFormatType fileInterleave = pFileDescriptor->getInterleaveFormat();
-      if (dataInterleave != fileInterleave)
+      if (pFileDescriptor->getBandCount() > 1 && dataInterleave != fileInterleave)
       {
-         errorMessage = "Interleave format conversions are not supported with on-disk read-only processing!";
+         errorMessage = "Interleave format conversions are not supported with on-disk read-only processing"
+            " of data with more than one band!";
          return false;
       }
 
