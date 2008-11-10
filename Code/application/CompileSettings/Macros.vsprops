@@ -25,6 +25,10 @@
 		Value="$(OPTICKSDEPENDENCIES)\ffmpeg"
 	/>
 	<UserMacro
+		Name="GDAL"
+		Value="$(OPTICKSDEPENDENCIES)\gdal"
+	/>
+	<UserMacro
 		Name="GLEW"
 		Value="$(OPTICKSDEPENDENCIES)\glew"
 	/>
