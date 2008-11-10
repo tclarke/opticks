@@ -135,6 +135,7 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
       temp_list.append(dependency_dir(r"ffmpeg\Windows\build",["avcodec.dll","avformat.dll","avutil.dll"], True))
       temp_list.append(dependency_suffix(r"ossim\bin",["ossim"],"d.dll",".dll"))
       temp_list.append(dependency_suffix(r"ehs\bin",["ehs"],"d.dll",".dll"))
+      temp_list.append(dependency_suffix(r"gdal\bin",["gdal15"],".dll",".dll"))
 
       for depend in temp_list:
          cur_list = depend.getListFor(arch, is_debug)
