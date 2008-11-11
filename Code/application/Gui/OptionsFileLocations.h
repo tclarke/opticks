@@ -78,16 +78,12 @@ public:
       return var;
    }
 
-private slots:
-   void addBookmark();
-
 private:
    static const QString sBookmarkListSentinal;
    std::vector<std::pair<std::string,std::string> > mFileLocations;
    std::string mPlugInPath;
    std::string mWizardPath;
    CustomTreeWidget* mpFileTree;
-   CustomTreeWidget *mpBookmarkList;
 };
 
 #endif

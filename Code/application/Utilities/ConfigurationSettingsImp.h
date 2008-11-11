@@ -107,6 +107,7 @@ public:
 
 protected:
    std::string getUserSettingsFile(bool createDir = false) const;
+   std::string translateKey(const std::string& key) const;
 
    bool serialize() const;
    bool deserialize();

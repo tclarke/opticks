@@ -58,22 +58,15 @@ OptionsFileLocations::OptionsFileLocations() :
       pHeader->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
    }
    LabeledSection *pFileSection = new LabeledSection(mpFileTree, "Default File Locations", this);
-
-   mpBookmarkList = new CustomTreeWidget(this);
-   mpBookmarkList->setColumnCount(1);
-   mpBookmarkList->setRootIsDecorated(false);
-   mpBookmarkList->setGridlinesShown(Qt::Horizontal, true);
-   mpBookmarkList->header()->hide();
-   LabeledSection *pBookmarkSection = new LabeledSection(mpBookmarkList, "Path Bookmarks", this);
    
    // Dialog layout
    QVBoxLayout* pLayout = new QVBoxLayout(this);
    pLayout->setMargin(0);
    pLayout->setSpacing(10);
    pLayout->addWidget(pFileSection, 10);
-   pLayout->addWidget(pBookmarkSection, 10);
 
-   mFileLocations.push_back(pair<string,string>("Default Import/Export Path", ConfigurationSettings::getSettingImportExportPathKey()));
+   mFileLocations.push_back(pair<string,string>("Default Export Path", ConfigurationSettings::getSettingExportPathKey()));
+   mFileLocations.push_back(pair<string,string>("Default Import Path", ConfigurationSettings::getSettingImportPathKey()));
    mFileLocations.push_back(pair<string,string>("Default Session Save/Open Path", ConfigurationSettings::getSettingSaveOpenSessionPathKey()));
    mFileLocations.push_back(pair<string,string>("Default Product Template", ProductView::getSettingTemplateFileKey()));
    mFileLocations.push_back(pair<string,string>("Message Log Path", ConfigurationSettings::getSettingMessageLogPathKey()));
@@ -125,20 +118,6 @@ OptionsFileLocations::OptionsFileLocations() :
          mWizardPath = pFilename->getFullPathAndName();
       }
    }
-
-   vector<Filename*> pathBookmarks = Service<ConfigurationSettings>()->getSettingPathBookmarks();
-   for(vector<Filename*>::iterator pathBookmark = pathBookmarks.begin(); pathBookmark != pathBookmarks.end(); ++pathBookmark)
-   {
-      Filename *pPath = *pathBookmark;
-      if(pPath != NULL)
-      {
-         QTreeWidgetItem *pItem = new QTreeWidgetItem(mpBookmarkList);
-         pItem->setText(0, QString::fromStdString(pPath->getFullPathAndName()));
-         mpBookmarkList->setCellWidgetType(pItem, 0, CustomTreeWidget::BROWSE_DIR_EDIT);
-      }
-   }
-   addBookmark();
-   VERIFYNRV(connect(mpBookmarkList, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(addBookmark())));
 }
 
 void OptionsFileLocations::applyChanges()
@@ -197,67 +176,8 @@ void OptionsFileLocations::applyChanges()
       }
       ++iter;
    }
-
-   vector<Filename*> pathBookmarks;
-   for(QTreeWidgetItemIterator iter(mpBookmarkList); *iter != NULL; ++iter)
-   {
-      QTreeWidgetItem *pItem = *iter;
-      QString pathName(pItem->text(0));
-      QDir path(pathName);
-      if(pathName != sBookmarkListSentinal && path.exists())
-      {
-         FactoryResource<Filename> bookmark;
-         if(bookmark.get() != NULL)
-         {
-            bookmark->setFullPathAndName(path.absolutePath().toStdString());
-            pathBookmarks.push_back(bookmark.release());
-         }
-      }
-   }
-   Service<ConfigurationSettings>()->setSettingPathBookmarks(pathBookmarks);
 }
 
 OptionsFileLocations::~OptionsFileLocations()
 {
-}
-
-void OptionsFileLocations::addBookmark()
-{
-   QTreeWidgetItem *pItem = NULL;
-   QList<QTreeWidgetItem*> items = mpBookmarkList->findItems(sBookmarkListSentinal, Qt::MatchExactly);
-   if(items.empty())
-   {
-      pItem = new QTreeWidgetItem(mpBookmarkList);
-   }
-   else
-   {
-      foreach(QTreeWidgetItem *pTmpItem, items)
-      {
-         if(pItem == NULL)
-         {
-            pItem = pTmpItem;
-         }
-         else
-         {
-            QTreeWidgetItem *pRemoveItem = mpBookmarkList->takeTopLevelItem(mpBookmarkList->indexOfTopLevelItem(pItem));
-            if(pRemoveItem == pItem)
-            {
-               pItem = NULL;
-            }
-            delete pRemoveItem;
-         }
-      }
-   }
-   if(pItem != NULL)
-   {
-      pItem->setText(0, sBookmarkListSentinal);
-      mpBookmarkList->setCellWidgetType(pItem, 0, CustomTreeWidget::BROWSE_DIR_EDIT);
-      mpBookmarkList->setCurrentItem(pItem);
-   }
-   // now remove empty sections
-   items = mpBookmarkList->findItems("", Qt::MatchExactly);
-   foreach(QTreeWidgetItem *pTmpItem, items)
-   {
-      delete pTmpItem;
-   }
 }
