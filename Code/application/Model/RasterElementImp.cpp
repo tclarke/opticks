@@ -901,13 +901,13 @@ bool RasterElementImp::copyDataBsq(RasterElement *pChipElement,
          VERIFY(chipDa.isValid() && srcDa.isValid());
          for (iterator rowItr = selectedRows.begin(); rowItr != selectedRows.end(); ++rowItr)
          {
+            srcDa->toPixel(rowItr->getActiveNumber(), 0);
             VERIFY(chipDa.isValid());
             VERIFY(srcDa.isValid());
             char *pChip = reinterpret_cast<char*>(chipDa->getRow());
             char *pSrc = reinterpret_cast<char*>(srcDa->getRow());
             memcpy(pChip, pSrc, selectedColumns.size() * bytesPerElement);
             chipDa->nextRow();
-            srcDa->nextRow();
             pProgress->updateProgress(progressText, (step++ * 100)/steps, NORMAL);
             if (abort)
             {
