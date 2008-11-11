@@ -16,7 +16,8 @@ def generate(env):
     if not gdalpath or not jpegpath:
        SCons.Warnings.warn(GdalNotFound,"Could not detect gdal")
     else:
-       env.AppendUnique(CXXFLAGS="-I%s/include/%s -I%s/include" % (gdalpath,env["PLATFORM"],jpegpath),
+       env.AppendUnique(CXXFLAGS=["-I%s/include/%s" % (gdalpath,env["PLATFORM"]),
+                                  "-I%s/include" % jpegpath],
                         LIBPATH=['%s/lib/%s' % (gdalpath,env["PLATFORM"]),
                                  '%s/lib/%s' % (jpegpath,env["PLATFORM"])],
                         LIBS=["gdal","jpeg"])
