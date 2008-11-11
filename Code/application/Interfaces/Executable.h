@@ -55,6 +55,8 @@ public:
     *  Window pointer when the plug-in is executed with an ExecutableAgent.
     *  Arguments with this name should be of the type Window or one of its
     *  subclasses.
+    *  It should not be used by an Exporter or subclasses derived from Exporter
+    *  to access the window associated with the exported item.
     *
     *  @see     ExecutableAgent::execute()
     */
@@ -67,6 +69,8 @@ public:
     *  View pointer when the plug-in is executed with an ExecutableAgent.
     *  Arguments with this name should be of the type View or one of its
     *  subclasses.
+    *  It should not be used by an Exporter or subclasses derived from Exporter
+    *  to access the view associated with the exported item.
     *
     *  @see     ExecutableAgent::execute()
     */
@@ -79,6 +83,8 @@ public:
     *  Layer pointer when the plug-in is executed with an ExecutableAgent.
     *  Arguments with this name should be of the type Layer or one of its
     *  subclasses.
+    *  It should not be used by an Exporter or classes derived from Exporter
+    *  to access the layer associated with the exported item.
     *
     *  @see     ExecutableAgent::execute()
     */
@@ -88,9 +94,11 @@ public:
     *  The name for a DataElement argument.
     *
     *  Input arguments with this name will be automatically populated with a
-    *  DataElement pointer when the plug-in is executed with an
-    *  ExecutableAgent.  Arguments with this name should be of the type
-    *  DataElement or one of its subclasses.
+    *  DataElement pointer when the plug-in is executed with an ExecutableAgent.
+    *  Arguments with this name should be of the type DataElement or one of its
+    *  subclasses.
+    *  It should not be used by Exporter or classes derived from Exporter to access a 
+    *  DataElement associated with the exported item.
     *
     *  @see     ExecutableAgent::execute()
     */
