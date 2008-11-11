@@ -107,7 +107,7 @@ CachedPage::UnitPtr GdalRasterPager::fetchUnit(DataRequest* pOriginalRequest)
    // calculate the rows we are loading
    std::vector<DimensionDescriptor> rows = RasterUtilities::subsetDimensionVector(pDesc->getRows(), pOriginalRequest->getStartRow(),
       pOriginalRequest->getStopRow());
-   unsigned int numRows = std::min(pOriginalRequest->getConcurrentRows(), rows.size());
+   unsigned int numRows = std::min<size_t>(pOriginalRequest->getConcurrentRows(), rows.size());
 
    // calculate to columns we a loading
 
