@@ -192,7 +192,8 @@ bool ScriptPlugIn::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList
          pStep->addProperty("Script File", scriptPath);
       }
    }
-   setEnvironmentOption(ConfigurationSettings::getSettingImportExportPath(), "IMPORT_EXPORT_PATH");
+   setEnvironmentOption(ConfigurationSettings::getSettingExportPath(), "EXPORT_PATH");
+   setEnvironmentOption(ConfigurationSettings::getSettingImportPath(), "IMPORT_PATH");
    setEnvironmentOption(ConfigurationSettings::getSettingMessageLogPath(), "MESSAGE_LOG_PATH");
    setEnvironmentOption(ConfigurationSettings::getSettingPlugInPath(), "PLUG_IN_PATH");
    setEnvironmentOption(ConfigurationSettings::getSettingSupportFilesPath(), "SUPPORT_FILES_PATH");

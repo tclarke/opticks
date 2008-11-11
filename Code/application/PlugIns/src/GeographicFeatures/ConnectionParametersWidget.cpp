@@ -232,7 +232,7 @@ void ConnectionParametersWidget::selectFileClicked()
       }
       else
       {
-         pWorkingDir = ConfigurationSettings::getSettingImportExportPath();
+         pWorkingDir = ConfigurationSettings::getSettingImportPath();
       }
       if (pWorkingDir != NULL)
       {

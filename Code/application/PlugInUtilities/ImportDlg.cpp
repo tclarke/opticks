@@ -102,6 +102,25 @@ ImportDlg::ImportDlg(const QString& strPlugInSubtype, const QString& strInitialP
    setPlugInLabel("Importer");
    enableOptions(true);
 
+   // Set the initial directory
+   string directory;
+   const Filename* pWorkingDir = NULL;
+   Service<ConfigurationSettings> pSettings;
+   pWorkingDir = pSettings->getSetting(ConfigurationSettings::getSettingPluginWorkingDirectoryKey(strPlugInSubtype.toStdString())).getPointerToValue<Filename>();
+   if (pWorkingDir == NULL)
+   {
+      pWorkingDir = ConfigurationSettings::getSettingImportPath();
+   }
+   if (pWorkingDir != NULL)
+   {
+      directory = pWorkingDir->getFullPathAndName();
+   }
+
+   if(!directory.empty())
+   {
+      setDirectory(QString::fromStdString(directory));
+   }
+
    // If the auto importer is available, select it from the drop down
    if (strInitialPlugIn.isEmpty() == true)
    {

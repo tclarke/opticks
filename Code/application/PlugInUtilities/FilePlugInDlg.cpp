@@ -8,6 +8,7 @@
  */
 
 #include <QtCore/QDir>
+#include <QtCore/QUrl>
 #include <QtGui/QLabel>
 #include <QtGui/QLayout>
 #include <QtGui/QMessageBox>
@@ -15,6 +16,7 @@
 #include "ConfigurationSettings.h"
 #include "AppVerify.h"
 #include "Filename.h"
+#include "FilenameImp.h"
 #include "FilePlugInDlg.h"
 #include "ObjectResource.h"
 #include "PlugInDescriptor.h"
@@ -89,27 +91,24 @@ FilePlugInDlg::FilePlugInDlg(const std::vector<PlugInDescriptor*> &availablePlug
    }
 
    // Set the path bookmarks
-   QStringList bookmarks;
+   QList<QUrl> bookmarks;
    vector<Filename*> pathBookmarks = Service<ConfigurationSettings>()->getSettingPathBookmarks();
    for(vector<Filename*>::iterator pathBookmark = pathBookmarks.begin(); pathBookmark != pathBookmarks.end(); ++pathBookmark)
    {
       Filename *pPath = *pathBookmark;
       if(pPath != NULL && pPath->isDirectory())
       {
-         bookmarks << QString::fromStdString(pPath->getFullPathAndName());
+         QUrl url = QUrl::fromLocalFile(QString::fromStdString(pPath->getFullPathAndName()));
+         bookmarks.push_back(url);
       }
    }
-   setHistory(bookmarks);
+   setSidebarUrls(bookmarks);
 
    // Set the initial directory
    string directory;
    const Filename* pWorkingDir = NULL;
    Service<ConfigurationSettings> pSettings;
    pWorkingDir = pSettings->getSetting(mPlugInKey).getPointerToValue<Filename>();
-   if (pWorkingDir == NULL)
-   {
-      pWorkingDir = pSettings->getSettingImportExportPath();
-   }
    if (pWorkingDir != NULL)
    {
       directory = pWorkingDir->getFullPathAndName();
@@ -120,6 +119,7 @@ FilePlugInDlg::FilePlugInDlg(const std::vector<PlugInDescriptor*> &availablePlug
       setDirectory(QString::fromStdString(directory));
    }
 
+   
    // Set the initial plug-in
    mpPlugInCombo->setCurrentIndex(0);
    setSelectedPlugIn(mLastPlugIns[mPlugInKey]);
@@ -127,7 +127,7 @@ FilePlugInDlg::FilePlugInDlg(const std::vector<PlugInDescriptor*> &availablePlug
 
    // Connections
    connect(mpPlugInCombo, SIGNAL(activated(const QString&)), this, SLOT(updateFileFilters(const QString&)));
-   connect(mpPlugInCombo, SIGNAL(activated(const QString&)), this, SIGNAL(plugInSelected(const QString&)));
+   connect(mpPlugInCombo, SIGNAL(activated(const QString&)), this, SIGNAL(plugInSelected(const QString&))); 
    connect(mpOptionsButton, SIGNAL(clicked()), this, SIGNAL(optionsClicked()));
 }
 
@@ -256,6 +256,24 @@ void FilePlugInDlg::accept()
          Service<ConfigurationSettings> pSettings;
          pSettings->setSessionSetting(mPlugInKey, *pImportDir.get());
       }
+   }
+
+   vector<Filename*> pathBookmarks;
+   QList<QUrl> bookmarks = sidebarUrls();
+   for (QList<QUrl>::iterator bookmark = bookmarks.begin(); bookmark != bookmarks.end(); ++bookmark)
+   {
+      FactoryResource<Filename> pPath;
+      if (pPath.get() != NULL)
+      {
+         pPath->setFullPathAndName(bookmark->toLocalFile().toStdString());
+         pathBookmarks.push_back(pPath.release());
+      }
+   }
+   Service<ConfigurationSettings>()->setSettingPathBookmarks(pathBookmarks);
+
+   for (unsigned int i = 0; i < pathBookmarks.size(); ++i)
+   {
+      FactoryResource<Filename> pDestroy(pathBookmarks[i]);
    }
 
    QFileDialog::accept();

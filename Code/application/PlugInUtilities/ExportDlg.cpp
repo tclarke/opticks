@@ -37,6 +37,25 @@ ExportDlg::ExportDlg(ExporterResource& pExporter,
    setPlugInLabel("Exporter");
    enableOptions(true);
 
+   // Set the initial directory
+   string directory;
+   const Filename* pWorkingDir = NULL;
+   Service<ConfigurationSettings> pSettings;
+   pWorkingDir = pSettings->getSetting(ConfigurationSettings::getSettingPluginWorkingDirectoryKey("Exporter")).getPointerToValue<Filename>();
+   if (pWorkingDir == NULL)
+   {
+      pWorkingDir = ConfigurationSettings::getSettingExportPath();
+   }
+   if (pWorkingDir != NULL)
+   {
+      directory = pWorkingDir->getFullPathAndName();
+   }
+
+   if(!directory.empty())
+   {
+      setDirectory(QString::fromStdString(directory));
+   }
+
    if (isDefaultPlugIn())
    {
       setSelectedPlugIn("Ice Exporter");

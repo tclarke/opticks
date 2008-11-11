@@ -864,7 +864,7 @@ void SignatureSelector::browseFiles()
    }
    else
    {
-      pWorkingDir = ConfigurationSettings::getSettingImportExportPath();
+      pWorkingDir = ConfigurationSettings::getSettingImportPath();
    }
    if (pWorkingDir != NULL)
    {
@@ -912,7 +912,7 @@ void SignatureSelector::searchDirectories()
    }
    else
    {
-      pWorkingDir = ConfigurationSettings::getSettingImportExportPath();
+      pWorkingDir = ConfigurationSettings::getSettingImportPath();
    }
    if (pWorkingDir != NULL)
    {

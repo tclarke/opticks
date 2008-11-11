@@ -528,7 +528,8 @@ public:
     */
    SIGNAL_METHOD(ConfigurationSettings, AboutToSave);
 
-   SETTING_PTR(ImportExportPath, FileLocations, Filename)
+   SETTING_PTR(ExportPath, FileLocations, Filename)
+   SETTING_PTR(ImportPath, FileLocations, Filename)
    SETTING_PTR(SaveOpenSessionPath, FileLocations, Filename)
    SETTING_PTR(InternalPath, FileLocations, Filename)
    SETTING(PathBookmarks, FileLocations, std::vector<Filename*>, std::vector<Filename*>())
