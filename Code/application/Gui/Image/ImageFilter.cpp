@@ -30,10 +30,20 @@ ImageFilter::ImageFilter(ImageFilterDescriptor *pDescriptor) :
    mpInputColorBuffer(NULL),
    mpResultsBuffer(NULL),
    mpDescriptor(pDescriptor),
-   mFreezeFlag(false)
+   mFreezeFlag(false),
+   mRunBackwards(true)
 {
    // check for valid image filter descriptor
    REQUIRE(mpDescriptor != NULL);
+
+   if (getFilterType() == ImageFilterDescriptor::FEEDBACK_FILTER)
+   {
+      ImageFilterDescriptorExt1 *pDescriptorExt = dynamic_cast<ImageFilterDescriptorExt1*>(pDescriptor);
+      if (pDescriptorExt != NULL)
+      {
+         mRunBackwards = dv_cast<bool>(pDescriptorExt->getParameter("runBackwards"), mRunBackwards);
+      }
+   }
 
    // get GPU program descriptors
    const vector<GpuProgramDescriptor*>& gpuProgramDescriptors = mpDescriptor->getGpuPrograms();
@@ -107,7 +117,9 @@ ColorBuffer *ImageFilter::applyFilter()
           gpuProgramIter != mGpuPrograms.end(); ++gpuProgramIter)
       {
          ColorBuffer *pRenderBuffer = mBuffers[colorBufferPos];
-         if(!mFreezeFlag || (pRenderBuffer != mBuffers.back()))
+         if(!mFreezeFlag || 
+            (mRunBackwards && (pRenderBuffer == mBuffers.front())) ||
+            (!mRunBackwards && (pRenderBuffer == mBuffers.back())))
          {
             try
             {
@@ -189,7 +201,14 @@ void ImageFilter::resetBuffer()
    // with the filter results
    if(mBuffers.size() >= 2)
    {
-      mBuffers.back()->clear();
+      if (mRunBackwards)
+      {
+         mBuffers.back()->clear();
+      }
+      else
+      {
+         mBuffers.front()->clear();
+      }
    }
 }
 
@@ -423,7 +442,7 @@ bool ImageFilter::populateTextureParameters(ColorBuffer *pInputColorBuffer)
       ++gpuProgramIter;
    }
 
-   if(getFilterType() == ImageFilterDescriptor::FEEDBACK_FILTER)
+   if(getFilterType() == ImageFilterDescriptor::FEEDBACK_FILTER && mRunBackwards == true)
    {
       reverse(mBuffers.begin(), mBuffers.end());
 
