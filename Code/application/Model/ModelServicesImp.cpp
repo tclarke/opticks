@@ -246,7 +246,11 @@ vector<DataElement*> ModelServicesImp::createElements(const vector<DataDescripto
    priority_queue<DataDescriptor*, vector<DataDescriptor*>, ElementDepthComparitor> q(ElementDepthComparitor(), descriptors);
    for(; !q.empty(); q.pop())
    {
-      elements.push_back(createElement(q.top()));
+      DataElement* pElement = createElement(q.top());
+      if (pElement != NULL)
+      {
+         elements.push_back(pElement);
+      }
    }
    return elements;
 }
