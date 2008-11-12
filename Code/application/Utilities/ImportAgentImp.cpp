@@ -430,11 +430,15 @@ bool ImportAgentImp::execute()
    queue<DataElement*> toVisit;
    for (list<DataElement*>::iterator elmnt = createdElements.begin(); elmnt != createdElements.end(); ++elmnt)
    {
-      // does the element's parent need to be imported?
-      if (find(createdElements.begin(), createdElements.end(), (*elmnt)->getParent()) == createdElements.end())
+      DataElement* pElement = *elmnt;
+      if (pElement != NULL)
       {
-         // if not, add it to the visit queue
-         toVisit.push(*elmnt);
+         // does the element's parent need to be imported?
+         if (find(createdElements.begin(), createdElements.end(), pElement->getParent()) == createdElements.end())
+         {
+            // if not, add it to the visit queue
+            toVisit.push(pElement);
+         }
       }
    }
 
