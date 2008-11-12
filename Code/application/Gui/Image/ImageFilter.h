@@ -112,6 +112,7 @@ private: // member variables
    ImageFilterDescriptor *mpDescriptor;
    std::vector<GpuProgram*> mGpuPrograms;
    bool mFreezeFlag;
+   bool mRunBackwards;
 };
 
 #endif
