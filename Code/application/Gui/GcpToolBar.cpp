@@ -11,13 +11,12 @@
 #include <QtGui/QToolButton>
 #include <QtGui/QWidgetAction>
 
-#include "GcpToolBar.h"
-
-#include "ColorMenu.h"
 #include "AppAssert.h"
+#include "ColorMenu.h"
 #include "GcpLayer.h"
 #include "GcpLayerImp.h"
 #include "GcpSymbolGrid.h"
+#include "GcpToolBar.h"
 #include "Icons.h"
 #include "MenuBarImp.h"
 
@@ -121,6 +120,7 @@ void GcpToolBar::gcpLayerDeleted(Subject& subject, const string& signal, const b
    if (dynamic_cast<GcpLayer*>(&subject) == mpGcpLayer)
    {
       setGcpLayer(NULL);
+      setEnabled(false);
    }
 }
 

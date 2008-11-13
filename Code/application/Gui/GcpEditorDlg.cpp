@@ -573,6 +573,11 @@ bool GcpEditorDlg::removeLayer(Layer* pLayer)
       mGcpLayers.removeAt(iIndex);
       mpListCombo->removeItem(iIndex);
 
+      if (mGcpLayers.empty())
+      {
+         mpGcpView->clear();
+      }
+
       GcpLayerImp* pGcpLayerImp = dynamic_cast<GcpLayerImp*>(pGcpLayer);
       if (pGcpLayerImp != NULL)
       {

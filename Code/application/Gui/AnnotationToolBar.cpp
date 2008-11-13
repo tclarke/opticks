@@ -642,6 +642,7 @@ void AnnotationToolBar::annotationLayerDeleted(Subject& subject, const string& s
    if (dynamic_cast<AnnotationLayerImp*>(&subject) == mpAnnotationLayer)
    {
       setAnnotationLayer(NULL);
+      setEnabled(false);
    }
 }
 

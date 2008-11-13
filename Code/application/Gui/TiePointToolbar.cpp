@@ -7,13 +7,12 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "TiePointToolbar.h"
-
-#include "ColorMenu.h"
 #include "AppAssert.h"
+#include "ColorMenu.h"
 #include "Icons.h"
 #include "MenuBarImp.h"
 #include "TiePointLayerAdapter.h"
+#include "TiePointToolbar.h"
 
 #include <string>
 using namespace std;
@@ -119,6 +118,7 @@ void TiePointToolBar::tiePointLayerDeleted(Subject& subject, const string& signa
    if (dynamic_cast<TiePointLayer*>(&subject) == mpTiePointLayer)
    {
       setTiePointLayer(NULL);
+      setEnabled(false);
    }
 }
 
