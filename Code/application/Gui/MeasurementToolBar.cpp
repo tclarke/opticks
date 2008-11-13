@@ -237,6 +237,7 @@ void MeasurementToolBar::measurementsLayerDeleted(Subject& subject, const string
    if (dynamic_cast<MeasurementLayerImp*>(&subject) == mpMeasurementsLayer)
    {
       setMeasurementsLayer(NULL);
+      setEnabled(false);
    }
 }
 

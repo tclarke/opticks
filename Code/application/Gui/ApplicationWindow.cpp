@@ -903,6 +903,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
       addWindow(mpAnnotationToolBar);
       mpAnnotationToolBar->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &ApplicationWindow::windowRemoved));
       mpAnnotationToolBar->hide();
+      mpAnnotationToolBar->installEventFilter(this);
    }
 
    // Brightness toolbar
@@ -4672,7 +4673,6 @@ void ApplicationWindow::enableToolBars(bool bEnable)
    bool bEnableGcp = false;
    bool bEnableTiePoint = false;
    bool bEnableMeasurement = false;
-   bool bEnableClipboard = false;
 
    WorkspaceWindow* pWindow = getCurrentWorkspaceWindow();
    if (pWindow != NULL)
@@ -4713,7 +4713,6 @@ void ApplicationWindow::enableToolBars(bool bEnable)
             bEnableAoi = (dynamic_cast<AoiLayer*>(pActiveLayer) != NULL);
             bEnableGcp = (dynamic_cast<GcpLayer*>(pActiveLayer) != NULL);
             bEnableTiePoint = (dynamic_cast<TiePointLayer*>(pActiveLayer) != NULL);
-            bEnableClipboard = bEnableAnnotation;
          }
          else if (bMeasurementMode == true)
          {
@@ -4728,18 +4727,9 @@ void ApplicationWindow::enableToolBars(bool bEnable)
          if ((bLayerMode == true) && (pActiveLayer != NULL))
          {
             bEnableAnnotation = true;
-
-            if (pActiveLayer == pProductView->getLayoutLayer())
-            {
-               bEnableClipboard = true;
-            }
          }
       }
    }
-
-   m_pCut_Action->setEnabled(bEnable && bEnableClipboard);
-   m_pCopy_Action->setEnabled(bEnable && bEnableClipboard);
-   m_pPaste_Action->setEnabled(bEnable && bEnableClipboard);
 
    mpDisplayToolBar->setEnabled(bEnable && bView);
    mpBrightnessToolbar->setEnabled(bEnable && bSpatialDataView);
@@ -4927,6 +4917,14 @@ bool ApplicationWindow::eventFilter(QObject* pObj, QEvent* pEvent)
             }
          }
       }
+   }
+
+   if (pObj == mpAnnotationToolBar && pEvent->type() == QEvent::EnabledChange)
+   {
+      bool enable(mpAnnotationToolBar->isEnabled());
+      m_pCopy_Action->setEnabled(enable);
+      m_pCut_Action->setEnabled(enable);
+      m_pPaste_Action->setEnabled(enable);
    }
 
    return QMainWindow::eventFilter(pObj, pEvent);

@@ -338,6 +338,7 @@ void AoiToolBar::aoiLayerDeleted(Subject& subject, const string& signal, const b
    if (dynamic_cast<AoiLayer*>(&subject) == mpAoiLayer)
    {
       setAoiLayer(NULL);
+      setEnabled(false);
    }
 }
 
