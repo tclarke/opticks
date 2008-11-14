@@ -35,6 +35,10 @@
 #include "xmlreader.h"
 #include "xmlwriter.h"
 
+#include "yaml.h"
+
+#include <iostream>
+#include <fstream>
 #if defined(WIN_API)
 #include <windows.h>
 #include <stdlib.h>
@@ -77,12 +81,11 @@ void ConfigurationSettingsImp::destroy()
    mDestroyed = true;
 }
 
-ConfigurationSettingsImp::ConfigurationSettingsImp() : mIsInitialized(false)
+ConfigurationSettingsImp::ConfigurationSettingsImp() : mpReleaseDate(new DateTimeImp()), mIsInitialized(false)
 {
    mCreator = APP_SPONSOR;
    mProduct = APP_NAME;
    mVersion = APP_VERSION_NUMBER;
-   mpReleaseDate = NULL;
    mNeedToLoadMruFiles = true;
 #if defined(_DEBUG)
    mProductionRelease = false;
@@ -90,50 +93,70 @@ ConfigurationSettingsImp::ConfigurationSettingsImp() : mIsInitialized(false)
    mProductionRelease = APP_IS_PRODUCTION_RELEASE;
 #endif
    mReleaseType = RT_NORMAL;
-
-   mHomePath = locateApplicationHome();
    mUserDocs = locateUserDocs();
 
-   //Perform a check to see if the app home env var is good, ie.
-   //has SupportFiles available
-   if (!QFile::exists(QString::fromStdString(mHomePath + "/SupportFiles/")))
-   {
-      mInitializationErrorMsg = string(APP_NAME) + " may be missing required support files."
-                                " Please check your " + APP_NAME + " installation.";
-   }
+   mpReleaseDate->set(APP_RELEASE_DATE_YEAR,
+                      APP_RELEASE_DATE_MONTH,
+                      APP_RELEASE_DATE_DAY);
 
-   UtilityServicesImp* pUtilities = NULL;
-   pUtilities = UtilityServicesImp::instance();
-   if (pUtilities != NULL)
+   string errorMessage;
+   if (!parseDeploymentFile(errorMessage, mDeploymentDebugMsg))
    {
-      mpReleaseDate = pUtilities->getDateTime();
-      if (mpReleaseDate != NULL)
-      {
-         mpReleaseDate->set(APP_RELEASE_DATE_YEAR,
-                            APP_RELEASE_DATE_MONTH,
-                            APP_RELEASE_DATE_DAY);
-      }
+      mIsInitialized = false;
+      mInitializationErrorMsg = errorMessage;
+      return;
    }
 
    Service<ApplicationServices> pApp;
    pApp->attach(SIGNAL_NAME(ApplicationServices, ApplicationClosed), Slot(this, &ConfigurationSettingsImp::applicationClosed));
 
    // Load the values into config settings
-   if (!deserialize())
+   string settingErrorMsg;
+   if (!loadSettings(settingErrorMsg))
    {
       mIsInitialized = false;
-      mInitializationErrorMsg = "Unable to find application settings defaults, located in OPTICKS_HOME/DefaultSettings/1-ApplicationDefaults.cfg";
+      mInitializationErrorMsg = settingErrorMsg + " The application "
+         "will be shut "
+         "down.\n\n" + mDeploymentDebugMsg;
       return;
    }
-   const ReleaseType* pReleaseType = dv_cast<ReleaseType>(&getSetting(ConfigurationSettingsImp::getSettingReleaseTypeKey()));
-   if (pReleaseType != NULL)
+
+   // Reset Any Error Codes and mark as initialized
+   mIsInitialized = true;
+   mInitializationErrorMsg = "";
+}
+
+void ConfigurationSettingsImp::validateInitialization()
+{
+   //check for support files
+   string supportFilesPath;
+   const Filename* pFilename = getSettingSupportFilesPath();
+   if (pFilename != NULL)
    {
-      mReleaseType = *pReleaseType;
+      supportFilesPath = pFilename->getFullPathAndName();
    }
+   else
+   {
+      mIsInitialized = false;
+      mInitializationErrorMsg = "The Support Files setting could not be found. The "
+         "application will be shut "
+         "down.\n\n" + mDeploymentDebugMsg;
+      return;
+   }
+   if (!QFile::exists(QString::fromStdString(supportFilesPath)))
+   {
+      mIsInitialized = false;
+      mInitializationErrorMsg = "The Support Files directory of " + supportFilesPath + 
+         " does not exist. The application will be shut "
+         "down.\n\n" + mDeploymentDebugMsg;
+      return;
+   }
+
+   mReleaseType = getSettingReleaseType();
 
    // Set Internal Path -  Note that this only affects the environment
    // variable of the current process. 
-   const Filename* pInternalPath = dv_cast<Filename>(&getSetting(ConfigurationSettings::getSettingInternalPathKey()));
+   const Filename* pInternalPath = getSettingInternalPath();
    if (pInternalPath != NULL)
    {
       string internalPath = pInternalPath->getFullPathAndName();
@@ -155,6 +178,13 @@ ConfigurationSettingsImp::ConfigurationSettingsImp() : mIsInitialized(false)
          putenv(const_cast<char*>(internalPath.c_str()));
    #endif
       }
+   }
+
+   if (ArgumentList::instance()->getOption("debugDeployment") == "true")
+   {
+      mIsInitialized = true;
+      mInitializationErrorMsg = mDeploymentDebugMsg;
+      return;
    }
 
    // Reset Any Error Codes and mark as initialized
@@ -185,67 +215,344 @@ ConfigurationSettingsImp::~ConfigurationSettingsImp()
          }
       }
    }
+}
 
-   UtilityServicesImp* pUtilities = NULL;
-   pUtilities = UtilityServicesImp::instance();
-   if (pUtilities != NULL)
+void ConfigurationSettingsImp::initDeploymentValues()
+{
+   QDir binaryDir(QCoreApplication::applicationDirPath());
+   binaryDir.makeAbsolute();
+   QString binaryDirPath = binaryDir.canonicalPath();
+   QString newHome = binaryDirPath + QString::fromStdString("/../");
+   QDir homeDir(newHome);
+   homeDir.makeAbsolute();
+   mHomePath = homeDir.canonicalPath().toStdString();
+
+   mPlugInPath = mHomePath + SLASH + "PlugIns";
    {
-      if (mpReleaseDate != NULL)
+      FactoryResource<Filename> pFilename;
+      pFilename->setFullPathAndName(getPlugInPath());
+      mPlugInPathVariant = DataVariant(*(pFilename.get()));
+   }
+   mAdditionalDefaultDir = "";
+   mUserConfigPath = "";
+
+   QString userSettingsPath;
+   QString appNamePath;
+#if defined(WIN_API)
+   char path[MAX_PATH];
+   HRESULT retValue = SHGetFolderPath(NULL, CSIDL_APPDATA | CSIDL_FLAG_CREATE, NULL, SHGFP_TYPE_CURRENT, path);
+   if(SUCCEEDED(retValue))
+   {
+      userSettingsPath = QString::fromAscii(path);
+   }
+   appNamePath = "Opticks";
+#else
+   char* pPath = getenv("HOME");
+   if (pPath != NULL)
+   {
+      userSettingsPath = QString::fromAscii(pPath);
+   }
+   appNamePath = ".opticks";
+#endif
+   if (!userSettingsPath.isEmpty())
+   {
+      userSettingsPath.replace("\\", "/");
+      QDir userSettingsDir(userSettingsPath);
+      if (userSettingsDir.exists())
       {
-         pUtilities->destroyDateTime(mpReleaseDate);
+         QString appUserSettingsPath = userSettingsDir.absoluteFilePath(appNamePath);
+         QDir appSettingsDir(appUserSettingsPath);
+         if (!appSettingsDir.exists())
+         {
+            userSettingsDir.mkdir(appNamePath);
+         }
+         mUserConfigPath = appSettingsDir.absolutePath().toStdString();
       }
    }
 }
 
-string ConfigurationSettingsImp::locateApplicationHome()
+string expandDeploymentPathVar(const std::string& originalValue, const std::string& relativeRoot, std::string& errorMessage)
 {
-   string homeLocation;
-
-   const char* pHome = getenv("OPTICKS_HOME");
-   if (pHome != NULL)
+   errorMessage.clear();
+   vector<string> ignoredExpansions;
+   ignoredExpansions.push_back("C");
+   ignoredExpansions.push_back("V");
+   string expandedStr = StringUtilities::expandVariables(originalValue, ignoredExpansions);
+   QString expandedPath = QString::fromStdString(expandedStr).replace("\\", "/");
+   if (QDir::isRelativePath(expandedPath))
    {
-      homeLocation = pHome;
+      expandedPath = QString::fromStdString(relativeRoot) + "/" + expandedPath;
+   }
+   QFileInfo dirFileInfo(expandedPath);
+   if (!dirFileInfo.exists() || !dirFileInfo.isDir())
+   {
+      errorMessage = QString("The provided directory %1 "
+         "does not exist.").arg(expandedPath).toStdString();
+   }
+   QDir dirInfo(expandedPath);
+   return dirInfo.canonicalPath().toStdString();
+}
+
+bool ConfigurationSettingsImp::parseDeploymentFile(string& errorMessage, string& deploymentDebugMsg)
+{
+   errorMessage.clear();
+
+   initDeploymentValues();
+
+   //determine which .dep file that we are loading.
+   bool depMustExist = false;
+   string deploymentFile = ArgumentList::instance()->getOption("deployment");
+   if (deploymentFile.empty())
+   {
+      QDir binaryDir(QCoreApplication::applicationDirPath());
+      binaryDir.makeAbsolute();
+      QString binaryDirPath = binaryDir.canonicalPath();
+      deploymentFile = binaryDirPath.toStdString() + SLASH + "opticks.dep";
+   }
+   else
+   {
+      depMustExist = true;
    }
 
-   if(!homeLocation.empty())
+   //if provided as arg, .dep file must exist
+   bool needToParse = true;
+   QFileInfo depFileInfo(QString::fromStdString(deploymentFile));
+   if (!depFileInfo.exists() || !depFileInfo.isFile())
    {
-      // OPTICKS_HOME was set as environment variable,
-      // this should only be set for non-user installs, ie. developers
-      // so go ahead and use that.
-      QFileInfo homeDir(QString::fromStdString(homeLocation + "/"));
-
-      if (homeDir.exists())
+      if (depMustExist)
       {
-         homeDir.makeAbsolute();
-#if defined(WIN_API)
-         homeLocation = homeDir.canonicalPath().toStdString();
-#else
-         homeLocation = homeDir.absolutePath().toStdString();
-#endif
+         errorMessage = QString("The %1 deployment file does not exist.  "
+            "The application will be shut down.").arg(depFileInfo.absoluteFilePath()).toStdString();
+         return false;
+      }
+      else
+      {
+         needToParse = false; //the .dep doesn't exist, but it doesn't need to
+         //and all the hard-coded defaults have already been configured.
       }
    }
-   
-   if(homeLocation.empty())
+
+   //parse data out of .dep file here.
+   std::map<string, string> parsedDepMap;
+   bool appHomePathReadFromDep = false;
+   bool plugInPathReadFromDep = false;
+   bool userConfigPathReadFromDep = false;
+   bool addDefaultsPathReadFromDep = false;
+   if (needToParse)
    {
-      //attempt to auto-discover OPTICKS_HOME, by looking one directory up
-      //from the application directory
-      QString moveUp = QString::fromStdString("/../");
-      QString newHome = QCoreApplication::applicationDirPath().append(moveUp);
-      QFileInfo homeDir(newHome);
-      homeDir.makeAbsolute();
-#if defined(WIN_API)
-      homeLocation = homeDir.canonicalPath().toStdString();
-#else
-      homeLocation = homeDir.absolutePath().toStdString();
-#endif
+      try
+      {
+         ifstream depStream(deploymentFile.c_str());
+         YAML::Parser parser(depStream);
+         YAML::Node doc;
+         if (!parser)
+         {
+            errorMessage = QString("Unknown error while parsing %1 deployment file.  "
+               "The application will be shut down.").arg(depFileInfo.absoluteFilePath()).toStdString();
+            return false;
+         }
+         parser.GetNextDocument(doc);
+         string tag = doc.GetTag();
+         if (tag != "!depV1")
+         {
+            errorMessage = QString("Error while parsing %1 deployment file.  The initial YAML map "
+               "must be tagged with a local type of depV1, i.e. !depV1.  The application will be "
+               "shut down.").arg(depFileInfo.absoluteFilePath()).toStdString();
+            return false;
+         }
+         if (doc.GetType() != YAML::CT_MAP || doc["deployment"].GetType() != YAML::CT_MAP)
+         {
+            errorMessage = QString("Error while parsing %1 deployment file. "
+               "The deployment file must contain a YAML map with a key of 'deployment'. "
+               "The application will be shut down.").arg(depFileInfo.absoluteFilePath()).toStdString();
+            return false;
+         }
+         const YAML::Node& depMap = doc["deployment"];
+         for (YAML::Iterator iter = depMap.begin(); iter != depMap.end(); ++iter)
+         {
+            if (iter.second().GetType() == YAML::CT_SCALAR)
+            {
+               string key, value;
+               iter.first() >> key;
+               iter.second() >> value;
+               parsedDepMap.insert(make_pair(key, value));
+            }
+         }
+         depStream.close();
+      }
+      catch (YAML::ParserException& ex)
+      {
+         errorMessage = QString("Error while parsing %1 deployment file. "
+            "Found '%2' problem at line %3 and column %4. "
+            "The application will be shut"
+            "down.").arg(depFileInfo.absoluteFilePath()). \
+            arg(QString::fromStdString(ex.msg)).arg(ex.line).arg(ex.column).toStdString();
+         return false;
+      }
+      catch (YAML::Exception&)
+      {
+         errorMessage = QString("Unknown error while parsing %1 deployment file.  "
+            "The application will be shut down.").arg(depFileInfo.absoluteFilePath()).toStdString();
+         return false;
+      }
+
+      string pathErrorMsg;
+      string relativeRoot = depFileInfo.absolutePath().toStdString();
+      //set app home first from the .dep file
+      if (!parsedDepMap["AppHomePath"].empty())
+      {
+         appHomePathReadFromDep = true;
+         mHomePath = expandDeploymentPathVar(parsedDepMap["AppHomePath"], relativeRoot, pathErrorMsg);
+         if (!pathErrorMsg.empty())
+         {
+            errorMessage = QString("Error while parsing %1 deployment file. "
+               "The value for AppHomePath is invalid. %2" 
+               "The application will be shut "
+               "down.").arg(depFileInfo.absoluteFilePath()).arg(QString::fromStdString(pathErrorMsg)).toStdString();
+            return false;
+         }
+      }
+      //allow the other three variables to reference each other in any order.
+      if (!parsedDepMap["PlugInPath"].empty())
+      {
+         plugInPathReadFromDep = true;
+         mPlugInPath = expandDeploymentPathVar(parsedDepMap["PlugInPath"], relativeRoot, pathErrorMsg);
+         if (!pathErrorMsg.empty())
+         {
+            errorMessage = QString("Error while parsing %1 deployment file. "
+               "The value for PlugInPath is invalid. %2" 
+               "The application will be shut "
+               "down").arg(depFileInfo.absoluteFilePath()).arg(QString::fromStdString(pathErrorMsg)).toStdString();
+            return false;
+         }
+         FactoryResource<Filename> pFilename;
+         pFilename->setFullPathAndName(getPlugInPath());
+         mPlugInPathVariant = DataVariant(*(pFilename.get()));
+      }
+      if (!parsedDepMap["UserConfigPath"].empty())
+      {
+         userConfigPathReadFromDep = true;
+         mUserConfigPath = expandDeploymentPathVar(parsedDepMap["UserConfigPath"], relativeRoot, pathErrorMsg);
+         if (!pathErrorMsg.empty())
+         {
+            errorMessage = QString("Error while parsing %1 deployment file. "
+               "The value for UserConfigPath is invalid. %2" 
+               "The application will be shut "
+               "down").arg(depFileInfo.absoluteFilePath()).arg(QString::fromStdString(pathErrorMsg)).toStdString();
+            return false;
+         }
+      }
+      if (!parsedDepMap["AdditionalDefaultPath"].empty())
+      {
+         addDefaultsPathReadFromDep = true;
+         mAdditionalDefaultDir = expandDeploymentPathVar(parsedDepMap["AdditionalDefaultPath"], relativeRoot,
+            pathErrorMsg);
+         if (!pathErrorMsg.empty())
+         {
+            errorMessage = QString("Error while parsing %1 deployment file. "
+               "The value for AdditionalDefaultPath is invalid. %2" 
+               "The application will be shut "
+               "down").arg(depFileInfo.absoluteFilePath()).arg(QString::fromStdString(pathErrorMsg)).toStdString();
+            return false;
+         }
+      }
    }
-   return homeLocation;
+
+   QString deploymentInfoMsg;
+   deploymentInfoMsg += QString("The DefaultSettings will be loaded from the following directories:\n");
+   deploymentInfoMsg += QString("     1) [AppHomePath]/DefaultSettings\n");
+   deploymentInfoMsg += QString("     2) [AdditionalDefaultPath]\n");
+   deploymentInfoMsg += QString("The plug-ins will be loaded from the [PlugInPath] directory\n");
+   deploymentInfoMsg += QString("The user settings file (%1) will be "
+      "loaded from the [UserConfigPath] directory\n\n").arg(QString::fromStdString(getUserSettingsFileName()));
+   if (depMustExist || needToParse)
+   {
+      if (depMustExist)
+      {
+         deploymentInfoMsg += QString("The settings below were loaded from the %1 "
+            "deployment file that was specified using the /deployment: "
+            "command-line argument.\n").arg(depFileInfo.absoluteFilePath());
+
+      }
+      else if (needToParse)
+      {
+         deploymentInfoMsg += QString("The settings below were loaded from the %1 "
+            "deployment file because an opticks.dep file was present in the same directory "
+            "as the Opticks executable and the /deployment: command-line argument "
+            "was NOT used.\n").arg(depFileInfo.absoluteFilePath());
+      }
+      if (appHomePathReadFromDep)
+      {
+         deploymentInfoMsg += QString("     AppHomePath = %1\n").arg(QString::fromStdString(mHomePath));
+      }
+      if (plugInPathReadFromDep)
+      {
+         deploymentInfoMsg += QString("     PlugInPath = %1\n").arg(QString::fromStdString(mPlugInPath));
+      }
+      if (userConfigPathReadFromDep)
+      {
+         deploymentInfoMsg += QString("     UserConfigPath = %1\n").arg(QString::fromStdString(mUserConfigPath));
+      }
+      if (addDefaultsPathReadFromDep)
+      {
+         deploymentInfoMsg += QString("     AdditionalDefaultPath = %1\n").arg(QString::fromStdString(mAdditionalDefaultDir));
+      }
+      deploymentInfoMsg += QString("\n");
+   }
+   else
+   {
+      deploymentInfoMsg += QString("All of the settings were resolved using the "
+         "application defaults because the the /deployment: command-line argument "
+         "was not used and an opticks.dep file was not present in the same directory "
+         "as the Opticks executable.\n");
+   }
+
+   if (!appHomePathReadFromDep || !plugInPathReadFromDep ||
+       !userConfigPathReadFromDep || !addDefaultsPathReadFromDep)
+   {
+      deploymentInfoMsg += QString("The settings below were resolved using the application "
+         "defaults.\n");
+      if (!appHomePathReadFromDep)
+      {
+         deploymentInfoMsg += QString("     AppHomePath - This was defaulted as one directory "
+            "up from the directory where the Opticks "
+            "executable resides on the filesystem. In this case "
+            "%1.\n").arg(QString::fromStdString(mHomePath));
+      }
+      if (!plugInPathReadFromDep)
+      {
+         deploymentInfoMsg += QString("     PlugInPath - This was defaulted as ..\\PlugIns from the "
+            "directory where the Opticks executable resides on the filesystem. In this case "
+            "%1\n").arg(QString::fromStdString(mPlugInPath));
+      }
+      if (!userConfigPathReadFromDep)
+      {
+         deploymentInfoMsg += QString("     UserConfigPath - This was defaulted as the users "
+            "setting directory from the specific platform.  In this case "
+            "%1\n").arg(QString::fromStdString(mUserConfigPath));
+      }
+      if (!addDefaultsPathReadFromDep)
+      {
+         deploymentInfoMsg += QString("     AdditionalDefaultPath - This was defaulted "
+            "as empty, i.e. default settings "
+            "will not be searched for in this directory.\n");
+      }
+   }
+   deploymentDebugMsg = deploymentInfoMsg.toStdString();
+
+   return true;
 }
 
 string ConfigurationSettingsImp::getHome() const
 {
    return mHomePath;
 }
+
+string ConfigurationSettingsImp::getPlugInPath() const
+{
+   return mPlugInPath;
+}
+
 
 string ConfigurationSettingsImp::getUserDocs() const
 {
@@ -331,7 +638,7 @@ string ConfigurationSettingsImp::getArchitectureName() const
 
 const DateTime* ConfigurationSettingsImp::getReleaseDate() const
 {
-   return mpReleaseDate;
+   return dynamic_cast<DateTime*>(mpReleaseDate.get());
 }
 
 bool ConfigurationSettingsImp::isProductionRelease() const
@@ -414,6 +721,10 @@ const DataVariant &ConfigurationSettingsImp::getSetting(const string& key) const
       return defaultValue;
    }
 
+   if (key == "FileLocations/PlugInPath")
+   {
+      return mPlugInPathVariant;
+   }
 
    return empty;
 }
@@ -553,7 +864,7 @@ void ConfigurationSettingsImp::deserializeMruFiles()
    }
 
    FactoryResource<Filename> pFilename;
-   pFilename->setFullPathAndName(getUserSettingsFile());
+   pFilename->setFullPathAndName(getUserSettingsFilePath());
    XmlReader xmlReader(NULL, false);
    XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *pDomDoc(NULL);
    pDomDoc = xmlReader.parse(pFilename.get());
@@ -675,70 +986,26 @@ void ConfigurationSettingsImp::applicationClosed(Subject& subject, const std::st
    serialize();
 }
 
-string ConfigurationSettingsImp::getUserSettingsFile(bool createDir) const
+string ConfigurationSettingsImp::getUserSettingsFileName() const
 {
-   string configDir = ArgumentList::instance()->getOption("configDir");
-
-   QDir configDirectory;
-   if (configDir.empty())
-   {
-      QString userSettingsPath;
-      QString appNamePath;
-   #if defined(WIN_API)
-      char path[MAX_PATH];
-      HRESULT retValue = SHGetFolderPath(NULL, CSIDL_APPDATA | CSIDL_FLAG_CREATE, NULL, SHGFP_TYPE_CURRENT, path);
-      if(SUCCEEDED(retValue))
-      {
-         userSettingsPath = QString::fromAscii(path);
-      }
-      appNamePath = "Opticks";
-   #else
-      char* pPath = getenv("HOME");
-      if (pPath != NULL)
-      {
-         userSettingsPath = QString::fromAscii(pPath);
-      }
-      appNamePath = ".opticks";
-   #endif
-      if (!userSettingsPath.isEmpty())
-      {
-         userSettingsPath.replace("\\", "/");
-         QDir userSettingsDir(userSettingsPath);
-         if (!userSettingsDir.exists())
-         {
-            return "";
-         }
-         QString appUserSettingsPath = userSettingsDir.absoluteFilePath(appNamePath);
-         QDir appSettingsDir(appUserSettingsPath);
-         if (!appSettingsDir.exists() && createDir)
-         {
-            userSettingsDir.mkdir(appNamePath);
-         }
-         configDirectory = appSettingsDir;
-      }
-      else
-      {
-         return "";
-      }
-   }
-   else
-   {
-      QDir userConfigDir = QDir(QString::fromStdString(configDir));
-      if (!userConfigDir.exists())
-      {
-         return "";
-      }
-      configDirectory = userConfigDir;
-   }
-
    string os = getOperatingSystemName();
    string arch = getArchitectureName();
    string mode = "";
    #if defined(DEBUG)
       mode = "Debug";
    #endif
+   return "UserSettings-" + mVersion + "-" + os + "-" + arch + mode + ".cfg";
+}
 
-   QString cfgFilePath = configDirectory.absoluteFilePath(QString::fromStdString("UserSettings-" + mVersion + "-" + os + "-" + arch + mode + ".cfg"));
+string ConfigurationSettingsImp::getUserSettingsFilePath() const
+{
+   QDir configDirectory = QDir(QString::fromStdString(mUserConfigPath));
+   if (!configDirectory.exists())
+   {
+      return "";
+   }
+
+   QString cfgFilePath = configDirectory.absoluteFilePath(QString::fromStdString(getUserSettingsFileName()));
    return QDir::toNativeSeparators(cfgFilePath).toStdString();
 }
 
@@ -784,7 +1051,7 @@ string ConfigurationSettingsImp::locateUserDocs()
 
 bool ConfigurationSettingsImp::serialize() const
 {
-   return serializeSettings(getUserSettingsFile(true), mpUserSettings.get(), true);
+   return serializeSettings(getUserSettingsFilePath(), mpUserSettings.get(), true);
 }
 
 bool ConfigurationSettingsImp::serializeAsDefaults(const Filename* pFilename, const DynamicObject* pObject) const
@@ -796,10 +1063,10 @@ bool ConfigurationSettingsImp::serializeAsDefaults(const Filename* pFilename, co
    return serializeSettings(pFilename->getFullPathAndName(), pObject, false);
 }
 
-bool ConfigurationSettingsImp::deserialize()
+bool ConfigurationSettingsImp::loadSettings(string& errorMessage)
 {
    string defaultDir = mHomePath + SLASH + "DefaultSettings";
-   string customDefaultDir = ArgumentList::instance()->getOption("defaultDir");
+   string customDefaultDir = mAdditionalDefaultDir;
 
    QStringList defaultDirectories;
    defaultDirectories.append(QString::fromStdString(defaultDir));
@@ -832,7 +1099,7 @@ bool ConfigurationSettingsImp::deserialize()
                unsigned int loadOrder = loadOrderStr.toUInt(&success);
                if (success)
                {
-                  configFileMap.insert(pair<const unsigned int, string>(loadOrder, cfgFile.absoluteFilePath().toStdString()));
+                  configFileMap.insert(make_pair(loadOrder, cfgFile.absoluteFilePath().toStdString()));
                }
             }
          }
@@ -840,13 +1107,30 @@ bool ConfigurationSettingsImp::deserialize()
    }
 
    //we must at least have "1-ApplicationDefaults.cfg" which contains the application default settings
-   if (configFileMap.count(1) != 1)
+   bool missingAppDefaults = false;
+   if (configFileMap.count(1) <= 0)
    {
+      missingAppDefaults = true;
+   }
+   else if (configFileMap.count(1) == 1)
+   {
+      QFileInfo appDefaultConfigFileName(QString::fromStdString(configFileMap.find(1)->second));
+      if (appDefaultConfigFileName.fileName() != "1-ApplicationDefaults.cfg")
+      {
+         missingAppDefaults = true;
+      }
+   }
+   else 
+   {
+      errorMessage = "More than 1 default settings file was found with a load priority of 1. "
+         "Only 1 default settings file can have a priority of 1.";
       return false;
    }
-   QFileInfo appDefaultConfigFileName(QString::fromStdString(configFileMap.find(1)->second));
-   if (appDefaultConfigFileName.fileName() != "1-ApplicationDefaults.cfg")
+
+   if (missingAppDefaults)
    {
+      errorMessage = "The 1-ApplicationDefaults.cfg could not be located in any of the default "
+         "settings directories that were searched.";
       return false;
    }
 
@@ -857,7 +1141,7 @@ bool ConfigurationSettingsImp::deserialize()
 
    //parse all .cfg's files into mpDefaultSettings using the
    //load order
-   multimap<unsigned int, string>::iterator configFileIter;
+   multimap<unsigned int, string>::const_iterator configFileIter;
    for (configFileIter = configFileMap.begin(); configFileIter != configFileMap.end(); ++configFileIter)
    {
       FactoryResource<Filename> pFilename;
@@ -868,7 +1152,7 @@ bool ConfigurationSettingsImp::deserialize()
 
    //parse the user's config file
    FactoryResource<Filename> pFilename;
-   pFilename->setFullPathAndName(getUserSettingsFile());
+   pFilename->setFullPathAndName(getUserSettingsFilePath());
    FactoryResource<DynamicObject> pObj(deserialize(pFilename.get()));
    if (pObj.get() != NULL)
    {

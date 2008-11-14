@@ -17,15 +17,15 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(CODE_DIR)\Release\Toolkit\doc\html"
-			IntermediateDirectory="$(CODE_DIR)\Release\Toolkit\doc\html"
+			OutputDirectory="$(BuildDir)\$(PlatformName)\$(ConfigurationName)\$(ProjectName)"
+			IntermediateDirectory="$(BuildDir)\$(PlatformName)\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="0"
 			InheritedPropertySheets="..\CompileSettings\Macros.vsprops"
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="&quot;$(CODE_DIR)\build.py&quot; --build-doxygen"
-				ReBuildCommandLine="&quot;$(CODE_DIR)\build.py&quot; --build-doxygen"
+				BuildCommandLine="&quot;$(CODE_DIR)\build.py&quot; --build-doxygen=html -v"
+				ReBuildCommandLine="&quot;$(CODE_DIR)\build.py&quot; --build-doxygen=html -v"
 				CleanCommandLine=""
 				Output="$(CODE_DIR)\Release\Toolkit\doc\html\index.html"
 				PreprocessorDefinitions="WIN32;_DEBUG"
@@ -38,15 +38,15 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(CODE_DIR)\Release\Toolkit\doc\html"
-			IntermediateDirectory="$(CODE_DIR)\Release\Toolkit\doc\html"
+			OutputDirectory="$(BuildDir)\$(PlatformName)\$(ConfigurationName)\$(ProjectName)"
+			IntermediateDirectory="$(BuildDir)\$(PlatformName)\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="0"
 			InheritedPropertySheets="..\CompileSettings\Macros.vsprops"
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="&quot;$(CODE_DIR)\build.py&quot; --build-doxygen"
-				ReBuildCommandLine="&quot;$(CODE_DIR)\build.py&quot; --build-doxygen"
+				BuildCommandLine="&quot;$(CODE_DIR)\build.py&quot; --build-doxygen=html -v"
+				ReBuildCommandLine="&quot;$(CODE_DIR)\build.py&quot; --build-doxygen=html -v"
 				CleanCommandLine=""
 				Output="$(CODE_DIR)\Release\Toolkit\doc\html\index.html"
 				PreprocessorDefinitions="WIN32;NDEBUG"

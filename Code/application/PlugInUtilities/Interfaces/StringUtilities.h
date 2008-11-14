@@ -158,11 +158,16 @@ namespace StringUtilities
     * use $$ to escape the $.
     *
     * @param originalString
-    *        the string that should be expanded.
+    *        The string that should be expanded.
+    * @param ignoredExpansions
+    *        The list of variable expansions that should be ignored.  For example,
+    *        providing a vector with 'E' and 'C' in it, would cause $E(varname) and
+    *        $C(varname) to be left in the string as is (i.e. no expansion would occur).
     *
     * @return the expanded string.
     */
-   std::string expandVariables(const std::string& originalString);
+   std::string expandVariables(const std::string& originalString,
+      const std::vector<std::string>& ignoredExpansions = std::vector<std::string>());
 
    /**
     * Convert the given value into a string.  The

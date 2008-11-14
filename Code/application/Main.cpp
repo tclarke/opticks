@@ -9,6 +9,7 @@
 
 #include "AppConfig.h"
 #include "AppVerify.h"
+#include "AppVersion.h"
 #include "ArgumentList.h"
 #include "InteractiveApplication.h"
 #include "SystemServicesImp.h"
@@ -22,22 +23,22 @@ int main(int argc, char** argv)
    // will try to open the Qt args as data files.
    QApplication app(argc, argv);
 
-   SystemServicesImp::instance()->WriteLogInfo(QString("%1 Startup").arg("Application").toStdString());
+   SystemServicesImp::instance()->WriteLogInfo(QString("%1 Startup").arg(APP_NAME).toStdString());
    // Register the command line options
    ArgumentList* pArgumentList = NULL;
    pArgumentList = ArgumentList::instance();
    if (pArgumentList == NULL)
    {
-      SystemServicesImp::instance()->WriteLogInfo(QString("%1 Shutdown").arg("Application").toStdString());
+      SystemServicesImp::instance()->WriteLogInfo(QString("%1 Shutdown").arg(APP_NAME).toStdString());
       return -1;
    }
 
    pArgumentList->registerOption("input");
+   pArgumentList->registerOption("deployment");
+   pArgumentList->registerOption("debugDeployment");
    pArgumentList->registerOption("exitAfterWizards");
-   pArgumentList->registerOption("defaultDir");
    pArgumentList->registerOption("generate");
    pArgumentList->registerOption("processors");
-   pArgumentList->registerOption("configDir");
    pArgumentList->registerOption("");
    pArgumentList->set(argc, argv);
 
@@ -52,6 +53,6 @@ int main(int argc, char** argv)
       delete pApp;
    }
 
-   SystemServicesImp::instance()->WriteLogInfo(QString("%1 Shutdown").arg("Application").toStdString());
+   SystemServicesImp::instance()->WriteLogInfo(QString("%1 Shutdown").arg(APP_NAME).toStdString());
    return iSuccess;
 }

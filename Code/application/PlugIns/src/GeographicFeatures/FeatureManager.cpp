@@ -481,12 +481,7 @@ FeatureProxyConnector *FeatureManager::getProxy()
    if (mpProxy == NULL)
    {
       // Start up ArcProxy
-      const Filename* pPlugInPath = ConfigurationSettings::getSettingPlugInPath();
-      string plugInPath;
-      if (pPlugInPath != NULL)
-      {
-         plugInPath = pPlugInPath->getFullPathAndName();
-      }
+      string plugInPath = Service<ConfigurationSettings>()->getPlugInPath();
 #if defined(WIN_API)
       QString proxyPath = QString::fromStdString(
          plugInPath + SLASH + "ArcProxy" + SLASH + "ArcProxy" + EXE_EXTENSION);

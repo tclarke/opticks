@@ -16,11 +16,13 @@
 #include "TypesFile.h"
 
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
 class DataDescriptor;
 class DateTime;
+class DateTimeImp;
 class DynamicObject;
 struct MruFile;
 class XMLWriter;
@@ -54,7 +56,10 @@ public:
    static ConfigurationSettingsImp* instance();
    static void destroy();
 
+   void validateInitialization();
+
    std::string getHome() const;
+   std::string getPlugInPath() const;
    std::string getUserDocs() const;
    std::string getCreator() const;
    std::string getProduct() const;
@@ -106,20 +111,16 @@ public:
    SUBJECTADAPTER_METHODS(SubjectImp);
 
 protected:
-   std::string getUserSettingsFile(bool createDir = false) const;
+   std::string getUserSettingsFilePath() const;
+   std::string getUserSettingsFileName() const;
    std::string translateKey(const std::string& key) const;
 
    bool serialize() const;
-   bool deserialize();
+   bool loadSettings(std::string& errorMessage);
    void deserializeMruFiles();
    void applicationClosed(Subject& subject, const std::string& signal, const boost::any &args);
-
-   /**
-    *  Find the application home directory
-    *
-    *  @return The home directory for the application
-    */
-   static std::string locateApplicationHome();
+   void initDeploymentValues();
+   bool parseDeploymentFile(std::string& errorMessage, std::string& deploymentDebugMsg);
 
    /**
    *  Find the user's documents directory
@@ -169,7 +170,7 @@ private:
    std::string mCreator;
    std::string mProduct;
    std::string mVersion;
-   DateTime* mpReleaseDate;
+   std::auto_ptr<DateTimeImp> mpReleaseDate;
    bool mProductionRelease;
    ReleaseType mReleaseType;
 
@@ -180,11 +181,16 @@ private:
    std::vector<MruFile> mMruFiles;
    bool mNeedToLoadMruFiles;
 
+   std::string mUserConfigPath;
+   std::string mAdditionalDefaultDir;
    std::string mHomePath;
+   std::string mPlugInPath;
+   DataVariant mPlugInPathVariant;
    std::string mUserDocs;
 
    std::string mInitializationErrorMsg;
    bool mIsInitialized;
+   std::string mDeploymentDebugMsg;
 };
 
 #endif

@@ -70,7 +70,6 @@ OptionsFileLocations::OptionsFileLocations() :
    mFileLocations.push_back(pair<string,string>("Default Session Save/Open Path", ConfigurationSettings::getSettingSaveOpenSessionPathKey()));
    mFileLocations.push_back(pair<string,string>("Default Product Template", ProductView::getSettingTemplateFileKey()));
    mFileLocations.push_back(pair<string,string>("Message Log Path", ConfigurationSettings::getSettingMessageLogPathKey()));
-   mFileLocations.push_back(pair<string,string>("Plug-In Path", ConfigurationSettings::getSettingPlugInPathKey()));
    mFileLocations.push_back(pair<string,string>("Product Template Path", ProductView::getSettingTemplatePathKey()));
    mFileLocations.push_back(pair<string,string>("Temp Path", ConfigurationSettings::getSettingTempPathKey()));
    mFileLocations.push_back(pair<string,string>("Support Files Path", ConfigurationSettings::getSettingSupportFilesPathKey()));
@@ -152,16 +151,6 @@ void OptionsFileLocations::applyChanges()
             if (type == "Message Log Path")
             {
                MessageLogMgrImp::instance()->setPath(location);
-            }
-            else if (type == "Plug-In Path")
-            {
-               if (location != mPlugInPath)
-               {
-                  Service<DesktopServices> pDesktop;
-                  QMessageBox::information(pDesktop->getMainWidget(), APP_NAME, 
-                     "Currently loaded plug-ins will not be updated until a new session is started");
-
-               }
             }
             else if (type == "Wizard Path")
             {

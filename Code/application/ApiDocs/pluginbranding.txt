@@ -1,7 +1,7 @@
 /** \page pluginbranding Plug-In Branding of the Application
 This document describes how to add plug-in suite branding to the application.
 Plug-In Suites can add a custom splash screen to the application and can have some general description information added to the About dialog of the application.
-In order to brand the application, plug-in developers need to create a .brand file and install it to the OPTICKS_HOME/SupportFiles/PlugInBranding directory.
+In order to brand the application, plug-in developers need to create a .brand file and install it to the AppHome/SupportFiles/PlugInBranding directory.
 On start-up the application will parse information out of all the .brand files located in that directory.
 The format of the .brand file is defined in the .xsd used to define all of the application's xml formats.
 A sample .brand file is shown below
