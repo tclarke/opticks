@@ -66,12 +66,8 @@ bool IceExporterShell::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
       ICEVERIFY_MSG(pOutputCube != NULL, "No Raster Element specified.");
       ICEVERIFY_MSG(pOutputFileDescriptor != NULL, "No Raster File Descriptor specified.");
 
-      // Check that the RasterElement is exportable
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Make BIL export work (kstreith)")
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Possibly make interleave conversions on export work (kstreith)")
       RasterDataDescriptor* pRasterDescriptor = dynamic_cast<RasterDataDescriptor*>(pOutputCube->getDataDescriptor());
       ICEVERIFY_MSG(pRasterDescriptor != NULL, "Raster Element is invalid.");
-      ICEVERIFY_MSG(pRasterDescriptor->getInterleaveFormat() != BIL, "BIL formatted cubes cannot be exported.");
 
       // Open the file for writing
       filename = pOutputFileDescriptor->getFilename().getFullPathAndName();

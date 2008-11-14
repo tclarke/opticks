@@ -40,6 +40,8 @@ static transMapMember transMap[] = {{"%","%25"},
                                    {"[","%5b"},
                                    {"]","%5d"},
                                    {"`","%60"},
+                                   {"(","%28"},
+                                   {")","%29"},
                                    {NULL,NULL}};
 
 std::string XmlBase::URLtoPath(const XMLCh *url)
