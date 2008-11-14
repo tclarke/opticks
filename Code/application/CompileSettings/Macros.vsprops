@@ -108,4 +108,8 @@
 		Name="ZLIB"
 		Value="$(OPTICKSDEPENDENCIES)\zlib"
 	/>
+	<UserMacro
+		Name="YAMLCPP"
+		Value="$(OPTICKSDEPENDENCIES)\yaml-cpp"
+	/>
 </VisualStudioPropertySheet>

@@ -195,7 +195,6 @@ bool ScriptPlugIn::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList
    setEnvironmentOption(ConfigurationSettings::getSettingExportPath(), "EXPORT_PATH");
    setEnvironmentOption(ConfigurationSettings::getSettingImportPath(), "IMPORT_PATH");
    setEnvironmentOption(ConfigurationSettings::getSettingMessageLogPath(), "MESSAGE_LOG_PATH");
-   setEnvironmentOption(ConfigurationSettings::getSettingPlugInPath(), "PLUG_IN_PATH");
    setEnvironmentOption(ConfigurationSettings::getSettingSupportFilesPath(), "SUPPORT_FILES_PATH");
    setEnvironmentOption(ProductView::getSettingTemplatePath(), "TEMPLATE_PATH");
    setEnvironmentOption(ConfigurationSettings::getSettingWizardPath(), "WIZARD_PATH");
@@ -204,6 +203,7 @@ bool ScriptPlugIn::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList
    Service<ConfigurationSettings> pConfig;
    string homePath = pConfig->getHome();
    setEnvironmentVariable("OPTICKS_HOME", homePath.c_str());
+   setEnvironmentVariable("PLUG_IN_PATH", pConfig->getPlugInPath().c_str());
 
    bool success = true;
 #if defined(WIN_API)

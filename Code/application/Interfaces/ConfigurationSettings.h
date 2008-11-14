@@ -535,7 +535,6 @@ public:
    SETTING(PathBookmarks, FileLocations, std::vector<Filename*>, std::vector<Filename*>())
    SETTING_PTR(MessageLogPath, FileLocations, Filename)
    SETTING(NumberOfMruFiles, General, unsigned int, 3)
-   SETTING_PTR(PlugInPath, FileLocations, Filename)
    SETTING_PTR(SupportFilesPath, FileLocations, Filename)
    SETTING(ShowStatusBarCubeValue, StatusBar, bool, true)
    SETTING(ShowStatusBarElevationValue, StatusBar, bool, true)
@@ -559,6 +558,15 @@ public:
     * @return   Base folder for the main application.
     */
    virtual std::string getHome() const = 0;
+
+   /**
+    * Gets the plug-in path.  This is the directory
+    * where plug-ins must be placed if they
+    * are to be loaded by the application.
+    * 
+    * @return   The plug-in path.
+    */
+   virtual std::string getPlugInPath() const = 0;
 
    /**
     * Gets the application creator.
@@ -755,7 +763,7 @@ public:
 
    /**
     * Saves the given DynamicObject values into a .cfg file that could be put
-    * into the OPTICKS_HOME/DefaultSettings directory and be used as defaults
+    * into the AppHome/DefaultSettings directory and be used as defaults
     * by the application.
     *
     * @param pFilename

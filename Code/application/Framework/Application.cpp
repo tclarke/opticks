@@ -76,40 +76,6 @@ Application::~Application()
 int Application::run(int argc, char** argv)
 {
     // Add the number of processors to the configuration settings
-   bool configSettingsValid = false;
-   string configSettingsErrorMsg = "";
-   ConfigurationSettingsImp* pConfigSettings = NULL;
-   pConfigSettings = ConfigurationSettingsImp::instance();
-   if (pConfigSettings == NULL)
-   {
-      return -1;
-   }
-   configSettingsValid = pConfigSettings->isInitialized();
-   if (pConfigSettings->getInitializationErrorMsg() != NULL)
-   {
-      configSettingsErrorMsg = pConfigSettings->getInitializationErrorMsg();
-   }
-
-   if (!configSettingsValid)
-   {
-      if (configSettingsErrorMsg.empty())
-      {
-         configSettingsErrorMsg = "Unable to locate configuration settings";
-      }
-
-      reportError(configSettingsErrorMsg);
-      return -1;
-   }
-   else
-   {
-      //config settings were valid, still see if there is an error msg
-      //if so treat as a warning
-      if (!configSettingsErrorMsg.empty())
-      {
-         reportWarning(configSettingsErrorMsg);
-      }
-   }
-
    // determine number of available processors
    unsigned int numberOfProcessors = UtilityServicesImp::instance()->getNumProcessors();
    string processorArg = ArgumentList::instance()->getOption("processors");
@@ -145,15 +111,7 @@ int Application::run(int argc, char** argv)
    }
 
    // Build the plug-in list from the plug-in directory
-   string plugPath = "";
-   if (ConfigurationSettings::hasSettingPlugInPath())
-   {
-      const Filename* pPlugInPath = ConfigurationSettings::getSettingPlugInPath();
-      if (pPlugInPath != NULL)
-      {
-         plugPath = pPlugInPath->getFullPathAndName();
-      }
-   }
+   string plugPath = pSettings->getPlugInPath();
 
    //check all singletons here for proper creation
    PlugInManagerServicesImp* pManager = NULL;

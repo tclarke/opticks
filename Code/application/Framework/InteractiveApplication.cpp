@@ -78,6 +78,15 @@ int InteractiveApplication::run(int argc, char** argv)
       {
          configSettingsErrorMsg = pConfigSettings->getInitializationErrorMsg();
       }
+      if (configSettingsValid)
+      {
+         pConfigSettings->validateInitialization();
+         configSettingsValid = pConfigSettings->isInitialized();
+         if (pConfigSettings->getInitializationErrorMsg() != NULL)
+         {
+            configSettingsErrorMsg = pConfigSettings->getInitializationErrorMsg();
+         }
+      }
    }
 
    if (!configSettingsValid)

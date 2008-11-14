@@ -179,8 +179,12 @@ string StringUtilities::latLonToText(LocationType latLonCoords)
    return latLon.getText().c_str();
 }
 
-string StringUtilities::expandVariables(const string& originalString)
+string StringUtilities::expandVariables(const string& originalString,
+   const vector<string>& ignoredExpansions)
 {
+   bool allowV = (find(ignoredExpansions.begin(), ignoredExpansions.end(), "V") == ignoredExpansions.end());
+   bool allowC = (find(ignoredExpansions.begin(), ignoredExpansions.end(), "C") == ignoredExpansions.end());
+   bool allowE = (find(ignoredExpansions.begin(), ignoredExpansions.end(), "E") == ignoredExpansions.end());
    Service<ConfigurationSettings> pSettings;
    string newString = originalString;
    for (int i = 0; i < 50; i++)
@@ -206,7 +210,7 @@ string StringUtilities::expandVariables(const string& originalString)
                   string::size_type closeParen = newString.find(')', pos+2);
                   string variableName = newString.substr(pos+3, closeParen-(pos+2)-1);
                   string replacementString;
-                  if (type == "V")
+                  if (type == "V" && allowV)
                   {
                      if (variableName == "APP_HOME")
                      {
@@ -233,7 +237,7 @@ string StringUtilities::expandVariables(const string& originalString)
                         replaced = true;
                      }
                   }
-                  else if (type == "E")
+                  else if (type == "E" && allowE)
                   {
                      char* value = getenv(variableName.c_str());
                      if (value != NULL)
@@ -247,7 +251,7 @@ string StringUtilities::expandVariables(const string& originalString)
                         replaced = true;
                      }
                   }
-                  else if (type == "C")
+                  else if (type == "C" && allowC)
                   {
                      const DataVariant& value = pSettings->getSetting(variableName);
                      if (value.isValid())

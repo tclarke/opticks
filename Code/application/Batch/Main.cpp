@@ -42,8 +42,8 @@ int main(int argc, char** argv)
       return -1;
    }
    pArgumentList->registerOption("brief");
-   pArgumentList->registerOption("configDir");
-   pArgumentList->registerOption("defaultDir");
+   pArgumentList->registerOption("deployment");
+   pArgumentList->registerOption("debugDeployment");
    pArgumentList->registerOption("input");
    pArgumentList->registerOption("generate");
    pArgumentList->registerOption("processors");
@@ -61,16 +61,22 @@ int main(int argc, char** argv)
    bool configSettingsValid = false;
    string configSettingsErrorMsg = "";
 
-   ConfigurationSettingsImp* pSettings = NULL;
-   pSettings = ConfigurationSettingsImp::instance();
+   ConfigurationSettingsImp* pSettings = ConfigurationSettingsImp::instance();
    if (pSettings != NULL)
    {
-      bProductionRelease = pSettings->isProductionRelease();
-      releaseType = StringUtilities::toDisplayString(pSettings->getReleaseType());
       configSettingsValid = pSettings->isInitialized();
       if (pSettings->getInitializationErrorMsg() != NULL)
       {
          configSettingsErrorMsg = pSettings->getInitializationErrorMsg();
+      }
+      if (configSettingsValid)
+      {
+         pSettings->validateInitialization();
+         configSettingsValid = pSettings->isInitialized();
+         if (pSettings->getInitializationErrorMsg() != NULL)
+         {
+            configSettingsErrorMsg = pSettings->getInitializationErrorMsg();
+         }
       }
    }
 
@@ -80,7 +86,7 @@ int main(int argc, char** argv)
       {
          configSettingsErrorMsg = "Unable to locate configuration settings";
       }
-      cerr << "ERROR: " << configSettingsErrorMsg << endl;
+      pApp->reportError(configSettingsErrorMsg);
       SystemServicesImp::instance()->WriteLogInfo(string(APP_NAME) + " Batch shutdown");
       return -1;
    }
@@ -88,10 +94,12 @@ int main(int argc, char** argv)
    {
       if (!configSettingsErrorMsg.empty())
       {
-         cerr << "WARNING: " << configSettingsErrorMsg << endl;
+         pApp->reportWarning(configSettingsErrorMsg);
       }
    }
 
+   bProductionRelease = pSettings->isProductionRelease();
+   releaseType = StringUtilities::toDisplayString(pSettings->getReleaseType());
    string version = pSettings->getVersion();
    version += " Build " + pSettings->getBuildRevision();
    const DateTime* pDate = pSettings->getReleaseDate();

@@ -171,8 +171,7 @@ void BatchApplication::reportWarning(const string& warningMessage) const
 {
    if (warningMessage.empty() == false)
    {
-      cerr << endl;
-      cerr << APP_NAME << " WARNING: " << warningMessage << endl;
+      cerr << endl << APP_NAME << " WARNING: " << warningMessage << endl;
    }
 }
 
@@ -184,6 +183,5 @@ void BatchApplication::reportError(const string& errorMessage) const
       message = "Unknown error";
    }
 
-   cerr << endl;
-   cerr << APP_NAME << " ERROR: " << message << endl;
+   cerr << endl << APP_NAME << " ERROR: " << message << endl;
 }
