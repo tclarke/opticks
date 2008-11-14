@@ -44,4 +44,5 @@ If you are just starting out, you should look at the tutorial first.
   -# \subpage settingsmacros
   -# \subpage usingimporterresource
   -# \subpage EnumWrapperHowTo
+  -# \subpage coordinate_systems
  */

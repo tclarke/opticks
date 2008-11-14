@@ -69,6 +69,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\coordinate_systems.txt"
+				>
+			</File>
+			<File
 				RelativePath=".\howto_buildenvironment.txt"
 				>
 			</File>
