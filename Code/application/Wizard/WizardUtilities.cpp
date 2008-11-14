@@ -199,6 +199,8 @@ bool WizardUtilities::runBatchFiles(const vector<string> &wizardFiles, Progress 
       return false;
    }
 
+   bool bOverallSuccess = true;
+
    unsigned int iCount = wizardFiles.size(); 
 
    // Launch the batch wizard executor for each xml file
@@ -229,6 +231,7 @@ bool WizardUtilities::runBatchFiles(const vector<string> &wizardFiles, Progress 
                pProgress->updateProgress("Batch file complete: " + filename, (i + 1) * 100 / iCount, NORMAL);
             }
          }
+         bOverallSuccess = bOverallSuccess && bSuccess;
       }
    }
 
@@ -238,5 +241,5 @@ bool WizardUtilities::runBatchFiles(const vector<string> &wizardFiles, Progress 
       pProgress->updateProgress(message, 100, NORMAL);
    }
 
-   return true;
+   return bOverallSuccess;
 }
