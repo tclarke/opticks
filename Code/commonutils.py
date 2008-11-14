@@ -177,7 +177,7 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
             ["avcodec.dll", "avformat.dll", "avutil.dll"], True)
         ds(r"ossim\bin", ["ossim"], "d.dll", ".dll")
         ds(r"ehs\bin", ["ehs"], "d.dll", ".dll")
-      temp_list.append(dependency_suffix(r"gdal\bin",["gdal15"],".dll",".dll"))
+        ds(r"gdal\bin", ["gdal15"], ".dll", ".dll")
 
         for depend in temp_list:
             cur_list = depend.get_list_for(arch, is_debug)
