@@ -58,6 +58,11 @@ public:
    int getGzipCompressionLevel() const;
 
 private:
+   void writeBilCubeData(const std::string& hdfPath,
+      RasterElement* pCube,
+      const RasterFileDescriptor* pOutputFileDescriptor,
+      Hdf5DataSetResource& dataId,
+      Progress* pProgress);
    void writeBipCubeData(const std::string& hdfPath,
       RasterElement* pCube,
       const RasterFileDescriptor* pOutputFileDescriptor,
