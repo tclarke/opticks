@@ -308,14 +308,15 @@ bool Nitf::ImageSubheader::importMetadata(const ossimPropertyInterface *pHeader,
    FactoryResource<DynamicObject> pImageHeaderMetadata;
    VERIFY(pImageHeaderMetadata.get() != NULL);
 
-   ossimNitfImageHeaderV2_X *pImageHeader = PTR_CAST(ossimNitfImageHeaderV2_X, pHeader);
+   ossimNitfImageHeaderV2_X* pImageHeader = PTR_CAST(ossimNitfImageHeaderV2_X, pHeader);
    VERIFY(pImageHeader != NULL);
    VERIFY(Header::importMetadata(pImageHeader, pDescriptor, pImageHeaderMetadata.get()));
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : TODO: Fix OSSIM to parse comments and return the size of the vector (leckels)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : TODO: Fix OSSIM to parse comments and " \
+   "return the size of the vector (leckels)")
 
    VERIFY(pDescriptor != NULL);
-   DynamicObject *pMetadata = pDescriptor->getMetadata();
+   DynamicObject* pMetadata = pDescriptor->getMetadata();
    VERIFY(pMetadata != NULL);
    pMetadata->setAttributeByPath(getMetadataPath(), *pImageHeaderMetadata.get());
    return true;
@@ -326,7 +327,7 @@ bool Nitf::ImageSubheader::importBandInformation(const ossimPropertyInterface *p
    DynamicObject *pDynObj, const string& appName,
    const string& ossimName)
 {
-   ossimNitfImageHeaderV2_X *pImageHeader = PTR_CAST(ossimNitfImageHeaderV2_X, pPropertyInterface);
+   ossimNitfImageHeaderV2_X* pImageHeader = PTR_CAST(ossimNitfImageHeaderV2_X, pPropertyInterface);
    if (pImageHeader == NULL || pDescriptor == NULL || pDynObj == NULL)
    {
       return false;
@@ -414,8 +415,7 @@ bool Nitf::ImageSubheader::importGeoInformation_2_0(const ossimPropertyInterface
    }
 
    VERIFY(pDescriptor != NULL && pDynObj != NULL);
-   RasterFileDescriptor *pFd =
-      dynamic_cast<RasterFileDescriptor*>(pDescriptor->getFileDescriptor());
+   RasterFileDescriptor* pFd = dynamic_cast<RasterFileDescriptor*>(pDescriptor->getFileDescriptor());
    VERIFY(pFd != NULL);
    if (Header::importMetadataValue<string>(pPropertyInterface, pDescriptor,
         pDynObj, ICORDS, ossimNitfImageHeaderV2_X::ICORDS_KW) == false)
@@ -466,7 +466,8 @@ bool Nitf::ImageSubheader::importGeoInformation_2_0(const ossimPropertyInterface
       return true;
 
    }
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : TODO: Add full NITF 02.00 compatibility for IGEOLO (GeoCentric). (dadkins)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : TODO: Add full NITF 02.00 compatibility " \
+   "for IGEOLO (GeoCentric). (dadkins)")
 
    return false;
 }
@@ -482,8 +483,7 @@ bool Nitf::ImageSubheader::importGeoInformation(const ossimPropertyInterface *pP
    }
 
    VERIFY(pDescriptor != NULL && pDynObj != NULL);
-   RasterFileDescriptor *pFd =
-      dynamic_cast<RasterFileDescriptor*>(pDescriptor->getFileDescriptor());
+   RasterFileDescriptor* pFd = dynamic_cast<RasterFileDescriptor*>(pDescriptor->getFileDescriptor());
    VERIFY(pFd != NULL);
    if (Header::importMetadataValue<string>(pPropertyInterface, pDescriptor,
         pDynObj, ICORDS, ossimNitfImageHeaderV2_X::ICORDS_KW) == false)
@@ -558,7 +558,7 @@ bool Nitf::ImageSubheader::importGeoInformation(const ossimPropertyInterface *pP
 }
 
 bool Nitf::ImageSubheader::getGCPsFromUtmMgrs(const string& iGeolo, const LocationType gcpPixels[],
-   const unsigned int& numGcpPixels, list<GcpPoint>& gcps)
+                                              unsigned int numGcpPixels, list<GcpPoint>& gcps)
 {
    const unsigned int charsPerIGEOLO = 15;
 
@@ -576,8 +576,8 @@ bool Nitf::ImageSubheader::getGCPsFromUtmMgrs(const string& iGeolo, const Locati
    return true;
 }
 
-bool Nitf::ImageSubheader::getGCPsFromUtm(const string& iCords, const string& iGeolo,
-   const LocationType gcpPixels[], const unsigned int& numGcpPixels, list<GcpPoint>& gcps)
+bool Nitf::ImageSubheader::getGCPsFromUtm(const string& iCords, const string& iGeolo, const LocationType gcpPixels[],
+                                          unsigned int numGcpPixels, list<GcpPoint>& gcps)
 {
    if (iCords.empty() == true)
    {
@@ -627,15 +627,16 @@ bool Nitf::ImageSubheader::getGCPsFromUtm(const string& iCords, const string& iG
    return true;
 }
 
-bool Nitf::ImageSubheader::getGCPsFromGeographic(const string& iGeolo,
-   const LocationType gcpPixels[], const unsigned int& numGcpPixels, list<GcpPoint>& gcps)
-{   
+bool Nitf::ImageSubheader::getGCPsFromGeographic(const string& iGeolo, const LocationType gcpPixels[],
+                                                 unsigned int numGcpPixels, list<GcpPoint>& gcps)
+{
    istringstream strm(iGeolo);
    for (unsigned int ui = 0; ui < numGcpPixels; ++ui)
    {
       int n;
       vector<char> buf(3, 0);
-      double latitude = 0, longitude = 0;
+      double latitude = 0;
+      double longitude = 0;
       char dir;
       for (int lat = 0; lat < 3; ++lat)
       {
@@ -658,8 +659,8 @@ bool Nitf::ImageSubheader::getGCPsFromGeographic(const string& iGeolo,
       {
          memset(&buf.front(), 0, buf.size());
          strm.read(&buf.front(), 2);
-         stringstream numer(&buf.front());
-         numer >> n;
+         stringstream numer2(&buf.front());
+         numer2 >> n;
          longitude += n * pow(60.0, -1.0*lon);
       }
       strm.read(&dir, 1);
@@ -680,7 +681,7 @@ bool Nitf::ImageSubheader::getGCPsFromGeographic(const string& iGeolo,
 }
 
 bool Nitf::ImageSubheader::getGCPsFromDecimalDegrees(const string& iGeolo, const LocationType gcpPixels[],
-   const unsigned int& numGcpPixels, list<GcpPoint>& gcps)
+                                                     unsigned int numGcpPixels, list<GcpPoint>& gcps)
 {
    istringstream strm(iGeolo);
    for (unsigned int i = 0; i < numGcpPixels; i++)
@@ -704,7 +705,7 @@ bool Nitf::ImageSubheader::exportGeoInformation(const RasterDataDescriptor *pDes
    VERIFY(pDescriptor != NULL);
 
    Service<ModelServices> pModel;
-   RasterElement *pRaster = dynamic_cast<RasterElement*>(pModel->getElement(pDescriptor->getName(), 
+   RasterElement* pRaster = dynamic_cast<RasterElement*>(pModel->getElement(pDescriptor->getName(), 
       pDescriptor->getType(), pDescriptor->getParent()));
    VERIFY(pRaster != NULL);
 
@@ -742,7 +743,7 @@ bool Nitf::ImageSubheader::exportGeoInformation(const RasterDataDescriptor *pDes
       const string fileVersionStr = fileVersion.toXmlString();
       const string iCordsStr = iCords.toXmlString();
       const string iGeoloStr = iGeolo.toXmlString();
-       if (fileVersionStr == Nitf::VERSION_02_10 || (fileVersionStr == Nitf::VERSION_02_00 &&
+      if (fileVersionStr == Nitf::VERSION_02_10 || (fileVersionStr == Nitf::VERSION_02_00 &&
           (iCordsStr == ICORDS_UTM_MGRS || iCordsStr == ICORDS_GEOGRAPHIC)))
       {
          return pOssimCords->setValue(iCordsStr) && pOssimGeolo->setValue(iGeoloStr);
@@ -894,7 +895,7 @@ bool Nitf::ImageSubheader::exportClassificationString(const RasterDataDescriptor
    const string& ossimName)
 {
    VERIFY(pDescriptor != NULL);
-   const Classification *pClass = pDescriptor->getClassification();
+   const Classification* pClass = pDescriptor->getClassification();
    VERIFY(pClass != NULL);
 
    string value;
@@ -970,10 +971,10 @@ bool Nitf::ImageSubheader::exportClassificationDate(const RasterDataDescriptor *
    const string& ossimName)
 {
    VERIFY(pDescriptor != NULL);
-   const Classification *pClass = pDescriptor->getClassification();
+   const Classification* pClass = pDescriptor->getClassification();
    VERIFY(pClass != NULL);
 
-   const DateTime *pValue = NULL;
+   const DateTime* pValue = NULL;
    
    if (appName == SECURITY_DECLASS_DATE)
    {

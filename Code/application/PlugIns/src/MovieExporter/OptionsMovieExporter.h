@@ -164,49 +164,49 @@ private slots:
    void frameRateListChanged(const QString &value);
 
 private:
-   QCheckBox *mpUseViewResolution;
-   QLineEdit *mpResolutionX;
-   QLineEdit *mpResolutionY;
-   QPushButton *mpResolutionAspectLock;
-   QIcon *mpLockIcon;
-   QIcon *mpUnlockIcon;
+   QCheckBox* mpUseViewResolution;
+   QLineEdit* mpResolutionX;
+   QLineEdit* mpResolutionY;
+   QPushButton* mpResolutionAspectLock;
+   QIcon* mpLockIcon;
+   QIcon* mpUnlockIcon;
    unsigned int mCurrentResolutionX;
    unsigned int mCurrentResolutionY;
 
-   QSlider *mpBitrate;
-   QLabel *mpBitrateValue;
-   QLabel *mpStartLabel;
-   QDoubleSpinBox *mpStart;
-   QDoubleSpinBox *mpStop;
-   QLabel *mpStopLabel;
-   QSpinBox *mpFramerateNum;
-   QSpinBox *mpFramerateDen;
-   QComboBox *mpFramerateList;
+   QSlider* mpBitrate;
+   QLabel* mpBitrateValue;
+   QLabel* mpStartLabel;
+   QDoubleSpinBox* mpStart;
+   QDoubleSpinBox* mpStop;
+   QLabel* mpStopLabel;
+   QSpinBox* mpFramerateNum;
+   QSpinBox* mpFramerateDen;
+   QComboBox* mpFramerateList;
 
-   QComboBox *mpMeMethod;
-   QSpinBox *mpGopSize;
-   QDoubleSpinBox *mpQCompress;
-   QDoubleSpinBox *mpQBlur;
-   QSpinBox *mpQMinimum;
-   QSpinBox *mpQMaximum;
-   QSpinBox *mpQDiffMaximum;
-   QSpinBox *mpMaxBFrames;
-   QDoubleSpinBox *mpBQuantFactor;
-   QDoubleSpinBox *mpBQuantOffset;
-   QSpinBox *mpDiaSize;
-   QCheckBox *mpQScale;
-   QCheckBox *mpQPel;
-   QCheckBox *mpGmc;
-   QCheckBox *mpNormalizeAqp;
-   QCheckBox *mpTrellis;
-   QCheckBox *mpAcPred;
-   QCheckBox *mpCbpRd;
-   QCheckBox *mpQpRd;
-   QCheckBox *mpObmc;
-   QCheckBox *mpClosedGop;
+   QComboBox* mpMeMethod;
+   QSpinBox* mpGopSize;
+   QDoubleSpinBox* mpQCompress;
+   QDoubleSpinBox* mpQBlur;
+   QSpinBox* mpQMinimum;
+   QSpinBox* mpQMaximum;
+   QSpinBox* mpQDiffMaximum;
+   QSpinBox* mpMaxBFrames;
+   QDoubleSpinBox* mpBQuantFactor;
+   QDoubleSpinBox* mpBQuantOffset;
+   QSpinBox* mpDiaSize;
+   QCheckBox* mpQScale;
+   QCheckBox* mpQPel;
+   QCheckBox* mpGmc;
+   QCheckBox* mpNormalizeAqp;
+   QCheckBox* mpTrellis;
+   QCheckBox* mpAcPred;
+   QCheckBox* mpCbpRd;
+   QCheckBox* mpQpRd;
+   QCheckBox* mpObmc;
+   QCheckBox* mpClosedGop;
 
    LabeledSection* mpSettingsSection;
-   QCheckBox *mpSaveSettings;
+   QCheckBox* mpSaveSettings;
 };
 
 #endif

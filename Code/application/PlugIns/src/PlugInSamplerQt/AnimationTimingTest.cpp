@@ -107,29 +107,30 @@ AnimationTimingTestDlg::AnimationTimingTestDlg(Executable* pPlugIn, QWidget* pPa
    pLayout->addWidget(mpFrameRateLabel);
 
    Service<DesktopServices> pDesktop;
-   SpatialDataView *pView = dynamic_cast<SpatialDataView*>(pDesktop->getCurrentWorkspaceWindowView());
+   SpatialDataView* pView = dynamic_cast<SpatialDataView*>(pDesktop->getCurrentWorkspaceWindowView());
    if (pView != NULL)
    {
-      AnimationController *pController = NULL;
-      LayerList *pLayerList = pView->getLayerList();
+      AnimationController* pController = NULL;
+      LayerList* pLayerList = pView->getLayerList();
       if (pLayerList != NULL)
       {
-         RasterLayer *pLayer = static_cast<RasterLayer*>(pLayerList->getLayer(RASTER, 
+         RasterLayer* pLayer = static_cast<RasterLayer*>(pLayerList->getLayer(RASTER,
             pLayerList->getPrimaryRasterElement()));
          if (pLayer != NULL)
          {
             mpRasterLayerNameLabel->setText(rasterLayerNameTag + QString::fromStdString(pLayer->getName()));
             mpRasterLayer.reset(pLayer);
-            Animation *pAnimation = pLayer->getAnimation();
+            Animation* pAnimation = pLayer->getAnimation();
             Service<AnimationServices> pAnimations;
-            const vector<AnimationController*> &animationControllers = pAnimations->getAnimationControllers();
+            const vector<AnimationController*>& animationControllers = pAnimations->getAnimationControllers();
             vector<AnimationController*>::const_iterator ppAnimationController;
-            for(ppAnimationController=animationControllers.begin(); ppAnimationController!=animationControllers.end(); 
+            for (ppAnimationController = animationControllers.begin();
+               ppAnimationController != animationControllers.end();
                ++ppAnimationController)
             {
-               const vector<Animation*> &animations = (*ppAnimationController)->getAnimations();
+               const vector<Animation*>& animations = (*ppAnimationController)->getAnimations();
                vector<Animation*>::const_iterator ppAnimation;
-               for (ppAnimation=animations.begin(); ppAnimation!=animations.end(); ++ppAnimation)
+               for (ppAnimation = animations.begin(); ppAnimation != animations.end(); ++ppAnimation)
                {
                   if (*ppAnimation == pAnimation)
                   {
@@ -173,7 +174,7 @@ void AnimationTimingTestDlg::displayedBandChanged(Subject& subject, const string
 
 void AnimationTimingTestDlg::animationStateChanged(Subject& subject, const string &signal, const boost::any &value)
 {
-   AnimationController *pController = dynamic_cast<AnimationController*>(&subject);
+   AnimationController* pController = dynamic_cast<AnimationController*>(&subject);
    if (pController)
    {
       AnimationState state = pController->getAnimationState();

@@ -75,7 +75,7 @@ QModelIndex DynamicObjectItemModel::index(DynamicObject* pDynamicObject) const
 
 QModelIndex DynamicObjectItemModel::index(int row, int column, const QModelIndex& parent) const
 {
-   if ((row >= 0) && (row < rowCount(parent)) && (column >= 0) & (column < columnCount(parent)))
+   if ((row >= 0) && (row < rowCount(parent)) && (column >= 0) && (column < columnCount(parent)))
    {
       AttributeWrapper* pParentWrapper = mpRootWrapper;
       if (parent.isValid() == true)

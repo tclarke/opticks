@@ -6,14 +6,10 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
- 
-
 
 #ifndef MIPMAPPEDTEXTURES_H
 #define MIPMAPPEDTEXTURES_H
 
-void GenerateMipMappedTextures(unsigned int *texData, int width, int height);
+void GenerateMipMappedTextures(unsigned int* pTexData1, int sourceWidth, int sourceHeight);
 
 #endif
-
- 

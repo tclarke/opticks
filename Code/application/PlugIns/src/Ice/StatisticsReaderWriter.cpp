@@ -22,13 +22,15 @@
 
 using namespace std;
 
-StatisticsValuesReaderWriter::StatisticsValuesReaderWriter()
-: mDataType(-1), mpValue(NULL)
+StatisticsValuesReaderWriter::StatisticsValuesReaderWriter() :
+   mpValue(NULL),
+   mDataType(-1)
 {
 }
 
-StatisticsValuesReaderWriter::StatisticsValuesReaderWriter(hid_t dataType)
-: mpValue(NULL), mDataType(dataType)
+StatisticsValuesReaderWriter::StatisticsValuesReaderWriter(hid_t dataType) :
+   mpValue(NULL),
+   mDataType(dataType)
 {
    //if data cannot be read, return from constructor before mpValue is set to non-NULL.
    //so that isValid() will return false.
@@ -37,21 +39,21 @@ StatisticsValuesReaderWriter::StatisticsValuesReaderWriter(hid_t dataType)
    {
       return;
    }
-   static vector<string> expectedMembers;
-   if (expectedMembers.empty())
+   static vector<string> sExpectedMembers;
+   if (sExpectedMembers.empty())
    {
-      expectedMembers.push_back("onDiskNumber");
-      expectedMembers.push_back("average");
-      expectedMembers.push_back("min");
-      expectedMembers.push_back("max");
-      expectedMembers.push_back("standardDeviation");
-      expectedMembers.push_back("percentiles");
-      expectedMembers.push_back("binCenters");
-      expectedMembers.push_back("histogramCounts");
-      sort(expectedMembers.begin(), expectedMembers.end());
+      sExpectedMembers.push_back("onDiskNumber");
+      sExpectedMembers.push_back("average");
+      sExpectedMembers.push_back("min");
+      sExpectedMembers.push_back("max");
+      sExpectedMembers.push_back("standardDeviation");
+      sExpectedMembers.push_back("percentiles");
+      sExpectedMembers.push_back("binCenters");
+      sExpectedMembers.push_back("histogramCounts");
+      sort(sExpectedMembers.begin(), sExpectedMembers.end());
    }
    int memberCount = H5Tget_nmembers(dataType);
-   if (memberCount != expectedMembers.size())
+   if (memberCount != sExpectedMembers.size())
    {
       return;
    }
@@ -73,7 +75,7 @@ StatisticsValuesReaderWriter::StatisticsValuesReaderWriter(hid_t dataType)
 #endif
    }
    sort(memberNames.begin(), memberNames.end());
-   if (!equal(expectedMembers.begin(), expectedMembers.end(), memberNames.begin()))
+   if (!equal(sExpectedMembers.begin(), sExpectedMembers.end(), memberNames.begin()))
    {
       return;
    }
@@ -100,21 +102,27 @@ Hdf5TypeResource StatisticsValuesReaderWriter::getReadMemoryType() const
    H5Tinsert(*memCompoundType, "min", HOFFSET(StatisticsValues, mMin), *doubleType);
    H5Tinsert(*memCompoundType, "max", HOFFSET(StatisticsValues, mMax), *doubleType);
    H5Tinsert(*memCompoundType, "standardDeviation", HOFFSET(StatisticsValues, mStandardDeviation), *doubleType);
-   Hdf5TypeResource percentileType(HdfUtilities::getHdf5Type<StatisticsValues::percentileType>());
+   Hdf5TypeResource percentileType(HdfUtilities::getHdf5Type<StatisticsValues::PercentileType>());
    Hdf5TypeResource variablePercentileType(H5Tvlen_create(*percentileType));
-   hsize_t herr = H5Tinsert(*memCompoundType, "percentiles", HOFFSET(StatisticsValues, mpPercentiles), *variablePercentileType);
-   Hdf5TypeResource binCenterType(HdfUtilities::getHdf5Type<StatisticsValues::binCenterType>());
+   hsize_t herr = H5Tinsert(*memCompoundType, "percentiles", HOFFSET(StatisticsValues, mpPercentiles),
+      *variablePercentileType);
+   Hdf5TypeResource binCenterType(HdfUtilities::getHdf5Type<StatisticsValues::BinCenterType>());
    Hdf5TypeResource variableBinCenterType(H5Tvlen_create(*binCenterType));
    herr = H5Tinsert(*memCompoundType, "binCenters", HOFFSET(StatisticsValues, mpBinCenters), *variableBinCenterType);
-   Hdf5TypeResource histogramType(HdfUtilities::getHdf5Type<StatisticsValues::histogramType>());
+   Hdf5TypeResource histogramType(HdfUtilities::getHdf5Type<StatisticsValues::HistogramType>());
    Hdf5TypeResource variableHistogramTypeType(H5Tvlen_create(*histogramType));
-   herr = H5Tinsert(*memCompoundType, "histogramCounts", HOFFSET(StatisticsValues, mpHistogramCounts), *variableHistogramTypeType);
+   herr = H5Tinsert(*memCompoundType, "histogramCounts", HOFFSET(StatisticsValues, mpHistogramCounts),
+      *variableHistogramTypeType);
    return memCompoundType;
 }
 
 bool StatisticsValuesReaderWriter::setDataToWrite(void* pObject)
 {
-   if (pObject == NULL) return false;
+   if (pObject == NULL)
+   {
+      return false;
+   }
+
    mpValue = reinterpret_cast<StatisticsValues*>(pObject);
    return true;
 }
@@ -161,13 +169,15 @@ bool StatisticsValuesReaderWriter::isValid() const
    return mpValue != NULL;
 }
 
-StatisticsMetadataReaderWriter::StatisticsMetadataReaderWriter()
-: mDataType(-1), mpValue(NULL)
+StatisticsMetadataReaderWriter::StatisticsMetadataReaderWriter() :
+   mpValue(NULL),
+   mDataType(-1)
 {
 }
 
-StatisticsMetadataReaderWriter::StatisticsMetadataReaderWriter(hid_t dataType)
-: mpValue(NULL), mDataType(dataType)
+StatisticsMetadataReaderWriter::StatisticsMetadataReaderWriter(hid_t dataType) :
+   mpValue(NULL),
+   mDataType(dataType)
 {
    //if data cannot be read, return from constructor before mpValue is set to non-NULL.
    //so that isValid() will return false.
@@ -177,15 +187,15 @@ StatisticsMetadataReaderWriter::StatisticsMetadataReaderWriter(hid_t dataType)
       return;
    }
 
-   static vector<string> expectedMembers;
-   if (expectedMembers.empty())
+   static vector<string> sExpectedMembers;
+   if (sExpectedMembers.empty())
    {
-      expectedMembers.push_back("resolution");
-      expectedMembers.push_back("badValues");
-      sort(expectedMembers.begin(), expectedMembers.end());
+      sExpectedMembers.push_back("resolution");
+      sExpectedMembers.push_back("badValues");
+      sort(sExpectedMembers.begin(), sExpectedMembers.end());
    }
    int memberCount = H5Tget_nmembers(dataType);
-   if (memberCount != expectedMembers.size())
+   if (memberCount != sExpectedMembers.size())
    {
       return;
    }
@@ -207,7 +217,7 @@ StatisticsMetadataReaderWriter::StatisticsMetadataReaderWriter(hid_t dataType)
 #endif
    }
    sort(memberNames.begin(), memberNames.end());
-   if (!equal(expectedMembers.begin(), expectedMembers.end(), memberNames.begin()))
+   if (!equal(sExpectedMembers.begin(), sExpectedMembers.end(), memberNames.begin()))
    {
       return;
    }
@@ -229,7 +239,7 @@ Hdf5TypeResource StatisticsMetadataReaderWriter::getReadMemoryType() const
    Hdf5TypeResource memCompoundType(H5Tcreate(H5T_COMPOUND, sizeof(StatisticsMetadata)));
    Hdf5TypeResource uintType(HdfUtilities::getHdf5Type<unsigned int>());
    hsize_t herr = H5Tinsert(*memCompoundType, "resolution", HOFFSET(StatisticsMetadata, mStatResolution), *uintType);
-   Hdf5TypeResource badValueType(HdfUtilities::getHdf5Type<StatisticsMetadata::badValueType>());
+   Hdf5TypeResource badValueType(HdfUtilities::getHdf5Type<StatisticsMetadata::BadValueType>());
    Hdf5TypeResource variableBadValueType(H5Tvlen_create(*badValueType));
    herr = H5Tinsert(*memCompoundType, "badValues", HOFFSET(StatisticsMetadata, mBadValues), *variableBadValueType);
    return memCompoundType;
@@ -237,7 +247,11 @@ Hdf5TypeResource StatisticsMetadataReaderWriter::getReadMemoryType() const
 
 bool StatisticsMetadataReaderWriter::setDataToWrite(void* pObject)
 {
-   if (pObject == NULL) return false;
+   if (pObject == NULL)
+   {
+      return false;
+   }
+
    mpValue = reinterpret_cast<StatisticsMetadata*>(pObject);
    return true;
 }

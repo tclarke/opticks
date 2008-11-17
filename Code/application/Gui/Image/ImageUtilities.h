@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef IMAGE_UTILITIES_H
-#define IMAGE_UTILITIES_H
+#ifndef IMAGEUTILITIES_H
+#define IMAGEUTILITIES_H
 
 #include "glCommon.h"
 #include "TypesFile.h"
@@ -96,4 +96,4 @@ namespace ImageUtilities
                        GLenum textureFormat, GLenum dataType);
 };
 
-#endif /* IMAGE_UTILITIES_H */
+#endif

@@ -86,7 +86,7 @@ void TriangleObjectImp::draw(double zoomFactor) const
 #if defined(WIN_API)
       glEnable(GL_LINE_SMOOTH);
 #else
-      if(lineWidth == 1.0)
+      if (lineWidth == 1.0)
       {
          glEnable(GL_LINE_SMOOTH);
       }
@@ -136,7 +136,7 @@ void TriangleObjectImp::draw(double zoomFactor) const
    }
 }
 
-void TriangleObjectImp::moveHandle (int handle, LocationType point, bool bMaintainAspect)
+void TriangleObjectImp::moveHandle(int handle, LocationType point, bool bMaintainAspect)
 {
    LocationType llCorner = getLlCorner();
    LocationType urCorner = getUrCorner();
@@ -216,17 +216,15 @@ bool TriangleObjectImp::hit(LocationType pixelCoord) const
    // Line
    if (bHit == false)
    {
-      bool bLine = false;
-      bLine = getLineState();
+      bool bLine = getLineState();
       if (bLine == true)
       {
          double size = 1.0;
 
-         GraphicLayer* pLayer = NULL;
-         pLayer = getLayer();
+         GraphicLayer* pLayer = getLayer();
          if (pLayer != NULL)
          {
-            View *pView = pLayer->getView();
+            View* pView = pLayer->getView();
             if (pView != NULL)
             {
                size = pView->getPixelSize(llCorner, urCorner);

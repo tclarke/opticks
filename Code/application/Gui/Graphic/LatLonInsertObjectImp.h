@@ -42,7 +42,7 @@ public:
 
    void move(LocationType delta);
 
-   void moveHandle (int handle, LocationType pixel, bool bMaintainAspect = false);
+   void moveHandle(int handle, LocationType pixel, bool bMaintainAspect = false);
    bool hit(LocationType pixelCoord) const;
 
    bool replicateObject(const GraphicObject* pObject);
@@ -54,27 +54,21 @@ public:
 
    LocationType getLatLonLoc() const;
 
-   const GraphicGroup& getGroup() const { return *dynamic_cast<const GraphicGroup*>(mpGroup.get()); }
+   const GraphicGroup& getGroup() const;
 
    /**
     * Intended insertion behavior:
     *  * Clicking left mouse will insert object with default bounding box.
     *  * No further insertion behavior
     */
-   virtual bool processMousePress(LocationType screenCoord, 
-                                  Qt::MouseButton button,
-                                  Qt::MouseButtons buttons,
-                                  Qt::KeyboardModifiers modifiers);
-   virtual bool processMouseMove(LocationType screenCoord, 
-                                  Qt::MouseButton button,
-                                  Qt::MouseButtons buttons,
-                                  Qt::KeyboardModifiers modifiers);
-   virtual bool processMouseRelease(LocationType screenCoord, 
-                                  Qt::MouseButton button,
-                                  Qt::MouseButtons buttons,
-                                  Qt::KeyboardModifiers modifiers);
+   virtual bool processMousePress(LocationType screenCoord, Qt::MouseButton button, Qt::MouseButtons buttons,
+      Qt::KeyboardModifiers modifiers);
+   virtual bool processMouseMove(LocationType screenCoord, Qt::MouseButton button, Qt::MouseButtons buttons,
+      Qt::KeyboardModifiers modifiers);
+   virtual bool processMouseRelease(LocationType screenCoord, Qt::MouseButton button, Qt::MouseButtons buttons,
+      Qt::KeyboardModifiers modifiers);
 
-   bool hasCornerHandles() const { return false; }
+   bool hasCornerHandles() const;
 
    void updateGeo();
 

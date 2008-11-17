@@ -32,18 +32,18 @@ XERCES_CPP_NAMESPACE_USE
 using namespace std;
 using namespace StringUtilities;
 
-DataVariantFactoryImp *DataVariantFactoryImp::spInstance = NULL;;
+DataVariantFactoryImp* DataVariantFactoryImp::spInstance = NULL;
 bool DataVariantFactoryImp::mDestroyed = false;
 
 namespace
 {
    template<typename N>
-   bool fromXmlVectorHelper(DOMNode* pDocument, unsigned int version, vector<N> &values)
+   bool fromXmlVectorHelper(DOMNode* pDocument, unsigned int version, vector<N>& values)
    {
       VERIFY(pDocument != NULL);
       values.clear();
       bool bDone = false;
-      DOMNode *pVectorChild = NULL;
+      DOMNode* pVectorChild = NULL;
       for (pVectorChild = pDocument->getFirstChild(); 
          pVectorChild != NULL;
          pVectorChild = pVectorChild->getNextSibling())
@@ -55,8 +55,9 @@ namespace
          }
       }
       if (bDone == true && pVectorChild != NULL) // 2.3.7+
-      {         
-         for (DOMNode *pVectorElement = pVectorChild->getFirstChild(); pVectorElement != NULL;
+      {
+         for (DOMNode* pVectorElement = pVectorChild->getFirstChild();
+            pVectorElement != NULL;
             pVectorElement = pVectorElement->getNextSibling())
          {
             if (XMLString::equals(pVectorElement->getNodeName(), X("value")))
@@ -75,15 +76,14 @@ namespace
    template<typename T>
    bool toXmlVectorHelper(XMLWriter* pWriter, const vector<T>& values)
    {
-      DOMElement *pElement = pWriter->addElement("vector");
+      DOMElement* pElement = pWriter->addElement("vector");
       VERIFY(pElement != NULL);
 
       pWriter->pushAddPoint(pElement);
-      for(vector<T>::const_iterator vit=values.begin();
-         vit!=values.end(); ++vit)
+      for (vector<T>::const_iterator vit = values.begin(); vit != values.end(); ++vit)
       {
          stringstream sstr;
-         DOMElement *pElement = pWriter->addElement("value");
+         pElement = pWriter->addElement("value");
          VERIFY(pElement != NULL);
          pWriter->pushAddPoint(pElement);
          pWriter->addText(StringUtilities::toXmlString(*vit).c_str(), pElement);
@@ -100,7 +100,7 @@ template <typename T>
 class DataVariantValue : public DataValueWrapper
 {
 public:
-   DataVariantValue(const T* pValue) 
+   DataVariantValue(const T* pValue)
    {
       if (pValue != NULL)
       {
@@ -121,14 +121,14 @@ public:
       return types;
    }
 
-   const std::type_info &getType() const
+   const std::type_info& getType() const
    {
       return typeid(T);
    }
 
    string getTypeName() const
    {
-      T *pT = NULL;
+      T* pT = NULL;
       return TypeConverter::toString(pT);
    }
 
@@ -143,7 +143,7 @@ public:
       return retValue;
    }
 
-   DataVariant::Status fromXmlString(const std::string &text)
+   DataVariant::Status fromXmlString(const std::string& text)
    {
       bool error;
       T tempValue = StringUtilities::fromXmlString<T>(text, &error);
@@ -165,7 +165,7 @@ public:
       return retValue;
    }
 
-   DataVariant::Status fromDisplayString(const std::string &text)
+   DataVariant::Status fromDisplayString(const std::string& text)
    {
       bool error;
       T tempValue = StringUtilities::fromDisplayString<T>(text, &error);
@@ -178,7 +178,7 @@ public:
 
    bool toXml(XMLWriter* pWriter) const
    {
-      DOMElement *pElement(pWriter->addElement("value"));
+      DOMElement* pElement(pWriter->addElement("value"));
       VERIFY(pElement != NULL);
       pWriter->pushAddPoint(pElement);
       pWriter->addText(toXmlString(NULL).c_str(), pElement);
@@ -188,7 +188,7 @@ public:
 
    bool fromXml(DOMNode* pDocument, unsigned int version)
    {
-      for(DOMNode *pNode = pDocument->getFirstChild();
+      for (DOMNode* pNode = pDocument->getFirstChild();
          pNode != NULL;
          pNode = pNode->getNextSibling())
       {
@@ -208,12 +208,12 @@ public:
       return pData;
    }
 
-   void *getValue()
+   void* getValue()
    {
       return &mValue;
    }
 
-   bool operator==(const DataValueWrapper &rhs) const
+   bool operator==(const DataValueWrapper& rhs) const
    {
       if (getType() == rhs.getType())
       {
@@ -255,7 +255,7 @@ public:
       return pData;
    }
 
-   bool operator==(const DataValueWrapper &rhs) const
+   bool operator==(const DataValueWrapper& rhs) const
    {
       if (getType() == rhs.getType())
       {
@@ -295,7 +295,7 @@ public:
       return types;
    }
 
-   const std::type_info &getType() const
+   const std::type_info& getType() const
    {
       return typeid(T);
    }
@@ -315,7 +315,7 @@ public:
       return "";
    }
 
-   DataVariant::Status fromXmlString(const std::string &text)
+   DataVariant::Status fromXmlString(const std::string& text)
    {
       return DataVariant::NOT_SUPPORTED;
    }
@@ -329,7 +329,7 @@ public:
       return "";
    }
 
-   DataVariant::Status fromDisplayString(const std::string &text)
+   DataVariant::Status fromDisplayString(const std::string& text)
    {
       return DataVariant::NOT_SUPPORTED;
    }
@@ -344,12 +344,12 @@ public:
       return false;
    }
 
-   void *getValue()
+   void* getValue()
    {
       return dynamic_cast<T*>(&mValue);
    }
 
-   bool operator==(const DataValueWrapper &rhs) const
+   bool operator==(const DataValueWrapper& rhs) const
    {
       string message = std::string(TypeConverter::toString<T>()) + " doesn't support comparison";
       throw DataVariant::UnsupportedOperation(message);
@@ -384,7 +384,7 @@ public:
       return retValue;
    }
 
-   DataVariant::Status fromXmlString(const std::string &text)
+   DataVariant::Status fromXmlString(const std::string& text)
    {
       bool error;
       FactoryResource<T> pTempValue(StringUtilities::fromXmlString<T*>(text, &error));
@@ -406,7 +406,7 @@ public:
       return retValue;
    }
 
-   DataVariant::Status fromDisplayString(const std::string &text)
+   DataVariant::Status fromDisplayString(const std::string& text)
    {
       bool error;
       FactoryResource<T> pTempValue(StringUtilities::fromDisplayString<T*>(text, &error));
@@ -419,8 +419,12 @@ public:
 
    bool toXml(XMLWriter* pWriter) const
    {
-      if (pWriter == NULL) return false;
-      DOMElement *pElement(pWriter->addElement("value"));
+      if (pWriter == NULL)
+      {
+         return false;
+      }
+
+      DOMElement* pElement(pWriter->addElement("value"));
       VERIFY(pElement != NULL);
       pWriter->pushAddPoint(pElement);
       string text = StringUtilities::toXmlString(dynamic_cast<const T*>(&mValue));
@@ -431,7 +435,7 @@ public:
 
    bool fromXml(DOMNode* pDocument, unsigned int version)
    {
-      for(DOMNode *pNode = pDocument->getFirstChild();
+      for (DOMNode* pNode = pDocument->getFirstChild();
          pNode != NULL;
          pNode = pNode->getNextSibling())
       {
@@ -447,15 +451,15 @@ public:
 
    DataValueWrapper* copy() const
    {
-      DataValueWrapper* pData = new DataVariantPointerSupportString<T,U>(&mValue);
+      DataValueWrapper* pData = new DataVariantPointerSupportString<T, U>(&mValue);
       return pData;
    }
 
-   bool operator==(const DataValueWrapper &rhs) const
+   bool operator==(const DataValueWrapper& rhs) const
    {
       if (getType() == rhs.getType())
       {
-         return mValue == dynamic_cast<const DataVariantPointerSupportString<T,U>&>(rhs).mValue;
+         return mValue == dynamic_cast<const DataVariantPointerSupportString<T, U>&>(rhs).mValue;
       }
       return false;
    }
@@ -521,7 +525,7 @@ public:
 
    ~DataVariantVectorPtr()
    {
-      for (unsigned int i=0; i<mValue.size(); ++i)
+      for (unsigned int i = 0; i < mValue.size(); ++i)
       {
          U* pItem = dynamic_cast<U*>(mValue[i]);
          if (pItem != NULL)
@@ -545,7 +549,7 @@ public:
       return types;
    }
 
-   const std::type_info &getType() const
+   const std::type_info& getType() const
    {
       return typeid(vector<T*>);
    }
@@ -566,7 +570,7 @@ public:
       return retValue;
    }
 
-   DataVariant::Status fromXmlString(const std::string &text)
+   DataVariant::Status fromXmlString(const std::string& text)
    {
       bool error;
       vector<T*> tempValue = StringUtilities::fromXmlString<vector<T*> >(text, &error);
@@ -588,7 +592,7 @@ public:
       return retValue;
    }
 
-   DataVariant::Status fromDisplayString(const std::string &text)
+   DataVariant::Status fromDisplayString(const std::string& text)
    {
       bool error;
       vector<T*> tempValue = StringUtilities::fromDisplayString<vector<T*> >(text, &error);
@@ -611,28 +615,27 @@ public:
 
    DataValueWrapper* copy() const
    {
-      DataValueWrapper* pData = new DataVariantVectorPtr<T,U>(&mValue);
+      DataValueWrapper* pData = new DataVariantVectorPtr<T, U>(&mValue);
       return pData;
    }
 
-   void *getValue()
+   void* getValue()
    {
       return &mValue;
    }
 
-   bool operator==(const DataValueWrapper &rhs) const
+   bool operator==(const DataValueWrapper& rhs) const
    {
       if (getType() == rhs.getType())
       {
-         const vector<T*> &rhsValue = 
-            static_cast<const DataVariantVectorPtr<T,U>&>(rhs).mValue;
+         const vector<T*>& rhsValue = static_cast<const DataVariantVectorPtr<T, U>&>(rhs).mValue;
          if (mValue.size() != rhsValue.size())
          {
             return false;
          }
          vector<T*>::const_iterator ppT, ppTrhs;
-         for (ppT=mValue.begin(), ppTrhs=rhsValue.begin(); 
-            ppT!=mValue.end() && ppTrhs!=rhsValue.end(); 
+         for (ppT = mValue.begin(), ppTrhs = rhsValue.begin(); 
+            ppT != mValue.end() && ppTrhs != rhsValue.end(); 
             ++ppT, ++ppTrhs)
          {
             if (*dynamic_cast<U*>(*ppT) != *dynamic_cast<U*>(*ppTrhs))
@@ -651,8 +654,7 @@ private:
 
 void DataVariantFactoryImp::registerType(const std::string type, WrapperCreatorProc creationFunc)
 {
-   sCreateWrapperMap.insert(ObjectMapType3::value_type(type,
-      creationFunc));   
+   mCreateWrapperMap.insert(ObjectMapType3::value_type(type, creationFunc));
 }
 
 void DataVariantFactoryImp::initializeMaps()
@@ -736,11 +738,11 @@ DataVariantFactoryImp::~DataVariantFactoryImp()
 {
 }
 
-DataVariantFactoryImp *DataVariantFactoryImp::instance()
+DataVariantFactoryImp* DataVariantFactoryImp::instance()
 {
    if (spInstance == NULL)
    {
-      if(mDestroyed)
+      if (mDestroyed)
       {
          throw std::logic_error("Attempting to use DataVariantFactory after "
             "destroying it.");
@@ -752,7 +754,7 @@ DataVariantFactoryImp *DataVariantFactoryImp::instance()
 
 void DataVariantFactoryImp::destroy()
 {
-   if(mDestroyed)
+   if (mDestroyed)
    {
       throw std::logic_error("Attempting to destroy DataVariantFactory after "
          "destroying it.");
@@ -762,18 +764,19 @@ void DataVariantFactoryImp::destroy()
    mDestroyed = true;
 }
 
-DataValueWrapper* DataVariantFactoryImp::createWrapper(const void *pObject, const std::string &className, bool strict)
+DataValueWrapper* DataVariantFactoryImp::createWrapper(const void* pObject, const std::string& className, bool strict)
 {
    ObjectMapType3::iterator itr;
 
    // Fabricate the entry point name, using the class name argument
-   itr = sCreateWrapperMap.find(className);
-   if (itr != sCreateWrapperMap.end())
+   itr = mCreateWrapperMap.find(className);
+   if (itr != mCreateWrapperMap.end())
    {
       return ((*itr).second) (pObject);
    }
-   
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : WBS9.1: stack overflow if we get here via CS::deserialize (TJOHNSON)")
+
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : WBS9.1: stack overflow if we get here " \
+   "via CS::deserialize (TJOHNSON)")
    if (strict)
    {
       string msg = "DataVariantFactory::createWrapper given unknown object type: '" + className + "'";
@@ -782,11 +785,11 @@ DataValueWrapper* DataVariantFactoryImp::createWrapper(const void *pObject, cons
    return NULL;
 }
 
-DataValueWrapper* DataVariantFactoryImp::createWrapper(DOMNode *pDocument, int version)
+DataValueWrapper* DataVariantFactoryImp::createWrapper(DOMNode* pDocument, int version)
 {
-   DOMElement *pElement(static_cast<DOMElement*>(pDocument));
+   DOMElement* pElement(static_cast<DOMElement*>(pDocument));
    std::string type = A(pElement->getAttribute(X("type")));
-   DataValueWrapper *pWrapper = createWrapper(NULL, type);
+   DataValueWrapper* pWrapper = createWrapper(NULL, type);
    if (pWrapper)
    {
       if (pWrapper->fromXml(pDocument, version) == false)

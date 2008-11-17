@@ -17,7 +17,8 @@ class SignatureLibrary;
 class LibrarySignatureImp : public SignatureImp
 {
 public:
-   LibrarySignatureImp(const DataDescriptorImp& descriptor, const std::string& id, unsigned int index, const SignatureLibrary *pLib);
+   LibrarySignatureImp(const DataDescriptorImp& descriptor, const std::string& id, unsigned int index,
+      const SignatureLibrary* pLib);
    ~LibrarySignatureImp();
 
    const DataVariant &getData(std::string name) const;
@@ -34,7 +35,7 @@ public:
 
 private:
    unsigned int mSignatureIndex;
-   const SignatureLibrary *mpLibrary;
+   const SignatureLibrary* mpLibrary;
    std::string mOrdinateName;
 };
 

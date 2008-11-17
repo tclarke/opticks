@@ -37,9 +37,9 @@ using namespace std;
 
 EnviLibraryImporter::EnviLibraryImporter() :
    mbAbort(false),
+   mpStep(NULL),
    mpProgress(NULL),
-   mpSignatureLibrary(NULL),
-   mpStep(NULL)
+   mpSignatureLibrary(NULL)
 {
    setName("ENVI Library Importer");
    setCreator("Ball Aerospace & Technologies Corp.");
@@ -128,10 +128,12 @@ vector<ImportDescriptor*> EnviLibraryImporter::getImportDescriptors(const string
 
                   name = "Spectral Library " + string(buffer);
                   pSignatureLibrary = pModel->getElement(name, "SignatureLibrary", pRasterElement);
-               } while (pSignatureLibrary != NULL);
+               }
+               while (pSignatureLibrary != NULL);
             }
 
-            ImportDescriptor* pImportDescriptor = pModel->createImportDescriptor(name, "SignatureLibrary", pRasterElement);
+            ImportDescriptor* pImportDescriptor =
+               pModel->createImportDescriptor(name, "SignatureLibrary", pRasterElement);
             if (pImportDescriptor != NULL)
             {
                DataDescriptor* pDescriptor = pImportDescriptor->getDataDescriptor();
@@ -158,7 +160,7 @@ vector<ImportDescriptor*> EnviLibraryImporter::getImportDescriptors(const string
    return descriptors;
 }
 
-unsigned char EnviLibraryImporter::getFileAffinity(const std::string& filename)
+unsigned char EnviLibraryImporter::getFileAffinity(const string& filename)
 {
    if (getImportDescriptors(filename).empty())
    {
@@ -210,15 +212,22 @@ bool EnviLibraryImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
    if (parseHeader(dataFile) == false)
    {
       message = "Cannot access the spectral library file!";
-      if (mpProgress != NULL) { mpProgress->updateProgress(message, 0, ERRORS); }
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(message, 0, ERRORS);
+      }
+
       pStep->finalize(Message::Failure, message);
       return false;
    }
 
    message = "Reading the values from the header file...";
-   if (mpProgress != NULL) { mpProgress->updateProgress(message, 0, NORMAL); }
+   if (mpProgress != NULL)
+   {
+      mpProgress->updateProgress(message, 0, NORMAL);
+   }
 
-   DynamicObject *pMetadata = mpSignatureLibrary->getMetadata();
+   DynamicObject* pMetadata = mpSignatureLibrary->getMetadata();
    VERIFY(pMetadata != NULL);
 
    // Description
@@ -251,13 +260,13 @@ bool EnviLibraryImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
       }
 
       // metadata
-      vector<EnviField*> &children = pDescriptionField->mChildren;
+      vector<EnviField*>& children = pDescriptionField->mChildren;
       vector<EnviField*>::iterator it;
-      for (it=children.begin(); it!=children.end(); ++it)
+      for (it = children.begin(); it != children.end(); ++it)
       {
-         if ((*it)!=NULL && (*it)->mTag.empty()==false && (*it)->mValue.empty()==false)
+         if ((*it) != NULL && (*it)->mTag.empty() == false && (*it)->mValue.empty() == false)
          {
-            EnviField *pField = *it;
+            EnviField* pField = *it;
             pMetadata->setAttribute(pField->mTag, pField->mValue);
          }
       }
@@ -267,7 +276,11 @@ bool EnviLibraryImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
    if (mbAbort)
    {
       message = "ENVI signature library import aborted!";
-      if (mpProgress != NULL) { mpProgress->updateProgress(message, 0, ABORT); }
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(message, 0, ABORT);
+      }
+
       pStep->finalize(Message::Abort);
       return false;
    }
@@ -288,7 +301,11 @@ bool EnviLibraryImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
          if (mbAbort)
          {
             message = "ENVI signature library import aborted!";
-            if (mpProgress != NULL) { mpProgress->updateProgress(message, 0, ABORT); }
+            if (mpProgress != NULL)
+            {
+               mpProgress->updateProgress(message, 0, ABORT);
+            }
+
             pStep->finalize(Message::Abort);
             return false;
          }
@@ -297,11 +314,11 @@ bool EnviLibraryImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
          if (pField != NULL)
          {
             vector<char> bufferVector(pField->mValue.size() + 1);
-            char *pBuffer = &bufferVector.front();
+            char* pBuffer = &bufferVector.front();
             strcpy(pBuffer, pField->mValue.c_str());
 
             char* pPtr = strtok(pBuffer, ",");
-            while(pPtr != NULL)
+            while (pPtr != NULL)
             {
                string sigName = StringUtilities::stripWhitespace(string(pPtr));
                sigNames.push_back(sigName);
@@ -337,7 +354,11 @@ bool EnviLibraryImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
          if (mbAbort)
          {
             message = "ENVI signature library import aborted!";
-            if (mpProgress != NULL) { mpProgress->updateProgress(message, 0, ABORT); }
+            if (mpProgress != NULL)
+            {
+               mpProgress->updateProgress(message, 0, ABORT);
+            }
+
             pStep->finalize(Message::Abort);
             return false;
          }
@@ -408,14 +429,18 @@ bool EnviLibraryImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
 
    if (bConvertWavelengths == true)
    {
-      for (unsigned int i = 0; i < wavelengths.size(); i++)
+      for (vector<double>::size_type i = 0; i < wavelengths.size(); i++)
       {
          wavelengths[i] *= 0.001;
       }
 
       message = "Warning ENVI Library Importer002: The wavelengths for all signatures "
          "were converted from nanometers to microns!";
-      if (mpProgress != NULL) { mpProgress->updateProgress(message, 60, WARNING); }
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(message, 60, WARNING);
+      }
+
       pStep->addMessage(message, "app", "31FAD3F3-78F7-49DE-A0A8-1211750F9141");
    }
 
@@ -424,14 +449,20 @@ bool EnviLibraryImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
    pMetadata->setAttributeByPath(pCenterPath, wavelengths);
 
    message = "Mapping the library...";
-   if (mpProgress != NULL) { mpProgress->updateProgress(message, 50, NORMAL); }
+   if (mpProgress != NULL)
+   {
+      mpProgress->updateProgress(message, 50, NORMAL);
+   }
 
    bool cubeLoaded = mpSignatureLibrary->import(dataFile, "ENVI Importer");
 
    message = "ENVI library import complete!";
-   if (mpProgress != NULL) { mpProgress->updateProgress(message, 100, NORMAL); }
-   pStep->finalize(Message::Success);
+   if (mpProgress != NULL)
+   {
+      mpProgress->updateProgress(message, 100, NORMAL);
+   }
 
+   pStep->finalize(Message::Success);
    return true;
 }
 
@@ -451,12 +482,16 @@ bool EnviLibraryImporter::extractPlugInArgs(PlugInArgList* pArgList)
    // Progress
    mpProgress = pArgList->getPlugInArgValue<Progress>(ProgressArg());
 
-    // SignatureLibrary
+   // SignatureLibrary
    mpSignatureLibrary = pArgList->getPlugInArgValue<SignatureLibrary>(ImportElementArg());
    if (mpSignatureLibrary == NULL)
    {
       string message = "The spectral library input value is invalid!";
-      if (mpProgress != NULL) { mpProgress->updateProgress(message, 0, ERRORS); }
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(message, 0, ERRORS);
+      }
+
       mpStep->finalize(Message::Failure, message);
       return false;
    }
@@ -474,8 +509,8 @@ string EnviLibraryImporter::findHeaderFile(const string& filename)
    // Check if the input filename is the header file
    string headerFileExtension = ".hdr";
 
-   int iPos = filename.rfind(headerFileExtension);
-   if (iPos == (filename.length() - 4))
+   string::size_type pos = filename.rfind(headerFileExtension);
+   if (pos == (filename.length() - 4))
    {
       return filename;
    }
@@ -484,9 +519,9 @@ string EnviLibraryImporter::findHeaderFile(const string& filename)
    FILE* pFp = NULL;
    string headerFile;
 
-   if (iPos != string::npos)
+   if (pos != string::npos)
    {
-      headerFile = filename.substr(0, iPos) + headerFileExtension;
+      headerFile = filename.substr(0, pos) + headerFileExtension;
       pFp = fopen(headerFile.c_str(), "rt");
    }
 
@@ -500,10 +535,10 @@ string EnviLibraryImporter::findHeaderFile(const string& filename)
    // Truncate the input filename extension and append the header file extension
    if (pFp == NULL)
    {
-      iPos = filename.rfind('.');
-      if (iPos != string::npos)
+      pos = filename.rfind('.');
+      if (pos != string::npos)
       {
-         headerFile = filename.substr(0, iPos) + headerFileExtension;
+         headerFile = filename.substr(0, pos) + headerFileExtension;
          pFp = fopen(headerFile.c_str(), "rt");
       }
    }
@@ -545,8 +580,8 @@ string EnviLibraryImporter::findDataFile(const string& filename)
    // Check if the input filename is the data file
    string dataFileExtension = ".sli";
 
-   int iPos = filename.rfind(dataFileExtension);
-   if (iPos == (filename.length() - 4))
+   string::size_type pos = filename.rfind(dataFileExtension);
+   if (pos == (filename.length() - 4))
    {
       return filename;
    }
@@ -555,9 +590,9 @@ string EnviLibraryImporter::findDataFile(const string& filename)
    FILE* pFp = NULL;
    string dataFile;
 
-   if (iPos != string::npos)
+   if (pos != string::npos)
    {
-      dataFile = filename.substr(0, iPos) + dataFileExtension;
+      dataFile = filename.substr(0, pos) + dataFileExtension;
       pFp = fopen(dataFile.c_str(), "rb");
    }
 
@@ -571,10 +606,10 @@ string EnviLibraryImporter::findDataFile(const string& filename)
    // Truncate the input filename extension and append the data file extension
    if (pFp == NULL)
    {
-      iPos = filename.rfind('.');
-      if (iPos != string::npos)
+      pos = filename.rfind('.');
+      if (pos != string::npos)
       {
-         dataFile = filename.substr(0, iPos) + dataFileExtension;
+         dataFile = filename.substr(0, pos) + dataFileExtension;
          pFp = fopen(dataFile.c_str(), "rb");
       }
    }

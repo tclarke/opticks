@@ -22,8 +22,15 @@ class MemoryObject
 {
 public:
    class Args {};
-   T *obtainResource(const Args &args) const { return new T; }
-   void releaseResource(const Args &args, T *pObject) const { delete pObject; }
+   T* obtainResource(const Args& args) const
+   {
+      return new T;
+   }
+
+   void releaseResource(const Args& args, T* pObject) const
+   {
+      delete pObject;
+   }
 };
 
 /**
@@ -77,13 +84,13 @@ public:
  *  @param   SourceTrait
  *           The type of object to use for obtaining and releasing objects of type T
 */
-template <class T, class SourceTrait=MemoryObject<T> >
+template <class T, class SourceTrait = MemoryObject<T> >
 class Resource
 {
 protected:
    typedef typename SourceTrait::Args Args;
+
 public:
-   typedef T element_type;
    /**
     *  Constructs the Resource object.
     *
@@ -95,9 +102,11 @@ public:
     *           The arguments that will be provided to the obtainResource method of the SourceTrait. The type
     *           of this argument is dependent on the SourceTrait.
     */
-   explicit Resource(const Args &args=Args()) : mArgs(args), mOwns(true), mpObject(static_cast<T*>(SourceTrait().obtainResource(args)))
-   {
-   }
+   explicit Resource(const Args& args = Args()) :
+      mArgs(args),
+      mOwns(true),
+      mpObject(static_cast<T*>(SourceTrait().obtainResource(args))) {}
+
    /**
     *  Constructs the Resource object.
     *
@@ -110,9 +119,11 @@ public:
     *           The arguments that would have been provided to the obtainResource method of the SourceTrait. The type
     *           of this argument is dependent on the SourceTrait.
     */
-   explicit Resource(T* pObject, const Args &args=Args()) : mArgs(args), mOwns(true), mpObject(pObject)
-   {
-   }
+   explicit Resource(T* pObject, const Args& args = Args()) :
+      mArgs(args),
+      mOwns(true),
+      mpObject(pObject) {}
+
    /**
     *  Copy-constructs the Resource object.
     *
@@ -122,9 +133,11 @@ public:
     *  @param   source
     *           The Resource object to construct from. After this call, the source no longer owns the wrapped object.
     */
-   Resource(const Resource<T,SourceTrait> &source) : mArgs(source.mArgs), mOwns(source.mOwns), mpObject(const_cast<T*>(source.release()))
-   {
-   }
+   Resource(const Resource<T, SourceTrait>& source) :
+      mArgs(source.mArgs),
+      mOwns(source.mOwns),
+      mpObject(const_cast<T*>(source.release())) {}
+
    /**
     *  Sets a Resource object to another one.
     *
@@ -134,7 +147,7 @@ public:
     *  @param   source
     *           The Resource object to assign from. After this call, the source no longer owns the wrapped object.
     */
-   Resource<T,SourceTrait> &operator=(const Resource<T,SourceTrait> &source)
+   Resource<T, SourceTrait>& operator=(const Resource<T, SourceTrait>& source)
    {
       if (this != &source)
       {
@@ -152,6 +165,7 @@ public:
       }
       return *this;
    }
+
    /**
     *  Destructs a %Resource object.
     *
@@ -162,6 +176,7 @@ public:
    {
       destroyIfOwned();
    }
+
    /**
     *  Gets the args that were used when the %Resource was created.
     *
@@ -169,10 +184,11 @@ public:
     *
     *  @return   The args that were used when the %Resource was created.
     */
-   const Args &getArgs() const
+   const Args& getArgs() const
    {
       return mArgs;
    }
+
    /**
     *  Gets a pointer to the underlying object.
     *
@@ -180,7 +196,7 @@ public:
     *
     *  @return   A pointer to the underlying object.
     */
-   const T *get() const
+   const T* get() const
    {
       return mpObject;
    }
@@ -192,7 +208,7 @@ public:
     *
     *  @return   A pointer to the underlying object.
     */
-   T *get()
+   T* get()
    {
       return mpObject;
    }
@@ -204,9 +220,9 @@ public:
     *
     *  @return   A pointer to the underlying object.
     */
-   const T *operator->() const
-   { 
-      return get(); 
+   const T* operator->() const
+   {
+      return get();
    }
 
    /**
@@ -216,7 +232,7 @@ public:
     *
     *  @return   A pointer to the underlying object.
     */
-   T *operator->()
+   T* operator->()
    {
       return get();
    }
@@ -228,7 +244,7 @@ public:
     *
     *  @return   A reference to the underlying object.
     */
-   const T &operator*() const
+   const T& operator*() const
    {
       return *get();
    }
@@ -240,7 +256,7 @@ public:
     *
     *  @return   A reference to the underlying object.
     */
-   T &operator*()
+   T& operator*()
    {
       return *get();
    }
@@ -260,7 +276,7 @@ public:
     *
     *  @return   A reference to the underlying indexed object.
     */
-   const T &operator[](int index) const
+   const T& operator[](int index) const
    {
       return get()[index];
    }
@@ -280,7 +296,7 @@ public:
     *
     *  @return   A reference to the underlying indexed object.
     */
-   T &operator[](int index)
+   T& operator[](int index)
    {
       return get()[index];
    }
@@ -335,7 +351,7 @@ protected:
 private:
    Args mArgs;
    mutable bool mOwns;
-   T *mpObject;
+   T* mpObject;
 };
 
 /**
@@ -354,8 +370,8 @@ public:
     * @param value
     *        The value to put in the variable until destruction.
     */
-   ResetVariableOnDestroy(T &variable, const T &value) : \
-      mVariable(variable), 
+   ResetVariableOnDestroy(T& variable, const T& value) :
+      mVariable(variable),
       mOriginalValue(variable)
    {
       mVariable = value;
@@ -370,7 +386,7 @@ public:
    }
 
 private:
-   T &mVariable;
+   T& mVariable;
    T mOriginalValue;
 };
 

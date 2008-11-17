@@ -23,8 +23,6 @@
  */
 class SystemServicesImp : public SystemServices
 {
-   static SystemServicesImp* SystemServicesImp::singleton;
-
 public:
    static SystemServicesImp* instance();
 
@@ -47,6 +45,8 @@ protected:
    SystemServicesImp();
 
 private:
+   static SystemServicesImp* SystemServicesImp::singleton;
+
    bool mLoggingActive;
 #if defined(WIN_API)
    HANDLE mpHandle;
@@ -68,4 +68,4 @@ private:
    friend class Deleter;
 };
 
-#endif   // _SYSTEMSERVICESIMP_H
+#endif

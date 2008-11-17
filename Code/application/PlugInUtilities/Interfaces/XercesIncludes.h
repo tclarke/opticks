@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef XERCES_INCLUDES_H
-#define XERCES_INCLUDES_H
+#ifndef XERCESINCLUDES_H
+#define XERCESINCLUDES_H
 
 #include "AppConfig.h"
 
@@ -48,4 +48,5 @@ namespace xercesc_2_7
 #endif
 
 #endif
+
 

@@ -7,6 +7,9 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#ifndef STATISTICSREADERWRITER_H
+#define STATISTICSREADERWRITER_H
+
 #include "Hdf5CustomReader.h"
 #include "Hdf5CustomWriter.h"
 #include "Hdf5Resource.h"
@@ -14,25 +17,39 @@
 class StatisticsMetadata
 {
 public:
+   StatisticsMetadata() :
+      mStatResolution(0)
+   {
+   }
+
    int mStatResolution;
    hvl_t mBadValues;
-   typedef int badValueType;
+   typedef int BadValueType;
 };
 
 class StatisticsValues
 {
 public:
+   StatisticsValues() :
+      mOnDiskBandNumber(0),
+      mAverage(0.0),
+      mMin(0.0),
+      mMax(0.0),
+      mStandardDeviation(0.0)
+   {
+   }
+
    unsigned int mOnDiskBandNumber;
    double mAverage;
    double mMin;
    double mMax;
    double mStandardDeviation;
    hvl_t mpPercentiles;
-   typedef double percentileType;
+   typedef double PercentileType;
    hvl_t mpBinCenters;
-   typedef double binCenterType;
+   typedef double BinCenterType;
    hvl_t mpHistogramCounts;
-   typedef unsigned int histogramType;
+   typedef unsigned int HistogramType;
 };
 
 class StatisticsValuesReaderWriter : public Hdf5CustomReader, public Hdf5CustomWriter
@@ -82,3 +99,5 @@ private:
    mutable StatisticsMetadata* mpValue; //not owned by class
    hid_t mDataType;
 };
+
+#endif

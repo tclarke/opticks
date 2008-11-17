@@ -59,7 +59,7 @@ AnimationTestPlugIn::~AnimationTestPlugIn()
 
 }
 
-bool AnimationTestPlugIn::execute(PlugInArgList *pInputArgList, PlugInArgList *pOutArgList)
+bool AnimationTestPlugIn::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
    if (mpDialog == NULL)
    {
@@ -386,25 +386,25 @@ void AnimationTestDlg::viewFrames(const std::vector<Animation*>& animations)
 
    if (frameInfo.isEmpty() == false)
    {
-      QDialog* pDialog = new QDialog(this);
-      QTextEdit* pInfo = new QTextEdit(frameInfo, pDialog);
+      QDialog dialog(this);
+      QTextEdit* pInfo = new QTextEdit(frameInfo, &dialog);
       pInfo->setReadOnly(true);
 
-      QVBoxLayout* pLayout = new QVBoxLayout(pDialog);
+      QVBoxLayout* pLayout = new QVBoxLayout(&dialog);
       pLayout->addWidget(pInfo);
 
-      pDialog->setWindowTitle("Animation Frames -- Sorted by Frame Time");
-      pDialog->setLayout(pLayout);
-      pDialog->resize(350, 350);
-      pDialog->exec();
-      delete pDialog;
+      dialog.setWindowTitle("Animation Frames -- Sorted by Frame Time");
+      dialog.setLayout(pLayout);
+      dialog.resize(350, 350);
+      dialog.exec();
    }
 }
 
 void AnimationTestDlg::toggleTimeDisplay()
 {
-   AnimationToolBar* pToolBar = dynamic_cast<AnimationToolBar*>
-      (Service<DesktopServices>()->getWindow("Animation", TOOLBAR));
+   Service<DesktopServices> pDesktop;
+
+   AnimationToolBar* pToolBar = dynamic_cast<AnimationToolBar*>(pDesktop->getWindow("Animation", TOOLBAR));
    if (pToolBar != NULL)
    {
       pToolBar->setHideTimestamp(pToolBar->getHideTimestamp() == false);

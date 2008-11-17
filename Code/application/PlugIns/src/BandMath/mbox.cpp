@@ -84,10 +84,6 @@ MBox::MBox(const QString& strTitle, const QString& strMessage, int type, QWidget
    connect(pCancelButton, SIGNAL(clicked()), this, SLOT(reject()));
 }
 
-/*  
- *  Destroys the object and frees any allocated resources
- */
 MBox::~MBox()
 {
-    // no need to delete child widgets, Qt does it all for us
 }

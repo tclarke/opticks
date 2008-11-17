@@ -44,7 +44,8 @@ AboutDlg::AboutDlg(QWidget* parent) :
    bool bProductionRelease = false;
    QString strReleaseType;
 
-   ConfigurationSettingsImp* pConfigSettings = dynamic_cast<ConfigurationSettingsImp*>(Service<ConfigurationSettings>().get());
+   ConfigurationSettingsImp* pConfigSettings =
+      dynamic_cast<ConfigurationSettingsImp*>(Service<ConfigurationSettings>().get());
    strVersion = QString::fromStdString(pConfigSettings->getVersion());
    strVersion += " Build " + QString::fromStdString(pConfigSettings->getBuildRevision());
 
@@ -146,9 +147,9 @@ AboutDlg::AboutDlg(QWidget* parent) :
       QTableWidgetItem* pDesc = new QTableWidgetItem(QString::fromStdString(brandings[itemCount].getDescription()));
       pDesc->setToolTip(pDesc->text());
       pPlugInBrandingTable->setItem(itemCount, 1, pDesc);
-      QTableWidgetItem* pVersion = new QTableWidgetItem(QString::fromStdString(brandings[itemCount].getVersion()));
-      pVersion->setToolTip(pVersion->text());
-      pPlugInBrandingTable->setItem(itemCount, 2, pVersion);
+      QTableWidgetItem* pVersionItem = new QTableWidgetItem(QString::fromStdString(brandings[itemCount].getVersion()));
+      pVersion->setToolTip(pVersionItem->text());
+      pPlugInBrandingTable->setItem(itemCount, 2, pVersionItem);
    }
    pPlugInBrandingTable->resizeColumnToContents(0);
    pPlugInBrandingTable->resizeColumnToContents(2);
@@ -633,16 +634,14 @@ AboutDlg::AboutDlg(QWidget* parent) :
    QTabWidget* pLicenseTabBox = new QTabWidget(this);
    pLicenseTabBox->addTab(pNoticeEdit, APP_NAME);
 
-   for (unsigned int itemCount = 0;
-        itemCount < brandings.size();
-        ++itemCount)
+   for (unsigned int itemCount = 0; itemCount < brandings.size(); ++itemCount)
    {
       string license = brandings[itemCount].getLicense();
       if (license.empty())
       {
          continue;
       }
-      QTextEdit *pEdit = new QTextEdit(this);
+      QTextEdit* pEdit = new QTextEdit(this);
       pEdit->setLineWrapMode(QTextEdit::WidgetWidth);
       pEdit->setReadOnly(true);
       pEdit->setHtml(QString::fromStdString(license));
@@ -661,13 +660,13 @@ AboutDlg::AboutDlg(QWidget* parent) :
 
    map<string, string> dependencyCopyrights;
    vector<PlugInDescriptor*> pluginDescriptors = Service<PlugInManagerServices>()->getPlugInDescriptors();
-   for(vector<PlugInDescriptor*>::iterator pluginDescriptor = pluginDescriptors.begin();
+   for (vector<PlugInDescriptor*>::iterator pluginDescriptor = pluginDescriptors.begin();
       pluginDescriptor != pluginDescriptors.end(); ++pluginDescriptor)
    {
-      if(*pluginDescriptor != NULL)
+      if (*pluginDescriptor != NULL)
       {
          map<string, string> tmp = (*pluginDescriptor)->getDependencyCopyright();
-         for(map<string, string>::iterator tmpIt = tmp.begin(); tmpIt != tmp.end(); ++tmpIt)
+         for (map<string, string>::iterator tmpIt = tmp.begin(); tmpIt != tmp.end(); ++tmpIt)
          {
             map<string, string>::iterator current = dependencyCopyrights.find(tmpIt->first);
             VERIFYNR_MSG(current == dependencyCopyrights.end() || current->second == tmpIt->second,
@@ -677,10 +676,10 @@ AboutDlg::AboutDlg(QWidget* parent) :
          }
       }
    }
-   for(map<string, string>::const_iterator dependencyCopyright = dependencyCopyrights.begin();
+   for (map<string, string>::const_iterator dependencyCopyright = dependencyCopyrights.begin();
       dependencyCopyright != dependencyCopyrights.end(); ++dependencyCopyright)
    {
-      QTextEdit *pEdit = new QTextEdit(this);
+      QTextEdit* pEdit = new QTextEdit(this);
       pEdit->setLineWrapMode(QTextEdit::WidgetWidth);
       pEdit->setReadOnly(true);
       pEdit->setHtml(QString::fromStdString(dependencyCopyright->second));

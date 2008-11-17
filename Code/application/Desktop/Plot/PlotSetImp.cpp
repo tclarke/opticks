@@ -462,7 +462,7 @@ QString PlotSetImp::renamePlot(PlotWidget* pPlot)
          // Do not change the name to that of an existing plot
          if (getPlot(strNewName) == NULL)
          {
-            bool bSuccess = renamePlot(pPlot, strNewName);
+            bSuccess = renamePlot(pPlot, strNewName);
             if (bSuccess == false)
             {
                return QString();
@@ -734,7 +734,7 @@ bool PlotSetImp::toXml(XMLWriter* pXml) const
    vector<PlotWidget*> widgets = getPlots();
    for (vector<PlotWidget*>::const_iterator it = widgets.begin(); it != widgets.end(); ++it)
    {
-      if(*it != NULL)
+      if (*it != NULL)
       {
          pXml->pushAddPoint(pXml->addElement("PlotWidget"));
          pXml->addAttr("id", (*it)->getId());
@@ -751,7 +751,7 @@ bool PlotSetImp::fromXml(DOMNode* pDocument, unsigned int version)
    {
       return false;
    }
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
+   DOMElement* pElem = static_cast<DOMElement*>(pDocument);
 
    if (pElem->hasAttribute(X("plotWindowId")))
    {
@@ -781,7 +781,7 @@ bool PlotSetImp::fromXml(DOMNode* pDocument, unsigned int version)
    {
       if (XMLString::equals(pChld->getNodeName(), X("PlotWidget")))
       {
-         PlotWidget *pWidget = dynamic_cast<PlotWidget*>(
+         PlotWidget* pWidget = dynamic_cast<PlotWidget*>(
             Service<SessionManager>()->getSessionItem(A(static_cast<DOMElement*>(pChld)->getAttribute(X("id")))));
          if (pWidget != NULL)
          {

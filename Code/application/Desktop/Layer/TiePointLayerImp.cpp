@@ -94,7 +94,7 @@ bool TiePointLayerImp::isKindOf(const string& className) const
 
 bool TiePointLayerImp::toXml(XMLWriter* pXml) const
 {
-   if(!LayerImp::toXml(pXml))
+   if (!LayerImp::toXml(pXml))
    {
       return false;
    }
@@ -108,7 +108,7 @@ bool TiePointLayerImp::toXml(XMLWriter* pXml) const
 
 bool TiePointLayerImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   if(!LayerImp::fromXml(pDocument, version))
+   if (!LayerImp::fromXml(pDocument, version))
    {
       return false;
    }
@@ -121,7 +121,7 @@ bool TiePointLayerImp::fromXml(DOMNode* pDocument, unsigned int version)
       oldPoints = pTiePointList->getTiePoints();
    }
 
-   DOMElement *pElmnt = static_cast<DOMElement*>(pDocument);
+   DOMElement* pElmnt = static_cast<DOMElement*>(pDocument);
 
    setSymbolSize(StringUtilities::fromXmlString<int>(A(pElmnt->getAttribute(X("symbolSize")))));
    setColor(COLORTYPE_TO_QCOLOR(StringUtilities::fromXmlString<ColorType>(A(pElmnt->getAttribute(X("symbolColor"))))));
@@ -160,7 +160,7 @@ vector<ColorType> TiePointLayerImp::getColors() const
 void TiePointLayerImp::draw()
 {
    const int labelTolerance = 5000; // only draw labels if <labelTolerance to be drawn
-   TiePointList *pList = static_cast<TiePointList*>(getDataElement());
+   TiePointList* pList = static_cast<TiePointList*>(getDataElement());
    VERIFYNRV(pList != NULL);
 
    const vector<TiePoint>& points = pList->getTiePoints();
@@ -168,8 +168,7 @@ void TiePointLayerImp::draw()
    glColor3ub(mColor.red(), mColor.green(), mColor.blue());
 
    // compute the symbol size in scene coordinates
-   double sceneSymbolSize = double(mSymbolSize) / 
-      DrawUtil::getPixelSize(0.0, 0.0, 1.0, 1.0);
+   double sceneSymbolSize = static_cast<double>(mSymbolSize) / DrawUtil::getPixelSize(0.0, 0.0, 1.0, 1.0);
 
    int viewableBounds[4] = {INT_MIN, INT_MIN, INT_MAX, INT_MAX};
    DrawUtil::restrictToViewport(viewableBounds[0], viewableBounds[1], viewableBounds[2], viewableBounds[3]);
@@ -185,8 +184,16 @@ namespace
 {
 bool isInBounds(const LocationType &point, const int viewableBounds[4])
 {
-   if (point.mX < viewableBounds[0] || point.mX > viewableBounds[2]) return false;
-   if (point.mY < viewableBounds[1] || point.mY > viewableBounds[3]) return false;
+   if (point.mX < viewableBounds[0] || point.mX > viewableBounds[2])
+   {
+      return false;
+   }
+
+   if (point.mY < viewableBounds[1] || point.mY > viewableBounds[3])
+   {
+      return false;
+   }
+
    return true;
 }
 }
@@ -199,9 +206,9 @@ int TiePointLayerImp::drawSymbols(const vector<TiePoint> &points, double sceneSy
    if (mSymbolSize <= 1)
    {
       glBegin(GL_POINTS);
-      for (pPoint=points.begin(); pPoint!=points.end(); ++pPoint)
+      for (pPoint = points.begin(); pPoint != points.end(); ++pPoint)
       {
-         LocationType point = getPoint(*pPoint) + LocationType(0.5,0.5);
+         LocationType point = getPoint(*pPoint) + LocationType(0.5, 0.5);
          if (isInBounds(point, viewableBounds))
          {
             viewableCount++;
@@ -213,9 +220,9 @@ int TiePointLayerImp::drawSymbols(const vector<TiePoint> &points, double sceneSy
    else
    {
       glLineWidth(1.0);
-      for (pPoint=points.begin(); pPoint!=points.end(); ++pPoint)
+      for (pPoint = points.begin(); pPoint != points.end(); ++pPoint)
       {
-         LocationType point = getPoint(*pPoint) + LocationType(0.5,0.5);
+         LocationType point = getPoint(*pPoint) + LocationType(0.5, 0.5);
          if (isInBounds(point, viewableBounds))
          {
             viewableCount++;
@@ -253,7 +260,7 @@ void TiePointLayerImp::drawLabels(const vector<TiePoint>& points, double sceneSy
    font.setPointSize(12);
 
    vector<TiePoint>::const_iterator pPoint;
-   for (pPoint=points.begin(); pPoint!=points.end(); ++pPoint)
+   for (pPoint = points.begin(); pPoint != points.end(); ++pPoint)
    {
       LocationType point = getPoint(*pPoint);
       if (isInBounds(point, viewableBounds))
@@ -299,7 +306,7 @@ void TiePointLayerImp::drawSymbol(const LocationType& point, double symbolSize) 
 
 bool TiePointLayerImp::getExtents(double& x1, double& y1, double& x4, double& y4)
 {
-   TiePointList *pList = static_cast<TiePointList*>(getDataElement());
+   TiePointList* pList = static_cast<TiePointList*>(getDataElement());
    VERIFY(pList != NULL);
 
    const vector<TiePoint>& points = pList->getTiePoints();
@@ -463,6 +470,16 @@ bool TiePointLayerImp::areLabelsEnabled() const
    return mLabelsEnabled;
 }
 
+bool TiePointLayerImp::isMission() const
+{
+   return mIsMission;
+}
+
+void TiePointLayerImp::setIsMission(bool isMission)
+{
+   mIsMission = isMission;
+}
+
 bool TiePointLayerImp::acceptsMouseEvents() const
 {
    return true;
@@ -488,7 +505,7 @@ bool TiePointLayerImp::processMousePress(const QPoint& screenCoord, Qt::MouseBut
    {
       if (button == Qt::LeftButton)
       {
-         View *pView = getView();
+         View* pView = getView();
          VERIFY(pView != NULL);
 
          pView->translateScreenToWorld(screenCoord.x(), screenCoord.y(), sAnchor.mX, sAnchor.mY);
@@ -559,9 +576,9 @@ bool TiePointLayerImp::processMouseRelease(const QPoint& screenCoord, Qt::MouseB
          }
 
          vector<TiePoint> remainingPoints;
-         const vector<TiePoint> &oldPoints = pElement->getTiePoints();
+         const vector<TiePoint>& oldPoints = pElement->getTiePoints();
          vector<TiePoint>::const_iterator pPoint;
-         for (pPoint=oldPoints.begin(); pPoint!=oldPoints.end(); ++pPoint)
+         for (pPoint = oldPoints.begin(); pPoint != oldPoints.end(); ++pPoint)
          {
             LocationType point = getPoint(*pPoint);
             if (!isInBounds(point, bounds))
@@ -587,12 +604,13 @@ void TiePointLayerImp::reset()
 {
    ColorType color = TiePointLayer::getSettingMarkerColor();
    QColor clrTiePoint = COLORTYPE_TO_QCOLOR(color);
+
    bool autoColorOn = TiePointLayer::getSettingAutoColor();
    if (autoColorOn == true)
    {
       Service<UtilityServices> pUtilities;
-      ColorType color = pUtilities->getAutoColor(msNumLayers);
-      clrTiePoint = COLORTYPE_TO_QCOLOR(color);
+      ColorType autoColor = pUtilities->getAutoColor(msNumLayers);
+      clrTiePoint = COLORTYPE_TO_QCOLOR(autoColor);
    }
 
    setColor(clrTiePoint);

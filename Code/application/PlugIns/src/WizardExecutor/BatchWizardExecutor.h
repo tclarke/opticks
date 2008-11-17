@@ -30,8 +30,6 @@ public:
    BatchWizardExecutor();
    ~BatchWizardExecutor();
 
-   bool setBatch();
-   bool setInteractive();
    bool hasAbort();
    bool getInputSpecification(PlugInArgList*& pArgList);
    bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
@@ -40,12 +38,10 @@ public:
 protected:
    bool extractInputArgs(PlugInArgList* pInArgList);
 
-   WizardNode* getValueNode(WizardObject* pWizard, const std::string& nodeName,
-      const std::string& nodeType);
+   WizardNode* getValueNode(const WizardObject* pWizard, const std::string& nodeName, const std::string& nodeType);
    bool runWizard(WizardObject* pWizard);
 
 private:
-   bool mbInteractive;
    bool mbAbort;
    Progress* mpProgress;
    Step* mpStep;
@@ -57,4 +53,4 @@ private:
    Service<ObjectFactory> mpObjFact;
 };
 
-#endif   // BATCHWIZARDEXECUTOR_H
+#endif

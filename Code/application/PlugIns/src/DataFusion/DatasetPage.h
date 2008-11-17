@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef DATASET_PAGE_H
-#define DATASET_PAGE_H
+#ifndef DATASETPAGE_H
+#define DATASETPAGE_H
 
 #include "ConfigurationSettings.h"
 #include "DesktopServices.h"
@@ -48,11 +48,11 @@ public:
    SpatialDataView* getSecondaryView() const;
 
    void windowAdded(Subject& subject, const std::string& signal, const boost::any& value);
-   void windowDeleted(Subject &subject, const std::string &signal, const boost::any &v);
-   void windowModified(Subject &subject, const std::string &signal, const boost::any &v);
-   void windowAttached(Subject &subject, const std::string &signal, const boost::any &v);
-   void attached(Subject &subject, const std::string &signal, const Slot &slot);
-   void detached(Subject &subject, const std::string &signal, const Slot &slot);
+   void windowDeleted(Subject& subject, const std::string& signal, const boost::any& v);
+   void windowModified(Subject& subject, const std::string& signal, const boost::any& v);
+   void windowAttached(Subject& subject, const std::string& signal, const boost::any& v);
+   void attached(Subject& subject, const std::string& signal, const Slot& slot);
+   void detached(Subject& subject, const std::string& signal, const Slot& slot);
 
    bool isValid() const;
 
@@ -69,7 +69,8 @@ private:
    SpatialDataView* getView(QListWidget* pBox) const;
 
    // map from windows to index in the ListBoxes
-   QMap<SpatialDataWindow*, QListWidgetItem*> mPrimaryMap, mSecondaryMap;
+   QMap<SpatialDataWindow*, QListWidgetItem*> mPrimaryMap;
+   QMap<SpatialDataWindow*, QListWidgetItem*> mSecondaryMap;
 
    QListWidget* mpSecondaryList;
    QListWidget* mpPrimaryList;

@@ -235,7 +235,7 @@ Nitf::TreState Nitf::PatchaParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID && totalFields != numFields)
    {
       reporter << "Total fields in the Dynamic Object(" <<
-         totalFields <<") did not match the number found(" << numFields << ") ";
+         totalFields << ") did not match the number found(" << numFields << ") ";
       status = INVALID;
    }
 
@@ -261,27 +261,27 @@ bool Nitf::PatchaParser::fromDynamicObject(const DynamicObject& input, ostream& 
 
    try
    {
-      output <<   toString( dv_cast<int>(input.getAttribute(PATCHA::PAT_NO)), 4);
-      output <<   toString( dv_cast<int>(input.getAttribute(PATCHA::LAST_PAT_FLAG)), 1);
-      output <<   toString( dv_cast<int>(input.getAttribute(PATCHA::LNSTRT)), 7);
-      output <<   toString( dv_cast<int>(input.getAttribute(PATCHA::LNSTOP)), 7);
-      output <<   toString( dv_cast<int>(input.getAttribute(PATCHA::AZL)), 5);
-      output <<   toString( dv_cast<int>(input.getAttribute(PATCHA::NVL)), 5);
-      output <<   toString( dv_cast<int>(input.getAttribute(PATCHA::FVL)), 3);
-      output <<   toString( dv_cast<int>(input.getAttribute(PATCHA::NPIXEL)), 5);
-      output <<   toString( dv_cast<int>(input.getAttribute(PATCHA::FVPIX)), 5);
-      output <<   toString( dv_cast<int>(input.getAttribute(PATCHA::FRAME)), 3);
-      output <<   toString( dv_cast<double>(input.getAttribute(PATCHA::UTC)), 8, 2);
-      output <<   toString( dv_cast<double>(input.getAttribute(PATCHA::SHEAD)), 7, 3);
-      output <<   toString( dv_cast<double>(input.getAttribute(PATCHA::GRAVITY)), 7, 4);
-      output <<   toString( dv_cast<int>(input.getAttribute(PATCHA::INS_V_NC)), 5, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<int>(input.getAttribute(PATCHA::INS_V_EC)), 5, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<int>(input.getAttribute(PATCHA::INS_V_DC)), 5, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute(PATCHA::OFFLAT)), 8, 4, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute(PATCHA::OFFLONG)), 8, 4, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<int>(input.getAttribute(PATCHA::TRACK)), 3);
-      output <<   toString( dv_cast<double>(input.getAttribute(PATCHA::GSWEEP)), 6, 2);
-      output <<   toString( dv_cast<double>(input.getAttribute(PATCHA::SHEAR)), 8);
+      output << toString(dv_cast<int>(input.getAttribute(PATCHA::PAT_NO)), 4);
+      output << toString(dv_cast<int>(input.getAttribute(PATCHA::LAST_PAT_FLAG)), 1);
+      output << toString(dv_cast<int>(input.getAttribute(PATCHA::LNSTRT)), 7);
+      output << toString(dv_cast<int>(input.getAttribute(PATCHA::LNSTOP)), 7);
+      output << toString(dv_cast<int>(input.getAttribute(PATCHA::AZL)), 5);
+      output << toString(dv_cast<int>(input.getAttribute(PATCHA::NVL)), 5);
+      output << toString(dv_cast<int>(input.getAttribute(PATCHA::FVL)), 3);
+      output << toString(dv_cast<int>(input.getAttribute(PATCHA::NPIXEL)), 5);
+      output << toString(dv_cast<int>(input.getAttribute(PATCHA::FVPIX)), 5);
+      output << toString(dv_cast<int>(input.getAttribute(PATCHA::FRAME)), 3);
+      output << toString(dv_cast<double>(input.getAttribute(PATCHA::UTC)), 8, 2);
+      output << toString(dv_cast<double>(input.getAttribute(PATCHA::SHEAD)), 7, 3);
+      output << toString(dv_cast<double>(input.getAttribute(PATCHA::GRAVITY)), 7, 4);
+      output << toString(dv_cast<int>(input.getAttribute(PATCHA::INS_V_NC)), 5, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<int>(input.getAttribute(PATCHA::INS_V_EC)), 5, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<int>(input.getAttribute(PATCHA::INS_V_DC)), 5, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(PATCHA::OFFLAT)), 8, 4, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(PATCHA::OFFLONG)), 8, 4, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<int>(input.getAttribute(PATCHA::TRACK)), 3);
+      output << toString(dv_cast<double>(input.getAttribute(PATCHA::GSWEEP)), 6, 2);
+      output << toString(dv_cast<double>(input.getAttribute(PATCHA::SHEAR)), 8);
    }
    catch (const bad_cast&)
    {

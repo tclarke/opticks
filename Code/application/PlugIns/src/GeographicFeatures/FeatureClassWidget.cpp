@@ -28,13 +28,14 @@
 #include <boost/bind.hpp>
 
 FeatureClassWidget::FeatureClassWidget(QWidget* pParent) :
-   QWidget(pParent)
+   QWidget(pParent),
+   mpFeatureClass(NULL)
 {
-   QTabWidget *pTabWidget = new QTabWidget(this);
+   QTabWidget* pTabWidget = new QTabWidget(this);
 
-   QWidget *pConnectionTab = new QWidget(this);
-   QGridLayout *pConnectionLayout = new QGridLayout(pConnectionTab);
-   QLabel *pLayerNameLabel = new QLabel("Layer name:", pConnectionTab);
+   QWidget* pConnectionTab = new QWidget(this);
+   QGridLayout* pConnectionLayout = new QGridLayout(pConnectionTab);
+   QLabel* pLayerNameLabel = new QLabel("Layer name:", pConnectionTab);
    mpLayerNameEdit = new QLineEdit(pConnectionTab);
    mpConnection = new ConnectionParametersWidget(pConnectionTab);
 
@@ -42,7 +43,7 @@ FeatureClassWidget::FeatureClassWidget(QWidget* pParent) :
    pConnectionLayout->addWidget(mpLayerNameEdit, 0, 1);
    pConnectionLayout->addWidget(mpConnection, 1, 0, 1, 2);
 
-   QueryOptionsWidget *pInspector = new QueryOptionsWidget;
+   QueryOptionsWidget* pInspector = new QueryOptionsWidget;
    mpDisplay = new ListInspectorWidget(pInspector, this);
 
    mpClipping = new QWidget(this);
@@ -53,10 +54,10 @@ FeatureClassWidget::FeatureClassWidget(QWidget* pParent) :
    mpSouthEdit = new LatLonLineEdit(mpClipping);
    mpEastEdit = new LatLonLineEdit(mpClipping);
    mpWestEdit = new LatLonLineEdit(mpClipping);
-   QLabel *pNorthLabel = new QLabel("North:", mpClipping);
-   QLabel *pSouthLabel = new QLabel("South:", mpClipping);
-   QLabel *pEastLabel = new QLabel("East:", mpClipping);
-   QLabel *pWestLabel = new QLabel("West:", mpClipping);
+   QLabel* pNorthLabel = new QLabel("North:", mpClipping);
+   QLabel* pSouthLabel = new QLabel("South:", mpClipping);
+   QLabel* pEastLabel = new QLabel("East:", mpClipping);
+   QLabel* pWestLabel = new QLabel("West:", mpClipping);
 
    mSpecifiedClipWidgets.push_back(mpNorthEdit);
    mSpecifiedClipWidgets.push_back(mpSouthEdit);
@@ -67,7 +68,7 @@ FeatureClassWidget::FeatureClassWidget(QWidget* pParent) :
    mSpecifiedClipWidgets.push_back(pEastLabel);
    mSpecifiedClipWidgets.push_back(pWestLabel);
 
-   QGridLayout *pClipLayout = new QGridLayout(mpClipping);
+   QGridLayout* pClipLayout = new QGridLayout(mpClipping);
    pClipLayout->setColumnStretch(2, 10);
    pClipLayout->setColumnMinimumWidth(0, 15);
    pClipLayout->addWidget(mpNoClipButton, 0, 0, 1, 3);
@@ -101,13 +102,13 @@ FeatureClassWidget::FeatureClassWidget(QWidget* pParent) :
    // Word wrap
    mpErrorLabel->setWordWrap(true);
 
-   QPushButton *pTestConnectionButton = new QPushButton("Test connection", this);
+   QPushButton* pTestConnectionButton = new QPushButton("Test connection", this);
 
    mpProgressBar = new QProgressBar(this);
    mpProgressBar->setRange(0, 0);
    mpProgressBar->setHidden(true);
    
-   QGridLayout *pLayout = new QGridLayout(this);
+   QGridLayout* pLayout = new QGridLayout(this);
    pLayout->setMargin(0);
    pLayout->setSpacing(5);
    pLayout->setColumnStretch(1, 10);
@@ -198,14 +199,14 @@ void FeatureClassWidget::initialize(FeatureClass *pFeatureClass)
    mpDisplay->clearList();
    mQueries.clear();
 
-   const std::vector<QueryOptions> &queries = mpFeatureClass->getQueries();
+   const std::vector<QueryOptions>& queries = mpFeatureClass->getQueries();
    for (std::vector<QueryOptions>::const_iterator iter = queries.begin();
       iter != queries.end(); ++iter)
    {
       mQueries[mpDisplay->addItem(iter->getQueryName())] = *iter;
    }
 
-   const ArcProxyLib::ConnectionParameters &connect = mpFeatureClass->getConnectionParameters();
+   const ArcProxyLib::ConnectionParameters& connect = mpFeatureClass->getConnectionParameters();
 
    setFeatureClassProperties(mpFeatureClass->getFeatureClassProperties(), connect.getConnectionType());
 
@@ -278,7 +279,7 @@ void FeatureClassWidget::setFeatureClassProperties(
       return;
    }
 
-   QueryOptionsWidget *pInspector = dynamic_cast<QueryOptionsWidget*>(mpDisplay->getInspector());
+   QueryOptionsWidget* pInspector = dynamic_cast<QueryOptionsWidget*>(mpDisplay->getInspector());
    VERIFYNRV(pInspector != NULL);
 
    bool hideQueries = connectionType == ArcProxyLib::SHAPELIB_CONNECTION;
@@ -316,7 +317,7 @@ void FeatureClassWidget::saveDisplayInspector(QWidget *pInspector, QListWidgetIt
       return;
    }
 
-   QueryOptionsWidget *pOptionsWidget = dynamic_cast<QueryOptionsWidget*>(pInspector);
+   QueryOptionsWidget* pOptionsWidget = dynamic_cast<QueryOptionsWidget*>(pInspector);
    VERIFYNRV(pOptionsWidget != NULL);
 
    std::map<QListWidgetItem*, QueryOptions>::iterator iter = mQueries.find(pItem);
@@ -334,9 +335,9 @@ void FeatureClassWidget::saveDisplayInspector(QWidget *pInspector, QListWidgetIt
    }
 }
 
-void FeatureClassWidget::loadDisplayInspector(QWidget *pInspector, QListWidgetItem *pItem)
+void FeatureClassWidget::loadDisplayInspector(QWidget* pInspector, QListWidgetItem* pItem)
 {
-   QueryOptionsWidget *pOptionsWidget = dynamic_cast<QueryOptionsWidget*>(pInspector);
+   QueryOptionsWidget* pOptionsWidget = dynamic_cast<QueryOptionsWidget*>(pInspector);
    VERIFYNRV(pOptionsWidget != NULL);
 
    std::map<QListWidgetItem*, QueryOptions>::iterator iter = mQueries.find(pItem);
@@ -348,7 +349,7 @@ void FeatureClassWidget::loadDisplayInspector(QWidget *pInspector, QListWidgetIt
    pOptionsWidget->setDisplayOptions(iter->second);
 }
 
-void FeatureClassWidget::removeDisplayItem(QListWidgetItem *pItem)
+void FeatureClassWidget::removeDisplayItem(QListWidgetItem* pItem)
 {
    std::map<QListWidgetItem*, QueryOptions>::iterator iter = mQueries.find(pItem);
    if (iter == mQueries.end())

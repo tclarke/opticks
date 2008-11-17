@@ -26,14 +26,34 @@ class XmlRpcParam
 {
 public:
    XmlRpcParam() {}
-   XmlRpcParam(const QString &type, const QVariant &value=QVariant()) : mType(type), mValue(value) {}
-   XmlRpcParam(const XmlRpcParam &other) : mType(other.mType), mValue(other.mValue) {}
+   XmlRpcParam(const QString& type, const QVariant& value = QVariant()) :
+      mType(type),
+      mValue(value)
+   {
+   }
 
-   const QString &type() const { return mType; }
-   const QVariant &value() const { return mValue; }
+   XmlRpcParam(const XmlRpcParam& other) :
+      mType(other.mType),
+      mValue(other.mValue)
+   {
+   }
 
-   virtual bool isValid() const { return !mType.isEmpty() && mValue.isValid(); }
-   virtual bool toXml(XMLWriter &xml) const
+   const QString& type() const
+   {
+      return mType;
+   }
+
+   const QVariant& value() const
+   {
+      return mValue;
+   }
+
+   virtual bool isValid() const
+   {
+      return !mType.isEmpty() && mValue.isValid();
+   }
+
+   virtual bool toXml(XMLWriter& xml) const
    {
       xml.addText(mValue.toString().toAscii().constData(), xml.addElement(mType.toStdString()));
       return true;

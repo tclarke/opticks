@@ -58,7 +58,7 @@ Layer* AnnotationLayerAdapter::copy(const string& layerName, bool bCopyElement, 
    // Get the annotation
    AnnotationElement* pAnnotation = NULL;
 
-   AnnotationElement* pCurrentAnnotation  = dynamic_cast<AnnotationElement*>(getDataElement());
+   AnnotationElement* pCurrentAnnotation = dynamic_cast<AnnotationElement*>(getDataElement());
    if (pCurrentAnnotation != NULL)
    {
       string elementName = name;

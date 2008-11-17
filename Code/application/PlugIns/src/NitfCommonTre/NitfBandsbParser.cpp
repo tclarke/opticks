@@ -83,14 +83,14 @@ Nitf::BandsbParser::BandsbParser()
 bool Nitf::BandsbParser::runAllTests(Progress* pProgress, ostream& failure)
 {
    // Data for test 1, also used for tests 2 and 3
-   string test1_1 = "00007"                                      // COUNT
+   string test1_1 = "00007"                                     // COUNT
                    "RAW                     "                   // RADIOMETRIC QUANTITY
                    "S";                                         // RADIOMETRIC QUANTITY UNIT
 
-   unsigned char test1_2[] = {0x3f, 0x80, 0x00, 0x00,                     // SCALE FACTOR  0x3f800000 == (float)1.0
+   unsigned char test1_2[] = {0x3f, 0x80, 0x00, 0x00,           // SCALE FACTOR  0x3f800000 == (float)1.0
                     0x00, 0x00, 0x00, 0x00};                    // ADDITIVE FACTOR  0x00000000 == (float)0.0
 
-   string test1_3 = "-------"                                    // ROW GSD
+   string test1_3 = "-------"                                   // ROW GSD
                    "M"                                          // ROW GSD UNIT
                    "-------"                                    // COL GSD
                    "M"                                          // COL GSD UNIT
@@ -100,7 +100,7 @@ bool Nitf::BandsbParser::runAllTests(Progress* pProgress, ostream& failure)
                    "M"                                          // SPT RESP UNIT COL
                    "123456789012345678901234567890123456789012345678"; // DATA FLD 1
 
-   unsigned char test1_4[] = {0x5e, 0xbb, 0xfc, 0x01};                    // EXISTENCE MASK  0x5ebbfc01 bit mask
+   unsigned char test1_4[] = {0x5e, 0xbb, 0xfc, 0x01};          // EXISTENCE MASK  0x5ebbfc01 bit mask
 
    string test1_5 =
       "0000.01"                                                 // DIAMETER
@@ -327,7 +327,7 @@ bool Nitf::BandsbParser::runAllTests(Progress* pProgress, ostream& failure)
       "RAW\037                    "                             // RADIOMETRIC QUANTITY
       "S";                                                      // RADIOMETRIC QUANTITY UNIT
 
-   unsigned char test4_2[] = {0x3f, 0x80, 0x00, 0x00,                    // SCALE FACTOR  0x3f800000 == (float)1.0
+   unsigned char test4_2[] = {0x3f, 0x80, 0x00, 0x00,           // SCALE FACTOR  0x3f800000 == (float)1.0
                      0x00, 0x00, 0x00, 0x00};                   // ADDITIVE FACTOR  0x00000000 == (float)0.0
 
    string test4_3 =
@@ -342,7 +342,7 @@ bool Nitf::BandsbParser::runAllTests(Progress* pProgress, ostream& failure)
       "123456789012345678901234567890123456789012345678"        // DATA FLD 1
       ;
 
-   unsigned char test4_4[] = {0x5e, 0xbb, 0xf0, 0x00};                   // EXISTENCE MASK  0x5ebbf000 bit mask
+   unsigned char test4_4[] = {0x5e, 0xbb, 0xf0, 0x00};          // EXISTENCE MASK  0x5ebbf000 bit mask
 
    string test4_5 =
       "0000.01"                                                 // DIAMETER
@@ -655,7 +655,7 @@ bool Nitf::BandsbParser::runAllTests(Progress* pProgress, ostream& failure)
       "RAW                     "                                // RADIOMETRIC QUANTITY
       "S";                                                      // RADIOMETRIC QUANTITY UNIT
 
-   unsigned char test5_2[] = {0x3f, 0x80, 0x00, 0x00,                    // SCALE FACTOR     0x3f800000 == (float)1.0
+   unsigned char test5_2[] = {0x3f, 0x80, 0x00, 0x00,           // SCALE FACTOR     0x3f800000 == (float)1.0
                      0x47, 0xc3, 0x50, 0x00};                   // ADDITIVE FACTOR  0x47c35000 == (float)100000.0
 
    string test5_3 =
@@ -829,7 +829,7 @@ bool Nitf::BandsbParser::runAllTests(Progress* pProgress, ostream& failure)
       "1234567"                                                 // UBAP
       ;
 
-   unsigned char test5_16[] = {0xc0, 0x49, 0x0f, 0xdb,                   // APR   0xc0490fdb == pi == (float)-3.1415927
+   unsigned char test5_16[] = {0xc0, 0x49, 0x0f, 0xdb,          // APR   0xc0490fdb == pi == (float)-3.1415927
                       0xc0, 0x2d, 0xf8, 0x54,                   // APR   0xc02df854 ==  e == (float)-2.7182817
                       0x42, 0x28, 0x00, 0x00                    // APR   0x42280000 == 42
                       };
@@ -881,7 +881,7 @@ bool Nitf::BandsbParser::runAllTests(Progress* pProgress, ostream& failure)
    input.write(reinterpret_cast<char*>(test1_4), sizeof(test1_4));
    input << test1_5;
 
-   size_t numBytes = input.str().size();;
+   size_t numBytes = input.str().size();
 
    FactoryResource<DynamicObject> treDO;
    string errorMessage;
@@ -944,7 +944,7 @@ bool Nitf::BandsbParser::runAllTests(Progress* pProgress, ostream& failure)
    input4.write(reinterpret_cast<char*>(test4_4), sizeof(test4_4));
    input4 << test4_5;
 
-   numBytes = input4.str().size();;
+   numBytes = input4.str().size();
 
    success = toDynamicObject(input4, numBytes, *treDO.get(), errorMessage);
 
@@ -990,7 +990,7 @@ bool Nitf::BandsbParser::runAllTests(Progress* pProgress, ostream& failure)
    input5.write(reinterpret_cast<char*>(test5_18), sizeof(test5_18));
 
    string data5(input5.str());
-   numBytes = data5.size();;
+   numBytes = data5.size();
 
    success = toDynamicObject(input5, numBytes, *treDO.get(), errorMessage);
 
@@ -1034,7 +1034,7 @@ bool Nitf::BandsbParser::runAllTests(Progress* pProgress, ostream& failure)
    input6.write(reinterpret_cast<char*>(test5_16), sizeof(test5_16));
    input6 << test5_17_Error;
 
-   numBytes = input6.str().size();;
+   numBytes = input6.str().size();
 
    success = toDynamicObject(input6, numBytes, *treDO.get(), errorMessage);
 
@@ -1056,7 +1056,7 @@ bool Nitf::BandsbParser::runAllTests(Progress* pProgress, ostream& failure)
    input7.write(reinterpret_cast<char*>(test4_4), sizeof(test4_4));
    input7 << test4_5_ERROR;
 
-   numBytes = input7.str().size();;
+   numBytes = input7.str().size();
 
    success = toDynamicObject(input7, numBytes, *treDO.get(), errorMessage);
 
@@ -1101,19 +1101,19 @@ bool Nitf::BandsbParser::runAllTests(Progress* pProgress, ostream& failure)
    input8.write(reinterpret_cast<char*>(test4_4), sizeof(test4_4));
    input8 << test4_5;
 
-   numBytes = input8.str().size();;
+   numBytes = input8.str().size();
 
    success = toDynamicObject(input8, numBytes, *treDO.get(), errorMessage);
 
    status = INVALID;
    if (success)
    {
-      stringstream tmpStream;
-      status = isTreValid(*treDO.get(), tmpStream);
+      stringstream tmpStream2;
+      status = isTreValid(*treDO.get(), tmpStream2);
       if (status != INVALID)
       {
          failure << "Error: Negative test with bad BCS-A byte failed did not return INVALID\n";
-         failure << tmpStream.str();
+         failure << tmpStream2.str();
          treDO->clear();
          return false;
       }
@@ -1137,19 +1137,19 @@ bool Nitf::BandsbParser::runAllTests(Progress* pProgress, ostream& failure)
    input9.write(reinterpret_cast<char*>(test9_4), sizeof(test9_4));
    input9 << test9_5;
 
-   numBytes = input9.str().size();;
+   numBytes = input9.str().size();
 
    success = toDynamicObject(input9, numBytes, *treDO.get(), errorMessage);
 
    status = INVALID;
    if (success)
    {
-      stringstream tmpStream;
-      status = isTreValid(*treDO.get(), tmpStream);
+      stringstream tmpStream2;
+      status = isTreValid(*treDO.get(), tmpStream2);
       if (status != VALID)
       {
          failure << "Error: Positive test with EXISTANCE max = 0x00000001 did not return VALID\n";
-         failure << tmpStream.str();
+         failure << tmpStream2.str();
          treDO->clear();
          return false;
       }
@@ -1170,19 +1170,19 @@ bool Nitf::BandsbParser::runAllTests(Progress* pProgress, ostream& failure)
    input10 << test5_3;
    input10.write(reinterpret_cast<char*>(test10_4), sizeof(test10_4));
 
-   numBytes = input10.str().size();;
+   numBytes = input10.str().size();
 
    success = toDynamicObject(input10, numBytes, *treDO.get(), errorMessage);
 
    status = INVALID;
    if (success)
    {
-      stringstream tmpStream;
-      status = isTreValid(*treDO.get(), tmpStream);
+      stringstream tmpStream2;
+      status = isTreValid(*treDO.get(), tmpStream2);
       if (status != VALID)
       {
          failure << "Error: Positive test with EXISTANCE max = 0x00000001 did not return VALID\n";
-         failure << tmpStream.str();
+         failure << tmpStream2.str();
          treDO->clear();
          return false;
       }
@@ -1207,18 +1207,23 @@ bool bandsbDtgParse(string &fDTG,
    static const unsigned short maxDayOfMonth[] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
    bool allFieldsValid = true;
-   year  = month = day = hour = min = sec = 0;
+   year = 0;
+   month = 0;
+   day = 0;
+   hour = 0;
+   min = 0;
+   sec = 0;
    frac = 0.0;
 
    try
    {
-      year  = boost::lexical_cast<unsigned short>(fDTG.substr(0, 2));
+      year = boost::lexical_cast<unsigned short>(fDTG.substr(0, 2));
       month = boost::lexical_cast<unsigned short>(fDTG.substr(2, 2));
-      day   = boost::lexical_cast<unsigned short>(fDTG.substr(4, 2));
-      hour  = boost::lexical_cast<unsigned short>(fDTG.substr(6, 2));
-      min   = boost::lexical_cast<unsigned short>(fDTG.substr(8, 2));
-      sec   = boost::lexical_cast<unsigned short>(fDTG.substr(10, 2));
-      frac  = boost::lexical_cast<double>(fDTG.substr(12, 4));
+      day = boost::lexical_cast<unsigned short>(fDTG.substr(4, 2));
+      hour = boost::lexical_cast<unsigned short>(fDTG.substr(6, 2));
+      min = boost::lexical_cast<unsigned short>(fDTG.substr(8, 2));
+      sec = boost::lexical_cast<unsigned short>(fDTG.substr(10, 2));
+      frac = boost::lexical_cast<double>(fDTG.substr(12, 4));
    }
    catch (const boost::bad_lexical_cast&)
    {
@@ -1289,7 +1294,7 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
    readField<string>(input, output, success, BANDSB::RADIOMETRIC_QUANTITY_UNIT, 1, errorMessage, buf, true);
    if (success)
    {
-      success = readFromStream(input, buf, 4)  &&
+      success = readFromStream(input, buf, 4) &&
          output.setAttribute(BANDSB::SCALE_FACTOR, convertBinary<float>(&buf[0], BIG_ENDIAN));
       if (!success)
       {
@@ -1298,7 +1303,7 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
    }
    if (success)
    {
-      success = readFromStream(input, buf, 4)  &&
+      success = readFromStream(input, buf, 4) &&
          output.setAttribute(BANDSB::ADDITIVE_FACTOR, convertBinary<float>(&buf[0], BIG_ENDIAN));
       if (!success)
       {
@@ -1411,7 +1416,7 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
       readField<string>(input, output, success, BANDSB::WAVE_LENGTH_UNIT, 1, errorMessage, buf);
    }
 
-   for(unsigned int bandNum = 0; bandNum < count; ++bandNum)
+   for (unsigned int bandNum = 0; bandNum < count; ++bandNum)
    {
       stringstream bandStreamStr;
       bandStreamStr << "#" << bandNum;
@@ -1531,7 +1536,12 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
          dtg.resize(16);
          memcpy(&dtg[0], &buf[0], 16);
 
-         unsigned short year(0), month(0), day(0), hour(0), min(0), sec(0);
+         unsigned short year(0);
+         unsigned short month(0);
+         unsigned short day(0);
+         unsigned short hour(0);
+         unsigned short min(0);
+         unsigned short sec(0);
          double frac(0.0);
 
          // Purposely ignore the return value of bandsbDtgParse since not all values may be set.
@@ -1717,7 +1727,7 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
       num_aux_c = QString(&buf.front()).toUInt();
    }
 
-   for(unsigned int aux_b=0; aux_b < num_aux_b; ++aux_b)
+   for (unsigned int aux_b = 0; aux_b < num_aux_b; ++aux_b)
    {
       stringstream auxbStreamStr;
       auxbStreamStr << "#" << aux_b;
@@ -1733,7 +1743,7 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
       readField<string>(input, output, success, fieldName, 7, errorMessage, buf);
       string ubap(&buf.front());
 
-      for(unsigned int bandNum = 0; bandNum < count; ++bandNum)
+      for (unsigned int bandNum = 0; bandNum < count; ++bandNum)
       {
          stringstream bandStreamStr;
          bandStreamStr << "#" << bandNum;
@@ -1780,7 +1790,7 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
       }
    }
 
-   for(unsigned int aux_c=0; aux_c < num_aux_c; ++aux_c)
+   for (unsigned int aux_c = 0; aux_c < num_aux_c; ++aux_c)
    {
       stringstream auxcStreamStr;
       auxcStreamStr << "#" << aux_c;
@@ -2087,7 +2097,7 @@ Nitf::TreState Nitf::BandsbParser::isTreValid(const DynamicObject& tre, ostream&
          &numFields, "WAVE_LENGTH_UNIT", testSet, false, false));
    }
 
-   for(unsigned int bandNum = 0; (bandNum < count) && status != INVALID; ++bandNum)
+   for (unsigned int bandNum = 0; (bandNum < count) && status != INVALID; ++bandNum)
    {
       stringstream bandStreamStr;
       bandStreamStr << "#" << bandNum;
@@ -2217,11 +2227,11 @@ Nitf::TreState Nitf::BandsbParser::isTreValid(const DynamicObject& tre, ostream&
 
          fieldName = BANDSB::START_TIME_FRAC + bandNumStr;
 
-         const double *frac;
+         const double* frac = NULL;
 
          DataVariant tempDV = tre.getAttribute(fieldName);
 
-         if ( tempDV.isValid() )
+         if (tempDV.isValid())
          {
             frac = dv_cast<double>(&tempDV);
             ++numFields;
@@ -2474,7 +2484,7 @@ Nitf::TreState Nitf::BandsbParser::isTreValid(const DynamicObject& tre, ostream&
       }
    }
 
-   for(unsigned int aux_b=0; (aux_b < num_aux_b) && status!=INVALID; ++aux_b)
+   for (unsigned int aux_b = 0; (aux_b < num_aux_b) && status != INVALID; ++aux_b)
    {
       stringstream auxbStreamStr;
       auxbStreamStr << "#" << aux_b;
@@ -2507,7 +2517,7 @@ Nitf::TreState Nitf::BandsbParser::isTreValid(const DynamicObject& tre, ostream&
       testSet.clear();
       status = MaxState(status, testTagValidBcsASet(tre, reporter, &numFields, fieldName, testSet, true, true, false));
 
-      for(unsigned int bandNum = 0; (bandNum < count) && status!=INVALID; ++bandNum)
+      for (unsigned int bandNum = 0; (bandNum < count) && status != INVALID; ++bandNum)
       {
          stringstream bandStreamStr;
          bandStreamStr << "#" << bandNum;
@@ -2558,7 +2568,7 @@ Nitf::TreState Nitf::BandsbParser::isTreValid(const DynamicObject& tre, ostream&
       }
    }
 
-   for(unsigned int aux_c=0; (aux_c < num_aux_c) && status!=INVALID; ++aux_c)
+   for (unsigned int aux_c = 0; (aux_c < num_aux_c) && status != INVALID; ++aux_c)
    {
       stringstream auxcStreamStr;
       auxcStreamStr << "#" << aux_c;
@@ -2640,7 +2650,7 @@ Nitf::TreState Nitf::BandsbParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID && totalFields != numFields)
    {
       reporter << "Total fields in the Dynamic Object(" <<
-         totalFields <<") did not match the number found(" << numFields << ") ";
+         totalFields << ") did not match the number found(" << numFields << ") ";
       status = INVALID;
    }
 
@@ -2676,60 +2686,60 @@ bool Nitf::BandsbParser::fromDynamicObject(const DynamicObject& input, ostream& 
       string dashes7("-------");         // Unknown numeric are 7 char of "-"
       unsigned int count =
          dv_cast<unsigned int>(input.getAttribute(BANDSB::COUNT));      // COUNT == the number of bands in the cube
-      output <<   toString( count, 5);
+      output << toString(count, 5);
 
-      output << sizeString( dv_cast<string>(input.getAttribute(BANDSB::RADIOMETRIC_QUANTITY)), 24);
-      output << sizeString( dv_cast<string>(input.getAttribute (BANDSB::RADIOMETRIC_QUANTITY_UNIT)), 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(BANDSB::RADIOMETRIC_QUANTITY)), 24);
+      output << sizeString(dv_cast<string>(input.getAttribute(BANDSB::RADIOMETRIC_QUANTITY_UNIT)), 1);
 
       tempFloat = convertBinary<float>(&dv_cast<float>(input.getAttribute(BANDSB::SCALE_FACTOR)), BIG_ENDIAN);
-      output.write( reinterpret_cast<char *>(&tempFloat), 4);
+      output.write(reinterpret_cast<char*>(&tempFloat), 4);
 
       tempFloat = convertBinary<float>(&dv_cast<float>(input.getAttribute(BANDSB::ADDITIVE_FACTOR)), BIG_ENDIAN);
-      output.write( reinterpret_cast<char *>(&tempFloat), 4);
+      output.write(reinterpret_cast<char*>(&tempFloat), 4);
 
       DataVariant tempDV = input.getAttribute(BANDSB::ROW_GSD);
       if (tempDV.isValid())
       {
-         output << toString( dv_cast<float>(tempDV), 7, 3);
+         output << toString(dv_cast<float>(tempDV), 7, 3);
       }
       else
       {
          output << dashes7;
       }
-      output << sizeString( dv_cast<string>(input.getAttribute(BANDSB::ROW_GSD_UNIT)), 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(BANDSB::ROW_GSD_UNIT)), 1);
 
       tempDV = input.getAttribute(BANDSB::COL_GSD);
       if (tempDV.isValid())
       {
-         output << toString( dv_cast<float>(tempDV), 7, 3);
+         output << toString(dv_cast<float>(tempDV), 7, 3);
       }
       else
       {
          output << dashes7;
       }
-      output << sizeString( dv_cast<string>(input.getAttribute(BANDSB::COL_GSD_UNITS)), 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(BANDSB::COL_GSD_UNITS)), 1);
 
       tempDV = input.getAttribute(BANDSB::SPT_RESP_ROW);
       if (tempDV.isValid())
       {
-         output << toString( dv_cast<float>(tempDV), 7, 3);
+         output << toString(dv_cast<float>(tempDV), 7, 3);
       }
       else
       {
          output << dashes7;
       }
-      output << sizeString( dv_cast<string>(input.getAttribute(BANDSB::SPT_RESP_UNIT_ROW)), 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(BANDSB::SPT_RESP_UNIT_ROW)), 1);
 
       tempDV = input.getAttribute(BANDSB::SPT_RESP_COL);
       if (tempDV.isValid())
       {
-         output << toString( dv_cast<float>(tempDV), 7, 3);
+         output << toString(dv_cast<float>(tempDV), 7, 3);
       }
       else
       {
          output << dashes7;
       }
-      output << sizeString( dv_cast<string>(input.getAttribute(BANDSB::SPT_RESP_UNIT_COL)), 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(BANDSB::SPT_RESP_UNIT_COL)), 1);
 
 
       length = 48;      // binary array of 48 single byte unsigned int's
@@ -2751,23 +2761,22 @@ bool Nitf::BandsbParser::fromDynamicObject(const DynamicObject& input, ostream& 
       // extension. A bit set to the value one indicates the inclusion of the conditional field.
       unsigned int existmask = dv_cast<unsigned int>(input.getAttribute(BANDSB::EXISTENCE_MASK));
       unsigned int tempUInt = convertBinary<unsigned int>(&existmask, BIG_ENDIAN);
-      output.write(reinterpret_cast<char *>(&tempUInt), 4 );
-
+      output.write(reinterpret_cast<char*>(&tempUInt), 4);
 
       // b31 signals the RADIOMETRIC ADJUSTMENT SURFACE and ATMOSPHERIC ADJUSTMENT ALTITUDE fields.
       if (bitTest(existmask, 31))
       {
-         output << sizeString( dv_cast<string>(input.getAttribute (BANDSB::RADIOMETRIC_ADJUSTMENT_SURFACE)), 24);
+         output << sizeString(dv_cast<string>(input.getAttribute(BANDSB::RADIOMETRIC_ADJUSTMENT_SURFACE)), 24);
 
          tempFloat = convertBinary<float>(&dv_cast<float>
             (input.getAttribute(BANDSB::ATMOSPHERIC_ADJUSTMENT_ALTITUDE)), BIG_ENDIAN);
-         output.write( reinterpret_cast<char *>(&tempFloat), 4);
+         output.write(reinterpret_cast<char*>(&tempFloat), 4);
       }
 
       // b30 signals the DIAMETER field.
       if (bitTest(existmask, 30))
       {
-         output <<   toString( dv_cast<double>(input.getAttribute(BANDSB::DIAMETER)), 7, 2);
+         output << toString(dv_cast<double>(input.getAttribute(BANDSB::DIAMETER)), 7, 2);
       }
 
       // b29 signals the DATA_FLD_2 field.
@@ -2776,10 +2785,10 @@ bool Nitf::BandsbParser::fromDynamicObject(const DynamicObject& input, ostream& 
          length = 32;      // binary array of 32 single byte unsigned int's
          bufUC = dv_cast<vector<unsigned char> >(input.getAttribute(BANDSB::DATA_FLD_2));
          if (bufUC.size() != length)
-            {
-               cerr << " Error writing " << BANDSB::DATA_FLD_2 <<
-                  " size == " << buf.size() << " should have been " << length << endl;
-            }
+         {
+            cerr << " Error writing " << BANDSB::DATA_FLD_2 <<
+               " size == " << buf.size() << " should have been " << length << endl;
+         }
          buf.resize(length);
          memcpy(&buf[0], &bufUC[0], length);
 
@@ -2795,11 +2804,10 @@ bool Nitf::BandsbParser::fromDynamicObject(const DynamicObject& input, ostream& 
       if (bitTest(existmask, 24) || bitTest(existmask, 23) || bitTest(existmask, 22) ||
          bitTest(existmask, 21) || bitTest(existmask, 20) || bitTest(existmask, 19))
       {
-         output << sizeString( dv_cast<string>(input.getAttribute (BANDSB::WAVE_LENGTH_UNIT)), 1);
+         output << sizeString(dv_cast<string>(input.getAttribute(BANDSB::WAVE_LENGTH_UNIT)), 1);
       }
 
-
-      for(unsigned int bandNum = 0; bandNum < count; ++bandNum)
+      for (unsigned int bandNum = 0; bandNum < count; ++bandNum)
       {
          stringstream bandStreamStr;
          bandStreamStr << "#" << bandNum;
@@ -2811,73 +2819,73 @@ bool Nitf::BandsbParser::fromDynamicObject(const DynamicObject& input, ostream& 
          if (bitTest(existmask, 28))
          {
             fieldName = BANDSB::BANDID + bandNumStr;
-            output << sizeString( dv_cast<string>(input.getAttribute (fieldName)), 50);
+            output << sizeString(dv_cast<string>(input.getAttribute(fieldName)), 50);
          }
 
          // b27 signals the BAD_BANDn field.
          if (bitTest(existmask, 27))
          {
             fieldName = BANDSB::BAD_BAND + bandNumStr;
-            output <<   toString( dv_cast<int>(input.getAttribute(fieldName)), 1);
+            output << toString(dv_cast<int>(input.getAttribute(fieldName)), 1);
          }
 
          // b26 signals the NIIRSn field.
          if (bitTest(existmask, 26))
          {
             fieldName = BANDSB::NIIRS + bandNumStr;
-            output <<   toString( dv_cast<double>(input.getAttribute(fieldName)), 3);
+            output << toString(dv_cast<double>(input.getAttribute(fieldName)), 3);
          }
 
          // b25 signals the FOCAL_LENn field.
          if (bitTest(existmask, 25))
          {
             fieldName = BANDSB::FOCAL_LEN + bandNumStr;
-            output <<   toString( dv_cast<int>(input.getAttribute(fieldName)), 5);
+            output << toString(dv_cast<int>(input.getAttribute(fieldName)), 5);
          }
 
          // b24 signals the CWAVE and WAVE_LENGTH_UNIT fields.
          if (bitTest(existmask, 24))
          {
             fieldName = BANDSB::CWAVE + bandNumStr;
-            output <<   toString( dv_cast<double>(input.getAttribute(fieldName)), 7);
+            output << toString(dv_cast<double>(input.getAttribute(fieldName)), 7);
          }
 
          // b23 signals the FWHM and WAVE_LENGTH_UNIT fields.
          if (bitTest(existmask, 23))
          {
             fieldName = BANDSB::FWHM + bandNumStr;
-            output <<   toString( dv_cast<double>(input.getAttribute(fieldName)), 7);
+            output << toString(dv_cast<double>(input.getAttribute(fieldName)), 7);
          }
 
          // b22 signals the FWHM_UNC and WAVE_LENGTH_UNIT field.
          if (bitTest(existmask, 22))
          {
             fieldName = BANDSB::FWHM_UNC + bandNumStr;
-            output <<   toString( dv_cast<double>(input.getAttribute(fieldName)), 7);
+            output << toString(dv_cast<double>(input.getAttribute(fieldName)), 7);
          }
 
          // b21 signals the NOM_WAVEn and WAVE_LENGTH_UNIT fields.
          if (bitTest(existmask, 21))
          {
             fieldName = BANDSB::NOM_WAVE + bandNumStr;
-            output <<   toString( dv_cast<double>(input.getAttribute(fieldName)), 7);
+            output << toString(dv_cast<double>(input.getAttribute(fieldName)), 7);
          }
 
          // b20 signals the NOM_WAVE_UNCn field and WAVE_LENGTH_UNIT fields.
          if (bitTest(existmask, 20))
          {
             fieldName = BANDSB::NOM_WAVE_UNC + bandNumStr;
-            output <<   toString( dv_cast<double>(input.getAttribute(fieldName)), 7);
+            output << toString(dv_cast<double>(input.getAttribute(fieldName)), 7);
          }
 
          // b19 signals the LBOUNDn, UBOUNDn and WAVE_LENGTH_UNIT fields.
          if (bitTest(existmask, 19))
          {
             fieldName = BANDSB::LBOUND + bandNumStr;
-            output <<   toString( dv_cast<double>(input.getAttribute(fieldName)), 7);
+            output << toString(dv_cast<double>(input.getAttribute(fieldName)), 7);
 
             fieldName = BANDSB::UBOUND + bandNumStr;
-            output <<   toString( dv_cast<double>(input.getAttribute(fieldName)), 7);
+            output << toString(dv_cast<double>(input.getAttribute(fieldName)), 7);
          }
 
          // b18 signals the SCALE FACTORn, and ADDITIVE FACTORn fields.
@@ -2885,11 +2893,11 @@ bool Nitf::BandsbParser::fromDynamicObject(const DynamicObject& input, ostream& 
          {
             fieldName = BANDSB::SCALE_FACTOR + bandNumStr;
             tempFloat = convertBinary<float>(&dv_cast<float>(input.getAttribute(fieldName)), BIG_ENDIAN);
-            output.write( reinterpret_cast<char *>(&tempFloat), 4);
+            output.write(reinterpret_cast<char*>(&tempFloat), 4);
 
             fieldName = BANDSB::ADDITIVE_FACTOR + bandNumStr;
             tempFloat = convertBinary<float>(&dv_cast<float>(input.getAttribute(fieldName)), BIG_ENDIAN);
-            output.write( reinterpret_cast<char *>(&tempFloat), 4);
+            output.write(reinterpret_cast<char*>(&tempFloat), 4);
          }
 
 
@@ -2898,11 +2906,11 @@ bool Nitf::BandsbParser::fromDynamicObject(const DynamicObject& input, ostream& 
          {
 
             fieldName = BANDSB::START_TIME_FRAC + bandNumStr;
-            const double *frac = dv_cast<double>(&input.getAttribute(fieldName));
+            const double* frac = dv_cast<double>(&input.getAttribute(fieldName));
 
             fieldName = BANDSB::START_TIME + bandNumStr;
 
-            const DateTime *pStartDtg = dv_cast<DateTime>(&input.getAttribute(fieldName));
+            const DateTime* pStartDtg = dv_cast<DateTime>(&input.getAttribute(fieldName));
             if (pStartDtg == NULL)
             {
                return false;
@@ -2919,65 +2927,65 @@ bool Nitf::BandsbParser::fromDynamicObject(const DynamicObject& input, ostream& 
          if (bitTest(existmask, 16))
          {
             fieldName = BANDSB::INT_TIME + bandNumStr;
-            output <<   toString( dv_cast<int>(input.getAttribute(fieldName)), 6);
+            output << toString(dv_cast<int>(input.getAttribute(fieldName)), 6);
          }
 
          // b15 signals the CALDRK and CALIBRATION SENSITIVITYn fields.
          if (bitTest(existmask, 15))
          {
             fieldName = BANDSB::CALDRK + bandNumStr;
-            output <<   toString( dv_cast<double>(input.getAttribute(fieldName)), 6, 1);
+            output << toString(dv_cast<double>(input.getAttribute(fieldName)), 6, 1);
 
             fieldName = BANDSB::CALIBRATION_SENSITIVITY + bandNumStr;
-            output <<   toString( dv_cast<double>(input.getAttribute(fieldName)), 5, 2);
+            output << toString(dv_cast<double>(input.getAttribute(fieldName)), 5, 2);
          }
 
          // b14 signals the ROW_GSDn and ROW_GSD_UNITSn, COL_GSDn, COL_GSD_UNITSn fields.
          if (bitTest(existmask, 14))
          {
             fieldName = BANDSB::ROW_GSD + bandNumStr;
-            output <<   toString( dv_cast<double>(input.getAttribute(fieldName)), 7, 2);
+            output << toString(dv_cast<double>(input.getAttribute(fieldName)), 7, 2);
          }
 
          // b13 signals the ROW_GSD_UNCn and COL_GSD_UNCn fields. (If b13 is set to 1 then b14 must be set.)
          if (bitTest(existmask, 13))
          {
             fieldName = BANDSB::ROW_GSD_UNC + bandNumStr;
-            output <<   toString( dv_cast<double>(input.getAttribute(fieldName)), 7, 3);
+            output << toString(dv_cast<double>(input.getAttribute(fieldName)), 7, 3);
          }
 
          // b14 signals the ROW_GSDn and ROW_GSD_UNITSn, COL_GSDn, COL_GSD_UNITSn fields.
          if (bitTest(existmask, 14))
          {
             fieldName = BANDSB::ROW_GSD_UNIT + bandNumStr;
-            output << sizeString( dv_cast<string>(input.getAttribute (fieldName)), 1);
+            output << sizeString(dv_cast<string>(input.getAttribute(fieldName)), 1);
 
             fieldName = BANDSB::COL_GSD + bandNumStr;
-            output <<   toString( dv_cast<double>(input.getAttribute(fieldName)), 7, 2);
+            output << toString(dv_cast<double>(input.getAttribute(fieldName)), 7, 2);
          }
 
          // b13 signals the ROW_GSD_UNCn and COL_GSD_UNCn fields. (If b13 is set to 1 then b14 must be set.)
          if (bitTest(existmask, 13))
          {
             fieldName = BANDSB::COL_GSD_UNC + bandNumStr;
-            output <<   toString( dv_cast<double>(input.getAttribute(fieldName)), 7, 3);
+            output << toString(dv_cast<double>(input.getAttribute(fieldName)), 7, 3);
          }
 
          // b14 signals the ROW_GSDn and ROW_GSD_UNITSn, COL_GSDn, COL_GSD_UNITSn fields.
          if (bitTest(existmask, 14))
          {
             fieldName = BANDSB::COL_GSD_UNIT + bandNumStr;
-            output << sizeString( dv_cast<string>(input.getAttribute (fieldName)), 1);
+            output << sizeString(dv_cast<string>(input.getAttribute(fieldName)), 1);
          }
 
          // b12 signals the BKNOISEn and SCNNOISEn fields.
          if (bitTest(existmask, 12))
          {
             fieldName = BANDSB::BKNOISE + bandNumStr;
-            output <<   toString( dv_cast<double>(input.getAttribute(fieldName)), 5, 2);
+            output << toString(dv_cast<double>(input.getAttribute(fieldName)), 5, 2);
 
             fieldName = BANDSB::SCNNOISE + bandNumStr;
-            output <<   toString( dv_cast<double>(input.getAttribute(fieldName)), 5, 2);
+            output << toString(dv_cast<double>(input.getAttribute(fieldName)), 5, 2);
          }
 
          // b11 signals the SPT_RESP_FUNCTION_ROWn, SPT_RESP_UNIT_ROWn,
@@ -2985,14 +2993,14 @@ bool Nitf::BandsbParser::fromDynamicObject(const DynamicObject& input, ostream& 
          if (bitTest(existmask, 11))
          {
             fieldName = BANDSB::SPT_RESP_FUNCTION_ROW + bandNumStr;
-            output <<   toString( dv_cast<double>(input.getAttribute(fieldName)), 7, 3);
+            output << toString(dv_cast<double>(input.getAttribute(fieldName)), 7, 3);
          }
 
          // b10 signals the SPT_RESP_UNC_ROWn and SPT_RESP_UNC_COLn fields. (If b10 is set to 1 then b11 must be set.)
          if (bitTest(existmask, 10))
          {
             fieldName = BANDSB::SPT_RESPUNC_ROW + bandNumStr;
-            output <<   toString( dv_cast<double>(input.getAttribute(fieldName)), 7, 3);
+            output << toString(dv_cast<double>(input.getAttribute(fieldName)), 7, 3);
          }
 
          // b11 signals the SPT_RESP_FUNCTION_ROWn, SPT_RESP_UNIT_ROWn,
@@ -3000,17 +3008,17 @@ bool Nitf::BandsbParser::fromDynamicObject(const DynamicObject& input, ostream& 
          if (bitTest(existmask, 11))
          {
             fieldName = BANDSB::SPT_RESP_UNIT_ROW + bandNumStr;
-            output << sizeString( dv_cast<string>(input.getAttribute (fieldName)), 1);
+            output << sizeString(dv_cast<string>(input.getAttribute(fieldName)), 1);
 
             fieldName = BANDSB::SPT_RESP_FUNCTION_COL + bandNumStr;
-            output <<   toString( dv_cast<double>(input.getAttribute(fieldName)), 7, 3);
+            output << toString(dv_cast<double>(input.getAttribute(fieldName)), 7, 3);
          }
 
          // b10 signals the SPT_RESP_UNC_ROWn and SPT_RESP_UNC_COLn fields. (If b10 is set to 1 then b11 must be set.)
          if (bitTest(existmask, 10))
          {
             fieldName = BANDSB::SPT_RESPUNC_COL + bandNumStr;
-            output <<   toString( dv_cast<double>(input.getAttribute(fieldName)), 7, 3);
+            output << toString(dv_cast<double>(input.getAttribute(fieldName)), 7, 3);
          }
 
          // b11 signals the SPT_RESP_FUNCTION_ROWn, SPT_RESP_UNIT_ROWn,
@@ -3018,7 +3026,7 @@ bool Nitf::BandsbParser::fromDynamicObject(const DynamicObject& input, ostream& 
          if (bitTest(existmask, 11))
          {
             fieldName = BANDSB::SPT_RESP_UNIT_COL + bandNumStr;
-            output << sizeString( dv_cast<string>(input.getAttribute (fieldName)), 1);
+            output << sizeString(dv_cast<string>(input.getAttribute(fieldName)), 1);
          }
 
          // b9 signals the DATA_FLD_3n field.
@@ -3103,12 +3111,12 @@ bool Nitf::BandsbParser::fromDynamicObject(const DynamicObject& input, ostream& 
       if (bitTest(existmask, 0))
       {
          num_aux_b = dv_cast<unsigned int>(input.getAttribute(BANDSB::NUM_AUX_B));
-         output <<   toString( num_aux_b, 2);
+         output << toString(num_aux_b, 2);
          num_aux_c = dv_cast<unsigned int>(input.getAttribute(BANDSB::NUM_AUX_C));
-         output <<   toString( num_aux_c, 2);
+         output << toString(num_aux_c, 2);
       }
 
-      for(unsigned int aux_b=0; aux_b < num_aux_b; ++aux_b)
+      for (unsigned int aux_b = 0; aux_b < num_aux_b; ++aux_b)
       {
          stringstream auxbStreamStr;
          auxbStreamStr << "#" << aux_b;
@@ -3117,15 +3125,15 @@ bool Nitf::BandsbParser::fromDynamicObject(const DynamicObject& input, ostream& 
          string fieldName;
 
          fieldName = BANDSB::BAPF + auxbStr;
-         string tempString = dv_cast<string>(input.getAttribute (fieldName));
+         string tempString = dv_cast<string>(input.getAttribute(fieldName));
          char bapf = tempString.c_str()[0];
-         output << sizeString( tempString, 1);
+         output << sizeString(tempString, 1);
 
          fieldName = BANDSB::UBAP + auxbStr;
-         string ubap = dv_cast<string>(input.getAttribute (fieldName));
-         output << sizeString( ubap, 7);
+         string ubap = dv_cast<string>(input.getAttribute(fieldName));
+         output << sizeString(ubap, 7);
 
-         for(unsigned int bandNum = 0; bandNum < count; ++bandNum)
+         for (unsigned int bandNum = 0; bandNum < count; ++bandNum)
          {
             stringstream bandStreamStr;
             bandStreamStr << "#" << bandNum;
@@ -3137,20 +3145,20 @@ bool Nitf::BandsbParser::fromDynamicObject(const DynamicObject& input, ostream& 
                {
 #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : BANDSB::APN Needs to be an int64 (lbeck)")
                   fieldName = BANDSB::APN + auxbStr + bandNumStr;
-                  output << sizeString( dv_cast<string>(input.getAttribute (fieldName)), 10);
+                  output << sizeString(dv_cast<string>(input.getAttribute(fieldName)), 10);
                   break;
                }
                case 'R':
                {
                   fieldName = BANDSB::APR + auxbStr + bandNumStr;
                   tempFloat = convertBinary<float>(&dv_cast<float>(input.getAttribute(fieldName)), BIG_ENDIAN);
-                  output.write( reinterpret_cast<char *>(&tempFloat), 4);
+                  output.write(reinterpret_cast<char*>(&tempFloat), 4);
                   break;
                }
                case 'A':
                {
                   fieldName = BANDSB::APA + auxbStr + bandNumStr;
-                  output << sizeString( dv_cast<string>(input.getAttribute (fieldName)), 20);
+                  output << sizeString(dv_cast<string>(input.getAttribute(fieldName)), 20);
                   break;
                }
                default:
@@ -3162,7 +3170,7 @@ bool Nitf::BandsbParser::fromDynamicObject(const DynamicObject& input, ostream& 
          }
       }
 
-      for(unsigned int aux_c=0; aux_c < num_aux_c; ++aux_c)
+      for (unsigned int aux_c = 0; aux_c < num_aux_c; ++aux_c)
       {
          stringstream auxcStreamStr;
          auxcStreamStr << "#" << aux_c;
@@ -3171,11 +3179,11 @@ bool Nitf::BandsbParser::fromDynamicObject(const DynamicObject& input, ostream& 
          string fieldName;
 
          fieldName = BANDSB::CAPF + auxcStr;
-         output << sizeString( dv_cast<string>(input.getAttribute (fieldName)), 1);
+         output << sizeString(dv_cast<string>(input.getAttribute(fieldName)), 1);
          char capf = buf[0];
 
          fieldName = BANDSB::UCAP + auxcStr;
-         output << sizeString( dv_cast<string>(input.getAttribute (fieldName)), 7);
+         output << sizeString(dv_cast<string>(input.getAttribute(fieldName)), 7);
          string ubap(&buf.front());
 
          switch (capf)
@@ -3184,20 +3192,20 @@ bool Nitf::BandsbParser::fromDynamicObject(const DynamicObject& input, ostream& 
             {
 #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : BANDSB::APN Needs to be an int64 (lbeck)")
                fieldName = BANDSB::APN + auxcStr;
-               output << sizeString( dv_cast<string>(input.getAttribute (fieldName)), 10);
+               output << sizeString(dv_cast<string>(input.getAttribute(fieldName)), 10);
                break;
             }
             case 'R':
             {
                fieldName = BANDSB::APR + auxcStr;
                tempFloat = convertBinary<float>(&dv_cast<float>(input.getAttribute(fieldName)), BIG_ENDIAN);
-               output.write( reinterpret_cast<char *>(&tempFloat), 4);
+               output.write(reinterpret_cast<char*>(&tempFloat), 4);
                break;
             }
             case 'A':
             {
                fieldName = BANDSB::APA + auxcStr;
-               output << sizeString( dv_cast<string>(input.getAttribute (fieldName)), 20);
+               output << sizeString(dv_cast<string>(input.getAttribute(fieldName)), 20);
                break;
             }
             default:
@@ -3224,23 +3232,23 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
    const RasterFileDescriptor &exportDescriptor, DynamicObject &tre, 
    unsigned int & ownerIndex, string & tagType, string &errorMessage) const
 {
-   const vector<DimensionDescriptor> &bands = exportDescriptor.getBands();
+   const vector<DimensionDescriptor>& bands = exportDescriptor.getBands();
 
    // Find out if we are exporting a subset of the original bands. If so then delete the
    // band info for the excluded bands.
 
-   const DynamicObject *pMetadata = descriptor.getMetadata();
+   const DynamicObject* pMetadata = descriptor.getMetadata();
    VERIFYRV(pMetadata != NULL, REMOVE);
    try
    {
-      const DataVariant &nitfMetadata = pMetadata->getAttribute(Nitf::NITF_METADATA);
-      const DynamicObject *pExistingBandsb = getTagHandle(dv_cast<DynamicObject>(nitfMetadata), "BANDSB", FindFirst());
+      const DataVariant& nitfMetadata = pMetadata->getAttribute(Nitf::NITF_METADATA);
+      const DynamicObject* pExistingBandsb = getTagHandle(dv_cast<DynamicObject>(nitfMetadata), "BANDSB", FindFirst());
       if (!pExistingBandsb)
       {
          return UNCHANGED;
       }
 
-      const vector<DimensionDescriptor> &exportBands = exportDescriptor.getBands();
+      const vector<DimensionDescriptor>& exportBands = exportDescriptor.getBands();
 
       VERIFYRV(!exportBands.empty(), REMOVE);
 
@@ -3353,10 +3361,11 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
          LOG_IF(!iter->isOriginalNumberValid(), continue);
          unsigned int origBandNum = iter->getOriginalNumber();
 
-         stringstream bandStreamStr, origBandStreamStr;
+         stringstream bandStreamStr;
          bandStreamStr << "#" << bandcount;
          string bandStr(bandStreamStr.str());
 
+         stringstream origBandStreamStr;
          origBandStreamStr << "#" << origBandNum;
          string origBandStr(origBandStreamStr.str());
 
@@ -3368,186 +3377,184 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
          // b28 flags the BANDIDn field.
          if (bitTest(existmask, 28))
          {
-            fieldName      = BANDSB::BANDID + bandStr;
-            origFieldName  = BANDSB::BANDID + origBandStr;
+            fieldName = BANDSB::BANDID + bandStr;
+            origFieldName = BANDSB::BANDID + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
 
          // b27 signals the BAD_BANDn field.
          if (bitTest(existmask, 27))
          {
-            fieldName      = BANDSB::BAD_BAND + bandStr;
-            origFieldName  = BANDSB::BAD_BAND + origBandStr;
+            fieldName = BANDSB::BAD_BAND + bandStr;
+            origFieldName = BANDSB::BAD_BAND + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
 
          // b26 signals the NIIRSn field.
          if (bitTest(existmask, 26))
          {
-            fieldName      = BANDSB::NIIRS + bandStr;
-            origFieldName  = BANDSB::NIIRS + origBandStr;
+            fieldName = BANDSB::NIIRS + bandStr;
+            origFieldName = BANDSB::NIIRS + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
 
          // b25 signals the FOCAL_LENn field.
          if (bitTest(existmask, 25))
          {
-            fieldName      = BANDSB::FOCAL_LEN + bandStr;
-            origFieldName  = BANDSB::FOCAL_LEN + origBandStr;
+            fieldName = BANDSB::FOCAL_LEN + bandStr;
+            origFieldName = BANDSB::FOCAL_LEN + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
 
             // b24 signals the CWAVE and WAVE_LENGTH_UNIT fields.
          if (bitTest(existmask, 24))
          {
-            fieldName      = BANDSB::CWAVE + bandStr;
-            origFieldName  = BANDSB::CWAVE + origBandStr;
+            fieldName = BANDSB::CWAVE + bandStr;
+            origFieldName = BANDSB::CWAVE + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
 
          // b23 signals the FWHM and WAVE_LENGTH_UNIT fields.
          if (bitTest(existmask, 23))
          {
-            fieldName      = BANDSB::FWHM + bandStr;
-            origFieldName  = BANDSB::FWHM + origBandStr;
+            fieldName = BANDSB::FWHM + bandStr;
+            origFieldName = BANDSB::FWHM + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
 
          // b22 signals the FWHM_UNC and WAVE_LENGTH_UNIT field.
          if (bitTest(existmask, 22))
          {
-            fieldName      = BANDSB::FWHM_UNC + bandStr;
-            origFieldName  = BANDSB::FWHM_UNC + origBandStr;
+            fieldName = BANDSB::FWHM_UNC + bandStr;
+            origFieldName = BANDSB::FWHM_UNC + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
 
          // b21 signals the NOM_WAVEn and WAVE_LENGTH_UNIT fields.
          if (bitTest(existmask, 21))
          {
-            fieldName      = BANDSB::NOM_WAVE + bandStr;
-            origFieldName  = BANDSB::NOM_WAVE + origBandStr;
+            fieldName = BANDSB::NOM_WAVE + bandStr;
+            origFieldName = BANDSB::NOM_WAVE + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
 
          // b20 signals the NOM_WAVE_UNCn field and WAVE_LENGTH_UNIT fields.
          if (bitTest(existmask, 20))
          {
-            fieldName      = BANDSB::NOM_WAVE_UNC + bandStr;
-            origFieldName  = BANDSB::NOM_WAVE_UNC + origBandStr;
+            fieldName = BANDSB::NOM_WAVE_UNC + bandStr;
+            origFieldName = BANDSB::NOM_WAVE_UNC + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
 
          // b19 signals the LBOUNDn, UBOUNDn and WAVE_LENGTH_UNIT fields.
          if (bitTest(existmask, 19))
          {
-            fieldName      = BANDSB::LBOUND + bandStr;
-            origFieldName  = BANDSB::LBOUND + origBandStr;
+            fieldName = BANDSB::LBOUND + bandStr;
+            origFieldName = BANDSB::LBOUND + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
 
-            fieldName      = BANDSB::UBOUND + bandStr;
-            origFieldName  = BANDSB::UBOUND + origBandStr;
+            fieldName = BANDSB::UBOUND + bandStr;
+            origFieldName = BANDSB::UBOUND + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
 
          // b18 signals the SCALE FACTORn, and ADDITIVE FACTORn fields.
          if (bitTest(existmask, 18))
          {
-            fieldName      = BANDSB::SCALE_FACTOR + bandStr;
-            origFieldName  = BANDSB::SCALE_FACTOR + origBandStr;
+            fieldName = BANDSB::SCALE_FACTOR + bandStr;
+            origFieldName = BANDSB::SCALE_FACTOR + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
 
-            fieldName      = BANDSB::ADDITIVE_FACTOR + bandStr;
-            origFieldName  = BANDSB::ADDITIVE_FACTOR + origBandStr;
+            fieldName = BANDSB::ADDITIVE_FACTOR + bandStr;
+            origFieldName = BANDSB::ADDITIVE_FACTOR + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
-
 
          // b17 signals the START_TIMEn.
          if (bitTest(existmask, 17))
          {
-
-            fieldName      = BANDSB::START_TIME_FRAC + bandStr;
-            origFieldName  = BANDSB::START_TIME_FRAC + origBandStr;
+            fieldName = BANDSB::START_TIME_FRAC + bandStr;
+            origFieldName = BANDSB::START_TIME_FRAC + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
 
-            fieldName      = BANDSB::START_TIME + bandStr;
-            origFieldName  = BANDSB::START_TIME + origBandStr;
+            fieldName = BANDSB::START_TIME + bandStr;
+            origFieldName = BANDSB::START_TIME + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
 
          // b16 signals the INT_TIMEn field.
          if (bitTest(existmask, 16))
          {
-            fieldName      = BANDSB::INT_TIME + bandStr;
-            origFieldName  = BANDSB::INT_TIME + origBandStr;
+            fieldName = BANDSB::INT_TIME + bandStr;
+            origFieldName = BANDSB::INT_TIME + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
 
          // b15 signals the CALDRK and CALIBRATION SENSITIVITYn fields.
          if (bitTest(existmask, 15))
          {
-            fieldName      = BANDSB::CALDRK + bandStr;
-            origFieldName  = BANDSB::CALDRK + origBandStr;
+            fieldName = BANDSB::CALDRK + bandStr;
+            origFieldName = BANDSB::CALDRK + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
 
-            fieldName      = BANDSB::CALIBRATION_SENSITIVITY + bandStr;
-            origFieldName  = BANDSB::CALIBRATION_SENSITIVITY + origBandStr;
+            fieldName = BANDSB::CALIBRATION_SENSITIVITY + bandStr;
+            origFieldName = BANDSB::CALIBRATION_SENSITIVITY + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
 
          // b14 signals the ROW_GSDn and ROW_GSD_UNITSn, COL_GSDn, COL_GSD_UNITSn fields.
          if (bitTest(existmask, 14))
          {
-            fieldName      = BANDSB::ROW_GSD + bandStr;
-            origFieldName  = BANDSB::ROW_GSD + origBandStr;
+            fieldName = BANDSB::ROW_GSD + bandStr;
+            origFieldName = BANDSB::ROW_GSD + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
 
          // b13 signals the ROW_GSD_UNCn and COL_GSD_UNCn fields. (If b13 is set to 1 then b14 must be set.)
          if (bitTest(existmask, 13))
          {
-            fieldName      = BANDSB::ROW_GSD_UNC + bandStr;
-            origFieldName  = BANDSB::ROW_GSD_UNC + origBandStr;
+            fieldName = BANDSB::ROW_GSD_UNC + bandStr;
+            origFieldName = BANDSB::ROW_GSD_UNC + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
 
          // b14 signals the ROW_GSDn and ROW_GSD_UNITSn, COL_GSDn, COL_GSD_UNITSn fields.
          if (bitTest(existmask, 14))
          {
-            fieldName      = BANDSB::ROW_GSD_UNIT + bandStr;
-            origFieldName  = BANDSB::ROW_GSD_UNIT + origBandStr;
+            fieldName = BANDSB::ROW_GSD_UNIT + bandStr;
+            origFieldName = BANDSB::ROW_GSD_UNIT + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
 
-            fieldName      = BANDSB::COL_GSD + bandStr;
-            origFieldName  = BANDSB::COL_GSD + origBandStr;
+            fieldName = BANDSB::COL_GSD + bandStr;
+            origFieldName = BANDSB::COL_GSD + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
 
          // b13 signals the ROW_GSD_UNCn and COL_GSD_UNCn fields. (If b13 is set to 1 then b14 must be set.)
          if (bitTest(existmask, 13))
          {
-            fieldName      = BANDSB::COL_GSD_UNC + bandStr;
-            origFieldName  = BANDSB::COL_GSD_UNC + origBandStr;
+            fieldName = BANDSB::COL_GSD_UNC + bandStr;
+            origFieldName = BANDSB::COL_GSD_UNC + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
 
          // b14 signals the ROW_GSDn and ROW_GSD_UNITSn, COL_GSDn, COL_GSD_UNITSn fields.
          if (bitTest(existmask, 14))
          {
-            fieldName      = BANDSB::COL_GSD_UNIT + bandStr;
-            origFieldName  = BANDSB::COL_GSD_UNIT + origBandStr;
+            fieldName = BANDSB::COL_GSD_UNIT + bandStr;
+            origFieldName = BANDSB::COL_GSD_UNIT + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
 
          // b12 signals the BKNOISEn and SCNNOISEn fields.
          if (bitTest(existmask, 12))
          {
-            fieldName      = BANDSB::BKNOISE + bandStr;
-            origFieldName  = BANDSB::BKNOISE + origBandStr;
+            fieldName = BANDSB::BKNOISE + bandStr;
+            origFieldName = BANDSB::BKNOISE + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
 
-            fieldName      = BANDSB::SCNNOISE + bandStr;
-            origFieldName  = BANDSB::SCNNOISE + origBandStr;
+            fieldName = BANDSB::SCNNOISE + bandStr;
+            origFieldName = BANDSB::SCNNOISE + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
 
@@ -3555,16 +3562,16 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
          // SPT_RESP_FUNCTION_COLn, SPT_RESP_UNIT_COLn fields.
          if (bitTest(existmask, 11))
          {
-            fieldName      = BANDSB::SPT_RESP_FUNCTION_ROW + bandStr;
-            origFieldName  = BANDSB::SPT_RESP_FUNCTION_ROW + origBandStr;
+            fieldName = BANDSB::SPT_RESP_FUNCTION_ROW + bandStr;
+            origFieldName = BANDSB::SPT_RESP_FUNCTION_ROW + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
 
          // b10 signals the SPT_RESP_UNC_ROWn and SPT_RESP_UNC_COLn fields. (If b10 is set to 1 then b11 must be set.)
          if (bitTest(existmask, 10))
          {
-            fieldName      = BANDSB::SPT_RESPUNC_ROW + bandStr;
-            origFieldName  = BANDSB::SPT_RESPUNC_ROW + origBandStr;
+            fieldName = BANDSB::SPT_RESPUNC_ROW + bandStr;
+            origFieldName = BANDSB::SPT_RESPUNC_ROW + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
 
@@ -3572,20 +3579,20 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
          // SPT_RESP_FUNCTION_COLn, SPT_RESP_UNIT_COLn fields.
          if (bitTest(existmask, 11))
          {
-            fieldName      = BANDSB::SPT_RESP_UNIT_ROW + bandStr;
-            origFieldName  = BANDSB::SPT_RESP_UNIT_ROW + origBandStr;
+            fieldName = BANDSB::SPT_RESP_UNIT_ROW + bandStr;
+            origFieldName = BANDSB::SPT_RESP_UNIT_ROW + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
 
-            fieldName      = BANDSB::SPT_RESP_FUNCTION_COL + bandStr;
-            origFieldName  = BANDSB::SPT_RESP_FUNCTION_COL + origBandStr;
+            fieldName = BANDSB::SPT_RESP_FUNCTION_COL + bandStr;
+            origFieldName = BANDSB::SPT_RESP_FUNCTION_COL + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
 
          // b10 signals the SPT_RESP_UNC_ROWn and SPT_RESP_UNC_COLn fields. (If b10 is set to 1 then b11 must be set.)
          if (bitTest(existmask, 10))
          {
-            fieldName      = BANDSB::SPT_RESPUNC_COL + bandStr;
-            origFieldName  = BANDSB::SPT_RESPUNC_COL + origBandStr;
+            fieldName = BANDSB::SPT_RESPUNC_COL + bandStr;
+            origFieldName = BANDSB::SPT_RESPUNC_COL + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
 
@@ -3593,40 +3600,40 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
          // SPT_RESP_FUNCTION_COLn, SPT_RESP_UNIT_COLn fields.
          if (bitTest(existmask, 11))
          {
-            fieldName      = BANDSB::SPT_RESP_UNIT_COL + bandStr;
-            origFieldName  = BANDSB::SPT_RESP_UNIT_COL + origBandStr;
+            fieldName = BANDSB::SPT_RESP_UNIT_COL + bandStr;
+            origFieldName = BANDSB::SPT_RESP_UNIT_COL + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
 
          // b9 signals the DATA_FLD_3n field.
          if (bitTest(existmask, 9))
          {
-            fieldName      = BANDSB::DATA_FLD_3 + bandStr;
-            origFieldName  = BANDSB::DATA_FLD_3 + origBandStr;
+            fieldName = BANDSB::DATA_FLD_3 + bandStr;
+            origFieldName = BANDSB::DATA_FLD_3 + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
 
          // b8 signals the DATA_FLD_4n field.
          if (bitTest(existmask, 8))
          {
-            fieldName      = BANDSB::DATA_FLD_4 + bandStr;
-            origFieldName  = BANDSB::DATA_FLD_4 + origBandStr;
+            fieldName = BANDSB::DATA_FLD_4 + bandStr;
+            origFieldName = BANDSB::DATA_FLD_4 + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
 
          // b7 signals the DATA_FLD_5n field.
          if (bitTest(existmask, 7))
          {
-            fieldName      = BANDSB::DATA_FLD_5 + bandStr;
-            origFieldName  = BANDSB::DATA_FLD_5 + origBandStr;
+            fieldName = BANDSB::DATA_FLD_5 + bandStr;
+            origFieldName = BANDSB::DATA_FLD_5 + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
 
          // b6 signals the DATA_FLD_6n field.
          if (bitTest(existmask, 6))
          {
-            fieldName      = BANDSB::DATA_FLD_6 + bandStr;
-            origFieldName  = BANDSB::DATA_FLD_6 + origBandStr;
+            fieldName = BANDSB::DATA_FLD_6 + bandStr;
+            origFieldName = BANDSB::DATA_FLD_6 + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
       }
@@ -3646,7 +3653,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
          tre.setAttribute(BANDSB::NUM_AUX_C, num_aux_c);
       }
 
-      for(unsigned int aux_b=0; aux_b < num_aux_b; ++aux_b)
+      for (unsigned int aux_b = 0; aux_b < num_aux_b; ++aux_b)
       {
          stringstream auxbStreamStr;
          auxbStreamStr << "#" << aux_b;
@@ -3654,13 +3661,13 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
 
          string fieldName;
 
-         fieldName      = BANDSB::BAPF + auxbStr;
-         string tempString = dv_cast<string>(pExistingBandsb->getAttribute (fieldName));
+         fieldName = BANDSB::BAPF + auxbStr;
+         string tempString = dv_cast<string>(pExistingBandsb->getAttribute(fieldName));
          tre.setAttribute(fieldName, tempString);
          char bapf = tempString.c_str()[0];
 
-         fieldName      = BANDSB::UBAP + auxbStr;
-         string ubap = dv_cast<string>(pExistingBandsb->getAttribute (fieldName));
+         fieldName = BANDSB::UBAP + auxbStr;
+         string ubap = dv_cast<string>(pExistingBandsb->getAttribute(fieldName));
          tre.setAttribute(fieldName, ubap);
 
          unsigned int bandcount(0);
@@ -3672,10 +3679,11 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
             LOG_IF(!iter->isOriginalNumberValid(), continue);
             unsigned int origBandNum = iter->getOriginalNumber();
 
-            stringstream bandStreamStr, origBandStreamStr;
+            stringstream bandStreamStr;
             bandStreamStr << "#" << bandcount;
             string bandNumStr(bandStreamStr.str());
 
+            stringstream origBandStreamStr;
             origBandStreamStr << "#" << origBandNum;
             string origBandNumStr(origBandStreamStr.str());
 
@@ -3716,7 +3724,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
          }
       }
 
-      for(unsigned int aux_c=0; aux_c < num_aux_c; ++aux_c)
+      for (unsigned int aux_c = 0; aux_c < num_aux_c; ++aux_c)
       {
          stringstream auxcStreamStr;
          auxcStreamStr << "#" << aux_c;

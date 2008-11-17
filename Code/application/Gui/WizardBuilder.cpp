@@ -55,8 +55,8 @@
 #include <string>
 using namespace std;
 
-WizardBuilder::WizardBuilder(QWidget* parent) :
-   QMainWindow(parent),
+WizardBuilder::WizardBuilder(QWidget* pParent) :
+   QMainWindow(pParent),
    mpWizard(NULL),
    mFilename(QString()),
    mpCanvas(NULL),
@@ -461,7 +461,7 @@ bool WizardBuilder::eventFilter(QObject* o, QEvent* e)
    {
       if (e->type() == QEvent::KeyPress)
       {
-         QKeyEvent* k = (QKeyEvent*) e;
+         QKeyEvent* k = static_cast<QKeyEvent*>(e);
          if (k->key() == Qt::Key_Delete)
          {
             keyPressEvent(k);
@@ -558,7 +558,8 @@ void WizardBuilder::buildWizard(WizardObject* pWizardObject)
 
 void WizardBuilder::buildInputNodes(WizardItem* pItem, const PlugInArgList* pArgList)
 {
-   if (pItem == NULL)
+   WizardItemImp* pItemImp = static_cast<WizardItemImp*>(pItem);
+   if (pItemImp == NULL)
    {
       return;
    }
@@ -570,7 +571,7 @@ void WizardBuilder::buildInputNodes(WizardItem* pItem, const PlugInArgList* pArg
    }
 
    // Clear existing nodes
-   ((WizardItemImp*) pItem)->clearInputNodes();
+   pItemImp->clearInputNodes();
 
    // Set the input nodes
    for (int i = 0; i < iCount; i++)
@@ -599,8 +600,7 @@ void WizardBuilder::buildInputNodes(WizardItem* pItem, const PlugInArgList* pArg
          argDescription = pArg->getDescription();
       }
 
-      WizardNode* pNode = NULL;
-      pNode = dynamic_cast<WizardItemImp*>(pItem)->addInputNode(argName, argType, argDescription);
+      WizardNodeImp* pNode = static_cast<WizardNodeImp*>(pItemImp->addInputNode(argName, argType, argDescription));
       if (pNode != NULL)
       {
          vector<string> validTypes;
@@ -626,21 +626,22 @@ void WizardBuilder::buildInputNodes(WizardItem* pItem, const PlugInArgList* pArg
             pDesktop->getViewTypes(argType, validTypes);
          }
 
-         ((WizardNodeImp*) pNode)->setValidTypes(validTypes);
+         pNode->setValidTypes(validTypes);
          if (pArg != NULL)
          {
             pNode->setValue(pArg->getDefaultValue());
          }
 
-         static_cast<WizardNodeImp*>(pNode)->attach(SIGNAL_NAME(Subject, Modified), Slot(mpView, &WizardView::nodeModified));
-         static_cast<WizardNodeImp*>(pNode)->attach(SIGNAL_NAME(Subject, Deleted), Slot(mpView, &WizardView::nodeDeleted));
+         pNode->attach(SIGNAL_NAME(Subject, Modified), Slot(mpView, &WizardView::nodeModified));
+         pNode->attach(SIGNAL_NAME(Subject, Deleted), Slot(mpView, &WizardView::nodeDeleted));
       }
    }
 }
 
 void WizardBuilder::buildOutputNodes(WizardItem* pItem, const PlugInArgList* pArgList)
 {
-   if (pItem == NULL)
+   WizardItemImp* pItemImp = static_cast<WizardItemImp*>(pItem);
+   if (pItemImp == NULL)
    {
       return;
    }
@@ -652,7 +653,7 @@ void WizardBuilder::buildOutputNodes(WizardItem* pItem, const PlugInArgList* pAr
    }
 
    // Clear existing nodes
-   ((WizardItemImp*) pItem)->clearOutputNodes();
+   pItemImp->clearOutputNodes();
 
    // Set the output nodes
    for (int i = 0; i < iCount; i++)
@@ -681,8 +682,7 @@ void WizardBuilder::buildOutputNodes(WizardItem* pItem, const PlugInArgList* pAr
          argDescription = pArg->getDescription();
       }
 
-      WizardNodeImp* pNode = static_cast<WizardNodeImp*>
-         ((static_cast<WizardItemImp*> (pItem))->addOutputNode(argName, argType, argDescription));
+      WizardNodeImp* pNode = static_cast<WizardNodeImp*>(pItemImp->addOutputNode(argName, argType, argDescription));
       if (pNode != NULL)
       {
          vector<string> validTypes;
@@ -738,7 +738,7 @@ bool WizardBuilder::setItemBatchMode(WizardItem* pItem, bool bBatch)
       string itemName = "";
       itemName = pItem->getName();
 
-      PlugInDescriptor* pDescriptor = pManager->getPlugInDescriptor(itemName.c_str());
+      PlugInDescriptor* pDescriptor = pManager->getPlugInDescriptor(itemName);
       if (pDescriptor == NULL)
       {
          return false;
@@ -766,7 +766,11 @@ bool WizardBuilder::setItemBatchMode(WizardItem* pItem, bool bBatch)
    }
 
    // Set the mode and support flag in the wizard item
-   ((WizardItemImp*) pItem)->setBatchMode(bBatch, bModeSupport);
+   WizardItemImp* pItemImp = static_cast<WizardItemImp*>(pItem);
+   if (pItemImp != NULL)
+   {
+      pItemImp->setBatchMode(bBatch, bModeSupport);
+   }
 
    updateItemInfo();
    return true;
@@ -782,15 +786,24 @@ void WizardBuilder::editItem(WizardItem* pItem)
    string itemType = pItem->getType();
    if (itemType != "Value")
    {
-      QMessageBox::critical(this, "Wizard Builder", "You can only edit an "
-         "item with the Value type!");
+      QMessageBox::critical(this, "Wizard Builder", "You can only edit an item with the Value type!");
       return;
    }
 
-   vector<WizardNode*> outputNodes = ((WizardItemImp*) pItem)->getOutputNodes();
+   vector<WizardNode*> outputNodes;
 
-   WizardNode* pNode = NULL;
-   pNode = outputNodes.at(0);
+   WizardItemImp* pItemImp = static_cast<WizardItemImp*>(pItem);
+   if (pItemImp != NULL)
+   {
+      outputNodes = pItemImp->getOutputNodes();
+   }
+
+   if (outputNodes.empty() == true)
+   {
+      return;
+   }
+
+   WizardNodeImp* pNode = static_cast<WizardNodeImp*>(outputNodes.front());
    if (pNode == NULL)
    {
       return;
@@ -798,16 +811,13 @@ void WizardBuilder::editItem(WizardItem* pItem)
 
    string nodeName = pNode->getName();
    string nodeType = pNode->getType();
-
-   void* pValue = NULL;
-   pValue = pNode->getValue();
+   void* pValue = pNode->getValue();
 
    NameTypeValueDlg dlgValue(this);
    dlgValue.setWindowTitle("Wizard Value Item");
    dlgValue.setValue(QString::fromStdString(nodeName), DataVariant(nodeType, pValue));
 
-   int iReturn = 0;
-   iReturn = dlgValue.exec();
+   int iReturn = dlgValue.exec();
    if (iReturn == QDialog::Accepted)
    {
       QString strName = dlgValue.getName();
@@ -820,12 +830,12 @@ void WizardBuilder::editItem(WizardItem* pItem)
       string newNodeName = strName.toStdString();
       string newNodeType = strType.toStdString();
 
-      const DataVariant &var = dlgValue.getValue();
+      const DataVariant& var = dlgValue.getValue();
 
       if (newNodeName != nodeName)
       {
-         ((WizardNodeImp*) pNode)->setName(newNodeName);
-         ((WizardItemImp*) pItem)->setName("Value - " + newNodeName);
+         pNode->setName(newNodeName);
+         pItemImp->setName("Value - " + newNodeName);
       }
 
       if (newNodeType != nodeType)
@@ -833,10 +843,10 @@ void WizardBuilder::editItem(WizardItem* pItem)
          vector<string> validTypes;
          validTypes.push_back(newNodeType);
 
-         ((WizardNodeImp*) pNode)->setOriginalType(newNodeType);
-         ((WizardNodeImp*) pNode)->setType(newNodeType);
-         ((WizardNodeImp*) pNode)->setValidTypes(validTypes);
-         ((WizardNodeImp*) pNode)->clearConnectedNodes();
+         pNode->setOriginalType(newNodeType);
+         pNode->setType(newNodeType);
+         pNode->setValidTypes(validTypes);
+         pNode->clearConnectedNodes();
       }
 
       if (var.getPointerToValueAsVoid() != pValue)
@@ -1095,8 +1105,8 @@ bool WizardBuilder::saveWizard()
          delete pBatchWizard;
          if (!bCreatedBatchWizard)
          {
-            QMessageBox::critical(this, "Wizard Builder", "Could not save the '" + QString::fromStdString(batchFilename) +
-               "' file!");
+            QMessageBox::critical(this, "Wizard Builder", "Could not save the '" +
+               QString::fromStdString(batchFilename) + "' file!");
          }
       }
 
@@ -1163,7 +1173,7 @@ bool WizardBuilder::saveNewWizard()
    dlg.selectFile(strDefaultFile);
 
    QString strFilename;
-   if(dlg.exec() == QDialog::Accepted)
+   if (dlg.exec() == QDialog::Accepted)
    {
       strFilename = dlg.selectedFiles().front();
    }
@@ -1289,17 +1299,17 @@ void WizardBuilder::paste()
    vector<WizardItem*> newItems;
    for (unsigned int i = 0; i < items.size(); i++)
    {
-      WizardItem* pClipboardItem = items[i];
+      WizardItemImp* pClipboardItem = static_cast<WizardItemImp*>(items[i]);
       if (pClipboardItem != NULL)
       {
          const string& itemName = pClipboardItem->getName();
          const string& itemType = pClipboardItem->getType();
 
-         WizardItem* pItem = mpWizard->addItem(itemName, itemType);
+         WizardItemImp* pItem = static_cast<WizardItemImp*>(mpWizard->addItem(itemName, itemType));
          if (pItem != NULL)
          {
-            *((WizardItemImp*) pItem) = *((WizardItemImp*) pClipboardItem);
-            newItems.push_back(pItem);
+            *pItem = *pClipboardItem;
+            newItems.push_back(static_cast<WizardItem*>(pItem));
          }
       }
    }
@@ -1370,9 +1380,9 @@ void WizardBuilder::addDesktopItem()
          // Set the item position to the viewport origin
          double dXCoord = pItem->getXPosition();
          double dYCoord = pItem->getYPosition();
-         QPoint ptContents = mpView->viewportToContents(QPoint((int) dXCoord, (int) dYCoord));
+         QPoint ptContents = mpView->viewportToContents(QPoint(static_cast<int>(dXCoord), static_cast<int>(dYCoord)));
 
-         pItem->setPosition((double) ptContents.x(), (double) ptContents.y());
+         pItem->setPosition(ptContents.x(), ptContents.y());
 
          // Set the modified flag
          setModified();
@@ -1418,9 +1428,9 @@ void WizardBuilder::addPlugInItem()
          // Set the item position to the viewport origin
          double dXCoord = pItem->getXPosition();
          double dYCoord = pItem->getYPosition();
-         QPoint ptContents = mpView->viewportToContents(QPoint((int) dXCoord, (int) dYCoord));
+         QPoint ptContents = mpView->viewportToContents(QPoint(static_cast<int>(dXCoord), static_cast<int>(dYCoord)));
 
-         pItem->setPosition((double) ptContents.x(), (double) ptContents.y());
+         pItem->setPosition(ptContents.x(), ptContents.y());
 
          // Set the modified flag
          setModified();
@@ -1466,7 +1476,7 @@ void WizardBuilder::addValueItem()
          WizardNodeImp* pNode = static_cast<WizardNodeImp*>(pItem->addOutputNode(name, type, ""));
          if (pNode != NULL)
          {
-            const DataVariant &var = dlgValue.getValue();
+            const DataVariant& var = dlgValue.getValue();
 
             pNode->setValue(var.getPointerToValueAsVoid());
             pNode->attach(SIGNAL_NAME(Subject, Modified), Slot(mpView, &WizardView::nodeModified));
@@ -1476,9 +1486,9 @@ void WizardBuilder::addValueItem()
          // Set the item position to the viewport origin
          double dXCoord = pItem->getXPosition();
          double dYCoord = pItem->getYPosition();
-         QPoint ptContents = mpView->viewportToContents(QPoint((int) dXCoord, (int) dYCoord));
+         QPoint ptContents = mpView->viewportToContents(QPoint(static_cast<int>(dXCoord), static_cast<int>(dYCoord)));
 
-         pItem->setPosition((double) ptContents.x(), (double) ptContents.y());
+         pItem->setPosition(ptContents.x(), ptContents.y());
 
          // Set the modified flag
          setModified();
@@ -1556,8 +1566,10 @@ void WizardBuilder::removeItems()
 
       if ((currentConnection.mpOutputNode != NULL) && (currentConnection.mpInputNode != NULL))
       {
-         ((WizardNodeImp*) currentConnection.mpOutputNode)->removeConnectedNode(currentConnection.mpInputNode);
-         ((WizardNodeImp*) currentConnection.mpInputNode)->removeConnectedNode(currentConnection.mpOutputNode);
+         static_cast<WizardNodeImp*>(currentConnection.mpOutputNode)->removeConnectedNode(
+            currentConnection.mpInputNode);
+         static_cast<WizardNodeImp*>(currentConnection.mpInputNode)->removeConnectedNode(
+            currentConnection.mpOutputNode);
       }
    }
 
@@ -1851,9 +1863,10 @@ void WizardBuilder::setWizardBatchMode(bool bBatch)
 
 void WizardBuilder::setItemPosition(WizardItem* pItem, double dX, double dY)
 {
-   if (pItem != NULL)
+   WizardItemImp* pItemImp = static_cast<WizardItemImp*>(pItem);
+   if (pItemImp != NULL)
    {
-      ((WizardItemImp*) pItem)->setPosition(dX, dY);
+      pItemImp->setPosition(dX, dY);
       setModified();
    }
 }
@@ -1874,16 +1887,13 @@ void WizardBuilder::setItemBatchMode()
    vector<WizardItem*> selectedItems = mpView->getSelectedItems();
    int iModifiedCount = 0;
 
-   int iCount = 0;
-   iCount = selectedItems.size();
+   int iCount = selectedItems.size();
    for (int i = 0; i < iCount; i++)
    {
-      WizardItem* pItem = NULL;
-      pItem = selectedItems.at(i);
+      WizardItemImp* pItem = static_cast<WizardItemImp*>(selectedItems.at(i));
       if (pItem != NULL)
       {
-         bool bItemBatch = false;
-         bItemBatch = ((WizardItemImp*) pItem)->getBatchMode();
+         bool bItemBatch = pItem->getBatchMode();
          if (bBatch != bItemBatch)
          {
             setItemBatchMode(pItem, bBatch);
@@ -1983,23 +1993,20 @@ void WizardBuilder::connectItems()
    }
 
    // Get the nodes
-   WizardNode* pOutputNode = NULL;
-   pOutputNode = pOutputItem->getOutputNode(outputNodeName, outputNodeType);
+   WizardNodeImp* pOutputNode = static_cast<WizardNodeImp*>(pOutputItem->getOutputNode(outputNodeName, outputNodeType));
    if (pOutputNode == NULL)
    {
       return;
    }
 
-   WizardNode* pInputNode = NULL;
-   pInputNode = pInputItem->getInputNode(inputNodeName, inputNodeType);
+   WizardNodeImp* pInputNode = static_cast<WizardNodeImp*>(pInputItem->getInputNode(inputNodeName, inputNodeType));
    if (pInputNode == NULL)
    {
       return;
    }
 
    // Check for circular connections between the two items
-   bool bConnected = false;
-   bConnected = ((WizardItemImp*) pOutputItem)->isItemConnected(pInputItem, true);
+   bool bConnected = static_cast<WizardItemImp*>(pOutputItem)->isItemConnected(pInputItem, true);
    if (bConnected == true)
    {
       QMessageBox::critical(this, "Wizard Builder", "These nodes cannot be connected "
@@ -2008,7 +2015,7 @@ void WizardBuilder::connectItems()
    }
 
    // Check if the nodes are already connected
-   bConnected = ((WizardNodeImp*) pInputNode)->isNodeConnected(pOutputNode);
+   bConnected = pInputNode->isNodeConnected(pOutputNode);
    if (bConnected == true)
    {
       QMessageBox::warning(this, "Wizard Builder", "These nodes are already connected!");
@@ -2016,8 +2023,8 @@ void WizardBuilder::connectItems()
    }
 
    // Connect the nodes
-   ((WizardNodeImp*) pOutputNode)->addConnectedNode(pInputNode);
-   ((WizardNodeImp*) pInputNode)->addConnectedNode(pOutputNode);
+   pOutputNode->addConnectedNode(pInputNode);
+   pInputNode->addConnectedNode(pOutputNode);
 }
 
 void WizardBuilder::updateConnectedItemsOrder(WizardItem* pOutputItem, WizardItem* pInputItem)
@@ -2028,10 +2035,8 @@ void WizardBuilder::updateConnectedItemsOrder(WizardItem* pOutputItem, WizardIte
    }
 
    // Update the execution order if necessary
-   int iOutputOrder = 0;
-   int iInputOrder = 0;
-   iOutputOrder = getExecutionOrder(pOutputItem);
-   iInputOrder = getExecutionOrder(pInputItem);
+   int iOutputOrder = getExecutionOrder(pOutputItem);
+   int iInputOrder = getExecutionOrder(pInputItem);
 
    if (iOutputOrder < iInputOrder)
    {
@@ -2040,8 +2045,7 @@ void WizardBuilder::updateConnectedItemsOrder(WizardItem* pOutputItem, WizardIte
 
    while (iOutputOrder > iInputOrder)
    {
-      bool bSuccess = false;
-      bSuccess = mpWizard->decreaseItemOrder(pOutputItem);
+      bool bSuccess = mpWizard->decreaseItemOrder(pOutputItem);
       if (bSuccess == false)
       {
          break;
@@ -2065,8 +2069,7 @@ void WizardBuilder::increaseCurrentItemOrder()
 
    vector<WizardItem*> selectedItems = mpView->getSelectedItems();
 
-   int iCount = 0;
-   iCount = selectedItems.size();
+   int iCount = selectedItems.size();
    if (iCount > 1)
    {
       QMessageBox::warning(this, "Wizard Builder", "Please select only one item!");
@@ -2074,12 +2077,10 @@ void WizardBuilder::increaseCurrentItemOrder()
    }
    else if (iCount == 1)
    {
-      WizardItem* pItem = NULL;
-      pItem = selectedItems.front();
+      WizardItem* pItem = selectedItems.front();
       if (pItem != NULL)
       {
-         bool bSuccess = false;
-         bSuccess = mpWizard->increaseItemOrder(pItem);
+         bool bSuccess = mpWizard->increaseItemOrder(pItem);
          if (bSuccess == true)
          {
             refreshOrder();
@@ -2098,8 +2099,7 @@ void WizardBuilder::decreaseCurrentItemOrder()
 
    vector<WizardItem*> selectedItems = mpView->getSelectedItems();
 
-   int iCount = 0;
-   iCount = selectedItems.size();
+   int iCount = selectedItems.size();
    if (iCount > 1)
    {
       QMessageBox::warning(this, "Wizard Builder", "Please select only one item!");
@@ -2107,12 +2107,10 @@ void WizardBuilder::decreaseCurrentItemOrder()
    }
    else if (iCount == 1)
    {
-      WizardItem* pItem = NULL;
-      pItem = selectedItems.front();
+      WizardItem* pItem = selectedItems.front();
       if (pItem != NULL)
       {
-         bool bSuccess = false;
-         bSuccess = mpWizard->decreaseItemOrder(pItem);
+         bool bSuccess = mpWizard->decreaseItemOrder(pItem);
          if (bSuccess == true)
          {
             refreshOrder();
@@ -2132,12 +2130,10 @@ void WizardBuilder::updateItemInfo()
    int iNumSelected = 0;
    int iNumBatch = 0;
 
-   int iCount = 0;
-   iCount = selectedItems.size();
+   int iCount = selectedItems.size();
    for (int i = 0; i < iCount; i++)
    {
-      WizardItem* pItem = NULL;
-      pItem = selectedItems.at(i);
+      WizardItem* pItem = selectedItems.at(i);
       if (pItem == NULL)
       {
          continue;
@@ -2147,29 +2143,24 @@ void WizardBuilder::updateItemInfo()
       QString strOrder;
 
       // Name
-      string itemName = "";
-      itemName = pItem->getName();
+      string itemName = pItem->getName();
       if (itemName.empty() == false)
       {
          strItemName = QString::fromStdString(itemName);
       }
 
       // Execution order
-      int iOrder = 0;
-      iOrder = getExecutionOrder(pItem);
+      int iOrder = getExecutionOrder(pItem);
       strOrder = QString::number(iOrder);
 
       // Input nodes
       vector<WizardNode*> inputNodes = pItem->getInputNodes();
 
       unsigned int j = 0;
-      unsigned int uiNodes = 0;
-      uiNodes = inputNodes.size();
+      unsigned int uiNodes = inputNodes.size();
       for (j = 0; j < uiNodes; j++)
       {
-         WizardNode* pNode = NULL;
-         pNode = inputNodes.at(j);
-
+         WizardNode* pNode = inputNodes.at(j);
          if (pNode != NULL)
          {
             QString strNodeName;
@@ -2219,9 +2210,7 @@ void WizardBuilder::updateItemInfo()
       uiNodes = outputNodes.size();
       for (j = 0; j < uiNodes; j++)
       {
-         WizardNode* pNode = NULL;
-         pNode = outputNodes.at(j);
-
+         WizardNode* pNode = outputNodes.at(j);
          if (pNode != NULL)
          {
             QString strNodeName;

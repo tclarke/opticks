@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef _UNITSIMP
-#define _UNITSIMP
+#ifndef UNITSIMP_H
+#define UNITSIMP_H
 
 #include "Units.h"
 

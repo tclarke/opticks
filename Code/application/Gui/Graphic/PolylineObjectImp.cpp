@@ -32,14 +32,13 @@ PolylineObjectImp::PolylineObjectImp(const string& id, GraphicObjectType type, G
                                      LocationType pixelCoord) :
    MultipointObjectImp(id, type, pLayer, pixelCoord),
    mPaths(1, 0),
+   mUseHitTolerance(true),
    mResetSymbolName(true)
 {
    addProperty("LineWidth");
    addProperty("LineColor");
    addProperty("LineStyle");
    addProperty("LineScaled");
-
-   mUseHitTolerance = true;
 }
 
 PolylineObjectImp::~PolylineObjectImp()
@@ -77,7 +76,7 @@ void PolylineObjectImp::drawVector(double zoomFactor) const
 #if defined(WIN_API)
    glEnable(GL_LINE_SMOOTH);
 #else
-   if(lineWidth == 1.0)
+   if (lineWidth == 1.0)
    {
       glEnable(GL_LINE_SMOOTH);
    }
@@ -111,11 +110,11 @@ void PolylineObjectImp::drawVector(double zoomFactor) const
       glLineStipple(2, 0x24ff);
    }
 
-   const vector<LocationType> &vertices = getVertices();
+   const vector<LocationType>& vertices = getVertices();
    unsigned int max = vertices.size();
    unsigned int min = 0;
    
-   for (int i = (int)mPaths.size()-1; i >= 0; --i)
+   for (int i = static_cast<int>(mPaths.size() - 1); i >= 0; --i)
    {
       min = mPaths[i];
       glBegin(GL_LINE_STRIP);
@@ -151,7 +150,7 @@ void PolylineObjectImp::drawPixels(double zoomFactor) const
 
    glColor3ub(color.mRed, color.mGreen, color.mBlue);
 
-   const vector<LocationType> &vertices = getVertices();
+   const vector<LocationType>& vertices = getVertices();
    unsigned int ignorePos = 1;
    for (unsigned int i = 1; i < vertices.size(); ++i)
    {
@@ -188,7 +187,7 @@ bool PolylineObjectImp::hit(LocationType pixelCoord) const
       }
    }
 
-   const vector<LocationType> &vectices = getVertices();
+   const vector<LocationType>& vectices = getVertices();
    int numLines = vectices.size();
    unsigned int ignorePos = 1;
    for (unsigned int i = 1; i < vectices.size() && bHit == false; ++i)
@@ -205,7 +204,7 @@ bool PolylineObjectImp::hit(LocationType pixelCoord) const
 
 unsigned int PolylineObjectImp::getNumSegments() const
 {
-   const vector<LocationType> &vectices = getVertices();
+   const vector<LocationType>& vectices = getVertices();
    return vectices.size() == 0 ? 0 : vectices.size() - 1;
 }
 
@@ -250,7 +249,7 @@ const BitMask* PolylineObjectImp::getPixels(int iStartColumn, int iStartRow, int
    mPixelMask.setPixel(iObjectEndColumn, iObjectEndRow, false);
 
    DrawUtil::BitMaskPixelDrawer drawer(&mPixelMask);
-   const vector<LocationType> &vertices = getVertices();
+   const vector<LocationType>& vertices = getVertices();
    unsigned int ignorePos = 1;
    for (unsigned int i = 1; i < vertices.size(); ++i)
    {
@@ -273,7 +272,7 @@ const BitMask* PolylineObjectImp::getPixels(int iStartColumn, int iStartRow, int
 
 bool PolylineObjectImp::replicateObject(const GraphicObject *pObject)
 {
-   const PolylineObjectImp *pPoly = dynamic_cast<const PolylineObjectImp*>(pObject);
+   const PolylineObjectImp* pPoly = dynamic_cast<const PolylineObjectImp*>(pObject);
    if (pPoly != NULL)
    {
       bool bSuccess = MultipointObjectImp::replicateObject(pObject);
@@ -399,7 +398,7 @@ bool PolylineObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
                string name(A(path->getNodeName()));
                if (XMLString::equals(path->getNodeName(), X("pixel")))
                {
-                  DOMNode *pValue = path->getFirstChild();
+                  DOMNode* pValue = path->getFirstChild();
                   unsigned int pixel = atoi(A(pValue->getNodeValue()));
                   if (mPaths.empty() || mPaths.back() < pixel)
                   {
@@ -482,7 +481,7 @@ bool PolylineObjectImp::processMouseDoubleClick(LocationType screenCoord, Qt::Mo
       removeVertex(getVertices().size() - 1);
 
       // Complete the insertion
-      GraphicLayerImp *pLayerImp = dynamic_cast<GraphicLayerImp*>(getLayer());
+      GraphicLayerImp* pLayerImp = dynamic_cast<GraphicLayerImp*>(getLayer());
       if (pLayerImp != NULL)
       {
          pLayerImp->completeInsertion();

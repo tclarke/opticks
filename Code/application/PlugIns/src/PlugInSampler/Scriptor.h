@@ -39,7 +39,7 @@ public:
    bool getTypeDescription(const std::string& type, std::string& description) const;
 
    //----- Inherited obligations
-   bool isBackground() const {return false;};
+   bool isBackground() const;
 
 protected:
    bool extractInputArgs(PlugInArgList* pArgList);
@@ -49,4 +49,4 @@ private:
    std::string mCommand;
 };
 
-#endif   // SCRIPTOR_H
+#endif

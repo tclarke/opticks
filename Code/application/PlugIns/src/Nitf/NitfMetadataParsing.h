@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef NITF_METADATA_PARSING_H
-#define NITF_METADATA_PARSING_H
+#ifndef NITFMETADATAPARSING_H
+#define NITFMETADATAPARSING_H
 
 #include "ConfigurationSettings.h"
 #include "PlugInResource.h"

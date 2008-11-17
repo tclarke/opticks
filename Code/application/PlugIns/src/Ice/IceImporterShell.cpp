@@ -67,7 +67,7 @@ unsigned char IceImporterShell::getFileAffinity(const string& filename)
    if (file.readFileData("/IceFormatDescriptor") == true)
    {
       IceReader reader(file);
-      if (reader.isValidIceFile() != IceReader::NOT_ICE && reader.getFileType() == mFileType)
+      if (reader.getIceFileValidity() != IceReader::NOT_ICE && reader.getFileType() == mFileType)
       {
          return Importer::CAN_LOAD;
       }
@@ -88,7 +88,7 @@ vector<ImportDescriptor*> IceImporterShell::getImportDescriptors(const string& f
    if (file.readFileData() == true)
    {
       IceReader reader(file);
-      IceReader::ValidityType iceValid = reader.isValidIceFile();
+      IceReader::ValidityType iceValid = reader.getIceFileValidity();
       IceUtilities::FileType fileType = reader.getFileType();
       if (iceValid == IceReader::NOT_SUPPORTED || iceValid == IceReader::NOT_ICE || fileType != mFileType)
       {

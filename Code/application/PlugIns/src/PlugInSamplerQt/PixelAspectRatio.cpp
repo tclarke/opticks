@@ -16,18 +16,18 @@
 #include "Service.h"
 #include "SessionItemSerializer.h"
 
-PixelAspectRatio::PixelAspectRatio()
+PixelAspectRatio::PixelAspectRatio() :
+   mpGui(NULL)
 {
    setCreator("Opticks Community");
    setVersion("Sample");
    setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setProductionStatus(false);
-   ViewerShell::setName( "Pixel Aspect Ratio Test" );
-   setDescription( "Verifies MPR1 Requirement 180." );
-   setMenuLocation( "[Tests]\\Pixel Aspect Ratio Test" );
+   ViewerShell::setName("Pixel Aspect Ratio Test");
+   setDescription("Verifies MPR1 Requirement 180.");
+   setMenuLocation("[Tests]\\Pixel Aspect Ratio Test");
    setDescriptorId("{626E12E9-41C0-489e-B92A-1E495083E69C}");
-   mpGui = NULL;
-   destroyAfterExecute( false );
+   destroyAfterExecute(false);
 }
 
 PixelAspectRatio::~PixelAspectRatio()
@@ -41,7 +41,7 @@ bool PixelAspectRatio::showGui()
    StepResource pStep( "Pixel Aspect Ratio Started.", "app", "5E4BCD48-E662-408b-93AF-F9127CE56C66" );
 
    std::vector<DataElement*> cubes = pModel->getElements( "RasterElement" );
-   if( cubes.size() == 0 )
+   if ( cubes.size() == 0 )
    {
       QMessageBox::critical( NULL, "Pixel Aspect Ratio Test", "No RasterElement input found!", "OK" );
       pStep->finalize( Message::Failure, "No RasterElement input found!" );

@@ -36,7 +36,7 @@ void DrawUtil::initializeCircle()
    static bool isInitialized = false;
    if (isInitialized == false)
    {
-      for (int i = 0; i < VERTEX_COUNT; i++)
+      for (int i = 0; i < VERTEX_COUNT; ++i)
       {
          sCirclePoints[i].mX = cos(2.0 * PI * (double) i / VERTEX_COUNT);
          sCirclePoints[i].mY = sin(2.0 * PI * (double) i / VERTEX_COUNT);
@@ -60,7 +60,7 @@ unsigned char* DrawUtil::getHatchPattern(SymbolType eSymbol)
 
    memset(sHatchPattern, 0, 128 * sizeof(unsigned char));
 
-   for (int i = 0; i < 128; i++)
+   for (int i = 0; i < 128; ++i)
    {
       int iShift = 0;
       iShift = (i % 32) / 4;
@@ -134,27 +134,29 @@ unsigned char* DrawUtil::getHatchPattern(SymbolType eSymbol)
   */
 void DrawUtil::drawEllipse(LocationType corner1, LocationType corner2, bool filled)
 {
-   LocationType center, radii;
-   int step = 2;
-   int i;
-
    initializeCircle();
 
+   LocationType center;
    center.mX = (corner1.mX + corner2.mX) / 2.0;
    center.mY = (corner1.mY + corner2.mY) / 2.0;
 
+   LocationType radii;
    radii.mX = fabs (corner1.mX - corner2.mX) / 2.0;
    radii.mY = fabs (corner1.mY - corner2.mY) / 2.0;
 
    if (filled)
-      glBegin(GL_POLYGON);
-   else
-      glBegin(GL_LINE_LOOP);
-
-   for (i = 0; i < VERTEX_COUNT; i += step)
    {
-      glVertex2f(center.mX + radii.mX * sCirclePoints[i].mX, 
-         center.mY+ radii.mY * sCirclePoints[i].mY);
+      glBegin(GL_POLYGON);
+   }
+   else
+   {
+      glBegin(GL_LINE_LOOP);
+   }
+
+   int step = 2;
+   for (int i = 0; i < VERTEX_COUNT; i += step)
+   {
+      glVertex2f(center.mX + radii.mX * sCirclePoints[i].mX, center.mY+ radii.mY * sCirclePoints[i].mY);
    }
 
    glEnd();
@@ -163,17 +165,15 @@ void DrawUtil::drawEllipse(LocationType corner1, LocationType corner2, bool fill
 double DrawUtil::linePointDistance(LocationType p1, LocationType p2, LocationType target, LocationType *pIntersection)
 {
    LocationType intersection;
-   double m1, m2;   // slopes for y=mx+b
-   double b1, b2;   // y-intercepts for y=mx+b
    double distance = -1.0;
 
-   if (fabs(p2.mX-p1.mX)<=1e-13*maximum(fabs(p2.mX), fabs(p1.mX))) // effectively: if(p2.mX==p1.mX)
+   if (fabs(p2.mX - p1.mX) <= 1e-13 * maximum(fabs(p2.mX), fabs(p1.mX))) // effectively: if (p2.mX == p1.mX)
    { // vertical line
       distance = fabs(p1.mX - target.mX);
       intersection.mX = p2.mX;
       intersection.mY = target.mY;
    }
-   else if (fabs(p2.mY-p1.mY)<=1e-13*maximum(fabs(p2.mY), fabs(p1.mY))) // effectively: if(p2.mY==p1.mY)
+   else if (fabs(p2.mY - p1.mY) <= 1e-13 * maximum(fabs(p2.mY), fabs(p1.mY))) // effectively: if (p2.mY == p1.mY)
    { // horizontal line
       distance = fabs(p1.mY - target.mY);
       intersection.mX = target.mX;
@@ -181,17 +181,16 @@ double DrawUtil::linePointDistance(LocationType p1, LocationType p2, LocationTyp
    }
    else
    {
-      m1 = (p2.mY - p1.mY) / (p2.mX - p1.mX);
-      b1 = p1.mY - m1 * p1.mX;
-      m2 = -1.0 / m1;
-      b2 = target.mY - m2 * target.mX;
+      double m1 = (p2.mY - p1.mY) / (p2.mX - p1.mX);
+      double b1 = p1.mY - m1 * p1.mX;
+      double m2 = -1.0 / m1;
+      double b2 = target.mY - m2 * target.mX;
 
       intersection.mX = (b2 - b1) / (m1 - m2);
       intersection.mY = m1 * intersection.mX + b1;
 
-      double dx, dy;
-      dx = intersection.mX - target.mX;
-      dy = intersection.mY - target.mY;
+      double dx = intersection.mX - target.mX;
+      double dy = intersection.mY - target.mY;
       distance = sqrt(dx * dx + dy * dy);
    }
 
@@ -209,11 +208,10 @@ bool DrawUtil::lineHit(LocationType p1, LocationType p2, LocationType target, do
 
    double distance = linePointDistance(p1, p2, target, &intersection);
 
-   double xMin, xMax, yMin, yMax;
-   xMin = minimum(p1.mX, p2.mX);
-   xMax = maximum(p1.mX, p2.mX);
-   yMin = minimum(p1.mY, p2.mY);
-   yMax = maximum(p1.mY, p2.mY);
+   double xMin = minimum(p1.mX, p2.mX);
+   double xMax = maximum(p1.mX, p2.mX);
+   double yMin = minimum(p1.mY, p2.mY);
+   double yMax = maximum(p1.mY, p2.mY);
 
    if (intersection.mX >= xMin && intersection.mY >= yMin)
    {
@@ -226,30 +224,12 @@ bool DrawUtil::lineHit(LocationType p1, LocationType p2, LocationType target, do
    return false;
 }
 
-int DrawUtil::isBetween(float x, float x1, float x2)
-{
-   if (x2 < x1)
-   {
-      if ((x2 < x) && (x <= x1))
-         return (1);
-   }
-   else
-   {
-      if ((x1 < x) && (x <= x2))
-         return (1);
-   }
-
-   return (0);
-}
-
 int DrawUtil::isWithin(double x, double y, const double *bx, const double *by, int count)
 {
    double slope;
-   int i, above;
+   int above = 0;
 
-   above = 0;
-
-   for (i = 0; i < count - 1; i++)
+   for (int i = 0; i < count - 1; ++i)
    {
       if (isBetween (x, bx[i], bx[i + 1]))
       {
@@ -287,9 +267,8 @@ bool DrawUtil::isWithin(LocationType point, const LocationType *pRegion, int cou
                         const unsigned int *pIgnoreSegmentsEnd, int ignoreCount)
 {
    double slope;
-   int i, above;
    int ignorePos = 0;
-   above = 0;
+   int above = 0;
 
    if (pIgnoreSegmentsEnd == NULL)
    {
@@ -300,9 +279,9 @@ bool DrawUtil::isWithin(LocationType point, const LocationType *pRegion, int cou
       ++ignorePos;
    }
 
-   for (i = 0; i < count - 1; i++)
+   for (int i = 0; i < count - 1; ++i)
    {
-      if (ignorePos < ignoreCount && i+1 == pIgnoreSegmentsEnd[ignorePos])
+      if (ignorePos < ignoreCount && i + 1 == pIgnoreSegmentsEnd[ignorePos])
       {
          ++ignorePos;
          continue;
@@ -327,40 +306,44 @@ static void project(double xCoord, double yCoord, double zCoord, const double mo
 {
    double vector1[4];
    double vector2[4];
-   int i, j;
+   int i;
+   int j;
 
    // object coordinates
-   vector1[0] = xCoord; vector1[1] = yCoord; vector1[2] = zCoord; vector1[3] = 1.0;
+   vector1[0] = xCoord;
+   vector1[1] = yCoord;
+   vector1[2] = zCoord;
+   vector1[3] = 1.0;
 
    // to eye coordinates
-   for (i=0; i<4; i++)
+   for (i = 0; i < 4; ++i)
    {
       vector2[i] = 0.0;
-      for (j=0; j<4; j++)
+      for (j = 0; j < 4; ++j)
       {
-         vector2[i] += vector1[j]*modelMatrix[4*j+i];
+         vector2[i] += vector1[j] * modelMatrix[4 * j + i];
       }
    }
 
    // to clip coordinates
-   for (i=0; i<4; i++)
+   for (i = 0; i < 4; ++i)
    {
       vector1[i] = 0.0;
-      for (j=0; j<4; j++)
+      for (j = 0; j < 4; ++j)
       {
-         vector1[i] += vector2[j]*projectionMatrix[4*j+i];
+         vector1[i] += vector2[j] * projectionMatrix[4 * j + i];
       }
    }
 
    // to normalized device coordinates
-   for (i=0; i<3; i++)
+   for (i = 0; i < 3; ++i)
    {
       vector1[i] /= vector1[3];
    }
 
    // to window coordinates
-   *xPixel = (1.0 + vector1[0]) / 2.0 * (double)viewport[2] + (double)viewport[0];
-   *yPixel = (1.0 + vector1[1]) / 2.0 * (double)viewport[3] + (double)viewport[1];
+   *xPixel = (1.0 + vector1[0]) / 2.0 * static_cast<double>(viewport[2]) + static_cast<double>(viewport[0]);
+   *yPixel = (1.0 + vector1[1]) / 2.0 * static_cast<double>(viewport[3]) + static_cast<double>(viewport[1]);
    *zPixel = vector1[2];
 }
 
@@ -371,7 +354,8 @@ bool DrawUtil::unProject(double xPixel, double yPixel, double zPixel, const doub
 {
    double vector1[4];
    double vector2[4];
-   int i, j;
+   int i;
+   int j;
    double projectionInverse[16];
    double modelInverse[16];
 
@@ -397,46 +381,46 @@ bool DrawUtil::unProject(double xPixel, double yPixel, double zPixel, const doub
    modelInverse[8] = modelMatrix[2];
    modelInverse[9] = modelMatrix[6];
    modelInverse[10] = modelMatrix[10];
-   for (i=0; i<3; i++)
+   for (i = 0; i < 3; ++i)
    {
-      modelInverse[12+i] = 0.0;
-      for (j=0; j<3; j++)
+      modelInverse[12 + i] = 0.0;
+      for (j = 0; j < 3; ++j)
       {
-         modelInverse[12+i] += modelMatrix[12+j] * modelMatrix[4*i+j];
+         modelInverse[12 + i] += modelMatrix[12 + j] * modelMatrix[4 * i + j];
       }
-      modelInverse[12+i] = -modelInverse[12+i];
+      modelInverse[12 + i] = -modelInverse[12 + i];
    }
    modelInverse[15] = 1.0;
 
    // to normalized device coords
-   vector1[0] = ((xPixel - (double)viewport[0]) / (double)viewport[2]) * 2.0 - 1.0;
-   vector1[1] = ((yPixel - (double)viewport[1]) / (double)viewport[3]) * 2.0 - 1.0;
+   vector1[0] = ((xPixel - static_cast<double>(viewport[0])) / static_cast<double>(viewport[2])) * 2.0 - 1.0;
+   vector1[1] = ((yPixel - static_cast<double>(viewport[1])) / static_cast<double>(viewport[3])) * 2.0 - 1.0;
    vector1[2] = zPixel;
    vector1[3] = -projectionMatrix[14] / (-zPixel - projectionMatrix[10]);
 
    // to clip coordinates
-   for (i=0; i<3; i++)
+   for (i = 0; i < 3; ++i)
    {
       vector1[i] *= vector1[3];
    }
 
    // to eye coordinates
-   for (i=0; i<4; i++)
+   for (i = 0; i < 4; ++i)
    {
       vector2[i] = 0.0;
-      for (j=0; j<4; j++)
+      for (j = 0; j < 4; ++j)
       {
-         vector2[i] += vector1[j]*projectionInverse[4*j+i];
+         vector2[i] += vector1[j] * projectionInverse[4 * j + i];
       }
    }
 
    // to object coordinates
-   for (i=0; i<4; i++)
+   for (i = 0; i < 4; ++i)
    {
       vector1[i] = 0.0;
-      for (j=0; j<4; j++)
+      for (j = 0; j < 4; ++j)
       {
-         vector1[i] += vector2[j]*modelInverse[4*j+i];
+         vector1[i] += vector2[j] * modelInverse[4 * j + i];
       }
    }
 
@@ -451,11 +435,12 @@ bool DrawUtil::unProjectToZero(double xPixel, double yPixel, const double modelM
                                const double projectionMatrix[16], const int viewport[4],
                                double *xCoord, double *yCoord)
 {
-   LocationType temp1, temp2;
-   double winZ1, winZ2;
-   bool success = true;
+   LocationType temp1;
+   LocationType temp2;
+   double winZ1;
+   double winZ2;
 
-   success = gluUnProject(xPixel, yPixel, 0.0, modelMatrix, projectionMatrix, viewport, &temp1.mX,
+   bool success = gluUnProject(xPixel, yPixel, 0.0, modelMatrix, projectionMatrix, viewport, &temp1.mX,
       &temp1.mY, &winZ1);
    if (success == true)
    {
@@ -465,12 +450,10 @@ bool DrawUtil::unProjectToZero(double xPixel, double yPixel, const double modelM
 
    if (success == true)
    {
-      double m1, m2;
-      LocationType loc;
       if (winZ2 != winZ1)
       {
-         m1 = (temp2.mX - temp1.mX) / (winZ2 - winZ1);
-         m2 = (temp2.mY - temp1.mY) / (winZ2 - winZ1);
+         double m1 = (temp2.mX - temp1.mX) / (winZ2 - winZ1);
+         double m2 = (temp2.mY - temp1.mY) / (winZ2 - winZ1);
          *xCoord = (m1 * (0 - winZ1)) + temp1.mX;
          *yCoord = (m2 * (0 - winZ1)) + temp1.mY;
       }
@@ -486,7 +469,8 @@ bool DrawUtil::unProjectToZero(double xPixel, double yPixel, const double modelM
 void DrawUtil::restrictToViewport(int &ulStartColumn, int &ulStartRow,
                                   int &ulEndColumn, int &ulEndRow)
 {
-   double modelMatrix[16], projectionMatrix[16];
+   double modelMatrix[16];
+   double projectionMatrix[16];
    int viewPort[4];
    glGetIntegerv(GL_VIEWPORT, viewPort);
    glGetDoublev(GL_PROJECTION_MATRIX, projectionMatrix);
@@ -494,8 +478,8 @@ void DrawUtil::restrictToViewport(int &ulStartColumn, int &ulStartRow,
    int viewExtents[4];
    viewExtents[0] = viewPort[0];
    viewExtents[1] = viewPort[1];
-   viewExtents[2] = viewPort[0]+viewPort[2]-1;
-   viewExtents[3] = viewPort[1]+viewPort[3]-1;
+   viewExtents[2] = viewPort[0] + viewPort[2] - 1;
+   viewExtents[3] = viewPort[1] + viewPort[3] - 1;
    if (glIsEnabled(GL_SCISSOR_TEST))
    {
       int scissorBox[4];
@@ -528,14 +512,14 @@ void DrawUtil::restrictToViewport(int &ulStartColumn, int &ulStartRow,
    bool maxYset = false;
    bool minXset = false;
    bool minYset = false;
-   LocationType maxes(-1e20, -1e20), mins(1e20, 1e20);
+   LocationType maxes(-1e20, -1e20);
+   LocationType mins(1e20, 1e20);
 
    int i;
    bool success = true;
-   for (i=0; i<4; i++)
+   for (i = 0; i < 4; ++i)
    {
       success = unProjectToZero(xCoords[i], yCoords[i], modelMatrix, projectionMatrix, viewPort, &loc.mX, &loc.mY);
-
       if (success)
       {
          if (loc.mX < mins.mX)
@@ -563,19 +547,19 @@ void DrawUtil::restrictToViewport(int &ulStartColumn, int &ulStartRow,
 
    if (minXset && ulStartColumn < mins.mX)
    {
-      ulStartColumn = min(mins.mX, (double)ulEndColumn);
+      ulStartColumn = min(mins.mX, static_cast<double>(ulEndColumn));
    }
    if (maxXset && ulEndColumn > maxes.mX)
    {
-      ulEndColumn = max(maxes.mX, (double)ulStartColumn);
+      ulEndColumn = max(maxes.mX, static_cast<double>(ulStartColumn));
    }
    if (minYset && ulStartRow < mins.mY)
    {
-      ulStartRow = min(mins.mY, (double)ulEndRow);
+      ulStartRow = min(mins.mY, static_cast<double>(ulEndRow));
    }
    if (maxYset && ulEndRow > maxes.mY)
    {
-      ulEndRow = max(maxes.mY, (double)ulStartRow);
+      ulEndRow = max(maxes.mY, static_cast<double>(ulStartRow));
    }
 }
 
@@ -589,7 +573,8 @@ inline double magdiff2(LocationType temp1, LocationType temp2)
 double DrawUtil::getPixelSize(GLfloat ulStartColumn, GLfloat ulStartRow,
                               GLfloat ulEndColumn, GLfloat ulEndRow)
 {
-   double modelMatrix[16], projectionMatrix[16];
+   double modelMatrix[16];
+   double projectionMatrix[16];
    int viewPort[4];
    glGetIntegerv(GL_VIEWPORT, viewPort);
    glGetDoublev(GL_PROJECTION_MATRIX, projectionMatrix);
@@ -597,7 +582,8 @@ double DrawUtil::getPixelSize(GLfloat ulStartColumn, GLfloat ulStartRow,
 
    double pixelSize = 0.0;
 
-   LocationType temp1, temp2;
+   LocationType temp1;
+   LocationType temp2;
    GLdouble winZ;
 
    project(ulStartColumn, ulStartRow, 0.0, modelMatrix, projectionMatrix, viewPort, &temp1.mX, &temp1.mY, &winZ);
@@ -678,41 +664,41 @@ void DrawUtil::drawRotatedText(DrawUtil::TextTexture &tex, QString text, QFont f
       // Get bounding box for text using specified font
       QRect textBoundingBox;           // Bounding box that surrounds the text
       QFontMetrics ftMetrics(font);    // Used to get width and height of text
-      int maxTextureSize   = 0;        // The max allowable texture size
-      double textWidth     = 0;        // The width of the text bounding box
-      double textHeight    = 0;        // The height of the text bounding box
+      int maxTextureSize = 0;          // The max allowable texture size
+      double textWidth = 0;            // The width of the text bounding box
+      double textHeight = 0;           // The height of the text bounding box
       glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
-      textBoundingBox   = ftMetrics.boundingRect(0, 0, maxTextureSize, maxTextureSize,
-                                                Qt::AlignLeft | Qt::TextWordWrap, text);
-      textWidth         = textBoundingBox.width();
-      textHeight        = textBoundingBox.height();
+      textBoundingBox = ftMetrics.boundingRect(0, 0, maxTextureSize, maxTextureSize,
+         Qt::AlignLeft | Qt::TextWordWrap, text);
+      textWidth = textBoundingBox.width();
+      textHeight = textBoundingBox.height();
 
       // Get corner locations of area to draw on screen
-      double pixelSize        = 0;  // The number of screen pixels represented by a coordinate pixel
-      double locationWidth    = 0;  // The width of the area on the screen that will be drawn
-      double locationHeight   = 0;  // The height of the area on the screen that will be drawn
+      double pixelSize = 0;            // The number of screen pixels represented by a coordinate pixel
+      double locationWidth = 0;        // The width of the area on the screen that will be drawn
+      double locationHeight = 0;       // The height of the area on the screen that will be drawn
       LocationType lowerStartLocation; // The lower left corner of the text display on the screen
       LocationType lowerEndLocation;   // The lower right corner of the text display on the screen
       LocationType upperStartLocation; // The upper left corner of the text display on the screen
       LocationType upperEndLocation;   // The upper right corner of the text display on the screen
-      pixelSize        = getPixelSize(textLocation.mX, textLocation.mY, textLocation.mX, textLocation.mY);
-      locationWidth    = (textWidth/pixelSize);
-      locationHeight   = (textHeight/pixelSize);
+      pixelSize = getPixelSize(textLocation.mX, textLocation.mY, textLocation.mX, textLocation.mY);
+      locationWidth = (textWidth/pixelSize);
+      locationHeight = (textHeight/pixelSize);
       if (drawFromTop)  // Upper left origin
       {
-         upperStartLocation    = textLocation;
-         upperEndLocation.mX   = upperStartLocation.mX + cos(textDirection) * locationWidth;
-         upperEndLocation.mY   = upperStartLocation.mY + sin(textDirection) * locationWidth;
-         getParallelLine(upperStartLocation, upperEndLocation, locationHeight * (-1), float(0), float(1),
-                        lowerStartLocation, lowerEndLocation);
+         upperStartLocation = textLocation;
+         upperEndLocation.mX = upperStartLocation.mX + cos(textDirection) * locationWidth;
+         upperEndLocation.mY = upperStartLocation.mY + sin(textDirection) * locationWidth;
+         getParallelLine(upperStartLocation, upperEndLocation, locationHeight * (-1), 0.0f, 1.0f,
+            lowerStartLocation, lowerEndLocation);
       }
       else   // Lower left origin
       {
-         lowerStartLocation    = textLocation;
-         lowerEndLocation.mX   = lowerStartLocation.mX + cos(textDirection) * locationWidth;
-         lowerEndLocation.mY   = lowerStartLocation.mY + sin(textDirection) * locationWidth;
-         getParallelLine(lowerStartLocation, lowerEndLocation, locationHeight, float(0), float(1),
-                        upperStartLocation, upperEndLocation);
+         lowerStartLocation = textLocation;
+         lowerEndLocation.mX = lowerStartLocation.mX + cos(textDirection) * locationWidth;
+         lowerEndLocation.mY = lowerStartLocation.mY + sin(textDirection) * locationWidth;
+         getParallelLine(lowerStartLocation, lowerEndLocation, locationHeight, 0.0f, 1.0f, upperStartLocation,
+            upperEndLocation);
       }
 
       // Create text image
@@ -727,24 +713,23 @@ void DrawUtil::drawRotatedText(DrawUtil::TextTexture &tex, QString text, QFont f
       QImage image = textBitmap.toImage();
 
       // Create GL texture
-      int textureWidth     = 0;     // The width of the GL texture
-      int textureHeight    = 0;     // The height of the GL texture
-      int bufSize          = 0;     // The size of the memory buffer used to hold the GL texture
-      GLuint textureId     = 0;     // Id of generated texture
+      int textureWidth = 0;      // The width of the GL texture
+      int textureHeight = 0;     // The height of the GL texture
+      int bufSize = 0;           // The size of the memory buffer used to hold the GL texture
+      GLuint textureId = 0;      // Id of generated texture
       unsigned int* target = NULL;
-      int i, j;                     // Loop variables
-      textureWidth   = pow(2.0, ceil(log10((double) textWidth) / log10(2.0))) + 0.5;
-      textureHeight  = pow(2.0, ceil(log10((double) textHeight) / log10(2.0))) + 0.5;
-      bufSize        = textureWidth * textureHeight;
+      textureWidth = pow(2.0, ceil(log10(textWidth) / log10(2.0))) + 0.5;
+      textureHeight = pow(2.0, ceil(log10(textHeight) / log10(2.0))) + 0.5;
+      bufSize = textureWidth * textureHeight;
       vector<unsigned int> texData(bufSize);
       fill(texData.begin(), texData.end(), 0);
       target = &texData[0];
-      for (j=0; j<textHeight; j++)
+      for (int j = 0; j < textHeight; ++j)
       {
          target = &texData[textureWidth * j];
-         for (i=0; i<textWidth; i++)
+         for (int i = 0; i < textWidth; ++i)
          {
-            if (image.pixel(i,j) != 0xffffffff)
+            if (image.pixel(i, j) != 0xffffffff)
             {
                *target = 0xffffffff;
             }
@@ -767,17 +752,15 @@ void DrawUtil::drawRotatedText(DrawUtil::TextTexture &tex, QString text, QFont f
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glEnable(GL_TEXTURE_2D);
-      glGenTextures (1, &textureId);
+      glGenTextures(1, &textureId);
       glBindTexture(GL_TEXTURE_2D, textureId);
-      glTexParameterf(GL_TEXTURE_2D,  GL_TEXTURE_WRAP_S, GL_CLAMP);
-      glTexParameterf(GL_TEXTURE_2D,  GL_TEXTURE_WRAP_T, GL_CLAMP);
+      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
       glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,   GL_LINEAR);
+      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
       glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 
-         0, GL_RGBA, GL_UNSIGNED_BYTE, &texData[0]);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, &texData[0]);
       tex = DrawUtil::TextTexture(textureId, font, textureWidth, textureHeight, textWidth, textHeight);
-
    }
 
    // Get corner locations of area to draw on screen
@@ -785,28 +768,28 @@ void DrawUtil::drawRotatedText(DrawUtil::TextTexture &tex, QString text, QFont f
    LocationType lowerEndLocation;   // The lower right corner of the text display on the screen
    LocationType upperStartLocation; // The upper left corner of the text display on the screen
    LocationType upperEndLocation;   // The upper right corner of the text display on the screen
-   double locationWidth  = 0;       // The width of the text image on the screen
+   double locationWidth = 0;        // The width of the text image on the screen
    double locationHeight = 0;       // The height of the text image on the screen
-   locationWidth  = (tex.getTextWidth()/getPixelSize(textLocation.mX, textLocation.mY,
-                     textLocation.mX, textLocation.mY));
-   locationHeight = (tex.getTextHeight()/getPixelSize(textLocation.mX, textLocation.mY,
-                     textLocation.mX, textLocation.mY));
+   locationWidth = (tex.getTextWidth()/getPixelSize(textLocation.mX, textLocation.mY, textLocation.mX,
+      textLocation.mY));
+   locationHeight = (tex.getTextHeight()/getPixelSize(textLocation.mX, textLocation.mY, textLocation.mX,
+      textLocation.mY));
    if (drawFromTop)  // Upper left origin
    {
-      upperStartLocation    = textLocation;
-      upperEndLocation.mX   = upperStartLocation.mX + cos(textDirection) * locationWidth;
-      upperEndLocation.mY   = upperStartLocation.mY + sin(textDirection) * locationWidth;
-      getParallelLine(upperStartLocation, upperEndLocation, locationHeight * (-1), float(0), float(1),
-                      lowerStartLocation, lowerEndLocation);
+      upperStartLocation = textLocation;
+      upperEndLocation.mX = upperStartLocation.mX + cos(textDirection) * locationWidth;
+      upperEndLocation.mY = upperStartLocation.mY + sin(textDirection) * locationWidth;
+      getParallelLine(upperStartLocation, upperEndLocation, locationHeight * (-1), 0.0f, 1.0f, lowerStartLocation,
+         lowerEndLocation);
    }
    else   // Lower left origin
    {
-      lowerStartLocation    = textLocation;
-      lowerEndLocation.mX   = lowerStartLocation.mX + cos(textDirection) * locationWidth;
-      lowerEndLocation.mY   = lowerStartLocation.mY + sin(textDirection) * locationWidth;
-      getParallelLine(lowerStartLocation, lowerEndLocation, locationHeight, float(0), float(1),
-                      upperStartLocation, upperEndLocation);
-   } 
+      lowerStartLocation = textLocation;
+      lowerEndLocation.mX = lowerStartLocation.mX + cos(textDirection) * locationWidth;
+      lowerEndLocation.mY = lowerStartLocation.mY + sin(textDirection) * locationWidth;
+      getParallelLine(lowerStartLocation, lowerEndLocation, locationHeight, 0.0f, 1.0f, upperStartLocation,
+         upperEndLocation);
+   }
 
    // Set GL options for text
    glEnable(GL_BLEND);
@@ -818,7 +801,8 @@ void DrawUtil::drawRotatedText(DrawUtil::TextTexture &tex, QString text, QFont f
    bool bHorizontalFlip = false;
    bool bVerticalFlip = false;
    {
-      double projection[16], modelView[16];
+      double projection[16];
+      double modelView[16];
       int viewport[4];
       glGetIntegerv(GL_VIEWPORT, viewport);
       glGetDoublev(GL_PROJECTION_MATRIX, projection);
@@ -842,9 +826,8 @@ void DrawUtil::drawRotatedText(DrawUtil::TextTexture &tex, QString text, QFont f
    }
 
    // Draw text
-   double maxS, maxT;      // Texture coordinates
-   maxS = tex.getTextWidth() / (double) tex.getTextureWidth();
-   maxT = tex.getTextHeight() / (double) tex.getTextureHeight();
+   double maxS = tex.getTextWidth() / static_cast<double>(tex.getTextureWidth());
+   double maxT = tex.getTextHeight() / static_cast<double>(tex.getTextureHeight());
 
    glBegin(GL_QUADS);
    glColor4ub(textColor.mRed, textColor.mGreen, textColor.mBlue, 255);
@@ -927,79 +910,78 @@ void DrawUtil::getParallelLine(LocationType origLineStart, LocationType origLine
    }
    
    // Variables
-   double offsetScreenX = 0; // Screen coord X offset from main line to new line
-   double offsetScreenY = 0; // Screen coord Y offset from main line to new line
-   double width         = 0; // Width of box bounding original line
-   double height        = 0; // Height of box bounding original line
-   double theta         = 0; // angle of line
+   double offsetScreenX = 0;  // Screen coord X offset from main line to new line
+   double offsetScreenY = 0;  // Screen coord Y offset from main line to new line
+   double width = 0;          // Width of box bounding original line
+   double height = 0;         // Height of box bounding original line
+   double theta = 0;          // angle of line
 
    // Calculate parameters
-   width          = origLineEnd.mX - origLineStart.mX;
-   height         = origLineEnd.mY - origLineStart.mY;
-   theta          = atan2(height, width);
-   offsetScreenX  = offset * cos(theta);
-   offsetScreenY  = offset * sin(theta);
+   width = origLineEnd.mX - origLineStart.mX;
+   height = origLineEnd.mY - origLineStart.mY;
+   theta = atan2(height, width);
+   offsetScreenX = offset * cos(theta);
+   offsetScreenY = offset * sin(theta);
 
    // Calculate new line coordinates
-   newLineStart.mX   = origLineStart.mX + (width * startRatio) + offsetScreenY;
-   newLineStart.mY   = origLineStart.mY + (height * startRatio) - offsetScreenX;
-   newLineEnd.mX     = origLineEnd.mX - (width * (1-endRatio)) + offsetScreenY;
-   newLineEnd.mY     = origLineEnd.mY - (height * (1-endRatio)) - offsetScreenX;
+   newLineStart.mX = origLineStart.mX + (width * startRatio) + offsetScreenY;
+   newLineStart.mY = origLineStart.mY + (height * startRatio) - offsetScreenX;
+   newLineEnd.mX = origLineEnd.mX - (width * (1 - endRatio)) + offsetScreenY;
+   newLineEnd.mY = origLineEnd.mY - (height * (1 - endRatio)) - offsetScreenX;
 }
 
 void DrawUtil::getPerpendicularLine(LocationType origLineStart, LocationType origLineEnd,
-                                    float length, LocationType &newLineStart, LocationType &newLineEnd)
+                                    float length, LocationType& newLineStart, LocationType& newLineEnd)
 {
-
    // Verify that arguments are valid
    if (length < 0)
    {
       return;
    }
-   
+
    // Variables
-   double perpLineLength   = 0;  // The length of the perpendicular line
-   double perpLineScreenX  = 0;  // Screen coord x component of perp. line length
-   double perpLineScreenY  = 0;  // Screen coord y component of perp. line length
-   double width            = 0;  // Width of box bounding original line
-   double height           = 0;  // Height of box bounding original line
-   double theta            = 0;  // angle of original line
+   double perpLineLength = 0;    // The length of the perpendicular line
+   double perpLineScreenX = 0;   // Screen coord x component of perp. line length
+   double perpLineScreenY = 0;   // Screen coord y component of perp. line length
+   double width = 0;             // Width of box bounding original line
+   double height = 0;            // Height of box bounding original line
+   double theta = 0;             // angle of original line
 
    // Calculate parameters
-   width             = origLineEnd.mX - origLineStart.mX;
-   height            = origLineEnd.mY - origLineStart.mY;
-   theta             = atan2(height, width);
-   perpLineScreenX   = length * cos(theta);
-   perpLineScreenY   = length * sin(theta);
+   width = origLineEnd.mX - origLineStart.mX;
+   height = origLineEnd.mY - origLineStart.mY;
+   theta = atan2(height, width);
+   perpLineScreenX = length * cos(theta);
+   perpLineScreenY = length * sin(theta);
 
    // Calculate perpendicular line coordinates
-   newLineStart.mX   = origLineEnd.mX - width - perpLineScreenY;
-   newLineStart.mY   = origLineEnd.mY - height + perpLineScreenX;
-   newLineEnd.mX     = origLineEnd.mX - width + perpLineScreenY;
-   newLineEnd.mY     = origLineEnd.mY - height - perpLineScreenX;
+   newLineStart.mX = origLineEnd.mX - width - perpLineScreenY;
+   newLineStart.mY = origLineEnd.mY - height + perpLineScreenX;
+   newLineEnd.mX = origLineEnd.mX - width + perpLineScreenY;
+   newLineEnd.mY = origLineEnd.mY - height - perpLineScreenX;
 }
 
 DrawUtil::TextTexture::TextTextureImp::TextTextureImp(GLuint textureId, QFont font, unsigned int textureWidth,
-                                      unsigned int textureHeight, unsigned int textWidth, 
-                                      unsigned int textHeight) :
-      mTextureWidth(textureWidth),
-      mTextureHeight(textureHeight),
-      mTextWidth(textWidth),
-      mTextHeight(textHeight),
-      mTextureId(textureId),
-      mFont(font),
-      mReferenceCount(1)
+                                                      unsigned int textureHeight, unsigned int textWidth,
+                                                      unsigned int textHeight) :
+   mTextureWidth(textureWidth),
+   mTextureHeight(textureHeight),
+   mTextWidth(textWidth),
+   mTextHeight(textHeight),
+   mFont(font),
+   mTextureId(textureId),
+   mReferenceCount(1)
 {
 }
 
-DrawUtil::TextTexture::TextTextureImp::TextTextureImp(const TextTextureImp &rhs)
+DrawUtil::TextTexture::TextTextureImp::TextTextureImp(const TextTextureImp& rhs)
 {
    // should never get here
    VERIFYNRV(false);
 }
 
-const DrawUtil::TextTexture::TextTextureImp &DrawUtil::TextTexture::TextTextureImp::operator=
-   (const TextTextureImp &rhs)
+const DrawUtil::TextTexture::TextTextureImp& DrawUtil::TextTexture::TextTextureImp::operator=
+   (const TextTextureImp& rhs)
 {
    // should never get here
    VERIFYRV(false, *this);
@@ -1402,16 +1384,24 @@ int DrawUtil::determineOctant(double dx, double dy)
       if (dx > 0)
       {
          if (dx > dy)
+         {
             return 0;
+         }
          else
+         {
             return 1;
+         }
       }
       else
       {
          if (-dx > dy)
+         {
             return 3;
+         }
          else
+         {
             return 2;
+         }
       }
    }
    else
@@ -1419,16 +1409,24 @@ int DrawUtil::determineOctant(double dx, double dy)
       if (dx > 0)
       {
          if (dx > -dy)
+         {
             return 7;
+         }
          else
+         {
             return 6;
+         }
       }
       else
       {
          if (dx < dy)
+         {
             return 4;
+         }
          else
+         {
             return 5;
+         }
       }
    }
 }

@@ -60,8 +60,8 @@ public:
    bool fromXml(DOMNode* pDocument, unsigned int version);
 
 public slots:
-   void setXScaleType(ScaleType eType);
-   void setYScaleType(ScaleType eType);
+   void setXScaleType(ScaleType scaleType);
+   void setYScaleType(ScaleType scaleType);
    void setXDataType(const QString& strDataType);
    void setYDataType(const QString& strDataType);
    void zoomCustom();

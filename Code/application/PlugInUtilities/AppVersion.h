@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef APP_VERSION_H
-#define APP_VERSION_H
+#ifndef APPVERSION_H
+#define APPVERSION_H
 
 #define APP_NAME "Opticks"
 #define APP_NAME_LONG "Opticks"

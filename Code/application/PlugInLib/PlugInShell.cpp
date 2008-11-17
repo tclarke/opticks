@@ -199,14 +199,14 @@ void PlugInShell::setCopyright(const string& copyright)
    mCopyright = copyright;
 }
 
-void PlugInShell::addDependencyCopyright(const string &dependencyName, const string &copyright)
+void PlugInShell::addDependencyCopyright(const string& dependencyName, const string& copyright)
 {
-   if(!dependencyName.empty())
+   if (!dependencyName.empty())
    {
-      if(copyright.empty())
+      if (copyright.empty())
       {
          map<string, string>::iterator loc = mDependencyCopyright.find(dependencyName);
-         if(loc != mDependencyCopyright.end())
+         if (loc != mDependencyCopyright.end())
          {
             mDependencyCopyright.erase(loc);
          }

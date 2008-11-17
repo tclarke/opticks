@@ -33,16 +33,11 @@
 #include "SampleGeoref.h"
 #include "TiePointTester.h"
 
-//
-// These static variables are used to describe the Module.  Set
-// these according to how you want the Module configured.
-//
-const char *ModuleManager::mspName = "Plug-In Sampler Qt";
-const char *ModuleManager::mspVersion = "1.0";
-const char *ModuleManager::mspDescription = "Sample plug-ins that test various components "
-   "in the published interfaces.";
-const char *ModuleManager::mspValidationKey = "none";
-const char *ModuleManager::mspUniqueId = "{5A464B36-8FAB-4168-9234-B1C341CE2999}";
+const char* ModuleManager::mspName = "Plug-In Sampler Qt";
+const char* ModuleManager::mspVersion = "1.0";
+const char* ModuleManager::mspDescription = "Sample plug-ins that test various components in the published interfaces.";
+const char* ModuleManager::mspValidationKey = "none";
+const char* ModuleManager::mspUniqueId = "{5A464B36-8FAB-4168-9234-B1C341CE2999}";
 
 unsigned int ModuleManager::getTotalPlugIns()
 {
@@ -52,7 +47,6 @@ unsigned int ModuleManager::getTotalPlugIns()
 PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
 {
    PlugIn* pPlugIn = NULL;
-
    switch (plugInNumber)
    {
       case 0:

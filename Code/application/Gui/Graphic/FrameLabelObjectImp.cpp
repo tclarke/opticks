@@ -28,27 +28,20 @@
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
 
-FrameLabelObjectImp::FrameLabelObjectImp(const string& id,
-   GraphicObjectType type, GraphicLayer* pLayer, LocationType pixelCoord) :
+FrameLabelObjectImp::FrameLabelObjectImp(const string& id, GraphicObjectType type, GraphicLayer* pLayer,
+                                         LocationType pixelCoord) :
    TextObjectImp(id, type, pLayer, pixelCoord),
-   mpView(SIGNAL_NAME(ViewImp, AnimationControllerChanged),
-      Slot(this, &FrameLabelObjectImp::updateAnimations)),
-   mpLayerList(SIGNAL_NAME(LayerList, LayerAdded),
-      Slot(this, &FrameLabelObjectImp::updateAnimations)),
    mAutoMode(false),
-   mLocked(false)
+   mLocked(false),
+   mpView(SIGNAL_NAME(ViewImp, AnimationControllerChanged), Slot(this, &FrameLabelObjectImp::updateAnimations)),
+   mpLayerList(SIGNAL_NAME(LayerList, LayerAdded), Slot(this, &FrameLabelObjectImp::updateAnimations))
 {
    mpAnimationController.addSignal(SIGNAL_NAME(AnimationController, AnimationAdded),
       Slot(this, &FrameLabelObjectImp::animationAdded));
-
    mpAnimationController.addSignal(SIGNAL_NAME(AnimationController, AnimationRemoved),
       Slot(this, &FrameLabelObjectImp::animationRemoved));
-
-   mpAnimationController.addSignal(SIGNAL_NAME(Subject, Deleted),
-      Slot(this, &FrameLabelObjectImp::updateAnimations));
-
-   mpLayer.addSignal(SIGNAL_NAME(LayerImp, ViewModified),
-      Slot(this, &FrameLabelObjectImp::updateAnimations));
+   mpAnimationController.addSignal(SIGNAL_NAME(Subject, Deleted), Slot(this, &FrameLabelObjectImp::updateAnimations));
+   mpLayer.addSignal(SIGNAL_NAME(LayerImp, ViewModified), Slot(this, &FrameLabelObjectImp::updateAnimations));
 
    reset();
 }
@@ -234,10 +227,8 @@ void FrameLabelObjectImp::eraseLayer(RasterLayer* pLayer)
       vector<RasterLayer*>::iterator location = find(mLayers.begin(), mLayers.end(), pLayer);
       if (location != mLayers.end())
       {
-         pLayer->detach(SIGNAL_NAME(RasterLayer, AnimationChanged),
-            Slot(this, &FrameLabelObjectImp::updateAnimations));
-         pLayer->detach(SIGNAL_NAME(Subject, Deleted),
-            Slot(this, &FrameLabelObjectImp::layerDeleted));
+         pLayer->detach(SIGNAL_NAME(RasterLayer, AnimationChanged), Slot(this, &FrameLabelObjectImp::updateAnimations));
+         pLayer->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &FrameLabelObjectImp::layerDeleted));
          eraseAnimation(pLayer->getAnimation());
          mLayers.erase(location);
       }
@@ -262,7 +253,7 @@ void FrameLabelObjectImp::updateText()
    unsigned int maxCount = 0;
    const bool findMinimum = FrameLabelObject::getSettingDisplayMinimumFrame();
 
-   for (vector<Animation*>::const_iterator iter = mAnimations.begin(); iter != mAnimations.end(); iter++)
+   for (vector<Animation*>::const_iterator iter = mAnimations.begin(); iter != mAnimations.end(); ++iter)
    {
       const Animation* pCurrentAnimation = *iter;
       if (pCurrentAnimation != NULL)
@@ -309,7 +300,7 @@ void FrameLabelObjectImp::insertAnimations(const vector<Animation*> &animations)
 {
    if (getLocked() == false)
    {
-      for (vector<Animation*>::const_iterator iter = animations.begin(); iter != animations.end(); iter++)
+      for (vector<Animation*>::const_iterator iter = animations.begin(); iter != animations.end(); ++iter)
       {
          insertAnimation(*iter);
       }
@@ -425,11 +416,11 @@ bool FrameLabelObjectImp::toXml(XMLWriter* pXml) const
    }
 
    pXml->addAttr("autoMode", StringUtilities::toXmlString<bool>(getAutoMode()));
-   if (mAnimations.size() > 0)
+   if (mAnimations.empty() == false)
    {
       pXml->pushAddPoint(pXml->addElement("Animations"));
       vector<Animation*>::const_iterator it;
-      for (it=mAnimations.begin(); it!=mAnimations.end(); ++it)
+      for (it = mAnimations.begin(); it != mAnimations.end(); ++it)
       {
          Animation* pAnim = *it;
          if (pAnim != NULL)
@@ -466,17 +457,17 @@ bool FrameLabelObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
       // If the object is not currently locked, load all frames
       if (getLocked() == false)
       {
-         for(DOMNode* pChild = pDocument->getFirstChild(); 
+         for (DOMNode* pChild = pDocument->getFirstChild(); 
             pChild != NULL; pChild = pChild->getNextSibling())
          {
-            if(XMLString::equals(pChild->getNodeName(), X("Animations")))
+            if (XMLString::equals(pChild->getNodeName(), X("Animations")))
             {
                vector<Animation*> animations;
-               for(DOMNode* pGrandchild = pChild->getFirstChild();
+               for (DOMNode* pGrandchild = pChild->getFirstChild();
                   pGrandchild != NULL;
                   pGrandchild = pGrandchild->getNextSibling())
                {
-                  if(XMLString::equals(pGrandchild->getNodeName(), X("Animation")))
+                  if (XMLString::equals(pGrandchild->getNodeName(), X("Animation")))
                   {
                      pElement = dynamic_cast<DOMElement*>(pGrandchild);
                      if (pElement != NULL)

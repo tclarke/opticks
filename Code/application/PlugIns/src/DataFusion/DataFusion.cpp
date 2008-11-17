@@ -18,7 +18,7 @@
 #include <string>
 using namespace std;
 
-const std::string DataFusion::PLUGIN_NAME = "Data Fusion";
+const string DataFusion::PLUGIN_NAME = "Data Fusion";
 
 DataFusion::DataFusion() : mbInteractive(true), mpWizardDlg(NULL)
 {
@@ -42,7 +42,7 @@ bool DataFusion::abort()
    return ViewerShell::abort();
 }
 
-bool DataFusion::getInputSpecification(PlugInArgList* &pArgList)
+bool DataFusion::getInputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
    if (mbInteractive)
@@ -70,9 +70,9 @@ bool DataFusion::getInputSpecification(PlugInArgList* &pArgList)
    return true;
 }
 
-bool DataFusion::getOutputSpecification(PlugInArgList* &pOutputArgs)
+bool DataFusion::getOutputSpecification(PlugInArgList*& pArgList)
 {
-   pOutputArgs = NULL;
+   pArgList = NULL;
    return true;
 }
 
@@ -105,7 +105,7 @@ bool DataFusion::execute(PlugInArgList* pInputArgs, PlugInArgList* pOutputArgs)
    if (mbInteractive)
    {
       mProgressTracker.initialize(pProgress, "Executing DataFusion Plug-In", "app",
-                                  "B7E3EF13-70D1-4a45-A95E-0126373C3191");
+         "B7E3EF13-70D1-4a45-A95E-0126373C3191");
 
       if (mpWizardDlg == NULL)
       {

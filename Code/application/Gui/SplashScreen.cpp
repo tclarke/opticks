@@ -35,7 +35,8 @@ SplashScreen::SplashScreen(Progress* pProgress) :
    bool bProductionRelease = false;
    QString strReleaseType;
 
-   ConfigurationSettingsImp* pConfigSettings = dynamic_cast<ConfigurationSettingsImp*>(Service<ConfigurationSettings>().get());
+   ConfigurationSettingsImp* pConfigSettings =
+      dynamic_cast<ConfigurationSettingsImp*>(Service<ConfigurationSettings>().get());
    strVersion = QString::fromStdString(pConfigSettings->getVersion());
    strVersion += " Build " + QString::fromStdString(pConfigSettings->getBuildRevision());
 

@@ -7,14 +7,12 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef HDF_PAGER_H
-#define HDF_PAGER_H
-
-#include <string>
+#ifndef HDFPAGER_H
+#define HDFPAGER_H
 
 #include "CachedPager.h"
+
+#include <string>
 
 /**
  * This base class is a raster pager for all HDF files. It provides a specification
@@ -64,7 +62,7 @@ protected:
     * @return  The name of the HDF dataset. For HDF4 data sets, this will be a name. For HDF5 datasets,
     *          this will be the full path and name that uniquely identifies the dataset.
     */
-   const std::string& getHdfDatasetName() const { return mHdfName; }
+   const std::string& getHdfDatasetName() const;
 
    /**
     * Closes the HDF file.

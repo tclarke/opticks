@@ -16,13 +16,14 @@
 
 #include <limits>
 
-ConvertToBsqPager::ConvertToBsqPager(RasterElement *pRaster): 
-   mpRaster(pRaster), mBytesPerElement(0), mSkipBytes(std::numeric_limits<unsigned int>::max())
+ConvertToBsqPager::ConvertToBsqPager(RasterElement* pRaster) :
+   mpRaster(pRaster),
+   mBytesPerElement(0),
+   mSkipBytes(std::numeric_limits<unsigned int>::max())
 {
    if (mpRaster != NULL)
    {
-      const RasterDataDescriptor* pDd =
-         dynamic_cast<const RasterDataDescriptor*>(mpRaster->getDataDescriptor());
+      const RasterDataDescriptor* pDd = dynamic_cast<const RasterDataDescriptor*>(mpRaster->getDataDescriptor());
       if (pDd != NULL)
       {
          mBytesPerElement = pDd->getBytesPerElement();
@@ -39,14 +40,12 @@ ConvertToBsqPager::ConvertToBsqPager(RasterElement *pRaster):
    }
 }
 
-ConvertToBsqPager::~ConvertToBsqPager(void)
+ConvertToBsqPager::~ConvertToBsqPager()
 {
 }
 
-RasterPage *ConvertToBsqPager::getPage(DataRequest *pOriginalRequest, 
-      DimensionDescriptor startRow,
-      DimensionDescriptor startColumn,
-      DimensionDescriptor startBand)
+RasterPage *ConvertToBsqPager::getPage(DataRequest* pOriginalRequest, DimensionDescriptor startRow,
+                                       DimensionDescriptor startColumn, DimensionDescriptor startBand)
 {
    VERIFYRV(pOriginalRequest != NULL, NULL);
 
@@ -67,7 +66,7 @@ RasterPage *ConvertToBsqPager::getPage(DataRequest *pOriginalRequest,
    VERIFY(startBand == stopBand && concurrentBands == 1);
 
    VERIFY(mpRaster != NULL);
-   const RasterDataDescriptor *pDd = dynamic_cast<const RasterDataDescriptor*>(mpRaster->getDataDescriptor());
+   const RasterDataDescriptor* pDd = dynamic_cast<const RasterDataDescriptor*>(mpRaster->getDataDescriptor());
    VERIFY(pDd != NULL);
    InterleaveFormatType interleave = pDd->getInterleaveFormat();
 
@@ -86,9 +85,7 @@ RasterPage *ConvertToBsqPager::getPage(DataRequest *pOriginalRequest,
    }
 
    unsigned int cols = stopColumn.getActiveNumber()-startColumn.getActiveNumber()+1;
-   ConvertToBsqPage *pPage = new ConvertToBsqPage(concurrentRows,
-      cols, mBytesPerElement);
-
+   ConvertToBsqPage* pPage = new ConvertToBsqPage(concurrentRows, cols, mBytesPerElement);
 
    FactoryResource<DataRequest> pRequest;
    pRequest->setRows(startRow, stopRow, concurrentRows);
@@ -113,9 +110,9 @@ RasterPage *ConvertToBsqPager::getPage(DataRequest *pOriginalRequest,
    return pPage;
 }
 
-void ConvertToBsqPager::releasePage(RasterPage *pPage)
+void ConvertToBsqPager::releasePage(RasterPage* pPage)
 {
-   ConvertToBsqPage *pConvertPage = dynamic_cast<ConvertToBsqPage*>(pPage);
+   ConvertToBsqPage* pConvertPage = dynamic_cast<ConvertToBsqPage*>(pPage);
    if (pConvertPage != NULL)
    {
       delete pConvertPage;

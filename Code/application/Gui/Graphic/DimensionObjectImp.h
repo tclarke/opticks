@@ -25,8 +25,8 @@ public:
    void drawVector(double zoomFactor) const;
    void drawPixels(double zoomFactor) const;
 
-   void getSecExtents(int &minSec, int &maxSec) const;
-   void getMainExtents(int &minMin, int &maxMain) const;
+   void getSecExtents(int& minSec, int& maxSec) const;
+   void getMainExtents(int& minMain, int& maxMain) const;
 
 
    bool hit(LocationType coord) const;

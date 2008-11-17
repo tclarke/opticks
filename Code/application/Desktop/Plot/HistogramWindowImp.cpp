@@ -38,8 +38,8 @@
 #include <vector>
 using namespace std;
 
-HistogramWindowImp::HistogramWindowImp(const string& id, const string& windowName, QWidget* parent) :
-   PlotWindowImp(id, windowName, parent),
+HistogramWindowImp::HistogramWindowImp(const string& id, const string& windowName, QWidget* pParent) :
+   PlotWindowImp(id, windowName, pParent),
    mpExplorer(Service<SessionExplorer>().get(), SIGNAL_NAME(SessionExplorer, AboutToShowSessionItemContextMenu),
       Slot(this, &HistogramWindowImp::updateContextMenu)),
    mDisplayModeChanging(false),
@@ -220,9 +220,9 @@ PlotWidget* HistogramWindowImp::getPlot(Layer* pLayer) const
 
    // Iterate over all histogram plots on all plot sets to find the plot
    vector<PlotWidget*> plots = getPlots(HISTOGRAM_PLOT);
-   for (unsigned int i = 0; i < plots.size(); i++)
+   for (vector<PlotWidget*>::iterator iter = plots.begin(); iter != plots.end(); ++iter)
    {
-      PlotWidget* pPlot = plots[i];
+      PlotWidget* pPlot = *iter;
       if (pPlot != NULL)
       {
          HistogramPlotImp* pHistogramPlot = dynamic_cast<HistogramPlotImp*>(pPlot->getPlot());
@@ -265,9 +265,9 @@ PlotWidget* HistogramWindowImp::getPlot(RasterLayer* pLayer, RasterChannelType c
 
    // Iterate over all histogram plots on all plot sets to find the plot
    vector<PlotWidget*> plots = getPlots(HISTOGRAM_PLOT);
-   for (unsigned int i = 0; i < plots.size(); i++)
+   for (vector<PlotWidget*>::iterator iter = plots.begin(); iter != plots.end(); ++iter)
    {
-      PlotWidget* pPlot = plots[i];
+      PlotWidget* pPlot = *iter;
       if (pPlot != NULL)
       {
          HistogramPlotImp* pHistogramPlot = dynamic_cast<HistogramPlotImp*>(pPlot->getPlot());
@@ -632,7 +632,7 @@ void HistogramWindowImp::deletePlot(RasterLayer* pLayer, RasterChannelType chann
          pPlotWidget->detach(SIGNAL_NAME(PlotWidget, AboutToShowContextMenu),
             Slot(this, &HistogramWindowImp::updateContextMenu));
 
-         RasterLayerImp *pRasterLayerImp = dynamic_cast<RasterLayerImp*>(pLayer);
+         RasterLayerImp* pRasterLayerImp = dynamic_cast<RasterLayerImp*>(pLayer);
          if (pRasterLayerImp != NULL)
          {
             disconnect(pRasterLayerImp, SIGNAL(displayModeChanged(const DisplayMode&)), this,
@@ -749,11 +749,11 @@ void HistogramWindowImp::activateLayer(PlotWidget* pPlot)
       if (activate)
       {
          // Don't activate the primary raster element
-         RasterElement *pElement = dynamic_cast<RasterElement*>(pLayer->getDataElement());
-         SpatialDataView *pView = dynamic_cast<SpatialDataView*>(pLayer->getView());
+         RasterElement* pElement = dynamic_cast<RasterElement*>(pLayer->getDataElement());
+         SpatialDataView* pView = dynamic_cast<SpatialDataView*>(pLayer->getView());
          if (pView != NULL && pElement != NULL)
          {
-            LayerList *pLayerList = pView->getLayerList();
+            LayerList* pLayerList = pView->getLayerList();
             if (pLayerList != NULL)
             {
                if (pLayerList->getPrimaryRasterElement() == pElement)
@@ -801,7 +801,7 @@ void HistogramWindowImp::activateLayer(PlotWidget* pPlot)
    emit plotActivated(pLayer, channel);
 }
 
-void HistogramWindowImp::showEvent(QShowEvent * pEvent)
+void HistogramWindowImp::showEvent(QShowEvent* pEvent)
 {
    PlotWindowImp::showEvent(pEvent);
    mUpdater.update();
@@ -959,7 +959,8 @@ void HistogramWindowImp::syncAutoZoom()
    }
 }
 
-HistogramWindowImp::HistogramUpdater::HistogramUpdater(HistogramWindowImp *pWindow) : mpWindow(pWindow)
+HistogramWindowImp::HistogramUpdater::HistogramUpdater(HistogramWindowImp* pWindow) :
+   mpWindow(pWindow)
 {
 }
 
@@ -974,32 +975,34 @@ void HistogramWindowImp::HistogramUpdater::update()
    mUpdatesPending.clear();
 }
 
-HistogramWindowImp::HistogramUpdater::UpdateMomento::UpdateMomento(HistogramWindowImp *pWindow, RasterLayer *pLayer, 
+HistogramWindowImp::HistogramUpdater::UpdateMomento::UpdateMomento(HistogramWindowImp* pWindow,
+                                                                   RasterLayer* pLayer,
                                                                    RasterChannelType channel) :
-   mpWindow(pWindow), mpRasterLayer(new AttachmentPtr<RasterLayer>(pLayer)), mChannel(channel)
+   mpWindow(pWindow),
+   mpRasterLayer(new AttachmentPtr<RasterLayer>(pLayer)),
+   mChannel(channel)
 {
 }
 
 void HistogramWindowImp::HistogramUpdater::UpdateMomento::update() const
 {
-   RasterLayer *pLayer = mpRasterLayer.get()==NULL?NULL:mpRasterLayer.get()->get();
+   RasterLayer* pLayer = mpRasterLayer.get() == NULL ? NULL : mpRasterLayer.get()->get();
    if (pLayer == NULL || mpWindow == NULL)
    {
       return;
    }
+
    mpWindow->updatePlotInfo(pLayer, mChannel);
 }
 
-bool HistogramWindowImp::HistogramUpdater::UpdateMomento::operator<(const UpdateMomento &rhs) const
+bool HistogramWindowImp::HistogramUpdater::UpdateMomento::operator<(const UpdateMomento& rhs) const
 {
-   RasterLayer *pLeftLayer = mpRasterLayer.get()==NULL?NULL:mpRasterLayer.get()->get();
-   RasterLayer *pRightLayer = rhs.mpRasterLayer.get()==NULL?NULL:rhs.mpRasterLayer.get()->get();
+   RasterLayer* pLeftLayer = mpRasterLayer.get() == NULL ? NULL : mpRasterLayer.get()->get();
+   RasterLayer* pRightLayer = rhs.mpRasterLayer.get() == NULL ? NULL : rhs.mpRasterLayer.get()->get();
    if (pLeftLayer == pRightLayer)
    {
       return this->mChannel < rhs.mChannel;
    }
-   else
-   {
-      return pLeftLayer < pRightLayer;
-   }
+
+   return pLeftLayer < pRightLayer;
 }

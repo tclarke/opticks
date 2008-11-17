@@ -57,7 +57,7 @@ private:
    LineStyleComboBox* mpLineStyleCombo;
    LineWidthComboBox* mpLineWidthCombo;
    CustomColorButton* mpLineColorButton;
-   QCheckBox *mpScaledCheck;
+   QCheckBox* mpScaledCheck;
 
 };
 

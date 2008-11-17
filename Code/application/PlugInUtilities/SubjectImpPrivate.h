@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef SUBJECT_IMP_PRIVATE_H
-#define SUBJECT_IMP_PRIVATE_H
+#ifndef SUBJECTIMPPRIVATE_H
+#define SUBJECTIMPPRIVATE_H
 
 #include "TypesFile.h"
 
@@ -29,16 +29,17 @@ class SubjectImpPrivate
 public:
    SubjectImpPrivate();
    virtual ~SubjectImpPrivate();
-   virtual bool attach(Subject &subject, const std::string &signal, const Slot &slot);
-   virtual bool detach(Subject &subject, const std::string &signal, const Slot &slot);
-   void notify(Subject &subject, const std::string &signal, const std::string &originalSignal, const boost::any &data=boost::any());
-   const std::list<SafeSlot>& getSlots(const std::string & signal);
-   void removeEmptySlots(const std::string &recursion, std::list<SafeSlot> &slotVec);
+   virtual bool attach(Subject& subject, const std::string& signal, const Slot& slot);
+   virtual bool detach(Subject& subject, const std::string& signal, const Slot& slot);
+   void notify(Subject& subject, const std::string& signal, const std::string& originalSignal,
+      const boost::any& data = boost::any());
+   const std::list<SafeSlot>& getSlots(const std::string& signal);
+   void removeEmptySlots(const std::string& recursion, std::list<SafeSlot>& slotVec);
 
 private:
    MapType mSlots;
    std::vector<std::string> mRecursions;
-   Subject *mpSubject;
+   Subject* mpSubject;
 };
 
 #endif

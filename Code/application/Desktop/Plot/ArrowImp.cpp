@@ -50,10 +50,9 @@ ArrowImp::ArrowImp(ArrowStyle arrowStyle, PlotViewImp* pPlot, bool bPrimary) :
 }
 
 ArrowImp::~ArrowImp()
-{
-}
+{}
 
-ArrowImp& ArrowImp::operator= (const ArrowImp& object)
+ArrowImp& ArrowImp::operator=(const ArrowImp& object)
 {
    if (this != &object)
    {
@@ -412,21 +411,20 @@ bool ArrowImp::fromXml(DOMNode* pDocument, unsigned int version)
    {
       return false;
    }
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
-   mStyle = StringUtilities::fromXmlString<ArrowStyle>(
-      A(pElem->getAttribute(X("arrowStyle"))));
-   for(DOMNode *pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
+   DOMElement* pElem = static_cast<DOMElement*>(pDocument);
+   mStyle = StringUtilities::fromXmlString<ArrowStyle>(A(pElem->getAttribute(X("arrowStyle"))));
+   for (DOMNode* pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
    {
-      if(XMLString::equals(pChld->getNodeName(), X("Line")))
+      if (XMLString::equals(pChld->getNodeName(), X("Line")))
       {
-         if(!mLine.fromXml(pChld, version))
+         if (!mLine.fromXml(pChld, version))
          {
             return false;
          }
       }
-      else if(XMLString::equals(pChld->getNodeName(), X("ArrowHead")))
+      else if (XMLString::equals(pChld->getNodeName(), X("ArrowHead")))
       {
-         if(!mArrowHead.fromXml(pChld, version))
+         if (!mArrowHead.fromXml(pChld, version))
          {
             return false;
          }

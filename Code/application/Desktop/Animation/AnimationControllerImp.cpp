@@ -515,7 +515,7 @@ void AnimationControllerImp::stepForward()
    for (vector<Animation*>::const_iterator iter = mAnimations.begin();
       iter != mAnimations.end(); ++iter)
    {
-      Animation *pAnimation = *iter;
+      Animation* pAnimation = *iter;
       VERIFYNRV(pAnimation != NULL);
 
       const double startValue = pAnimation->getStartValue();
@@ -569,7 +569,7 @@ void AnimationControllerImp::stepBackward()
    for (vector<Animation*>::const_iterator iter = mAnimations.begin();
       iter != mAnimations.end(); ++iter)
    {
-      Animation *pAnimation = *iter;
+      Animation* pAnimation = *iter;
       VERIFYNRV(pAnimation != NULL);
 
       const double startValue = pAnimation->getStartValue();
@@ -760,7 +760,7 @@ void AnimationControllerImp::runAnimations()
       mppActiveController = mRunningControllers.begin();
       while (mppActiveController != mRunningControllers.end())
       {
-         AnimationControllerImp *pActiveController = *mppActiveController;
+         AnimationControllerImp* pActiveController = *mppActiveController;
          VERIFYNR(pActiveController != NULL);
          pActiveController->advance();
          QApplication::processEvents();
@@ -886,10 +886,10 @@ void AnimationControllerImp::advance()
 void AnimationControllerImp::destroyAnimation()
 {
    // An object has been detached from the movie, so destroy it if the last object watching it is this player
-   AnimationImp* pAnimationImp = const_cast<AnimationImp*> (dynamic_cast<const AnimationImp*> (sender()));
+   AnimationImp* pAnimationImp = dynamic_cast<AnimationImp*>(sender());
    if (pAnimationImp != NULL)
    {
-      const list<SafeSlot> &frameChangedObservers = pAnimationImp->getSlots(SIGNAL_NAME(Animation, FrameChanged));
+      const list<SafeSlot>& frameChangedObservers = pAnimationImp->getSlots(SIGNAL_NAME(Animation, FrameChanged));
       if (frameChangedObservers.empty())
       {
          const list<SafeSlot>& deletedObservers = pAnimationImp->getSlots(SIGNAL_NAME(Subject, Deleted));
@@ -934,7 +934,7 @@ double AnimationControllerImp::getNextValue(double value) const
       for (vector<Animation*>::const_iterator iter = mAnimations.begin();
          iter != mAnimations.end(); ++iter)
       {
-         Animation *pAnimation = *iter;
+         Animation* pAnimation = *iter;
          VERIFYRV(pAnimation != NULL, -1.0);
 
          double movieValue = pAnimation->getNextFrameValue(state, 2);
@@ -953,7 +953,7 @@ double AnimationControllerImp::getNextValue(double value) const
       for (vector<Animation*>::const_iterator iter = mAnimations.begin();
          iter != mAnimations.end(); ++iter)
       {
-         Animation *pAnimation = *iter;
+         Animation* pAnimation = *iter;
          VERIFYRV(pAnimation != NULL, -1.0);
 
          double movieValue = pAnimation->getNextFrameValue(state, 1);
@@ -975,7 +975,7 @@ bool AnimationControllerImp::serialize(SessionItemSerializer& serializer) const
 {
    XMLWriter xml("AnimationController");
 
-   if(!SessionItemImp::toXml(&xml))
+   if (!SessionItemImp::toXml(&xml))
    {
       return false;
    }
@@ -993,12 +993,12 @@ bool AnimationControllerImp::serialize(SessionItemSerializer& serializer) const
    xml.addAttr("dropframes", mCanDropFrames);
 
    AnimationToolBar* pToolBar = static_cast<AnimationToolBar*>(Service<DesktopServices>()->getWindow("Animation", TOOLBAR));
-   if(pToolBar != NULL && dynamic_cast<const AnimationController*>(this) == pToolBar->getAnimationController())
+   if (pToolBar != NULL && dynamic_cast<const AnimationController*>(this) == pToolBar->getAnimationController())
    {
       xml.addAttr("selected", true);
    }
 
-   for(vector<Animation*>::const_iterator it = mAnimations.begin(); it != mAnimations.end(); ++it)
+   for (vector<Animation*>::const_iterator it = mAnimations.begin(); it != mAnimations.end(); ++it)
    {
       xml.addAttr("id", (*it)->getId(), xml.addElement("animation"));
    }
@@ -1009,8 +1009,8 @@ bool AnimationControllerImp::serialize(SessionItemSerializer& serializer) const
 bool AnimationControllerImp::deserialize(SessionItemDeserializer &deserializer)
 {
    XmlReader reader(NULL, false);
-   DOMElement *pRoot = deserializer.deserialize(reader, "AnimationController");
-   if(pRoot == NULL || !SessionItemImp::fromXml(pRoot, XmlBase::VERSION))
+   DOMElement* pRoot = deserializer.deserialize(reader, "AnimationController");
+   if (pRoot == NULL || !SessionItemImp::fromXml(pRoot, XmlBase::VERSION))
    {
       return false;
    }
@@ -1023,7 +1023,7 @@ bool AnimationControllerImp::deserialize(SessionItemDeserializer &deserializer)
    mCurrentFrame = StringUtilities::fromXmlString<double>(
       A(pRoot->getAttribute(X("currentframe"))));
    QStringList minFrameRate = QString(A(pRoot->getAttribute(X("minimumframerate")))).split("/");
-   if(minFrameRate.size() != 2)
+   if (minFrameRate.size() != 2)
    {
       return false;
    }
@@ -1034,17 +1034,17 @@ bool AnimationControllerImp::deserialize(SessionItemDeserializer &deserializer)
       A(pRoot->getAttribute(X("cycle"))));
    mCanDropFrames = StringUtilities::fromXmlString<bool>(
       A(pRoot->getAttribute(X("dropframes"))));
-   for(DOMNode *pNode = pRoot->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())
+   for (DOMNode *pNode = pRoot->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())
    {
-      if (XMLString::equals(pNode->getNodeName(),X("DisplayText")))
+      if (XMLString::equals(pNode->getNodeName(), X("DisplayText")))
       {
          setDisplayText(A(pNode->getTextContent()));
       }
-      else if (XMLString::equals(pNode->getNodeName(),X("animation")))
+      else if (XMLString::equals(pNode->getNodeName(), X("animation")))
       {
-         DOMElement *pElement(static_cast<DOMElement*>(pNode));
+         DOMElement* pElement(static_cast<DOMElement*>(pNode));
          string id = A(pElement->getAttribute(X("id")));
-         AnimationImp *pAnimation = dynamic_cast<AnimationImp*>(Service<SessionManager>()->getSessionItem(id));
+         AnimationImp* pAnimation = dynamic_cast<AnimationImp*>(Service<SessionManager>()->getSessionItem(id));
          if (pAnimation == NULL)
          {
             return false;
@@ -1058,10 +1058,10 @@ bool AnimationControllerImp::deserialize(SessionItemDeserializer &deserializer)
    setCurrentFrame(mCurrentFrame);
 
 #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Should this be moved into the tool bar? (mconsidine)")
-   if(pRoot->hasAttribute(X("selected")))
+   if (pRoot->hasAttribute(X("selected")))
    {
       AnimationToolBar* pToolBar = static_cast<AnimationToolBar*>(Service<DesktopServices>()->getWindow("Animation", TOOLBAR));
-      if(pToolBar != NULL)
+      if (pToolBar != NULL)
       {
          pToolBar->setAnimationController(dynamic_cast<AnimationController*>(this));
       }

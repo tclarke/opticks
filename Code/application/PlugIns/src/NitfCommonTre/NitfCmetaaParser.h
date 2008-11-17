@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef NITF_CMETAA_PARSER_H
-#define NITF_CMETAA_PARSER_H
+#ifndef NITFCMETAAPARSER_H
+#define NITFCMETAAPARSER_H
 
 #include "NitfTreParserShell.h"
 

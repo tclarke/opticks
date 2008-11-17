@@ -15,7 +15,8 @@
 #include "MenuBar.h"
 #include "ToolBar.h"
 
-MenuAndToolBarTest::MenuAndToolBarTest()
+MenuAndToolBarTest::MenuAndToolBarTest() :
+   mpGui(NULL)
 {
    setCreator("Opticks Community");
    setVersion("Sample");
@@ -50,4 +51,6 @@ void MenuAndToolBarTest::dialogClosed()
 {
    abort();
 }
+
+
 

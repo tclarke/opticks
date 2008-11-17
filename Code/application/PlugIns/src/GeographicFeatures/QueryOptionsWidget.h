@@ -63,7 +63,7 @@ private:
 
       QSize sizeHint() const
       {
-         QWidget *pCurrentWidget = currentWidget();
+         QWidget* pCurrentWidget = currentWidget();
          if (pCurrentWidget != NULL)
          {
             return pCurrentWidget->sizeHint();
@@ -72,22 +72,22 @@ private:
       }
    };
 
-   QLineEdit *mpQueryNameEdit;
-   QTreeWidget *mpFieldList;
-   QLineEdit *mpFormatStringEdit;
+   QLineEdit* mpQueryNameEdit;
+   QTreeWidget* mpFieldList;
+   QLineEdit* mpFormatStringEdit;
    
-   LabeledSection *mpQuerySection;
-   QLabel *mpNumberFile;
-   QLabel *mpShapeType;
+   LabeledSection* mpQuerySection;
+   QLabel* mpNumberFile;
+   QLabel* mpShapeType;
 
-   QStackedWidget *mpDisplayOptionsStack;
+   QStackedWidget* mpDisplayOptionsStack;
 
-   GraphicSymbolWidget *mpSymbolWidget;
-   GraphicLineWidget *mpLineWidget;
-   QWidget *mpPolygonWidget;
-   GraphicLineWidget *mpPolygonLineWidget;
-   GraphicFillWidget *mpPolygonFillWidget;
-   QueryBuilderWidget *mpQueryBuilderWidget;
+   GraphicSymbolWidget* mpSymbolWidget;
+   GraphicLineWidget* mpLineWidget;
+   QWidget* mpPolygonWidget;
+   GraphicLineWidget* mpPolygonLineWidget;
+   GraphicFillWidget* mpPolygonFillWidget;
+   QueryBuilderWidget* mpQueryBuilderWidget;
 };
 
 #endif

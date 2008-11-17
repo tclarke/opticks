@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef ANIMATION_TOOLBAR_IMP_H
-#define ANIMATION_TOOLBAR_IMP_H
+#ifndef ANIMATIONTOOLBARIMP_H
+#define ANIMATIONTOOLBARIMP_H
 
 #include <QtGui/QComboBox>
 #include <QtGui/QLabel>

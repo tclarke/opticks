@@ -234,15 +234,15 @@ View* ProductViewImp::copy(QGLContext* drawContext, QWidget* parent) const
    if (pView != NULL)
    {
       UndoLock lock(pView);
-      *((ProductViewImp*) pView) = *this;
+      *(static_cast<ProductViewImp*>(pView)) = *this;
    }
 
-   return (View*) pView;
+   return static_cast<View*>(pView);
 }
 
 bool ProductViewImp::copy(View *pView) const
 {
-   ProductViewImp *pViewImp = dynamic_cast<ProductViewImp*>(pView);
+   ProductViewImp* pViewImp = dynamic_cast<ProductViewImp*>(pView);
    if (pViewImp != NULL)
    {
       UndoLock lock(pView);
@@ -271,7 +271,8 @@ QColor ProductViewImp::getPaperColor() const
 QImage ProductViewImp::getPaperImage()
 {
    // Save matrices
-   double modelMatrix[16], projectionMatrix[16];
+   double modelMatrix[16];
+   double projectionMatrix[16];
    int viewPort[4];
    glGetIntegerv(GL_VIEWPORT, viewPort);
    glGetDoublev(GL_PROJECTION_MATRIX, projectionMatrix);
@@ -300,24 +301,17 @@ QImage ProductViewImp::getPaperImage()
    list<GraphicObject*>::iterator iter = viewObjects.begin();
    while (iter != viewObjects.end())
    {
-      GraphicObject* pObject = NULL;
-      pObject = *iter;
+      GraphicObject* pObject = *iter;
       if (pObject != NULL)
       {
-         View* pView = NULL;
-         pView = pObject->getObjectView();
-         if (pView != NULL)
+         PerspectiveView* pPerspectiveView = static_cast<PerspectiveView*>(pObject->getObjectView());
+         if (pPerspectiveView != NULL)
          {
-            if (pView->isKindOf("PerspectiveView") == true)
-            {
-               PerspectiveView* pPerspectiveView = static_cast<PerspectiveView*> (pView);
+            double dViewPercent = pPerspectiveView->getZoomPercentage();
+            viewZoomPercents[pObject] = dViewPercent;
 
-               double dViewPercent = pPerspectiveView->getZoomPercentage();
-               viewZoomPercents[pObject] = dViewPercent;
-
-               UndoLock viewLock(pPerspectiveView);
-               pPerspectiveView->zoomTo(dViewPercent * (dExtentsPercent / dZoomPercent));
-            }
+            UndoLock viewLock(pPerspectiveView);
+            pPerspectiveView->zoomTo(dViewPercent * (dExtentsPercent / dZoomPercent));
          }
       }
 
@@ -340,8 +334,8 @@ QImage ProductViewImp::getPaperImage()
       dPaperScreenEndY = temp;
    }
 
-   int iWidth = abs((int) (dPaperScreenEndX - dPaperScreenStartX));
-   int iHeight = abs((int) (dPaperScreenEndY - dPaperScreenStartY));
+   int iWidth = abs(static_cast<int>(dPaperScreenEndX - dPaperScreenStartX));
+   int iHeight = abs(static_cast<int>(dPaperScreenEndY - dPaperScreenStartY));
 
    // Draw the layers in the back buffer
    glEnable(GL_SCISSOR_TEST);
@@ -360,27 +354,19 @@ QImage ProductViewImp::getPaperImage()
    iter = viewObjects.begin();
    while (iter != viewObjects.end())
    {
-      GraphicObject* pObject = NULL;
-      pObject = *iter;
+      GraphicObject* pObject = *iter;
       if (pObject != NULL)
       {
-         map<GraphicObject*, double>::iterator valueIter;
-         valueIter = viewZoomPercents.find(pObject);
+         map<GraphicObject*, double>::iterator valueIter = viewZoomPercents.find(pObject);
          if (valueIter != viewZoomPercents.end())
          {
-            View* pView = NULL;
-            pView = pObject->getObjectView();
-            if (pView != NULL)
+            PerspectiveView* pPerspectiveView = static_cast<PerspectiveView*>(pObject->getObjectView());
+            if (pPerspectiveView != NULL)
             {
-               if (pView->isKindOf("PerspectiveView") == true)
-               {
-                  PerspectiveView* pPerspectiveView = static_cast<PerspectiveView*> (pView);
+               double dViewPercent = valueIter->second;
 
-                  double dViewPercent = valueIter->second;
-
-                  UndoLock viewLock(pPerspectiveView);
-                  pPerspectiveView->zoomTo(dViewPercent);
-               }
+               UndoLock viewLock(pPerspectiveView);
+               pPerspectiveView->zoomTo(dViewPercent);
             }
          }
       }
@@ -398,7 +384,7 @@ QImage ProductViewImp::getPaperImage()
    // Read the pixels from the draw buffer
    vector<unsigned int> pixels(iWidth * iHeight);
    glReadPixels(dPaperScreenStartX, dPaperScreenStartY, iWidth, iHeight, GL_RGBA, GL_UNSIGNED_BYTE,
-      (GLvoid*) &pixels[0]);
+      reinterpret_cast<GLvoid*>(&pixels[0]));
 
    ViewImp::reorderImage(&pixels[0], iWidth, iHeight);
 
@@ -558,14 +544,14 @@ bool ProductViewImp::saveTemplate(const QString& strTemplateFile) const
 
       if (bSuccess == false)
       {
-         QMessageBox::critical((ProductViewImp*) this, APP_NAME, "Could not save the template file!");
+         QMessageBox::critical(const_cast<ProductViewImp*>(this), APP_NAME, "Could not save the template file!");
          remove(templateFile.c_str());
       }
    }
    else
    {
       QString strError = "Could not open the template file for writing:\n" + strTemplateFile;
-      QMessageBox::critical((ProductViewImp*) this, APP_NAME, strError);
+      QMessageBox::critical(const_cast<ProductViewImp*>(this), APP_NAME, strError);
    }
 
    // Remove the classification label
@@ -623,24 +609,24 @@ void ProductViewImp::updateClassificationMarks(const QString &newClassification)
    QString strBottomText = newClassification;
 
    Service<ConfigurationSettings> pConfigSettings;
-   if(!strTopText.isEmpty())
+   if (!strTopText.isEmpty())
    {
       strTopText.append("\n");
    }
    strTopText.append(QString::fromStdString(StringUtilities::toDisplayString(pConfigSettings->getReleaseType())));
-   if(!pConfigSettings->isProductionRelease())
+   if (!pConfigSettings->isProductionRelease())
    {
       strBottomText.prepend("Not for Production Use\n");
    }
 
-   TextObject *pTopText = mpClassificationLayer->getTopText();
-   if(pTopText != NULL)
+   TextObject* pTopText = mpClassificationLayer->getTopText();
+   if (pTopText != NULL)
    {
       pTopText->setText(strTopText.toStdString());
    }
 
-   TextObject *pBottomText = mpClassificationLayer->getBottomText();
-   if(pBottomText != NULL)
+   TextObject* pBottomText = mpClassificationLayer->getBottomText();
+   if (pBottomText != NULL)
    {
       pBottomText->setText(strBottomText.toStdString());
    }
@@ -702,8 +688,7 @@ void ProductViewImp::setPaperSize(double dWidth, double dHeight)
 
       // Notify connected and attached objects
       emit paperSizeChanged(mPaperWidth, mPaperHeight);
-      notify(SIGNAL_NAME(ProductView, PaperSizeChanged), boost::any(
-         std::pair<double,double>(mPaperWidth, mPaperHeight)));
+      notify(SIGNAL_NAME(ProductView, PaperSizeChanged), boost::any(pair<double, double>(mPaperWidth, mPaperHeight)));
    }
 }
 
@@ -954,7 +939,7 @@ void ProductViewImp::keyPressEvent(QKeyEvent* e)
             pMouseMode->getName(mouseMode);
             if ((mouseMode == "LayerMode") && (mpActiveLayer != NULL))
             {
-               ((AnnotationLayerAdapter*) mpActiveLayer)->deleteSelectedObjects();
+               dynamic_cast<AnnotationLayerImp*>(mpActiveLayer)->deleteSelectedObjects();
             }
          }
       }
@@ -1472,13 +1457,11 @@ void ProductViewImp::updateContextMenu(Subject& subject, const string& signal, c
 
 void ProductViewImp::updateClassificationLocation()
 {
-   TextObjectImp *pTopText = NULL;
-   pTopText = dynamic_cast<TextObjectImp*>(mpClassificationLayer->getTopText());
+   TextObjectImp* pTopText = dynamic_cast<TextObjectImp*>(mpClassificationLayer->getTopText());
    if (pTopText != NULL)
    {
       // Disconnect the object signal to prevent recursive calls
-      disconnect(pTopText, SIGNAL(propertyModified(GraphicProperty*)), this,
-         SLOT(updateClassificationLocation()));
+      disconnect(pTopText, SIGNAL(propertyModified(GraphicProperty*)), this, SLOT(updateClassificationLocation()));
 
       // Ensure the text bounding box is the correct size
       pTopText->updateTexture();
@@ -1499,17 +1482,14 @@ void ProductViewImp::updateClassificationLocation()
       pTopText->move(delta);
 
       // Reconnect the object signal
-      connect(pTopText, SIGNAL(propertyModified(GraphicProperty*)), this,
-         SLOT(updateClassificationLocation()));
+      connect(pTopText, SIGNAL(propertyModified(GraphicProperty*)), this, SLOT(updateClassificationLocation()));
    }
 
-   TextObjectImp* pBottomText = dynamic_cast<TextObjectImp*>(
-      mpClassificationLayer->getBottomText());
+   TextObjectImp* pBottomText = dynamic_cast<TextObjectImp*>(mpClassificationLayer->getBottomText());
    if (pBottomText != NULL)
    {
       // Disconnect the object signal to prevent recursive calls
-      disconnect(pBottomText, SIGNAL(propertyModified(GraphicProperty*)), this,
-         SLOT(updateClassificationLocation()));
+      disconnect(pBottomText, SIGNAL(propertyModified(GraphicProperty*)), this, SLOT(updateClassificationLocation()));
 
       // Ensure the text bounding box is the correct size
       pBottomText->updateTexture();
@@ -1530,8 +1510,7 @@ void ProductViewImp::updateClassificationLocation()
       pBottomText->move(delta);
 
       // Reconnect the object signal
-      connect(pBottomText, SIGNAL(propertyModified(GraphicProperty*)), this,
-         SLOT(updateClassificationLocation()));
+      connect(pBottomText, SIGNAL(propertyModified(GraphicProperty*)), this, SLOT(updateClassificationLocation()));
    }
 }
 
@@ -1584,15 +1563,16 @@ bool ProductViewImp::toXml(XMLWriter* pXml) const
    pXml->addAttr("viewEvent", mbViewEvent);
    if (mpLayoutLayer != NULL)
    {
-      DOMElement *pElement = pXml->addElement("LayoutLayer");
+      DOMElement* pElement = pXml->addElement("LayoutLayer");
       pXml->pushAddPoint(pElement);
       pXml->addAttr("id", mpLayoutLayer->getId());
       mpLayoutLayer->toXml(pXml);
       pXml->popAddPoint();
-      DataElement *pAnno = mpLayoutLayer->getDataElement();
+
+      DataElement* pAnno = mpLayoutLayer->getDataElement();
       if (pAnno != NULL)
       {
-         DOMElement *pElement = pXml->addElement("LayoutElement");
+         pElement = pXml->addElement("LayoutElement");
          pXml->pushAddPoint(pElement);
          pXml->addAttr("id", pAnno->getId());
          pAnno->toXml(pXml);
@@ -1601,15 +1581,16 @@ bool ProductViewImp::toXml(XMLWriter* pXml) const
    }
    if (mpClassificationLayer != NULL)
    {
-      DOMElement *pElement = pXml->addElement("ClassificationLayer");
+      DOMElement* pElement = pXml->addElement("ClassificationLayer");
       pXml->pushAddPoint(pElement);
       pXml->addAttr("id", mpClassificationLayer->getId());
       mpClassificationLayer->toXml(pXml);
       pXml->popAddPoint();
-      DataElement *pAnno = mpClassificationLayer->getDataElement();
+
+      DataElement* pAnno = mpClassificationLayer->getDataElement();
       if (pAnno != NULL)
       {
-         DOMElement *pElement = pXml->addElement("ClassificationElement");
+         pElement = pXml->addElement("ClassificationElement");
          pXml->pushAddPoint(pElement);
          pXml->addAttr("id", pAnno->getId());
          pAnno->toXml(pXml);
@@ -1643,22 +1624,18 @@ bool ProductViewImp::fromXml(DOMNode* pDocument, unsigned int version)
       return false;
    }
 
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
-   mPaperWidth = StringUtilities::fromXmlString<double>(
-      A(pElem->getAttribute(X("paperWidth"))));
-   mPaperHeight = StringUtilities::fromXmlString<double>(
-      A(pElem->getAttribute(X("paperHeight"))));
+   DOMElement* pElem = static_cast<DOMElement*>(pDocument);
+   mPaperWidth = StringUtilities::fromXmlString<double>(A(pElem->getAttribute(X("paperWidth"))));
+   mPaperHeight = StringUtilities::fromXmlString<double>(A(pElem->getAttribute(X("paperHeight"))));
    mPaperColor = QColor(A(pElem->getAttribute(X("paperColor"))));
-   mDpi = StringUtilities::fromXmlString<unsigned int>(
-      A(pElem->getAttribute(X("dpi"))));
+   mDpi = StringUtilities::fromXmlString<unsigned int>(A(pElem->getAttribute(X("dpi"))));
 
-   AnnotationElement *pAnnoElem = dynamic_cast<AnnotationElement*>(
-      mpClassificationLayer->getDataElement());
+   AnnotationElement* pAnnoElem = dynamic_cast<AnnotationElement*>(mpClassificationLayer->getDataElement());
    mpClassificationLayer->setView(this);
    // restore classification text objects
    DOMNode* pNode = findChildNode(pElem, "ClassificationElement/group/objects");
    bool bTopText(true);
-   for (DOMNode* pChld=pNode->getFirstChild(); pChld!=NULL; pChld=pChld->getNextSibling())
+   for (DOMNode* pChld = pNode->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
    {
       string nodeName = A(pChld->getNodeName());
       if (nodeName=="Graphic" && bTopText)

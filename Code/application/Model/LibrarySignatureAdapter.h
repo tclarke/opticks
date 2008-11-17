@@ -18,7 +18,8 @@ class SignatureLibrary;
 class LibrarySignatureAdapter : public Signature, public LibrarySignatureImp LIBRARYSIGNATUREADAPTEREXTENSION_CLASSES
 {
 public:
-   LibrarySignatureAdapter(const DataDescriptorImp& descriptor, const std::string& id, unsigned int index, const SignatureLibrary *pLib);
+   LibrarySignatureAdapter(const DataDescriptorImp& descriptor, const std::string& id, unsigned int index,
+      const SignatureLibrary* pLib);
    ~LibrarySignatureAdapter();
 
    // TypeAwareObject

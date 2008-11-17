@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef MESSAGE_LOG_IMP_H
-#define MESSAGE_LOG_IMP_H
+#ifndef MESSAGELOGIMP_H
+#define MESSAGELOGIMP_H
 
 #include <QtCore/QFile>
 #include <QtCore/QString>
@@ -33,51 +33,67 @@ class StepImp;
 
 class NumChain
 {
-   int val;
-   NumChain *next;
-
 public:
-   NumChain() : val(0), next(NULL) {}
-   NumChain(NumChain &other) : val(other.val)
+   NumChain() :
+      mVal(0),
+      mpNext(NULL)
    {
-      if(other.next != NULL)
-         next = new NumChain(*other.next);
-      else
-         next = NULL;
    }
-   ~NumChain() {
-         if(next != NULL)
-            delete next;
+
+   NumChain(NumChain& other) :
+      mVal(other.mVal),
+      mpNext(NULL)
+   {
+      if (other.mpNext != NULL)
+      {
+         mpNext = new NumChain(*other.mpNext);
       }
-   void operator()(int v) { val = v; }
-   int append(int v) {
-         if(next == NULL)
-         {
-            next = new NumChain();
-            (*next)(v);
-            return 1;
-         }
-         else
-         {
-            return next->append(v) + 1;
-         }
+   }
+
+   ~NumChain()
+   {
+      if (mpNext != NULL)
+      {
+         delete mpNext;
+      }
+   }
+
+   void operator()(int v)
+   {
+      mVal = v;
+   }
+
+   int append(int v)
+   {
+      if (mpNext == NULL)
+      {
+         mpNext = new NumChain();
+         (*mpNext)(v);
+         return 1;
       }
 
-   std::string toString() {
-         QString str(toQString());
-         return str.toStdString();
+      return mpNext->append(v) + 1;
+   }
+
+   std::string toString()
+   {
+      QString str(toQString());
+      return str.toStdString();
+   }
+
+   QString toQString()
+   {
+      if (mpNext == NULL)
+      {
+         return QString::number(mVal);
       }
 
-   QString toQString() {
-         if(next == NULL)
-         {
-            return QString::number(val);
-         }
-         else
-         {
-            return QString::number(val) + "." + next->toString().c_str();
-         }
-      }
+      return QString::number(mVal) + "." + mpNext->toString().c_str();
+   }
+
+private:
+   int mVal;
+   NumChain* mpNext;
 };
 
 class MessageLogImp : public SubjectImp
@@ -92,12 +108,12 @@ public:
    virtual Message *createMessage(const std::string &action,
                                   const std::string &component,
                                   const std::string &key,
-                                  bool finalizeOnCreate=false,
-                                  bool recurse=true);
+                                  bool finalizeOnCreate = false,
+                                  bool recurse = true);
    virtual Step *createStep(const std::string &action,
                             const std::string &component,
                             const std::string &key,
-                            bool recurse=true);
+                            bool recurse = true);
 
    virtual MessageLog::size_t size() const;
    virtual MessageLog::iterator begin();
@@ -117,7 +133,7 @@ public: // serialize functionality
 
 public:
    const std::string& getLogName();
-   QFile *mpLogFile;
+   QFile* mpLogFile;
 
 protected: // Observer
    void messageDeleted(Subject &subject, const std::string &signal, const boost::any &v);
@@ -129,10 +145,10 @@ private:
    std::string mpLogName;
    Filename* mpFilename;
    std::vector<Message*> mMessageList;
-   Step *mpCurrentStep;
-   QFile *mpJournal;
-   QTextStream *mpJournalWriter;
-   XMLWriter *mpWriter;
+   Step* mpCurrentStep;
+   QFile* mpJournal;
+   QTextStream* mpJournalWriter;
+   XMLWriter* mpWriter;
 };
 
 #define MESSAGELOGADAPTEREXTENSION_CLASSES \
@@ -194,11 +210,8 @@ public:
    /**
     *  Create a new Message
     */
-   MessageImp(const std::string &action,
-              const std::string &component,
-              const std::string &key,
-              DateTime *timestamp=NULL,
-              const Step *pParent=NULL);
+   MessageImp(const std::string& action, const std::string& component, const std::string& key,
+      DateTime* timestamp = NULL, const Step* pParent = NULL);
    virtual ~MessageImp();
 
    virtual bool addProperty(const std::string &name, const char *value);
@@ -213,8 +226,8 @@ public:
    virtual bool addProperty(const std::string &name, float value);
    virtual bool addProperty(const std::string &name, double value);
    virtual bool addProperty(const std::string &name, const std::string &value);
-   virtual bool addProperty(const std::string &name, const Filename *value);
-   virtual bool addProperty(const std::string &name, const DateTime *value);
+   virtual bool addProperty(const std::string &name, const Filename* pValue);
+   virtual bool addProperty(const std::string &name, const DateTime* pValue);
    virtual bool addProperty(const std::string &name, const std::vector<char>& value);
    virtual bool addProperty(const std::string &name, const std::vector<unsigned char>& value);
    virtual bool addProperty(const std::string &name, const std::vector<short>& value);
@@ -240,14 +253,14 @@ public:
    virtual std::string getAction() const;
    virtual Message::Result getResult() const;
    virtual std::string propertyToString(const std::string &type, void *pValue) const;
-   virtual std::string getStringId() { return getId().toString(); }
-   NumChain &getId() { return *id; }
-   void setId(NumChain *v) { delete id; id = v; }
-   const Step *getParent() const { return mpParent; }
+   virtual std::string getStringId();
+   NumChain& getId();
+   void setId(NumChain* v);
+   const Step* getParent() const;
 
 public: // serialize functionality
    virtual bool toXml(XMLWriter* pXml) const;
-   virtual bool fromXml(DOMNode* pDocument, unsigned int version) const { return false; }
+   virtual bool fromXml(DOMNode* pDocument, unsigned int version) const;
    virtual void serializeDate(std::string &date, std::string &time) const;
 
 public: // SubjectAdapter functionality
@@ -259,16 +272,16 @@ protected:
    friend class MessageLogImp;
 
 protected:
-   DateTime *mpTimeStamp;
+   DateTime* mpTimeStamp;
    bool mFinalized;
 
 private:
    std::string mAction;
    std::string mComponent;
    std::string mKey;
-   NumChain *id;
-   DynamicObject *mpProperties;
-   const Step *mpParent;
+   NumChain* mpId;
+   DynamicObject* mpProperties;
+   const Step* mpParent;
 };
 
 class StepImp : public MessageImp
@@ -277,22 +290,19 @@ public:
    /**
     *  Construct a Step
     */
-   StepImp(const std::string &action,
-           const std::string &component,
-           const std::string &key,
-           DateTime *timestamp=NULL,
-           const Step *pParent=NULL);
+   StepImp(const std::string& action, const std::string& component, const std::string& key,
+      DateTime* timestamp = NULL, const Step* pParent = NULL);
    virtual ~StepImp();
 
    virtual Step *addStep(const std::string &action,
                          const std::string &component,
                          const std::string &key,
-                         bool recurse=true);
+                         bool recurse = true);
    virtual Message *addMessage(const std::string &action,
                                const std::string &component,
                                const std::string &key,
-                               bool finalizeOnCreate=false,
-                               bool recurse=true);
+                               bool finalizeOnCreate = false,
+                               bool recurse = true);
 
    virtual bool finalize(Message::Result result = Message::Success);
    virtual bool finalize(Message::Result result, const std::string& failureReason);
@@ -315,8 +325,8 @@ public: // SubjectAdapter functionality
 public: // serialize functionality
    virtual bool toXml(XMLWriter* pXml) const;
 
-   virtual std::string getComponent() const { return MessageImp::getComponent(); }
-   virtual std::string getKey() const { return MessageImp::getKey(); }
+   virtual std::string getComponent() const;
+   virtual std::string getKey() const;
 
 protected: // Observer
    void messageDeleted(Subject &subject, const std::string &signal, const boost::any &v);
@@ -328,7 +338,7 @@ private:
    Message::Result mResult;
    std::string mFailureReason;
    std::vector<Message*> mMessageList;
-   Step *mpCurrentStep;
+   Step* mpCurrentStep;
 };
 
 #define MESSAGEADAPTEREXTENSION_CLASSES \
@@ -549,15 +559,15 @@ const std::string& getFailureMessage() const \
 Step *StepAdapter::addStep(const std::string &action, \
                            const std::string &component, \
                            const std::string &key, \
-                           bool recurse=true) \
+                           bool recurse = true) \
 { \
    return impClass::addStep(action, component, key, recurse); \
 } \
 Message *StepAdapter::addMessage(const std::string &action, \
                                  const std::string &component, \
                                  const std::string &key, \
-                                 bool finalizeOnCreate=false, \
-                                 bool recurse=true) \
+                                 bool finalizeOnCreate = false, \
+                                 bool recurse = true) \
 { \
    return impClass::addMessage(action, component, key, finalizeOnCreate, recurse); \
 } \

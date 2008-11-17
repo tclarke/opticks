@@ -148,7 +148,7 @@ AnimationToolBarImp::AnimationToolBarImp(const string& id, QWidget* parent) :
    addSeparator();
 
    // Current frame slider
-   QWidget *pSliderWidget = new QWidget(this);
+   QWidget* pSliderWidget = new QWidget(this);
 
    mpFrameSlider = new WheelEventSlider(Qt::Horizontal, pSliderWidget);
    mpFrameSlider->setFixedWidth(200);
@@ -158,7 +158,7 @@ AnimationToolBarImp::AnimationToolBarImp(const string& id, QWidget* parent) :
    VERIFYNR(connect(mpFrameSlider, SIGNAL(sliderReleased()), this, SLOT(releaseSlider())));
    VERIFYNR(connect(mpFrameSlider, SIGNAL(actionTriggered(int)), this, SLOT(sliderActionTriggered(int))));
 
-   QHBoxLayout *pSliderLayout = new QHBoxLayout(pSliderWidget);
+   QHBoxLayout* pSliderLayout = new QHBoxLayout(pSliderWidget);
    pSliderLayout->setMargin(0);
    pSliderLayout->setSpacing(0);
    pSliderLayout->addSpacing(5);
@@ -435,9 +435,7 @@ void AnimationToolBarImp::updateFrameRange()
          {
             digits = log10(stopFrame+1) + 1;
          }
-         sample = QString("Frame: %1/%2")
-            .arg(int(0), digits, 10, QChar('0'))
-            .arg(static_cast<int>(stopFrame+1));
+         sample = QString("Frame: %1/%2").arg(0, digits, 10, QChar('0')).arg(static_cast<int>(stopFrame + 1));
       }
       else
       {
@@ -609,7 +607,7 @@ void AnimationToolBarImp::setAnimationController(AnimationController* pControlle
             SLOT(setCanDropFrames(bool))));
 
          mpDropFramesAction->setChecked(pControllerImp->getCanDropFrames());
-     }
+      }
    }
 
    updateAnimationControls();

@@ -50,10 +50,10 @@ public:
    // separate slots to force attach/detach pairs to function correctly. When 
    // Subject::attach is updated to reference count, these can be removed and
    // elementDeleted can be used directly.
-   void elementDeletedGray(Subject &subject, const std::string &signal, const boost::any &v);
-   void elementDeletedRed(Subject &subject, const std::string &signal, const boost::any &v);
-   void elementDeletedGreen(Subject &subject, const std::string &signal, const boost::any &v);
-   void elementDeletedBlue(Subject &subject, const std::string &signal, const boost::any &v);
+   void elementDeletedGray(Subject& subject, const std::string& signal, const boost::any& data);
+   void elementDeletedRed(Subject& subject, const std::string& signal, const boost::any& data);
+   void elementDeletedGreen(Subject& subject, const std::string& signal, const boost::any& data);
+   void elementDeletedBlue(Subject& subject, const std::string& signal, const boost::any& data);
 
    // Since Subject::attach does not reference count attachments, we need 4 
    // separate slots to force attach/detach pairs to function correctly. When 
@@ -82,7 +82,7 @@ public:
    // Displayed bands
    DimensionDescriptor getDisplayedBand(RasterChannelType eColor) const;
    RasterElement* getDisplayedRasterElement(RasterChannelType eColor) const;
-   bool isBandDisplayed(RasterChannelType eColor, DimensionDescriptor pBand,
+   bool isBandDisplayed(RasterChannelType eColor, DimensionDescriptor band,
       const RasterElement* pRasterElement = NULL) const;
 
    bool setColorMap(const std::string& name, const std::vector<ColorType>& colorTable);
@@ -93,7 +93,7 @@ public:
    StretchType getStretchType(const DisplayMode& eMode) const;
    RegionUnits getStretchUnits(const RasterChannelType& eColor) const;
    void getStretchValues(const RasterChannelType& eColor, double& dLower, double& dUpper) const;
-   unsigned int getAlpha() const { return mAlpha; }
+   unsigned int getAlpha() const;
    QString getStretchUnitsAsString(const RasterChannelType &eColor) const;
 
    double convertStretchValue(const RasterChannelType& eColor, const RegionUnits& eUnits,
@@ -141,8 +141,8 @@ public slots:
    void enableGpuImage(bool bEnable);
    void toggleDisplayMode();
    void setDisplayMode(const DisplayMode& eMode);
-   void setDisplayedBand(RasterChannelType eColor, DimensionDescriptor pBand);
-   void setDisplayedBand(RasterChannelType eColor, DimensionDescriptor pBand, RasterElement* pRasterElement);
+   void setDisplayedBand(RasterChannelType eColor, DimensionDescriptor band);
+   void setDisplayedBand(RasterChannelType eColor, DimensionDescriptor band, RasterElement* pRasterElement);
    bool canApplyFastContrastStretch() const;
    bool enableFastContrastStretch(bool enable);
    void setComplexComponent(const ComplexComponent& eComponent);
@@ -174,7 +174,7 @@ protected:
    void setImage(Image* pImage);
    void setImageChanged(bool bChanged);
    std::vector<double> getRawStretchValues(const RasterChannelType& eColor) const;
-   const std::vector<ColorType>& getColorTable() const { return mColorMap.getTable(); }
+   const std::vector<ColorType>& getColorTable() const;
 
    virtual void generateImage();
    virtual void applyFastContrastStretch();

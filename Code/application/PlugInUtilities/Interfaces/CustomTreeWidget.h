@@ -828,16 +828,32 @@ private:
    class CellLocation
    {
    public:
-      QTreeWidgetItem* pItem;
-      int iColumn;
+      CellLocation() :
+         pItem(NULL),
+         iColumn(-1)
+      {
+      }
 
       bool operator<(const CellLocation& cell) const
       {
-         if (cell.pItem < pItem) return true;
-         else if (cell.pItem > pItem) return false;
-         else if (cell.iColumn < iColumn) return true;
+         if (cell.pItem < pItem)
+         {
+            return true;
+         }
+         else if (cell.pItem > pItem)
+         {
+            return false;
+         }
+         else if (cell.iColumn < iColumn)
+         {
+            return true;
+         }
+
          return false;
       };
+
+      QTreeWidgetItem* pItem;
+      int iColumn;
    };
 
    class CustomTreeWidgetItemDelegate : public QItemDelegate

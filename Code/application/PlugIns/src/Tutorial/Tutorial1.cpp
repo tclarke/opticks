@@ -46,12 +46,12 @@ bool Tutorial1::getOutputSpecification(PlugInArgList *&pOutArgList)
 
 bool Tutorial1::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
 {
-   if(pInArgList == NULL)
+   if (pInArgList == NULL)
    {
       return false;
    }
-   Progress *pProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
-   if(pProgress != NULL)
+   Progress* pProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
+   if (pProgress != NULL)
    {
       pProgress->updateProgress("This demonstrates display of a warning.", 0, WARNING);
       pProgress->updateProgress("This demonstrates display of an error.", 0, ERRORS);

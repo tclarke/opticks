@@ -58,7 +58,7 @@ Layer* GraphicLayerAdapter::copy(const string& layerName, bool bCopyElement, Dat
    // Get the graphic element
    GraphicElement* pElement = NULL;
 
-   GraphicElement* pCurrentElement  = dynamic_cast<GraphicElement*>(getDataElement());
+   GraphicElement* pCurrentElement = dynamic_cast<GraphicElement*>(getDataElement());
    if (bCopyElement == true && pCurrentElement != NULL)
    {
       pElement = dynamic_cast<GraphicElement*>(pCurrentElement->copy(name, pParent));

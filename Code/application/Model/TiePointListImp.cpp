@@ -21,12 +21,10 @@ XERCES_CPP_NAMESPACE_USE
 
 TiePointListImp::TiePointListImp(const DataDescriptorImp& descriptor, const string& id) :
    DataElementImp(descriptor, id)
-{
-}
+{}
 
 TiePointListImp::~TiePointListImp()
-{
-}
+{}
 
 void TiePointListImp::setMissionDatasetName(string missionName)
 {
@@ -40,7 +38,7 @@ const string &TiePointListImp::getMissionDatasetName() const
 
 LocationType TiePointListImp::toMission(LocationType refPixel) const
 {
-   return LocationType (0.0,0.0);
+   return LocationType(0.0, 0.0);
 }
 
 const vector<TiePoint>& TiePointListImp::getTiePoints() const
@@ -82,8 +80,8 @@ DataElement* TiePointListImp::copy(const string& name, DataElement* pParent) con
 
 const string& TiePointListImp::getObjectType() const
 {
-   static string type("TiePointListImp");
-   return type;
+   static string sType("TiePointListImp");
+   return sType;
 }
 
 bool TiePointListImp::isKindOf(const string& className) const
@@ -103,7 +101,7 @@ bool TiePointListImp::toXml(XMLWriter* pWriter) const
       return false;
    }
 
-   DOMElement *pDomElement(pWriter->addElement("missionDataset"));
+   DOMElement* pDomElement(pWriter->addElement("missionDataset"));
    if (pDomElement == NULL)
    {
       return false;
@@ -144,40 +142,38 @@ bool TiePointListImp::fromXml(DOMNode* pNode, unsigned int version)
       return false;
    }
 
-   for(DOMNode *chld = pNode->getFirstChild();
-                chld != NULL;
-                chld = chld->getNextSibling())
+   for (DOMNode* pChld = pNode->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
    {
-      if(XMLString::equals(chld->getNodeName(),X("missionDataset")))
+      if (XMLString::equals(pChld->getNodeName(), X("missionDataset")))
       {
-         setMissionDatasetName(XmlBase::URLtoPath(static_cast<DOMElement*>(chld)->getAttribute(X("name"))));
+         setMissionDatasetName(XmlBase::URLtoPath(static_cast<DOMElement*>(pChld)->getAttribute(X("name"))));
       }
-      else if(XMLString::equals(chld->getNodeName(),X("pt")))
+      else if (XMLString::equals(pChld->getNodeName(), X("pt")))
       {
          TiePoint point;
-         DOMNode *pGchild(chld->getFirstChild());
+         DOMNode* pGchild(pChld->getFirstChild());
          XERCES_CPP_NAMESPACE_QUALIFIER XMLStringTokenizer t(pGchild->getNodeValue());
-         if(t.hasMoreTokens())
+         if (t.hasMoreTokens())
          {
             point.mReferencePoint.mX = atoi(A(t.nextToken()));
          }
-         if(t.hasMoreTokens())
+         if (t.hasMoreTokens())
          {
             point.mReferencePoint.mY = atoi(A(t.nextToken()));
          }
-         if(t.hasMoreTokens())
+         if (t.hasMoreTokens())
          {
             point.mMissionOffset.mX = static_cast<float>(atof(A(t.nextToken())));
          }
-         if(t.hasMoreTokens())
+         if (t.hasMoreTokens())
          {
             point.mMissionOffset.mY = static_cast<float>(atof(A(t.nextToken())));
          }
-         if(t.hasMoreTokens())
+         if (t.hasMoreTokens())
          {
             point.mConfidence = atoi(A(t.nextToken()));
          }
-         if(t.hasMoreTokens())
+         if (t.hasMoreTokens())
          {
             point.mPhi = atoi(A(t.nextToken()));
          }

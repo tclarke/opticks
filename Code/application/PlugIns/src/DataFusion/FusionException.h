@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef FUSION_EXCEPTION
-#define FUSION_EXCEPTION
+#ifndef FUSIONEXCEPTION_H
+#define FUSIONEXCEPTION_H
 
 #include <string>
 #include <sstream>
@@ -21,7 +19,12 @@ public:
    /**
     * Creates a FusionException based on a string message
     */
-   FusionException(std::string msg) : mMsg(msg), mLine(0), mbVerbose(false) {}
+   FusionException(std::string msg) :
+      mLine(0),
+      mMsg(msg),
+      mbVerbose(false)
+   {
+   }
 
    /**
     * Creates a FusionException based on a string message, line number, and file name
@@ -37,7 +40,10 @@ public:
     *         the compiler directive __FILE__
     */
    FusionException(std::string msg, int line, const char* file) :
-      mFile(file), mMsg(msg), mLine(line), mbVerbose(false)
+      mFile(file),
+      mLine(line),
+      mMsg(msg),
+      mbVerbose(false)
    {
       toString(true);
    }
@@ -69,7 +75,8 @@ public:
 private:
    std::string mFile;
    int mLine;
-   std::string mMsg, mText;
+   std::string mMsg;
+   std::string mText;
    bool mbVerbose;
 };
 

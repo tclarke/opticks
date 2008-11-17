@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef HDF5_CUSTOM_READER_H
-#define HDF5_CUSTOM_READER_H
+#ifndef HDF5CUSTOMREADER_H
+#define HDF5CUSTOMREADER_H
 
 #include "Hdf5Resource.h"
 

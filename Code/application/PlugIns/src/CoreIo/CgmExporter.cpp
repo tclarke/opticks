@@ -7,10 +7,9 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "CgmExporter.h"
-
 #include "AnnotationLayer.h"
 #include "AppVersion.h"
+#include "CgmExporter.h"
 #include "CgmObject.h"
 #include "FileDescriptor.h"
 #include "GraphicElement.h"
@@ -19,7 +18,6 @@
 #include "Progress.h"
 
 #include <string>
-
 using namespace std;
 
 CgmExporter::CgmExporter()
@@ -59,11 +57,11 @@ bool CgmExporter::getOutputSpecification(PlugInArgList*& pOutArgList)
    return true;
 }
 
-bool CgmExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
+bool CgmExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
-   Progress *pProgress = NULL;
-   FileDescriptor *pFileDescriptor = NULL;
-   AnnotationLayer *pLayer = NULL;
+   Progress* pProgress = NULL;
+   FileDescriptor* pFileDescriptor = NULL;
+   AnnotationLayer* pLayer = NULL;
 
    StepResource pStep("Export layer", "app", "09A23593-7065-4bc6-AF0B-935D2E735926");
 
@@ -75,9 +73,9 @@ bool CgmExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
       pMsg->addBooleanProperty("Progress Present", (pProgress != NULL));
 
       pFileDescriptor = pInArgList->getPlugInArgValue<FileDescriptor>(ExportDescriptorArg());
-      if(pFileDescriptor == NULL)
+      if (pFileDescriptor == NULL)
       {
-         if(pProgress != NULL)
+         if (pProgress != NULL)
          {
             pProgress->updateProgress("No file specified", 0, ERRORS);
          }
@@ -87,9 +85,9 @@ bool CgmExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
       pMsg->addProperty("Destination", pFileDescriptor->getFilename());
 
       pLayer = pInArgList->getPlugInArgValue<AnnotationLayer>(ExportItemArg());
-      if(pLayer == NULL)
+      if (pLayer == NULL)
       {
-         if(pProgress != NULL)
+         if (pProgress != NULL)
          {
             pProgress->updateProgress("No layer specified", 0, ERRORS);
          }

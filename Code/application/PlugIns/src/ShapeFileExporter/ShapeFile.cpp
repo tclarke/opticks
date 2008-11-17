@@ -40,11 +40,11 @@ namespace
       "PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]]";
 };
 
-ShapeFile::ShapeFile()
+ShapeFile::ShapeFile() :
+   mpAttributeFile(NULL),
+   mpShapeFile(NULL),
+   mShape(MULTIPOINT_SHAPE)
 {
-   mShape = MULTIPOINT_SHAPE;
-   mpShapeFile = NULL;
-   mpAttributeFile = NULL;
 }
 
 ShapeFile::~ShapeFile()
@@ -137,16 +137,19 @@ vector<Feature*> ShapeFile::addFeatures(DataElement* pElement, RasterElement* pG
    // Create the features
    string elementName = pElement->getName();
 
-   AoiElement *pAoi = dynamic_cast<AoiElement*>(pElement);
+   AoiElement* pAoi = dynamic_cast<AoiElement*>(pElement);
    if (pAoi != NULL)
    {
       if (mShape == POINT_SHAPE)
-      {      
+      {
          const BitMask* pMask = pAoi->getSelectedPoints();
          if ((pMask != NULL) && (pMask->getCount() > 0))
          {
             // Add features for each selected pixel
-            int startColumn=0, endColumn=0, startRow=0, endRow=0;
+            int startColumn = 0;
+            int endColumn = 0;
+            int startRow = 0;
+            int endRow = 0;
             pMask->getBoundingBox(startColumn, startRow, endColumn, endRow);
 
             LocationType pixel;
@@ -193,14 +196,13 @@ vector<Feature*> ShapeFile::addFeatures(DataElement* pElement, RasterElement* pG
       }
       else if (mShape == POLYLINE_SHAPE)
       {
-         GraphicGroup *pGroup = pAoi->getGroup();
+         GraphicGroup* pGroup = pAoi->getGroup();
          if (pGroup != NULL)
          {
-            const list<GraphicObject*> &objects = pGroup->getObjects();
+            const list<GraphicObject*>& objects = pGroup->getObjects();
             if (objects.empty())
             {
-               message = "Error Shape File 101: Cannot create a shape file from an "
-                  "empty AOI.";
+               message = "Error Shape File 101: Cannot create a shape file from an empty AOI.";
                return features;
             }
             else if (objects.size() != 1)
@@ -209,15 +211,15 @@ vector<Feature*> ShapeFile::addFeatures(DataElement* pElement, RasterElement* pG
                   "from an AOI which contains a single object.";
                return features;
             }
-            PolylineObject *pObj = dynamic_cast<PolylineObject*>(objects.front());
+            const PolylineObject* pObj = dynamic_cast<const PolylineObject*>(objects.front());
             if (pObj == NULL || pObj->getGraphicObjectType() != POLYLINE_OBJECT)
             {
                message = "Error Shape File 103: Can only create a polyline shape file "
                   "from an AOI which contains a single polyline.";
                return features;
             }
-            const std::vector<LocationType> &vertices = pObj->getVertices();
-            Feature *pFeature = new Feature(mShape);
+            const std::vector<LocationType>& vertices = pObj->getVertices();
+            Feature* pFeature = new Feature(mShape);
             if (pFeature != NULL)
             {
                features.push_back(pFeature);
@@ -230,9 +232,9 @@ vector<Feature*> ShapeFile::addFeatures(DataElement* pElement, RasterElement* pG
                   pFeature->setFieldValue("Name", elementName);
                }
 
-               for (unsigned int i = 0; i < vertices.size(); ++i)
+               for (vector<LocationType>::const_iterator iter = vertices.begin(); iter != vertices.end(); ++iter)
                {
-                  LocationType geo = pGeoref->convertPixelToGeocoord(vertices[i]);
+                  LocationType geo = pGeoref->convertPixelToGeocoord(*iter);
                   pFeature->addVertex(geo.mY, geo.mX);
                }
             }
@@ -240,14 +242,13 @@ vector<Feature*> ShapeFile::addFeatures(DataElement* pElement, RasterElement* pG
       }
       else if (mShape == POLYGON_SHAPE)
       {
-         GraphicGroup *pGroup = pAoi->getGroup();
+         GraphicGroup* pGroup = pAoi->getGroup();
          if (pGroup != NULL)
          {
-            const list<GraphicObject*> &objects = pGroup->getObjects();
+            const list<GraphicObject*>& objects = pGroup->getObjects();
             if (objects.empty())
             {
-               message = "Error Shape File 101: Cannot create a shape file from an "
-                  "empty AOI.";
+               message = "Error Shape File 101: Cannot create a shape file from an empty AOI.";
                return features;
             }
             else if (objects.size() != 1)
@@ -256,15 +257,15 @@ vector<Feature*> ShapeFile::addFeatures(DataElement* pElement, RasterElement* pG
                   "from an AOI which contains a single object.";
                return features;
             }
-            PolygonObject *pObj = dynamic_cast<PolygonObject*>(objects.front());
+            const PolygonObject* pObj = dynamic_cast<const PolygonObject*>(objects.front());
             if (pObj == NULL || pObj->getGraphicObjectType() != POLYGON_OBJECT)
             {
                message = "Error Shape File 103: Can only create a polygon shape file "
                   "from an AOI which contains a single polygon.";
                return features;
             }
-            const std::vector<LocationType> &vertices = pObj->getVertices();
-            Feature *pFeature = new Feature(mShape);
+            const std::vector<LocationType>& vertices = pObj->getVertices();
+            Feature* pFeature = new Feature(mShape);
             if (pFeature != NULL)
             {
                features.push_back(pFeature);
@@ -277,9 +278,9 @@ vector<Feature*> ShapeFile::addFeatures(DataElement* pElement, RasterElement* pG
                   pFeature->setFieldValue("Name", elementName);
                }
 
-               for (unsigned int i = 0; i < vertices.size(); ++i)
+               for (vector<LocationType>::const_iterator iter = vertices.begin(); iter != vertices.end(); ++iter)
                {
-                  LocationType geo = pGeoref->convertPixelToGeocoord(vertices[i]);
+                  LocationType geo = pGeoref->convertPixelToGeocoord(*iter);
                   pFeature->addVertex(geo.mY, geo.mX);
                }
             }
@@ -288,7 +289,6 @@ vector<Feature*> ShapeFile::addFeatures(DataElement* pElement, RasterElement* pG
       else if (mShape == MULTIPOINT_SHAPE)
       {
          const BitMask* pMask = pAoi->getSelectedPoints();
-
          if ((pMask != NULL) && (pMask->getCount() > 0))
          {
             // Add the feature
@@ -307,7 +307,10 @@ vector<Feature*> ShapeFile::addFeatures(DataElement* pElement, RasterElement* pG
                }
 
                // Vertices
-               int startColumn=0, endColumn=0, startRow=0, endRow=0;
+               int startColumn = 0;
+               int endColumn = 0;
+               int startRow = 0;
+               int endRow = 0;
                pMask->getBoundingBox(startColumn, startRow, endColumn, endRow);
 
                LocationType pixel;
@@ -636,7 +639,8 @@ bool ShapeFile::save(Progress* pProgress, string& errorMessage)
             // middle point and continue
             for (int a = 0; a < (iVertices - 2); a++)
             {
-               int b = a+1, c = a+2;
+               int b = a + 1;
+               int c = a + 2;
                double area = dX[a] * (dY[b] - dY[c]) + dX[b] * (dY[c] - dY[a]) + dX[c] * (dY[a] - dY[b]);
                if (fabs(area) < 1e-15) // equals zero
                {
@@ -649,8 +653,8 @@ bool ShapeFile::save(Progress* pProgress, string& errorMessage)
             }
          }
 
-         SHPObject* pObject = SHPCreateObject(iType, i, 0, NULL, NULL, iVertices,
-                                              &dX.front(), &dY.front(), &dZ.front(), NULL);
+         SHPObject* pObject = SHPCreateObject(iType, i, 0, NULL, NULL, iVertices, &dX.front(), &dY.front(),
+            &dZ.front(), NULL);
          if (pObject != NULL)
          {
             SHPRewindObject(pShapeFile, pObject);
@@ -666,7 +670,7 @@ bool ShapeFile::save(Progress* pProgress, string& errorMessage)
 
             if (!name.empty())
             {
-               const DataVariant &var = pFeature->getFieldValue(name);
+               const DataVariant& var = pFeature->getFieldValue(name);
                if (var.isValid())
                {
                   string fieldType = pFeature->getFieldType(name);

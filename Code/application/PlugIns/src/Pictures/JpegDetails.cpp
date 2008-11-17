@@ -38,7 +38,8 @@ QWidget* JpegDetails::getExportOptionsWidget(const PlugInArgList *)
 {
    if (mpOptionsWidget.get() == NULL)
    {
-      mpOptionsWidget.reset(new OptionsJpegExporter());
+      OptionsJpegExporter* pWidget = new OptionsJpegExporter();
+      mpOptionsWidget.reset(pWidget);
       mpOptionsWidget->setPromptUserToSaveSettings(true);
    }
 

@@ -18,8 +18,8 @@
 #include <string>
 
 SetDisplayMode::SetDisplayMode() :
-   mDisplayMode(GRAYSCALE_MODE),
-   mpRasterLayer(NULL)
+   mpRasterLayer(NULL),
+   mDisplayMode(GRAYSCALE_MODE)
 {
    setName("Set Display Mode");
    setVersion(APP_VERSION_NUMBER);

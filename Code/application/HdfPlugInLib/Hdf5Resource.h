@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef HDF5_RESOURCE_H
-#define HDF5_RESOURCE_H
+#ifndef HDF5RESOURCE_H
+#define HDF5RESOURCE_H
 
 #include "AppVerify.h"
 #include "Resource.h"
@@ -201,7 +201,10 @@ public:
     *
     *  @return   A pointer to the underlying hid_t returned by H5Fopen.
     */
-   operator hid_t*() { return get(); }
+   operator hid_t*()
+   {
+      return get();
+   }
 };
 
 /**
@@ -258,7 +261,9 @@ public:
       /**
        * Default constructor
        */
-      Args() : mFullPathAndName(), mFileHandle(-1)
+      Args() :
+         mFileHandle(-1),
+         mFullPathAndName()
       {
       }
    };
@@ -375,7 +380,10 @@ public:
     *
     *  @return   A pointer to the underlying hid_t returned by H5Dopen.
     */
-   operator hid_t*() { return get(); }
+   operator hid_t*()
+   {
+      return get();
+   }
 };
 
 /**
@@ -480,7 +488,10 @@ public:
     *
     *  @return   A pointer to the underlying hid_t held by this Resource.
     */
-   operator hid_t*() { return get(); }
+   operator hid_t*()
+   {
+      return get();
+   }
 };
 
 /**
@@ -609,7 +620,10 @@ public:
     *
     *  @return   A pointer to the underlying hid_t held by this Resource.
     */
-   operator hid_t*() { return get(); }
+   operator hid_t*()
+   {
+      return get();
+   }
 };
 
 /**
@@ -714,7 +728,10 @@ public:
     *
     *  @return   A pointer to the underlying hid_t held by this Resource.
     */
-   operator hid_t*() { return get(); }
+   operator hid_t*()
+   {
+      return get();
+   }
 };
 
 
@@ -820,7 +837,10 @@ public:
     *
     *  @return   A pointer to the underlying hid_t held by this Resource.
     */
-   operator hid_t*() { return get(); }
+   operator hid_t*()
+   {
+      return get();
+   }
 };
 
 /**

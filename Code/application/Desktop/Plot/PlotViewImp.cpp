@@ -448,7 +448,7 @@ bool PlotViewImp::insertObject(PlotObject* pObject)
 
    if (pObject->isPrimary())
    {
-      PlotObjectImp *pObjectImp = dynamic_cast<PlotObjectImp*>(pObject);
+      PlotObjectImp* pObjectImp = dynamic_cast<PlotObjectImp*>(pObject);
       VERIFY(pObjectImp != NULL);
 
       VERIFYNR(connect(pObjectImp, SIGNAL(extentsChanged()), this, SLOT(updateExtents())));
@@ -720,8 +720,7 @@ void PlotViewImp::selectObjects(const QPoint& point, const PointSet* pPointSet,
 
    vector<Point*> points = pPointSet->getPoints();
 
-   for (vector<Point*>::iterator pointIter = points.begin(); 
-      pointIter != points.end(); pointIter++)
+   for (vector<Point*>::iterator pointIter = points.begin(); pointIter != points.end(); ++pointIter)
    {
       Point* pPoint = *pointIter;
       if (pPoint != NULL)
@@ -759,8 +758,7 @@ list<PlotObject*> PlotViewImp::getSelectedObjects(bool filterVisible) const
 
             //----- Get the pointsets points
             vector<Point*> pPoints = pPointSet->getPoints();
-            for (vector<Point*>::iterator pointIter = pPoints.begin();
-               pointIter != pPoints.end(); pointIter++) 
+            for (vector<Point*>::iterator pointIter = pPoints.begin(); pointIter != pPoints.end(); ++pointIter)
             {
                Point* pPoint = *pointIter;
                if (pPoint->isSelected() && (!filterVisible || pPoint->isVisible()))
@@ -842,8 +840,8 @@ void PlotViewImp::deleteSelectedObjects(bool filterVisible)
    {
       bool deleteObject = false;
 
-      PlotObject *pObj = *iter;
-      PlotObjectImp *pObjImp = dynamic_cast<PlotObjectImp*>(pObj);
+      PlotObject* pObj = *iter;
+      PlotObjectImp* pObjImp = dynamic_cast<PlotObjectImp*>(pObj);
       VERIFYNRV(pObjImp != NULL);
       if (pObjImp->isSelected() && (!filterVisible || pObjImp->isVisible()))
       {
@@ -853,7 +851,7 @@ void PlotViewImp::deleteSelectedObjects(bool filterVisible)
       {
          if (mSelectionMode == DEEP_SELECTION)
          {
-            PointSetImp *pSet = dynamic_cast<PointSetImp*>(pObjImp);
+            PointSetImp* pSet = dynamic_cast<PointSetImp*>(pObjImp);
             if (pSet != NULL)
             {
                pSet->deleteSelectedPoints(filterVisible);
@@ -1349,7 +1347,7 @@ void PlotViewImp::draw()
 
 void PlotViewImp::temporaryGlContextChange()
 {
-   if(mpAnnotationLayer != NULL)
+   if (mpAnnotationLayer != NULL)
    {
       mpAnnotationLayer->temporaryGlContextChange();
    }
@@ -2221,7 +2219,7 @@ bool PlotViewImp::toXml(XMLWriter* pXml) const
    {
       pXml->pushAddPoint(pXml->addElement("PlotObjects"));
       list<PlotObject*>::const_iterator it;
-      for (it=mObjects.begin(); it!= mObjects.end(); ++it)
+      for (it = mObjects.begin(); it != mObjects.end(); ++it)
       {
          const PlotObjectImp* pObject = dynamic_cast<PlotObjectImp*>(*it);
          if (pObject != NULL)
@@ -2257,7 +2255,7 @@ bool PlotViewImp::fromXml(DOMNode* pDocument, unsigned int version)
       return false;
    }
 
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
+   DOMElement* pElem = static_cast<DOMElement*>(pDocument);
    if (pElem == NULL)
    {
       return false;

@@ -7,28 +7,30 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
 #include <QtGui/QMessageBox>
 
-#include "GraphicObjectImp.h"
-#include "GraphicObject.h"
-#include "GraphicObjectFactory.h"
-#include "AppVersion.h"
+#include "AppAssert.h"
 #include "AppVersion.h"
 #include "ArcObjectAdapter.h"
 #include "ArrowObjectAdapter.h"
 #include "BitMaskObjectAdapter.h"
 #include "CgmObjectAdapter.h"
-#include "AppAssert.h"
 #include "DimensionObjectAdapter.h"
 #include "EastArrowObjectAdapter.h"
 #include "EllipseObjectAdapter.h"
 #include "FileImageObjectAdapter.h"
 #include "FrameLabelObjectAdapter.h"
 #include "GraphicGroupAdapter.h"
+#include "GraphicLayer.h"
+#include "GraphicLayerImp.h"
+#include "GraphicObject.h"
+#include "GraphicObjectFactory.h"
+#include "GraphicObjectImp.h"
 #include "LatLonInsertObjectAdapter.h"
 #include "LineObjectAdapter.h"
 #include "MeasurementObjectAdapter.h"
+#include "MoveObjectImp.h"
+#include "MultipointObjectAdapter.h"
 #include "NorthArrowObjectAdapter.h"
 #include "PolygonObjectAdapter.h"
 #include "PolylineObjectAdapter.h"
@@ -41,22 +43,16 @@
 #include "TriangleObjectAdapter.h"
 #include "ViewObjectAdapter.h"
 #include "WidgetImageObjectAdapter.h"
-#include "MultipointObjectAdapter.h"
-#include "GraphicLayer.h"
-#include "GraphicLayerImp.h"
 
-GraphicObject* GraphicObjectFactory::createObject(GraphicObjectType eType,
-                                                           GraphicLayer* pLayer,
-                                                           LocationType pixelCoord)
+GraphicObject* GraphicObjectFactory::createObject(GraphicObjectType eType, GraphicLayer* pLayer,
+                                                  LocationType pixelCoord)
 {
    if (pLayer != NULL && !dynamic_cast<GraphicLayerImp*>(pLayer)->canContainGraphicObjectType(eType))
    {
       return NULL;
-
    }
 
    GraphicObjectImp* pObject = NULL;
-
    try
    {
       switch (eType)
@@ -177,13 +173,14 @@ GraphicObject* GraphicObjectFactory::createObject(GraphicObjectType eType,
          break;
       }
    }
-   catch(AssertException exception)
+   catch (AssertException exception)
    {
       QMessageBox::critical(NULL, QString("%1 Graphic Factory").arg(APP_NAME),
-         QString("An error occurred while creating the graphic object!\nCause: ") + QString::fromStdString(exception.getText()));
+         QString("An error occurred while creating the graphic object!\nCause: ") +
+         QString::fromStdString(exception.getText()));
       pObject = NULL;
    }
-   catch(...)
+   catch (...)
    {
       QMessageBox::critical(NULL, QString("%1 Graphic Factory").arg(APP_NAME),
          "An error occurred while creating the graphic object!");

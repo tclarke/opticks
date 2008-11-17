@@ -14,6 +14,7 @@
 #include "FileFinder.h"
 #include "glCommon.h"
 #include "GraphicObject.h"
+#include "GraphicObjectImp.h"
 #include "GraphicObjectFactory.h"
 #include "FileResource.h"
 #include "ObjectResource.h"
@@ -47,7 +48,7 @@ SymbolManager *SymbolManager::instance()
 
 GraphicObject *SymbolManager::getSymbol(const std::string &symbolName)
 {
-   GraphicObject *pObject = mSymbols[symbolName];
+   GraphicObject* pObject = mSymbols[symbolName];
    if (pObject == NULL)
    {
       pObject = loadSymbol(symbolName);
@@ -56,9 +57,9 @@ GraphicObject *SymbolManager::getSymbol(const std::string &symbolName)
    return pObject;
 }
 
-GraphicObject *SymbolManager::loadSymbol(const std::string &symbolName)
+GraphicObject* SymbolManager::loadSymbol(const string& symbolName)
 {
-   GraphicObject *pObject = NULL;
+   GraphicObject* pObject = NULL;
    string symbolPath;
    const Filename* pSupportFilesPath = ConfigurationSettings::getSettingSupportFilesPath();
    if (pSupportFilesPath != NULL)
@@ -80,11 +81,11 @@ GraphicObject *SymbolManager::loadSymbol(const std::string &symbolName)
    return pObject;
 }
 
-void SymbolManager::drawSymbols(const std::string &symbolName, const std::vector<LocationType> &points, 
+void SymbolManager::drawSymbols(const string& symbolName, const vector<LocationType>& points, 
       double screenSize, double zoomFactor, double rotation, double pitch, double xScale,
       double yScale, double objectRotation)
 {
-   GraphicObjectImp *pSymbol = dynamic_cast<GraphicObjectImp*>(getSymbol(symbolName));
+   GraphicObjectImp* pSymbol = dynamic_cast<GraphicObjectImp*>(getSymbol(symbolName));
    if (pSymbol == NULL)
    {
       return;

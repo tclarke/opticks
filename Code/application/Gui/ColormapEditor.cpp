@@ -18,7 +18,7 @@
 
 using namespace std;
 
-ColormapEditor::ColormapEditor(HistogramPlotImp &parent) : 
+ColormapEditor::ColormapEditor(HistogramPlotImp& parent) :
    QDialog(&parent),
    mHistogram (parent),
    mIsApplied(false),
@@ -192,7 +192,7 @@ void ColormapEditor::numPrimariesChanged(int newCount)
    {
       while (newCount > static_cast<int>(mPrimaries.size()))
       {
-         QSlider *pSlider = new QSlider(mpPrimaryView);
+         QSlider* pSlider = new QSlider(mpPrimaryView);
          pSlider->setOrientation(Qt::Horizontal);
          pSlider->setMaximum(mSliderRange-1);
          pSlider->setSingleStep(mSliderRange/100);
@@ -201,7 +201,7 @@ void ColormapEditor::numPrimariesChanged(int newCount)
          {
             pSlider->setValue(mSliderRange-1);
          }
-         CustomColorButton *pColorChip = new CustomColorButton(mpPrimaryView);
+         CustomColorButton* pColorChip = new CustomColorButton(mpPrimaryView);
 
          QColor newColor = Qt::white;
          if (mPrimaries.empty())
@@ -235,7 +235,7 @@ void ColormapEditor::applyColormap()
 {
    if (!mIsApplied)
    {
-      RasterLayer *pLayer = dynamic_cast<RasterLayer*>(mHistogram.getLayer());
+      RasterLayer* pLayer = dynamic_cast<RasterLayer*>(mHistogram.getLayer());
       VERIFYNRV(pLayer != NULL);
       string name = "Custom";
       if (!mName.empty())
@@ -249,7 +249,7 @@ void ColormapEditor::applyColormap()
 
 void ColormapEditor::saveColormap()
 {
-   QString filename = QFileDialog::getSaveFileName (this, "Save Colormap", QString(), "*.cgr");
+   QString filename = QFileDialog::getSaveFileName(this, "Save Colormap", QString(), "*.cgr");
    QString mapName = filename;
    if (filename.isNull())
    {
@@ -264,7 +264,7 @@ void ColormapEditor::saveColormap()
    {
       filename.append(".cgr");
    }
-   mName = mapName.mid(mapName.lastIndexOf('/')+1,mapName.length()).toStdString();
+   mName = mapName.mid(mapName.lastIndexOf('/') + 1, mapName.length()).toStdString();
    ColorMap cmap(mName, makeGradient());
    cmap.saveToFile(filename.toStdString());
 }
@@ -282,20 +282,18 @@ void ColormapEditor::loadColormap()
    {
       ColorMap cmap(filename.toStdString());
 
-      const ColorMap::Gradient *pGradient = cmap.getGradientDefinition();
+      const ColorMap::Gradient* pGradient = cmap.getGradientDefinition();
       if (pGradient == NULL)
       {
-         QString message = "The selected file:\n" + filename + 
-            "\ncould not be loaded as a color gradient file.";
+         QString message = "The selected file:\n" + filename + "\ncould not be loaded as a color gradient file.";
          QMessageBox::critical(this, "Error Loading Colormap", message, "Ok");
          return;
       }
       gradient = *pGradient;
    }
-   catch (std::runtime_error &)
+   catch (std::runtime_error&)
    {
-      QString message = "The selected file:\n" + filename + 
-         "\ncould not be loaded as a colormap file.";
+      QString message = "The selected file:\n" + filename + "\ncould not be loaded as a colormap file.";
       QMessageBox::critical(this, "Error Loading Colormap", message, "Ok");
       return;
    }
@@ -305,7 +303,7 @@ void ColormapEditor::loadColormap()
    this->mpPrimariesSpinBox->setValue(gradient.mControls.size());
 
    vector<Primary>::iterator pPrimary;
-   for (pPrimary=mPrimaries.begin(); pPrimary!=mPrimaries.end(); ++pPrimary)
+   for (pPrimary = mPrimaries.begin(); pPrimary != mPrimaries.end(); ++pPrimary)
    {
       disconnect(pPrimary->mpSlider, SIGNAL(valueChanged(int)), this, SLOT(primaryPositionChanged(int)));
    }
@@ -315,7 +313,7 @@ void ColormapEditor::loadColormap()
    mpRangeMinSlider->setValue(rangeMin);
    mpRangeMaxSlider->setValue(rangeMax);
    int sliderIndexRange = gradient.mStopPosition - gradient.mStartPosition;
-   for (unsigned int i=0; i<gradient.mControls.size(); ++i)
+   for (unsigned int i = 0; i < gradient.mControls.size(); ++i)
    {
       mPrimaries[i].mColor = QColor(gradient.mControls[i].mColor.mRed,
          gradient.mControls[i].mColor.mGreen, gradient.mControls[i].mColor.mBlue);
@@ -325,7 +323,7 @@ void ColormapEditor::loadColormap()
       mPrimaries[i].mpSlider->setValue(pos);
    }
 
-   for (pPrimary=mPrimaries.begin(); pPrimary!=mPrimaries.end(); ++pPrimary)
+   for (pPrimary = mPrimaries.begin(); pPrimary != mPrimaries.end(); ++pPrimary)
    {
       connect(pPrimary->mpSlider, SIGNAL(valueChanged(int)), this, SLOT(primaryPositionChanged(int)));
    }
@@ -333,13 +331,13 @@ void ColormapEditor::loadColormap()
    updateColormap();
 }
 
-void ColormapEditor::primaryColorChanged(const QColor &clrNew)
+void ColormapEditor::primaryColorChanged(const QColor& clrNew)
 {
-   CustomColorButton *pButton = dynamic_cast<CustomColorButton*>(sender());
+   CustomColorButton* pButton = dynamic_cast<CustomColorButton*>(sender());
    VERIFYNRV(pButton != NULL);
 
    unsigned int i = 0;
-   for (i=0; i<mPrimaries.size(); ++i)
+   for (i = 0; i < mPrimaries.size(); ++i)
    {
       if (pButton == mPrimaries[i].mpButton)
       {
@@ -356,12 +354,12 @@ void ColormapEditor::primaryColorChanged(const QColor &clrNew)
 
 void ColormapEditor::primaryPositionChanged(int newValue)
 {
-   QSlider *pThisSlider = dynamic_cast<QSlider *>(sender());
+   QSlider* pThisSlider = dynamic_cast<QSlider*>(sender());
    VERIFYNRV(pThisSlider != NULL);
-   QSlider *pPrevSlider = NULL;
-   QSlider *pNextSlider = NULL;
+   QSlider* pPrevSlider = NULL;
+   QSlider* pNextSlider = NULL;
    unsigned int i = 0;
-   for (i=0; i<mPrimaries.size(); ++i)
+   for (i = 0; i < mPrimaries.size(); ++i)
    {
       if (mPrimaries[i].mpSlider == pThisSlider)
       {
@@ -397,7 +395,7 @@ void ColormapEditor::primaryPositionChanged(int newValue)
 
 void ColormapEditor::rangePositionChanged(int newValue)
 {
-   QSlider *pThisSlider = dynamic_cast<QSlider *>(sender());
+   QSlider* pThisSlider = dynamic_cast<QSlider*>(sender());
    VERIFYNRV(pThisSlider != NULL);
 
    if (pThisSlider == mpRangeMinSlider)
@@ -428,19 +426,19 @@ void ColormapEditor::distributeUniformly()
    // first, set them all to max, in reverse order - this keeps 
    // primaryPositionChanged from interfering
    vector<Primary>::reverse_iterator pPrimaryRev;
-   for (pPrimaryRev=mPrimaries.rbegin(); pPrimaryRev!=mPrimaries.rend(); ++pPrimaryRev)
+   for (pPrimaryRev = mPrimaries.rbegin(); pPrimaryRev != mPrimaries.rend(); ++pPrimaryRev)
    {
       disconnect(pPrimaryRev->mpSlider, SIGNAL(valueChanged(int)), this, SLOT(primaryPositionChanged(int)));
       pPrimaryRev->mpSlider->setValue(mSliderRange-1);
    }
 
    int index = 0;
-   int maxIndex = mPrimaries.size()-1;
+   int maxIndex = mPrimaries.size() - 1;
    int max2 = maxIndex / 2;
    vector<Primary>::iterator pPrimary;
-   for (pPrimary=mPrimaries.begin(); pPrimary!=mPrimaries.end(); ++pPrimary, ++index)
+   for (pPrimary = mPrimaries.begin(); pPrimary != mPrimaries.end(); ++pPrimary, ++index)
    {
-      pPrimary->mpSlider->setValue(((mSliderRange-1) * index + max2) / maxIndex);
+      pPrimary->mpSlider->setValue(((mSliderRange - 1) * index + max2) / maxIndex);
       connect(pPrimary->mpSlider, SIGNAL(valueChanged(int)), this, SLOT(primaryPositionChanged(int)));
       pPrimary->mValue = pPrimary->mpSlider->value();
    }
@@ -462,7 +460,7 @@ void ColormapEditor::updateColormap()
 
       mColormap = colorMap.getTable();
    }
-   catch (std::runtime_error &)
+   catch (std::runtime_error&)
    {
       VERIFYNRV_MSG(false, "Invalid colormap creation attempted");
    }
@@ -471,14 +469,14 @@ void ColormapEditor::updateColormap()
    // Create the display of the colormap
    QImage image(size, 1, QImage::Format_ARGB32);
    vector<unsigned int> data(size);
-   for (int i=0; i<size; ++i)
+   for (int i = 0; i < size; ++i)
    {
       data[i] = qRgb(mColormap[i].mRed, mColormap[i].mGreen, mColormap[i].mBlue);
    }
    memcpy(image.bits(), &data[0], size * sizeof(unsigned int));
 
    // scale it ourselves non-smoothly to defeat Qt's hard-coded smooth rescaling
-   image = image.scaled(max(size,500), mpDisplay->height(), Qt::IgnoreAspectRatio, Qt::FastTransformation);
+   image = image.scaled(max(size, 500), mpDisplay->height(), Qt::IgnoreAspectRatio, Qt::FastTransformation);
    mpDisplay->setPixmap(QPixmap::fromImage(image));
 
    // Instruct the histogram to display the prospective colormap
@@ -487,7 +485,7 @@ void ColormapEditor::updateColormap()
    mIsApplied = false;
 }
 
-void ColormapEditor::histogramDeleted(Subject &subject, const std::string &signal, const boost::any& v)
+void ColormapEditor::histogramDeleted(Subject& subject, const std::string& signal, const boost::any& v)
 {
    mNeedDetach = false;
    delete this;
@@ -501,17 +499,16 @@ ColorMap::Gradient ColormapEditor::makeGradient() const
    int rangeMin = mpRangeMinSlider->value();
    int rangeMax = mpRangeMaxSlider->value();
    int sliderRange = rangeMax-rangeMin;
-   gradient.mStartPosition = (rangeMin * (size-1) + mSliderRange/2) / mSliderRange;
-   gradient.mStopPosition = (rangeMax * (size-1) + mSliderRange/2) / mSliderRange;
+   gradient.mStartPosition = (rangeMin * (size - 1) + mSliderRange / 2) / mSliderRange;
+   gradient.mStopPosition = (rangeMax * (size - 1) + mSliderRange / 2) / mSliderRange;
    vector<Primary>::const_iterator pPrimary;
-   for (pPrimary=mPrimaries.begin(); pPrimary!=mPrimaries.end(); ++pPrimary)
+   for (pPrimary = mPrimaries.begin(); pPrimary != mPrimaries.end(); ++pPrimary)
    {
       int index = gradient.mStartPosition + 
-         (pPrimary->mValue * (gradient.mStopPosition-gradient.mStartPosition) + sliderRange/2) 
-         / mSliderRange;
+         (pPrimary->mValue * (gradient.mStopPosition - gradient.mStartPosition) + sliderRange / 2) / mSliderRange;
+
       ColorMap::Gradient::Control control;
-      control.mColor = ColorType(pPrimary->mColor.red(), 
-         pPrimary->mColor.green(), pPrimary->mColor.blue());
+      control.mColor = ColorType(pPrimary->mColor.red(), pPrimary->mColor.green(), pPrimary->mColor.blue());
       control.mPosition = index;
       gradient.mControls.push_back(control);
    }

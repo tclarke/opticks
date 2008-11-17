@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef NITF_IMPORTER_H
-#define NITF_IMPORTER_H
+#ifndef NITFIMPORTER_H
+#define NITFIMPORTER_H
 
 #include "RasterElementImporterShell.h"
 

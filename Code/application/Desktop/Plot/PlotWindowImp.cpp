@@ -201,12 +201,10 @@ PlotSet* PlotWindowImp::getPlotSet(PlotWidget* pPlot) const
    vector<PlotSet*>::const_iterator iter = mPlotSets.begin();
    while (iter != mPlotSets.end())
    {
-      PlotSet* pPlotSet = NULL;
-      pPlotSet = *iter;
+      PlotSet* pPlotSet = *iter;
       if (pPlotSet != NULL)
       {
-         bool bContains = false;
-         bContains = pPlotSet->containsPlot(pPlot);
+         bool bContains = pPlotSet->containsPlot(pPlot);
          if (bContains == true)
          {
             return pPlotSet;
@@ -226,8 +224,7 @@ vector<PlotSet*> PlotWindowImp::getPlotSets() const
    vector<PlotSet*>::const_iterator iter = mPlotSets.begin();
    while (iter != mPlotSets.end())
    {
-      PlotSet* pPlotSet = NULL;
-      pPlotSet = *iter;
+      PlotSet* pPlotSet = *iter;
       if (pPlotSet != NULL)
       {
          plots.push_back(pPlotSet);
@@ -254,8 +251,7 @@ bool PlotWindowImp::containsPlotSet(PlotSet* pPlotSet) const
    vector<PlotSet*>::const_iterator iter = mPlotSets.begin();
    while (iter != mPlotSets.end())
    {
-      PlotSet* pCurrentPlotSet = NULL;
-      pCurrentPlotSet = *iter;
+      PlotSet* pCurrentPlotSet = *iter;
       if (pCurrentPlotSet == pPlotSet)
       {
          return true;
@@ -558,7 +554,7 @@ PlotWidget* PlotWindowImp::getCurrentPlot() const
 void PlotWindowImp::clear()
 {
    vector<PlotSet*> plotSets = getPlotSets();
-   for (unsigned int i = 0; i < plotSets.size(); i++)
+   for (unsigned int i = 0; i < plotSets.size(); ++i)
    {
       PlotSet* pPlotSet = plotSets[i];
       if (pPlotSet != NULL)
@@ -636,7 +632,7 @@ void PlotWindowImp::setCurrentPlotSet(const QString& strPlotSet)
 namespace
 {
    template<class T>
-   void extractFromVariant(const DataVariant &var, vector<double> &data)
+   void extractFromVariant(const DataVariant& var, vector<double>& data)
    {
       const vector<T>* pVec = var.getPointerToValue<vector<T> >();
       if (pVec != NULL)
@@ -645,28 +641,72 @@ namespace
          copy(pVec->begin(), pVec->end(), back_inserter(data));
       }
    }
-   void convertRawData(const DataVariant &var, vector<double> &data)
+   void convertRawData(const DataVariant& var, vector<double>& data)
    {
       // list<types> typeList = char, unsigned char, short, ...
       // for each type in typeList
       //    data = extractFromVariant<type>(var);
       //    if (!data.empty) return data;
-      extractFromVariant<char>(var, data); if (!data.empty()) return;
-      extractFromVariant<unsigned char>(var, data); if (!data.empty()) return;
-      extractFromVariant<short>(var, data); if (!data.empty()) return;
-      extractFromVariant<unsigned short>(var, data); if (!data.empty()) return;
-      extractFromVariant<int>(var, data); if (!data.empty()) return;
-      extractFromVariant<unsigned int>(var, data); if (!data.empty()) return;
-      extractFromVariant<long>(var, data); if (!data.empty()) return;
-      extractFromVariant<unsigned long>(var, data); if (!data.empty()) return;
-      extractFromVariant<float>(var, data); if (!data.empty()) return;
+      extractFromVariant<char>(var, data);
+      if (!data.empty())
+      {
+         return;
+      }
+
+      extractFromVariant<unsigned char>(var, data);
+      if (!data.empty())
+      {
+         return;
+      }
+
+      extractFromVariant<short>(var, data);
+      if (!data.empty())
+      {
+         return;
+      }
+
+      extractFromVariant<unsigned short>(var, data);
+      if (!data.empty())
+      {
+         return;
+      }
+
+      extractFromVariant<int>(var, data);
+      if (!data.empty())
+      {
+         return;
+      }
+
+      extractFromVariant<unsigned int>(var, data);
+      if (!data.empty())
+      {
+         return;
+      }
+
+      extractFromVariant<long>(var, data);
+      if (!data.empty())
+      {
+         return;
+      }
+
+      extractFromVariant<unsigned long>(var, data);
+      if (!data.empty())
+      {
+         return;
+      }
+
+      extractFromVariant<float>(var, data);
+      if (!data.empty())
+      {
+         return;
+      }
+
       extractFromVariant<double>(var, data);
    }
-
 }
 
-PlotWidget *PlotWindowImp::plotData(const DataVariant &xRawData, const DataVariant &yRawData,
-   const string &xAttribute, const string &yAttribute, const string &plotName)
+PlotWidget* PlotWindowImp::plotData(const DataVariant& xRawData, const DataVariant& yRawData, const string& xAttribute,
+                                    const string& yAttribute, const string& plotName)
 {
    vector<double> xData;
    convertRawData(xRawData, xData);
@@ -674,29 +714,28 @@ PlotWidget *PlotWindowImp::plotData(const DataVariant &xRawData, const DataVaria
    convertRawData(yRawData, yData);
    if (xData.size() != yData.size() || xData.size() == 0 || yData.size() == 0)
    {
-      string message = "The selected attributes are not plottable:\n" +
-         yAttribute + " vs. " + xAttribute;
+      string message = "The selected attributes are not plottable:\n" + yAttribute + " vs. " + xAttribute;
       QMessageBox::critical(this, "Unable to plot", message.c_str(), QMessageBox::Ok, 0);
       MessageResource msg("Plotting", "app", "7137567E-0EF3-4e46-9706-2F2F9764AD1C");
       msg->addProperty("Message", message);
       return NULL;
    }
 
-   PlotSet *pSet = getCurrentPlotSet();
+   PlotSet* pSet = getCurrentPlotSet();
    if (pSet == NULL)
    {
       pSet = this->createPlotSet(QString::fromStdString(plotName));
       VERIFYRV(pSet != NULL, NULL);
    }
 
-   PlotWidget *pPlotWidget = NULL;
+   PlotWidget* pPlotWidget = NULL;
    pPlotWidget = pSet->getPlot(plotName);
 
    if (pPlotWidget == NULL)
    {
       pPlotWidget = pSet->createPlot(plotName, CARTESIAN_PLOT);
 
-      Axis *pAxis = pPlotWidget->getAxis(AXIS_BOTTOM);
+      Axis* pAxis = pPlotWidget->getAxis(AXIS_BOTTOM);
       VERIFYRV(pAxis != NULL, NULL);
       pAxis->setTitle(xAttribute);
       pAxis = pPlotWidget->getAxis(AXIS_LEFT);
@@ -705,7 +744,7 @@ PlotWidget *PlotWindowImp::plotData(const DataVariant &xRawData, const DataVaria
    }
    else
    {
-      Axis *pAxis = pPlotWidget->getAxis(AXIS_BOTTOM);
+      Axis* pAxis = pPlotWidget->getAxis(AXIS_BOTTOM);
       VERIFYRV(pAxis != NULL, NULL);
       string xText = pAxis->getTitle();
       pAxis = pPlotWidget->getAxis(AXIS_LEFT);
@@ -727,9 +766,9 @@ PlotWidget *PlotWindowImp::plotData(const DataVariant &xRawData, const DataVaria
       }
    }
 
-   PlotView *pPlotView = pPlotWidget->getPlot();
-   PointSet *pPointSet = dynamic_cast<PointSet*>(pPlotView->addObject(POINT_SET, true));
-   for (unsigned int i=0; i<xData.size(); ++i)
+   PlotView* pPlotView = pPlotWidget->getPlot();
+   PointSet* pPointSet = dynamic_cast<PointSet*>(pPlotView->addObject(POINT_SET, true));
+   for (unsigned int i = 0; i < xData.size(); ++i)
    {
       pPointSet->addPoint(xData[i], yData[i]);
    }
@@ -737,19 +776,19 @@ PlotWidget *PlotWindowImp::plotData(const DataVariant &xRawData, const DataVaria
    return pPlotWidget;
 }
 
-PlotWidget* PlotWindowImp::plotData(const Signature &sig, const std::string &xAttribute,
-   const std::string &yAttribute, const std::string &plotName)
+PlotWidget* PlotWindowImp::plotData(const Signature& sig, const string& xAttribute, const string& yAttribute,
+                                    const string& plotName)
 {
-   const DataVariant &xRawData = sig.getData(xAttribute);
-   const DataVariant &yRawData = sig.getData(yAttribute);
+   const DataVariant& xRawData = sig.getData(xAttribute);
+   const DataVariant& yRawData = sig.getData(yAttribute);
    return plotData(xRawData, yRawData, xAttribute, yAttribute, plotName);
 }
 
-PlotWidget* PlotWindowImp::plotData(const DynamicObject &obj, const std::string &xAttribute,
-   const std::string &yAttribute, const std::string &plotName)
+PlotWidget* PlotWindowImp::plotData(const DynamicObject& obj, const string& xAttribute, const string& yAttribute,
+                                    const string& plotName)
 {
-   const DataVariant &xRawData = obj.getAttribute(xAttribute);
-   const DataVariant &yRawData = obj.getAttribute(yAttribute);
+   const DataVariant& xRawData = obj.getAttribute(xAttribute);
+   const DataVariant& yRawData = obj.getAttribute(yAttribute);
    return plotData(xRawData, yRawData, xAttribute, yAttribute, plotName);
 }
 
@@ -767,10 +806,10 @@ bool PlotWindowImp::toXml(XMLWriter* pXml) const
       pXml->addAttr("infoBarTitleFont", mpInfoBar->getTitleFont().toString().toStdString());
    }
 
-   PlotSet* pSet = getCurrentPlotSet();
-   if (pSet != NULL)
+   PlotSet* pCurrentSet = getCurrentPlotSet();
+   if (pCurrentSet != NULL)
    {
-      pXml->addAttr("currentPlotSetId", pSet->getId());
+      pXml->addAttr("currentPlotSetId", pCurrentSet->getId());
    }
 
    PlotWidget* pPlot = getCurrentPlot();
@@ -782,8 +821,7 @@ bool PlotWindowImp::toXml(XMLWriter* pXml) const
    if (mPlotSets.size() > 0)
    {
       pXml->pushAddPoint(pXml->addElement("PlotSets"));
-      vector<PlotSet*>::const_iterator it;
-      for (it=mPlotSets.begin(); it!=mPlotSets.end(); ++it)
+      for (vector<PlotSet*>::const_iterator it = mPlotSets.begin(); it != mPlotSets.end(); ++it)
       {
          PlotSet* pSet = *it;
          if (pSet != NULL)
@@ -814,14 +852,15 @@ bool PlotWindowImp::fromXml(DOMNode* pDocument, unsigned int version)
       return false;
    }
 
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
+   DOMElement* pElem = static_cast<DOMElement*>(pDocument);
    if (pElem == NULL)
    {
       return false;
    }
 
    // get attributes
-   string currentPlotSetId, currentPlotId;
+   string currentPlotSetId;
+   string currentPlotId;
    if (mpInfoBar != NULL)
    {
       string infoBarTitle = A(pElem->getAttribute(X("infoBarTitle")));
@@ -849,19 +888,15 @@ bool PlotWindowImp::fromXml(DOMNode* pDocument, unsigned int version)
    }
 
    // get plot sets
-   for (DOMNode *pChld = pDocument->getFirstChild();
-      pChld != NULL;
-      pChld = pChld->getNextSibling())
+   for (DOMNode* pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
    {
       string name = A(pChld->getNodeName());
-      if(name == "PlotSets")
+      if (name == "PlotSets")
       {
-         for (DOMNode *pGChld = pChld->getFirstChild();
-            pGChld != NULL;
-            pGChld = pGChld->getNextSibling())
+         for (DOMNode* pGChld = pChld->getFirstChild(); pGChld != NULL; pGChld = pGChld->getNextSibling())
          {
             string name = A(pGChld->getNodeName());
-            if(name == "PlotId")
+            if (name == "PlotId")
             {
                if (createPlotSet(A(pGChld->getFirstChild()->getNodeValue())) == NULL)
                {

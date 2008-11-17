@@ -24,14 +24,13 @@
 class RasterElement;
 class RasterDataDescriptor;
 
-class frmBM : public QDialog
+class FrmBM : public QDialog
 {
    Q_OBJECT
 
 public:
-   frmBM(const RasterDataDescriptor* pDescriptor,  const std::vector<RasterElement*>& cubeList,
-      QWidget* parent = 0);
-   ~frmBM();
+   FrmBM(const RasterDataDescriptor* pDescriptor, const std::vector<RasterElement*>& cubeList, QWidget* parent = 0);
+   ~FrmBM();
 
    QString getExpression(bool bLoadedBands) const;
    bool isDegrees() const;

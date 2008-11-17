@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef PLUGIN_RESOURCE_DOT_H
-#define PLUGIN_RESOURCE_DOT_H
+#ifndef PLUGINRESOURCE_H
+#define PLUGINRESOURCE_H
 
 #include "ExecutableAgent.h"
 #include "ExportAgent.h"
@@ -35,13 +35,27 @@ public:
    class Args 
    {
    public:
+      Args() :
+         mpPlugIn(NULL),
+         mNeedToCreate(false) {}
+
+      Args(std::string plugInName) :
+         mPlugInName(plugInName),
+         mpPlugIn(NULL),
+         mNeedToCreate(true) {}
+
+      Args(char* plugInName) :
+         mPlugInName(plugInName),
+         mpPlugIn(NULL),
+         mNeedToCreate(true) {}
+
+      Args(PlugIn* pPlugIn) :
+         mpPlugIn(pPlugIn),
+         mNeedToCreate(false) {}
+
       std::string mPlugInName;
       PlugIn* mpPlugIn;
       bool mNeedToCreate;
-      Args() : mpPlugIn(NULL), mNeedToCreate(false) {}
-      Args(std::string plugInName) : mPlugInName(plugInName), mpPlugIn(NULL), mNeedToCreate(true) {}
-      Args(char* plugInName) : mPlugInName(plugInName), mpPlugIn(NULL), mNeedToCreate(true) {}
-      Args(PlugIn* pPlugIn) : mpPlugIn(pPlugIn), mNeedToCreate(false) {}
    };
 
    PlugIn* obtainResource(const Args& args) const
@@ -80,12 +94,9 @@ class PlugInResource : public Resource<PlugIn, PlugInObject>
 public:
    /**
     *  Creates a plug-in resource which wraps no plug-in.
-    *
     */
    explicit PlugInResource() :
-      Resource<PlugIn, PlugInObject>(PlugInObject::Args())
-   {
-   }
+      Resource<PlugIn, PlugInObject>(PlugInObject::Args()) {}
 
    /**
     *  Creates a plug-in resource to create a plug-in with a given
@@ -95,9 +106,7 @@ public:
     *           The name of the plug-in to create.
     */
    explicit PlugInResource(const std::string& plugInName) :
-      Resource<PlugIn, PlugInObject>(PlugInObject::Args(plugInName))
-   {
-   }
+      Resource<PlugIn, PlugInObject>(PlugInObject::Args(plugInName)) {}
 
    /**
     *  Creates a plug-in resource to manage an existing plug-in.
@@ -108,9 +117,7 @@ public:
     *           destruction.
     */
    explicit PlugInResource(PlugIn* pPlugIn) :
-      Resource<PlugIn, PlugInObject>(pPlugIn, PlugInObject::Args(pPlugIn))
-   {
-   } 
+      Resource<PlugIn, PlugInObject>(pPlugIn, PlugInObject::Args(pPlugIn)) {}
 };
 
 /**
@@ -125,7 +132,7 @@ class ExecutableResource : public FactoryResource<ExecutableAgentCommon1>
 {
 public:
    /**
-    * @copydoc ExecutableAgent::instantiate(Progress*,bool)
+    * @copydoc ExecutableAgent::instantiate(Progress*, bool)
     * @par ExecutableAgent
     * This class simply allocates and controls the 
     * lifecycle of a ExecutableAgent object.  You can
@@ -142,7 +149,7 @@ public:
    }
 
    /**
-    * @copydoc ExecutableAgent::instantiate(const std::string&,const std::string&,Progress*,bool)
+    * @copydoc ExecutableAgent::instantiate(const std::string&, const std::string&, Progress*, bool)
     * @par ExecutableAgent
     * This class simply allocates and controls the 
     * lifecycle of a ExecutableAgent object.  You can
@@ -150,17 +157,17 @@ public:
     * on ExecutableAgent.
     */
    explicit ExecutableResource(const std::string& plugInName, const std::string& menuCommand = std::string(),
-      Progress* pProgress = NULL, bool batch = true)
+                               Progress* pProgress = NULL, bool batch = true)
    {
       ExecutableAgentCommon1* pAgent = get();
       if (pAgent != NULL)
       {
          pAgent->instantiate(plugInName, menuCommand, pProgress, batch);
-      } 
+      }
    }
 
    /**
-    * @copydoc ExecutableAgent::instantiate(PlugIn*,const std::string&,Progress*,bool)
+    * @copydoc ExecutableAgent::instantiate(PlugIn*, const std::string&, Progress*, bool)
     * @par ExecutableAgent
     * This class simply allocates and controls the 
     * lifecycle of a ExecutableAgent object.  You can
@@ -168,7 +175,7 @@ public:
     * on ExecutableAgent.
     */
    explicit ExecutableResource(PlugIn* pPlugIn, const std::string& menuCommand = std::string(),
-      Progress* pProgress = NULL, bool batch = true)
+                               Progress* pProgress = NULL, bool batch = true)
    {
       ExecutableAgentCommon1* pAgent = get();
       if (pAgent != NULL)
@@ -190,7 +197,7 @@ class ImporterResource : public FactoryResource<ImportAgentCommon>
 {
 public:
    /**
-    * @copydoc ImportAgent::instantiate(Progress*,bool)
+    * @copydoc ImportAgent::instantiate(Progress*, bool)
     * @par ImportAgent
     * This class simply allocates and controls the 
     * lifecycle of a ImportAgent object.  You can
@@ -207,7 +214,7 @@ public:
    }
 
    /**
-    * @copydoc ImportAgent::instantiate(const std::string&,Progress*,bool)
+    * @copydoc ImportAgent::instantiate(const std::string&, Progress*, bool)
     * @par ImportAgent
     * This class simply allocates and controls the 
     * lifecycle of a ImportAgent object.  You can
@@ -224,14 +231,15 @@ public:
    }
 
    /**
-    * @copydoc ImportAgent::instantiate(const std::string&,const std::string&,Progress*,bool)
+    * @copydoc ImportAgent::instantiate(const std::string&, const std::string&, Progress*, bool)
     * @par ImportAgent
     * This class simply allocates and controls the 
     * lifecycle of a ImportAgent object.  You can
     * use -> to access any of the methods available
     * on ImportAgent.
     */
-   ImporterResource(const std::string& importerName, const std::string& filename, Progress* pProgress = NULL, bool batch = true)
+   ImporterResource(const std::string& importerName, const std::string& filename, Progress* pProgress = NULL,
+                    bool batch = true)
    {
       ImportAgentCommon* pAgent = get();
       if (pAgent != NULL)
@@ -241,9 +249,9 @@ public:
    }
 
    /**
-    * @copydoc ImportAgent::instantiate(const std::string&,const std::vector<ImportDescriptor*>&,Progress*,bool)
+    * @copydoc ImportAgent::instantiate(const std::string&, const std::vector<ImportDescriptor*>&, Progress*, bool)
     * @par ImportAgent
-    * This class simply allocates and controls the              
+    * This class simply allocates and controls the
     * lifecycle of a ImportAgent object.  You can
     * use -> to access any of the methods available
     * on ImportAgent.
@@ -259,7 +267,7 @@ public:
    }
 
    /**
-    * @copydoc ImportAgent::instantiate(PlugIn*,const std::vector<ImportDescriptor*>&,Progress*,bool)
+    * @copydoc ImportAgent::instantiate(PlugIn*, const std::vector<ImportDescriptor*>&, Progress*, bool)
     * @par ImportAgent
     * This class simply allocates and controls the 
     * lifecycle of a ImportAgent object.  You can
@@ -289,7 +297,7 @@ class ExporterResource : public FactoryResource<ExportAgentCommon>
 {
 public:
    /**
-    * @copydoc ExportAgent::instantiate(Progress*,bool)
+    * @copydoc ExportAgent::instantiate(Progress*, bool)
     * @par ExportAgent
     * This class simply allocates and controls the 
     * lifecycle of a ExportAgent object.  You can
@@ -306,7 +314,7 @@ public:
    }
 
    /**
-    * @copydoc ExportAgent::instantiate(std::string,Progress*,bool)
+    * @copydoc ExportAgent::instantiate(std::string, Progress*, bool)
     * @par ExportAgent
     * This class simply allocates and controls the 
     * lifecycle of a ExportAgent object.  You can
@@ -323,7 +331,7 @@ public:
    }
 
    /**
-    * @copydoc ExportAgent::instantiate(PlugIn*,Progress*,bool)
+    * @copydoc ExportAgent::instantiate(PlugIn*, Progress*, bool)
     * @par ExportAgent
     * This class simply allocates and controls the 
     * lifecycle of a ExportAgent object.  You can
@@ -340,7 +348,7 @@ public:
    }
 
    /**
-    * @copydoc ExportAgent::instantiate(std::string,SessionItem*,FileDescriptor*,Progress*,bool)
+    * @copydoc ExportAgent::instantiate(std::string, SessionItem*, FileDescriptor*, Progress*, bool)
     * @par ExportAgent
     * This class simply allocates and controls the 
     * lifecycle of a ExportAgent object.  You can
@@ -348,7 +356,7 @@ public:
     * on ExportAgent.
     */
    ExporterResource(std::string exporterName, SessionItem* pItem, FileDescriptor* pFileDescriptor,
-      Progress* pProgress = NULL, bool batch = true)
+                    Progress* pProgress = NULL, bool batch = true)
    {
       ExportAgentCommon* pAgent = get();
       if (pAgent != NULL)
@@ -358,7 +366,7 @@ public:
    }
 
    /**
-    * @copydoc ExportAgent::instantiate(PlugIn*,SessionItem*,FileDescriptor*,Progress*,bool)
+    * @copydoc ExportAgent::instantiate(PlugIn*, SessionItem*, FileDescriptor*, Progress*, bool)
     * @par ExportAgent
     * This class simply allocates and controls the 
     * lifecycle of a ExportAgent object.  You can
@@ -366,7 +374,7 @@ public:
     * on ExportAgent.
     */
    ExporterResource(PlugIn* pPlugIn, SessionItem* pItem, FileDescriptor* pFileDescriptor,
-      Progress* pProgress = NULL, bool batch = true)
+                    Progress* pProgress = NULL, bool batch = true)
    {
       ExportAgentCommon* pAgent = get();
       if (pAgent != NULL)

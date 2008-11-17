@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef HDF4_UTILITIES_H
-#define HDF4_UTILITIES_H
+#ifndef HDF4UTILITIES_H
+#define HDF4UTILITIES_H
 
 #include "AppConfig.h"
 #if defined(HDF4_SUPPORT)
@@ -187,7 +187,10 @@ namespace HdfUtilities
        *
        * @return A pointer to an int32 reprsenting the file handle.
        */
-      operator int32*() { return get(); }
+      operator int32*()
+      {
+         return get();
+      }
    };
 
    /**
@@ -231,7 +234,9 @@ namespace HdfUtilities
           * @param  dsIndex
           *         The index of the dataset to access.
           */
-         Args(int32 fileHandle, int dsIndex) : mFileHandle(fileHandle), mIndex(dsIndex)
+         Args(int32 fileHandle, int dsIndex) :
+            mFileHandle(fileHandle),
+            mIndex(dsIndex)
          {
          }
 
@@ -249,10 +254,10 @@ namespace HdfUtilities
           * @param  datasetName
           *         The name of the dataset to access.
           */
-         Args(int32 fileHandle, const std::string& datasetName) : mFileHandle(fileHandle)
+         Args(int32 fileHandle, const std::string& datasetName) :
+            mFileHandle(fileHandle)
          {
-            int dsIndex = SDnametoindex(mFileHandle, const_cast<char*>(datasetName.c_str()));
-            mIndex = dsIndex;
+            mIndex = SDnametoindex(mFileHandle, datasetName.c_str());
          }
       };
 
@@ -340,7 +345,10 @@ namespace HdfUtilities
        *
        * @return A pointer to an int32 reprsenting the file handle.
        */
-      operator int32*() { return get(); }
+      operator int32*()
+      {
+         return get();
+      }
    };
 }
 

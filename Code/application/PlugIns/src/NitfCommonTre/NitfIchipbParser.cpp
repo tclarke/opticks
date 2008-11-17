@@ -201,7 +201,8 @@ bool Nitf::IchipbParser::toDynamicObject(const ossimNitfRegisteredTag& input, Dy
 bool Nitf::IchipbParser::toDynamicObject(istream& input, size_t numBytes, DynamicObject& output,
    string &errorMessage) const
 {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This method isn't ever being called.  Should it be removed? (leckels)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This method isn't ever being called.  " \
+   "Should it be removed? (leckels)")
    vector<char> buf;
    bool ok(true);
 
@@ -317,7 +318,7 @@ Nitf::TreState Nitf::IchipbParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID && totalFields != numFields)
    {
       reporter << "Total fields in the Dynamic Object(" <<
-         totalFields <<") did not match the number found(" << numFields << ") ";
+         totalFields << ") did not match the number found(" << numFields << ") ";
       status = INVALID;
    }
 
@@ -343,28 +344,28 @@ bool Nitf::IchipbParser::fromDynamicObject(const DynamicObject& input, ostream& 
 
    try
    {
-      output <<   toString( dv_cast<bool>(input.getAttribute(ICHIPB::XFRM_FLAG)), 2);
-      output <<   toString( dv_cast<double>(input.getAttribute(ICHIPB::SCALE_FACTOR)), 10, 5);
-      output <<   toString( dv_cast<bool>(input.getAttribute(ICHIPB::ANAMRPH_CORR)), 2);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(ICHIPB::SCANBLK_NUM)), 2);
-      output <<   toString( dv_cast<double>(input.getAttribute(ICHIPB::OP_ROW_11)), 12, 3);
-      output <<   toString( dv_cast<double>(input.getAttribute(ICHIPB::OP_COL_11)), 12, 3);
-      output <<   toString( dv_cast<double>(input.getAttribute(ICHIPB::OP_ROW_12)), 12, 3);
-      output <<   toString( dv_cast<double>(input.getAttribute(ICHIPB::OP_COL_12)), 12, 3);
-      output <<   toString( dv_cast<double>(input.getAttribute(ICHIPB::OP_ROW_21)), 12, 3);
-      output <<   toString( dv_cast<double>(input.getAttribute(ICHIPB::OP_COL_21)), 12, 3);
-      output <<   toString( dv_cast<double>(input.getAttribute(ICHIPB::OP_ROW_22)), 12, 3);
-      output <<   toString( dv_cast<double>(input.getAttribute(ICHIPB::OP_COL_22)), 12, 3);
-      output <<   toString( dv_cast<double>(input.getAttribute(ICHIPB::FI_ROW_11)), 12, 3);
-      output <<   toString( dv_cast<double>(input.getAttribute(ICHIPB::FI_COL_11)), 12, 3);
-      output <<   toString( dv_cast<double>(input.getAttribute(ICHIPB::FI_ROW_12)), 12, 3);
-      output <<   toString( dv_cast<double>(input.getAttribute(ICHIPB::FI_COL_12)), 12, 3);
-      output <<   toString( dv_cast<double>(input.getAttribute(ICHIPB::FI_ROW_21)), 12, 3);
-      output <<   toString( dv_cast<double>(input.getAttribute(ICHIPB::FI_COL_21)), 12, 3);
-      output <<   toString( dv_cast<double>(input.getAttribute(ICHIPB::FI_ROW_22)), 12, 3);
-      output <<   toString( dv_cast<double>(input.getAttribute(ICHIPB::FI_COL_22)), 12, 3);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(ICHIPB::FI_ROW)), 8);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(ICHIPB::FI_COL)), 8);
+      output << toString(dv_cast<bool>(input.getAttribute(ICHIPB::XFRM_FLAG)), 2);
+      output << toString(dv_cast<double>(input.getAttribute(ICHIPB::SCALE_FACTOR)), 10, 5);
+      output << toString(dv_cast<bool>(input.getAttribute(ICHIPB::ANAMRPH_CORR)), 2);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(ICHIPB::SCANBLK_NUM)), 2);
+      output << toString(dv_cast<double>(input.getAttribute(ICHIPB::OP_ROW_11)), 12, 3);
+      output << toString(dv_cast<double>(input.getAttribute(ICHIPB::OP_COL_11)), 12, 3);
+      output << toString(dv_cast<double>(input.getAttribute(ICHIPB::OP_ROW_12)), 12, 3);
+      output << toString(dv_cast<double>(input.getAttribute(ICHIPB::OP_COL_12)), 12, 3);
+      output << toString(dv_cast<double>(input.getAttribute(ICHIPB::OP_ROW_21)), 12, 3);
+      output << toString(dv_cast<double>(input.getAttribute(ICHIPB::OP_COL_21)), 12, 3);
+      output << toString(dv_cast<double>(input.getAttribute(ICHIPB::OP_ROW_22)), 12, 3);
+      output << toString(dv_cast<double>(input.getAttribute(ICHIPB::OP_COL_22)), 12, 3);
+      output << toString(dv_cast<double>(input.getAttribute(ICHIPB::FI_ROW_11)), 12, 3);
+      output << toString(dv_cast<double>(input.getAttribute(ICHIPB::FI_COL_11)), 12, 3);
+      output << toString(dv_cast<double>(input.getAttribute(ICHIPB::FI_ROW_12)), 12, 3);
+      output << toString(dv_cast<double>(input.getAttribute(ICHIPB::FI_COL_12)), 12, 3);
+      output << toString(dv_cast<double>(input.getAttribute(ICHIPB::FI_ROW_21)), 12, 3);
+      output << toString(dv_cast<double>(input.getAttribute(ICHIPB::FI_COL_21)), 12, 3);
+      output << toString(dv_cast<double>(input.getAttribute(ICHIPB::FI_ROW_22)), 12, 3);
+      output << toString(dv_cast<double>(input.getAttribute(ICHIPB::FI_COL_22)), 12, 3);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(ICHIPB::FI_ROW)), 8);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(ICHIPB::FI_COL)), 8);
    }
    catch (const bad_cast&)
    {
@@ -380,15 +381,15 @@ TreExportStatus Nitf::IchipbParser::exportMetadata(const RasterDataDescriptor &d
    const RasterFileDescriptor &exportDescriptor, DynamicObject &tre, 
    unsigned int & ownerIndex, string & tagType, string &errorMessage) const
 {
-   const DynamicObject *pMetadata = descriptor.getMetadata();
+   const DynamicObject* pMetadata = descriptor.getMetadata();
    VERIFYRV(pMetadata != NULL, REMOVE);
    try
    {
 
       try
       {
-         const DataVariant &nitfMetadata = pMetadata->getAttribute(Nitf::NITF_METADATA);
-         const DynamicObject *pExistingIchipb =
+         const DataVariant& nitfMetadata = pMetadata->getAttribute(Nitf::NITF_METADATA);
+         const DynamicObject* pExistingIchipb =
             getTagHandle(dv_cast<DynamicObject>(nitfMetadata), "ICHIPB", FindFirst());
          if (pExistingIchipb != NULL)
          {
@@ -396,13 +397,13 @@ TreExportStatus Nitf::IchipbParser::exportMetadata(const RasterDataDescriptor &d
          }
 
          // Make sure we have at least one of BLOCKA, RPC00A or RPC00B otherwise we don't write an ICHIPB
-         const DynamicObject *pExistingBlocka =
+         const DynamicObject* pExistingBlocka =
             getTagHandle(dv_cast<DynamicObject>(nitfMetadata), "BLOCKA", FindFirst());
 
-         const DynamicObject *pExistingRpc00a =
+         const DynamicObject* pExistingRpc00a =
             getTagHandle(dv_cast<DynamicObject>(nitfMetadata), "RPC00A", FindFirst());
 
-         const DynamicObject *pExistingRpc00b =
+         const DynamicObject* pExistingRpc00b =
             getTagHandle(dv_cast<DynamicObject>(nitfMetadata), "RPC00B", FindFirst());
 
          if (!pExistingBlocka && !pExistingRpc00a && !pExistingRpc00b)
@@ -416,8 +417,8 @@ TreExportStatus Nitf::IchipbParser::exportMetadata(const RasterDataDescriptor &d
          return REMOVE;
       }
 
-      const vector<DimensionDescriptor> &exportRows = exportDescriptor.getRows();
-      const vector<DimensionDescriptor> &exportCols = exportDescriptor.getColumns();
+      const vector<DimensionDescriptor>& exportRows = exportDescriptor.getRows();
+      const vector<DimensionDescriptor>& exportCols = exportDescriptor.getColumns();
 
       VERIFYRV(!exportRows.empty(), REMOVE);
       VERIFYRV(!exportCols.empty(), REMOVE);

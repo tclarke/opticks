@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef IMAGE_PBO_H
-#define IMAGE_PBO_H
+#ifndef IMAGEPBO_H
+#define IMAGEPBO_H
 
 #include "ImageLoader.h"
 
@@ -87,7 +87,7 @@ public:
                      GLenum textureFormat, GLenum dataType, GLvoid *pPixels);
 
 private:
-   PixelBufferObject *mpPixelBufferObject;
+   PixelBufferObject* mpPixelBufferObject;
 };
 
 #endif

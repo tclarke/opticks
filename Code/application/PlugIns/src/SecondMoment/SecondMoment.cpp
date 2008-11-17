@@ -40,7 +40,7 @@ static bool** CopySelectedPixels(const bool** pSelectedPixels, int xsize, int ys
 static void DeleteSelectedPixels(bool** pSelectedPixels);
 
 template<class T>
-T* GetRowPtr (T* raw, int numCols, int numBands, int row, int col)
+T* GetRowPtr(T* raw, int numCols, int numBands, int row, int col)
 {
    return raw + numBands * (row *numCols + col);
 }
@@ -85,7 +85,7 @@ void ComputeFactoredSmm(T* pData, RasterElement* pRaster, double* pMatrix,
 
    DataAccessor accessor = pRaster->getDataAccessor(pRequest.release());
    T* pDataColumn(NULL);
-   for (row = 0; row < numRows;)
+   for (row = 0; row < numRows; )
    {
       if (pProgress != NULL)
       {
@@ -133,7 +133,7 @@ void ComputeFactoredSmm(T* pData, RasterElement* pRaster, double* pMatrix,
       for (i = 0; i< static_cast<unsigned int>(rowFactor); ++i)
       {
          ++row;
-         if(row < numRows)
+         if (row < numRows)
          {
             accessor->nextRow();
          }
@@ -227,7 +227,7 @@ void ComputeMaskedSmm(T* pData, MaskInput* pInput, RasterElement* pRaster)
          if ((pInput->pAbortFlag == NULL) || !(*pInput->pAbortFlag))
          {
             int iPercent = (100 * j) / boundingBoxYSize;
-            if(iPercent == 100)
+            if (iPercent == 100)
             {
                iPercent = 99;
             }
@@ -310,16 +310,17 @@ bool SecondMoment::populateBatchInputArgList(PlugInArgList* pArgList)
 
    VERIFY(pArgList != NULL);
    VERIFY(populateInteractiveInputArgList(pArgList));
-   VERIFY(pArgList->addArg<int>("Row Factor", &lRowFactor, "Process the first row in a group of this many rows. "
-                                      "A value of 1 processes all rows. A value of 2 processes 1 row and skips 1 row, etc. "
-                                      "A row is used if its zero based index modulo the row factor is zero."));
-   VERIFY(pArgList->addArg<int>("Column Factor", &lColumnFactor, "Process the first column in a group of this many columns. "
-                                      "A value of 1 processes all columns. A value of 2 processes 1 column and skips 1 column, etc. "
-                                      "A column is used if its zero based index modulo the column factor is zero."));
-   VERIFY(pArgList->addArg<Filename>("SMM File", NULL, "Store and retrieve second moment data from this file. If NULL, a filename "
-                                          "based on the data set filename will be generated."));
-   VERIFY(pArgList->addArg<AoiElement>("AOI", NULL, "Only calculate using pixels selected by this AOI. If NULL, use the entire image. "
-                                          "If row and column factors are not 1, they will also be used when determining data to process."));
+   VERIFY(pArgList->addArg<int>("Row Factor", &lRowFactor, "Process the first row in a group of this many rows.  "
+      "A value of 1 processes all rows. A value of 2 processes 1 row and skips 1 row, etc.  A row is used if its "
+      "zero based index modulo the row factor is zero."));
+   VERIFY(pArgList->addArg<int>("Column Factor", &lColumnFactor, "Process the first column in a group of this many "
+      "columns.  A value of 1 processes all columns. A value of 2 processes 1 column and skips 1 column, etc.  "
+      "A column is used if its zero based index modulo the column factor is zero."));
+   VERIFY(pArgList->addArg<Filename>("SMM File", NULL, "Store and retrieve second moment data from this file.  "
+      "If NULL, a filename based on the data set filename will be generated."));
+   VERIFY(pArgList->addArg<AoiElement>("AOI", NULL, "Only calculate using pixels selected by this AOI.  If NULL, "
+      "use the entire image. If row and column factors are not 1, they will also be used when determining data to "
+      "process."));
 
    return true;
 }
@@ -330,13 +331,12 @@ bool SecondMoment::populateInteractiveInputArgList(PlugInArgList* pArgList)
    VERIFY(pArgList->addArg<Progress>(ProgressArg(), NULL));
    VERIFY(pArgList->addArg<RasterElement>(DataElementArg(), NULL));
    bool recalc = false;
-   VERIFY(pArgList->addArg<bool>("Recalculate", &recalc, "If true, the second moment matrix will be recalculated. If false, the plug-in "
-                                    "will decide if the matrix needs to be recalculated. If a matrix exists in memory, it is used. "
-                                    "If there exists a matrix on disk, it will be loaded. Finally, the matrix will be calculated."));
+   VERIFY(pArgList->addArg<bool>("Recalculate", &recalc, "If true, the second moment matrix will be recalculated.  "
+      "If false, the plug-in will decide if the matrix needs to be recalculated. If a matrix exists in memory, "
+      "it is used.  If there exists a matrix on disk, it will be loaded. Finally, the matrix will be calculated."));
    bool computeInverse(true);
-   VERIFY(pArgList->addArg<bool>("ComputeInverse", &computeInverse, "If true, the "
-      "inverse of the second moment matrix will be calculated. If false, the inverse "
-      "will not be calculated."));
+   VERIFY(pArgList->addArg<bool>("ComputeInverse", &computeInverse, "If true, the inverse of the second moment "
+      "matrix will be calculated. If false, the inverse will not be calculated."));
 
    return true;
 }
@@ -363,7 +363,11 @@ bool SecondMoment::parseInputArgList(PlugInArgList* pArgList)
    if (mpRasterElement == NULL)
    {
       string msg = "The raster element input value is invalid!";
-      if (pProgress != NULL) pProgress->updateProgress(msg, 0, ERRORS);
+      if (pProgress != NULL)
+      {
+         pProgress->updateProgress(msg, 0, ERRORS);
+      }
+
       return false;
    }
 
@@ -374,7 +378,11 @@ bool SecondMoment::parseInputArgList(PlugInArgList* pArgList)
    if (pDescriptor == NULL)
    {
       string msg = "The sensor data input value is invalid!";
-      if (pProgress != NULL) pProgress->updateProgress(msg, 0, ERRORS);
+      if (pProgress != NULL)
+      {
+         pProgress->updateProgress(msg, 0, ERRORS);
+      }
+
       return false;
    }
    eDataType = pDescriptor->getDataType();
@@ -382,7 +390,11 @@ bool SecondMoment::parseInputArgList(PlugInArgList* pArgList)
    if ((eDataType == INT4SCOMPLEX) || (eDataType == FLT8COMPLEX))
    {
       string msg = "Complex data is not supported!";
-      if (pProgress != NULL) pProgress->updateProgress(msg, 0, ERRORS);
+      if (pProgress != NULL)
+      {
+         pProgress->updateProgress(msg, 0, ERRORS);
+      }
+
       return false;
    }
    VERIFY(pArgList->getPlugInArgValue("Recalculate", mInput.mRecalculate));
@@ -431,7 +443,7 @@ bool SecondMoment::setActualValuesInOutputArgList(PlugInArgList *pArgList)
 
 QDialog* SecondMoment::getGui(void* pAlgData)
 {
-   if(isInteractive() && (mpSecondMomentAlg != NULL))
+   if (isInteractive() && (mpSecondMomentAlg != NULL))
    {
       delete mpSecondMomentGui; // re-initialize
 
@@ -511,7 +523,7 @@ bool SecondMomentAlgorithm::preprocess()
 bool SecondMomentAlgorithm::processAll()
 {
    StepResource pStep("Generate SecondMoment matrix", "app", "365B9658-2380-4f41-B344-AD96D9DBFA00",
-                              "Unable to generate SecondMoment matrix.");
+      "Unable to generate SecondMoment matrix.");
    mpStep = pStep.get();
 
    const RasterDataDescriptor* pDescriptor = NULL;
@@ -602,7 +614,7 @@ bool SecondMomentAlgorithm::processAll()
          }
          else
          {
-            const BitMask *pMask = mInput.mpAoi->getSelectedPoints();
+            const BitMask* pMask = mInput.mpAoi->getSelectedPoints();
             if (pMask == NULL)
             {
                reportProgress(ERRORS, 0, "Error getting mask from AOI");
@@ -610,10 +622,14 @@ bool SecondMomentAlgorithm::processAll()
             }
             else // pMask != NULL
             {
-               int x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+               int x1 = 0;
+               int y1 = 0;
+               int x2 = 0;
+               int y2 = 0;
                pMask->getBoundingBox(x1, y1, x2, y2);
+
                const bool** pSelectedPixels = const_cast<BitMask*>(pMask)->getRegion(x1, y1, x2, y2);
-               if(pSelectedPixels == NULL)
+               if (pSelectedPixels == NULL)
                {
                   reportProgress(ERRORS, 0, "Error getting selected pixels from AOI");
                   return false;
@@ -650,16 +666,14 @@ bool SecondMomentAlgorithm::processAll()
    else
    {
       // check that existing smm is right size and data type
-      const RasterDataDescriptor* pDesc = static_cast<const RasterDataDescriptor*>(
-         pSmmElement->getDataDescriptor());
+      const RasterDataDescriptor* pDesc = static_cast<const RasterDataDescriptor*>(pSmmElement->getDataDescriptor());
       VERIFY(pDesc != NULL);
       unsigned int rows = pDesc->getRowCount();
       unsigned int cols = pDesc->getColumnCount();
       EncodingType dataType = pDesc->getDataType();
       if (rows != numBands || cols != numBands)
       {
-         reportProgress(ERRORS, 0, "Dimensions of existing Second Moment matrix do "
-            "not match current data set.");
+         reportProgress(ERRORS, 0, "Dimensions of existing Second Moment matrix do not match current data set.");
          return false;
       }
       if (dataType != FLT8BYTES)
@@ -743,6 +757,11 @@ void SecondMomentAlgorithm::setFile(const Filename* pSmmFile, bool loadIfExists)
       mSmmFile = pSmmFile->getFullPathAndName();
    }
    mLoadIfExists = loadIfExists;
+}
+
+string SecondMomentAlgorithm::getFilename() const
+{
+   return mSmmFile;
 }
 
 RasterElement* SecondMomentAlgorithm::getSecondMomentElement() const
@@ -883,7 +902,7 @@ bool SecondMomentAlgorithm::writeMatrixToDisk(string filename, const RasterEleme
       accessor->nextRow();
    }
 
-   reportProgress(NORMAL, 100, "SecondMoment matrix saved to disk as " + filename);;
+   reportProgress(NORMAL, 100, "SecondMoment matrix saved to disk as " + filename);
    pStep->finalize(Message::Success);
 
    return true;
@@ -914,13 +933,12 @@ bool SecondMomentAlgorithm::canAbort() const
 bool SecondMomentAlgorithm::doAbort()
 {
    mAbortFlag = true;
-
    return true;
 }
 
 bool SecondMomentAlgorithm::initialize(void* pAlgorithmData)
 {
-   if(pAlgorithmData != NULL)
+   if (pAlgorithmData != NULL)
    {
       mInput = *static_cast<Input*>(pAlgorithmData);
    }

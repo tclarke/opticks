@@ -107,7 +107,7 @@ bool GetFilename::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    pStep->addProperty("Item", getName());
    mpStep = pStep.get();
 
-   if(!extractInputArgs(pInArgList))
+   if (!extractInputArgs(pInArgList))
    {
       reportError("Unable to extract input arguments.", "DED4E7C6-D38F-465f-93CB-F6F0391FA851");
       return false;
@@ -115,28 +115,28 @@ bool GetFilename::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 
    // Get the filename
    QString strFilename = getFilenameFromUser();
-   if(strFilename.isEmpty())
+   if (strFilename.isEmpty())
    {
       reportError("No filename selected.", "B121D579-96EF-4b4d-A5B4-3C70B12031EB");
       return false;
    }
 
    // Set the output value
-   if(pOutArgList != NULL)
+   if (pOutArgList != NULL)
    {
       PlugInArg* pArg = NULL;
-      if(pOutArgList->getArg("Filename", pArg) && (pArg != NULL))
+      if (pOutArgList->getArg("Filename", pArg) && (pArg != NULL))
       {
          Filename* pFilename = NULL;
          Service<ApplicationServices> pApplication;
          VERIFY(pApplication.get() != NULL);
-         ObjectFactory *pObjFact = pApplication->getObjectFactory();
-         if(pObjFact != NULL)
+         ObjectFactory* pObjFact = pApplication->getObjectFactory();
+         if (pObjFact != NULL)
          {
             pFilename = static_cast<Filename*>(pObjFact->createObject("Filename"));
          }
 
-         if(pFilename != NULL)
+         if (pFilename != NULL)
          {
             pFilename->setFullPathAndName(strFilename.toStdString());
             pArg->setActualValue(pFilename);
@@ -160,7 +160,7 @@ bool GetFilename::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 
 bool GetFilename::extractInputArgs(PlugInArgList* pInArgList)
 {
-   if(!DesktopItems::extractInputArgs(pInArgList))
+   if (!DesktopItems::extractInputArgs(pInArgList))
    {
       return false;
    }
@@ -168,19 +168,19 @@ bool GetFilename::extractInputArgs(PlugInArgList* pInArgList)
    PlugInArg* pArg = NULL;
 
    // Dialog caption
-   if(!pInArgList->getArg("Dialog Caption", pArg) || (pArg == NULL))
+   if (!pInArgList->getArg("Dialog Caption", pArg) || (pArg == NULL))
    {
       reportError("Could not read the dialog caption input value!", "C7B90CA5-33DC-4358-94C4-9E08885644FC");
       return false;
    }
-   string *pCaption = pArg->getPlugInArgValue<string>();
-   if(pCaption != NULL && !pCaption->empty())
+   string* pCaption = pArg->getPlugInArgValue<string>();
+   if (pCaption != NULL && !pCaption->empty())
    {
       mCaption = QString::fromStdString(*pCaption);
    }
 
    // Initial directory/file
-   if(!pInArgList->getArg("Initial Directory/File", pArg) || (pArg == NULL))
+   if (!pInArgList->getArg("Initial Directory/File", pArg) || (pArg == NULL))
    {
       reportError("Could not read the initial directory/file input value!", "D283CE82-D606-4ea6-9E38-2510127668F1");
       return false;
@@ -192,33 +192,33 @@ bool GetFilename::extractInputArgs(PlugInArgList* pInArgList)
    }
 
    // File filters
-   if(!pInArgList->getArg("File Filters", pArg) || (pArg == NULL))
+   if (!pInArgList->getArg("File Filters", pArg) || (pArg == NULL))
    {
       reportError("Could not read the file filters input value!", "32E891A0-80EA-4c9c-B34F-3DFFE9CE6766");
       return false;
    }
    string* pFilters = pArg->getPlugInArgValue<string>();
-   if(pFilters != NULL && !pFilters->empty())
+   if (pFilters != NULL && !pFilters->empty())
    {
       mFilters = QString::fromStdString(*pFilters);
    }
 
-   if(mpStep != NULL)
+   if (mpStep != NULL)
    {
       string filters = "";
-      if(!mFilters.isEmpty())
+      if (!mFilters.isEmpty())
       {
          filters = mFilters.toStdString();
       }
 
       string initialDir = "";
-      if(!mInitialDir.isEmpty())
+      if (!mInitialDir.isEmpty())
       {
          initialDir = mInitialDir.toStdString();
       }
 
       string caption = "";
-      if(!mCaption.isEmpty())
+      if (!mCaption.isEmpty())
       {
          caption = mCaption.toStdString();
       }
@@ -312,7 +312,7 @@ bool GetExistingFilenames::getOutputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
 
-   if(mbInteractive)
+   if (mbInteractive)
    {
       Service<PlugInManagerServices> pPlugInManager;
       VERIFY(pPlugInManager.get() != NULL);
@@ -339,7 +339,7 @@ bool GetExistingFilenames::execute(PlugInArgList* pInArgList, PlugInArgList* pOu
    pStep->addProperty("Item", getName());
    mpStep = pStep.get();
 
-   if(!extractInputArgs(pInArgList))
+   if (!extractInputArgs(pInArgList))
    {
       reportError("Unable to extract input arguments.", "5121B5C3-0C10-484a-B62A-0F5126A88676");
       return false;
@@ -351,7 +351,7 @@ bool GetExistingFilenames::execute(PlugInArgList* pInArgList, PlugInArgList* pOu
    // Get the filenames from the user
    QStringList strlFilenames = QFileDialog::getOpenFileNames(pDesktop->getMainWidget(), mCaption,
                                                              mInitialDir, mFilters);
-   if(strlFilenames.isEmpty())
+   if (strlFilenames.isEmpty())
    {
       reportError("No filenames selected.", "EFF383ED-7D6B-4607-942D-0B1D4D78B315");
       return false;
@@ -360,19 +360,19 @@ bool GetExistingFilenames::execute(PlugInArgList* pInArgList, PlugInArgList* pOu
    // Create the output vector
    Service<ApplicationServices> pApplication;
    VERIFY(pApplication.get() != NULL);
-   ObjectFactory *pObjFact = pApplication->getObjectFactory();
+   ObjectFactory* pObjFact = pApplication->getObjectFactory();
    VERIFY(pObjFact != NULL);
 
    vector<Filename*> filenames;
-   for(int i = 0; i < strlFilenames.count(); i++)
+   for (int i = 0; i < strlFilenames.count(); i++)
    {
       QString strFilename = strlFilenames[i];
-      if(!strFilename.isEmpty())
+      if (!strFilename.isEmpty())
       {
          Filename* pCurrentFilename = NULL;
          pCurrentFilename = static_cast<Filename*>(pObjFact->createObject("Filename"));
 
-         if(pCurrentFilename != NULL)
+         if (pCurrentFilename != NULL)
          {
             pCurrentFilename->setFullPathAndName(strFilename.toStdString());
             filenames.push_back(pCurrentFilename);
@@ -381,10 +381,10 @@ bool GetExistingFilenames::execute(PlugInArgList* pInArgList, PlugInArgList* pOu
    }
 
    // Set the output value
-   if(pOutArgList != NULL)
+   if (pOutArgList != NULL)
    {
       PlugInArg* pArg = NULL;
-      if(pOutArgList->getArg("Filenames", pArg) && (pArg != NULL))
+      if (pOutArgList->getArg("Filenames", pArg) && (pArg != NULL))
       {
          pArg->setActualValue(&filenames);
       }

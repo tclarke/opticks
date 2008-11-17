@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef DATA_FUSION_TESTS_H
-#define DATA_FUSION_TESTS_H
+#ifndef DATAFUSIONTESTS_H
+#define DATAFUSIONTESTS_H
 
 #include "Vector.h"
 #include "ProgressTracker.h"
@@ -23,32 +21,42 @@ class RasterElement;
 class Test
 {
 public:
-   Test(std::ostream& output, ProgressTracker &tracker) : mOutputStream(output), mProgressTracker(tracker) {}
+   Test(std::ostream& output, ProgressTracker& tracker) :
+      mOutputStream(output),
+      mProgressTracker(tracker)
+   {
+   }
+
    virtual bool run(double pause = 0) = 0;
-   const ProgressTracker::Stage& getStage() { return myStage; }
+
+   const ProgressTracker::Stage& getStage()
+   {
+      return myStage;
+   }
+
 protected:
    std::vector<ProgressTracker::Stage> mStages;
    ProgressTracker::Stage myStage;
 
    std::ostream& mOutputStream;
-   ProgressTracker &mProgressTracker;
+   ProgressTracker& mProgressTracker;
 };
 
 class PolywarpTests : public Test
 {
 public:
-   PolywarpTests(std::ostream& output, ProgressTracker &tracker);
+   PolywarpTests(std::ostream& output, ProgressTracker& tracker);
    bool run(double pause = 0);
 
 private:
-   void setupInputMatrices(Vector<double>& XP, Vector<double>& YP, Vector<double>& XS, Vector<double>& YS,
-                           Vector<double>& KX, Vector<double>& KY,
-                           Vector<double>& ExpectedKX, Vector<double>& ExpectedKY);
+   void setupInputMatrices(Vector<double>& xP, Vector<double>& yP, Vector<double>& xS, Vector<double>& yS,
+                           Vector<double>& kX, Vector<double>& kY,
+                           Vector<double>& expectedKX, Vector<double>& expectedKY);
 
    /*
     * Verifies if every value v in the vector fulfills abs(v) < SMALL_VALUE
     */
-   bool verifyVector(ProgressTracker::Stage &s, const Vector<double>& results, std::string name);
+   bool verifyVector(ProgressTracker::Stage& s, const Vector<double>& results, std::string name);
 
    bool positiveShiftTest();
    bool negativeShiftTest();
@@ -59,22 +67,21 @@ private:
 
 class Poly2DTests : public Test
 {
- public:
-   Poly2DTests(std::ostream& output, ProgressTracker &tracker);
+public:
+   Poly2DTests(std::ostream& output, ProgressTracker& tracker);
    bool run(double pause = 0);
 
    bool identityTest();
    bool positiveShiftTest();
    bool positiveScaleTest();
    bool positiveShiftAndScaleTest();
-   
 
    bool runTest(std::string inputFile, std::string outputFile, std::string testName,
-                const Vector<double>& KX, const Vector<double>& KY,
+                const Vector<double>& kX, const Vector<double>& kY,
                 unsigned int nx, unsigned int ny, unsigned int newx, unsigned int newy);
-      
-   bool verifyMatrix (ProgressTracker::Stage& s, RasterElement* pResults, RasterElement* pExpected,
-                      std::string name);
+
+   bool verifyMatrix(ProgressTracker::Stage& s, RasterElement* pResults, RasterElement* pExpected,
+                     std::string name);
 };
 
 #endif

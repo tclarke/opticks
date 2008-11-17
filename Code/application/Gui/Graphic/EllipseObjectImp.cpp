@@ -25,7 +25,7 @@ EllipseObjectImp::EllipseObjectImp(const string& id, GraphicObjectType type, Gra
 {
 }
 
-void EllipseObjectImp::draw (double zoomFactor) const
+void EllipseObjectImp::draw(double zoomFactor) const
 {
    LocationType llCorner = getLlCorner();
    LocationType urCorner = getUrCorner();
@@ -67,7 +67,7 @@ void EllipseObjectImp::draw (double zoomFactor) const
 #if defined(WIN_API)
       glEnable(GL_LINE_SMOOTH);
 #else
-      if(lineWidth == 1.0)
+      if (lineWidth == 1.0)
       {
          glEnable(GL_LINE_SMOOTH);
       }
@@ -118,13 +118,15 @@ bool EllipseObjectImp::hit(LocationType pixelCoord) const
    LocationType llCorner = getLlCorner();
    LocationType urCorner = getUrCorner();
 
-   double xVertices[DrawUtil::VERTEX_COUNT+1], yVertices[DrawUtil::VERTEX_COUNT+1];
+   double xVertices[DrawUtil::VERTEX_COUNT + 1];
+   double yVertices[DrawUtil::VERTEX_COUNT + 1];
    DrawUtil::initializeCircle();
 
-   LocationType center, radii;
+   LocationType center;
    center.mX = (llCorner.mX + urCorner.mX) / 2.0;
    center.mY = (llCorner.mY + urCorner.mY) / 2.0;
 
+   LocationType radii;
    radii.mX = fabs (llCorner.mX - urCorner.mX) / 2.0;
    radii.mY = fabs (llCorner.mY - urCorner.mY) / 2.0;
 

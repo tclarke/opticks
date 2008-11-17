@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef IMAGE_FILTER_MANAGER_H
-#define IMAGE_FILTER_MANAGER_H
+#ifndef IMAGEFILTERMANAGER_H
+#define IMAGEFILTERMANAGER_H
 
 #include "Service.h"
 

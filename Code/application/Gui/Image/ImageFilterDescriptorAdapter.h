@@ -7,13 +7,14 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef IMAGEFILTERDESCRIPTORADAPTER_H__
-#define IMAGEFILTERDESCRIPTORADAPTER_H__
+#ifndef IMAGEFILTERDESCRIPTORADAPTER_H
+#define IMAGEFILTERDESCRIPTORADAPTER_H
 
 #include "ImageFilterDescriptor.h"
 #include "ImageFilterDescriptorImp.h"
 
-class ImageFilterDescriptorAdapter : public ImageFilterDescriptor, public ImageFilterDescriptorImp IMAGEFILTERDESCRIPTOREXTENSION_CLASSES
+class ImageFilterDescriptorAdapter : public ImageFilterDescriptor, public ImageFilterDescriptorImp
+   IMAGEFILTERDESCRIPTOREXTENSION_CLASSES
 {
 public:
    ImageFilterDescriptorAdapter() {}

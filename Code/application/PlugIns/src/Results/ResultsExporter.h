@@ -46,9 +46,9 @@ public:
    bool runAllTests(Progress *pProgress, std::ostream& failure);
 
 protected:
-   bool extractInputArgs(PlugInArgList* pInArgList);
+   bool extractInputArgs(PlugInArgList* pArgList);
    bool isValueExported(double dValue, const std::vector<int>& badValues) const;
-   std::string getLocationString(unsigned int uiRow, unsigned int uiColumn, RasterElement *pGeo) const;
+   std::string getLocationString(unsigned int uiRow, unsigned int uiColumn, const RasterElement* pGeo) const;
    RasterElement* getGeoreferencedRaster() const;
    bool writeOutput(std::ostream &stream);
 

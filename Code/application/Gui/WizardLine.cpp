@@ -7,15 +7,13 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #include "WizardLine.h"
 
-WizardLine::WizardLine(WizardNode* pOutputNode, WizardNode* pInputNode, Q3Canvas* canvas) :
-   Q3CanvasLine(canvas)
+WizardLine::WizardLine(WizardNode* pOutputNode, WizardNode* pInputNode, Q3Canvas* pCanvas) :
+   Q3CanvasLine(pCanvas),
+   mpInputNode(pInputNode),
+   mpOutputNode(pOutputNode)
 {
-   mpOutputNode = pOutputNode;
-   mpInputNode = pInputNode;
 }
 
 WizardLine::~WizardLine()

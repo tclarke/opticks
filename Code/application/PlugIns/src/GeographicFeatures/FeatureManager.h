@@ -78,9 +78,9 @@ private:
    static const std::string IMPORT;
 
    std::vector<QAction*> mImportActions;
-   QAction *mpSeparator;
+   QAction* mpSeparator;
 
-   FeatureProxyConnector *mpProxy;
+   FeatureProxyConnector* mpProxy;
 };
 
 #endif

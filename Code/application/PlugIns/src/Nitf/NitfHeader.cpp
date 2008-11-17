@@ -57,7 +57,7 @@ bool Nitf::Header::importMetadata(const ossimPropertyInterface *pProperties,
    for (vector<Element>::const_iterator iter = mElements.begin();
         iter != mElements.end(); ++iter)
    {
-      const Element &element = *iter;
+      const Element& element = *iter;
       if (element.mImportFunction != NULL)
       {
          element.mImportFunction(pProperties, pDescriptor, pDynObj, 
@@ -80,9 +80,9 @@ bool Nitf::Header::exportMetadata(const RasterDataDescriptor *pDescriptor,
    for (vector<Element>::const_iterator iter = mElements.begin();
         iter != mElements.end(); ++iter)
    {
-      const Element &element = *iter;
+      const Element& element = *iter;
 
-      const DataVariant *pProp = &variant;
+      const DataVariant* pProp = &variant;
       if (pDynObj != NULL) // want to call mExportFunction even if the attribute doesn't exist
       {
          pProp = &pDynObj->getAttribute(element.mAppName);
@@ -106,10 +106,11 @@ bool Nitf::Header::exportMetadata(const RasterDataDescriptor *pDescriptor,
    FactoryResource<DynamicObject> pDefaults = createDefaultsDynamicObject(pDescriptor);
    VERIFY(Header::exportMetadata(pDescriptor, pDefaults.get(), pExportHeader));
 
-   const DynamicObject *pMetadata = pDescriptor->getMetadata();
+   const DynamicObject* pMetadata = pDescriptor->getMetadata();
    VERIFY(pMetadata != NULL);
 
-   const DynamicObject *pHeaderMetadata = pMetadata->getAttributeByPath(getMetadataPath()).getPointerToValue<DynamicObject>();
+   const DynamicObject* pHeaderMetadata =
+      pMetadata->getAttributeByPath(getMetadataPath()).getPointerToValue<DynamicObject>();
 
    VERIFY(Header::exportMetadata(pDescriptor, pHeaderMetadata, pExportHeader));
    return true;
@@ -126,7 +127,7 @@ bool Nitf::Header::importBinaryData(const ossimPropertyInterface *pPropertyInter
    }
 
    ossimRefPtr<ossimProperty> pProperty = pPropertyInterface->getProperty(ossimName);
-   ossimBinaryDataProperty *pBinaryDataProperty = PTR_CAST(ossimBinaryDataProperty, pProperty.get());
+   ossimBinaryDataProperty* pBinaryDataProperty = PTR_CAST(ossimBinaryDataProperty, pProperty.get());
    if (pBinaryDataProperty != NULL)
    {
       return pDynObj->setAttribute(appName, pBinaryDataProperty->getBinaryData());
@@ -140,7 +141,7 @@ bool Nitf::Header::exportBinaryData(const RasterDataDescriptor *pDescriptor,
    ossimContainerProperty *pProperties, const string& appName,
    const string& ossimName)
 {
-   const vector<unsigned char> *pData = prop.getPointerToValue<vector<unsigned char> >();
+   const vector<unsigned char>* pData = prop.getPointerToValue<vector<unsigned char> >();
    if (pData == NULL)
    {
       return false;
@@ -168,7 +169,7 @@ bool Nitf::Header::importColor(const ossimPropertyInterface *pPropertyInterface,
    }
 
    ossimRefPtr<ossimProperty> pProperty = pPropertyInterface->getProperty(ossimName);
-   ossimColorProperty *pColorProp = PTR_CAST(ossimColorProperty, pProperty.get());
+   ossimColorProperty* pColorProp = PTR_CAST(ossimColorProperty, pProperty.get());
    if (pColorProp != NULL)
    {
       ColorType colorType(static_cast<unsigned char>(pColorProp->getRed()),
@@ -185,7 +186,7 @@ bool Nitf::Header::exportColor(const RasterDataDescriptor *pDescriptor,
    ossimContainerProperty *pProperties, const string& appName,
    const string& ossimName)
 {
-   const ColorType *pColor = prop.getPointerToValue<ColorType>();
+   const ColorType* pColor = prop.getPointerToValue<ColorType>();
    if (pColor == NULL || pColor->isValid() == false)
    {
       return false;
@@ -245,7 +246,7 @@ bool Nitf::Header::exportDateCCYYMMDDhhmmss(const RasterDataDescriptor *pDescrip
    ossimContainerProperty *pProperties, const string& appName,
    const string& ossimName)
 {
-   const DateTime *pDateTime = prop.getPointerToValue<DateTime>();
+   const DateTime* pDateTime = prop.getPointerToValue<DateTime>();
    if (pDateTime == NULL || pDateTime->isValid() == false)
    {
       return false;
@@ -297,7 +298,7 @@ bool Nitf::Header::exportDateCCYYMMDD(const RasterDataDescriptor *pDescriptor,
    ossimContainerProperty *pProperties, const string& appName,
    const string& ossimName)
 {
-   const DateTime *pDateTime = prop.getPointerToValue<DateTime>();
+   const DateTime* pDateTime = prop.getPointerToValue<DateTime>();
    if (pDateTime == NULL || pDateTime->isValid() == false)
    {
       return false;

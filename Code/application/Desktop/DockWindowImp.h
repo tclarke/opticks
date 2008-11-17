@@ -141,6 +141,6 @@ private:
    bool isShown() const \
    { \
       return impClass::isShown(); \
-   }  
+   }
 
 #endif

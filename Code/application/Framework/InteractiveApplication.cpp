@@ -64,7 +64,7 @@ int InteractiveApplication::run(int argc, char** argv)
    }
 
    // Initialize the Qt application
-   QApplication &qApplication = dynamic_cast<QApplication&>(getQApp());
+   QApplication& qApplication = dynamic_cast<QApplication&>(getQApp());
    qApplication.setFont(QFont("Tahoma", 8));
 
    bool configSettingsValid = false;
@@ -111,7 +111,7 @@ int InteractiveApplication::run(int argc, char** argv)
       SessionSaveLock lock;
 
       // Create a progress object
-      ProgressAdapter* pProgress = new ProgressAdapter();
+      ProgressAdapter progress;
 
       // Splash screen
       Q_INIT_RESOURCE(Application);
@@ -131,36 +131,36 @@ int InteractiveApplication::run(int argc, char** argv)
             }
          }
       }
-      SplashScreen* pSplash = new SplashScreen(pProgress);
-      pSplash->setSplashImages(splashImages);
-      pSplash->show();
+
+      SplashScreen splashScreen(&progress);
+      splashScreen.setSplashImages(splashImages);
+      splashScreen.show();
 
       qApplication.processEvents();
 
       // Initialization
-      pProgress->updateProgress("Building the plug-in list...", 0, NORMAL);
+      progress.updateProgress("Building the plug-in list...", 0, NORMAL);
 
       int iReturn = Application::run(argc, argv);
       if (iReturn == -1)
       {
-         pSplash->close();
-         delete pSplash;
+         splashScreen.close();
          return -1;
       }
 
       qApplication.processEvents();
 
       // Create the main GUI window
-      pProgress->updateProgress("Creating the main application window...", 0, NORMAL);
+      progress.updateProgress("Creating the main application window...", 0, NORMAL);
 
-      ApplicationWindow* pAppWindow = new ApplicationWindow(pSplash);
+      ApplicationWindow* pAppWindow = new ApplicationWindow(&splashScreen);
       qApplication.processEvents();
 
       // Execute startup plug-ins
       PlugInManagerServicesImp* pManager = PlugInManagerServicesImp::instance();
       if (pManager != NULL)
       {
-         pManager->executeStartupPlugIns(pProgress);
+         pManager->executeStartupPlugIns(&progress);
          qApplication.processEvents();
       }
 
@@ -168,23 +168,22 @@ int InteractiveApplication::run(int argc, char** argv)
       pAppWindow->restoreConfiguration();
 
       // Keep the splash screen up until all images have been shown to the user.
-      while (!pSplash->canClose()) {}
+      while (!splashScreen.canClose()) {}
 
       // Display the main application window
       pAppWindow->show();
 
-      // Destroy the splash screen
-      pSplash->close();
-      delete pSplash;
+      // Close the splash screen
+      splashScreen.close();
 
       // Create a progress dialog
       ProgressDlg* pProgressDlg = new ProgressDlg(APP_NAME, pAppWindow);
-      pProgress->attach(SIGNAL_NAME(Subject, Modified), Slot(pProgressDlg, &ProgressDlg::progressUpdated));
-      pProgress->attach(SIGNAL_NAME(Subject, Deleted), Slot(pProgressDlg, &ProgressDlg::progressDeleted));
+      progress.attach(SIGNAL_NAME(Subject, Modified), Slot(pProgressDlg, &ProgressDlg::progressUpdated));
+      progress.attach(SIGNAL_NAME(Subject, Deleted), Slot(pProgressDlg, &ProgressDlg::progressDeleted));
 
       // Load files specified on the command line
-      ArgumentList *pArgList(ArgumentList::instance());
-      if(pArgList != NULL)
+      ArgumentList* pArgList(ArgumentList::instance());
+      if (pArgList != NULL)
       {
          bool validImport = true;
 
@@ -252,7 +251,7 @@ int InteractiveApplication::run(int argc, char** argv)
                      {
                         vector<string> batchFiles;
                         batchFiles.push_back(normalizedFilename);
-                        WizardUtilities::runBatchFiles(batchFiles, pProgress);
+                        WizardUtilities::runBatchFiles(batchFiles, &progress);
                      }
                      else if (info.suffix() == "session")
                      {
@@ -265,7 +264,7 @@ int InteractiveApplication::run(int argc, char** argv)
                      }
                      else
                      {
-                        ImporterResource importer("Auto Importer", normalizedFilename, pProgress, false);
+                        ImporterResource importer("Auto Importer", normalizedFilename, &progress, false);
                         importer->execute();
                      }
                   }
@@ -277,21 +276,20 @@ int InteractiveApplication::run(int argc, char** argv)
                }
             }
          }
-         else if (pProgress != NULL)
+         else
          {
             string msg = "Unable to import the files specified on the command line.  " + string(APP_NAME) +
                " supports loading one session file, one or more wizard files, or one or more data set files.";
-            pProgress->updateProgress(msg, 0, ERRORS);
+            progress.updateProgress(msg, 0, ERRORS);
          }
       }
 
       // If there are any wizards, run them
-      executeStartupBatchWizards(pProgress);
+      executeStartupBatchWizards(&progress);
 
       // Destroy the progress object and progress dialog
-      pProgress->detach(SIGNAL_NAME(Subject, Modified), Slot(pProgressDlg, &ProgressDlg::progressUpdated));
-      pProgress->detach(SIGNAL_NAME(Subject, Deleted), Slot(pProgressDlg, &ProgressDlg::progressDeleted));
-      delete pProgress;
+      progress.detach(SIGNAL_NAME(Subject, Modified), Slot(pProgressDlg, &ProgressDlg::progressUpdated));
+      progress.detach(SIGNAL_NAME(Subject, Deleted), Slot(pProgressDlg, &ProgressDlg::progressDeleted));
 
       vector<string> autoExitOptions = pArgList->getOptions("autoExit");
       if (autoExitOptions.empty() == false)

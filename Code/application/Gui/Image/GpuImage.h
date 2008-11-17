@@ -28,7 +28,7 @@ public:
 
    // Grayscale
    void initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsigned int imageSizeX, unsigned int imageSizeY,
-      unsigned int channels, GLenum format, EncodingType type, void* pDdata, StretchType stretchType,
+      unsigned int channels, GLenum format, EncodingType type, void* pData, StretchType stretchType,
       std::vector<double>& stretchPoints, RasterElement* pRasterElement, const std::vector<int>& badValues);
    void initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsigned int imageSizeX, unsigned int imageSizeY,
       unsigned int channels, GLenum format, EncodingType type, ComplexComponent component, void* pData,
@@ -46,19 +46,18 @@ public:
       const std::vector<ColorType>& colorMap, const std::vector<int>& badValues);
 
    // RGB
-   void initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2, DimensionDescriptor band3,
-      unsigned int imageSizeX, unsigned int imageSizeY, unsigned int channels, GLenum format,
-      EncodingType type, void* pData, StretchType stretchType, std::vector<double>& stretchPointsRed,
-      std::vector<double>& stretchPointsGreen, std::vector<double>& stretchPointsBlue,
-      RasterElement* pRasterElement);
-   void initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2, DimensionDescriptor band3,
-      unsigned int imageSizeX, unsigned int imageSizeY, unsigned int channels, GLenum format,
-      EncodingType type, ComplexComponent component, void* pData, StretchType stretchType,
+   void initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2,
+      DimensionDescriptor band3, unsigned int imageSizeX, unsigned int imageSizeY, unsigned int channels,
+      GLenum format, EncodingType type, void* pData, StretchType stretchType, std::vector<double>& stretchPointsRed,
+      std::vector<double>& stretchPointsGreen, std::vector<double>& stretchPointsBlue, RasterElement* pRasterElement);
+   void initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2,
+      DimensionDescriptor band3, unsigned int imageSizeX, unsigned int imageSizeY, unsigned int channels,
+      GLenum format, EncodingType type, ComplexComponent component, void* pData, StretchType stretchType,
       std::vector<double>& stretchPointsRed, std::vector<double>& stretchPointsGreen,
       std::vector<double>& stretchPointsBlue, RasterElement* pRasterElement);
-   void initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2, DimensionDescriptor band3,
-      unsigned int imageSizeX, unsigned int imageSizeY, unsigned int channels, GLenum format,
-      EncodingType type1, EncodingType type2, EncodingType type3, ComplexComponent component,
+   void initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2,
+      DimensionDescriptor band3, unsigned int imageSizeX, unsigned int imageSizeY, unsigned int channels,
+      GLenum format, EncodingType type1, EncodingType type2, EncodingType type3, ComplexComponent component,
       void* pData, StretchType stretchType, std::vector<double>& stretchPointsRed,
       std::vector<double>& stretchPointsGreen, std::vector<double>& stretchPointsBlue,
       RasterElement* pRasterElement1, RasterElement* pRasterElement2, RasterElement* pRasterElement3);
@@ -72,7 +71,7 @@ public:
    void freezeFilter(ImageFilterDescriptor *pDescriptor, bool toggle = true);
    unsigned int readTiles(double xCoord, double yCoord, GLsizei width, GLsizei height, std::vector<float>& values);
 
-   static void setMaxTextureSize(GLint maxSize=0);
+   static void setMaxTextureSize(GLint maxSize = 0);
    static GLint getMaxTextureSize();
 
 protected:
@@ -91,8 +90,8 @@ protected:
       std::vector<int>& tileZoomIndices);
    void getTilesToRead(int xCoord, int yCoord, GLsizei width, GLsizei height, 
                        std::vector<Tile*> &tiles, std::vector<LocationType> &tileLocations);
-   unsigned int readTile(Tile *pTile, const LocationType &tileLocation, int xCoord, int yCoord, 
-                         GLsizei &width, GLsizei &height, GLvoid *pValues);
+   unsigned int readTile(Tile* pTile, const LocationType& tileLocation, int x1Coord, int y1Coord,
+                         GLsizei& calculatedWidth, GLsizei& calculatedHeight, GLvoid* pValues);
 
 private:
    void setCgParameterValues();

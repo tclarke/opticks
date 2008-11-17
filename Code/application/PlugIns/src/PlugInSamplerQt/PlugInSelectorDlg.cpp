@@ -25,8 +25,9 @@ PlugInSelectorDlg::PlugInSelectorDlg(QWidget* pParent, const vector<string>& plu
    QGridLayout* pLayout = new QGridLayout(this);
    pLayout->setMargin(10);
    pLayout->setSpacing(5);
-   
-   pLayout->addWidget(new QLabel("Available Plug-Ins: ", this), 0, 0);
+
+   QLabel* pPlugInsLabel = new QLabel("Available Plug-Ins: ", this);
+   pLayout->addWidget(pPlugInsLabel, 0, 0);
 
    mpCombo = new QComboBox(this);
    pLayout->addWidget(mpCombo, 0, 1, 1, 2);
@@ -81,7 +82,7 @@ vector<string> PlugInSelectorDlg::getSelectedPlugins() const
 
    if (runAllTests() == true)
    {
-      for(int i = 0; i < mpCombo->count(); ++i)
+      for (int i = 0; i < mpCombo->count(); ++i)
       {
          QString str = mpCombo->itemText(i);
          if (str.isEmpty() == false)

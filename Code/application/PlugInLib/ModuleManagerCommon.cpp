@@ -44,13 +44,14 @@ ModuleManager* ModuleManager::mspSingleton = NULL;
  *
  *  PLUG-IN DEVELOPERS DO NOT EDIT THIS CLASS.
  */
-ModuleManager* ModuleManager::instance() 
+ModuleManager* ModuleManager::instance()
 {
-    if (mspSingleton == NULL)
-    {
-        mspSingleton = new ModuleManager;
-    }
-    return mspSingleton;
+   if (mspSingleton == NULL)
+   {
+      mspSingleton = new ModuleManager;
+   }
+
+   return mspSingleton;
 }
 
 /**

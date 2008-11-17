@@ -183,9 +183,9 @@ View* CartesianPlotImp::copy(QGLContext* pDrawContext, QWidget* pParent) const
    return pView;
 }
 
-bool CartesianPlotImp::copy(View *pView) const
+bool CartesianPlotImp::copy(View* pView) const
 {
-   CartesianPlotImp *pViewImp = dynamic_cast<CartesianPlotImp*>(pView);
+   CartesianPlotImp* pViewImp = dynamic_cast<CartesianPlotImp*>(pView);
    if (pViewImp != NULL)
    {
       UndoLock lock(pView);
@@ -466,7 +466,7 @@ bool CartesianPlotImp::fromXml(DOMNode* pDocument, unsigned int version)
       return false;
    }
 
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
+   DOMElement* pElem = static_cast<DOMElement*>(pDocument);
    if (pElem == NULL)
    {
       return false;
@@ -483,9 +483,7 @@ bool CartesianPlotImp::fromXml(DOMNode* pDocument, unsigned int version)
       (A(pElem->getAttribute(X("yScaleType")))));
    setYScaleType(eType);
 
-   for(DOMNode *pChld = pDocument->getFirstChild();  
-      pChld != NULL;
-      pChld = pChld->getNextSibling())
+   for (DOMNode* pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
    {
       string name = A(pChld->getNodeName());
       if (name == "HorizontalGridLines")

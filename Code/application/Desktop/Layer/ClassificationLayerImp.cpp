@@ -35,12 +35,12 @@ ClassificationLayerImp::ClassificationLayerImp(const string& id, const string& l
    ColorType textColor = GraphicLayer::getSettingTextColor();
    mClassificationColor = QColor(textColor.mRed, textColor.mGreen, textColor.mBlue);
 
-   GraphicObject *pTopObj = NULL;
-   GraphicObject *pBottomObj = NULL;
-   GraphicElement *pGraphicElement = dynamic_cast<GraphicElement*>(pElement);
+   GraphicObject* pTopObj = NULL;
+   GraphicObject* pBottomObj = NULL;
+   GraphicElement* pGraphicElement = dynamic_cast<GraphicElement*>(pElement);
    if (pGraphicElement)
    {
-      GraphicGroup *pGroup = pGraphicElement->getGroup();
+      GraphicGroup* pGroup = pGraphicElement->getGroup();
       if (pGroup)
       {
          const list<GraphicObject*>& objects = pGroup->getObjects();
@@ -87,14 +87,13 @@ ClassificationLayerImp::ClassificationLayerImp(const string& id, const string& l
    // Connections
    if (mpTopText)
    {
-      connect(mpTopText, SIGNAL(propertyModified(GraphicProperty*)), this,
-         SLOT(updateProperties(GraphicProperty*)));
+      connect(mpTopText, SIGNAL(propertyModified(GraphicProperty*)), this, SLOT(updateProperties(GraphicProperty*)));
    }
    if (mpBottomText)
    {
-      connect(mpBottomText, SIGNAL(propertyModified(GraphicProperty*)), this,
-         SLOT(updateProperties(GraphicProperty*)));
+      connect(mpBottomText, SIGNAL(propertyModified(GraphicProperty*)), this, SLOT(updateProperties(GraphicProperty*)));
    }
+
    connect(this, SIGNAL(fontChanged(const QFont&)), this, SIGNAL(modified()));
    connect(this, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(modified()));
 }
@@ -105,8 +104,8 @@ ClassificationLayerImp::~ClassificationLayerImp()
 
 const string& ClassificationLayerImp::getObjectType() const
 {
-   static string type("ClassificationLayerImp");
-   return type;
+   static string sType("ClassificationLayerImp");
+   return sType;
 }
 
 bool ClassificationLayerImp::isKindOf(const string& className) const
@@ -119,8 +118,7 @@ bool ClassificationLayerImp::isKindOf(const string& className) const
    return GraphicLayerImp::isKindOf(className);
 }
 
-ClassificationLayerImp &ClassificationLayerImp::operator =(
-   const ClassificationLayerImp &classificationLayer)
+ClassificationLayerImp& ClassificationLayerImp::operator=(const ClassificationLayerImp& classificationLayer)
 {
    if (this != &classificationLayer)
    {
@@ -128,10 +126,10 @@ ClassificationLayerImp &ClassificationLayerImp::operator =(
       mClassificationFont = classificationLayer.mClassificationFont;
       mClassificationColor = classificationLayer.mClassificationColor;
 
-      GraphicGroup *pGroup = getGroup();
+      GraphicGroup* pGroup = getGroup();
       VERIFYRV(pGroup != NULL, *this);
 
-      const std::list<GraphicObject*> &objects = pGroup->getObjects();
+      const list<GraphicObject*>& objects = pGroup->getObjects();
       VERIFYRV(objects.size() == 2, *this);
 
       mpTopText = dynamic_cast<TextObjectImp*>(objects.front());
@@ -161,6 +159,11 @@ list<GraphicObject*> ClassificationLayerImp::getObjects(const GraphicObjectType&
    return list<GraphicObject*>();
 }
 
+GraphicObject* ClassificationLayerImp::getObjectByName(const string& name) const
+{
+   return NULL;
+}
+
 bool ClassificationLayerImp::selectObject(GraphicObject* pObject)
 {
    return false;
@@ -175,7 +178,7 @@ bool ClassificationLayerImp::isObjectSelected(GraphicObject* pObject) const
    return false;
 }
 
-void ClassificationLayerImp::getSelectedObjects(std::list<GraphicObject*>& selectedObjects) const
+void ClassificationLayerImp::getSelectedObjects(list<GraphicObject*>& selectedObjects) const
 {
    selectedObjects.clear();
 }
@@ -237,8 +240,8 @@ bool ClassificationLayerImp::setText(const char* pText)
 
 const char* ClassificationLayerImp::getText() const
 {
-   static string classificationText;
-   classificationText.clear();
+   static string sClassificationText;
+   sClassificationText.clear();
 
    // Get the top and bottom text
    QString strTopText = QString::fromStdString(mpTopText->getText());
@@ -264,15 +267,15 @@ const char* ClassificationLayerImp::getText() const
    // Set the text only if the top and bottom text is the same
    if (strTopText == strBottomText)
    {
-      classificationText = strTopText.toStdString();
+      sClassificationText = strTopText.toStdString();
    }
 
-   if (classificationText.empty() == true)
+   if (sClassificationText.empty() == true)
    {
       return NULL;
    }
 
-   return classificationText.c_str();
+   return sClassificationText.c_str();
 }
 
 bool ClassificationLayerImp::setRotation(double angle)
@@ -334,7 +337,7 @@ vector<ColorType> ClassificationLayerImp::getColors() const
 
 void ClassificationLayerImp::draw()
 {
-   PerspectiveView *pView = dynamic_cast<PerspectiveView*>(getView());
+   PerspectiveView* pView = dynamic_cast<PerspectiveView*>(getView());
    double zoomPercent = 100;
    if (pView != NULL)
    {
@@ -459,7 +462,7 @@ void ClassificationLayerImp::updateProperties(GraphicProperty* pProperty)
    }
    else if (propertyName == "TextColor")
    {
-      ColorType textColor = ((TextColorProperty*) pProperty)->getColor();
+      ColorType textColor = (dynamic_cast<TextColorProperty*>(pProperty))->getColor();
       QColor clrText(textColor.mRed, textColor.mGreen, textColor.mBlue);
       setClassificationColor(clrText);
    }
@@ -514,7 +517,7 @@ bool ClassificationLayerImp::fromXml(DOMNode* pDocument, unsigned int version)
       return false;
    }
 
-   DOMElement *pRootElement = dynamic_cast<DOMElement *>(pDocument);
+   DOMElement* pRootElement = dynamic_cast<DOMElement*>(pDocument);
    mClassificationColor = QColor(A(pRootElement->getAttribute(X("classificationColor"))));
    readFontElement("ClassificationFont", pRootElement, mClassificationFont);
    return true;

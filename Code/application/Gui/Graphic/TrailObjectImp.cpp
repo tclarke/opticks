@@ -71,7 +71,8 @@ void TrailObjectImp::addToStencil(LocationType lowerLeft, LocationType lowerRigh
    }
 
    // find min rect to contain selection box
-   vector<double> xVals, yVals;
+   vector<double> xVals;
+   vector<double> yVals;
    xVals.push_back(lowerLeft.mX);
    xVals.push_back(lowerRight.mX);
    xVals.push_back(upperRight.mX); 
@@ -159,8 +160,8 @@ void TrailObjectImp::drawVector(double zoomFactor) const
    const_cast<TrailObjectImp*>(this)->updateStencil();
 
    glEnable(GL_STENCIL_TEST);
-   glStencilFunc(GL_NOTEQUAL, 0x1,0x1);
-   glStencilOp (GL_KEEP,GL_KEEP,GL_KEEP);
+   glStencilFunc(GL_NOTEQUAL, 0x1, 0x1);
+   glStencilOp (GL_KEEP, GL_KEEP, GL_KEEP);
 
    glEnable(GL_BLEND);
    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

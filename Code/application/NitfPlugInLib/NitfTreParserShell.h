@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef TRE_PARSER_SHELL_H
-#define TRE_PARSER_SHELL_H
+#ifndef NITFTREPARSERSHELL_H
+#define NITFTREPARSERSHELL_H
 
 #include "PlugInShell.h"
 #include "Testable.h"

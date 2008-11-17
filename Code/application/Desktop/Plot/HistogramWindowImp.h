@@ -91,12 +91,12 @@ private:
          bool operator<(const UpdateMomento &rhs) const;
          void update() const;
       private:
-         HistogramWindowImp *mpWindow;
+         HistogramWindowImp* mpWindow;
          boost::shared_ptr<AttachmentPtr<RasterLayer> > mpRasterLayer;
          RasterChannelType mChannel;
       };
       std::set<UpdateMomento> mUpdatesPending;
-      HistogramWindowImp *mpWindow;
+      HistogramWindowImp* mpWindow;
    } mUpdater;
 };
 

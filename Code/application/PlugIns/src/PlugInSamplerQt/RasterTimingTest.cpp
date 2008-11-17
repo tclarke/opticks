@@ -62,16 +62,16 @@ bool RasterTimingTest::getOutputSpecification(PlugInArgList*& pArgList)
 bool RasterTimingTest::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
    Service<DesktopServices> pDesktop;
-   SpatialDataView *pView = dynamic_cast<SpatialDataView*>(pDesktop->getCurrentWorkspaceWindowView());
+   SpatialDataView* pView = dynamic_cast<SpatialDataView*>(pDesktop->getCurrentWorkspaceWindowView());
    if (pView)
    {
       UndoLock lock(pView);
 
-      RasterElement *pElement = pView->getLayerList()->getPrimaryRasterElement();
-      RasterDataDescriptor *pDesc = dynamic_cast<RasterDataDescriptor*>(pElement->getDataDescriptor());
+      RasterElement* pElement = pView->getLayerList()->getPrimaryRasterElement();
+      RasterDataDescriptor* pDesc = dynamic_cast<RasterDataDescriptor*>(pElement->getDataDescriptor());
       int bands = pDesc->getBandCount();
       int frameNumber = 0;
-      RasterLayer *pLayer = NULL;
+      RasterLayer* pLayer = NULL;
       vector<Layer*> layers;
       pView->getLayerList()->getLayers(RASTER, layers);
       for (vector<Layer*>::iterator iter = layers.begin(); iter != layers.end(); ++iter)
@@ -87,25 +87,34 @@ bool RasterTimingTest::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
             }
          }
       }
-      for (int i=0; i<bands; ++i)
+      for (int i = 0; i < bands; ++i)
       {
          pElement->getStatistics(pDesc->getActiveBand(i))->getMin();
       }
       const int frameiterations = 10000;
       clock_t startTime = clock();
-      QWidget *pWidget = pView->getWidget();
+      QWidget* pWidget = pView->getWidget();
       int i = 0;
-      for (i=0; i<frameiterations; ++i, ++frameNumber)
+      for (i = 0; i < frameiterations; ++i, ++frameNumber)
       {
-         if (frameNumber >= bands) frameNumber = 0;
-         pLayer->setDisplayedBand(GRAY, pDesc->getActiveBand(frameNumber));
-         if (pWidget) pWidget->repaint();
-         if ((i+1)%(frameiterations/100) == 0)
+         if (frameNumber >= bands)
          {
-            QString message = QString("Frame ") + QString::number(i+1) + QString(" of ") + QString::number(frameiterations);
+            frameNumber = 0;
+         }
+
+         pLayer->setDisplayedBand(GRAY, pDesc->getActiveBand(frameNumber));
+         if (pWidget)
+         {
+            pWidget->repaint();
+         }
+
+         if ((i + 1) % (frameiterations / 100) == 0)
+         {
+            QString message = QString("Frame ") + QString::number(i+1) + QString(" of ") +
+               QString::number(frameiterations);
             pDesktop->setStatusBarMessage(message.toStdString());
          }
-         if ((i+1) % 20 == 0)
+         if ((i + 1) % 20 == 0)
          {
             clock_t stopTime = clock();
             double elapsedTime = static_cast<double>(stopTime - startTime) / CLOCKS_PER_SEC;

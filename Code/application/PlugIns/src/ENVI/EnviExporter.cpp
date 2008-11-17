@@ -178,7 +178,11 @@ bool EnviExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
    if (pDescriptor == NULL)
    {
       message = "Could not get the data descriptor!";
-      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(message, 0, ERRORS);
+      }
+
       pStep->finalize(Message::Failure, message);
       return false;
    }
@@ -186,7 +190,11 @@ bool EnviExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
    if (pDescriptor->getDataType() == INT4SCOMPLEX)
    {
       message = "An ENVI header cannot represent a data set with complex integer data.";
-      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(message, 0, ERRORS);
+      }
+
       pStep->finalize(Message::Failure, message);
       return false;
    }
@@ -228,7 +236,7 @@ bool EnviExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
    return success;
 }
 
-bool EnviExporter::extractInputArgs(PlugInArgList* pArgList)
+bool EnviExporter::extractInputArgs(const PlugInArgList* pArgList)
 {
    if (pArgList == NULL)
    {
@@ -252,7 +260,7 @@ bool EnviExporter::extractInputArgs(PlugInArgList* pArgList)
       return false;
    }
 
-    // File descriptor
+   // File descriptor
    mpFileDescriptor = pArgList->getPlugInArgValue<RasterFileDescriptor>(Exporter::ExportDescriptorArg());
    if (mpFileDescriptor == NULL)
    {
@@ -315,7 +323,11 @@ bool EnviExporter::exportHeaderFile() const
    if (headerFilename.empty() == true)
    {
       string message = "The header filename is invalid.";
-      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(message, 0, ERRORS);
+      }
+
       pStep->finalize(Message::Failure, message);
       return false;
    }
@@ -326,7 +338,11 @@ bool EnviExporter::exportHeaderFile() const
    if (pStream == NULL)
    {
       string message = "Unable to write to header file:\n" + headerFilename;
-      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(message, 0, ERRORS);
+      }
+
       pStep->finalize(Message::Failure, message);
       return false;
    }
@@ -357,7 +373,7 @@ bool EnviExporter::exportHeaderFile() const
 
    if (i > 0)
    {
-      const Classification *pClass = mpRaster->getClassification();
+      const Classification* pClass = mpRaster->getClassification();
       if (pClass != NULL)
       {
          string classLevel = pClass->getLevel();
@@ -404,7 +420,11 @@ bool EnviExporter::exportHeaderFile() const
             if (isAborted() == true)
             {
                message = "ENVI export aborted!";
-               if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ABORT);
+               if (mpProgress != NULL)
+               {
+                  mpProgress->updateProgress(message, 0, ABORT);
+               }
+
                pStep->finalize(Message::Abort);
 
                fclose(pStream);
@@ -439,7 +459,11 @@ bool EnviExporter::exportHeaderFile() const
    if (isAborted() == true)
    {
       message = "ENVI export aborted!";
-      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ABORT);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(message, 0, ABORT);
+      }
+
       pStep->finalize(Message::Abort);
 
       fclose(pStream);
@@ -591,14 +615,19 @@ bool EnviExporter::exportHeaderFile() const
          const vector<DimensionDescriptor>& cols = pFileDescriptor->getColumns();
          if (!rows.empty() && !cols.empty())
          {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This functionality should be moved into a method in a new RasterElementExporterShell class (dsulgrov)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This functionality should be moved into a method in a " \
+   "new RasterElementExporterShell class (dsulgrov)")
             list<GcpPoint> gcps;
-            unsigned int startRow, startCol, endRow, endCol;
-            startRow = rows.front().getActiveNumber();
-            endRow = rows.back().getActiveNumber();
-            startCol = cols.front().getActiveNumber();
-            endCol = cols.back().getActiveNumber();
-            GcpPoint urPoint, ulPoint, lrPoint, llPoint, centerPoint;
+            unsigned int startRow = rows.front().getActiveNumber();
+            unsigned int endRow = rows.back().getActiveNumber();
+            unsigned int startCol = cols.front().getActiveNumber();
+            unsigned int endCol = cols.back().getActiveNumber();
+
+            GcpPoint urPoint;
+            GcpPoint ulPoint;
+            GcpPoint lrPoint;
+            GcpPoint llPoint;
+            GcpPoint centerPoint;
             ulPoint.mPixel = LocationType(startCol, startRow);
             urPoint.mPixel = LocationType(endCol, startRow);
             llPoint.mPixel = LocationType(startCol, endRow);
@@ -611,11 +640,10 @@ bool EnviExporter::exportHeaderFile() const
 
             //reset the coordinates, because on import they are required to be in
             //on-disk numbers not active numbers
-            unsigned int diskStartRow, diskStartCol, diskEndRow, diskEndCol;
-            diskStartRow = rows.front().getOnDiskNumber();
-            diskEndRow = rows.back().getOnDiskNumber();
-            diskStartCol = cols.front().getOnDiskNumber();
-            diskEndCol = cols.back().getOnDiskNumber();
+            unsigned int diskStartRow = rows.front().getOnDiskNumber();
+            unsigned int diskEndRow = rows.back().getOnDiskNumber();
+            unsigned int diskStartCol = cols.front().getOnDiskNumber();
+            unsigned int diskEndCol = cols.back().getOnDiskNumber();
             ulPoint.mPixel = LocationType(diskStartCol, diskStartRow);
             urPoint.mPixel = LocationType(diskEndCol, diskStartRow);
             llPoint.mPixel = LocationType(diskStartCol, diskEndRow);
@@ -628,7 +656,7 @@ bool EnviExporter::exportHeaderFile() const
 
             list<GcpPoint>::const_iterator it;
             fprintf(pStream, "geo points = {");
-            for (it=gcps.begin(); it!=gcps.end(); ++it)
+            for (it = gcps.begin(); it != gcps.end(); ++it)
             {
                GcpPoint gcp = *it;
                // add 1.5 to adjust from Opticks to ENVI pixel coordinate systems
@@ -647,8 +675,7 @@ bool EnviExporter::exportHeaderFile() const
       const Units* pUnits = pDescriptor->getUnits();
       if (pUnits != NULL)
       {
-         if (pUnits->getUnitType() == REFLECTANCE && 
-            abs(pUnits->getScaleFromStandard() - 1.0) > 0.0000001)
+         if (pUnits->getUnitType() == REFLECTANCE && abs(pUnits->getScaleFromStandard() - 1.0) > 0.0000001)
          {
             float fltVal = static_cast<float>(1.0/pUnits->getScaleFromStandard());
             i = fprintf(pStream, "reflectance scale factor = %f\n", fltVal);
@@ -675,7 +702,11 @@ bool EnviExporter::exportHeaderFile() const
             if (isAborted() == true)
             {
                message = "ENVI export aborted!";
-               if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ABORT);
+               if (mpProgress != NULL)
+               {
+                  mpProgress->updateProgress(message, 0, ABORT);
+               }
+
                pStep->finalize(Message::Abort);
 
                fclose(pStream);
@@ -729,29 +760,29 @@ bool EnviExporter::exportHeaderFile() const
       vector<double> centerWavelengths;
       vector<double> startWavelengths;
       vector<double> endWavelengths;
+
       const DynamicObject* pMetadata = pDescriptor->getMetadata();
       if (pMetadata != NULL)
       {
-         string pCenterPath[] = { SPECIAL_METADATA_NAME, 
-            BAND_METADATA_NAME, CENTER_WAVELENGTHS_METADATA_NAME, END_METADATA_NAME };
-         const vector<double> *pWavelengthData = dv_cast<vector<double> >(
-            &pMetadata->getAttributeByPath(pCenterPath));
+         string pCenterPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME, CENTER_WAVELENGTHS_METADATA_NAME,
+            END_METADATA_NAME };
+         const vector<double>* pWavelengthData = dv_cast<vector<double> >(&pMetadata->getAttributeByPath(pCenterPath));
          if (pWavelengthData != NULL)
          {
             centerWavelengths = *pWavelengthData;
          }
-         string pStartPath[] = { SPECIAL_METADATA_NAME, 
-            BAND_METADATA_NAME, START_WAVELENGTHS_METADATA_NAME, END_METADATA_NAME };
-         pWavelengthData = dv_cast<vector<double> >(
-            &pMetadata->getAttributeByPath(pStartPath));
+
+         string pStartPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME, START_WAVELENGTHS_METADATA_NAME,
+            END_METADATA_NAME };
+         pWavelengthData = dv_cast<vector<double> >(&pMetadata->getAttributeByPath(pStartPath));
          if (pWavelengthData != NULL)
          {
             startWavelengths = *pWavelengthData;
          }
-         string pEndPath[] = { SPECIAL_METADATA_NAME, 
-            BAND_METADATA_NAME, END_WAVELENGTHS_METADATA_NAME, END_METADATA_NAME };
-         pWavelengthData = dv_cast<vector<double> >(
-            &pMetadata->getAttributeByPath(pEndPath));
+
+         string pEndPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME, END_WAVELENGTHS_METADATA_NAME,
+            END_METADATA_NAME };
+         pWavelengthData = dv_cast<vector<double> >(&pMetadata->getAttributeByPath(pEndPath));
          if (pWavelengthData != NULL)
          {
             endWavelengths = *pWavelengthData;
@@ -772,7 +803,11 @@ bool EnviExporter::exportHeaderFile() const
             if (isAborted() == true)
             {
                message = "ENVI export aborted!";
-               if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ABORT);
+               if (mpProgress != NULL)
+               {
+                  mpProgress->updateProgress(message, 0, ABORT);
+               }
+
                pStep->finalize(Message::Abort);
 
                fclose(pStream);
@@ -817,7 +852,11 @@ bool EnviExporter::exportHeaderFile() const
                if (isAborted() == true)
                {
                   message = "ENVI export aborted!";
-                  if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ABORT);
+                  if (mpProgress != NULL)
+                  {
+                     mpProgress->updateProgress(message, 0, ABORT);
+                  }
+
                   pStep->finalize(Message::Abort);
 
                   fclose(pStream);
@@ -871,7 +910,11 @@ bool EnviExporter::exportHeaderFile() const
                if (isAborted() == true)
                {
                   message = "ENVI export aborted!";
-                  if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ABORT);
+                  if (mpProgress != NULL)
+                  {
+                     mpProgress->updateProgress(message, 0, ABORT);
+                  }
+
                   pStep->finalize(Message::Abort);
 
                   fclose(pStream);
@@ -922,7 +965,11 @@ bool EnviExporter::exportHeaderFile() const
             if (isAborted() == true)
             {
                message = "ENVI export aborted!";
-               if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ABORT);
+               if (mpProgress != NULL)
+               {
+                  mpProgress->updateProgress(message, 0, ABORT);
+               }
+
                pStep->finalize(Message::Abort);
 
                fclose(pStream);
@@ -960,9 +1007,12 @@ bool EnviExporter::exportHeaderFile() const
    if (i <= 0)
    {
       message = "Error writing to header file:\n" + headerFilename;
-      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
-      pStep->finalize(Message::Failure, message);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(message, 0, ERRORS);
+      }
 
+      pStep->finalize(Message::Failure, message);
       remove(headerFilename.c_str());
       return false;
    }
@@ -986,7 +1036,7 @@ bool EnviExporter::exportDataFile() const
 
    string dataFilename = headerFilename;
 
-   int pos = headerFilename.rfind(".");
+   string::size_type pos = headerFilename.rfind(".");
    if (pos != string::npos)
    {
       dataFilename = headerFilename.substr(0, pos);

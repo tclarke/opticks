@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef TIE_POINT_LAYER_ADAPTER_H
-#define TIE_POINT_LAYER_ADAPTER_H
+#ifndef TIEPOINTLAYERADAPTER_H
+#define TIEPOINTLAYERADAPTER_H
 
 #include "TiePointLayer.h"
 #include "TiePointLayerImp.h"

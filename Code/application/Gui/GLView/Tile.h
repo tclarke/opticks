@@ -67,7 +67,7 @@ public:
    }
 
    virtual bool isTextureReady(unsigned int index) const;
-   bool isTextureReady() const { return isTextureReady(getTextureIndex()); }
+   bool isTextureReady() const;
 
    virtual void setupTexture(unsigned int index, unsigned char* pTextureData);
    bool computeTexture(unsigned int index, unsigned char *pTextureData);
@@ -76,7 +76,7 @@ public:
    Texture *getTextureToDeAllocate();
    bool hasHigherResTexture(unsigned int index)
    {
-      for (unsigned int i=0; i<index && i<mTextures.size(); ++i)
+      for (unsigned int i = 0; i < index && i < mTextures.size(); ++i)
       {
          if (mTextures[i].isAllocated())
          {
@@ -86,8 +86,8 @@ public:
       return false;
    }
 
-   virtual void setAlpha(unsigned int alpha) { mAlpha = alpha; }
-   unsigned int getAlpha() const { return mAlpha; }
+   virtual void setAlpha(unsigned int alpha);
+   unsigned int getAlpha() const;
 
    static int computeReductionFactor(unsigned int index)
    {

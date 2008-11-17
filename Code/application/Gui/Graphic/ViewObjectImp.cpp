@@ -38,7 +38,10 @@ XERCES_CPP_NAMESPACE_USE
 
 ViewObjectImp::ViewObjectImp(const string& id, GraphicObjectType type, GraphicLayer* pLayer,
                              LocationType pixelCoord) :
-      RectangleObjectImp(id, type, pLayer, pixelCoord), mpView(NULL), mpInvalidText(NULL), mUpdateBounds(false)
+   RectangleObjectImp(id, type, pLayer, pixelCoord),
+   mpView(NULL),
+   mpInvalidText(NULL),
+   mUpdateBounds(false)
 {
    // Create the text object for no associated view
    mpInvalidText = new TextObjectAdapter(SessionItemImp::generateUniqueId(), TEXT_OBJECT, pLayer, pixelCoord);
@@ -173,7 +176,7 @@ void ViewObjectImp::setView(View* pView)
             }
          }
 
-         PerspectiveViewImp *pPerspectiveView = dynamic_cast<PerspectiveViewImp*>(mpView);
+         PerspectiveViewImp* pPerspectiveView = dynamic_cast<PerspectiveViewImp*>(mpView);
          if (pPerspectiveView)
          {
             pPerspectiveView->setAllowZoomOnResize(true);
@@ -250,7 +253,8 @@ void ViewObjectImp::draw(double zoomFactor) const
    RectangleObjectImp::draw(zoomFactor);
 
    // Get the current matrices
-   double modelMatrix[16], projectionMatrix[16];
+   double modelMatrix[16];
+   double projectionMatrix[16];
    int viewPort[4];
    glGetIntegerv(GL_VIEWPORT, viewPort);
    glGetDoublev(GL_PROJECTION_MATRIX, projectionMatrix);
@@ -389,7 +393,7 @@ bool ViewObjectImp::setProperty(const GraphicProperty* pProperty)
 
 bool ViewObjectImp::replicateObject(const GraphicObject* pObject)
 {
-   const ViewObjectImp *pObjectView = dynamic_cast<const ViewObjectImp*>(pObject);
+   const ViewObjectImp* pObjectView = dynamic_cast<const ViewObjectImp*>(pObject);
    if ((pObjectView == NULL) || (pObjectView == this))
    {
       return false;
@@ -398,7 +402,7 @@ bool ViewObjectImp::replicateObject(const GraphicObject* pObject)
    bool bSuccess = RectangleObjectImp::replicateObject(pObject);
    if (bSuccess == true)
    {
-      TextObjectImp *pText = pObjectView->mpInvalidText;
+      TextObjectImp* pText = pObjectView->mpInvalidText;
       if (pText != NULL)
       {
          bSuccess = mpInvalidText->replicateObject(dynamic_cast<GraphicObject*>(pText));
@@ -444,7 +448,9 @@ void ViewObjectImp::updateTextColor()
    // Set the text color as the inverse of the fill color
    QColor clrText(fillColor.mRed, fillColor.mGreen, fillColor.mBlue);
 
-   int h, s, v;
+   int h;
+   int s;
+   int v;
    clrText.getHsv(&h, &s, &v);
    if (h == -1)
    {
@@ -484,7 +490,7 @@ bool ViewObjectImp::processMouseRelease(LocationType screenCoord,
    {
       screenCoord = getLayer()->correctCoordinate(screenCoord);
       setBoundingBox(getLlCorner(), screenCoord);
-      GraphicLayerImp *pLayerImp = dynamic_cast<GraphicLayerImp*>(getLayer());
+      GraphicLayerImp* pLayerImp = dynamic_cast<GraphicLayerImp*>(getLayer());
       if (pLayerImp != NULL)
       {
          QDialog dialog(dynamic_cast<ViewImp*>(pLayerImp->getView()));
@@ -623,7 +629,7 @@ bool ViewObjectImp::fromXml(DOMNode *pDocument, unsigned int version)
       {
          bSuccess = false;
 
-         DOMElement *pElem = dynamic_cast<DOMElement*>(pDocument);
+         DOMElement* pElem = dynamic_cast<DOMElement*>(pDocument);
          if (pElem)
          {
             string id(A(pElem->getAttribute(X("viewId"))));

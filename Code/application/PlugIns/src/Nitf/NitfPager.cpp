@@ -28,7 +28,9 @@
 
 #include <QtCore/QString>
 
-Nitf::Pager::Pager() : mSegment(1)
+Nitf::Pager::Pager() :
+   mSegment(1),
+   mpStep(NULL)
 {
    setCopyright(APP_COPYRIGHT);
    setName("NitfPager");
@@ -42,7 +44,6 @@ Nitf::Pager::~Pager()
 {
    // Do nothing
 }
-
 
 bool Nitf::Pager::getInputSpecification(PlugInArgList*& pArgList)
 {
@@ -146,7 +147,7 @@ CachedPage::UnitPtr Nitf::Pager::fetchUnit(DataRequest *pOriginalRequest)
    {
       return pUnit;
    }
-   ossimNitfTileSource *pTileSource = PTR_CAST(ossimNitfTileSource, mpImageHandler.get());
+   ossimNitfTileSource* pTileSource = PTR_CAST(ossimNitfTileSource, mpImageHandler.get());
    if (pTileSource == NULL)
    {
       return pUnit;
@@ -158,7 +159,10 @@ CachedPage::UnitPtr Nitf::Pager::fetchUnit(DataRequest *pOriginalRequest)
    // the Bounding Rectangle contains NITF Chipping Information.
    ossimIrect br = mpImageHandler->getBoundingRect();
 
-   int minx, miny, maxx, maxy;
+   int minx;
+   int miny;
+   int maxx;
+   int maxy;
    br.getBounds(minx, miny, maxx, maxy);
 
    ossimIrect region(colNumber + minx, rowNumber + miny,
@@ -175,10 +179,12 @@ CachedPage::UnitPtr Nitf::Pager::fetchUnit(DataRequest *pOriginalRequest)
    size_t dstSize = static_cast<size_t>(concurrentRows)*concurrentColumns*concurrentBands*getBytesPerBand();
    VERIFYRV(srcSize >= dstSize && dstSize > 0, pUnit);
 
-   char *pData = new char[dstSize];
+   char* pData = new char[dstSize];
    VERIFYRV(pData != NULL, pUnit);
    memcpy(pData, cubeData->getBuf(bandNumber), dstSize);
 
-   pUnit.reset(new CachedPage::CacheUnit(pData, startRow, concurrentRows, static_cast<int>(dstSize), startBand));
+   CachedPage::CacheUnit* pCacheUnit = new CachedPage::CacheUnit(pData, startRow, concurrentRows,
+      static_cast<int>(dstSize), startBand);
+   pUnit.reset(pCacheUnit);
    return pUnit;
 }

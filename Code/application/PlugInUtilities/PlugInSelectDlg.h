@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #ifndef PLUGINSELECTDLG_H
 #define PLUGINSELECTDLG_H
 
@@ -29,9 +27,9 @@ public:
    PlugInSelectDlg(QWidget* parent = 0);
    ~PlugInSelectDlg();
 
-   void setDisplayedPlugInType(const std::string& type, const std::string& strSubtype = "");
-   void setDisplayedPlugInTypes(const std::vector<std::string>& types, const std::string& strSubtype = "");
-   void setExcludedPlugInTypes(const std::vector<std::string>& types, const std::string& strSubtype = "");
+   void setDisplayedPlugInType(const std::string& type, const std::string& subtype = "");
+   void setDisplayedPlugInTypes(const std::vector<std::string>& types, const std::string& subtype = "");
+   void setExcludedPlugInTypes(const std::vector<std::string>& types, const std::string& subtype = "");
    void setShowPlugInsForWizardOnly(bool show);
 
    std::string getSelectedPlugInName() const;

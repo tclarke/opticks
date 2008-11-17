@@ -27,15 +27,14 @@ DummyCustomAlgorithm::DummyCustomAlgorithm()
    setProductionStatus(false);
    setName("Dummy Custom Algorithm");
    setDescription("DummyCustomAlgorithm");
-   setShortDescription( "DummyCustomAlgorithm" );
+   setShortDescription("DummyCustomAlgorithm");
    setDescriptorId("{7557F76C-E66A-4afe-A471-1021B8C14102}");
 }
 
 DummyCustomAlgorithm::~DummyCustomAlgorithm()
-{
-}
+{}
 
-bool DummyCustomAlgorithm::getInputSpecification( PlugInArgList * &pArgList )
+bool DummyCustomAlgorithm::getInputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
 
@@ -46,24 +45,23 @@ bool DummyCustomAlgorithm::getInputSpecification( PlugInArgList * &pArgList )
    }
 
    PlugInArg* pArg = mpPlugInManager->getPlugInArg();
-   if( pArg != NULL )
+   if (pArg != NULL)
    {
       mpModel->addElementType("DummyType");
-      pArg->setName( "Custom Test Element" );
-      pArg->setType( "DummyType" );
-      pArgList->addArg( *pArg );
+      pArg->setName("Custom Test Element");
+      pArg->setType("DummyType");
+      pArgList->addArg(*pArg);
    }
    return true;
 }
 
-bool DummyCustomAlgorithm::getOutputSpecification( PlugInArgList * &pArgList )
+bool DummyCustomAlgorithm::getOutputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
    return true;
 }
 
-bool DummyCustomAlgorithm::execute( PlugInArgList* inputArgList, PlugInArgList* outputArgList )
-{      
+bool DummyCustomAlgorithm::execute(PlugInArgList* inputArgList, PlugInArgList* outputArgList)
+{
    return true;
 }
-

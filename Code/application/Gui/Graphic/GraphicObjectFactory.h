@@ -7,22 +7,15 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#ifndef GRAPHICOBJECTFACTORY_H
+#define GRAPHICOBJECTFACTORY_H
 
-
-#ifndef GRAPHIC_OBJECT_FACTORY
-#define GRAPHIC_OBJECT_FACTORY
-
-#include "MoveObjectImp.h"
+#include "GraphicObject.h"
+#include "GraphicObjectImp.h"
 #include "Resource.h"
 #include "TypesFile.h"
 
 class GraphicLayer;
-
-// include GraphicObject/Imp here rather than forward declare since the 
-// GraphicObjectObject requires that both be fully declared, so do it here 
-// rather than putting the obligation of correct include order on everyone 
-// who uses it.
-#include "GraphicObject.h"
 
 /**
  *  Since the GraphicGroup had to change to no longer be static, the factory
@@ -31,9 +24,8 @@ class GraphicLayer;
 class GraphicObjectFactory
 {
 public:
-   static GraphicObject* createObject(GraphicObjectType eType,
-                                            GraphicLayer* pLayer,
-                                            LocationType point = LocationType());
+   static GraphicObject* createObject(GraphicObjectType eType, GraphicLayer* pLayer,
+      LocationType pixelCoord = LocationType());
 };
 
 template <typename T>
@@ -43,20 +35,22 @@ public:
    class Args
    {
    public:
+      Args(GraphicObjectType type, GraphicLayer* pLayer, LocationType pixel) :
+         mType(type),
+         mpLayer(pLayer),
+         mPixel(pixel) {}
+
       GraphicObjectType mType;
-      GraphicLayer *mpLayer;
+      GraphicLayer* mpLayer;
       LocationType mPixel;
-      Args(GraphicObjectType type, GraphicLayer *pLayer, LocationType pixel) :
-      mType(type), mpLayer(pLayer), mPixel(pixel) {}
    };
 
-   T *obtainResource(const Args &args) const
+   T* obtainResource(const Args& args) const
    {
-      return dynamic_cast<T*>(
-         GraphicObjectFactory::createObject(args.mType, args.mpLayer, args.mPixel));
+      return dynamic_cast<T*>(GraphicObjectFactory::createObject(args.mType, args.mpLayer, args.mPixel));
    }
 
-   void releaseResource(const Args &args, T *pObject) const
+   void releaseResource(const Args& args, T* pObject) const
    {
       delete dynamic_cast<GraphicObjectImp*>(pObject);
    }
@@ -66,11 +60,8 @@ template<typename T = GraphicObject>
 class GraphicResource : public Resource<T, GraphicObjectObject<T> >
 {
 public:
-   GraphicResource(GraphicObjectType type, GraphicLayer *pLayer = NULL, LocationType pixel = LocationType()) : 
-      Resource<T, GraphicObjectObject<T> >(GraphicObjectObject<T>::Args(type, pLayer, pixel))
-   {
-   }
+   GraphicResource(GraphicObjectType type, GraphicLayer* pLayer = NULL, LocationType pixel = LocationType()) :
+      Resource<T, GraphicObjectObject<T> >(GraphicObjectObject<T>::Args(type, pLayer, pixel)) {}
 };
-
 
 #endif

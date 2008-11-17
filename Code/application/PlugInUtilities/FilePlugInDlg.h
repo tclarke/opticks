@@ -28,8 +28,8 @@ class FilePlugInDlg : public QFileDialog
    Q_OBJECT
 
 public:
-   FilePlugInDlg(const std::vector<PlugInDescriptor*> &availablePlugins, 
-      const std::string plugInKey, QWidget* parent = 0);
+   FilePlugInDlg(const std::vector<PlugInDescriptor*>& availablePlugins, const std::string plugInKey,
+      QWidget* parent = 0);
    ~FilePlugInDlg();
 
    void setSelectedPlugIn(const QString& strPlugIn);
@@ -59,7 +59,7 @@ private:
    QWidget* mpPlugInWidget;
    QComboBox* mpPlugInCombo;
    QPushButton* mpOptionsButton;
-   QLabel *mpPlugInLabel;
+   QLabel* mpPlugInLabel;
    std::string mPlugInKey;
 };
 

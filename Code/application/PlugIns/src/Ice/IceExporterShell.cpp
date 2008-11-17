@@ -21,9 +21,9 @@
 using namespace std;
 
 IceExporterShell::IceExporterShell(IceUtilities::FileType fileType) :
-   mFileType(fileType),
    mpProgress(NULL),
-   mpWriter(NULL)
+   mpWriter(NULL),
+   mFileType(fileType)
 {
 }
 
@@ -181,4 +181,9 @@ void IceExporterShell::abortIfNecessary()
    {
       throw IceAbortException();
    }
+}
+
+string IceExporterShell::outputCubePath()
+{
+   return "/Datasets/Cube1";
 }

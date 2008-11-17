@@ -16,8 +16,6 @@
 #include "PlugInManagerServices.h"
 #include "ShapeFile.h"
 
-#include <string>
-
 class AoiElement;
 class LayerList;
 class RasterElement;
@@ -44,4 +42,4 @@ private:
    bool extractInputs(const PlugInArgList* pInArgList, std::string& message);
 };
 
-#endif   // SHAPEFILEEXPORTER_H
+#endif

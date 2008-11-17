@@ -7,14 +7,11 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef IMAGE_BUFFER_H
-#define IMAGE_BUFFER_H
+#ifndef IMAGEBUFFER_H
+#define IMAGEBUFFER_H
 
 #include "glCommon.h"
 
-// STL header files
 #include <map>
 
 class ColorBuffer;
@@ -67,7 +64,7 @@ public:
     */
    virtual void detachBuffer(ColorBuffer *pColorBuffer) = 0;
 
-    /**
+   /**
     *  Checks to see if a color buffer is attached to the ImageBuffer object.
     *
     *  This method provides the capability to search for a specified
@@ -175,8 +172,12 @@ protected: // member methods
    //             are not fully implemented due to problem of creating and
    //             destroying OpenGL texture objects
    // copy construct and assignment operation methods
-   ImageBuffer(const ImageBuffer &imageBuffer) { mAttachedBuffers = imageBuffer.mAttachedBuffers; }
-   ImageBuffer& operator=(const ImageBuffer &imageBuffer)
+   ImageBuffer(const ImageBuffer& imageBuffer) :
+      mAttachedBuffers(imageBuffer.mAttachedBuffers)
+   {
+   }
+
+   ImageBuffer& operator=(const ImageBuffer& imageBuffer)
    {
       mAttachedBuffers = imageBuffer.mAttachedBuffers;
       return *this;

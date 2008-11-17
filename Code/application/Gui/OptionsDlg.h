@@ -46,7 +46,7 @@ private:
    QSplitter* mpSplitter;
    QTreeWidget* mpOptionSelection;
    std::vector<Option*> mOptionPlugIns;
-   std::map<QTreeWidgetItem*,QWidget*> mOptionWidgets;
+   std::map<QTreeWidgetItem*, QWidget*> mOptionWidgets;
    QStackedWidget* mpOptionStack;
 };
 

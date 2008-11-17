@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef TIEPOINT_TESTER_ALGORITHM_H
-#define TIEPOINT_TESTER_ALGORITHM_H
+#ifndef TIEPOINTTESTERALGORITHM_H
+#define TIEPOINTTESTERALGORITHM_H
 
 #include <math.h>
 
@@ -25,7 +25,11 @@ class RasterElement;
 
 class TiePointTesterAlgorithm : public AlgorithmPattern
 {
-   int findCubes(RasterElement* pCubes[2]);
+public:
+   TiePointTesterAlgorithm(RasterElement &rasterElement, Progress *pProgress, bool interactive);
+
+private:
+   int findCubes(RasterElement* pCube[2]);
    void computeTiePoints(size_t xSize, size_t ySize, std::vector<TiePoint>& points);
    void addLayer(RasterElement *pCube, TiePointList *pList, bool isMission);
 
@@ -41,9 +45,6 @@ class TiePointTesterAlgorithm : public AlgorithmPattern
     *    The values that the algorithm will run on 
     */
    TiePointTesterInputs mInputs;
-
-public:
-   TiePointTesterAlgorithm(RasterElement &rasterElement, Progress *pProgress, bool interactive);
 };
 
 #endif

@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef AOIOVERLAYUNDO_H
-#define AOIOVERLAYUNDO_H
+#ifndef AOILAYERUNDO_H
+#define AOILAYERUNDO_H
 
 #include "UndoAction.h"
 #include "ColorType.h"

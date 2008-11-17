@@ -48,40 +48,42 @@ class AspamViewerDialog : public QDialog
 {
    Q_OBJECT
 
-   AspamViewer *mpViewer;
-   QComboBox *mpAspamList;
-   QPushButton *mpUnloadButton;
-   QTabWidget *mpDataWidget;
-   QLabel *mpErrorWidget;
-   QStackedWidget *mpDataStack;
-
-   QMap<QString,Any*> mAspams;
-
-   ParagraphAgui *mpParagraphAgui;
-   ParagraphBgui *mpParagraphBgui;
-   ParagraphDgui *mpParagraphDgui;
-   ParagraphFgui *mpParagraphFgui;
-   ParagraphGgui *mpParagraphGgui;
-   ParagraphHgui *mpParagraphHgui;
-   ParagraphJgui *mpParagraphJgui;
-
-   Service<ModelServices> mpModelServices;
-
-protected:
-   QMap<QString, unsigned int> getPlotSelectionList(QPushButton*& pButton) const;
-   void getPlotSelectionData(std::vector<Point*> &data, PlotView *pView,
-      unsigned int primary, unsigned int secondary) const;
-   virtual void closeEvent(QCloseEvent *pEvent);
-
 public:
-   AspamViewerDialog(AspamViewer *pViewer, QWidget *pParent=NULL);
+   AspamViewerDialog(AspamViewer* pViewer, QWidget* pParent = NULL);
+   ~AspamViewerDialog();
 
 public slots:
    void populateAspamList();
-   void setDataSet(const QString &dataset);
+   void setDataSet(const QString& dataset);
    void plot();
    void checkPlotStatus();
    void unloadAspam();
+
+protected:
+   QMap<QString, unsigned int> getPlotSelectionList(QPushButton*& pButton) const;
+   void getPlotSelectionData(std::vector<Point*>& data, PlotView* pView, unsigned int primary,
+      unsigned int secondary) const;
+   virtual void closeEvent(QCloseEvent* pEvent);
+
+private:
+   AspamViewer* mpViewer;
+   QComboBox* mpAspamList;
+   QPushButton* mpUnloadButton;
+   QTabWidget* mpDataWidget;
+   QLabel* mpErrorWidget;
+   QStackedWidget* mpDataStack;
+
+   QMap<QString, Any*> mAspams;
+
+   ParagraphAgui* mpParagraphAgui;
+   ParagraphBgui* mpParagraphBgui;
+   ParagraphDgui* mpParagraphDgui;
+   ParagraphFgui* mpParagraphFgui;
+   ParagraphGgui* mpParagraphGgui;
+   ParagraphHgui* mpParagraphHgui;
+   ParagraphJgui* mpParagraphJgui;
+
+   Service<ModelServices> mpModelServices;
 };
 
 /**
@@ -98,14 +100,14 @@ public:
     *
     *  @return Pointer to the table widget containing the data.
     */
-   virtual QTableWidget *getTable() const { return NULL; }
+   virtual QTableWidget* getTable() const;
 
    /**
     *  Accessor for the "Plot" button if this paragraph has data which can be plotted.
     *
     *  @return Pointer to the plot button widget.
     */
-   virtual QPushButton *getButton() const { return NULL; }
+   virtual QPushButton* getButton() const;
 
    /**
     *  Accessor for the plot data for a paragraph.
@@ -124,11 +126,10 @@ public:
     *
     *  @todo Use the Qt 4 QAbstractItemModel for accessing data.
     */
-   virtual void getPlotData(std::vector<Point*> &data, PlotView *pView,
-      unsigned int primary, unsigned int secondary) {}
+   virtual void getPlotData(std::vector<Point*>& data, PlotView* pView, unsigned int primary, unsigned int secondary);
 
 protected:
-   ParagraphGui(QWidget *pParent = NULL) : QFrame(pParent) {}
+   ParagraphGui(QWidget* pParent = NULL);
 };
 
 /**
@@ -139,13 +140,15 @@ class ParagraphAgui : public ParagraphGui
 {
    Q_OBJECT
 
-   QLineEdit *mpSiteId;
-
 public:
-   ParagraphAgui(QWidget *pParent = NULL);
+   ParagraphAgui(QWidget* pParent = NULL);
+   ~ParagraphAgui();
 
 public slots:
-   void setData(const Aspam::ParagraphA &data, QTabWidget *pTabWidget);
+   void setData(const Aspam::ParagraphA& data, QTabWidget* pTabWidget);
+
+private:
+   QLineEdit* mpSiteId;
 };
 
 /**
@@ -156,13 +159,15 @@ class ParagraphBgui : public ParagraphGui
 {
    Q_OBJECT
 
-   QDateTimeEdit *mpDateTime;
-
 public:
-   ParagraphBgui(QWidget *pParent = NULL);
+   ParagraphBgui(QWidget* pParent = NULL);
+   ~ParagraphBgui();
 
 public slots:
-   void setData(const Aspam::ParagraphB &data, QTabWidget *pTabWidget);
+   void setData(const Aspam::ParagraphB& data, QTabWidget* pTabWidget);
+
+private:
+   QDateTimeEdit* mpDateTime;
 };
 
 /**
@@ -173,30 +178,32 @@ class ParagraphDgui : public ParagraphGui
 {
    Q_OBJECT
 
-   QLineEdit    *mpSurfaceVisibility;
-   QSpinBox     *mpTotalCoverage;
-   QLineEdit    *mpWindDirection;
-   QLineEdit    *mpWindSpeed;
-   QLineEdit    *mpGustSpeed;
-   QTextEdit    *mpRemark;
-   QTableWidget *mpClouds;
-   QPushButton  *mpPlotButton;
-
-   const Aspam::ParagraphD *mpRawData;
-
 public:
-   ParagraphDgui(QWidget *pParent = NULL);
-   QTableWidget *getTable() const { return mpClouds; }
-   QPushButton *getButton() const { return mpPlotButton; }
-   virtual void getPlotData(std::vector<Point*> &data, PlotView *pView,
-      unsigned int primary, unsigned int secondary);
+   ParagraphDgui(QWidget* pParent = NULL);
+   ~ParagraphDgui();
+
+   QTableWidget* getTable() const;
+   QPushButton* getButton() const;
+   virtual void getPlotData(std::vector<Point*>& data, PlotView* pView, unsigned int primary, unsigned int secondary);
+
+public slots:
+   void setData(const Aspam::ParagraphD& data, QTabWidget* pTabWidget);
 
 signals:
    void plot();
    void plotDataUpdated();
 
-public slots:
-   void setData(const Aspam::ParagraphD &data, QTabWidget *pTabWidget);
+private:
+   QLineEdit* mpSurfaceVisibility;
+   QSpinBox* mpTotalCoverage;
+   QLineEdit* mpWindDirection;
+   QLineEdit* mpWindSpeed;
+   QLineEdit* mpGustSpeed;
+   QTextEdit* mpRemark;
+   QTableWidget* mpClouds;
+   QPushButton* mpPlotButton;
+
+   const Aspam::ParagraphD* mpRawData;
 };
 
 /**
@@ -207,25 +214,27 @@ class ParagraphFgui : public ParagraphGui
 {
    Q_OBJECT
 
-   QLineEdit    *mpLevel;
-   QTableWidget *mpAnalytic;
-   QPushButton  *mpPlotButton;
-
-   const Aspam::ParagraphF *mpRawData;
-
 public:
-   ParagraphFgui(QWidget *pParent = NULL);
-   QTableWidget *getTable() const { return mpAnalytic; }
-   QPushButton *getButton() const { return mpPlotButton; }
-   virtual void getPlotData(std::vector<Point*> &data, PlotView *pView,
-      unsigned int primary, unsigned int secondary);
+   ParagraphFgui(QWidget* pParent = NULL);
+   ~ParagraphFgui();
+
+   QTableWidget* getTable() const;
+   QPushButton* getButton() const;
+   virtual void getPlotData(std::vector<Point*>& data, PlotView* pView, unsigned int primary, unsigned int secondary);
+
+public slots:
+   void setData(const Aspam::ParagraphF& data, QTabWidget* pTabWidget);
 
 signals:
    void plot();
    void plotDataUpdated();
 
-public slots:
-   void setData(const Aspam::ParagraphF &data, QTabWidget *pTabWidget);
+private:
+   QLineEdit* mpLevel;
+   QTableWidget* mpAnalytic;
+   QPushButton* mpPlotButton;
+
+   const Aspam::ParagraphF* mpRawData;
 };
 
 /**
@@ -236,13 +245,15 @@ class ParagraphGgui : public ParagraphGui
 {
    Q_OBJECT
 
-   QTextEdit *mpRemarks;
-
 public:
-   ParagraphGgui(QWidget *pParent = NULL);
+   ParagraphGgui(QWidget* pParent = NULL);
+   ~ParagraphGgui();
 
 public slots:
-   void setData(const Aspam::ParagraphG &data, QTabWidget *pTabWidget);
+   void setData(const Aspam::ParagraphG& data, QTabWidget* pTabWidget);
+
+private:
+   QTextEdit* mpRemarks;
 };
 
 /**
@@ -253,35 +264,37 @@ class ParagraphHgui : public ParagraphGui
 {
    Q_OBJECT
 
-   QLineEdit    *mpLevels;
-   QComboBox    *mpSeasonalDependence;
-   QComboBox    *mpStratosphericAerosol;
-   QComboBox    *mpOzoneProfile;
-   QLineEdit    *mpBlpqi;
-   QComboBox    *mpPrimaryBlap;
-   QLineEdit    *mpAirParcelType;
-   QLineEdit    *mpSurfaceVisibility;
-   QComboBox    *mpAlternateBlap;
-   QLineEdit    *mpAlternateAirParcelType;
-   QLineEdit    *mpAlternateSurfaceVisibility;
-   QTableWidget *mpAerosol;
-   QPushButton  *mpPlotButton;
-
-   const Aspam::ParagraphH *mpRawData;
-
 public:
-   ParagraphHgui(QWidget *pParent = NULL);
-   QTableWidget *getTable() const { return mpAerosol; }
-   QPushButton *getButton() const { return mpPlotButton; }
-   virtual void getPlotData(std::vector<Point*> &data, PlotView *pView,
-      unsigned int primary, unsigned int secondary);
+   ParagraphHgui(QWidget* pParent = NULL);
+   ~ParagraphHgui();
+
+   QTableWidget* getTable() const;
+   QPushButton* getButton() const;
+   virtual void getPlotData(std::vector<Point*>& data, PlotView* pView, unsigned int primary, unsigned int secondary);
+
+public slots:
+   void setData(const Aspam::ParagraphH& data, QTabWidget* pTabWidget);
 
 signals:
    void plot();
    void plotDataUpdated();
 
-public slots:
-   void setData(const Aspam::ParagraphH &data, QTabWidget *pTabWidget);
+private:
+   QLineEdit* mpLevels;
+   QComboBox* mpSeasonalDependence;
+   QComboBox* mpStratosphericAerosol;
+   QComboBox* mpOzoneProfile;
+   QLineEdit* mpBlpqi;
+   QComboBox* mpPrimaryBlap;
+   QLineEdit* mpAirParcelType;
+   QLineEdit* mpSurfaceVisibility;
+   QComboBox* mpAlternateBlap;
+   QLineEdit* mpAlternateAirParcelType;
+   QLineEdit* mpAlternateSurfaceVisibility;
+   QTableWidget* mpAerosol;
+   QPushButton* mpPlotButton;
+
+   const Aspam::ParagraphH* mpRawData;
 };
 
 /**
@@ -292,27 +305,29 @@ class ParagraphJgui : public ParagraphGui
 {
    Q_OBJECT
 
-   QLineEdit    *mpMaxTemperature;
-   QLineEdit    *mpMinTemperature;
-   QLineEdit    *mpSnowDepth;
-   QTableWidget *mpSurfaceWeather;
-   QPushButton  *mpPlotButton;
-
-   const Aspam::ParagraphJ *mpRawData;
-
 public:
-   ParagraphJgui(QWidget *pParent = NULL);
-   QTableWidget *getTable() const { return mpSurfaceWeather; }
-   QPushButton *getButton() const { return mpPlotButton; }
-   virtual void getPlotData(std::vector<Point*> &data, PlotView *pView,
-      unsigned int primary, unsigned int secondary);
+   ParagraphJgui(QWidget* pParent = NULL);
+   ~ParagraphJgui();
+
+   QTableWidget* getTable() const;
+   QPushButton* getButton() const;
+   virtual void getPlotData(std::vector<Point*>& data, PlotView* pView, unsigned int primary, unsigned int secondary);
+
+public slots:
+   void setData(const Aspam::ParagraphJ& data, QTabWidget* pTabWidget);
 
 signals:
    void plot();
    void plotDataUpdated();
 
-public slots:
-   void setData(const Aspam::ParagraphJ &data, QTabWidget *pTabWidget);
+private:
+   QLineEdit* mpMaxTemperature;
+   QLineEdit* mpMinTemperature;
+   QLineEdit* mpSnowDepth;
+   QTableWidget* mpSurfaceWeather;
+   QPushButton* mpPlotButton;
+
+   const Aspam::ParagraphJ* mpRawData;
 };
 
 #endif

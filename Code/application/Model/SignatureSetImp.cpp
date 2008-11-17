@@ -59,11 +59,11 @@ bool SignatureSetImp::insertSignature(Signature* pSignature)
 vector<Signature*> SignatureSetImp::getSignatures() const
 {
    vector<Signature*> signatures;
-   const vector<DataElement*> &elements = mGroup.getElements();
+   const vector<DataElement*>& elements = mGroup.getElements();
    vector<DataElement*>::const_iterator ppElement;
-   for (ppElement=elements.begin(); ppElement!=elements.end(); ++ppElement)
+   for (ppElement = elements.begin(); ppElement != elements.end(); ++ppElement)
    {
-      Signature *pSignature = static_cast<Signature*>(*ppElement);
+      Signature* pSignature = static_cast<Signature*>(*ppElement);
       if (pSignature)
       {
          signatures.push_back(pSignature);
@@ -115,21 +115,21 @@ DataElement* SignatureSetImp::copy(const string& name, DataElement* pParent) con
 bool SignatureSetImp::serialize(SessionItemSerializer& serializer) const
 {
    XMLWriter xml("SignatureSet");
-   if(!SessionItemImp::toXml(&xml))
+   if (!SessionItemImp::toXml(&xml))
    {
       return false;
    }
-   const DynamicObject *pMetadata = getMetadata();
-   if(pMetadata != NULL)
+   const DynamicObject* pMetadata = getMetadata();
+   if (pMetadata != NULL)
    {
       xml.pushAddPoint(xml.addElement("Metadata"));
-      if(!pMetadata->toXml(&xml))
+      if (!pMetadata->toXml(&xml))
       {
          return false;
       }
    }
    // the DataDescriptor will be serialized as part of the group's serialization
-   if(!mGroup.toXml(&xml))
+   if (!mGroup.toXml(&xml))
    {
       return false;
    }
@@ -139,22 +139,22 @@ bool SignatureSetImp::serialize(SessionItemSerializer& serializer) const
 bool SignatureSetImp::deserialize(SessionItemDeserializer &deserializer)
 {
    XmlReader reader(NULL, false);
-   DOMDocument *pDoc = deserializer.deserialize(reader);
-   if(pDoc == NULL || !SessionItemImp::fromXml(pDoc, XmlBase::VERSION))
+   DOMDocument* pDoc = deserializer.deserialize(reader);
+   if (pDoc == NULL || !SessionItemImp::fromXml(pDoc, XmlBase::VERSION))
    {
       return false;
    }
-   DOMElement *pRoot = pDoc->getDocumentElement();
+   DOMElement* pRoot = pDoc->getDocumentElement();
    VERIFY(pRoot != NULL);
    unsigned int formatVersion = 0;
    stringstream str(A(pRoot->getAttribute(X("version"))));
    str >> formatVersion;
-   for(DOMNode *pNode = pRoot->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())
+   for (DOMNode *pNode = pRoot->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())
    {
-      if (XMLString::equals(pNode->getNodeName(),X("Metadata")))
+      if (XMLString::equals(pNode->getNodeName(), X("Metadata")))
       {
-         DynamicObject *pMetadata = getMetadata();
-         if(pMetadata == NULL || !pMetadata->fromXml(pNode, formatVersion))
+         DynamicObject* pMetadata = getMetadata();
+         if (pMetadata == NULL || !pMetadata->fromXml(pNode, formatVersion))
          {
             return false;
          }
@@ -175,8 +175,8 @@ bool SignatureSetImp::fromXml(DOMNode* pDocument, unsigned int version)
 
 const string& SignatureSetImp::getObjectType() const
 {
-   static string type("SignatureSetImp");
-   return type;
+   static string sType("SignatureSetImp");
+   return sType;
 }
 
 bool SignatureSetImp::isKindOf(const string& className) const

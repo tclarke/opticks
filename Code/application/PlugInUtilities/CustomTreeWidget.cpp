@@ -318,8 +318,9 @@ void CustomTreeWidget::activateCellWidget(QTreeWidgetItem* pItem, int iColumn)
             if (eType == BROWSE_DIR_EDIT)
             {
                QCompleter* pCompleter = new QCompleter(this);
-               pCompleter->setModel(new QDirModel(QStringList(), QDir::NoDotAndDotDot | QDir::Dirs | QDir::Drives,
-                  QDir::DirsFirst, pCompleter));
+               QDirModel* pDirModel = new QDirModel(QStringList(), QDir::NoDotAndDotDot | QDir::Dirs | QDir::Drives,
+                  QDir::DirsFirst, pCompleter);
+               pCompleter->setModel(pDirModel);
                mpEdit->setCompleter(pCompleter);
 
                if (mpBrowse == NULL)
@@ -361,6 +362,8 @@ void CustomTreeWidget::activateCellWidget(QTreeWidgetItem* pItem, int iColumn)
             mpFileBrowser->installEventFilter(this);
             viewport()->setFocusProxy(mpFileBrowser);
          }
+
+         break;
       }
 
       case COMBO_BOX:

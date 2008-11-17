@@ -10,9 +10,9 @@
 #ifndef ARGUMENTLIST_H
 #define ARGUMENTLIST_H
 
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
 
 /**
  * Argument List
@@ -44,7 +44,7 @@ public:
     */
    void clear()
    {
-      arguments.clear();
+      mArguments.clear();
    }
 
    /**
@@ -59,7 +59,7 @@ public:
     *           The array of arguments, including the executable name 
     *           as argv[0].
     */
-   void set( int argc, char* argv[] );
+   void set(int argc, char* argv[]);
 
    /**
     *  Registers an argument for processing and validation.
@@ -67,9 +67,9 @@ public:
     *  @param   name
     *           Name of the new option/argument.
     */
-   void registerOption( std::string name )
+   void registerOption(std::string name)
    {
-      options.insert(std::map<std::string,bool>::value_type(delimiter+name,false));
+      mOptions.insert(std::map<std::string, bool>::value_type(mDelimiter + name, false));
    }
 
    /**
@@ -78,11 +78,13 @@ public:
     *  @param   name
     *           Name of the old option/argument.
     */
-   void unregisterOption( std::string name )
+   void unregisterOption(std::string name)
    {
-      std::map<std::string,bool>::iterator option;
-      option = options.find( name );
-      if (option!=options.end()) options.erase(option);
+      std::map<std::string, bool>::iterator option = mOptions.find(name);
+      if (option != mOptions.end())
+      {
+         mOptions.erase(option);
+      }
    }
 
    /**
@@ -94,7 +96,7 @@ public:
     */
    std::string getExecutableName()
    {
-      return executableName;
+      return mExecutableName;
    }
 
    /**
@@ -120,7 +122,7 @@ public:
     *           The string name for the option without the delimiter.
     *  @return  The list of option values.
     */
-   std::vector<std::string> getOptions( std::string optionName );
+   std::vector<std::string> getOptions(std::string optionName);
 
    /**
     *  Filter the list of arguments.
@@ -135,7 +137,7 @@ public:
     *           The string name for the option without the delimiter.
     *  @return  The first option value.
     */
-   std::string getOption( std::string optionName );
+   std::string getOption(std::string optionName);
 
    /**
     *  Does the option exist in the argument list?
@@ -144,7 +146,7 @@ public:
     *           Name of the argument value.
     *  @return  Returns true if the argument exists in the argument list.
     */
-   bool exists( std::string name );
+   bool exists(std::string name);
 
    /** 
     *  Is the current list of options valid registered options?
@@ -153,7 +155,7 @@ public:
     */
    bool valid()
    {
-      return validArgumentList;
+      return mValidArgumentList;
    }
 
    /**
@@ -165,7 +167,7 @@ public:
     */
    std::string getDelimiter()
    {
-      return delimiter;
+      return mDelimiter;
    }
 
 protected:
@@ -177,7 +179,7 @@ protected:
     *  instantiate this class the ArgumentList::instance() 
     *  method must be called.
     */
-   ArgumentList(); 
+   ArgumentList();
 
    /**
     * Destructor which can not be invoked outside this class.
@@ -195,9 +197,9 @@ private:
     *  @param   value
     *           Delimiter string value
     */
-   void setDelimiter( std::string value )
+   void setDelimiter(std::string value)
    {
-      delimiter = value;
+      mDelimiter = value;
    }
 
    /**
@@ -208,12 +210,12 @@ private:
 
    static ArgumentList* singleton;
 
-   std::string delimiter;
-   std::vector<std::string> arguments;
-   std::map<std::string,bool> options;
-   bool validArgumentList;
-   std::string executableName;
+   std::string mDelimiter;
+   std::vector<std::string> mArguments;
+   std::map<std::string, bool> mOptions;
+   bool mValidArgumentList;
+   std::string mExecutableName;
 };
 
-#endif   // ARGUMENTLIST_H
+#endif
 

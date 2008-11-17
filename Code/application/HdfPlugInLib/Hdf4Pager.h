@@ -7,11 +7,11 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#ifndef HDF4PAGER_H
+#define HDF4PAGER_H
+
 #include "AppConfig.h"
 #if defined(HDF4_SUPPORT)
-
-#ifndef HDF4_PAGER
-#define HDF4_PAGER
 
 #include "HdfPager.h"
 

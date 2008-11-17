@@ -642,7 +642,8 @@ void DockWindowWidget::deletePlot()
    PlotWindow* pWindow = getSelectedPlotWindow();
    if (pWindow == NULL)
    {
-      QMessageBox::critical(this, PLOT_MANAGER_NAME, "Please select a plot window for which to delete a plot set or plot!");
+      QMessageBox::critical(this, PLOT_MANAGER_NAME,
+         "Please select a plot window for which to delete a plot set or plot!");
       return;
    }
 
@@ -766,7 +767,8 @@ void DockWindowWidget::activatePlot()
    PlotWindow* pWindow = getSelectedPlotWindow();
    if (pWindow == NULL)
    {
-      QMessageBox::critical(this, PLOT_MANAGER_NAME, "Please select a plot window for which to activate a plot set or plot!");
+      QMessageBox::critical(this, PLOT_MANAGER_NAME,
+         "Please select a plot window for which to activate a plot set or plot!");
       return;
    }
 
@@ -813,7 +815,8 @@ void DockWindowWidget::renamePlot()
    PlotWindow* pWindow = getSelectedPlotWindow();
    if (pWindow == NULL)
    {
-      QMessageBox::critical(this, PLOT_MANAGER_NAME, "Please select a plot window for which to rename a plot set or plot!");
+      QMessageBox::critical(this, PLOT_MANAGER_NAME,
+         "Please select a plot window for which to rename a plot set or plot!");
       return;
    }
 
@@ -893,8 +896,8 @@ void DockWindowWidget::renamePlot()
             bool bSuccess = pWindow->renamePlotSet(pPlotSet, newPlotSetName);
             if (bSuccess == false)
             {
-               QMessageBox::critical(this, PLOT_MANAGER_NAME, "Could not rename the plot set because a plot set with the " +
-                  strPlotSet + " name already exists!");
+               QMessageBox::critical(this, PLOT_MANAGER_NAME,
+                  "Could not rename the plot set because a plot set with the " + strPlotSet + " name already exists!");
             }
             else
             {
@@ -910,7 +913,8 @@ void DockWindowWidget::editPlotProperties()
    PlotWindow* pWindow = getSelectedPlotWindow();
    if (pWindow == NULL)
    {
-      QMessageBox::critical(this, PLOT_MANAGER_NAME, "Please select a plot window for which to edit a plot's properties!");
+      QMessageBox::critical(this, PLOT_MANAGER_NAME,
+         "Please select a plot window for which to edit a plot's properties!");
       return;
    }
 

@@ -38,7 +38,7 @@ MessageLogMgrImp::MessageLogMgrImp() : mLogPath()
          mLogPath = pTempPath->getFullPathAndName();
       }
    }
-   char *tmpname(tempnam(mLogPath.c_str(),"journ"));
+   char* tmpname(tempnam(mLogPath.c_str(), "journ"));
    mpJournal = new QTemporaryFile(QString::fromStdString(mLogPath) + "/journ");
    mpJournal->open(QIODevice::WriteOnly);
    mpJournal->setPermissions(QFile::WriteOwner);
@@ -59,7 +59,7 @@ MessageLogMgrImp* MessageLogMgrImp::instance()
 {
    if (spInstance == NULL)
    {
-      if(mDestroyed)
+      if (mDestroyed)
       {
          throw std::logic_error("Attempting to use MessageLogMgr after "
             "destroying it.");
@@ -72,7 +72,7 @@ MessageLogMgrImp* MessageLogMgrImp::instance()
 
 void MessageLogMgrImp::destroy()
 {
-   if(mDestroyed)
+   if (mDestroyed)
    {
       throw std::logic_error("Attempting to destroy MessageLogMgr after "
          "destroying it.");
@@ -91,10 +91,10 @@ void MessageLogMgrImp::setPath(const string& path)
 
 MessageLog *MessageLogMgrImp::getLog(const string &logName)
 {
-   if(mLogMap.count(logName) == 0)
+   if (mLogMap.count(logName) == 0)
    {
       MessageLog* pLog(NULL);
-      pLog = static_cast<MessageLog *>(new MessageLogAdapter(logName.c_str(), mLogPath.c_str(),mpJournal));
+      pLog = static_cast<MessageLog*>(new MessageLogAdapter(logName.c_str(), mLogPath.c_str(), mpJournal));
       mLogMap.insert(pair<string, MessageLog*>(logName, pLog));
       notify(SIGNAL_NAME(Subject, Modified));
    }
@@ -138,11 +138,10 @@ vector<MessageLog*> MessageLogMgrImp::getLogs() const
    return logs;
 }
 
-
 const string& MessageLogMgrImp::getObjectType() const
 {
-   static string type("MessageLogMgrImp");
-   return type;
+   static string sType("MessageLogMgrImp");
+   return sType;
 }
 
 bool MessageLogMgrImp::isKindOf(const string& className) const

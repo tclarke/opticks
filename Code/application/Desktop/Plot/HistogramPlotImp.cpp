@@ -56,7 +56,7 @@ using XERCES_CPP_NAMESPACE_QUALIFIER DOMElement;
 using XERCES_CPP_NAMESPACE_QUALIFIER DOMNode;
 using XERCES_CPP_NAMESPACE_QUALIFIER XMLString;
 
-static void ShowRangeValues(char *pFormat, double lower, double upper = 0.0);
+static void ShowRangeValues(char* pFormat, double lower, double upper = 0.0);
 
 HistogramPlotImp::HistogramPlotImp(const string& id, const string& viewName, QGLContext* pDrawContext,
                                    QWidget* pParent) :
@@ -88,8 +88,8 @@ HistogramPlotImp::HistogramPlotImp(const string& id, const string& viewName, QGL
    mpInPhaseAction(NULL),
    mpQuadratureAction(NULL),
    mpPassAreaMenu(NULL),
-   mpStretchTypeMenu(NULL),
    mpStretchUnitsMenu(NULL),
+   mpStretchTypeMenu(NULL),
    mpElementMenu(NULL),
    mpElementList(NULL),
    mpBandMenu(NULL),
@@ -258,8 +258,7 @@ HistogramPlotImp::HistogramPlotImp(const string& id, const string& viewName, QGL
    mpColorMapMenu = new QMenu("&Color Map", this);
    if (mpColorMapMenu != NULL)
    {
-      QAction* pColorMapLoadAction = mpColorMapMenu->addAction("&Load Color Map...", this,
-         SLOT(setColorMapFromFile()));
+      QAction* pColorMapLoadAction = mpColorMapMenu->addAction("&Load Color Map...", this, SLOT(setColorMapFromFile()));
       pColorMapLoadAction->setAutoRepeat(false);
       pColorMapLoadAction->setStatusTip("Sets the color map of a raster layer from a file");
       pDesktop->initializeAction(pColorMapLoadAction, shortcutContext);
@@ -576,8 +575,8 @@ bool HistogramPlotImp::canRename() const
 
 const string& HistogramPlotImp::getObjectType() const
 {
-   static string type("HistogramPlotImp");
-   return type;
+   static string sType("HistogramPlotImp");
+   return sType;
 }
 
 bool HistogramPlotImp::isKindOf(const string& className) const
@@ -606,7 +605,7 @@ void HistogramPlotImp::getViewTypes(vector<string>& classList)
    CartesianPlotImp::getViewTypes(classList);
 }
 
-HistogramPlotImp& HistogramPlotImp::operator= (const HistogramPlotImp& histogramPlot)
+HistogramPlotImp& HistogramPlotImp::operator=(const HistogramPlotImp& histogramPlot)
 {
    if (this != &histogramPlot)
    {
@@ -672,7 +671,7 @@ View* HistogramPlotImp::copy(QGLContext* pDrawContext, QWidget* pParent) const
 
 bool HistogramPlotImp::copy(View *pView) const
 {
-   HistogramPlotImp *pViewImp = dynamic_cast<HistogramPlotImp*>(pView);
+   HistogramPlotImp* pViewImp = dynamic_cast<HistogramPlotImp*>(pView);
    if (pViewImp != NULL)
    {
       UndoLock lock(pView);
@@ -687,7 +686,7 @@ PlotType HistogramPlotImp::getPlotType() const
    return HISTOGRAM_PLOT;
 }
 
-void HistogramPlotImp::elementDeleted(Subject &subject, const string &signal, const boost::any &v)
+void HistogramPlotImp::elementDeleted(Subject& subject, const string& signal, const boost::any& v)
 {
    if (!NN(dynamic_cast<RasterElement*>(&subject)))
    {
@@ -698,7 +697,7 @@ void HistogramPlotImp::elementDeleted(Subject &subject, const string &signal, co
    updateHistogramValues();
 }
 
-void HistogramPlotImp::elementModified(Subject &subject, const string &signal, const boost::any &v)
+void HistogramPlotImp::elementModified(Subject& subject, const string& signal, const boost::any& v)
 {
    RasterElement* pElement = dynamic_cast<RasterElement*>(&subject);
    if (!NN(pElement))
@@ -823,7 +822,8 @@ bool HistogramPlotImp::setHistogram(Layer* pLayer, RasterChannelType color)
             SLOT(setComplexComponent(const ComplexComponent&))));
          VERIFYNR(disconnect(pRasterLayer, SIGNAL(displayedBandChanged(RasterChannelType, DimensionDescriptor)), this,
             SLOT(updateElement())));
-         VERIFYNR(disconnect(pRasterLayer, SIGNAL(colorMapChanged(const ColorMap&)), this, SLOT(updateSelectedColorMap())));
+         VERIFYNR(disconnect(pRasterLayer, SIGNAL(colorMapChanged(const ColorMap&)), this,
+            SLOT(updateSelectedColorMap())));
       }
    }
 
@@ -844,9 +844,10 @@ bool HistogramPlotImp::setHistogram(Layer* pLayer, RasterChannelType color)
       }
 
       // Set the current pass area menu action
-      if (dynamic_cast<ThresholdLayer*> (mpLayer.get()) != NULL)
+      ThresholdLayer* pThresholdLayer = dynamic_cast<ThresholdLayer*>(mpLayer.get());
+      if (pThresholdLayer != NULL)
       {
-         PassArea ePassArea = ((ThresholdLayer*) mpLayer.get())->getPassArea();
+         PassArea ePassArea = pThresholdLayer->getPassArea();
          if (ePassArea == LOWER)
          {
             mpBelowAction->setChecked(true);
@@ -923,7 +924,7 @@ bool HistogramPlotImp::setHistogram(Layer* pLayer, RasterChannelType color)
    return true;
 }
 
-void HistogramPlotImp::showEvent(QShowEvent * pEvent)
+void HistogramPlotImp::showEvent(QShowEvent* pEvent)
 {
    QWidget::showEvent(pEvent);
    mUpdater.update();
@@ -1022,7 +1023,7 @@ void HistogramPlotImp::setComplexComponent(const ComplexComponent& eComponent)
    updateHistogramValues();
 }
 
-static void ShowRangeValues(char *pFormat, double lower, double upper)
+static void ShowRangeValues(char* pFormat, double lower, double upper)
 {
    char message[1024];
    sprintf(message, pFormat, lower, upper);
@@ -1077,11 +1078,11 @@ void HistogramPlotImp::mousePressEvent(QMouseEvent* pEvent)
 
             bool showRegions = true;
 
-            if (mpLayer->isKindOf("RasterLayer") == true)
+            RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(mpLayer.get());
+            if (pRasterLayer != NULL)
             {
-               RasterLayer* pLayer = (RasterLayer*) mpLayer.get();
-               RegionUnits eUnits = pLayer->getStretchUnits(mRasterChannelType);
-               if (pLayer->getStretchType(pLayer->getDisplayMode()) == EQUALIZATION)
+               RegionUnits eUnits = pRasterLayer->getStretchUnits(mRasterChannelType);
+               if (pRasterLayer->getStretchType(pRasterLayer->getDisplayMode()) == EQUALIZATION)
                {
                   showRegions = false;
                }
@@ -1102,12 +1103,14 @@ void HistogramPlotImp::mousePressEvent(QMouseEvent* pEvent)
 
                   ShowRangeValues("Contrast stretch: %g - %g", lowerLimit, upperLimit);
 
-                  locatorValue = pLayer->convertStretchValue(mRasterChannelType, RAW_VALUE, dXValue, eUnits);
-                  locatorValueUnit = dynamic_cast<RasterLayerImp*>(pLayer)->getStretchUnitsAsString(mRasterChannelType);
+                  locatorValue = pRasterLayer->convertStretchValue(mRasterChannelType, RAW_VALUE, dXValue, eUnits);
+                  locatorValueUnit =
+                     dynamic_cast<RasterLayerImp*>(pRasterLayer)->getStretchUnitsAsString(mRasterChannelType);
                }
             }
 
-            if (mpLayer->isKindOf("ThresholdLayer") == true)
+            ThresholdLayer* pThresholdLayer = dynamic_cast<ThresholdLayer*>(mpLayer.get());
+            if (pThresholdLayer != NULL)
             {
                if ((ePassArea == LOWER) || (ePassArea == UPPER))
                {
@@ -1154,9 +1157,9 @@ void HistogramPlotImp::mousePressEvent(QMouseEvent* pEvent)
                // Correct swapping of lower and upper limit
                if (lowerLimit > upperLimit)
                {
-                   double tmp = lowerLimit;
-                   upperLimit = lowerLimit;
-                   lowerLimit = tmp;
+                  double tmp = lowerLimit;
+                  upperLimit = lowerLimit;
+                  lowerLimit = tmp;
                }
 
                if ((ePassArea == LOWER) || (ePassArea == UPPER))
@@ -1168,16 +1171,15 @@ void HistogramPlotImp::mousePressEvent(QMouseEvent* pEvent)
                   ShowRangeValues("Threshold: %g - %g", lowerLimit, upperLimit);
                }
 
-               ThresholdLayer* pLayer = static_cast<ThresholdLayer*>(mpLayer.get());
-               RegionUnits eUnits = pLayer->getRegionUnits();
-               locatorValue = pLayer->convertThreshold(RAW_VALUE, dXValue, eUnits);
-               locatorValueUnit = dynamic_cast<ThresholdLayerImp*>(pLayer)->getRegionUnitsAsString();
+               RegionUnits eUnits = pThresholdLayer->getRegionUnits();
+               locatorValue = pThresholdLayer->convertThreshold(RAW_VALUE, dXValue, eUnits);
+               locatorValueUnit = dynamic_cast<ThresholdLayerImp*>(pThresholdLayer)->getRegionUnitsAsString();
 
-               double lowerLimitStretched = pLayer->convertThreshold(RAW_VALUE, lowerLimit, eUnits);
-               double upperLimitStretched = pLayer->convertThreshold(RAW_VALUE, upperLimit, eUnits);
+               double lowerLimitStretched = pThresholdLayer->convertThreshold(RAW_VALUE, lowerLimit, eUnits);
+               double upperLimitStretched = pThresholdLayer->convertThreshold(RAW_VALUE, upperLimit, eUnits);
 
-               pLayer->setFirstThreshold(lowerLimit);
-               pLayer->setSecondThreshold(upperLimit);
+               pThresholdLayer->setFirstThreshold(lowerLimit);
+               pThresholdLayer->setSecondThreshold(upperLimit);
             }
 
             updateHistogramRegions(lowerLimit, upperLimit, minValue, maxValue, ePassArea, regionColor, showRegions);
@@ -1192,7 +1194,11 @@ void HistogramPlotImp::mousePressEvent(QMouseEvent* pEvent)
                pLocator->setLineStyle(SOLID_LINE);
             }
 
-            if (showRegions) refresh();
+            if (showRegions)
+            {
+               refresh();
+            }
+
             return;
          }
       }
@@ -1249,7 +1255,7 @@ void HistogramPlotImp::mouseMoveEvent(QMouseEvent* pEvent)
                upperLimit = dXValue;
             }
 
-            RasterLayerImp *pRasterLayer = dynamic_cast<RasterLayerImp*>(mpLayer.get());
+            RasterLayerImp* pRasterLayer = dynamic_cast<RasterLayerImp*>(mpLayer.get());
             if (pRasterLayer != NULL)
             {
                RegionUnits eUnits = pRasterLayer->getStretchUnits(mRasterChannelType);
@@ -1267,21 +1273,9 @@ void HistogramPlotImp::mouseMoveEvent(QMouseEvent* pEvent)
 
             if (mpLayer->isKindOf("ThresholdLayer") == true)
             {
-                // Correct swapping of lower and upper limit
-               if (lowerLimit > upperLimit)
-               {
-                   //double tmp = lowerLimit;
-                   //upperLimit = lowerLimit;
-                   //lowerLimit = tmp;
-                   //if (meSelectedValue == LOWER_VALUE) 
-                   //{
-                   //    meSelectedValue = UPPER_VALUE;
-                   //} else meSelectedValue = LOWER_VALUE;
-               }
-
                if ((ePassArea == LOWER) || (ePassArea == UPPER))
                {
-                  ShowRangeValues("Threshold: %g", meSelectedValue==LOWER_VALUE?lowerLimit:upperLimit);
+                  ShowRangeValues("Threshold: %g", meSelectedValue == LOWER_VALUE ? lowerLimit : upperLimit);
                }
                else
                {
@@ -1310,7 +1304,11 @@ void HistogramPlotImp::mouseMoveEvent(QMouseEvent* pEvent)
                pLocator->setText(QString::number(locatorValue) + " " + locatorValueUnit, QString());
             }
 
-            if (showRegions) refresh();
+            if (showRegions)
+            {
+               refresh();
+            }
+
             return;
          }
       }
@@ -1363,45 +1361,36 @@ void HistogramPlotImp::mouseReleaseEvent(QMouseEvent* pEvent)
                upperLimit = dXValue;
             }
 
-            if (mpLayer->isKindOf("RasterLayer") == true)
+            RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(mpLayer.get());
+            if (pRasterLayer != NULL)
             {
-               RasterLayer* pLayer = (RasterLayer*) mpLayer.get();
-               RegionUnits eUnits = pLayer->getStretchUnits(mRasterChannelType);
+               RegionUnits eUnits = pRasterLayer->getStretchUnits(mRasterChannelType);
 
-               double lowerLimitStretched = pLayer->convertStretchValue(mRasterChannelType, RAW_VALUE, lowerLimit, eUnits);
-               double upperLimitStretched = pLayer->convertStretchValue(mRasterChannelType, RAW_VALUE, upperLimit, eUnits);
+               double lowerLimitStretched = pRasterLayer->convertStretchValue(mRasterChannelType, RAW_VALUE,
+                  lowerLimit, eUnits);
+               double upperLimitStretched = pRasterLayer->convertStretchValue(mRasterChannelType, RAW_VALUE,
+                  upperLimit, eUnits);
 
-               if (pLayer->getStretchType(pLayer->getDisplayMode()) == EQUALIZATION)
+               if (pRasterLayer->getStretchType(pRasterLayer->getDisplayMode()) == EQUALIZATION)
                {
                   showRegions = false;
                }
                else
                {
-                  pLayer->setStretchValues(mRasterChannelType, lowerLimitStretched, upperLimitStretched);
+                  pRasterLayer->setStretchValues(mRasterChannelType, lowerLimitStretched, upperLimitStretched);
                }
             }
-            else if (mpLayer->isKindOf("ThresholdLayer") == true)
+
+            ThresholdLayer* pThresholdLayer = dynamic_cast<ThresholdLayer*>(mpLayer.get());
+            if (pThresholdLayer != NULL)
             {
-               // Correct swapping of lower and upper limit
-               //if (lowerLimit > upperLimit)
-               //{
-               //    double tmp = lowerLimit;
-               //    upperLimit = lowerLimit;
-               //    lowerLimit = tmp;
-               //    if (meSelectedValue == LOWER_VALUE) 
-               //    {
-               //       meSelectedValue = UPPER_VALUE;
-               //    } else meSelectedValue = LOWER_VALUE;
-               //}
+               RegionUnits eUnits = pThresholdLayer->getRegionUnits();
 
-               ThresholdLayer* pLayer = static_cast<ThresholdLayer*>(mpLayer.get());
-               RegionUnits eUnits = pLayer->getRegionUnits();
+               double lowerLimitStretched = pThresholdLayer->convertThreshold(RAW_VALUE, lowerLimit, eUnits);
+               double upperLimitStretched = pThresholdLayer->convertThreshold(RAW_VALUE, upperLimit, eUnits);
 
-               double lowerLimitStretched = pLayer->convertThreshold(RAW_VALUE, lowerLimit, eUnits);
-               double upperLimitStretched = pLayer->convertThreshold(RAW_VALUE, upperLimit, eUnits);
-
-               pLayer->setFirstThreshold(lowerLimit);
-               pLayer->setSecondThreshold(upperLimit);
+               pThresholdLayer->setFirstThreshold(lowerLimit);
+               pThresholdLayer->setSecondThreshold(upperLimit);
             }
 
             updateHistogramRegions(lowerLimit, upperLimit, minValue, maxValue, ePassArea, regionColor, showRegions);
@@ -1413,7 +1402,11 @@ void HistogramPlotImp::mouseReleaseEvent(QMouseEvent* pEvent)
             }
 
             meSelectedValue = NO_VALUE;
-            if (showRegions) refresh();
+
+            if (showRegions)
+            {
+               refresh();
+            }
          }
       }
    }
@@ -1446,28 +1439,27 @@ bool HistogramPlotImp::getDataLowerUpper(double& lowerLimit, double& upperLimit)
 {
    if (mpLayer.get() != NULL)
    {
-      if (mpLayer->isKindOf("RasterLayer") == true)
+      const RasterLayer* pRasterLayer = dynamic_cast<const RasterLayer*>(mpLayer.get());
+      if (pRasterLayer != NULL)
       {
-         RasterLayer* pLayer = (RasterLayer*) mpLayer.get();
-         // NOTE:: getStretchValues returns stretched (Not Raw) values
-         pLayer->getStretchValues(mRasterChannelType, lowerLimit, upperLimit);
+         // NOTE: getStretchValues returns stretched (Not Raw) values
+         pRasterLayer->getStretchValues(mRasterChannelType, lowerLimit, upperLimit);
 
-         RegionUnits eUnits = pLayer->getStretchUnits(mRasterChannelType);
+         RegionUnits eUnits = pRasterLayer->getStretchUnits(mRasterChannelType);
          if (eUnits != RAW_VALUE)
          {
-            lowerLimit = pLayer->convertStretchValue(mRasterChannelType, lowerLimit, RAW_VALUE);
-            upperLimit = pLayer->convertStretchValue(mRasterChannelType, upperLimit, RAW_VALUE);
+            lowerLimit = pRasterLayer->convertStretchValue(mRasterChannelType, lowerLimit, RAW_VALUE);
+            upperLimit = pRasterLayer->convertStretchValue(mRasterChannelType, upperLimit, RAW_VALUE);
          }
 
          return true;
       }
 
-      if (mpLayer->isKindOf("ThresholdLayer") == true)
+      const ThresholdLayer* pThresholdLayer = dynamic_cast<const ThresholdLayer*>(mpLayer.get());
+      if (pThresholdLayer != NULL)
       {
-         const ThresholdLayer* pLayer = static_cast<const ThresholdLayer*>(mpLayer.get());
-
-         lowerLimit = pLayer->getFirstThreshold();
-         upperLimit = pLayer->getSecondThreshold();
+         lowerLimit = pThresholdLayer->getFirstThreshold();
+         upperLimit = pThresholdLayer->getSecondThreshold();
          return true;
       }
    }
@@ -1501,12 +1493,11 @@ Statistics* HistogramPlotImp::getStatistics() const
 PassArea HistogramPlotImp::getLayerPassArea() const
 {
    PassArea ePassArea = MIDDLE;
-   if (mpLayer.get() != NULL)
+
+   const ThresholdLayer* pThresholdLayer = dynamic_cast<const ThresholdLayer*>(mpLayer.get());
+   if (pThresholdLayer != NULL)
    {
-      if (mpLayer->isKindOf("ThresholdLayer") == true)
-      {
-         ePassArea = ((ThresholdLayer*) mpLayer.get())->getPassArea();
-      }
+      ePassArea = pThresholdLayer->getPassArea();
    }
 
    return ePassArea;
@@ -1539,6 +1530,9 @@ QColor HistogramPlotImp::getLayerColor() const
                case BLUE:
                   layerColor = Qt::blue;
                   break;
+
+               default:
+                  break;
             }
 
             break;
@@ -1546,13 +1540,16 @@ QColor HistogramPlotImp::getLayerColor() const
 
          case THRESHOLD:
          {
-            const ThresholdLayerImp *pThresholdLayer = dynamic_cast<const ThresholdLayerImp*>(mpLayer.get());
+            const ThresholdLayerImp* pThresholdLayer = dynamic_cast<const ThresholdLayerImp*>(mpLayer.get());
             if (pThresholdLayer != NULL)
             {
                layerColor = pThresholdLayer->getColor();
             }
             break;
          }
+
+         default:
+            break;
       }
    }
 
@@ -1654,8 +1651,7 @@ void HistogramPlotImp::setAlternateColormap(const std::vector<ColorType>* pColor
    updateHistogramRegions();
 }
 
-void HistogramPlotImp::updateHistogramRegions(double lowerLimit, double upperLimit,
-                                              double minValue, double maxValue,
+void HistogramPlotImp::updateHistogramRegions(double lowerLimit, double upperLimit, double minValue, double maxValue,
                                               const PassArea& eArea, const QColor& layerColor, bool showRegions)
 {
    if (showRegions == false)
@@ -1690,7 +1686,7 @@ void HistogramPlotImp::updateHistogramRegions(double lowerLimit, double upperLim
          RasterLayerImp* pRasterImp =
             dynamic_cast<RasterLayerImp*> (pRasterLayer);
 
-         if ((mpAlternateColormap?ColorMap("Custom", *mpAlternateColormap) : pRasterImp->getColorMap()).isDefault() 
+         if ((mpAlternateColormap ? ColorMap("Custom", *mpAlternateColormap) : pRasterImp->getColorMap()).isDefault() 
             == false)
          {
             bUseColorMap = true;
@@ -1705,14 +1701,14 @@ void HistogramPlotImp::updateHistogramRegions(double lowerLimit, double upperLim
       // colormap
       if (bUseColorMap && pRasterLayer != NULL)
       {
-         RasterLayerImp *pRasterLayerImp = dynamic_cast<RasterLayerImp*>(pRasterLayer);
+         RasterLayerImp* pRasterLayerImp = dynamic_cast<RasterLayerImp*>(pRasterLayer);
          if (pRasterLayerImp != NULL)
          {
-            const ColorMap &colormap = pRasterLayerImp->getColorMap();
-            const vector<ColorType> colors = mpAlternateColormap?*mpAlternateColormap:colormap.getTable();
+            const ColorMap& colormap = pRasterLayerImp->getColorMap();
+            const vector<ColorType> colors = mpAlternateColormap ? *mpAlternateColormap : colormap.getTable();
 
             int opacity = 0;
-            for (unsigned int i=0; i<colors.size(); ++i)
+            for (unsigned int i = 0; i < colors.size(); ++i)
             {
                opacity = max(opacity, colors[i].mAlpha);
             }
@@ -1822,8 +1818,7 @@ void HistogramPlotImp::saveHistogram()
       mpHistogram->getHistogramData(centers, counts, widths);
    }
 
-   unsigned int uiBins = 0;
-   uiBins = centers.size();
+   unsigned int uiBins = centers.size();
    if (uiBins == 0)
    {
       QMessageBox::critical(this, QString::fromStdString(getName()),
@@ -1939,8 +1934,7 @@ void HistogramPlotImp::preloadColormaps()
    QDir dir(colorMapDir, "*.clu *.cgr");
    QString strDirectory = dir.absolutePath() + "/";
 
-   unsigned int i = 0;
-   for (i = 0; i < dir.count(); ++i)
+   for (unsigned int i = 0; i < dir.count(); ++i)
    {
       QString strFilename = strDirectory + dir[i];
       if (strFilename.isEmpty() == false)
@@ -1949,10 +1943,10 @@ void HistogramPlotImp::preloadColormaps()
          try
          {
             ColorMap cmap(filename);
-            mPreloadedColorMaps.insert(pair<string,string>(cmap.getName(), filename));
+            mPreloadedColorMaps.insert(pair<string, string>(cmap.getName(), filename));
             mpColorMapList->addItem(QString::fromStdString(cmap.getName()));
          }
-         catch(...) // bad color map file
+         catch (...) // bad color map file
          {
          }
       }
@@ -2031,8 +2025,7 @@ void HistogramPlotImp::updateSelectedColorMap()
    const string& colorMapName = colorMap.getName();
    if (colorMapName.empty() == false)
    {
-      QList<QListWidgetItem*> items = mpColorMapList->findItems(QString::fromStdString(colorMapName),
-         Qt::MatchExactly);
+      QList<QListWidgetItem*> items = mpColorMapList->findItems(QString::fromStdString(colorMapName), Qt::MatchExactly);
       if (items.count() == 1)
       {
          QListWidgetItem* pItem = items.front();
@@ -2052,7 +2045,7 @@ bool HistogramPlotImp::setColorMapFromFile(const QString& filename)
       return false;
    }
 
-   RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*> (mpLayer.get());
+   RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(mpLayer.get());
    if (pRasterLayer == NULL)
    {
       return false;
@@ -2066,7 +2059,8 @@ bool HistogramPlotImp::setColorMapFromFile(const QString& filename)
    }
    catch (std::exception)
    {
-      QMessageBox::critical(this, "Bad Color Table", QString("The file selected was not a valid %1 color table file").arg(APP_NAME));
+      QMessageBox::critical(this, "Bad Color Table",
+         QString("The file selected was not a valid %1 color table file").arg(APP_NAME));
    }
 
    return false;
@@ -2117,11 +2111,9 @@ void HistogramPlotImp::createColorMap()
 
    if (pRasterLayer->getDisplayMode() != GRAYSCALE_MODE)
    {
-      int response = QMessageBox::warning(this, "Change to Grayscale?", 
-         "The image is not currently in grayscale mode. It must be\n"
-         "in grayscale mode in order to apply a colormap. Do you\n"
-         "wish to switch to grayscale mode and proceed?", 
-         QMessageBox::Yes, QMessageBox::No);
+      int response = QMessageBox::warning(this, "Change to Grayscale?", "The image is not currently in grayscale "
+         "mode. It must be\nin grayscale mode in order to apply a colormap. Do you\nwish to switch to grayscale "
+         "mode and proceed?", QMessageBox::Yes, QMessageBox::No);
       if (response == QMessageBox::No)
       {
          return;
@@ -2130,46 +2122,47 @@ void HistogramPlotImp::createColorMap()
       pRasterLayer->setDisplayMode(GRAYSCALE_MODE);
    }
 
-   ColormapEditor *pEditor = new ColormapEditor(*this);
+   ColormapEditor* pEditor = new ColormapEditor(*this);
    pEditor->show();
 }
 
 void HistogramPlotImp::setThresholdMode(QAction* pAction)
 {
-   if ((pAction == NULL) || (mpLayer.get() == NULL))
+   if (pAction == NULL)
    {
       return;
    }
 
-   if (mpLayer->isKindOf("ThresholdLayer") == false)
+   ThresholdLayer* pThresholdLayer = dynamic_cast<ThresholdLayer*>(mpLayer.get());
+   if (pThresholdLayer == NULL)
    {
       return;
    }
 
-   PassArea ePassArea = ((ThresholdLayer*) mpLayer.get())->getPassArea();
+   PassArea passArea = pThresholdLayer->getPassArea();
    if (pAction == mpBelowAction)
    {
-      ePassArea = LOWER;
+      passArea = LOWER;
    }
    else if (pAction == mpAboveAction)
    {
-      ePassArea = UPPER;
+      passArea = UPPER;
    }
    else if (pAction == mpBetweenAction)
    {
-      ePassArea = MIDDLE;
+      passArea = MIDDLE;
    }
    else if (pAction == mpOutsideAction)
    {
-      ePassArea = OUTSIDE;
+      passArea = OUTSIDE;
    }
 
-   ((ThresholdLayer*) mpLayer.get())->setPassArea(ePassArea);
+   pThresholdLayer->setPassArea(passArea);
 }
 
 void HistogramPlotImp::setStretchUnits(QAction* pAction)
 {
-   if ((pAction == NULL) || (mpLayer.get() == NULL))
+   if (pAction == NULL)
    {
       return;
    }
@@ -2177,76 +2170,75 @@ void HistogramPlotImp::setStretchUnits(QAction* pAction)
    RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(mpLayer.get());
    if (pRasterLayer != NULL)
    {
-        RegionUnits eCurrentUnits = pRasterLayer->getStretchUnits(mRasterChannelType);
-        RegionUnits eNewUnits;
+      RegionUnits eCurrentUnits = pRasterLayer->getStretchUnits(mRasterChannelType);
+      RegionUnits eNewUnits;
 
-        if (pAction == mpRawAction)
-        {
-            eNewUnits = RAW_VALUE;
-        }
-        else if (pAction == mpPercentageAction)
-        {
-            eNewUnits = PERCENTAGE;
-        }
-        else if (pAction == mpPercentileAction)
-        {
-            eNewUnits = PERCENTILE;
-        }
-        else if (pAction == mpStdDevAction)
-        {
-            eNewUnits = STD_DEV;
-        }
+      if (pAction == mpRawAction)
+      {
+         eNewUnits = RAW_VALUE;
+      }
+      else if (pAction == mpPercentageAction)
+      {
+         eNewUnits = PERCENTAGE;
+      }
+      else if (pAction == mpPercentileAction)
+      {
+         eNewUnits = PERCENTILE;
+      }
+      else if (pAction == mpStdDevAction)
+      {
+         eNewUnits = STD_DEV;
+      }
 
-        double lower, upper;
-        pRasterLayer->getStretchValues(mRasterChannelType, lower, upper);
-        lower = pRasterLayer->convertStretchValue(mRasterChannelType, eCurrentUnits, lower, eNewUnits);
-        upper = pRasterLayer->convertStretchValue(mRasterChannelType, eCurrentUnits, upper, eNewUnits);
-        pRasterLayer->setStretchValues(mRasterChannelType, lower, upper);
-        pRasterLayer->setStretchUnits(mRasterChannelType, eNewUnits);
+      double lower;
+      double upper;
+      pRasterLayer->getStretchValues(mRasterChannelType, lower, upper);
+      lower = pRasterLayer->convertStretchValue(mRasterChannelType, eCurrentUnits, lower, eNewUnits);
+      upper = pRasterLayer->convertStretchValue(mRasterChannelType, eCurrentUnits, upper, eNewUnits);
+      pRasterLayer->setStretchValues(mRasterChannelType, lower, upper);
+      pRasterLayer->setStretchUnits(mRasterChannelType, eNewUnits);
    }
 
    ThresholdLayer* pThresholdLayer = dynamic_cast<ThresholdLayer*>(mpLayer.get());
    if (pThresholdLayer != NULL)
    {
-       RegionUnits eUnits;
+      RegionUnits regionUnits;
+      if (pAction == mpRawAction)
+      {
+         regionUnits = RAW_VALUE;
+      }
+      else if (pAction == mpPercentageAction)
+      {
+         regionUnits = PERCENTAGE;
+      }
+      else if (pAction == mpPercentileAction)
+      {
+         regionUnits = PERCENTILE;
+      }
+      else if (pAction == mpStdDevAction)
+      {
+         regionUnits = STD_DEV;
+      }
 
-       if (pAction == mpRawAction)
-        {
-            eUnits = RAW_VALUE;
-        }
-        else if (pAction == mpPercentageAction)
-        {
-            eUnits = PERCENTAGE;
-        }
-        else if (pAction == mpPercentileAction)
-        {
-            eUnits = PERCENTILE;
-        }
-        else if (pAction == mpStdDevAction)
-        {
-            eUnits = STD_DEV;
-        }
-
-        pThresholdLayer->setRegionUnits(eUnits);
+      pThresholdLayer->setRegionUnits(regionUnits);
    }
-
-   return;
 }
 
 void HistogramPlotImp::setStretchMode(QAction* pAction)
 {
-   if ((pAction == NULL) || (mpLayer.get() == NULL))
+   if (pAction == NULL)
    {
       return;
    }
 
-   if (mpLayer->isKindOf("RasterLayer") == false)
+   RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(mpLayer.get());
+   if (pRasterLayer == NULL)
    {
       return;
    }
 
    DisplayMode eMode = mRasterChannelType == GRAY ? GRAYSCALE_MODE : RGB_MODE;
-   StretchType eType = ((RasterLayer*) mpLayer.get())->getStretchType (eMode);
+   StretchType eType = pRasterLayer->getStretchType(eMode);
 
    if (pAction == mpLinearAction)
    {
@@ -2265,40 +2257,41 @@ void HistogramPlotImp::setStretchMode(QAction* pAction)
       eType = EQUALIZATION;
    }
 
-   ((RasterLayer*) mpLayer.get())->setStretchType(eMode, eType);
+   pRasterLayer->setStretchType(eMode, eType);
 }
 
 void HistogramPlotImp::setComplexComponent(QAction* pAction)
 {
-   if ((pAction == NULL) || (mpLayer.get() == NULL))
+   if (pAction == NULL)
    {
       return;
    }
 
-   if (mpLayer->isKindOf("RasterLayer") == false)
+   RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(mpLayer.get());
+   if (pRasterLayer == NULL)
    {
       return;
    }
 
-   ComplexComponent eComponent = ((RasterLayer*) mpLayer.get())->getComplexComponent();
+   ComplexComponent component = pRasterLayer->getComplexComponent();
    if (pAction == mpMagnitudeAction)
    {
-      eComponent = COMPLEX_MAGNITUDE;
+      component = COMPLEX_MAGNITUDE;
    }
    else if (pAction == mpPhaseAction)
    {
-      eComponent = COMPLEX_PHASE;
+      component = COMPLEX_PHASE;
    }
    else if (pAction == mpInPhaseAction)
    {
-      eComponent = COMPLEX_INPHASE;
+      component = COMPLEX_INPHASE;
    }
    else if (pAction == mpQuadratureAction)
    {
-      eComponent = COMPLEX_QUADRATURE;
+      component = COMPLEX_QUADRATURE;
    }
 
-   ((RasterLayer*) mpLayer.get())->setComplexComponent(eComponent);
+   pRasterLayer->setComplexComponent(component);
 }
 
 void HistogramPlotImp::setDisplayedElement(QListWidgetItem* pItem)
@@ -2439,8 +2432,7 @@ void HistogramPlotImp::initializeElementList()
 
                   if (displayName.empty() == false)
                   {
-                     QListWidgetItem* pItem = new QListWidgetItem(QString::fromStdString(displayName),
-                        mpElementList);
+                     QListWidgetItem* pItem = new QListWidgetItem(QString::fromStdString(displayName), mpElementList);
                      pItem->setData(Qt::UserRole, QVariant::fromValue(pCurrentRasterElement));
 
                      // Select the displayed element
@@ -2618,18 +2610,17 @@ void HistogramPlotImp::updateHistogramValues(bool force)
       {
          unsigned int uiCount = 256;
 
-         double* pCounts = NULL;
-         pCounts = new double[uiCount];
+         double* pCounts = new double[uiCount];
          if (pCounts != NULL)
          {
             for (unsigned int i = 0; i < uiCount; i++)
             {
-               pCounts[i] = (double) pHistogramCounts[i];
+               pCounts[i] = static_cast<double>(pHistogramCounts[i]);
             }
          }
 
          setHistogram(uiCount, pHistogramLocations, pCounts);
-         delete pCounts;
+         delete [] pCounts;
       }
       else
       {
@@ -2664,7 +2655,8 @@ void HistogramPlotImp::updateHistogramRegions(bool force)
       PassArea ePassArea = getLayerPassArea();
       QColor regionColor = getLayerColor();
       bool showRegions = true;
-      RasterLayer *pRasterLayer = dynamic_cast<RasterLayer*>(mpLayer.get());
+
+      RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(mpLayer.get());
       if (pRasterLayer != NULL)
       {
          if ((pRasterLayer->getStretchType(pRasterLayer->getDisplayMode()) == EQUALIZATION) ||
@@ -2831,17 +2823,18 @@ void HistogramPlotImp::setBadValues()
    }
 }
 
-void HistogramPlotImp::attached(Subject &subject, const string &signal, const Slot &slot)
+void HistogramPlotImp::attached(Subject& subject, const string& signal, const Slot& slot)
 {
    elementModified(subject, signal, boost::any());
 }
 
-void HistogramPlotImp::detached(Subject &subject, const string &signal, const Slot &slot)
+void HistogramPlotImp::detached(Subject& subject, const string& signal, const Slot& slot)
 {
    elementDeleted(subject, signal, boost::any());
 }
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove QListWidget subclass when QListWidget defines an appropriate size hint! (Qt 4.3.1) (dsulgrov)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove QListWidget subclass when QListWidget " \
+   "defines an appropriate size hint! (Qt 4.3.1) (dsulgrov)")
 QSize HistogramPlotImp::MenuListWidget::sizeHint() const
 {
    int iWidth = sizeHintForColumn(0) + 25;   // Add 25 to provide room for the scroll bar
@@ -2854,12 +2847,19 @@ template<>
 std::string StringUtilities::toXmlString(const HistogramPlotImp::ValuesType& val, bool* pError)
 {
    string retValue;
-   switch(val)
+   switch (val)
    {
-   case HistogramPlotImp::NO_VALUE:    retValue = "none";
-   case HistogramPlotImp::LOWER_VALUE: retValue = "lower";
-   case HistogramPlotImp::UPPER_VALUE: retValue = "upper";
-   default: break;
+   case HistogramPlotImp::NO_VALUE:
+      retValue = "none";
+      break;
+   case HistogramPlotImp::LOWER_VALUE:
+      retValue = "lower";
+      break;
+   case HistogramPlotImp::UPPER_VALUE:
+      retValue = "upper";
+      break;
+   default:
+      break;
    }
    if (pError != NULL)
    {
@@ -2876,11 +2876,11 @@ HistogramPlotImp::ValuesType StringUtilities::fromXmlString<HistogramPlotImp::Va
    {
       retValue = HistogramPlotImp::NO_VALUE;
    }
-   else if(value == "lower")
+   else if (value == "lower")
    {
       retValue = HistogramPlotImp::LOWER_VALUE;
    }
-   else if(value == "upper")
+   else if (value == "upper")
    {
       retValue = HistogramPlotImp::UPPER_VALUE;
    }
@@ -2905,11 +2905,11 @@ bool HistogramPlotImp::toXml(XMLWriter* pXml) const
       pXml->addAttr("layerId", mpLayer->getId());
    }
 
-   if (mPreloadedColorMaps.size() > 0)
+   if (mPreloadedColorMaps.empty() == false)
    {
       pXml->pushAddPoint(pXml->addElement("PreloadedColorMaps"));
       map<string, string>::const_iterator it;
-      for (it=mPreloadedColorMaps.begin(); it!=mPreloadedColorMaps.end(); ++it)
+      for (it = mPreloadedColorMaps.begin(); it != mPreloadedColorMaps.end(); ++it)
       {
          pXml->pushAddPoint(pXml->addElement("ColorMap"));
          pXml->addAttr("name", it->first);
@@ -2933,23 +2933,22 @@ bool HistogramPlotImp::toXml(XMLWriter* pXml) const
 
 bool HistogramPlotImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   if(!CartesianPlotImp::fromXml(pDocument, version))
+   if (!CartesianPlotImp::fromXml(pDocument, version))
    {
       return false;
    }
-   DOMElement *pElement = static_cast<DOMElement*>(pDocument);
+   DOMElement* pElement = static_cast<DOMElement*>(pDocument);
    meSelectedValue = StringUtilities::fromXmlString<HistogramPlotImp::ValuesType>(
       A(pElement->getAttribute(X("selectedValue"))));
    RasterChannelType channel = StringUtilities::fromXmlString<RasterChannelType>(
       A(pElement->getAttribute(X("rasterChannelType"))));
-   Layer *pLayer = NULL;
+   Layer* pLayer = NULL;
    mpLayer.reset(NULL);
 
-   if(pElement->hasAttribute(X("layerId")))
+   if (pElement->hasAttribute(X("layerId")))
    {
-      pLayer = dynamic_cast<Layer*>(
-         Service<SessionManager>()->getSessionItem(A(pElement->getAttribute(X("layerId")))));
-      if(pLayer == NULL)
+      pLayer = dynamic_cast<Layer*>(Service<SessionManager>()->getSessionItem(A(pElement->getAttribute(X("layerId")))));
+      if (pLayer == NULL)
       {
          return false;
       }
@@ -2961,36 +2960,36 @@ bool HistogramPlotImp::fromXml(DOMNode* pDocument, unsigned int version)
    }
 
    mpAlternateColormap = NULL;
-   for(DOMNode *pChild = pElement->getFirstChild(); pChild != NULL; pChild = pChild->getNextSibling())
+   for (DOMNode* pChild = pElement->getFirstChild(); pChild != NULL; pChild = pChild->getNextSibling())
    {
-      if(XMLString::equals(pChild->getNodeName(), X("Histogram")))
+      if (XMLString::equals(pChild->getNodeName(), X("Histogram")))
       {
-         if(!mpHistogram->fromXml(pChild, version))
+         if (!mpHistogram->fromXml(pChild, version))
          {
             return false;
          }
       }
-      else if(XMLString::equals(pChild->getNodeName(), X("Region1")))
+      else if (XMLString::equals(pChild->getNodeName(), X("Region1")))
       {
-         for (DOMNode *pGChld = pChild->getFirstChild(); pGChld != NULL; pGChld = pGChld->getNextSibling())
+         for (DOMNode* pGChld = pChild->getFirstChild(); pGChld != NULL; pGChld = pGChld->getNextSibling())
          {
-           if (pGChld->getNodeType() == DOMNode::ELEMENT_NODE)
+            if (pGChld->getNodeType() == DOMNode::ELEMENT_NODE)
             {
                string name = A(pGChld->getNodeName());
-               if(!mpRegion->fromXml(pGChld, version))
+               if (!mpRegion->fromXml(pGChld, version))
                {
                   return false;
                }
             }
          }
       }
-      else if(XMLString::equals(pChild->getNodeName(), X("Region2")))
+      else if (XMLString::equals(pChild->getNodeName(), X("Region2")))
       {
-         for (DOMNode *pGChld = pChild->getFirstChild(); pGChld != NULL; pGChld = pGChld->getNextSibling())
+         for (DOMNode* pGChld = pChild->getFirstChild(); pGChld != NULL; pGChld = pGChld->getNextSibling())
          {
             if (pGChld->getNodeType() == DOMNode::ELEMENT_NODE)
             {
-               if(!mpRegion2->fromXml(pGChld, version))
+               if (!mpRegion2->fromXml(pGChld, version))
                {
                   return false;
                }
@@ -2998,12 +2997,13 @@ bool HistogramPlotImp::fromXml(DOMNode* pDocument, unsigned int version)
          }
       }
    }
-   draw();
 
+   draw();
    return true;
 }
 
-HistogramPlotImp::HistogramUpdater::HistogramUpdater(HistogramPlotImp *pPlot) : mpPlot(pPlot),
+HistogramPlotImp::HistogramUpdater::HistogramUpdater(HistogramPlotImp* pPlot) :
+   mpPlot(pPlot),
    mNeedsUpdated(false)
 {
 }

@@ -51,7 +51,7 @@ Layer* ClassificationLayerAdapter::copy(const string& layerName, bool bCopyEleme
    // Get the annotation
    AnnotationElement* pAnnotation = NULL;
 
-   AnnotationElement* pCurrentAnnotation  = dynamic_cast<AnnotationElement*>(getDataElement());
+   AnnotationElement* pCurrentAnnotation = dynamic_cast<AnnotationElement*>(getDataElement());
    if (bCopyElement == true && pCurrentAnnotation != NULL)
    {
       pAnnotation = dynamic_cast<AnnotationElement*>(pCurrentAnnotation->copy(name, pParent));

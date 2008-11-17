@@ -31,6 +31,7 @@ GcpToolBar::GcpToolBar(const string& id, QWidget* parent) :
 {
    Icons* pIcons = Icons::instance();
    REQUIRE(pIcons != NULL);
+
    // Symbol button
    mpSymbol = new GcpSymbolButton(this);
    mpSymbol->setSyncIcon(false);

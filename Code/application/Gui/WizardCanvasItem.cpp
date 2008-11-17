@@ -22,23 +22,22 @@ using namespace std;
 
 QMap<QString, QColor> WizardCanvasItem::mNodeColors;
 
-WizardCanvasItem::WizardCanvasItem(WizardItem* pItem, Q3Canvas* canvas) :
-   Q3CanvasPolygonalItem(canvas)
+WizardCanvasItem::WizardCanvasItem(WizardItem* pItem, Q3Canvas* pCanvas) :
+   Q3CanvasPolygonalItem(pCanvas),
+   mpItem(static_cast<WizardItemImp*>(pItem)),
+   mMargin(6),
+   mRectWidth(80),
+   mRectHeight(0),
+   mBorderWidth(4),
+   mColor(Qt::white),
+   mOrder(0),
+   mNodeDiameter(11),
+   mNodeMargin(4),
+   mpActiveNode(NULL),
+   mTextWidth(0),
+   mTextHeight(0),
+   mSelectionNodeSize(6)
 {
-   mpItem = (WizardItemImp*) pItem;
-   mMargin = 6;
-   mRectWidth = 80;
-   mRectHeight = 0;
-   mBorderWidth = 4;
-   mColor = Qt::white;
-   mOrder = 0;
-   mNodeDiameter = 11;
-   mNodeMargin = 4;
-   mTextWidth = 0;
-   mTextHeight = 0;
-   mSelectionNodeSize = 6;
-   mpActiveNode = NULL;
-
    mpDownButton = new QToolButton(NULL);
    mpDownButton->setWindowFlags(Qt::SubWindow);
    mpDownButton->setArrowType(Qt::DownArrow);
@@ -47,8 +46,7 @@ WizardCanvasItem::WizardCanvasItem(WizardItem* pItem, Q3Canvas* canvas) :
    updateDimensions();
 
    // Initialize the color map
-   PlugInManagerServices* pManager = NULL;
-   pManager = PlugInManagerServicesImp::instance();
+   PlugInManagerServices* pManager = PlugInManagerServicesImp::instance();
    if (pManager != NULL)
    {
       const vector<string>& argTypes = pManager->getArgTypes();
@@ -62,12 +60,23 @@ WizardCanvasItem::WizardCanvasItem(WizardItem* pItem, Q3Canvas* canvas) :
          for (unsigned int i = 0; i < numTypes + 1; i++)
          {
             int r = (i % 5) * 64;
-            int g = (((int) (i / 5)) % 5) * 64;
-            int b = ((int) (i / 25)) * 64;
+            int g = ((static_cast<int>(i) / 5) % 5) * 64;
+            int b = static_cast<int>(i) / 25 * 64;
 
-            if (r > 255) r = 255;
-            if (g > 255) g = 255;
-            if (b > 255) b = 255;
+            if (r > 255)
+            {
+               r = 255;
+            }
+
+            if (g > 255)
+            {
+               g = 255;
+            }
+
+            if (b > 255)
+            {
+               b = 255;
+            }
 
             QString strType = "Unknown";
             QColor clrType = Qt::white;
@@ -268,7 +277,7 @@ QRect WizardCanvasItem::getNodeRect(WizardNode* pNode) const
    {
       if (i == iIndex)
       {
-         rcNode.setRect((int) x() + iX, (int) y() + iY, mNodeDiameter, mNodeDiameter);
+         rcNode.setRect(static_cast<int>(x()) + iX, static_cast<int>(y()) + iY, mNodeDiameter, mNodeDiameter);
          break;
       }
 
@@ -286,7 +295,7 @@ QRect WizardCanvasItem::getNodeToggleRect(WizardNode* pNode) const
       return rcButton;
    }
 
-   const vector<string>& validTypes = ((WizardNodeImp*) pNode)->getValidTypes();
+   const vector<string>& validTypes = static_cast<WizardNodeImp*>(pNode)->getValidTypes();
    if (validTypes.size() <= 1)
    {
       return rcButton;
@@ -324,7 +333,7 @@ QRect WizardCanvasItem::getNodeToggleRect(WizardNode* pNode) const
    {
       if (i == iIndex)
       {
-         rcButton.setRect((int) x() + iX, (int) y() + iY, mNodeDiameter, mNodeDiameter);
+         rcButton.setRect(static_cast<int>(x()) + iX, static_cast<int>(y()) + iY, mNodeDiameter, mNodeDiameter);
          break;
       }
 
@@ -382,8 +391,8 @@ Q3PointArray WizardCanvasItem::areaPoints() const
 {
    Q3PointArray points(8);
 
-   int iX = (int) x();
-   int iY = (int) y();
+   int iX = static_cast<int>(x());
+   int iY = static_cast<int>(y());
 
    if (mRectWidth > mTextWidth)
    {
@@ -403,7 +412,7 @@ Q3PointArray WizardCanvasItem::areaPoints() const
       points[2] = QPoint(iX + (mTextWidth / 2) + (mRectWidth / 2) + mMargin, iY + mRectHeight - mMargin);
       points[3] = QPoint(iX + mTextWidth + mMargin, iY + mRectHeight - mMargin);
       points[4] = QPoint(iX + mTextWidth + mMargin, iY + mRectHeight + mTextHeight + mMargin);
-      points[5] = QPoint(iX - mMargin,iY + mRectHeight + mTextHeight + mMargin);
+      points[5] = QPoint(iX - mMargin, iY + mRectHeight + mTextHeight + mMargin);
       points[6] = QPoint(iX - mMargin, iY + mRectHeight - mMargin);
       points[7] = QPoint(iX + (mTextWidth / 2) - (mRectWidth / 2) - mMargin, iY + mRectHeight - mMargin);
    }
@@ -453,7 +462,7 @@ void WizardCanvasItem::drawShape(QPainter& p)
 
    p.setBrush(clrItem);
    p.setPen(QPen(QBrush(clrBorder), mBorderWidth, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin));
-   p.drawRect((int) x() + iX, (int) y() + iY, mRectWidth, mRectHeight);
+   p.drawRect(static_cast<int>(x()) + iX, static_cast<int>(y()) + iY, mRectWidth, mRectHeight);
 
    // Draw the nodes
    int iNumInputNodes = 0;
@@ -511,7 +520,7 @@ void WizardCanvasItem::drawShape(QPainter& p)
       // Down button
       if (pNode != NULL)
       {
-         const vector<string>& validTypes = ((WizardNodeImp*) pNode)->getValidTypes();
+         const vector<string>& validTypes = static_cast<WizardNodeImp*>(pNode)->getValidTypes();
          if (validTypes.size() > 1)
          {
             if (pNode == mpActiveNode)
@@ -540,12 +549,12 @@ void WizardCanvasItem::drawShape(QPainter& p)
    if (bSupported == false)
    {
       p.setPen(Qt::white);
-      p.drawText((int) x() + iX + 1, (int) y() + iY + 1, strOrder);
+      p.drawText(static_cast<int>(x()) + iX + 1, static_cast<int>(y()) + iY + 1, strOrder);
       p.setPen(Qt::darkGray);
    }
 
    p.setPen(Qt::black);
-   p.drawText((int) x() + iX, (int) y() + iY, strOrder);
+   p.drawText(static_cast<int>(x()) + iX, static_cast<int>(y()) + iY, strOrder);
 
    // Compute the label translation coordinates
    iX = 0;

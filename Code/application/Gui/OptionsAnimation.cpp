@@ -39,10 +39,10 @@ OptionsAnimation::OptionsAnimation() :
    }
 
    QWidget* pAnimationLayoutWidget = new QWidget();
-   QPushButton *pAddButton = new QPushButton("Add", pAnimationLayoutWidget);
-   QPushButton *pRemoveButton = new QPushButton("Remove", pAnimationLayoutWidget);
+   QPushButton* pAddButton = new QPushButton("Add", pAnimationLayoutWidget);
+   QPushButton* pRemoveButton = new QPushButton("Remove", pAnimationLayoutWidget);
 
-   QGridLayout *pAnimationLayout = new QGridLayout(pAnimationLayoutWidget);
+   QGridLayout* pAnimationLayout = new QGridLayout(pAnimationLayoutWidget);
    pAnimationLayout->setMargin(0);
    pAnimationLayout->setSpacing(5);
    pAnimationLayout->addWidget(pAnimationCycleSettingLabel, 0, 0);
@@ -113,7 +113,7 @@ void OptionsAnimation::removeFrameSpeed()
 {
    if (mpFrameSpeedList->count() > 0 && mpFrameSpeedList->currentItem() != NULL)
    {
-      if(mpFrameSpeedList->currentItem()->text().toDouble() > 0.0)  
+      if (mpFrameSpeedList->currentItem()->text().toDouble() > 0.0)  
       {
          mFrameSpeeds.erase(std::find(mFrameSpeeds.begin(), mFrameSpeeds.end(), 
                             mpFrameSpeedList->currentItem()->text().toDouble()));

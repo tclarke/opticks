@@ -58,26 +58,26 @@ protected:
       ArcProxyLib::ConnectionType connectionType);
 
 private:
-   ConnectionParametersWidget *mpConnection;
-   ListInspectorWidget *mpDisplay;
-   QWidget *mpClipping;
+   ConnectionParametersWidget* mpConnection;
+   ListInspectorWidget* mpDisplay;
+   QWidget* mpClipping;
 
-   QLineEdit *mpLayerNameEdit;
+   QLineEdit* mpLayerNameEdit;
 
    // clipping
-   QRadioButton *mpNoClipButton;
-   QRadioButton *mpSceneClipButton;
-   QRadioButton *mpSpecifiedClipButton;
-   LatLonLineEdit *mpNorthEdit;
-   LatLonLineEdit *mpSouthEdit;
-   LatLonLineEdit *mpEastEdit;
-   LatLonLineEdit *mpWestEdit;
+   QRadioButton* mpNoClipButton;
+   QRadioButton* mpSceneClipButton;
+   QRadioButton* mpSpecifiedClipButton;
+   LatLonLineEdit* mpNorthEdit;
+   LatLonLineEdit* mpSouthEdit;
+   LatLonLineEdit* mpEastEdit;
+   LatLonLineEdit* mpWestEdit;
 
-   FeatureClass *mpFeatureClass;
+   FeatureClass* mpFeatureClass;
    std::map<QListWidgetItem*, QueryOptions> mQueries;
 
-   QLabel *mpErrorLabel;
-   QProgressBar *mpProgressBar;
+   QLabel* mpErrorLabel;
+   QProgressBar* mpProgressBar;
 
    std::vector<QWidget*> mSpecifiedClipWidgets;
 };

@@ -24,15 +24,27 @@
 using namespace std;
 
 CachedPager::CachedPager() :
-   mpMutex(new mta::DMutex), mpRaster(NULL), mBytesPerBand(0), mColumnCount(0), mBandCount(0), mRowCount(0), mCache(10*1024*1024)
+   mCache(10 * 1024 * 1024),
+   mpMutex(new mta::DMutex),
+   mpDescriptor(NULL),
+   mpRaster(NULL),
+   mBytesPerBand(0),
+   mColumnCount(0),
+   mBandCount(0),
+   mRowCount(0)
 {
-   // Do nothing
 }
 
 CachedPager::CachedPager(const size_t cacheSize) :
-   mpMutex(new mta::DMutex), mpRaster(NULL), mBytesPerBand(0), mColumnCount(0), mBandCount(0), mRowCount(0), mCache(static_cast<const int>(cacheSize))
+   mCache(static_cast<const int>(cacheSize)),
+   mpMutex(new mta::DMutex),
+   mpDescriptor(NULL),
+   mpRaster(NULL),
+   mBytesPerBand(0),
+   mColumnCount(0),
+   mBandCount(0),
+   mRowCount(0)
 {
-   // Do nothing
 }
 
 CachedPager::~CachedPager()
@@ -45,7 +57,7 @@ bool CachedPager::getInputSpecification(PlugInArgList *&pArgList)
 
    pArgList = pPims->getPlugInArgList();
    VERIFY(pArgList != NULL);
-   
+
    pArgList->addArg<RasterElement>(PagedElementArg(), NULL);
    pArgList->addArg<Filename>(PagedFilenameArg(), NULL);
 
@@ -142,7 +154,9 @@ RasterPage* CachedPager::getPage(DataRequest *pOriginalRequest,
          cacheStopBand = DimensionDescriptor();
          concurrentBands = mBandCount;
       }
-      if (startRow.getActiveNumber() + concurrentRows < stopRow.getActiveNumber()) // get a bunch more rows if you can to prevent a cache miss
+
+      // get a bunch more rows if you can to prevent a cache miss
+      if (startRow.getActiveNumber() + concurrentRows < stopRow.getActiveNumber())
       {
          double CHUNK_SIZE = getChunkSize();
          concurrentRows =
@@ -177,4 +191,29 @@ void CachedPager::releasePage(RasterPage *pPage)
 int CachedPager::getSupportedRequestVersion() const
 {
    return 1;
+}
+
+const int CachedPager::getBytesPerBand() const
+{
+   return mBytesPerBand;
+}
+
+const int CachedPager::getColumnCount() const
+{
+   return mColumnCount;
+}
+
+const int CachedPager::getBandCount() const
+{
+   return mBandCount;
+}
+
+const RasterElement* CachedPager::getRasterElement() const
+{
+   return mpRaster;
+}
+
+double CachedPager::getChunkSize() const
+{
+   return 1 * 1024 * 1024;
 }

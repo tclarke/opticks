@@ -32,14 +32,14 @@
 
 ConnectionParametersWidget::ConnectionParametersWidget(QWidget *pParent) : QWidget(pParent), mModified(false)
 {
-   QLabel *pFilenameLabel = new QLabel("Filename: ", this);
-   QLabel *pUserLabel = new QLabel("Username: ", this);
-   QLabel *pPasswordLabel = new QLabel("Password: ", this);
-   QLabel *pDatabaseLabel = new QLabel("Database: ", this);
-   QLabel *pServerLabel = new QLabel("Server: ", this);
-   QLabel *pInstanceLabel = new QLabel("Instance: ", this);
-   QLabel *pVersionLabel = new QLabel("Version: ", this);
-   QLabel *pFeatureClassLabel = new QLabel("Feature class: ", this);
+   QLabel* pFilenameLabel = new QLabel("Filename: ", this);
+   QLabel* pUserLabel = new QLabel("Username: ", this);
+   QLabel* pPasswordLabel = new QLabel("Password: ", this);
+   QLabel* pDatabaseLabel = new QLabel("Database: ", this);
+   QLabel* pServerLabel = new QLabel("Server: ", this);
+   QLabel* pInstanceLabel = new QLabel("Instance: ", this);
+   QLabel* pVersionLabel = new QLabel("Version: ", this);
+   QLabel* pFeatureClassLabel = new QLabel("Feature class: ", this);
 
    mFileWidgets.push_back(pFilenameLabel);
    mDatabaseWidgets.push_back(pUserLabel);
@@ -80,7 +80,7 @@ ConnectionParametersWidget::ConnectionParametersWidget(QWidget *pParent) : QWidg
    mDatabaseWidgets.push_back(mpVersionEdit);
    mDatabaseWidgets.push_back(mpFeatureClassEdit);
 
-   QGridLayout *pLayout = new QGridLayout(this);
+   QGridLayout* pLayout = new QGridLayout(this);
    pLayout->setMargin(0);
    pLayout->setSpacing(5);
    pLayout->setColumnMinimumWidth(0, 15);
@@ -252,7 +252,8 @@ void ConnectionParametersWidget::selectFileClicked()
       pNewWorkingDir->setFullPathAndName(newDirectory.path().toStdString());
 
       Service<ConfigurationSettings> pSettings;
-      pSettings->setSessionSetting(ConfigurationSettings::getSettingPluginWorkingDirectoryKey(ShapeFileImporter::PLUGIN_SUBTYPE), *pNewWorkingDir.get());
+      pSettings->setSessionSetting(ConfigurationSettings::getSettingPluginWorkingDirectoryKey(
+         ShapeFileImporter::PLUGIN_SUBTYPE), *pNewWorkingDir.get());
    }
 }
 

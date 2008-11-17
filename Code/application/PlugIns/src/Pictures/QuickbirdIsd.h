@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef QUICKBIRDISD_H__
-#define QUICKBIRDISD_H__
+#ifndef QUICKBIRDISD_H
+#define QUICKBIRDISD_H
 
 #include <string>
 

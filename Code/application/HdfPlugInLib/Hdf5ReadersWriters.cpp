@@ -29,12 +29,14 @@ template<typename T>
 class ValueReaderWriter : public Hdf5CustomReader, public Hdf5CustomWriter
 {
 public:
-   ValueReaderWriter() : mpValue(NULL)
+   ValueReaderWriter() :
+      mpValue(NULL)
    {
    }
 
    //extraArg is provided because hid_t is an int, which results in ambiguity when T is an int as well.
-   ValueReaderWriter(hid_t dataType, void* extraArg) : mpValue(NULL)
+   ValueReaderWriter(hid_t dataType, void* extraArg) :
+      mpValue(NULL)
    {
       //if data cannot be read, return from constructor before mpValue is set to non-NULL.
       //so that isValid() will return false.
@@ -60,7 +62,11 @@ public:
 
    bool setDataToWrite(void* pObject)
    {
-      if (pObject == NULL) return false;
+      if (pObject == NULL)
+      {
+         return false;
+      }
+
       mpValue = reinterpret_cast<T*>(pObject);
       return true;
    }
@@ -120,11 +126,15 @@ template<typename T>
 class ValueReaderWriter<std::vector<T> > : public Hdf5CustomReader, public Hdf5CustomWriter
 {
 public:
-   ValueReaderWriter() : mValid(false), mpValue(NULL)
+   ValueReaderWriter() :
+      mpValue(NULL),
+      mValid(false)
    {
    }
 
-   ValueReaderWriter(hid_t dataType) : mpValue(NULL), mValid(false)
+   ValueReaderWriter(hid_t dataType) :
+      mpValue(NULL),
+      mValid(false)
    {
       //if data cannot be read, return from constructor before mpValue is set to non-NULL.
       //so that isValid() will return false.
@@ -149,7 +159,11 @@ public:
 
    bool setDataToWrite(void* pObject)
    {
-      if (pObject == NULL) return false;
+      if (pObject == NULL)
+      {
+         return false;
+      }
+
       mpValue = reinterpret_cast<vector<T>*>(pObject);
       mValid = true;
       return true;
@@ -216,13 +230,21 @@ private:
 class StringReaderWriter : public Hdf5CustomReader, public Hdf5CustomWriter
 {
 public:
-   StringReaderWriter()
-   : mpReadBuffer(NULL), mpWriteBuffer(NULL), mDataType(-1), mpValue(NULL), mDeleteFixedSpace(false)
+   StringReaderWriter() :
+      mpValue(NULL),
+      mpWriteBuffer(NULL),
+      mpReadBuffer(NULL),
+      mDeleteFixedSpace(false),
+      mDataType(-1)
    {
    }
 
-   StringReaderWriter(hid_t dataType)
-   : mpValue(NULL), mpReadBuffer(NULL), mpWriteBuffer(NULL), mDataType(dataType), mDeleteFixedSpace(false)
+   StringReaderWriter(hid_t dataType) :
+      mpValue(NULL),
+      mpWriteBuffer(NULL),
+      mpReadBuffer(NULL),
+      mDeleteFixedSpace(false),
+      mDataType(dataType)
    {
       //if data cannot be read, return from constructor before mpValue is set to non-NULL.
       //so that isValid() will return false.
@@ -262,7 +284,11 @@ public:
 
    bool setDataToWrite(void* pObject)
    {
-      if (pObject == NULL) return false;
+      if (pObject == NULL)
+      {
+         return false;
+      }
+
       mpValue = reinterpret_cast<string*>(pObject);
       delete [] mpWriteBuffer;
       mpWriteBuffer = NULL;
@@ -372,13 +398,21 @@ private:
 class StringVecReaderWriter : public Hdf5CustomReader, public Hdf5CustomWriter
 {
 public:
-   StringVecReaderWriter()
-   : mpReadBuffer(NULL), mpWriteBuffer(NULL), mDataType(-1), mpValue(NULL), mDeleteFixedSpace(false)
+   StringVecReaderWriter() :
+      mpValue(NULL),
+      mpReadBuffer(NULL),
+      mpWriteBuffer(NULL),
+      mDeleteFixedSpace(false),
+      mDataType(-1)
    {
    }
 
-   StringVecReaderWriter(hid_t dataType)
-   : mpValue(NULL), mpReadBuffer(NULL), mpWriteBuffer(NULL), mDataType(dataType), mDeleteFixedSpace(false)
+   StringVecReaderWriter(hid_t dataType) :
+      mpValue(NULL),
+      mpReadBuffer(NULL),
+      mpWriteBuffer(NULL),
+      mDeleteFixedSpace(false),
+      mDataType(dataType)
    {
       //if data cannot be read, return from constructor before mpValue is set to non-NULL.
       //so that isValid() will return false.
@@ -418,7 +452,11 @@ public:
 
    bool setDataToWrite(void* pObject)
    {
-      if (pObject == NULL) return false;
+      if (pObject == NULL)
+      {
+         return false;
+      }
+
       mpValue = reinterpret_cast<vector<string>*>(pObject);
       delete [] mpWriteBuffer;
       mpWriteBuffer = NULL;
@@ -538,7 +576,6 @@ public:
    }
 
 private:
-   bool mReadMode;
    std::vector<std::string>* mpValue; //not owned by class
    mutable char** mpReadBuffer;
    mutable char** mpWriteBuffer;
@@ -762,5 +799,6 @@ Hdf5CustomWriter* createHdf5CustomWriter<vector<string> >()
 {
    return new StringVecReaderWriter();
 }
+
 
 

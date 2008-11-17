@@ -83,7 +83,9 @@ bool IceFormatDescriptor::getSupportedFeature(FeatureType feature)
    VERIFY_MSG(false, "Missing condition in the IceFormatDescriptor::getSupportedFeature function");
 }
 
-IceFormatDescriptor::IceFormatDescriptor() : mVersion(0, 0), mValidFile(false)
+IceFormatDescriptor::IceFormatDescriptor() :
+   mValidFile(false),
+   mVersion(0, 0)
 {
 }
 

@@ -43,7 +43,7 @@ bool SelectPlugIn::getInputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
 
-   if(mbInteractive)
+   if (mbInteractive)
    {
       VERIFY(DesktopItems::getInputSpecification(pArgList) && (pArgList != NULL));
 
@@ -80,7 +80,7 @@ bool SelectPlugIn::getOutputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
 
-   if(mbInteractive)
+   if (mbInteractive)
    {
       Service<PlugInManagerServices> pPlugInManager;
       VERIFY(pPlugInManager.get() != NULL);
@@ -107,7 +107,7 @@ bool SelectPlugIn::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
    pStep->addProperty("Item", getName());
    mpStep = pStep.get();
 
-   if(!extractInputArgs(pInArgList))
+   if (!extractInputArgs(pInArgList))
    {
       reportError("Unable to extract input arguments.", "6C0440A3-61D8-49e5-8255-7C8EF31A39D4");
       return false;
@@ -117,27 +117,27 @@ bool SelectPlugIn::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
    PlugInSelectDlg dlg(mpDesktop->getMainWidget());
    dlg.setDisplayedPlugInType(mType, mSubtype);
 
-   if(!mCaption.empty())
+   if (!mCaption.empty())
    {
       dlg.setWindowTitle(QString::fromStdString(mCaption));
    }
 
-   if(dlg.exec() == QDialog::Rejected)
+   if (dlg.exec() == QDialog::Rejected)
    {
       reportError("The Select Plug-In dialog was cancelled!", "B82E40EB-8309-41cd-887A-8DA75F7B1F05");
       return false;
    }
 
    // Set the output value
-   if(pOutArgList != NULL)
+   if (pOutArgList != NULL)
    {
       PlugInArg* pArg = NULL;
 
       // Plug-in name
-      if(pOutArgList->getArg("Plug-In Name", pArg) && (pArg != NULL))
+      if (pOutArgList->getArg("Plug-In Name", pArg) && (pArg != NULL))
       {
          string plugInName = dlg.getSelectedPlugInName();
-         if(!plugInName.empty())
+         if (!plugInName.empty())
          {
             pArg->setActualValue(&plugInName);
          }
@@ -160,7 +160,7 @@ bool SelectPlugIn::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
 
 bool SelectPlugIn::extractInputArgs(PlugInArgList* pInArgList)
 {
-   if(!DesktopItems::extractInputArgs(pInArgList))
+   if (!DesktopItems::extractInputArgs(pInArgList))
    {
       return false;
    }
@@ -179,7 +179,7 @@ bool SelectPlugIn::extractInputArgs(PlugInArgList* pInArgList)
    mCaption.clear();
    pInArgList->getPlugInArgValue<string>("Dialog Caption", mCaption);
 
-   if(mpStep != NULL)
+   if (mpStep != NULL)
    {
       mpStep->addProperty("plugInType", mType);
       mpStep->addProperty("plugInSubtype", mSubtype);

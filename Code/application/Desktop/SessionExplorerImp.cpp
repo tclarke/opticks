@@ -685,7 +685,7 @@ void SessionExplorerImp::treeViewChanged()
 
 void SessionExplorerImp::renameItem()
 {
-   QTreeView *pView = getCurrentTreeView();
+   QTreeView* pView = getCurrentTreeView();
    if (pView == NULL)
    {
       return;

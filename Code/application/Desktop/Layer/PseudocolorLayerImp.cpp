@@ -45,12 +45,16 @@ template<class T>
 class PixelOper
 {
 public:
-   PixelOper(const T* pData, int rows, int cols, T value) : 
+   PixelOper(const T* pData, int rows, int cols, T value) :
       mpData(pData), mRows(rows), mCols(cols), mValue(value) {}
+
    inline bool operator()(int row, int col) const
    {
-      return (int)ModelServices::getDataValue((T)mpData[row*mCols+col], COMPLEX_MAGNITUDE) == (int)mValue;
+      int value = static_cast<int>(ModelServices::getDataValue(static_cast<T>(mpData[row * mCols + col]),
+         COMPLEX_MAGNITUDE));
+      return (value == static_cast<int>(mValue));
    }
+
 private:
    const T* mpData;
    int mRows;
@@ -63,7 +67,8 @@ PseudocolorLayerImp::PseudocolorLayerImp(const string& id, const string& layerNa
    mNextID(0),
    mpImage(NULL)
 {
-   mpElement.addSignal(SIGNAL_NAME(RasterElement, DataModified), Slot(this, &PseudocolorLayerImp::rasterElementDataModified));
+   mpElement.addSignal(SIGNAL_NAME(RasterElement, DataModified),
+      Slot(this, &PseudocolorLayerImp::rasterElementDataModified));
 
    setSymbol(PseudocolorLayer::getSettingMarkerSymbol());
    addPropertiesPage(PropertiesPseudocolorLayer::getName());
@@ -85,8 +90,8 @@ PseudocolorLayerImp::~PseudocolorLayerImp()
 
 const string& PseudocolorLayerImp::getObjectType() const
 {
-   static string type("PseudocolorLayerImp");
-   return type;
+   static string sType("PseudocolorLayerImp");
+   return sType;
 }
 
 bool PseudocolorLayerImp::isKindOf(const string& className) const
@@ -99,7 +104,7 @@ bool PseudocolorLayerImp::isKindOf(const string& className) const
    return LayerImp::isKindOf(className);
 }
 
-void PseudocolorLayerImp::rasterElementDataModified(Subject &subject, const std::string &signal, const boost::any &v)
+void PseudocolorLayerImp::rasterElementDataModified(Subject& subject, const string& signal, const boost::any& v)
 {
    invalidateImage();
 }
@@ -111,8 +116,7 @@ PseudocolorLayerImp& PseudocolorLayerImp::operator= (const PseudocolorLayerImp& 
       LayerImp::operator =(pseudocolorLayer);
       clear();
 
-      QMap<int, PseudocolorClass*>::ConstIterator iter;
-      iter = pseudocolorLayer.mClasses.begin();
+      QMap<int, PseudocolorClass*>::ConstIterator iter = pseudocolorLayer.mClasses.begin();
       while (iter != pseudocolorLayer.mClasses.end())
       {
          PseudocolorClass* pClass = iter.value();
@@ -195,13 +199,13 @@ void PseudocolorLayerImp::draw()
       }
       else
       {
-         DataAccessor accessor(NULL,NULL);
+         DataAccessor accessor(NULL, NULL);
          bool usingRawData = false;
 
          int columns = 0;
          int rows = 0;
          EncodingType eType;
-         void *pData = NULL;
+         void* pData = NULL;
 
          const RasterDataDescriptor* pDescriptor =
             dynamic_cast<const RasterDataDescriptor*>(pRasterElement->getDataDescriptor());
@@ -253,13 +257,17 @@ void PseudocolorLayerImp::draw()
                   {
                      for (int row = 0; row < rows; ++row)
                      {
-                        if (!accessor.isValid()) break;
+                        if (!accessor.isValid())
+                        {
+                           break;
+                        }
+
                         pData = accessor->getColumn();
                         switchOnEncoding(eType, drawPseudocolorMarkers, pData, columns - 1, row, visStartColumn,
                            row, visEndColumn, row, eSymbol, clrMarker, pClass->getValue(), row);
                         accessor->nextRow();
                      }
-                     accessor->toPixel(0,0);
+                     accessor->toPixel(0, 0);
                   }
                }
             }
@@ -272,7 +280,7 @@ void PseudocolorLayerImp::draw()
 
 bool PseudocolorLayerImp::getExtents(double& x1, double& y1, double& x4, double& y4)
 {
-   RasterElement *pRasterElement = dynamic_cast<RasterElement*>(getDataElement());
+   RasterElement* pRasterElement = dynamic_cast<RasterElement*>(getDataElement());
    VERIFY(pRasterElement != NULL);
 
    const RasterDataDescriptor* pDescriptor =
@@ -299,7 +307,8 @@ PseudocolorClass* PseudocolorLayerImp::addClass()
    return pClass;
 }
 
-PseudocolorClass* PseudocolorLayerImp::addClass(const QString& strClass, int iValue, const QColor& clrClass, bool bDisplayed)
+PseudocolorClass* PseudocolorLayerImp::addClass(const QString& strClass, int iValue, const QColor& clrClass,
+                                                bool bDisplayed)
 {
    UndoGroup group(getView(), "Add Pseudocolor Class");
 
@@ -315,7 +324,7 @@ PseudocolorClass* PseudocolorLayerImp::addClass(const QString& strClass, int iVa
    return pClass;
 }
 
-void PseudocolorLayerImp::insertClass(PseudocolorClass *pClass, int iID)
+void PseudocolorLayerImp::insertClass(PseudocolorClass* pClass, int iID)
 {
    if (pClass != NULL)
    {
@@ -411,8 +420,8 @@ vector<PseudocolorClass*> PseudocolorLayerImp::getAllClasses() const
 {
    vector<PseudocolorClass*> classList;
 
-   QMap<int, PseudocolorClass*>::ConstIterator iter = mClasses.begin();
-   while (iter != mClasses.end())
+   QMap<int, PseudocolorClass*>::const_iterator iter = mClasses.constBegin();
+   while (iter != mClasses.constEnd())
    {
       PseudocolorClass* pClass = iter.value();
       if (pClass != NULL)
@@ -517,12 +526,12 @@ void PseudocolorLayerImp::clear()
 
 bool PseudocolorLayerImp::toXml(XMLWriter* pXml) const
 {
-   if(!LayerImp::toXml(pXml))
+   if (!LayerImp::toXml(pXml))
    {
       return false;
    }
 
-   if(Service<SessionManager>()->isSessionSaving())
+   if (Service<SessionManager>()->isSessionSaving())
    {
       pXml->addAttr("symbol", mSymbol);
    }
@@ -530,7 +539,7 @@ bool PseudocolorLayerImp::toXml(XMLWriter* pXml) const
    if (mClasses.size() > 0)
    {
       QMap<int, PseudocolorClass*>::ConstIterator it;
-      for (it=mClasses.begin(); it!=mClasses.end(); ++it)
+      for (it = mClasses.begin(); it != mClasses.end(); ++it)
       {
          PseudocolorClass* pClass = it.value();
          if (pClass != NULL)
@@ -550,29 +559,29 @@ bool PseudocolorLayerImp::toXml(XMLWriter* pXml) const
 
 bool PseudocolorLayerImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   if(!LayerImp::fromXml(pDocument, version))
+   if (!LayerImp::fromXml(pDocument, version))
    {
       return false;
    }
    mClasses.clear();
  
-   DOMElement *pTop = static_cast<DOMElement*>(pDocument);
-   if(Service<SessionManager>()->isSessionLoading())
+   DOMElement* pTop = static_cast<DOMElement*>(pDocument);
+   if (Service<SessionManager>()->isSessionLoading())
    {
       mSymbol = StringUtilities::fromXmlString<SymbolType>(A(pTop->getAttribute(X("symbol"))));
    }
-   for(DOMNode *pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
+   for (DOMNode* pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
    {
-      if(XMLString::equals(pChld->getNodeName(), X("PseudocolorClass")))
+      if (XMLString::equals(pChld->getNodeName(), X("PseudocolorClass")))
       {
-         DOMElement *pElmnt = static_cast<DOMElement *>(pChld);
+         DOMElement* pElmnt = static_cast<DOMElement*>(pChld);
          int value = StringUtilities::fromXmlString<int>(A(pElmnt->getAttribute(X("value"))));
          QString name(A(pElmnt->getAttribute(X("name"))));
          bool displayed = StringUtilities::fromXmlString<bool>(A(pElmnt->getAttribute(X("displayed"))));
          ColorType color = StringUtilities::fromXmlString<ColorType>(A(pElmnt->getAttribute(X("color"))));
          QColor clrClass = COLORTYPE_TO_QCOLOR(color);
 
-         if(addClass(name, value, clrClass, displayed) == NULL)
+         if (addClass(name, value, clrClass, displayed) == NULL)
          {
             return false;
          }
@@ -582,9 +591,12 @@ bool PseudocolorLayerImp::fromXml(DOMNode* pDocument, unsigned int version)
    return true;
 }
 
-void PseudocolorLayerImp::getBoundingBox(int &x1, int &y1, int &x2, int &y2) const
+void PseudocolorLayerImp::getBoundingBox(int& x1, int& y1, int& x2, int& y2) const
 {
-   x1 = y1 = x2 = y2 = 0;
+   x1 = 0;
+   y1 = 0;
+   x2 = 0;
+   y2 = 0;
 
    const RasterElement* pRasterElement = dynamic_cast<const RasterElement*>(getDataElement());
    if (pRasterElement != NULL)
@@ -600,12 +612,12 @@ void PseudocolorLayerImp::getBoundingBox(int &x1, int &y1, int &x2, int &y2) con
 }
 
 template<class T, class Drawer>
-void fillRegion(T* pData, DataAccessor &da, Drawer drawer, int classValue,
-                unsigned int numRows, unsigned int numColumns)
+void fillRegion(T* pData, DataAccessor& da, Drawer drawer, int classValue, unsigned int numRows,
+                unsigned int numColumns)
 {
-   for (unsigned int uiRow = 0; uiRow < numRows; uiRow++)
+   for (unsigned int uiRow = 0; uiRow < numRows; ++uiRow)
    {
-      for (unsigned int uiColumn = 0; uiColumn < numColumns; uiColumn++)
+      for (unsigned int uiColumn = 0; uiColumn < numColumns; ++uiColumn)
       {
          VERIFYNRV(da.isValid());
          int iValue = ModelServices::getDataValue(*((T*)da->getColumn()), COMPLEX_MAGNITUDE);
@@ -620,11 +632,10 @@ void fillRegion(T* pData, DataAccessor &da, Drawer drawer, int classValue,
       da->nextRow();
    }
 }
-const BitMask *PseudocolorLayerImp::getSelectedPixels() const
-{
-   int classValue = -1;
 
-   const RasterElement *pRasterElement = dynamic_cast<const RasterElement*>(getDataElement());
+const BitMask* PseudocolorLayerImp::getSelectedPixels() const
+{
+   const RasterElement* pRasterElement = dynamic_cast<const RasterElement*>(getDataElement());
    if (pRasterElement != NULL)
    {
       const RasterDataDescriptor* pDescriptor =
@@ -644,8 +655,7 @@ const BitMask *PseudocolorLayerImp::getSelectedPixels() const
          mpMask->clear();
          DrawUtil::BitMaskPixelDrawer drawer(mpMask.get());
 
-         QMap<int, PseudocolorClass*>::const_iterator iter;
-         iter = mClasses.begin();
+         QMap<int, PseudocolorClass*>::const_iterator iter = mClasses.begin();
          while (iter != mClasses.end())
          {
             PseudocolorClass* pClass = iter.value();
@@ -693,21 +703,22 @@ SymbolType PseudocolorLayerImp::getSymbol() const
 }
 
 /**
-   *  Gets the range of values for which classes are defined.
-   *
-   *  Gets the range of values for which classes are defined, possibly limiting
-   *  its scan to displayed classes. If there are no classes (or no displayed
-   *  classes) it returns (0,-1). Otherwise it returns (min,max).
-   *
-   * @param onlyDisplayed
-   *          If true, only displayed classes will be considered
-   *
-   *  @return  The range of class values or (0,-1) if there are no classes
-   */
+ *  Gets the range of values for which classes are defined.
+ *
+ *  Gets the range of values for which classes are defined, possibly limiting
+ *  its scan to displayed classes. If there are no classes (or no displayed
+ *  classes) it returns (0,-1). Otherwise it returns (min,max).
+ *
+ * @param onlyDisplayed
+ *          If true, only displayed classes will be considered
+ *
+ *  @return  The range of class values or (0,-1) if there are no classes
+ */
 pair<int,int> PseudocolorLayerImp::getValueRange(bool onlyDisplayed) const
 {
    int minValue = numeric_limits<int>::max();
    int maxValue = numeric_limits<int>::min();
+
    QMap<int, PseudocolorClass*>::ConstIterator iter = mClasses.constBegin();
    while (iter != mClasses.constEnd())
    {
@@ -724,15 +735,12 @@ pair<int,int> PseudocolorLayerImp::getValueRange(bool onlyDisplayed) const
       iter++;
    }
 
-   if (minValue == numeric_limits<int>::max() &&
-      maxValue == numeric_limits<int>::min())
+   if (minValue == numeric_limits<int>::max() && maxValue == numeric_limits<int>::min())
    {
-      return pair<int,int>(0, -1);
+      return pair<int, int>(0, -1);
    }
-   else
-   {
-      return pair<int,int>(minValue, maxValue);
-   }
+
+   return pair<int, int>(minValue, maxValue);
 }
 
 bool PseudocolorLayerImp::canRenderAsImage() const
@@ -745,9 +753,9 @@ bool PseudocolorLayerImp::canRenderAsImage() const
 
    // there must be displayed classes and the range of values must
    // be low enough to prevent an unreasonably large colormap.
-   std::pair<int,int> range = getValueRange(true);
-   if (range.first == 0 && range.second == -1 || // no displayed classes
-      range.second - range.first > 1000000) // too many colors for a colormap
+   pair<int, int> range = getValueRange(true);
+   if (range.first == 0 && range.second == -1 ||   // no displayed classes
+      range.second - range.first > 1000000)        // too many colors for a colormap
    {
       canBeImage = false;
    }
@@ -757,7 +765,7 @@ bool PseudocolorLayerImp::canRenderAsImage() const
 
 void PseudocolorLayerImp::generateImage()
 {
-   RasterElement *pRaster = dynamic_cast<RasterElement*>(getDataElement());
+   RasterElement* pRaster = dynamic_cast<RasterElement*>(getDataElement());
    if (pRaster == NULL)
    {
       if (!VERIFYNR(mpImage == NULL))
@@ -784,15 +792,14 @@ void PseudocolorLayerImp::generateImage()
 
       VERIFYNRV (mpImage != NULL);
 
-      std::vector<int> badValues; // empty - the classes already determine 
-                                  // which values to display
-      RasterDataDescriptor *pDescriptor = dynamic_cast<RasterDataDescriptor*>(pRaster->getDataDescriptor());
+      vector<int> badValues; // empty - the classes already determine which values to display
+      RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(pRaster->getDataDescriptor());
       VERIFYNRV(pDescriptor != NULL);
       unsigned int uiRows = pDescriptor->getRowCount();
       unsigned int uiColumns = pDescriptor->getColumnCount();
       EncodingType eEncoding = pDescriptor->getDataType();
       vector<double> lstStretchValues;
-      std::pair<int,int> valueRange = getValueRange(true); // first = min, second = max
+      pair<int, int> valueRange = getValueRange(true); // first = min, second = max
 
       if (valueRange.first == -1 && valueRange.second == 0) // no classes displayed!
       {
@@ -802,7 +809,7 @@ void PseudocolorLayerImp::generateImage()
 
       // +1 to be inclusive, +2 to put a transparent entry at each end
       vector<ColorType> colorMap(valueRange.second-valueRange.first+1+2); 
-      for (unsigned int i=0; i<colorMap.size(); ++i)
+      for (unsigned int i = 0; i < colorMap.size(); ++i)
       {
          colorMap[i].mAlpha = 0;
          colorMap[i].mRed = 0;
@@ -834,9 +841,8 @@ void PseudocolorLayerImp::generateImage()
       lstStretchValues.push_back(valueRange.second+1+0.5);
       GLenum format = GL_RGBA;
       DimensionDescriptor bandDim = pDescriptor->getActiveBand(0);
-      mpImage->initialize(512, 512, bandDim, uiColumns, uiRows, 1, format, eEncoding,
-         COMPLEX_MAGNITUDE, NULL, LINEAR, lstStretchValues, pRaster,
-         colorMap, badValues);
+      mpImage->initialize(512, 512, bandDim, uiColumns, uiRows, 1, format, eEncoding, COMPLEX_MAGNITUDE, NULL,
+         LINEAR, lstStretchValues, pRaster, colorMap, badValues);
    }
 }
 
@@ -862,8 +868,10 @@ bool PseudocolorLayerImp::isGpuImageSupported() const
    const DataElement* pElement = getDataElement();
    if (pElement != NULL)
    {
-      const RasterDataDescriptor *pDescriptor = dynamic_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor());
+      const RasterDataDescriptor* pDescriptor =
+         dynamic_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor());
       VERIFY(pDescriptor != NULL);
+
       EncodingType eEncoding = pDescriptor->getDataType();
       if ((eEncoding != INT4SCOMPLEX) || (eEncoding != FLT8COMPLEX))
       {

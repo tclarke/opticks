@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef HDF4_ATTRIBUTE_H
-#define HDF4_ATTRIBUTE_H
+#ifndef HDF4ATTRIBUTE_H
+#define HDF4ATTRIBUTE_H
 
 #include <string>
 
@@ -89,7 +87,6 @@ public:
       return getVariant().getValue(value);
    }
 
-
    /**
     * Returns a pointer to the value or NULL if the type does not match.
     *
@@ -131,4 +128,4 @@ private:
    DataVariant mValue;
 };
 
-#endif   
+#endif

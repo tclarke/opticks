@@ -55,41 +55,42 @@ bool KmlExporter::getOutputSpecification(PlugInArgList*& pArgList)
 
 bool KmlExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
-   ProgressTracker progress(pInArgList->getPlugInArgValue<Progress>(ProgressArg()), "Export KML", "app", "447D4133-FD36-4D00-8078-D104F2D8929D");
+   ProgressTracker progress(pInArgList->getPlugInArgValue<Progress>(ProgressArg()), "Export KML", "app",
+      "447D4133-FD36-4D00-8078-D104F2D8929D");
 
-   FileDescriptor *pDescriptor = pInArgList->getPlugInArgValue<FileDescriptor>(ExportDescriptorArg());
-   if(pDescriptor == NULL || pDescriptor->getFilename().getFullPathAndName().empty())
+   FileDescriptor* pDescriptor = pInArgList->getPlugInArgValue<FileDescriptor>(ExportDescriptorArg());
+   if (pDescriptor == NULL || pDescriptor->getFilename().getFullPathAndName().empty())
    {
       progress.report("No output file specified.", 0, ERRORS, true);
       return false;
    }
    // Try and get a view and a layer...the basic exporter works on views but subclasses may work on layers.
-   SpatialDataView *pView = pInArgList->getPlugInArgValue<SpatialDataView>(ExportItemArg());
-   Layer *pLayer = pInArgList->getPlugInArgValue<Layer>(ExportItemArg());
+   SpatialDataView* pView = pInArgList->getPlugInArgValue<SpatialDataView>(ExportItemArg());
+   Layer* pLayer = pInArgList->getPlugInArgValue<Layer>(ExportItemArg());
    bool isKmz(pDescriptor->getFilename().getExtension() == "kmz");
    Kml kml(isKmz);
    bool success = false;
-   if(pView == NULL && pLayer == NULL)
+   if (pView == NULL && pLayer == NULL)
    {
       progress.report("Exporting Session", 10, NORMAL);
       success = kml.addSession();
    }
-   else if(pView != NULL)
+   else if (pView != NULL)
    {
       progress.report("Exporting View", 10, NORMAL);
       success = kml.addView(pView);
    }
-   else if(pLayer != NULL)
+   else if (pLayer != NULL)
    {
       progress.report("Exporting Layer", 10, NORMAL);
       pView = dynamic_cast<SpatialDataView*>(pLayer->getView());
-      if(pView == NULL)
+      if (pView == NULL)
       {
          progress.report("Layer is not displayed.", 0, ERRORS, true);
          return false;
       }
-      RasterElement *pElement = pView->getLayerList()->getPrimaryRasterElement();
-      if(pElement == NULL || !pElement->isGeoreferenced())
+      RasterElement* pElement = pView->getLayerList()->getPrimaryRasterElement();
+      if (pElement == NULL || !pElement->isGeoreferenced())
       {
          progress.report("Primary raster layer is not geo-referenced.", 0, ERRORS, true);
          return false;
@@ -97,12 +98,12 @@ bool KmlExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
       Layer* pPrimaryLayer = pView->getLayerList()->getLayer(RASTER, pElement);
       success = kml.addLayer(pLayer, pPrimaryLayer, pView, pView->getLayerList()->getNumLayers());
    }
-   if(!success)
+   if (!success)
    {
       progress.report("Failed to export.", 0, ERRORS, true);
       return false;
    }
-   if(!kml.toFile(pDescriptor->getFilename().getFullPathAndName()))
+   if (!kml.toFile(pDescriptor->getFilename().getFullPathAndName()))
    {
       progress.report("KML Export Failed", 0, ERRORS, true);
       progress.upALevel();

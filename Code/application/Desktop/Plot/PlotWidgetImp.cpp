@@ -147,7 +147,7 @@ void PlotWidgetImp::initialize(PlotViewImp *pPlotView, const string& plotName, P
    QWidget* pPlotWidget = new QWidget();
 
    // Plot
-   if(pPlotView == NULL)
+   if (pPlotView == NULL)
    {
       mpPlot = dynamic_cast<PlotViewImp*>(Service<DesktopServices>()->createPlot(plotName, plotType, pPlotWidget));
    }
@@ -242,7 +242,7 @@ void PlotWidgetImp::initialize(PlotViewImp *pPlotView, const string& plotName, P
    pPlotLayout->addLayout(pBottomLabelLayout);
 
    QVBoxLayout* pLayout = dynamic_cast<QVBoxLayout*>(layout());
-   if(pLayout == NULL)
+   if (pLayout == NULL)
    {
       pLayout = new QVBoxLayout(this);
    }
@@ -1356,7 +1356,7 @@ bool PlotWidgetImp::toXml(XMLWriter* pXml) const
 
    pXml->pushAddPoint(pXml->addElement("ClassificationFont"));
    // no foul if font not stored - just keep defaults
-   if(!mClassificationFont.toXml(pXml))
+   if (!mClassificationFont.toXml(pXml))
    {
       return false;
    }
@@ -1364,7 +1364,7 @@ bool PlotWidgetImp::toXml(XMLWriter* pXml) const
 
    pXml->pushAddPoint(pXml->addElement("OrganizationFont"));
    // no foul if font not stored - just keep defaults
-   if(!mOrganizationFont.toXml(pXml))
+   if (!mOrganizationFont.toXml(pXml))
    {
       return false;
    }
@@ -1373,7 +1373,7 @@ bool PlotWidgetImp::toXml(XMLWriter* pXml) const
    if (mpXAxis != NULL)
    {
       pXml->pushAddPoint(pXml->addElement("Xaxis"));
-      if(!mpXAxis->toXml(pXml))
+      if (!mpXAxis->toXml(pXml))
       {
          return false;
       }
@@ -1382,7 +1382,7 @@ bool PlotWidgetImp::toXml(XMLWriter* pXml) const
    if (mpYAxis != NULL)
    {
       pXml->pushAddPoint(pXml->addElement("Yaxis"));
-      if(!mpYAxis->toXml(pXml))
+      if (!mpYAxis->toXml(pXml))
       {
          return false;
       }
@@ -1399,7 +1399,7 @@ bool PlotWidgetImp::fromXml(DOMNode* pDocument, unsigned int version)
       return false;
    }
 
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
+   DOMElement* pElem = static_cast<DOMElement*>(pDocument);
    setName(A(pElem->getAttribute(X("name"))));
    setDisplayName(A(pElem->getAttribute(X("displayName"))));
    setDisplayText(A(pElem->getAttribute(X("displayText"))));
@@ -1426,34 +1426,32 @@ bool PlotWidgetImp::fromXml(DOMNode* pDocument, unsigned int version)
    setOrganizationPosition(StringUtilities::fromXmlString<PositionType>(
       A(pElem->getAttribute(X("organizationPosition")))));
 
-   for(DOMNode *pChld = pDocument->getFirstChild();  
-      pChld != NULL;
-      pChld = pChld->getNextSibling())
+   for (DOMNode* pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
    {
       if (XMLString::equals(pChld->getNodeName(), X("ClassificationFont")))
       {
-         if(!mClassificationFont.fromXml(pChld, version))
+         if (!mClassificationFont.fromXml(pChld, version))
          {
             return false;
          }
       }
       else if (XMLString::equals(pChld->getNodeName(), X("OrganizationFont")))
       {
-         if(!mOrganizationFont.fromXml(pChld, version))
+         if (!mOrganizationFont.fromXml(pChld, version))
          {
             return false;
          }
       }
       else if (XMLString::equals(pChld->getNodeName(), X("Xaxis")))
       {
-         if(!mpXAxis->fromXml(pChld, version))
+         if (!mpXAxis->fromXml(pChld, version))
          {
             return false;
          }
       }
       else if (XMLString::equals(pChld->getNodeName(), X("Yaxis")))
       {
-         if(!mpYAxis->fromXml(pChld, version))
+         if (!mpYAxis->fromXml(pChld, version))
          {
             return false;
          }
@@ -1470,8 +1468,8 @@ bool PlotWidgetImp::canRename() const
 
 bool PlotWidgetImp::rename(const string &newName, string &errorMessage)
 {
-   PlotSet *pPlotSet = getPlotSet();
-   if(pPlotSet == NULL)
+   PlotSet* pPlotSet = getPlotSet();
+   if (pPlotSet == NULL)
    {
       return SessionItemImp::rename(newName, errorMessage);
    }

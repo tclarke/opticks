@@ -43,11 +43,12 @@ public:
    static bool isKindOfElement(const std::string& className);
    static void getElementTypes(std::vector<std::string>& classList);
 
-   static bool gcpsToXml(std::list<GcpPoint>::const_iterator first, std::list<GcpPoint>::const_iterator last, XMLWriter* pXml);
+   static bool gcpsToXml(std::list<GcpPoint>::const_iterator first, std::list<GcpPoint>::const_iterator last,
+      XMLWriter* pXml);
    static bool xmlToGcps(std::back_insert_iterator<std::list<GcpPoint> > first, DOMNode* pDoc, unsigned int version);
 
 private:
-   std::list<GcpPoint> selected;
+   std::list<GcpPoint> mSelected;
 };
 
 #define GCPLISTADAPTEREXTENSION_CLASSES \

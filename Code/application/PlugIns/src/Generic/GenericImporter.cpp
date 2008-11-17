@@ -40,7 +40,7 @@ GenericImporter::~GenericImporter()
 {
 }
 
-unsigned char GenericImporter::getFileAffinity(const std::string& filename)
+unsigned char GenericImporter::getFileAffinity(const string& filename)
 {
    // If the file exists, it can be loaded (with user input).
    QString fileName = QString::fromStdString(filename);
@@ -83,14 +83,15 @@ vector<ImportDescriptor*> GenericImporter::getImportDescriptors(const string& fi
    return descriptors;
 }
 
-bool GenericImporter::validate(const DataDescriptor* pDescriptor, std::string& errorMessage) const
+bool GenericImporter::validate(const DataDescriptor* pDescriptor, string& errorMessage) const
 {
    if (pDescriptor == NULL)
    {
       errorMessage = "The data descriptor is invalid!";
       return false;
    }
-   const RasterFileDescriptor* pFileDescriptor = dynamic_cast<const RasterFileDescriptor*>(pDescriptor->getFileDescriptor());
+   const RasterFileDescriptor* pFileDescriptor =
+      dynamic_cast<const RasterFileDescriptor*>(pDescriptor->getFileDescriptor());
    if (pFileDescriptor == NULL)
    {
       errorMessage = "The file descriptor is invalid!";

@@ -51,11 +51,10 @@ std::vector<PlugInSamplerQt::Node> &DemoGuiImp::getNodes()
    static std::vector<PlugInSamplerQt::Node> nodes;
 
    nodes.clear();
-
-   nodes.push_back(PlugInSamplerQt::Node(slider1->value()/100.0, ColorType(mColor1.red(), mColor1.green(), mColor1.blue())));
-   nodes.push_back(PlugInSamplerQt::Node(slider1_2->value()/100.0, ColorType(mColor2.red(), mColor2.green(), mColor2.blue())));
-   nodes.push_back(PlugInSamplerQt::Node(slider1_2_2->value()/100.0, ColorType(mColor3.red(), mColor3.green(), mColor3.blue())));
-   nodes.push_back(PlugInSamplerQt::Node(slider1_2_2_2->value()/100.0, ColorType(mColor4.red(), mColor4.green(), mColor4.blue())));
+   nodes.push_back(PlugInSamplerQt::Node(slider1->value() / 100.0, QCOLOR_TO_COLORTYPE(mColor1)));
+   nodes.push_back(PlugInSamplerQt::Node(slider1_2->value() / 100.0, QCOLOR_TO_COLORTYPE(mColor2)));
+   nodes.push_back(PlugInSamplerQt::Node(slider1_2_2->value() / 100.0, QCOLOR_TO_COLORTYPE(mColor3)));
+   nodes.push_back(PlugInSamplerQt::Node(slider1_2_2_2->value() / 100.0, QCOLOR_TO_COLORTYPE(mColor4)));
 
    return nodes;
 }

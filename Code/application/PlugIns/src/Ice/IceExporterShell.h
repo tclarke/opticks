@@ -35,7 +35,7 @@ public:
    QWidget* getExportOptionsWidget(const PlugInArgList* pInArgList);
 
 protected:
-   Progress *mpProgress;
+   Progress* mpProgress;
 
    virtual void parseInputArgs(PlugInArgList* pInArgList);
    virtual void getOutputCubeAndFileDescriptor(RasterElement*& pOutputCube,
@@ -43,7 +43,7 @@ protected:
    virtual void finishWriting(IceWriter& writer);
    void abortIfNecessary();
 
-   static std::string outputCubePath() { return "/Datasets/Cube1"; }
+   static std::string outputCubePath();
 
 private:
    Service<PlugInManagerServices> mpPlugInMgr;

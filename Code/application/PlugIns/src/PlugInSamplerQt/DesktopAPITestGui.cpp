@@ -42,7 +42,7 @@ using namespace std;
 
 namespace
 {
-const char* const OpenIcon[]={
+const char* const OpenIcon[] = {
    "16 16 5 1",
    "# c #000000",
    "c c #808000",
@@ -66,7 +66,7 @@ const char* const OpenIcon[]={
    "................",
    "................"};
 
-const char* const PrintIcon[]={
+const char* const PrintIcon[] = {
    "16 16 5 1",
    "# c #000000",
    "b c #808080",

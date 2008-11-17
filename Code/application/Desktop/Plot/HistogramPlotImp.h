@@ -138,7 +138,7 @@ private:
       void initialize();
       void update();
    private:
-      HistogramPlotImp *mpPlot;
+      HistogramPlotImp* mpPlot;
       bool mNeedsUpdated;
    };
 
@@ -160,7 +160,7 @@ private:
    HistogramImp* mpHistogram;
    RegionObjectAdapter* mpRegion;
    RegionObjectAdapter* mpRegion2;
-   const std::vector<ColorType> *mpAlternateColormap;
+   const std::vector<ColorType>* mpAlternateColormap;
    HistogramUpdater mUpdater;
 
    ValuesType meSelectedValue;

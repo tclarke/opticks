@@ -174,7 +174,7 @@ bool WindowModel::lessThan(const QModelIndex& left, const QModelIndex& right) co
       }
 
       // Check for layer items
-      SessionItem *pSessionItem = left.data(Qt::UserRole).value<SessionItem*>();
+      SessionItem* pSessionItem = left.data(Qt::UserRole).value<SessionItem*>();
       Layer* pLeftLayer = dynamic_cast<Layer*>(pSessionItem);
       pSessionItem = right.data(Qt::UserRole).value<SessionItem*>();
       Layer* pRightLayer = dynamic_cast<Layer*>(pSessionItem);
@@ -1175,8 +1175,7 @@ void WindowModel::WindowSourceModel::removeViewItem(SessionItemWrapper* pWindowW
       if (pProductView != NULL)
       {
          // Detach the view
-         pProductView->detach(SIGNAL_NAME(ProductView, LayerActivated),
-            Slot(this, &WindowSourceModel::activateLayer));
+         pProductView->detach(SIGNAL_NAME(ProductView, LayerActivated), Slot(this, &WindowSourceModel::activateLayer));
 
          // Remove the layer items
          ClassificationLayer* pClassificationLayer = pProductView->getClassificationLayer();

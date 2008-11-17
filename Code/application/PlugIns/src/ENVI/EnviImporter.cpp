@@ -39,18 +39,21 @@ static bool parseFwhm(EnviField* pField, vector<double>* pWavelengthStarts,
 static bool parseBbl(EnviField* pField, vector<unsigned int>* pBadBands);
 
 template <class T>
-void vectorFromField(EnviField* pField, vector<T> &vec, const char *pFormat)
+void vectorFromField(EnviField* pField, vector<T>& vec, const char* pFormat)
 {
-   char *pPtr;
-   char *pBuffer = new char[pField->mValue.size()+1];
-   strcpy (pBuffer, pField->mValue.c_str());
-   pPtr = strtok (pBuffer, ",");
+   char* pBuffer = new char[pField->mValue.size() + 1];
+   strcpy(pBuffer, pField->mValue.c_str());
+
+   char* pPtr = strtok(pBuffer, ",");
    while (pPtr != NULL)
    {
       T value;
-      int count = sscanf (pPtr, pFormat, &value);
+      int count = sscanf(pPtr, pFormat, &value);
       if (count == 1)
+      {
          vec.push_back (value);
+      }
+
       pPtr = strtok (NULL, ",");
    }
    delete pBuffer;
@@ -89,7 +92,7 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
       }
    }
 
-   EnviField *pField = NULL;
+   EnviField* pField = NULL;
    vector<ImportDescriptor*> descriptors;
    if (bSuccess == true)
    {
@@ -120,7 +123,8 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
                   pField = mFields.find("x start");
                   if (pField != NULL)
                   {
-                     columnOffset = atoi(pField->mValue.c_str()) - 1; // ENVI numbers are 1 based vs Opticks being 0 based
+                     // ENVI numbers are 1 based vs Opticks being 0 based
+                     columnOffset = atoi(pField->mValue.c_str()) - 1;
                   }
 
                   pField = mFields.find("y start");
@@ -219,11 +223,13 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
                                     dmsFormat = true;
                                  }
 
-                                 double deg, min, sec;
+                                 double deg;
+                                 double min;
+                                 double sec;
                                  if (dmsFormat == true)
                                  {
-                                    deg = (int)(gcp.mCoordinate.mY / 10000.0);
-                                    min = (int)((gcp.mCoordinate.mY - 10000.0 * deg) / 100.0);
+                                    deg = static_cast<int>(gcp.mCoordinate.mY / 10000.0);
+                                    min = static_cast<int>((gcp.mCoordinate.mY - 10000.0 * deg) / 100.0);
                                     sec = gcp.mCoordinate.mY - 10000.0 * deg - 100.0 * min;
                                     gcp.mCoordinate.mY = deg + (min / 60.0) + (sec / 3600.0);
                                  }
@@ -235,8 +241,8 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
 
                                  if (dmsFormat)
                                  {
-                                    deg = (int)(gcp.mCoordinate.mX / 10000.0);
-                                    min = (int)((gcp.mCoordinate.mX - 10000.0 * deg) / 100.0);
+                                    deg = static_cast<int>(gcp.mCoordinate.mX / 10000.0);
+                                    min = static_cast<int>((gcp.mCoordinate.mX - 10000.0 * deg) / 100.0);
                                     sec = gcp.mCoordinate.mX - 10000.0 * deg - 100.0 * min;
                                     gcp.mCoordinate.mX = deg + (min / 60.0) + (sec / 3600.0);
                                  }
@@ -296,7 +302,7 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
                         vector<double> geoValues;
                         const int expectedNumValues = 16;  // 4 values for each of the 4 corners
                         geoValues.reserve(expectedNumValues);
-                        for (unsigned int i=0; i<pField->mChildren.size(); i++)
+                        for (unsigned int i = 0; i < pField->mChildren.size(); i++)
                         {
                            vectorFromField(pField->mChildren.at(i), geoValues, "%lf");
                         }
@@ -445,14 +451,14 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
 
                   // check for scaling factor
                   pField = mFields.find("reflectance scale factor");
-                  if (pField !=NULL)
+                  if (pField != NULL)
                   {
-                     double scalingFactor=0.0;
+                     double scalingFactor = 0.0;
                      stringstream scaleStream(pField->mValue);
                      scaleStream >> scalingFactor;
                      if (!scaleStream.fail() && scalingFactor != 0.0)
                      {
-                        Units *pUnits = pDescriptor->getUnits();
+                        Units* pUnits = pDescriptor->getUnits();
                         if (pUnits != NULL)
                         {
                            pUnits->setScaleFromStandard(1.0 / scalingFactor);
@@ -527,7 +533,7 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
                      parseBbl(pField, &goodBandNumbers);
 
                      vector<DimensionDescriptor> bandsToLoad;
-                     for (unsigned int i = 0; i < goodBandNumbers.size(); ++i)
+                     for (vector<unsigned int>::size_type i = 0; i < goodBandNumbers.size(); ++i)
                      {
                         unsigned int onDiskNumber = goodBandNumbers[i];
                         DimensionDescriptor bandDim = pFileDescriptor->getOnDiskBand(onDiskNumber);
@@ -549,13 +555,13 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
                      vector<string> bandNames;
                      bandNames.reserve(bands.size());  
                      vector<string> strNames;
-                     for (unsigned int i = 0; i < pField->mChildren.size(); ++i)
+                     for (vector<EnviField*>::size_type i = 0; i < pField->mChildren.size(); ++i)
                      {
                         strNames = StringUtilities::split(pField->mChildren[i]->mValue, ',');
                         copy(strNames.begin(), strNames.end(), back_inserter(bandNames));
                      }
                      vector<string>::iterator it;
-                     for (it=bandNames.begin(); it!= bandNames.end(); ++it)
+                     for (it = bandNames.begin(); it != bandNames.end(); ++it)
                      {
                         *it = StringUtilities::stripWhitespace(*it);
                      }
@@ -622,7 +628,7 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
    return descriptors;
 }
 
-unsigned char EnviImporter::getFileAffinity(const std::string& filename)
+unsigned char EnviImporter::getFileAffinity(const string& filename)
 {
    if (getImportDescriptors(filename).empty())
    {
@@ -634,18 +640,16 @@ unsigned char EnviImporter::getFileAffinity(const std::string& filename)
    }
 }
 
-bool EnviImporter::parseWavelengths (EnviField *field, 
-                                     vector<double>* pWavelengthCenters, 
-                                     WavelengthUnitsType eType)
+bool EnviImporter::parseWavelengths(EnviField* pField, vector<double>* pWavelengthCenters, WavelengthUnitsType eType)
 {
    unsigned int i;
    double maxWavelength(0.0);
 
-   for (i=0; i<field->mChildren.size(); i++)
+   for (i = 0; i < pField->mChildren.size(); i++)
    {
-      vectorFromField(field->mChildren.at(i), *pWavelengthCenters, "%lf");
+      vectorFromField(pField->mChildren.at(i), *pWavelengthCenters, "%lf");
    }
-   for (i=0; i<pWavelengthCenters->size(); ++i)
+   for (i = 0; i < pWavelengthCenters->size(); ++i)
    {
       if (pWavelengthCenters->at(i) > maxWavelength)
       {
@@ -700,12 +704,12 @@ static bool parseDefaultBands(EnviField* pField, vector<unsigned int>* pBandNumb
       return false;
    }
 
-   for (unsigned int i = 0; i < pField->mChildren.size(); i++)
+   for (vector<EnviField*>::size_type i = 0; i < pField->mChildren.size(); ++i)
    {
       vectorFromField(pField->mChildren[i], *pBandNumbers, "%u");
    }
 
-   for (unsigned int i = 0; i < pBandNumbers->size(); i++)
+   for (vector<unsigned int>::size_type i = 0; i < pBandNumbers->size(); ++i)
    {
       pBandNumbers->at(i) = pBandNumbers->at(i) - 1;
    }
@@ -715,17 +719,13 @@ static bool parseDefaultBands(EnviField* pField, vector<unsigned int>* pBandNumb
 
 static double sWavelengthScaleFactor = 1.0;
 
-static bool parseFwhm(EnviField *field,
-                      vector<double>* pWavelengthStarts,
-                      const vector<double>* pWavelengthCenters,
-                      vector<double> *pWavelengthEnds)
+static bool parseFwhm(EnviField* pField, vector<double>* pWavelengthStarts, const vector<double>* pWavelengthCenters,
+                      vector<double>* pWavelengthEnds)
 {
-   unsigned int i;
-
    vector<double> fwhmValues;
-   for (i = 0; i < field->mChildren.size(); i++)
+   for (vector<EnviField*>::size_type i = 0; i < pField->mChildren.size(); i++)
    {
-      vectorFromField(field->mChildren.at(i), fwhmValues, "%lf");
+      vectorFromField(pField->mChildren.at(i), fwhmValues, "%lf");
    }
 
    if (fwhmValues.size() != pWavelengthCenters->size())
@@ -733,27 +733,24 @@ static bool parseFwhm(EnviField *field,
       return false;
    }
 
-   for (i = 0; i < fwhmValues.size(); i++)
+   for (vector<double>::size_type i = 0; i < fwhmValues.size(); i++)
    {
-      pWavelengthStarts->push_back((float) (pWavelengthCenters->at(i) - sWavelengthScaleFactor * fwhmValues[i] / 2.0));
-      pWavelengthEnds->push_back((float) (pWavelengthCenters->at(i) + sWavelengthScaleFactor * fwhmValues[i] / 2.0));
+      pWavelengthStarts->push_back(pWavelengthCenters->at(i) - sWavelengthScaleFactor * fwhmValues[i] / 2.0);
+      pWavelengthEnds->push_back(pWavelengthCenters->at(i) + sWavelengthScaleFactor * fwhmValues[i] / 2.0);
    }
 
    return true;
 }
 
-static bool parseBbl (EnviField *field, 
-                              vector<unsigned int>* pBadBands)
+static bool parseBbl(EnviField* pField, vector<unsigned int>* pBadBands)
 {
-   unsigned int i;
    int band = 0;
 
-   for (i=0; i<field->mChildren.size(); i++)
+   for (vector<EnviField*>::size_type i = 0; i < pField->mChildren.size(); ++i)
    {
       int fields = 1;
-      char *line, *ptr;
-      line = strdup (field->mChildren.at(i)->mValue.c_str());
-      ptr = strtok (line, ",");
+      char* line = strdup(pField->mChildren.at(i)->mValue.c_str());
+      char* ptr = strtok(line, ",");
       float f1 = 0.0;
       while (fields == 1 && ptr != NULL)
       {
@@ -846,8 +843,7 @@ string EnviImporter::findDataFile(const string& headerPath)
       temp = temp.substr(0, i);
 
       // Check common extensions
-      char *pExtensions[] = {".bip", ".bil", ".bsq", ".dat",
-                            "",     ".sio", ".cub", ".img"};
+      char* pExtensions[] = { ".bip", ".bil", ".bsq", ".dat", "", ".sio", ".cub", ".img" };
       for (int j = 0; j < sizeof(pExtensions) / sizeof(pExtensions[0]); j++)
       {
          string attempt = temp + pExtensions[j];

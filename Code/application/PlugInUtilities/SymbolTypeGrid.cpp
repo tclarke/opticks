@@ -71,30 +71,21 @@ void SymbolTypeGrid::setBorderedSymbols(bool showSymbols)
 
    if (showSymbols)
    {
-      setPixmap(2, 0, getSymbolPixmap(BOX),
-         QString::fromStdString(StringUtilities::toXmlString(BOX)),
-         "Border");
-      setPixmap(2, 1, getSymbolPixmap(BOXED_X),
-         QString::fromStdString(StringUtilities::toXmlString(BOXED_X)),
+      setPixmap(2, 0, getSymbolPixmap(BOX), QString::fromStdString(StringUtilities::toXmlString(BOX)), "Border");
+      setPixmap(2, 1, getSymbolPixmap(BOXED_X), QString::fromStdString(StringUtilities::toXmlString(BOXED_X)),
          "Bordered X");
       setPixmap(2, 2, getSymbolPixmap(BOXED_CROSS_HAIR),
-         QString::fromStdString(StringUtilities::toXmlString(BOXED_CROSS_HAIR)),
-         "Bordered Crosshair");
+         QString::fromStdString(StringUtilities::toXmlString(BOXED_CROSS_HAIR)), "Bordered Crosshair");
       setPixmap(2, 3, getSymbolPixmap(BOXED_ASTERISK),
-         QString::fromStdString(StringUtilities::toXmlString(BOXED_ASTERISK)),
-         "Bordered Asterisk");
+         QString::fromStdString(StringUtilities::toXmlString(BOXED_ASTERISK)), "Bordered Asterisk");
       setPixmap(3, 0, getSymbolPixmap(BOXED_VERTICAL_LINE),
-         QString::fromStdString(StringUtilities::toXmlString(BOXED_VERTICAL_LINE)),
-         "Bordered Vert. Line");
+         QString::fromStdString(StringUtilities::toXmlString(BOXED_VERTICAL_LINE)), "Bordered Vert. Line");
       setPixmap(3, 1, getSymbolPixmap(BOXED_HORIZONTAL_LINE),
-         QString::fromStdString(StringUtilities::toXmlString(BOXED_HORIZONTAL_LINE)),
-         "Bordered Horiz. Line");
+         QString::fromStdString(StringUtilities::toXmlString(BOXED_HORIZONTAL_LINE)), "Bordered Horiz. Line");
       setPixmap(3, 2, getSymbolPixmap(BOXED_FORWARD_SLASH),
-         QString::fromStdString(StringUtilities::toXmlString(BOXED_FORWARD_SLASH)),
-         "Bordered Pos. Slope");
+         QString::fromStdString(StringUtilities::toXmlString(BOXED_FORWARD_SLASH)), "Bordered Pos. Slope");
       setPixmap(3, 3, getSymbolPixmap(BOXED_BACK_SLASH),
-         QString::fromStdString(StringUtilities::toXmlString(BOXED_BACK_SLASH)),
-         "Bordered Neg. Slope");
+         QString::fromStdString(StringUtilities::toXmlString(BOXED_BACK_SLASH)), "Bordered Neg. Slope");
    }
    // Set the current symbol
    setSelectedPixmap(QString::fromStdString(StringUtilities::toXmlString(SOLID)));

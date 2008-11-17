@@ -169,7 +169,7 @@ bool ExportDataSet::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
       {
          exporter->setItem(mpElement);
       }
-      if(mOutputWidth != 0 && mOutputHeight != 0)
+      if (mOutputWidth != 0 && mOutputHeight != 0)
       {
          exporter->getInArgList().setPlugInArgValue("Output Width", &mOutputWidth);
          exporter->getInArgList().setPlugInArgValue("Output Height", &mOutputHeight);

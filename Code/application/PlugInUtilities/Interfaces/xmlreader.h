@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef XMLREADER_H__
-#define XMLREADER_H__
+#ifndef XMLREADER_H
+#define XMLREADER_H
 
 #include <stdio.h>
 
@@ -41,7 +39,7 @@ public:
    /**
     * Create an %XmlReader.
     *
-    * @param log
+    * @param pLog
     *        Optional MessageLog to be passed to XmlBase
     *
     * @param bValidate
@@ -50,7 +48,7 @@ public:
     *        this is not possible. (such as during development, before
     *        XSD entries are made)
     */
-   XmlReader(MessageLog *log=NULL, bool bValidate = true);
+   XmlReader(MessageLog* pLog = NULL, bool bValidate = true);
 
    /**
     * Destroy and cleanup the %XmlReader object.
@@ -71,7 +69,7 @@ public:
     * @throw XmlBase::XmlException
     *        When there is a parse exception.
     */
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *parse(const Filename *pFn, std::string endTag = "");
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* parse(const Filename* pFn, std::string endTag = "");
 
    /**
     * Parse a file.
@@ -87,7 +85,7 @@ public:
     * @throw XmlBase::XmlException
     *        When there is a parse exception.
     */
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *parse(std::string fn, std::string endTag = "");
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* parse(std::string fn, std::string endTag = "");
 
    /**
     * Parse a string.  This method should not be used if validation has been
@@ -101,7 +99,7 @@ public:
     * @throw XmlBase::XmlException
     *        When there is a parse exception.
     */
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *parseString(const std::string &str);
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* parseString(const std::string& str);
 
    /**
     * Perform an XPath query on the parsed document.
@@ -121,7 +119,7 @@ public:
     *
     * @return The result of the XPath query. \c NULL if the query failed or no document is loaded.
     */
-   XPath2Result *query(const std::string &expression, unsigned short type, bool reuse=true);
+   XPath2Result* query(const std::string& expression, unsigned short type, bool reuse = true);
 
 public: // struct and static utility functions
    /**
@@ -140,7 +138,7 @@ public: // struct and static utility functions
       /**
        * Convert a string to another type.
        *
-       * @param val
+       * @param pVal
        *        The string representation of a \b T
        *
        * @return The converted \b T. If \e arg does not
@@ -148,9 +146,9 @@ public: // struct and static utility functions
        *         of a \b T, the return value is the default
        *         value of \b T.
        */
-      T operator()(const char *val)
+      T operator()(const char* pVal)
       {
-         std::stringstream s(val);
+         std::stringstream s(pVal);
          T tmp;
          s >> tmp;
          return tmp;
@@ -173,15 +171,15 @@ public: // struct and static utility functions
       /**
        * Convert a const char * to another type.
        *
-       * @param val
+       * @param pVal
        *        The const char * representation of a \b T
        *
        * @return The converted \b T.
        */
-      T operator()(const char *val)
-         {
-            return std::string(val);
-         }
+      T operator()(const char* pVal)
+      {
+         return std::string(pVal);
+      }
    };
 
    /**
@@ -198,15 +196,15 @@ public: // struct and static utility functions
       /**
        * Convert a const char * to another type.
        *
-       * @param val
+       * @param pVal
        *        The const char * representation of a \b T
        *
        * @return The converted \b T. The caller takes ownership.
        */
-      T *operator()(const char *val)
-         {
-            return new T(val);
-         }
+      T* operator()(const char* pVal)
+      {
+         return new T(pVal);
+      }
    };
 
    /**
@@ -222,7 +220,7 @@ public: // struct and static utility functions
     *    pIntVec = reinterpret_cast<vector<int> >(StrToVector<int,StringStreamAssigner<int> >(X("1 2 3 4")));
     *  @endcode
     *
-    * @param str
+    * @param pStr
     *        The Unicode string to parse.
     *
     * @return A pointer to a \b vector<T> which has
@@ -230,15 +228,18 @@ public: // struct and static utility functions
     *         takes ownership of this vector.
     */
    template<typename T, class B>
-   static void *StrToVector(const XMLCh *str)
+   static void* StrToVector(const XMLCh* pStr)
+   {
+      std::vector<T>* v(new std::vector<T>);
+      XERCES_CPP_NAMESPACE_QUALIFIER XMLStringTokenizer t(pStr);
+      B bb;
+      while (t.hasMoreTokens())
       {
-         std::vector<T> *v(new std::vector<T>);
-         XERCES_CPP_NAMESPACE_QUALIFIER XMLStringTokenizer t(str);
-         B bb;
-         while(t.hasMoreTokens())
-            v->push_back(bb(A(t.nextToken())));
-         return (void *)v;
+         v->push_back(bb(A(t.nextToken())));
       }
+
+      return reinterpret_cast<void*>(v);
+   }
 
    /**
     * Convert a Unicode string to a vector of objects.
@@ -256,32 +257,34 @@ public: // struct and static utility functions
     * @param vec
     *        The vector to place the values in.
     *
-    * @param str
+    * @param pStr
     *        The Unicode string to parse.
     */
    template<typename T, class B>
-   static void StrToVector(typename std::vector<T> &vec, const XMLCh *str)
+   static void StrToVector(typename std::vector<T>& vec, const XMLCh* pStr)
+   {
+      XERCES_CPP_NAMESPACE_QUALIFIER XMLStringTokenizer t(pStr);
+      B bb;
+      while (t.hasMoreTokens())
       {
-         XERCES_CPP_NAMESPACE_QUALIFIER XMLStringTokenizer t(str);
-         B bb;
-         while(t.hasMoreTokens())
-            vec.push_back(bb(A(t.nextToken())));
+         vec.push_back(bb(A(t.nextToken())));
       }
+   }
 
    /**
     * Convert a Unicode string to a LocationType.
     *
     * The Unicode string is tokenized using XML list tokenization.
     *
-    * @param str
+    * @param pStr
     *        The Unicode string to parse.
     *
     * @param loc
     *        Output argument. The LocationType in which to store the result.
     */
-   static bool StrToLocation(const XMLCh *str, LocationType &loc)
+   static bool StrToLocation(const XMLCh* pStr, LocationType& loc)
    {
-      XERCES_CPP_NAMESPACE_QUALIFIER XMLStringTokenizer t(str);
+      XERCES_CPP_NAMESPACE_QUALIFIER XMLStringTokenizer t(pStr);
       if (t.hasMoreTokens())
       {
          loc.mX = atof(A(t.nextToken()));
@@ -326,7 +329,7 @@ public: // struct and static utility functions
     *
     *  @endcode
     *
-    * @param str
+    * @param pStr
     *        The Unicode string to parse.
     *
     * @param a
@@ -338,125 +341,155 @@ public: // struct and static utility functions
     * @param d
     *        Output argument. The fourth part of the quad-coord.
     */
-   static void StrToQuadCoord(const XMLCh *str, double &a, double &b,
-                                                double &c, double &d)
+   static void StrToQuadCoord(const XMLCh* pStr, double& a, double& b, double& c, double& d)
+   {
+      a = 0.0;
+      b = 0.0;
+      c = 0.0;
+      d = 0.0;
+
+      XERCES_CPP_NAMESPACE_QUALIFIER XMLStringTokenizer t(pStr);
+      if (t.hasMoreTokens())
       {
-         a = b = c = d = 0.0;
-         XERCES_CPP_NAMESPACE_QUALIFIER XMLStringTokenizer t(str);
-         if(t.hasMoreTokens())
-            a = atof(A(t.nextToken()));
-         if(t.hasMoreTokens())
-            b = atof(A(t.nextToken()));
-         if(t.hasMoreTokens())
-            c = atof(A(t.nextToken()));
-         if(t.hasMoreTokens())
-            d = atof(A(t.nextToken()));
+         a = atof(A(t.nextToken()));
+      }
+
+      if (t.hasMoreTokens())
+      {
+         b = atof(A(t.nextToken()));
+      }
+
+      if (t.hasMoreTokens())
+      {
+         c = atof(A(t.nextToken()));
+      }
+
+      if (t.hasMoreTokens())
+      {
+         d = atof(A(t.nextToken()));
+      }
+   }
+
+   /**
+    * An exception class representing an error or warning while reading and parsing.
+    */
+   class XmlReaderException : public XmlException
+   {
+   public:
+      /**
+       * Create a new %XmlReaderException.
+       *
+       * @param msg
+       *        The message associated with this exception.
+       *
+       * @param binary
+       *        The file (or string) being parsed is likely a binary file.
+       *        It is easy for the parser to determine when the parse string
+       *        is likely a binary (or non-XML) file. Since the application supports
+       *        loading of some older binary files, this is useful information
+       *        for the caller as they can attempt to load the file using the old
+       *        deserialization methods.
+       */
+      XmlReaderException(std::string msg, bool binary) :
+         XmlBase::XmlException(msg),
+         mBin(binary) {}
+
+      virtual ~XmlReaderException() {}
+
+      /**
+       * Returns the state of the \e binary flag.
+       *
+       * @return Is this possibly a binary file?
+       */
+      bool isBinary()
+      {
+         return mBin;
       }
 
       /**
-       * An exception class representing an error or warning while reading and parsing.
+       * This override appends an additional notice when the
+       * file may be binary.
+       *
+       * @return The message associated with this exception.
        */
-      class XmlReaderException : public XmlException
+      virtual std::string str()
       {
-         bool bin;
-      public:
-         /**
-          * Create a new %XmlReaderException.
-          *
-          * @param msg
-          *        The message associated with this exception.
-          *
-          * @param binary
-          *        The file (or string) being parsed is likely a binary file.
-          *        It is easy for the parser to determine when the parse string
-          *        is likely a binary (or non-XML) file. Since the application supports
-          *        loading of some older binary files, this is useful information
-          *        for the caller as they can attempt to load the file using the old
-          *        deserialization methods.
-          */
-         XmlReaderException(std::string msg, bool binary) : XmlBase::XmlException(msg),
-                                                            bin(binary) {}
-         virtual ~XmlReaderException() {}
-         /**
-          * Returns the state of the \e binary flag.
-          *
-          * @return Is this possibly a binary file?
-          */
-         bool isBinary() { return bin; }
+         std::string msg(XmlBase::XmlException::str());
+         if (isBinary())
+         {
+            msg += " :: file may be binary";
+         }
 
-         /**
-          * This override appends an additional notice when the
-          * file may be binary.
-          *
-          * @return The message associated with this exception.
-          */
-         virtual std::string str()
-            {
-               std::string msg(XmlBase::XmlException::str());
-               if(isBinary())
-                  msg += " :: file may be binary";
-               return msg;
-            }
-      };
+         return msg;
+      }
+
+   private:
+      bool mBin;
+   };
+
+   /**
+    * An exception class representing an error or warning while parsing the DOM
+    */
+   class DomParseException : public XmlException
+   {
+   public:
+      /**
+       * Create a new %DomParseException.
+       *
+       * @param msg
+       *        The message associated with this exception.
+       *
+       * @param pNode
+       *        The DOM node that caused the exception.
+       */
+      DomParseException(std::string msg, XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pNode) :
+         XmlBase::XmlException(msg),
+         mpNode(pNode) {}
 
       /**
-       * An exception class representing an error or warning while parsing the DOM
+       * Destroy and cleanup this exception.
        */
-      class DomParseException : public XmlException
+      virtual ~DomParseException() {}
+
+      /**
+       * Find out what DOM node caused the exception.
+       *
+       * @return The DOMNode that caused the exception.
+       */
+      XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* where()
       {
-         XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *mpNode;
+         return mpNode;
+      }
 
-      public:
-         /**
-          * Create a new %DomParseException.
-          *
-          * @param msg
-          *        The message associated with this exception.
-          *
-          * @param node
-          *        The DOM node that caused the exception.
-          */
-         DomParseException(std::string msg, XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *node) :
-                                    XmlBase::XmlException(msg), mpNode(node) {}
+      /**
+       * Get the message associated with this exception.
+       *
+       * This will append information about which DOM node
+       * caused the exception.
+       *
+       * @return The message associated with this exception.
+       */
+      virtual std::string str()
+      {
+         std::string msg(XmlBase::XmlException::str());
+         if (where() != NULL)
+         {
+            msg += " :: nodename=";
+            msg += A(where()->getNodeName());
+         }
+         return msg;
+      }
 
-         /**
-          * Destroy and cleanup this exception.
-          */
-         virtual ~DomParseException() {}
-
-         /**
-          * Find out what DOM node caused the exception.
-          *
-          * @return The DOMNode that caused the exception.
-          */
-         XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *where() { return mpNode; }
-
-         /**
-          * Get the message associated with this exception.
-          *
-          * This will append information about which DOM node
-          * caused the exception.
-          *
-          * @return The message associated with this exception.
-          */
-         virtual std::string str()
-            {
-               std::string msg(XmlBase::XmlException::str());
-               if(where() != NULL)
-               {
-                  msg += " :: nodename=";
-                  msg += A(where()->getNodeName());
-               }
-               return msg;
-            }
-      };
+   private:
+      XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* mpNode;
+   };
 
 private:
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMImplementation *mpImpl;
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMBuilder *mpParser;
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMImplementation* mpImpl;
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMBuilder* mpParser;
    std::string mXmlSchemaLocation;
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *mpDoc;
-   XPath2Result *mpResult;
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* mpDoc;
+   XPath2Result* mpResult;
 };
 
 /**
@@ -471,14 +504,14 @@ public:
    /**
     * Convert a null-terminated char array to a std::string.
     *
-    * @param val
+    * @param pVal
     *        The null-terminated char array.
     *
-    * @return The char array converted to a std::string. 
+    * @return The char array converted to a std::string.
     */
-   std::string operator()(const char *val)
+   std::string operator()(const char* pVal)
    {
-      return std::string(val);
+      return std::string(pVal);
    }
 };
 
@@ -488,62 +521,84 @@ public:
  */
 class BinFILEInputStream : public XERCES_CPP_NAMESPACE_QUALIFIER BinInputStream
 {
-   FILE *mpFP;
-   XERCES_CPP_NAMESPACE_QUALIFIER MemoryManager *mpManager;
 public:
-   BinFILEInputStream(FILE *fp,
-          XERCES_CPP_NAMESPACE_QUALIFIER MemoryManager *const manager=
-             XERCES_CPP_NAMESPACE_QUALIFIER XMLPlatformUtils::fgMemoryManager) :
-                           mpFP(fp), mpManager(manager) {}
+   BinFILEInputStream(FILE* pFp, XERCES_CPP_NAMESPACE_QUALIFIER MemoryManager* const pManager =
+                      XERCES_CPP_NAMESPACE_QUALIFIER XMLPlatformUtils::fgMemoryManager) :
+      mpFp(pFp),
+      mpManager(pManager) {}
+
    ~BinFILEInputStream() {}
 
-   virtual unsigned int curPos() const { return (unsigned int)ftell(mpFP); }
-   virtual unsigned int readBytes(XMLByte *const toFill,
-                                  const unsigned int maxToRead)
-      {
-         return (unsigned int) fread(toFill, sizeof(XMLByte), maxToRead, mpFP);
-      }
+   virtual unsigned int curPos() const
+   {
+      return static_cast<unsigned int>(ftell(mpFp));
+   }
+
+   virtual unsigned int readBytes(XMLByte* const pToFill, const unsigned int maxToRead)
+   {
+      return static_cast<unsigned int>(fread(pToFill, sizeof(XMLByte), maxToRead, mpFp));
+   }
+
+private:
+   FILE* mpFp;
+   XERCES_CPP_NAMESPACE_QUALIFIER MemoryManager* mpManager;
 };
 
 /**
  * Class required by Xerces for parsing.
  */
-class FILEInputSource : public
-                              XERCES_CPP_NAMESPACE_QUALIFIER InputSource
+class FILEInputSource : public XERCES_CPP_NAMESPACE_QUALIFIER InputSource
 {
-   FILE *mpFP;
-   XERCES_CPP_NAMESPACE_QUALIFIER MemoryManager *mpManager;
 public:
-   FILEInputSource(FILE *fp,
-       XERCES_CPP_NAMESPACE_QUALIFIER MemoryManager *const manager=
-          XERCES_CPP_NAMESPACE_QUALIFIER XMLPlatformUtils::fgMemoryManager) :
-                              mpFP(fp), mpManager(manager) {}
+   FILEInputSource(FILE* pFp, XERCES_CPP_NAMESPACE_QUALIFIER MemoryManager* const pManager =
+                   XERCES_CPP_NAMESPACE_QUALIFIER XMLPlatformUtils::fgMemoryManager) :
+      mpFp(pFp),
+      mpManager(pManager) {}
+
    ~FILEInputSource() {}
 
-   virtual const XMLCh *getEncoding() const
-      { return 0; }
-   virtual const XMLCh *getPublicId() const 
-      { return 0; }
-   virtual const XMLCh *getSystemId() const
-      { return 0; }
-   virtual const XMLCh *getBaseURI() const
-      { return 0; }
-   virtual void setEncoding(const XMLCh *const encodingStr)
-      {}
-   virtual void setPublicId(const XMLCh *const publicId)
-      {}
-   virtual void setSystemId(const XMLCh *const systemId)
-      {}
-   virtual void setBaseURI(const XMLCh *const baseURI)
-      {}
+   virtual const XMLCh* getEncoding() const
+   {
+      return 0;
+   }
 
-   virtual XERCES_CPP_NAMESPACE_QUALIFIER BinInputStream *makeStream() const
-      {
-         return new(mpManager) BinFILEInputStream(mpFP, mpManager);
-      }
+   virtual const XMLCh* getPublicId() const
+   {
+      return 0;
+   }
+
+   virtual const XMLCh* getSystemId() const
+   {
+      return 0;
+   }
+
+   virtual const XMLCh* getBaseURI() const
+   {
+      return 0;
+   }
+
+   virtual void setEncoding(const XMLCh* const encodingStr) {}
+   virtual void setPublicId(const XMLCh* const publicId) {}
+   virtual void setSystemId(const XMLCh* const systemId) {}
+   virtual void setBaseURI(const XMLCh* const baseURI) {}
+
+   virtual XERCES_CPP_NAMESPACE_QUALIFIER BinInputStream* makeStream() const
+   {
+      return new(mpManager) BinFILEInputStream(mpFp, mpManager);
+   }
+
    virtual void setIssueFatalErrorIfNotFound(const bool flag) {}
-   virtual bool getIssueFatalErrorIfNotFound() const { return false; }
+
+   virtual bool getIssueFatalErrorIfNotFound() const
+   {
+      return false;
+   }
+
    virtual void release() {}
+
+private:
+   FILE* mpFp;
+   XERCES_CPP_NAMESPACE_QUALIFIER MemoryManager* mpManager;
 };
 
 /**
@@ -555,10 +610,10 @@ public:
  *  @param pChild
  *        The variable name that will be given to each child node.
  */
-#define FOR_EACH_DOMNODE(pParent,pChild) \
-   for(XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *pChild=pParent->getFirstChild(); \
-      pChild!=NULL; \
-      pChild=pChild->getNextSibling())
+#define FOR_EACH_DOMNODE(pParent, pChild) \
+   for (XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pChild = pParent->getFirstChild(); \
+      pChild != NULL; \
+      pChild = pChild->getNextSibling())
 
 /**
  *  This is a convenience method that returns a decendent of a DOMElement in 
@@ -583,8 +638,8 @@ public:
  *
  *  @return The found node, or \c NULL if the node is not found.
  */
-XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *findChildNode(
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *pParent, const char *pName);
+XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* findChildNode(XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pParent,
+   const char* pName);
 
 /**
  *  This is a convenience method that returns an attribute of a DOMElement in 
@@ -606,7 +661,7 @@ XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *findChildNode(
  *  @return The found attribute, or an empty string if the attribute is not
  *             found.
  */
-std::string findAttribute(XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *pParent, const char *pName);
+std::string findAttribute(XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pParent, const char* pName);
 
 /**
  *  This method reads a font that was written using XMLWriter::addFontElement.
@@ -623,8 +678,8 @@ std::string findAttribute(XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *pParent, const
  *  @return The DOMElement the data was read from, or NULL if the element was
  *            not found.
  */
-XERCES_CPP_NAMESPACE_QUALIFIER DOMElement *readFontElement(const char *pName, 
-                                                           XERCES_CPP_NAMESPACE_QUALIFIER DOMElement *pParent, Font &font);
+XERCES_CPP_NAMESPACE_QUALIFIER DOMElement* readFontElement(const char* pName,
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMElement* pParent, Font& font);
 
 /**
  * \cond INTERNAL
@@ -632,7 +687,7 @@ XERCES_CPP_NAMESPACE_QUALIFIER DOMElement *readFontElement(const char *pName,
  *  by developer code.
  */
 template <class T>
-void extractContainerElementValue(std::stringstream &str, T &iter)
+void extractContainerElementValue(std::stringstream& str, T& iter)
 {
    str >> *iter;
 }
@@ -642,7 +697,7 @@ void extractContainerElementValue(std::stringstream &str, T &iter)
  *  by developer code.
  */
 template <class Container>
-void extractContainerElementValue(std::stringstream &str, std::back_insert_iterator<Container> &iter)
+void extractContainerElementValue(std::stringstream& str, std::back_insert_iterator<Container>& iter)
 {
    Container::value_type value;
    str >> value;
@@ -671,8 +726,8 @@ void extractContainerElementValue(std::stringstream &str, std::back_insert_itera
  *  XML_ADD_CONTAINER(writer, int, v.begin(), v.end());
  *  ...
  *  XmlReader reader(NULL, false);
- *  DOMDocument *pDoc = reader.parse(file);
- *  DOMElement *pRoot = pDoc->getDocumentElement();
+ *  DOMDocument* pDoc = reader.parse(file);
+ *  DOMElement* pRoot = pDoc->getDocumentElement();
  *  int intArray[12];
  *  vector<int> v(12, 0);
  *  list<int> l;
@@ -688,19 +743,23 @@ void extractContainerElementValue(std::stringstream &str, std::back_insert_itera
  *  @return The number of values read into the container.
  */
 template <class T>
-int readContainerElements(DOMNode *pParent, const char *pName, T startIter, int countLimit = 0)
+int readContainerElements(DOMNode* pParent, const char* pName, T startIter, int countLimit = 0)
 {
    int numRead = 0;
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *pChild = findChildNode(pParent, pName);
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pChild = findChildNode(pParent, pName);
    if (pChild != NULL)
    {
       int i = 0;
-      FOR_EACH_DOMNODE(pChild, pGchild)
+      FOR_EACH_DOMNODE (pChild, pGchild)
       {
          if (XERCES_CPP_NAMESPACE_QUALIFIER XMLString::equals(pGchild->getNodeName(), X("element")))
          {
-            if (countLimit > 0 && i++ >= countLimit) break;
-            XERCES_CPP_NAMESPACE_QUALIFIER DOMElement *pElement = 
+            if (countLimit > 0 && i++ >= countLimit)
+            {
+               break;
+            }
+
+            XERCES_CPP_NAMESPACE_QUALIFIER DOMElement* pElement = 
                dynamic_cast<XERCES_CPP_NAMESPACE_QUALIFIER DOMElement*>(pGchild);
             if (pElement)
             {

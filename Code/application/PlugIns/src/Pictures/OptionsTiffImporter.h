@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef OPTIONSTIFFIMPORTER_H__
-#define OPTIONSTIFFIMPORTER_H__
+#ifndef OPTIONSTIFFIMPORTER_H
+#define OPTIONSTIFFIMPORTER_H
 
 #include "LabeledSectionGroup.h"
 
@@ -20,14 +20,14 @@ class OptionsTiffImporter : public LabeledSectionGroup
    Q_PROPERTY(QString filename READ getFilename WRITE setFilename)
 
 public:
-   OptionsTiffImporter(const QString &initialDirectory=QString());
+   OptionsTiffImporter(const QString& initialDirectory = QString());
    virtual ~OptionsTiffImporter();
 
    QString getFilename() const;
    void setFilename(const QString &filename);
 
 private:
-   FileBrowser *mpFilename;
+   FileBrowser* mpFilename;
 };
 
 #endif

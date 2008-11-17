@@ -102,9 +102,9 @@ NameTypeValueDlg::~NameTypeValueDlg()
 {
 }
 
-void NameTypeValueDlg::setValue(const QString& strName, const DataVariant &var)
+void NameTypeValueDlg::setValue(const QString& strName, const DataVariant& value)
 {
-   if (var.isValid() == false)
+   if (value.isValid() == false)
    {
       return;
    }
@@ -113,7 +113,7 @@ void NameTypeValueDlg::setValue(const QString& strName, const DataVariant &var)
    mpNameEdit->setText(strName);
 
    // Type
-   mCurrentType = var.getTypeName().c_str();
+   mCurrentType = value.getTypeName().c_str();
 
    string type = "";
    if (mCurrentType.isEmpty() == false)
@@ -135,7 +135,7 @@ void NameTypeValueDlg::setValue(const QString& strName, const DataVariant &var)
       }
    }
 
-   mpValueEditor->setValue(var);
+   mpValueEditor->setValue(value);
 }
 
 QString NameTypeValueDlg::getName() const

@@ -198,22 +198,22 @@ std::vector<DataVariantEditorDelegate> DataVariantEditor::getDelegates()
    return mDelegates;
 }
 
-void DataVariantEditor::setValue(const DataVariant &var, bool useVariantCurrentValue)
+void DataVariantEditor::setValue(const DataVariant& value, bool useVariantCurrentValue)
 {
    // Type
-   string type = var.getTypeName();
+   string type = value.getTypeName();
 
    // Value
    mpValueLineEdit->clear();
    mpValueTextEdit->clear();
 
-   if (var.isValid() == false)
+   if (value.isValid() == false)
    {
       return;
    }
 
    // Get the value string
-   string valueText = var.toDisplayString();
+   string valueText = value.toDisplayString();
 
    QString strValue = QString::fromStdString(valueText);
 
@@ -269,10 +269,10 @@ void DataVariantEditor::setValue(const DataVariant &var, bool useVariantCurrentV
       int iValue = 0;
       if (useVariantCurrentValue)
       {
-         QList<QListWidgetItem*> items = mpValueList->findItems(strValue, Qt::MatchExactly);
-         if (items.empty() == false)
+         QList<QListWidgetItem*> listItems = mpValueList->findItems(strValue, Qt::MatchExactly);
+         if (listItems.empty() == false)
          {
-            QListWidgetItem* pItem = items.front();
+            QListWidgetItem* pItem = listItems.front();
             if (pItem != NULL)
             {
                iValue = mpValueList->row(pItem);
@@ -306,7 +306,7 @@ void DataVariantEditor::setValue(const DataVariant &var, bool useVariantCurrentV
    }
 
    setStackWidget(type);
-   mValue = var;
+   mValue = value;
 }
 
 const DataVariant& DataVariantEditor::getValue()
@@ -470,5 +470,5 @@ DataVariantEditorDelegate DataVariantEditor::getDelegate(const string& type)
    return retVal;
 }
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Use a QListView to allow editing of vector data, since the fromDisplayString parser is brittle? (kstreith)")
-
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Use a QListView to allow editing of vector data, " \
+   "since the fromDisplayString parser is brittle? (kstreith)")

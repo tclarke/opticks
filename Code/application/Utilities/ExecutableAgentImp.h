@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef EXECUTABLE_AGENT_IMP_H
-#define EXECUTABLE_AGENT_IMP_H
+#ifndef EXECUTABLEAGENTIMP_H
+#define EXECUTABLEAGENTIMP_H
 
 #include <string>
 

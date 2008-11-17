@@ -21,7 +21,8 @@ The plug-in only provides this argument when running in batch mode.
 \until }
 This extracts the AOI argument if the plug-in is being executed in batch mode.
 
-\skipline pAois
+\skip pModel
+\until pAois
 This code gets a list of all the AoiElements which are children of the RasterElement.
 When a type string is required, TypeConverter will generate the correct string given a data type.
 The guarantees a compile time check for a correct type.

@@ -37,14 +37,14 @@ namespace
 {
    string trimString(string text)
    {
-      unsigned int i, j;
-      const char *pText = text.c_str();
+      const char* pText = text.c_str();
 
       if (text.size() == 0)
       {
          return text;
       }
 
+      unsigned int i;
       for (i = 0; i < text.size(); i++)
       {
          if (!isspace(pText[i]))
@@ -53,6 +53,7 @@ namespace
          }
       }
 
+      unsigned int j;
       for (j = text.size() - 1; j > 0; j--)
       {
          if (!isspace(pText[j]))
@@ -123,7 +124,7 @@ SecurityMarkingsDlg::SecurityMarkingsDlg(QWidget* parent, const QString& strInit
    mpClassLevelCombo->setEditable(false);
 
    // Favorites
-   QLabel *pFavoritesLabel = new QLabel("Favorites:", this);
+   QLabel* pFavoritesLabel = new QLabel("Favorites:", this);
    mpFavoritesCombo = new QComboBox(this);
    mpFavoritesCombo->setEditable(false);
 
@@ -275,8 +276,8 @@ SecurityMarkingsDlg::SecurityMarkingsDlg(QWidget* parent, const QString& strInit
    // Buttons
    QPushButton* pOkButton = new QPushButton("&OK", this);
    QPushButton* pCancelButton = new QPushButton("&Cancel", this);
-   QPushButton *pAddToFavoritesButton = new QPushButton("Add to favorites", this);
-   QPushButton *pRemoveFromFavoritesButton = new QPushButton("Remove from favorites", this);
+   QPushButton* pAddToFavoritesButton = new QPushButton("Add to favorites", this);
+   QPushButton* pRemoveFromFavoritesButton = new QPushButton("Remove from favorites", this);
 
    QHBoxLayout* pButtonLayout = new QHBoxLayout();
    pButtonLayout->setMargin(0);
@@ -791,7 +792,7 @@ QString SecurityMarkingsDlg::getListString(QListWidget* pListWidget, const QStri
    QList<QListWidgetItem*> selectedItems = pListWidget->selectedItems();
    for (int j = 0; j < pListWidget->count(); ++j)
    {
-      QListWidgetItem *pItem = pListWidget->item(j);
+      QListWidgetItem* pItem = pListWidget->item(j);
       if (pItem->isSelected())
       {
          if (pItem != NULL)
@@ -834,7 +835,7 @@ void SecurityMarkingsDlg::selectListFromString(QListWidget* pListWidget, const Q
       return;
    }
 
-   const char *ptr = StringUtilities::escapedToken(strText.toStdString());
+   const char* ptr = StringUtilities::escapedToken(strText.toStdString());
 
    // setSelected() below will signal to SecurityMarkingsDlg::updateMarkings(),
    // which indirectly calls selectListFromString.  Block the signal to prevent this.
@@ -1046,7 +1047,7 @@ void SecurityMarkingsDlg::removeFavoriteItem()
 
 void SecurityMarkingsDlg::favoriteSelected()
 {
-   Classification *pClass = mlstFavorites[mpFavoritesCombo->currentIndex()];
+   Classification* pClass = mlstFavorites[mpFavoritesCombo->currentIndex()];
    importFromClassification(pClass);
    updateMarkings();
 }
@@ -1073,7 +1074,7 @@ bool SecurityMarkingsDlg::serializeFavorites()
       string releasability = mlstFavorites[i]->getFileReleasing();
       string countries = mlstFavorites[i]->getCountryCode();
       string exemption = mlstFavorites[i]->getDeclassificationExemption();
-      const DateTime *pDeclassificationDate = mlstFavorites[i]->getDeclassificationDate();
+      const DateTime* pDeclassificationDate = mlstFavorites[i]->getDeclassificationDate();
 
       string classText;
       mlstFavorites[i]->getClassificationText(classText);
@@ -1097,7 +1098,7 @@ bool SecurityMarkingsDlg::serializeFavorites()
 
 bool SecurityMarkingsDlg::deserializeFavorites()
 {
-   const DynamicObject *pFavorites = SecurityMarkingsDlg::getSettingFavorites();
+   const DynamicObject* pFavorites = SecurityMarkingsDlg::getSettingFavorites();
    if (pFavorites == NULL)
    {
       return false;
@@ -1109,7 +1110,7 @@ bool SecurityMarkingsDlg::deserializeFavorites()
    pFavorites->getAttributeNames(previews);
    for (unsigned int i = 0; i < previews.size(); ++i)
    {
-      const DataVariant &var = pFavorites->getAttribute(previews[i]);
+      const DataVariant& var = pFavorites->getAttribute(previews[i]);
       const DynamicObject* pFavDynObj = dv_cast<DynamicObject>(&var);
       if (pFavDynObj == NULL)
       {

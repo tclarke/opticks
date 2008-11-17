@@ -7,17 +7,16 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #include "Hdf4File.h"
 #include "Hdf4Group.h"
 
 using namespace std;
 
-Hdf4File::Hdf4File(const std::string& name) : Hdf4Element(name),
-   mpActiveDataset(NULL)
+Hdf4File::Hdf4File(const string& name) :
+   Hdf4Element(name),
+   mpActiveDataset(NULL),
+   mpRootGroup(new Hdf4Group("/"))
 {
-   mpRootGroup = new Hdf4Group("/");
 }
 
 Hdf4File::~Hdf4File()

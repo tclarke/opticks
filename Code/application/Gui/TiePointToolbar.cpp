@@ -94,16 +94,16 @@ bool TiePointToolBar::setTiePointLayer(Layer* pLayer)
 
    if (mpTiePointLayer != NULL)
    {
-      disconnect((TiePointLayerAdapter*) mpTiePointLayer, SIGNAL(modified()), this,
+      disconnect(dynamic_cast<TiePointLayerImp*>(mpTiePointLayer), SIGNAL(modified()), this,
          SLOT(updateLabelsCheckBox()));
       mpTiePointLayer->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &TiePointToolBar::tiePointLayerDeleted));
    }
 
-   mpTiePointLayer = (TiePointLayer*) pLayer;
+   mpTiePointLayer = dynamic_cast<TiePointLayer*>(pLayer);
 
    if (mpTiePointLayer != NULL)
    {
-      connect((TiePointLayerAdapter*) mpTiePointLayer, SIGNAL(modified()), this,
+      connect(dynamic_cast<TiePointLayerImp*>(mpTiePointLayer), SIGNAL(modified()), this,
          SLOT(updateLabelsCheckBox()));
       mpTiePointLayer->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &TiePointToolBar::tiePointLayerDeleted));
 

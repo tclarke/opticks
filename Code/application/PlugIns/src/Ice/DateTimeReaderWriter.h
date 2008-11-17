@@ -7,6 +7,9 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#ifndef DATETIMEREADERWRITER_H
+#define DATETIMEREADERWRITER_H
+
 #include "Hdf5CustomReader.h"
 #include "Hdf5CustomWriter.h"
 #include "Hdf5Resource.h"
@@ -39,3 +42,5 @@ private:
    mutable TempDateTimeTransferStruct* mpReadBuffer;
    hid_t mDataType;
 };
+
+#endif

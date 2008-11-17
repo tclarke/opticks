@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef HDF5_FILE_H
-#define HDF5_FILE_H
+#ifndef HDF5FILE_H
+#define HDF5FILE_H
 
 #include <hdf5.h>
 #include <string>
@@ -93,4 +91,4 @@ private:
    Hdf5Group* mpRootGroup;
 };
 
-#endif   // HDF5FILE_H
+#endif

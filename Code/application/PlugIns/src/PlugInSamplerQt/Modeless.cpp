@@ -21,7 +21,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 // ModelessPlugIn
-static const char *spConfigKey = "ModelessDialog/Runs";
+static const char* spConfigKey = "ModelessDialog/Runs";
 
 ModelessPlugIn::ModelessPlugIn() :
    mpDialog(NULL),
@@ -69,7 +69,7 @@ void ModelessPlugIn::sessionClosed(Subject& subject, const std::string& signal, 
    mSessionClosed = true;
 }
 
-bool ModelessPlugIn::execute(PlugInArgList *pInputArgList, PlugInArgList *pOutArgList)
+bool ModelessPlugIn::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
    if (mpDialog == NULL)
    {
@@ -83,7 +83,8 @@ bool ModelessPlugIn::execute(PlugInArgList *pInputArgList, PlugInArgList *pOutAr
       mSessionClosed = false;
 
       Service<ConfigurationSettings> pConfig;
-      pConfig->attach(SIGNAL_NAME(ConfigurationSettings, AboutToSave), Slot(this, &ModelessPlugIn::updateConfigSettings));
+      pConfig->attach(SIGNAL_NAME(ConfigurationSettings, AboutToSave),
+         Slot(this, &ModelessPlugIn::updateConfigSettings));
 
       DataVariant var = pConfig->getSetting(spConfigKey);
       mRuns = dv_cast<int>(var, 1);

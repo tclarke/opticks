@@ -143,11 +143,11 @@ private slots:
    void removeDisplayedItem();
 
 private:
-   QListWidget *mpListWidget;
-   QWidget *mpInspector;
-   QSplitter *mpSplitter;
+   QListWidget* mpListWidget;
+   QWidget* mpInspector;
+   QSplitter* mpSplitter;
 
-   QListWidgetItem *mpDisplayedItem;
+   QListWidgetItem* mpDisplayedItem;
    bool mDeleteRowOnSave;
 };
 

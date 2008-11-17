@@ -548,7 +548,7 @@ bool GeoTIFFImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
    }
 
    // Update the log and progress with the start of the import
-   Progress *pProgress = getProgress();
+   Progress* pProgress = getProgress();
    if (pProgress != NULL)
    {
       pProgress->updateProgress("GeoTIFF Importer Started", 1, NORMAL);
@@ -563,7 +563,7 @@ bool GeoTIFFImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
    // Create the view
    if (!isBatch() && !Service<SessionManager>()->isSessionLoading())
    {
-      SpatialDataView *pView = createView();
+      SpatialDataView* pView = createView();
       if (pView == NULL)
       {
          pStep->finalize(Message::Failure, "The view could not be created.");
@@ -592,7 +592,7 @@ QWidget *GeoTIFFImporter::getImportOptionsWidget(DataDescriptor *pDescriptor)
    {
       QString initialDirectory;
       QString isdFilename;
-      const FileDescriptor *pFileDescriptor = (pDescriptor == NULL) ? NULL : pDescriptor->getFileDescriptor();
+      const FileDescriptor* pFileDescriptor = (pDescriptor == NULL) ? NULL : pDescriptor->getFileDescriptor();
       if (pFileDescriptor != NULL)
       {
          initialDirectory = QString::fromStdString(pFileDescriptor->getFilename().getPath());
@@ -603,7 +603,9 @@ QWidget *GeoTIFFImporter::getImportOptionsWidget(DataDescriptor *pDescriptor)
             isdFilename = isdInfo.absoluteFilePath();
          }
       }
-      mImportOptionsWidget.reset(new OptionsTiffImporter(initialDirectory));
+
+      OptionsTiffImporter* pWidget = new OptionsTiffImporter(initialDirectory);
+      mImportOptionsWidget.reset(pWidget);
       mImportOptionsWidget->setFilename(isdFilename);
    }
    return mImportOptionsWidget.get();
@@ -618,7 +620,7 @@ void GeoTIFFImporter::loadIsdMetadata(DataDescriptor *pDescriptor)
    }
    else
    {
-      const FileDescriptor *pFileDescriptor = (pDescriptor == NULL) ? NULL : pDescriptor->getFileDescriptor();
+      const FileDescriptor* pFileDescriptor = (pDescriptor == NULL) ? NULL : pDescriptor->getFileDescriptor();
       if (pFileDescriptor != NULL)
       {
          QFileInfo tiffInfo(QString::fromStdString(pFileDescriptor->getFilename().getFullPathAndName()));
@@ -638,7 +640,8 @@ void GeoTIFFImporter::loadIsdMetadata(DataDescriptor *pDescriptor)
    QFileInfo isdInfo(isdFilename);
    if (!isdInfo.isFile() || !isdInfo.exists())
    {
-      string message = "ISD metadata file " + isdFilename.toStdString() + " does not exist.\nMetadata will not be loaded.";
+      string message = "ISD metadata file " + isdFilename.toStdString() +
+         " does not exist.\nMetadata will not be loaded.";
       if (getProgress() != NULL)
       {
          getProgress()->updateProgress(message, 0, WARNING);
@@ -649,7 +652,8 @@ void GeoTIFFImporter::loadIsdMetadata(DataDescriptor *pDescriptor)
    QuickbirdIsd isd(isdFilename.toStdString());
    if (!isd.copyToMetadata(pDescriptor->getMetadata()))
    {
-      string message = "Unable to parse ISD metadata file " + isdFilename.toStdString() + ".\nMetadata will not be loaded.";
+      string message = "Unable to parse ISD metadata file " + isdFilename.toStdString() +
+         ".\nMetadata will not be loaded.";
       if (getProgress() != NULL)
       {
          getProgress()->updateProgress(message, 0, WARNING);
@@ -665,13 +669,13 @@ void GeoTIFFImporter::loadIsdMetadata(DataDescriptor *pDescriptor)
 bool GeoTIFFImporter::createRasterPager(RasterElement *pRasterElement) const
 {
    VERIFY(pRasterElement != NULL);
-   DataDescriptor *pDescriptor = pRasterElement->getDataDescriptor();
+   DataDescriptor* pDescriptor = pRasterElement->getDataDescriptor();
    VERIFY(pDescriptor != NULL);
-   FileDescriptor *pFileDescriptor = pDescriptor->getFileDescriptor();
+   FileDescriptor* pFileDescriptor = pDescriptor->getFileDescriptor();
    VERIFY(pFileDescriptor != NULL);
 
-   const string &filename = pRasterElement->getFilename();
-   Progress *pProgress = getProgress();
+   const string& filename = pRasterElement->getFilename();
+   Progress* pProgress = getProgress();
 
    StepResource pStep("Create pager for GeoTIFF", "app", "AF6176CD-5B39-4CED-A92E-394E3CD1CD00");
 
@@ -687,7 +691,11 @@ bool GeoTIFFImporter::createRasterPager(RasterElement *pRasterElement) const
    if ((pPager == NULL) || (success == false))
    {
       string message = "Execution of GeoTiffPager failed!";
-      if (pProgress != NULL) pProgress->updateProgress(message, 0, ERRORS);
+      if (pProgress != NULL)
+      {
+         pProgress->updateProgress(message, 0, ERRORS);
+      }
+
       pStep->finalize(Message::Failure, message);
       return false;
    }

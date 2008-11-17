@@ -6,14 +6,12 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
- 
-
 
 //         ***** UNCLASSIFIED *****
 //         Module Name: Thread
-         
-#ifndef _THREAD_DOT_H
-#define _THREAD_DOT_H
+
+#ifndef THREAD_H
+#define THREAD_H
 
 #include <stdlib.h>
 #include "mutex.h"

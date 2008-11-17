@@ -86,7 +86,7 @@ bool WizardExecutor::setInteractive()
 bool WizardExecutor::hasAbort()
 {
    bool bSuccess = true;
-   if(mpCurrentPlugIn != NULL)
+   if (mpCurrentPlugIn != NULL)
    {
       bSuccess = mpCurrentPlugIn->hasAbort();
    }
@@ -114,16 +114,20 @@ bool WizardExecutor::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLi
 {
    StepResource pStep("Run Wizard Executor", "app", "68D30CE9-3B60-4294-ADC2-69A838438542");
    mpStep = pStep.get();
-   
-   if(!extractInputArgs(pInArgList))
+
+   if (!extractInputArgs(pInArgList))
    {
       return false;
    }
 
-   if(mpWizard == NULL)
+   if (mpWizard == NULL)
    {
       mMessage = "The wizard is invalid!";
-      if(mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, ERRORS);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(mMessage, 0, ERRORS);
+      }
+
       pStep->finalize(Message::Failure, mMessage);
       return false;
    }
@@ -133,22 +137,25 @@ bool WizardExecutor::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLi
    mpWizard->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &WizardExecutor::wizardDeleted));
 
    mMessage = "Starting wizard execution";
-   if(mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, NORMAL);
+   if (mpProgress != NULL)
+   {
+      mpProgress->updateProgress(mMessage, 0, NORMAL);
+   }
+
    pStep->addMessage(mMessage, "app", "2D53370C-DD0D-4160-9BD5-4D46C49A4B7E", true);
 
    const vector<WizardItem*>& wizardItems = mpWizard->getItems();
-   
-   for(vector<WizardItem*>::const_iterator wiIter = wizardItems.begin(); wiIter != wizardItems.end(); ++wiIter)
+   for (vector<WizardItem*>::const_iterator wiIter = wizardItems.begin(); wiIter != wizardItems.end(); ++wiIter)
    {
       WizardItem* pItem = *wiIter;
-      if(pItem != NULL)
+      if (pItem != NULL)
       {
          bool bSuccess = false;
 
          string itemName = pItem->getName();
          string itemType = pItem->getType();
 
-         if(itemType == "Value")
+         if (itemType == "Value")
          {
             mMessage = "Executing " + itemType + " Item: " + itemName;
             pStep->addMessage(mMessage, "app", "9FC4024E-00FA-42cd-8EC3-2AAE84843BA7", true);
@@ -161,18 +168,18 @@ bool WizardExecutor::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLi
             resetNodeValues(pItem);
          }
 
-         if(mbAbort)
+         if (mbAbort)
          {
             resetAllNodeValues();
 
             mMessage = "Wizard Exector Aborted!";
             pStep->finalize(Message::Abort, mMessage);
 
-            if(mbDeleteWizard)
+            if (mbDeleteWizard)
             {
                mpObjFact->destroyObject(mpWizard, "WizardObject");
             }
-            else if(mpWizard != NULL)
+            else if (mpWizard != NULL)
             {
                mpWizard->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &WizardExecutor::wizardDeleted));
             }
@@ -180,23 +187,27 @@ bool WizardExecutor::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLi
             return false;
          }
 
-         if(mpWizard == NULL)
+         if (mpWizard == NULL)
          {
             mMessage = "The wizard is no longer valid!  Execution will be terminated.";
-            if(mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, ERRORS);
+            if (mpProgress != NULL)
+            {
+               mpProgress->updateProgress(mMessage, 0, ERRORS);
+            }
+
             pStep->finalize(Message::Failure, mMessage);
             return false;
          }
 
-         if(!bSuccess)
+         if (!bSuccess)
          {
             resetAllNodeValues();
 
-            if(mbDeleteWizard)
+            if (mbDeleteWizard)
             {
                mpObjFact->destroyObject(mpWizard, "WizardObject");
             }
-            else if(mpWizard != NULL)
+            else if (mpWizard != NULL)
             {
                mpWizard->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &WizardExecutor::wizardDeleted));
             }
@@ -208,14 +219,18 @@ bool WizardExecutor::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLi
    }
 
    mMessage = "Wizard complete.";
-   if(mpProgress != NULL) mpProgress->updateProgress(mMessage, 100, NORMAL);
+   if (mpProgress != NULL)
+   {
+      mpProgress->updateProgress(mMessage, 100, NORMAL);
+   }
+
    pStep->finalize(Message::Success);
 
-   if(mbDeleteWizard)
+   if (mbDeleteWizard)
    {
       mpObjFact->destroyObject(mpWizard, "WizardObject");
    }
-   else if(mpWizard != NULL)
+   else if (mpWizard != NULL)
    {
       mpWizard->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &WizardExecutor::wizardDeleted));
    }
@@ -228,7 +243,7 @@ bool WizardExecutor::abort()
    mbAbort = true;
 
    bool bSuccess = true;
-   if(mpCurrentPlugIn != NULL)
+   if (mpCurrentPlugIn != NULL)
    {
       bSuccess = mpCurrentPlugIn->abort();
    }
@@ -264,25 +279,29 @@ bool WizardExecutor::extractInputArgs(PlugInArgList* pInArgList)
    }
 
    // Filename
-   if(!pInArgList->getArg("Filename", pArg) || (pArg == NULL))
+   if (!pInArgList->getArg("Filename", pArg) || (pArg == NULL))
    {
       mMessage = "Could not read the filename input value!";
-      if(mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, ERRORS);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(mMessage, 0, ERRORS);
+      }
+
       mpStep->finalize(Message::Failure, mMessage);
       return false;
    }
 
    Filename* pFilename = pArg->getPlugInArgValue<Filename>();
    string filename;
-   if(pFilename == NULL)
+   if (pFilename == NULL)
    {
-      if(mbInteractive)
+      if (mbInteractive)
       {
          QString strDefaultDir = QDir::currentPath();
 
          QString strFilename = QFileDialog::getOpenFileName(mpDesktop->getMainWidget(), QString(),
             strDefaultDir, "Wizard Files (*.wiz)");
-         if(strFilename.isEmpty())
+         if (strFilename.isEmpty())
          {
             mpStep->finalize(Message::Failure, "No wizard file specified.");
             return false;
@@ -296,10 +315,14 @@ bool WizardExecutor::extractInputArgs(PlugInArgList* pInArgList)
       filename = pFilename->getFullPathAndName();
    }
 
-   if(filename.empty())
+   if (filename.empty())
    {
       mMessage = "The filename input value is invalid!";
-      if(mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, ERRORS);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(mMessage, 0, ERRORS);
+      }
+
       mpStep->finalize(Message::Failure, mMessage);
       return false;
    }
@@ -309,7 +332,11 @@ bool WizardExecutor::extractInputArgs(PlugInArgList* pInArgList)
    if (mpWizard == NULL)
    {
       mMessage = "Could not create the wizard!";
-      if(mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, ERRORS);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(mMessage, 0, ERRORS);
+      }
+
       mpStep->finalize(Message::Failure, mMessage);
       return false;
    }
@@ -334,7 +361,11 @@ bool WizardExecutor::extractInputArgs(PlugInArgList* pInArgList)
    if (bSuccess == false)
    {
       mMessage = "Could not load the wizard from the file!";
-      if(mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, ERRORS);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(mMessage, 0, ERRORS);
+      }
+
       mpStep->finalize(Message::Failure, mMessage);
 
       mpObjFact->destroyObject(mpWizard, "WizardObject");
@@ -348,7 +379,7 @@ bool WizardExecutor::extractInputArgs(PlugInArgList* pInArgList)
    return true;
 }
 
-void WizardExecutor::populatePlugInArgList(PlugInArgList* pArgList, WizardItem* pItem, bool bInArgs)
+void WizardExecutor::populatePlugInArgList(PlugInArgList* pArgList, const WizardItem* pItem, bool bInArgs)
 {
    if ((pArgList == NULL) || (pItem == NULL))
    {
@@ -358,7 +389,7 @@ void WizardExecutor::populatePlugInArgList(PlugInArgList* pArgList, WizardItem* 
    // Get the wizard nodes
    vector<WizardNode*> nodes;
 
-   if(bInArgs)
+   if (bInArgs)
    {
       nodes = pItem->getInputNodes();
    }
@@ -368,32 +399,32 @@ void WizardExecutor::populatePlugInArgList(PlugInArgList* pArgList, WizardItem* 
    }
 
    // Set the plug-in arg actual values from the node values
-   for(int i = 0; i < pArgList->getCount(); i++)
+   for (int i = 0; i < pArgList->getCount(); i++)
    {
       PlugInArg* pArg = NULL;
 
-      if(pArgList->getArg(i, pArg) && (pArg != NULL))
+      if (pArgList->getArg(i, pArg) && (pArg != NULL))
       {
          string argName = pArg->getName();
          string argType = pArg->getType();
 
          vector<WizardNode*>::iterator iter;
-         for(iter = nodes.begin(); iter != nodes.end(); ++iter)
+         for (iter = nodes.begin(); iter != nodes.end(); ++iter)
          {
             WizardNode* pNode = *iter;
-            if(pNode != NULL)
+            if (pNode != NULL)
             {
                string nodeName = pNode->getName();
                string nodeType = pNode->getOriginalType();
-               if(nodeType.empty())
+               if (nodeType.empty())
                {
                   nodeType = pNode->getType();
                }
 
-               if((nodeName == argName) && (nodeType == argType))
+               if ((nodeName == argName) && (nodeType == argType))
                {
                   void* pValue = pNode->getValue();
-                  if(pValue != NULL)
+                  if (pValue != NULL)
                   {
                      pArg->setActualValue(pValue);
                   }
@@ -408,7 +439,7 @@ void WizardExecutor::populatePlugInArgList(PlugInArgList* pArgList, WizardItem* 
             }
          }
 
-         if(iter == nodes.end())
+         if (iter == nodes.end())
          {
             if (argType == TypeConverter::toString<Progress>())
             {
@@ -423,7 +454,8 @@ bool WizardExecutor::launchPlugIn(WizardItem* pItem)
 {
    VERIFY(pItem != NULL);
 
-   StepResource pStep("Executing " + pItem->getType() + " Item: " + pItem->getName(), "app", "6A743B49-618B-44ed-9C5A-B4D67FB809D2");
+   StepResource pStep("Executing " + pItem->getType() + " Item: " + pItem->getName(), "app",
+      "6A743B49-618B-44ed-9C5A-B4D67FB809D2");
 
    bool pluginExecuteStatus = false;
 
@@ -456,12 +488,16 @@ bool WizardExecutor::launchPlugIn(WizardItem* pItem)
       else
       {
          mMessage = "The " + pItem->getName() + " plug-in could not be created! Wizard execution will be terminated.";
-         if (mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, ERRORS);
+         if (mpProgress != NULL)
+         {
+            mpProgress->updateProgress(mMessage, 0, ERRORS);
+         }
+
          pStep->finalize(Message::Failure, mMessage);
       }
 
    }
-   catch(AssertException exc)
+   catch (AssertException exc)
    {
       if (mpProgress != NULL) 
       {
@@ -484,21 +520,21 @@ void WizardExecutor::setConnectedNodeValues(WizardItem* pItem, PlugInArgList* pO
    // Set the connected item input node values
    const vector<WizardNode*>& outputNodes = pItem->getOutputNodes();
 
-   for(vector<WizardNode*>::const_iterator onIter = outputNodes.begin(); onIter != outputNodes.end(); ++onIter)
+   for (vector<WizardNode*>::const_iterator onIter = outputNodes.begin(); onIter != outputNodes.end(); ++onIter)
    {
       WizardNode* pNode = *onIter;
-      if(pNode != NULL)
+      if (pNode != NULL)
       {
          string nodeName = pNode->getName();
          string nodeType = pNode->getOriginalType();
-         if(nodeType.empty())
+         if (nodeType.empty())
          {
             nodeType = pNode->getType();
          }
 
          void* pValue = NULL;
 
-         if(pOutArgList == NULL)
+         if (pOutArgList == NULL)
          {
             pValue = pNode->getValue();
          }
@@ -506,9 +542,9 @@ void WizardExecutor::setConnectedNodeValues(WizardItem* pItem, PlugInArgList* pO
          {
             PlugInArg* pArg = NULL;
 
-            if(pOutArgList->getArg(nodeName, pArg) && (pArg != NULL))
+            if (pOutArgList->getArg(nodeName, pArg) && (pArg != NULL))
             {
-               if(pArg->isActualSet())
+               if (pArg->isActualSet())
                {
                   pValue = pArg->getActualValue();
                }
@@ -516,7 +552,7 @@ void WizardExecutor::setConnectedNodeValues(WizardItem* pItem, PlugInArgList* pO
                {
                   pValue = static_cast<void*>(mpProgress);
                }
-               else if(pArg->isDefaultSet())
+               else if (pArg->isDefaultSet())
                {
                   pValue = pArg->getDefaultValue();
                }
@@ -525,7 +561,7 @@ void WizardExecutor::setConnectedNodeValues(WizardItem* pItem, PlugInArgList* pO
 
          const vector<WizardNode*>& connectedNodes = pNode->getConnectedNodes();
 
-         for(vector<WizardNode*>::const_iterator cnIter = connectedNodes.begin();
+         for (vector<WizardNode*>::const_iterator cnIter = connectedNodes.begin();
                                                  cnIter != connectedNodes.end();
                                                  ++cnIter)
          {
@@ -534,19 +570,19 @@ void WizardExecutor::setConnectedNodeValues(WizardItem* pItem, PlugInArgList* pO
             {
                string connectedNodeName = pConnectedNode->getName();
                string connectedNodeType = pConnectedNode->getOriginalType();
-               if(connectedNodeType.empty())
+               if (connectedNodeType.empty())
                {
                   connectedNodeType = pConnectedNode->getType();
                }
 
                bool bValidKind = (nodeType == connectedNodeType);
 
-               if(!bValidKind)
+               if (!bValidKind)
                {
                   Service<ModelServices> pModel;
 
                   bValidKind = pModel->isKindOfElement(nodeType, connectedNodeType);
-                  if(!bValidKind)
+                  if (!bValidKind)
                   {
                      bool bElement = pModel->isKindOfElement(nodeType, TypeConverter::toString<DataElement>());
                      if ((bElement == true) && (pValue != NULL))
@@ -560,7 +596,8 @@ void WizardExecutor::setConnectedNodeValues(WizardItem* pItem, PlugInArgList* pO
                      bValidKind = pModel->isKindOfDataDescriptor(nodeType, connectedNodeType);
                      if (bValidKind == false)
                      {
-                        bool bDataDescriptor = pModel->isKindOfDataDescriptor(nodeType, TypeConverter::toString<DataDescriptor>());
+                        bool bDataDescriptor = pModel->isKindOfDataDescriptor(nodeType,
+                           TypeConverter::toString<DataDescriptor>());
                         if ((bDataDescriptor == true) && (pValue != NULL))
                         {
                            bValidKind = (reinterpret_cast<DataDescriptor*>(pValue))->isKindOf(connectedNodeType);
@@ -572,7 +609,8 @@ void WizardExecutor::setConnectedNodeValues(WizardItem* pItem, PlugInArgList* pO
                         bValidKind = pModel->isKindOfFileDescriptor(nodeType, connectedNodeType);
                         if (bValidKind == false)
                         {
-                           bool bFileDescriptor = pModel->isKindOfFileDescriptor(nodeType, TypeConverter::toString<FileDescriptor>());
+                           bool bFileDescriptor = pModel->isKindOfFileDescriptor(nodeType,
+                              TypeConverter::toString<FileDescriptor>());
                            if ((bFileDescriptor == true) && (pValue != NULL))
                            {
                               bValidKind = (reinterpret_cast<FileDescriptor*>(pValue))->isKindOf(connectedNodeType);
@@ -582,10 +620,10 @@ void WizardExecutor::setConnectedNodeValues(WizardItem* pItem, PlugInArgList* pO
                   }
                }
 
-               if(!bValidKind)
+               if (!bValidKind)
                {
                   bValidKind = mpDesktop->isKindOfView(nodeType, connectedNodeType);
-                  if(!bValidKind)
+                  if (!bValidKind)
                   {
                      bool bView = mpDesktop->isKindOfView(nodeType, TypeConverter::toString<View>());
                      if ((bView == true) && (pValue != NULL))
@@ -595,7 +633,7 @@ void WizardExecutor::setConnectedNodeValues(WizardItem* pItem, PlugInArgList* pO
                   }
                }
 
-               if(bValidKind)
+               if (bValidKind)
                {
                   pConnectedNode->setValue(pValue);
                }
@@ -605,10 +643,10 @@ void WizardExecutor::setConnectedNodeValues(WizardItem* pItem, PlugInArgList* pO
                   string connectedItemName = "";
 
                   WizardItem* pConnectedItem = pConnectedNode->getItem();
-                  if(pConnectedItem != NULL)
+                  if (pConnectedItem != NULL)
                   {
                      string name = pConnectedItem->getName();
-                     if(!name.empty())
+                     if (!name.empty())
                      {
                         connectedItemName = " on the " + name + " item";
                      }
@@ -617,7 +655,11 @@ void WizardExecutor::setConnectedNodeValues(WizardItem* pItem, PlugInArgList* pO
                   mMessage = "Could not set the " + connectedNodeName + " input node value" +
                               connectedItemName + "! The node type is incompatible with the " +
                               nodeName + " connected node type on the " + itemName + " item.";
-                  if(mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, WARNING);
+                  if (mpProgress != NULL)
+                  {
+                     mpProgress->updateProgress(mMessage, 0, WARNING);
+                  }
+
                   mpStep->addMessage(mMessage, "app", "CFA1428A-E382-4b2b-8A23-0C10F8BA97EC", true);
                }
             }
@@ -633,19 +675,19 @@ void WizardExecutor::resetNodeValues(WizardItem* pItem)
    const vector<WizardNode*>& inputNodes = pItem->getInputNodes();
    const vector<WizardNode*>& outputNodes = pItem->getOutputNodes();
 
-   for(vector<WizardNode*>::const_iterator inIter = inputNodes.begin(); inIter != inputNodes.end(); ++inIter)
+   for (vector<WizardNode*>::const_iterator inIter = inputNodes.begin(); inIter != inputNodes.end(); ++inIter)
    {
       WizardNode* pNode = *inIter;
-      if(pNode != NULL)
+      if (pNode != NULL)
       {
          pNode->setValue(NULL);
       }
    }
 
-   for(vector<WizardNode*>::const_iterator onIter = outputNodes.begin(); onIter != outputNodes.end(); ++onIter)
+   for (vector<WizardNode*>::const_iterator onIter = outputNodes.begin(); onIter != outputNodes.end(); ++onIter)
    {
       WizardNode* pNode = *onIter;
-      if(pNode != NULL)
+      if (pNode != NULL)
       {
          pNode->setValue(NULL);
       }
@@ -654,20 +696,20 @@ void WizardExecutor::resetNodeValues(WizardItem* pItem)
 
 void WizardExecutor::resetAllNodeValues()
 {
-   if(mpWizard == NULL)
+   if (mpWizard == NULL)
    {
       return;
    }
 
    const vector<WizardItem*>& items = mpWizard->getItems();
 
-   for(vector<WizardItem*>::const_iterator iter = items.begin(); iter != items.end(); ++iter)
+   for (vector<WizardItem*>::const_iterator iter = items.begin(); iter != items.end(); ++iter)
    {
       WizardItem* pItem = *iter;
-      if(pItem != NULL)
+      if (pItem != NULL)
       {
          const string& itemType = pItem->getType();
-         if(itemType != "Value")
+         if (itemType != "Value")
          {
             resetNodeValues(pItem);
          }

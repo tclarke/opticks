@@ -6,22 +6,20 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
- 
 
-
-#ifndef _MUTEX_DOT_H
-#define _MUTEX_DOT_H
+#ifndef MUTEX_H
+#define MUTEX_H
 
 #include <stdlib.h>
 
 class Mutex
 {
    public:
-      virtual bool MutexCreate () = 0; 
-      virtual bool MutexInit () = 0;
-      virtual bool MutexLock () = 0;
-      virtual bool MutexUnlock () = 0;
-      virtual bool MutexDestroy () = 0;
+      virtual bool MutexCreate() = 0;
+      virtual bool MutexInit() = 0;
+      virtual bool MutexLock() = 0;
+      virtual bool MutexUnlock() = 0;
+      virtual bool MutexDestroy() = 0;
 };
 
 #endif

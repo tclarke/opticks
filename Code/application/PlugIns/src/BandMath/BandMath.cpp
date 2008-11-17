@@ -36,13 +36,13 @@
 
 using namespace std;
 
-BandMath::BandMath()
-{ 
-   mpStep = NULL;
-   mpCube = NULL;
-
-   mbInteractive = true;
-
+BandMath::BandMath() :
+   mpStep(NULL),
+   mbInteractive(true),
+   mbDisplayResults(false),
+   mbCubeMath(false),
+   mpCube(NULL)
+{
    // set description values
    setName("Band Math");
    setVersion(APP_VERSION_NUMBER);
@@ -61,30 +61,30 @@ BandMath::BandMath()
 
 BandMath::~BandMath()
 { 
-   if((mpResultData != NULL) && mbError)
+   if ((mpResultData != NULL) && mbError)
    {
       mpDataModel->destroyElement(mpResultData);
    }
 }
 
-bool BandMath::isInputValid(PlugInArgList &pArgList)
+bool BandMath::isInputValid(PlugInArgList& pArgList)
 {
-   PlugInArg *pArg = NULL;
+   PlugInArg* pArg = NULL;
    bool bUseFullDataset = true;
 
    // The following must always have values set for them
    // Sensor data
-   if(!pArgList.getArg(DataElementArg(), pArg) || (pArg == NULL) || !pArg->isActualSet())
+   if (!pArgList.getArg(DataElementArg(), pArg) || (pArg == NULL) || !pArg->isActualSet())
    {
       mpStep->finalize(Message::Failure, "Sensor data input argument not present.");
       meGabbiness = ERRORS;
       return false;
    }
 
-   if(!mbInteractive)
+   if (!mbInteractive)
    {
       // Sensor data
-      if(!pArgList.getArg("Cube 2", pArg) || (pArg == NULL) || !pArg->isActualSet())
+      if (!pArgList.getArg("Cube 2", pArg) || (pArg == NULL) || !pArg->isActualSet())
       {
          mpStep->finalize(Message::Failure, "Sensor data input argument not present.");
          meGabbiness = ERRORS;
@@ -92,7 +92,7 @@ bool BandMath::isInputValid(PlugInArgList &pArgList)
       }
 
       // Sensor data
-      if(!pArgList.getArg("Cube 3", pArg) || (pArg == NULL) || !pArg->isActualSet())
+      if (!pArgList.getArg("Cube 3", pArg) || (pArg == NULL) || !pArg->isActualSet())
       {
          mpStep->finalize(Message::Failure, "Sensor data input argument not present.");
          meGabbiness = ERRORS;
@@ -100,7 +100,7 @@ bool BandMath::isInputValid(PlugInArgList &pArgList)
       }
 
       // Sensor data
-      if(!pArgList.getArg("Cube 4", pArg) || (pArg == NULL))
+      if (!pArgList.getArg("Cube 4", pArg) || (pArg == NULL))
       {
          mpStep->finalize(Message::Failure, "Sensor data input argument not present.");
          meGabbiness = ERRORS;
@@ -108,7 +108,7 @@ bool BandMath::isInputValid(PlugInArgList &pArgList)
       }
 
       // Sensor data
-      if(!pArgList.getArg("Cube 5", pArg) || (pArg == NULL))
+      if (!pArgList.getArg("Cube 5", pArg) || (pArg == NULL))
       {
          mpStep->finalize(Message::Failure, "Sensor data input argument not present.");
          meGabbiness = ERRORS;
@@ -116,7 +116,7 @@ bool BandMath::isInputValid(PlugInArgList &pArgList)
       }
 
       // Test 
-      if(pArgList.getArg("Input Expression", pArg) || (pArg == NULL) || !pArg->isActualSet())
+      if (pArgList.getArg("Input Expression", pArg) || (pArg == NULL) || !pArg->isActualSet())
       {
          mpStep->finalize(Message::Failure, "Expression input argument not present.");
          meGabbiness = ERRORS;
@@ -124,7 +124,7 @@ bool BandMath::isInputValid(PlugInArgList &pArgList)
       }
 
       // Test Display Results
-      if(pArgList.getArg("Display Results", pArg) || (pArg == NULL) || !pArg->isActualSet())
+      if (pArgList.getArg("Display Results", pArg) || (pArg == NULL) || !pArg->isActualSet())
       {
          mpStep->finalize(Message::Failure, "Display Results input argument not present.");
          meGabbiness = ERRORS;
@@ -132,7 +132,7 @@ bool BandMath::isInputValid(PlugInArgList &pArgList)
       }
 
       // Test Degrees
-      if(pArgList.getArg("Degrees", pArg) || (pArg == NULL) || !pArg->isActualSet())
+      if (pArgList.getArg("Degrees", pArg) || (pArg == NULL) || !pArg->isActualSet())
       {
          mpStep->finalize(Message::Failure, "Degrees input argument not present.");
          meGabbiness = ERRORS;
@@ -155,13 +155,13 @@ bool BandMath::setInteractive()
    return true;
 }
 
-bool BandMath::getInputSpecification(PlugInArgList *&pArgList)
+bool BandMath::getInputSpecification(PlugInArgList*& pArgList)
 {
    // Set up list
    pArgList = mpPluginManager->getPlugInArgList();
    VERIFY(pArgList != NULL);
 
-   PlugInArg *pArg = mpPluginManager->getPlugInArg();  //progress
+   PlugInArg* pArg = mpPluginManager->getPlugInArg();  //progress
    VERIFY(pArg != NULL);
    pArg->setName(ProgressArg());
    pArg->setType("Progress");
@@ -209,7 +209,7 @@ bool BandMath::getInputSpecification(PlugInArgList *&pArgList)
       VERIFY(pArg != NULL);
       pArg->setName("Input Expression");
       pArg->setType("string");
-      pArg->setDefaultValue((void*) &mExpression);
+      pArg->setDefaultValue(&mExpression);
       pArgList->addArg(*pArg);
 
       bool temp = true;
@@ -217,7 +217,7 @@ bool BandMath::getInputSpecification(PlugInArgList *&pArgList)
       VERIFY(pArg != NULL);
       pArg->setName("Display Results");
       pArg->setType("bool");
-      pArg->setDefaultValue((void*) &temp);
+      pArg->setDefaultValue(&temp);
       pArgList->addArg(*pArg);
 
       temp = false;
@@ -225,14 +225,14 @@ bool BandMath::getInputSpecification(PlugInArgList *&pArgList)
       VERIFY(pArg != NULL);
       pArg->setName("Degrees");
       pArg->setType("bool");
-      pArg->setDefaultValue((void*) &temp);
+      pArg->setDefaultValue(&temp);
       pArgList->addArg(*pArg);
    }
 
    return true;
 }
 
-bool BandMath::getOutputSpecification(PlugInArgList *&pArgList)
+bool BandMath::getOutputSpecification(PlugInArgList*& pArgList)
 {
    // Set up list
    pArgList = mpPluginManager->getPlugInArgList();
@@ -279,7 +279,7 @@ bool BandMath::initialize()
    return true;
 }
 
-bool BandMath::execute(PlugInArgList *pInputArgList, PlugInArgList *pOutputArgList)
+bool BandMath::execute(PlugInArgList* pInputArgList, PlugInArgList* pOutputArgList)
 {
    StepResource pStep("Start BandMath", "app", "02E18066-1355-4a5f-ABC5-0366D9890C1C");
    mpStep = pStep.get();
@@ -289,7 +289,7 @@ bool BandMath::execute(PlugInArgList *pInputArgList, PlugInArgList *pOutputArgLi
 
    // Get pointers
    // parse arg in list
-   if(!parse(pInputArgList, pOutputArgList))
+   if (!parse(pInputArgList, pOutputArgList))
    {
       meGabbiness = ERRORS;
       displayErrorMessage();
@@ -334,13 +334,13 @@ bool BandMath::execute(PlugInArgList *pInputArgList, PlugInArgList *pOutputArgLi
    char errorVal[80];
    int errorCode = -1;  
 
-   if(mbInteractive)
+   if (mbInteractive)
    {
-      QWidget* pParent =  mpDesktop->getMainWidget();
+      QWidget* pParent = mpDesktop->getMainWidget();
 
-      frmBM frmASIT(pDescriptor, mCubesList, pParent);
+      FrmBM frmASIT(pDescriptor, mCubesList, pParent);
 
-      if(frmASIT.exec() == QDialog::Rejected)
+      if (frmASIT.exec() == QDialog::Rejected)
       {
          pStep->finalize(Message::Abort);
          return false;
@@ -357,13 +357,13 @@ bool BandMath::execute(PlugInArgList *pInputArgList, PlugInArgList *pOutputArgLi
 
       //check for cube math
       unsigned int pos = mExpression.find_first_of(string("cC"));
-      if((pos >= 0) && (pos < (mExpression.length() - 1)) && ((mExpression[pos + 1] > '0') &&
+      if ((pos >= 0) && (pos < (mExpression.length() - 1)) && ((mExpression[pos + 1] > '0') &&
                                                               (mExpression[pos + 1] < '9')))
       {
          mbCubeMath = true;
       }
    }
-   if(!createReturnValue(mExpression))
+   if (!createReturnValue(mExpression))
    {
       mstrProgressString = "Could not allocate space for results.";
       meGabbiness = ERRORS;
@@ -371,15 +371,15 @@ bool BandMath::execute(PlugInArgList *pInputArgList, PlugInArgList *pOutputArgLi
       return false;
    }
    {
-      StepResource pStep("Compute result", "app", "CDCC12AC-32DD-4831-BC6B-225538C92053");
-      mpStep = pStep.get();
-      pStep->addProperty("Expression", mExpression);
+      StepResource pResultStep("Compute result", "app", "CDCC12AC-32DD-4831-BC6B-225538C92053");
+      mpStep = pResultStep.get();
+      pResultStep->addProperty("Expression", mExpression);
 
       FactoryResource<DataRequest> pReturnRequest;
       pReturnRequest->setInterleaveFormat(BIP);
       pReturnRequest->setWritable(true);
       DataAccessor returnDa = mpResultData->getDataAccessor(pReturnRequest.release());
-      if(!returnDa.isValid())
+      if (!returnDa.isValid())
       {
          mstrProgressString = "Could not access the result data.";
          meGabbiness = ERRORS;
@@ -387,12 +387,12 @@ bool BandMath::execute(PlugInArgList *pInputArgList, PlugInArgList *pOutputArgLi
          return false;
       }
 
-      if(!mbCubeMath)
+      if (!mbCubeMath)
       {
          FactoryResource<DataRequest> pCubeRequest;
          pCubeRequest->setInterleaveFormat(BIP);
          DataAccessor cubeDa = mpCube->getDataAccessor(pCubeRequest.release());
-         if(!cubeDa.isValid())
+         if (!cubeDa.isValid())
          {
             mstrProgressString = "Reading this cube format is not supported.";
             meGabbiness = ERRORS;
@@ -403,7 +403,7 @@ bool BandMath::execute(PlugInArgList *pInputArgList, PlugInArgList *pOutputArgLi
          vector<DataAccessor> accessors(1, cubeDa);
          vector<EncodingType> types(1, pDescriptor->getDataType());
 
-         char *mutableExpression = new char[mExpression.size() + 1];
+         char* mutableExpression = new char[mExpression.size() + 1];
          strcpy(mutableExpression, mExpression.c_str());
 
          errorCode = eval(mpProgress, accessors, types, mCubeRows, mCubeColumns,
@@ -415,18 +415,17 @@ bool BandMath::execute(PlugInArgList *pInputArgList, PlugInArgList *pOutputArgLi
       {
          EncodingType type = pDescriptor->getDataType();
 
-         std::vector<RasterElement*>::iterator ElemIter = mCubesList.begin();
          vector<DataAccessor> accessors;
          vector<EncodingType> dataTypes;
-         for(unsigned int i = 0; i < mCubesList.size(); ++i)
+         for (unsigned int i = 0; i < mCubesList.size(); ++i)
          {
             FactoryResource<DataRequest> pRequest;
             pRequest->setInterleaveFormat(BIP);
             DataAccessor daCube = mCubesList[i]->getDataAccessor(pRequest.release());
             accessors.push_back(daCube);
-            const RasterDataDescriptor *pDdCube = dynamic_cast<RasterDataDescriptor*>(mCubesList.at(i)->
+            const RasterDataDescriptor* pDdCube = dynamic_cast<RasterDataDescriptor*>(mCubesList.at(i)->
                getDataDescriptor());
-            if(pDdCube != NULL)
+            if (pDdCube != NULL)
             {
                dataTypes.push_back(pDdCube->getDataType());
             }
@@ -439,7 +438,7 @@ bool BandMath::execute(PlugInArgList *pInputArgList, PlugInArgList *pOutputArgLi
             }
          }
 
-         char *mutableExpression = new char[mExpression.size() + 1];
+         char* mutableExpression = new char[mExpression.size() + 1];
          strcpy(mutableExpression, mExpression.c_str());
 
          errorCode = eval(mpProgress, accessors, dataTypes, mCubeRows,
@@ -449,15 +448,15 @@ bool BandMath::execute(PlugInArgList *pInputArgList, PlugInArgList *pOutputArgLi
          delete [] mutableExpression;
       }
 
-      if(errorCode != 0)
+      if (errorCode != 0)
       {
          mbError = true;
-         if(errorCode == -1)
+         if (errorCode == -1)
          {
             mstrProgressString = errorVal;
             meGabbiness = ERRORS;
          }
-         else if(errorCode == -2)
+         else if (errorCode == -2)
          {
             mstrProgressString = "BandMath was cancelled due to an error in the input expression.";
             meGabbiness = ABORT;
@@ -471,11 +470,11 @@ bool BandMath::execute(PlugInArgList *pInputArgList, PlugInArgList *pOutputArgLi
          return false;
       }
 
-      pStep->finalize(Message::Success);
+      pResultStep->finalize(Message::Success);
    }
    mpStep = pStep.get();
 
-   if(!createReturnGuiElement())
+   if (!createReturnGuiElement())
    {
       mstrProgressString = "Could not create GUI element.";
       meGabbiness = ERRORS;
@@ -486,7 +485,7 @@ bool BandMath::execute(PlugInArgList *pInputArgList, PlugInArgList *pOutputArgLi
    // Fill output arg list
    if (pOutputArgList != NULL)
    {
-      PlugInArg *pArg = NULL;
+      PlugInArg* pArg = NULL;
       pOutputArgList->getArg("Band Math Result", pArg);
 
       VERIFY(pArg != NULL);
@@ -495,9 +494,9 @@ bool BandMath::execute(PlugInArgList *pInputArgList, PlugInArgList *pOutputArgLi
 
    mpResultData->updateData();
 
-   if(mpProgress != NULL)
+   if (mpProgress != NULL)
    {
-      mpProgress->updateProgress("Algorithm completed successfully",  100, meGabbiness);
+      mpProgress->updateProgress("Algorithm completed successfully", 100, meGabbiness);
    }
 
    pStep->finalize(Message::Success);
@@ -505,12 +504,12 @@ bool BandMath::execute(PlugInArgList *pInputArgList, PlugInArgList *pOutputArgLi
    return true;
 }
 
-bool BandMath::parse(PlugInArgList *pArgInList, PlugInArgList *pArgOutList)
+bool BandMath::parse(PlugInArgList* pArgInList, PlugInArgList* pArgOutList)
 {
    PlugInArg* pArg = NULL;
 
    //get the progress pointer---------------------------------------------------
-   if(!pArgInList->getArg(ProgressArg(), pArg) || (pArg == NULL))
+   if (!pArgInList->getArg(ProgressArg(), pArg) || (pArg == NULL))
    {
       mstrProgressString = "Progress input argument not present.";
       return false;
@@ -518,14 +517,14 @@ bool BandMath::parse(PlugInArgList *pArgInList, PlugInArgList *pArgOutList)
    mpProgress = pArg->getPlugInArgValue<Progress>();
 
    //get the pointer to the cube data------------------------------------------
-   if(!pArgInList->getArg(DataElementArg(), pArg) || (pArg == NULL))
+   if (!pArgInList->getArg(DataElementArg(), pArg) || (pArg == NULL))
    {
       mstrProgressString = "Raster Element input argument not present.";
       return false;
    }
    mpCube = pArg->getPlugInArgValue<RasterElement>();
 
-   if(mpCube == NULL)
+   if (mpCube == NULL)
    {
       mstrProgressString = "Sensor data input argument not set.";
       return false;
@@ -534,12 +533,12 @@ bool BandMath::parse(PlugInArgList *pArgInList, PlugInArgList *pArgOutList)
    EncodingType dataType;
 
    const RasterDataDescriptor* pDescriptor = dynamic_cast<const RasterDataDescriptor*>(mpCube->getDataDescriptor());
-   if(pDescriptor != NULL)
+   if (pDescriptor != NULL)
    {
       dataType = pDescriptor->getDataType();
    }
 
-   if((dataType == INT4SCOMPLEX) || (dataType == FLT8COMPLEX))
+   if ((dataType == INT4SCOMPLEX) || (dataType == FLT8COMPLEX))
    {
       mstrProgressString = "Complex data is not supported!";
       return false;
@@ -552,10 +551,10 @@ bool BandMath::parse(PlugInArgList *pArgInList, PlugInArgList *pArgOutList)
       pArgInList->getArg("Results Name", paResultsNameArg));
    mbGuiIsNeeded = !bAllParametersProvided;
 
-   if(!mbInteractive || bAllParametersProvided)
+   if (!mbInteractive || bAllParametersProvided)
    {
       //get the pointer to the cube data------------------------------------------
-      if(!pArgInList->getArg("Raster Element 2", pArg) || (pArg == NULL))
+      if (!pArgInList->getArg("Raster Element 2", pArg) || (pArg == NULL))
       {
          mstrProgressString = "Raster Element input argument not present.";
          return false;
@@ -563,7 +562,7 @@ bool BandMath::parse(PlugInArgList *pArgInList, PlugInArgList *pArgOutList)
       mpCube2 = pArg->getPlugInArgValue<RasterElement>();
 
       //get the pointer to the cube data------------------------------------------
-      if(!pArgInList->getArg("Raster Element 3", pArg) || (pArg == NULL))
+      if (!pArgInList->getArg("Raster Element 3", pArg) || (pArg == NULL))
       {
          mstrProgressString = "Raster Element input argument not present.";
          return false;
@@ -571,7 +570,7 @@ bool BandMath::parse(PlugInArgList *pArgInList, PlugInArgList *pArgOutList)
       mpCube3 = pArg->getPlugInArgValue<RasterElement>();
 
       //get the pointer to the cube data------------------------------------------
-      if(!pArgInList->getArg("Raster Element 4", pArg) || (pArg == NULL))
+      if (!pArgInList->getArg("Raster Element 4", pArg) || (pArg == NULL))
       {
          mstrProgressString = "Raster Element input argument not present.";
          return false;
@@ -579,7 +578,7 @@ bool BandMath::parse(PlugInArgList *pArgInList, PlugInArgList *pArgOutList)
       mpCube4 = pArg->getPlugInArgValue<RasterElement>();
 
       //get the pointer to the cube data------------------------------------------
-      if(!pArgInList->getArg("Raster Element 5", pArg) || (pArg == NULL))
+      if (!pArgInList->getArg("Raster Element 5", pArg) || (pArg == NULL))
       {
          mstrProgressString = "Raster Element input argument not present.";
          return false;
@@ -587,14 +586,14 @@ bool BandMath::parse(PlugInArgList *pArgInList, PlugInArgList *pArgOutList)
       mpCube5 = pArg->getPlugInArgValue<RasterElement>();
 
       //get the Expression --------------------------------------------------------
-      if(!pArgInList->getArg( "Input Expression", pArg) || (pArg == NULL))
+      if (!pArgInList->getArg( "Input Expression", pArg) || (pArg == NULL))
       {
          mstrProgressString = "Input Expression argument not present.";
          return false;
       }
       {
-         string *pTmp = pArg->getPlugInArgValue<string>();
-         if(pTmp != NULL)
+         string* pTmp = pArg->getPlugInArgValue<string>();
+         if (pTmp != NULL)
          {
             mExpression = *pTmp;
          }
@@ -606,14 +605,14 @@ bool BandMath::parse(PlugInArgList *pArgInList, PlugInArgList *pArgOutList)
       }
 
       //get the Display Results Value--------------------------------------------------------
-      if(!pArgInList->getArg("Display Results", pArg) || (pArg == NULL))
+      if (!pArgInList->getArg("Display Results", pArg) || (pArg == NULL))
       {
          mstrProgressString = "Display Results input argument not present.";
          return false;
       }
       {
-         bool *pTmp = pArg->getPlugInArgValue<bool>();
-         if(pTmp != NULL)
+         bool* pTmp = pArg->getPlugInArgValue<bool>();
+         if (pTmp != NULL)
          {
             mbDisplayResults = *pTmp;
          }
@@ -625,14 +624,14 @@ bool BandMath::parse(PlugInArgList *pArgInList, PlugInArgList *pArgOutList)
       }
 
       //   get the Degrees Value--------------------------------------------------------
-      if(!pArgInList->getArg("Degrees", pArg) || (pArg == NULL))
+      if (!pArgInList->getArg("Degrees", pArg) || (pArg == NULL))
       {
          mstrProgressString = "Degrees input argument not present.";
          return false;
       }
       {
-         bool *pTmp = pArg->getPlugInArgValue<bool>();
-         if(pTmp != NULL)
+         bool* pTmp = pArg->getPlugInArgValue<bool>();
+         if (pTmp != NULL)
          {
             mbDegrees = *pTmp;
          }
@@ -649,14 +648,14 @@ bool BandMath::parse(PlugInArgList *pArgInList, PlugInArgList *pArgOutList)
 
 void BandMath::displayErrorMessage()
 {
-   if(mpProgress != NULL)
+   if (mpProgress != NULL)
    {
       mpProgress->updateProgress(mstrProgressString, 0, meGabbiness);
-      if(meGabbiness == ABORT)
+      if (meGabbiness == ABORT)
       {
          mpStep->finalize(Message::Abort, mstrProgressString);
       }
-      else if(meGabbiness == ERRORS)
+      else if (meGabbiness == ERRORS)
       {
          mpStep->finalize(Message::Failure, mstrProgressString);
       }
@@ -669,7 +668,7 @@ bool BandMath::createReturnValue(string partialResultsName)
    FactoryResource<Filename> pFilename;
    string shortResultsName;
    string longResultsName;
-   if(pFilename.get() != NULL)
+   if (pFilename.get() != NULL)
    {
       pFilename->setFullPathAndName(mpCube->getFilename());
       shortResultsName = pFilename->getTitle() + " = " + partialResultsName;
@@ -677,7 +676,7 @@ bool BandMath::createReturnValue(string partialResultsName)
    }
    mResultsName = longResultsName;
 
-   const RasterDataDescriptor *pOrigDescriptor = dynamic_cast<RasterDataDescriptor*>(mpCube->getDataDescriptor());
+   const RasterDataDescriptor* pOrigDescriptor = dynamic_cast<RasterDataDescriptor*>(mpCube->getDataDescriptor());
    const vector<DimensionDescriptor>& origRows = pOrigDescriptor->getRows();
    const vector<DimensionDescriptor>& origColumns = pOrigDescriptor->getColumns();
 
@@ -689,7 +688,7 @@ bool BandMath::createReturnValue(string partialResultsName)
       bandCount = 1;
    }
 
-   RasterElement *pParent = NULL;
+   RasterElement* pParent = NULL;
    if (mbAsLayerOnExistingView)
    {
       pParent = mpCube;
@@ -764,11 +763,11 @@ bool BandMath::createReturnGuiElement()
 {
    bool bSuccess = false;
 
-   if(mbInteractive || mbDisplayResults) 
+   if (mbInteractive || mbDisplayResults) 
    {
-      SpatialDataWindow *pWindow = NULL;
+      SpatialDataWindow* pWindow = NULL;
 
-      if(mbAsLayerOnExistingView) 
+      if (mbAsLayerOnExistingView) 
       {
          // Create the spectral data window
          // Attach results matrix to data set view
@@ -786,7 +785,7 @@ bool BandMath::createReturnGuiElement()
 
       VERIFYRV(pWindow != NULL, NULL);
       
-      SpatialDataView *pView = pWindow->getSpatialDataView();
+      SpatialDataView* pView = pWindow->getSpatialDataView();
       VERIFYRV(pView != NULL, NULL);
 
       UndoLock lock(pView);
@@ -797,12 +796,12 @@ bool BandMath::createReturnGuiElement()
       }
 
       LayerList* pLayerList = pView->getLayerList();
-      if(pLayerList != NULL)
+      if (pLayerList != NULL)
       {
          Layer* pLayer = pLayerList->getLayer(RASTER, mpResultData);
-         if(pLayer == NULL)
+         if (pLayer == NULL)
          {
-            if(pView->createLayer(RASTER, mpResultData) != NULL)
+            if (pView->createLayer(RASTER, mpResultData) != NULL)
             {
                bSuccess = true;
             }

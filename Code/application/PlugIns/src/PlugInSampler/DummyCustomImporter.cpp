@@ -25,10 +25,9 @@ DummyCustomImporter::DummyCustomImporter()
 }
 
 DummyCustomImporter::~DummyCustomImporter()
-{
-}
+{}
 
-bool DummyCustomImporter::getInputSpecification( PlugInArgList * &pArgList )
+bool DummyCustomImporter::getInputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
 
@@ -39,17 +38,17 @@ bool DummyCustomImporter::getInputSpecification( PlugInArgList * &pArgList )
    }
 
    PlugInArg* pArg = mpPlugInManager->getPlugInArg();
-   if( pArg != NULL )
+   if (pArg != NULL)
    {
-      pArg->setName( "Filename" );
-      pArg->setType( "string" );
-      pArgList->addArg( *pArg );
+      pArg->setName("Filename");
+      pArg->setType("string");
+      pArgList->addArg(*pArg);
    }
 
    return true;
 }
 
-bool DummyCustomImporter::getOutputSpecification( PlugInArgList * &pArgList )
+bool DummyCustomImporter::getOutputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
 
@@ -60,12 +59,12 @@ bool DummyCustomImporter::getOutputSpecification( PlugInArgList * &pArgList )
    }
 
    PlugInArg* pArg = mpPlugInManager->getPlugInArg();
-   if( pArg != NULL )
+   if (pArg != NULL)
    {
       mpModel->addElementType("DummyType");
-      pArg->setName( "Custom Test Element" );
-      pArg->setType( "DummyType" );
-      pArgList->addArg( *pArg );
+      pArg->setName("Custom Test Element");
+      pArg->setType("DummyType");
+      pArgList->addArg(*pArg);
    }
 
    return true;
@@ -97,12 +96,12 @@ vector<ImportDescriptor*> DummyCustomImporter::getImportDescriptors(const string
    return data;
 }
 
-bool DummyCustomImporter::execute( PlugInArgList* inputArgList, PlugInArgList* outputArgList )
+bool DummyCustomImporter::execute(PlugInArgList* inputArgList, PlugInArgList* outputArgList)
 {
    return true;
 }
 
-unsigned char DummyCustomImporter::getFileAffinity( const std::string& filename )
+unsigned char DummyCustomImporter::getFileAffinity(const string& filename)
 {
    return Importer::CAN_NOT_LOAD;
 }

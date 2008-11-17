@@ -93,7 +93,7 @@ private:
    ModeType mCurrentMode;
    QFont mFont;
 
-   static unsigned int msNumLayers;
+   static unsigned int sNumLayers;
 };
 
 #define AOILAYERADAPTEREXTENSION_CLASSES \

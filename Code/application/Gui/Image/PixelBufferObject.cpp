@@ -79,10 +79,10 @@ bool PixelBufferObject::copyBytes(void *pData, int numBytes)
       return false;
    }
 
-   void *pReturn = NULL;
+   void* pReturn = NULL;
    if (mpDataBuffer != NULL && pData != NULL)
    {
-      switch(mAccessMode)
+      switch (mAccessMode)
       {
          case GL_READ_ONLY:
             pReturn = memcpy(pData, mpDataBuffer, numBytes);
@@ -96,6 +96,16 @@ bool PixelBufferObject::copyBytes(void *pData, int numBytes)
    }
 
    return (pReturn != NULL);
+}
+
+GLenum PixelBufferObject::getAccessMode()
+{
+   return mAccessMode;
+}
+
+int PixelBufferObject::getSize()
+{
+   return mNumBytes;
 }
 
 GLuint PixelBufferObject::allocatePixelBufferObject(int numBytes, GLenum access)

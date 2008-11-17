@@ -30,8 +30,8 @@ public:
 
    DateTime* getDateTime();
    void destroyDateTime(DateTime* dt);
-   Progress* getProgress(bool threadSafe=false);
-   void destroyProgress(Progress* pg);
+   Progress* getProgress(bool threadSafe = false);
+   void destroyProgress(Progress* pProgress);
    MessageLogMgr* getMessageLog() const;
    unsigned int getNumProcessors() const;
    std::string getDefaultClassification() const;

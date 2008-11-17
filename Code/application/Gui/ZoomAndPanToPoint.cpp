@@ -25,14 +25,14 @@ const int ZOOMBOX_MIN = 1;
 const int ZOOMBOX_MAX = 5000;
 
 // =============================================================================
-ZoomAndPanToPointDlg::ZoomAndPanToPointDlg(RasterElement *pRaster, GeocoordType coordType, QWidget* parent) :
+ZoomAndPanToPointDlg::ZoomAndPanToPointDlg(RasterElement* pRaster, GeocoordType coordType, QWidget* parent) :
    QDialog(parent),
-   mCoordType(coordType),
-   mpRaster(pRaster),
    mpLatitudeEdit(NULL),
    mpLongitudeEdit(NULL),
    mpZoneEdit(NULL),
-   mpHemEdit(NULL)
+   mpHemEdit(NULL),
+   mCoordType(coordType),
+   mpRaster(pRaster)
 {
    QGridLayout* pGrid = new QGridLayout(this);
    pGrid->setMargin(10);
@@ -151,7 +151,7 @@ ZoomAndPanToPointDlg::ZoomAndPanToPointDlg(RasterElement *pRaster, GeocoordType 
    }
 
    QString caption = "Coordinate Locator";
-   switch(mCoordType)
+   switch (mCoordType)
    {
    case GEOCOORD_LATLON:
       pGrid->addWidget(new QLabel("Latitude:", this), 0, 0, 1, 2);
@@ -223,8 +223,8 @@ ZoomAndPanToPointDlg::ZoomAndPanToPointDlg(RasterElement *pRaster, GeocoordType 
 
    if (mpZoneEdit != NULL)
    {
-     connect(mpZoneEdit, SIGNAL(textChanged(const QString&)), this, SLOT(allowOk()));
-     connect(mpZoneEdit, SIGNAL(editingFinished()), this, SLOT(zoneModified()));
+      connect(mpZoneEdit, SIGNAL(textChanged(const QString&)), this, SLOT(allowOk()));
+      connect(mpZoneEdit, SIGNAL(editingFinished()), this, SLOT(zoneModified()));
    }
 
    if (mpHemEdit != NULL)
@@ -239,7 +239,7 @@ ZoomAndPanToPointDlg::ZoomAndPanToPointDlg(RasterElement *pRaster, GeocoordType 
 
 void ZoomAndPanToPointDlg::setZoomPct(float pct)
 {
-   mpZoomBox->setValue((int)pct);
+   mpZoomBox->setValue(static_cast<int>(pct));
 }
 
 float ZoomAndPanToPointDlg::getZoomPct() const
@@ -259,8 +259,6 @@ bool invalid(const QString& str)
 
 void ZoomAndPanToPointDlg::allowOk()
 {
-   QString latStr, lonStr;
-
    if (invalid(mpLatitudeEdit->text()) || // this one will always need to be there
        (mCoordType == GEOCOORD_LATLON &&
               invalid(mpLongitudeEdit->text())) ||
@@ -268,29 +266,39 @@ void ZoomAndPanToPointDlg::allowOk()
               (invalid(mpLongitudeEdit->text()) ||
                invalid(mpZoneEdit->text()) ||
                invalid(mpHemEdit->text()))))
-      {
-         mpOK->setEnabled(false); // disallow user to click OK
-      }
-   else mpOK->setEnabled(true); // allow user to click OK
+   {
+      mpOK->setEnabled(false); // disallow user to click OK
+   }
+   else
+   {
+      mpOK->setEnabled(true); // allow user to click OK
+   }
 }
 
 void ZoomAndPanToPointDlg::zoneModified()
 {
-   if ((mpZoneEdit != NULL) &&!invalid(mpZoneEdit->text()))
+   if ((mpZoneEdit != NULL) && !invalid(mpZoneEdit->text()))
    {
       int zone = mpZoneEdit->text().toInt();
-      if (zone > 31 || zone < 1) zone = 31;
+      if (zone > 31 || zone < 1)
+      {
+         zone = 31;
+      }
+
       mpZoneEdit->setText(QString::number(zone));
    }
 }
 
 void ZoomAndPanToPointDlg::hemModified()
 {
-   if ((mpHemEdit != NULL) &&!invalid(mpHemEdit->text()))
+   if ((mpHemEdit != NULL) && !invalid(mpHemEdit->text()))
    {
       QString str = (mpHemEdit->text()).toUpper();
-      if (! (str == QString("N") || str == QString("S")) )
+      if (!(str == QString("N") || str == QString("S")))
+      {
          str = QString("N");
+      }
+
       mpHemEdit->setText(str);
    }
 }
@@ -304,7 +312,7 @@ void ZoomAndPanToPointDlg::latModified()
       lon = mpLongitudeEdit->text().toStdString();
    }
 
-   switch(mCoordType)
+   switch (mCoordType)
    {
       case GEOCOORD_LATLON:
       {
@@ -315,7 +323,9 @@ void ZoomAndPanToPointDlg::latModified()
 
       case GEOCOORD_UTM:
       {
-         QString latStr = mpLatitudeEdit->text(), lonStr = mpLongitudeEdit->text(), zoneStr = mpZoneEdit->text();
+         QString latStr = mpLatitudeEdit->text();
+         QString lonStr = mpLongitudeEdit->text();
+         QString zoneStr = mpZoneEdit->text();
 
          //if (invalid(latStr) || invalid(lonStr) || invalid(zoneStr) || invalid(mpHemEdit->text()))
          //   return; // can't do anything if any are invalid
@@ -330,7 +340,7 @@ void ZoomAndPanToPointDlg::latModified()
          }
 
          string hem = mpHemEdit->text().toStdString();
-         UtmPoint pt(lonStr.toDouble(), latStr.toDouble(), zoneStr.toInt(), hem[0]);         
+         UtmPoint pt(lonStr.toDouble(), latStr.toDouble(), zoneStr.toInt(), hem[0]);
          mpLatitudeEdit->setText(pt.getNorthingText().c_str());
 
          break;
@@ -352,13 +362,12 @@ void ZoomAndPanToPointDlg::latModified()
 
 void ZoomAndPanToPointDlg::lonModified()
 {
-  if (mCoordType == GEOCOORD_MGRS)
-  {
-     return; // nothing to do since MGRS is 1 coord
-  }
+   if (mCoordType == GEOCOORD_MGRS)
+   {
+      return; // nothing to do since MGRS is 1 coord
+   }
 
-
-   switch(mCoordType)
+   switch (mCoordType)
    {
       case GEOCOORD_LATLON:
       {
@@ -371,13 +380,15 @@ void ZoomAndPanToPointDlg::lonModified()
 
       case GEOCOORD_UTM: 
       {
-         QString latStr = mpLatitudeEdit->text(), lonStr = mpLongitudeEdit->text(), zoneStr = mpZoneEdit->text();
+         QString latStr = mpLatitudeEdit->text();
+         QString lonStr = mpLongitudeEdit->text();
+         QString zoneStr = mpZoneEdit->text();
 
          //if (invalid(latStr) || invalid(lonStr) || invalid(zoneStr) || invalid(mpHemEdit->text()))
          //   return; // can't do anything if any are invalid
 
-         lonStr.remove( 0, 1 );
-         latStr.remove( 0, 1 );
+         lonStr.remove(0, 1);
+         latStr.remove(0, 1);
          string hem = mpHemEdit->text().toStdString();
          UtmPoint pt(lonStr.toDouble(), latStr.toDouble(), zoneStr.toInt(), hem[0]);         
          mpLongitudeEdit->setText(UtmPoint(pt).getEastingText().c_str());
@@ -391,7 +402,9 @@ void ZoomAndPanToPointDlg::lonModified()
 
 LocationType ZoomAndPanToPointDlg::getCenter() const
 {
-   QString latStr, lonStr, zone;
+   QString latStr;
+   QString lonStr;
+   QString zone;
    string hem;
 
    // by the time the user hits OK, the QString cannot be empty
@@ -424,8 +437,8 @@ LocationType ZoomAndPanToPointDlg::getCenter() const
 
       case GEOCOORD_UTM:
       {
-         lonStr.remove( 0, 1 );
-         latStr.remove( 0, 1 );
+         lonStr.remove(0, 1);
+         latStr.remove(0, 1);
          UtmPoint utp(lonStr.toDouble(), latStr.toDouble(), zone.toInt(), hem[0]);
          pt = utp.getLatLonCoordinates();
          break;
@@ -439,7 +452,7 @@ LocationType ZoomAndPanToPointDlg::getCenter() const
       }
 
       default: // pixel coordinates
-         return LocationType (latStr.toInt(), lonStr.toInt());
+         return LocationType(latStr.toInt(), lonStr.toInt());
    }
 
    // we'll only get here if the cube is georeferenced... so now convert the pixel

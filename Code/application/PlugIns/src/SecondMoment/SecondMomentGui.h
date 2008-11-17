@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef SECONDMOMENTGUI_H__
-#define SECONDMOMENTGUI_H__
+#ifndef SECONDMOMENTGUI_H
+#define SECONDMOMENTGUI_H
 
 #include <QtCore/QFileInfo>
 #include <QtGui/QDialog>
@@ -29,8 +27,9 @@ class SecondMomentGui : public QDialog
    Q_OBJECT
 
 public:
-   SecondMomentGui(RasterElement* pElement, int rowFactor, int columnFactor,
-      bool forceRecalculate, bool elementExists, QWidget* pParent = 0);
+   SecondMomentGui(RasterElement* pElement, int rowFactor, int columnFactor, bool forceRecalculate,
+      bool elementExists, QWidget* pParent = 0);
+
    int getRowFactor() const;
    int getColumnFactor() const;
    AoiElement* getAoi() const;

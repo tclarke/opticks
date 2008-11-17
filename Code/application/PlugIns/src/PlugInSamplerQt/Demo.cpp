@@ -114,15 +114,19 @@ bool Demo::populateDefaultOutputArgList(PlugInArgList *pArgList)
 bool Demo::parseInputArgList(PlugInArgList *pArgList)
 {
    bool success = true;
-   
+
    VERIFY(pArgList != NULL);
    mpProgress = pArgList->getPlugInArgValue<Progress>(ProgressArg());
 
-   RasterElement *pRasterElement = pArgList->getPlugInArgValue<RasterElement>(DataElementArg());
+   RasterElement* pRasterElement = pArgList->getPlugInArgValue<RasterElement>(DataElementArg());
    if (pRasterElement == NULL)
    {
-      std::string msg = "Error Demo001: The raster element input value is invalid!";
-      if (mpProgress != NULL) mpProgress->updateProgress(msg, 0, ERRORS);
+      string msg = "Error Demo001: The raster element input value is invalid!";
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(msg, 0, ERRORS);
+      }
+
       return false;
    }
 
@@ -144,10 +148,10 @@ bool Demo::parseInputArgList(PlugInArgList *pArgList)
          return false;
       }
 
-      mInputs.mNodes.push_back(PlugInSamplerQt::Node(black, ColorType(0,0,0)));
-      mInputs.mNodes.push_back(PlugInSamplerQt::Node(red, ColorType(0xff,0,0)));
-      mInputs.mNodes.push_back(PlugInSamplerQt::Node(yellow, ColorType(0xff,0xff,0)));
-      mInputs.mNodes.push_back(PlugInSamplerQt::Node(white, ColorType(0xff,0xff,0xff)));
+      mInputs.mNodes.push_back(PlugInSamplerQt::Node(black, ColorType(0, 0, 0)));
+      mInputs.mNodes.push_back(PlugInSamplerQt::Node(red, ColorType(0xff, 0, 0)));
+      mInputs.mNodes.push_back(PlugInSamplerQt::Node(yellow, ColorType(0xff, 0xff, 0)));
+      mInputs.mNodes.push_back(PlugInSamplerQt::Node(white, ColorType(0xff, 0xff, 0xff)));
    }
 
    // create and register the algorithm object
@@ -159,8 +163,11 @@ bool Demo::parseInputArgList(PlugInArgList *pArgList)
    }
    else
    {
-      std::string msg = "Error Demo002: Not all input values could be extracted!";
-      if (mpProgress != NULL) mpProgress->updateProgress(msg, 0, ERRORS);
+      string msg = "Error Demo002: Not all input values could be extracted!";
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(msg, 0, ERRORS);
+      }
    }
 
    return success;

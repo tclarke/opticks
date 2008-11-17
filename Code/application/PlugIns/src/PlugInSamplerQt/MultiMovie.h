@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef MULTI_MOVIE_H
-#define MULTI_MOVIE_H
+#ifndef MULTIMOVIE_H
+#define MULTIMOVIE_H
 
 #include "AlgorithmShell.h"
 
@@ -30,12 +30,12 @@ private:
    RasterElement* mpRaster1;
    RasterElement* mpRaster2;
    RasterElement* mpRaster3;
-   SpatialDataWindow *mpWindow1;
-   SpatialDataWindow *mpWindow2;
-   SpatialDataWindow *mpWindow3;
-   RasterLayer *mpLayer1;
-   RasterLayer *mpLayer2;
-   RasterLayer *mpLayer3;
+   SpatialDataWindow* mpWindow1;
+   SpatialDataWindow* mpWindow2;
+   SpatialDataWindow* mpWindow3;
+   RasterLayer* mpLayer1;
+   RasterLayer* mpLayer2;
+   RasterLayer* mpLayer3;
    static const int mNumRows = 256;
    static const int mNumCols = 256;
    static const int mNumBands = 256;

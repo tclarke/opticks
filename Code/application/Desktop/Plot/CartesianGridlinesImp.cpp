@@ -224,7 +224,7 @@ bool CartesianGridlinesImp::toXml(XMLWriter* pXml) const
    }
    pXml->addAttr("orientation", mOrientation);
    pXml->pushAddPoint(pXml->addElement("Lines"));
-   if(!mLines.toXml(pXml))
+   if (!mLines.toXml(pXml))
    {
       return false;
    }
@@ -240,11 +240,11 @@ bool CartesianGridlinesImp::fromXml(DOMNode* pDocument, unsigned int version)
    }
    mOrientation = StringUtilities::fromXmlString<OrientationType>(
       A(static_cast<DOMElement*>(pDocument)->getAttribute(X("orientation"))));
-   for(DOMNode *pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
+   for (DOMNode* pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
    {
-      if(XMLString::equals(pChld->getNodeName(), X("Lines")))
+      if (XMLString::equals(pChld->getNodeName(), X("Lines")))
       {
-         if(!mLines.fromXml(pChld, version))
+         if (!mLines.fromXml(pChld, version))
          {
             return false;
          }

@@ -13,7 +13,8 @@
 #include "AnnotationElement.h"
 #include "AnnotationElementImp.h"
 
-class AnnotationElementAdapter : public AnnotationElement, public AnnotationElementImp ANNOTATIONELEMENTADAPTEREXTENSION_CLASSES
+class AnnotationElementAdapter : public AnnotationElement, public AnnotationElementImp
+   ANNOTATIONELEMENTADAPTEREXTENSION_CLASSES
 {
 public:
    AnnotationElementAdapter(const DataDescriptorImp& descriptor, const std::string& id);

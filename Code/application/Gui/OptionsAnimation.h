@@ -88,8 +88,8 @@ protected slots:
    void editFrameSpeedFinished(QListWidgetItem *pCurrentItem);
 
 private:
-   AnimationCycleButton *mpCycle;
-   QListWidget *mpFrameSpeedList;
+   AnimationCycleButton* mpCycle;
+   QListWidget* mpFrameSpeedList;
    std::vector<double> mFrameSpeeds;
 };
 

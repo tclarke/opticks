@@ -15,12 +15,13 @@
 class CustomElementData : public AnyData
 {
 public:
-   CustomElementData()
+   CustomElementData() :
+      mValue(0)
    {
    }
 
    CustomElementData(int value) :
-   mValue(value)
+      mValue(value)
    {
    }
 

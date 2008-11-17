@@ -32,7 +32,7 @@
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
 
-LayerImporter::LayerImporter() : mInteractive(false)
+LayerImporter::LayerImporter()
 {
    setName("Layer Importer");
    setCreator("Ball Aerospace & Technologies Corp.");
@@ -55,7 +55,7 @@ LayerImporter::~LayerImporter()
 {
 }
 
-bool LayerImporter::getInputSpecification(PlugInArgList *&pInArgList)
+bool LayerImporter::getInputSpecification(PlugInArgList*& pInArgList)
 {
    pInArgList = mpPlugInManager->getPlugInArgList();
    VERIFY(pInArgList != NULL);
@@ -67,7 +67,7 @@ bool LayerImporter::getInputSpecification(PlugInArgList *&pInArgList)
    return true;
 }
 
-bool LayerImporter::getOutputSpecification(PlugInArgList *&pOutArgList)
+bool LayerImporter::getOutputSpecification(PlugInArgList*& pOutArgList)
 {
    pOutArgList = mpPlugInManager->getPlugInArgList();
    VERIFY(pOutArgList != NULL);
@@ -94,21 +94,21 @@ vector<ImportDescriptor*> LayerImporter::getImportDescriptors(const string& file
       }
 
       XmlReader xml(pLog);
-      XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *pDoc = xml.parse(filename, "metadata");
-      DOMElement *pRootElement = NULL;
+      XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* pDoc = xml.parse(filename, "metadata");
+      DOMElement* pRootElement = NULL;
       if (pDoc != NULL)
       {
          pRootElement = pDoc->getDocumentElement();
       }
       if (pRootElement != NULL)
       {
-         for(DOMNode* pChild = pRootElement->getFirstChild();
+         for (DOMNode* pChild = pRootElement->getFirstChild();
             pChild != NULL;
             pChild = pChild->getNextSibling())
          {
             if (pChild->getNodeType() == DOMNode::ELEMENT_NODE)
             {
-               DOMElement *pChildElement = static_cast<DOMElement*>(pChild);
+               DOMElement* pChildElement = static_cast<DOMElement*>(pChild);
                string cNodeName = A(pChildElement->getNodeName());
 
                ImportDescriptor* pImportDescriptor = ModelImporter::populateImportDescriptor(pChildElement, filename);
@@ -136,11 +136,11 @@ unsigned char LayerImporter::getFileAffinity(const std::string& filename)
    }
 }
 
-bool LayerImporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
+bool LayerImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
-   Layer *pLayer = NULL;
-   Progress *pProgress = NULL;
-   DataElement *pElement = NULL;
+   Layer* pLayer = NULL;
+   Progress* pProgress = NULL;
+   DataElement* pElement = NULL;
    SpatialDataView* pView = NULL;
    StepResource pStep("Import layer", "app", "DF24688A-6B34-4244-98FF-5FFE2063AC05");
 
@@ -178,7 +178,7 @@ bool LayerImporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
    // parse the xml
    XmlReader xml(Service<MessageLogMgr>()->getLog());
 
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *pDomDocument = xml.parse(pElement->getFilename());
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* pDomDocument = xml.parse(pElement->getFilename());
    if (pDomDocument == NULL)
    {
       if (pProgress != NULL)
@@ -189,7 +189,7 @@ bool LayerImporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
       return false;
    }
 
-   DOMElement *pRootElement = pDomDocument->getDocumentElement();
+   DOMElement* pRootElement = pDomDocument->getDocumentElement();
    VERIFY(pRootElement != NULL);
 
    if (pProgress != NULL)
@@ -211,7 +211,7 @@ bool LayerImporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
    if (pView == NULL)
    {
       //no view provided, so find current view
-      SpatialDataWindow *pWindow = dynamic_cast<SpatialDataWindow*>(mpDesktop->getCurrentWorkspaceWindow());
+      SpatialDataWindow* pWindow = dynamic_cast<SpatialDataWindow*>(mpDesktop->getCurrentWorkspaceWindow());
       if (pWindow != NULL)
       {
          pView = pWindow->getSpatialDataView();
@@ -282,7 +282,7 @@ bool LayerImporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
          return false;
       }
    }
-   catch(XmlReader::DomParseException &)
+   catch (XmlReader::DomParseException&)
    {
       return false;
    }

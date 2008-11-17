@@ -72,56 +72,56 @@ private:
    enum MetafileConstantEnum
    {
       // Delimiters
-      BEGIN_METAFILE                = 0x003f,
-      BEGIN_PICTURE                 = 0x007f,
-      BEGIN_PICTURE_BODY            = 0x0080,
-      END_PICTURE                   = 0x00a0,
-      END_METAFILE                  = 0x0040,
+      BEGIN_METAFILE = 0x003f,
+      BEGIN_PICTURE = 0x007f,
+      BEGIN_PICTURE_BODY = 0x0080,
+      END_PICTURE = 0x00a0,
+      END_METAFILE = 0x0040,
 
       // Metafile descriptors
-      METAFILE_VERSION              = 0x1022,
-      METAFILE_ELEMENT_LIST         = 0x1166,
-      METAFILE_DESCRIPTION          = 0x105f,
-      FONT_LIST                     = 0x11bf,
+      METAFILE_VERSION = 0x1022,
+      METAFILE_ELEMENT_LIST = 0x1166,
+      METAFILE_DESCRIPTION = 0x105f,
+      FONT_LIST = 0x11bf,
 
       // Picture descriptors
-      COLOR_SELECTION_MODE          = 0x2042,
+      COLOR_SELECTION_MODE = 0x2042,
       EDGE_WIDTH_SPECIFICATION_MODE = 0x20a2,
       LINE_WIDTH_SPECIFICATION_MODE = 0x2062,
-      VDC_EXTENT                    = 0x20c8,
+      VDC_EXTENT = 0x20c8,
 
       // Control elements
-      AUXILLIARY_COLOR              = 0x3063,
-      TRANSPARENCY                  = 0x3082,
+      AUXILLIARY_COLOR = 0x3063,
+      TRANSPARENCY = 0x3082,
 
       // Attributes
-      TEXT_COLOR                    = 0x51c3,
-      CHARACTER_HEIGHT              = 0x51e2,
-      TEXT_FONT_INDEX               = 0x5142,
-      CHARACTER_ORIENTATION         = 0x5208,
-      FILL_COLOR                    = 0x52e3,
-      INTERIOR_STYLE                = 0x52c2,
-      HATCH_INDEX                   = 0x5302,
-      EDGE_VISIBILITY               = 0x53c2,
-      EDGE_WIDTH                    = 0x5382,
-      EDGE_TYPE                     = 0x5362,
-      EDGE_COLOR                    = 0x53a3,
-      LINE_WIDTH                    = 0x5062,
-      LINE_TYPE                     = 0x5042,
-      LINE_COLOR                    = 0x5083,
+      TEXT_COLOR = 0x51c3,
+      CHARACTER_HEIGHT = 0x51e2,
+      TEXT_FONT_INDEX = 0x5142,
+      CHARACTER_ORIENTATION = 0x5208,
+      FILL_COLOR = 0x52e3,
+      INTERIOR_STYLE = 0x52c2,
+      HATCH_INDEX = 0x5302,
+      EDGE_VISIBILITY = 0x53c2,
+      EDGE_WIDTH = 0x5382,
+      EDGE_TYPE = 0x5362,
+      EDGE_COLOR = 0x53a3,
+      LINE_WIDTH = 0x5062,
+      LINE_TYPE = 0x5042,
+      LINE_COLOR = 0x5083,
 
       // Graphical primitives
-      TEXT                          = 0x409f,
-      POLYGON                       = 0x40ff,
-      POLYGON_SET                   = 0x411f,
-      ELLIPSE                       = 0x422c,
-      POLYLINE                      = 0x403f,
-      ELLIPTICAL_ARC                = 0x4254,
-      ELLIPTICAL_ARC_CLOSE          = 0x4276,
-      RECTANGLE                     = 0x4168,
-      CIRCLE                        = 0x4186,
-      CIRCULAR_ARC_CENTER           = 0x41ee,
-      CIRCULAR_ARC_CENTER_CLOSE     = 0x4210
+      TEXT = 0x409f,
+      POLYGON = 0x40ff,
+      POLYGON_SET = 0x411f,
+      ELLIPSE = 0x422c,
+      POLYLINE = 0x403f,
+      ELLIPTICAL_ARC = 0x4254,
+      ELLIPTICAL_ARC_CLOSE = 0x4276,
+      RECTANGLE = 0x4168,
+      CIRCLE = 0x4186,
+      CIRCULAR_ARC_CENTER = 0x41ee,
+      CIRCULAR_ARC_CENTER_CLOSE = 0x4210
    };
 
    /**

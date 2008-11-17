@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef _MEMORYMAPPEDMATRIX
-#define _MEMORYMAPPEDMATRIX
+#ifndef MEMORYMAPPEDMATRIX_H
+#define MEMORYMAPPEDMATRIX_H
 
 #if defined(WIN_API)
 #include <windows.h>
@@ -56,8 +54,7 @@ private:
    int mHandle;
 #endif
 
-   std::set<MemoryMappedMatrixView*> views;
-
+   std::set<MemoryMappedMatrixView*> mViews;
 
    InterleaveFormatType mInterleave;
    unsigned int mBytesPerElement;
@@ -70,19 +67,9 @@ private:
    unsigned int mInterBandBytes;
 
    unsigned int mGranularity;
-   unsigned int currentSegment;
-
-   unsigned char* mpBlock;
-   size_t mBlockSize;
-
-   unsigned int mRequestedAddressLow;
-   unsigned int mRequestedAddressHigh;
-   unsigned int mAddressOffset;
-   unsigned int mAddressLow;
-   unsigned int mAddressHigh;
 
    unsigned int mHeaderOffset;
    bool mReadOnly;
 };
 
-#endif  // _MEMORYMAPPEDMATRIX
+#endif

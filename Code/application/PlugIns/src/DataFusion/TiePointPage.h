@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef TIE_POINT_PAGE_H
-#define TIE_POINT_PAGE_H
+#ifndef TIEPOINTPAGE_H
+#define TIEPOINTPAGE_H
 
 #include <QtCore/QMap>
 #include <QtGui/QWidget>
@@ -34,26 +34,26 @@ public:
    TiePointPage(QWidget* pParent);
    ~TiePointPage();
 
-   void gcpLayerAttached(Subject &subject, const std::string &signal, const boost::any &v);
-   void gcpLayerDetached(Subject &subject, const std::string &signal, const boost::any &v);
-   void gcpLayerDeleted(Subject &subject, const std::string &signal, const boost::any &v);
-   void gcpListDeleted(Subject &subject, const std::string &signal, const boost::any &v);
-   void gcpListModified(Subject &subject, const std::string &signal, const boost::any &v);
-   void gcpListDetached(Subject &subject, const std::string &signal, const boost::any &v);
-   void tiePointListDeleted(Subject &subject, const std::string &signal, const boost::any &v);
-   void attached(Subject &subject, const std::string &signal, const Slot &slot);
-   void detached(Subject &subject, const std::string &signal, const Slot &slot);
+   void gcpLayerAttached(Subject& subject, const std::string& signal, const boost::any& v);
+   void gcpLayerDetached(Subject& subject, const std::string& signal, const boost::any& v);
+   void gcpLayerDeleted(Subject& subject, const std::string& signal, const boost::any& v);
+   void gcpListDeleted(Subject& subject, const std::string& signal, const boost::any& v);
+   void gcpListModified(Subject& subject, const std::string& signal, const boost::any& v);
+   void gcpListDetached(Subject& subject, const std::string& signal, const boost::any& v);
+   void tiePointListDeleted(Subject& subject, const std::string& signal, const boost::any& v);
+   void attached(Subject& subject, const std::string& signal, const Slot& slot);
+   void detached(Subject& subject, const std::string& signal, const Slot& slot);
 
    bool isValid() const;
 
    void setViews(SpatialDataView* pPrimary, SpatialDataView* pSecondary);
 
-   const TiePointList* getTiePoints() const { return mpTiePoints; }
+   const TiePointList* getTiePoints() const;
 
-   std::string getPreferredPrimaryMouseMode() const { return "LayerMode"; }
-   std::string getPreferredSecondaryMouseMode() const { return "LayerMode"; }
-   Layer* getPreferredPrimaryActiveLayer() const { return mpPrimaryGcpLayer; }
-   Layer* getPreferredSecondaryActiveLayer() const { return mpSecondaryGcpLayer; }
+   std::string getPreferredPrimaryMouseMode() const;
+   std::string getPreferredSecondaryMouseMode() const;
+   Layer* getPreferredPrimaryActiveLayer() const;
+   Layer* getPreferredSecondaryActiveLayer() const;
 
 protected:
    void showEvent(QShowEvent* pEvt);
@@ -66,11 +66,11 @@ protected:
    void setGcpLayer(GcpLayer*& pMemberLayer, GcpLayer* pLayer);
 
    // clears the ListView and adds all GCPs in pList to the ListView
-   void populateListBox(GcpList& gcpList, QTreeWidget& listBox, QMap<QTreeWidgetItem*,const GcpPoint*>& map);
+   void populateListBox(GcpList& gcpList, QTreeWidget& listBox, QMap<QTreeWidgetItem*, const GcpPoint*>& map);
 
    // removes the current GCP from a view and the GCP List
-   void removeGcp(QTreeWidget& view, const GcpLayer& layer,
-                  QMap<QTreeWidgetItem*,const GcpPoint*>& map, QPushButton& button);
+   void removeGcp(QTreeWidget& view, const GcpLayer& layer, QMap<QTreeWidgetItem*, const GcpPoint*>& map,
+      QPushButton& button);
 
 protected slots:
    void deriveTiePoint();
@@ -114,7 +114,8 @@ private:
    QTreeWidget* mpSecondaryGcps;
    QPushButton* mpTiePointRemoveButton;
 
-   QMap<QTreeWidgetItem*, const GcpPoint*> mPrimaryMap, mSecondaryMap;
+   QMap<QTreeWidgetItem*, const GcpPoint*> mPrimaryMap;
+   QMap<QTreeWidgetItem*, const GcpPoint*> mSecondaryMap;
 };
 
 #endif

@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef NITF_BANDSB_PARSER_H
-#define NITF_BANDSB_PARSER_H
+#ifndef NITFBANDSBPARSER_H
+#define NITFBANDSBPARSER_H
 
 #include "NitfTreParserShell.h"
 
@@ -28,7 +28,7 @@ namespace Nitf
          const RasterFileDescriptor &exportDescriptor, DynamicObject &tre, 
          unsigned int & ownerIndex, std::string & tagType, std::string &errorMessage) const;
 
-      virtual TreState isTreValid(const DynamicObject& output, std::ostream& reporter) const;
+      virtual TreState isTreValid(const DynamicObject& tre, std::ostream& reporter) const;
 
       bool runAllTests(Progress* pProgress, std::ostream& failure);
    };

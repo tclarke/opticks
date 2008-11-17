@@ -18,9 +18,11 @@
 #include <QtCore/QString>
 #include <vector>
 
-#define SET_FROM_XQUERY(path__,query__,accessor__,type__) current = query__; \
-   VERIFY((pResult = xml.query(query__,XPath2Result::FIRST_RESULT)) != NULL); \
-   pMetadata->setAttributeByPath(path__,static_cast<type__>(pResult->accessor__()));
+#define SET_FROM_XQUERY(path__, query__, accessor__, type__) \
+   current = query__; \
+   pResult = xml.query(query__, XPath2Result::FIRST_RESULT); \
+   VERIFY(pResult != NULL); \
+   pMetadata->setAttributeByPath(path__, static_cast<type__>(pResult->accessor__()));
 
 QuickbirdIsd::QuickbirdIsd(const std::string &filename) : mFilename(filename)
 {
@@ -40,7 +42,7 @@ bool QuickbirdIsd::copyToMetadata(DynamicObject *pMetadata) const
    std::string current;
    try
    {
-      XPath2Result *pResult = xml.query("//RPB/SPECID/text()='RPC00B'", XPath2Result::FIRST_RESULT);
+      XPath2Result* pResult = xml.query("//RPB/SPECID/text()='RPC00B'", XPath2Result::FIRST_RESULT);
       if (pResult == NULL || !pResult->asBoolean())
       {
          return false;
@@ -61,35 +63,35 @@ bool QuickbirdIsd::copyToMetadata(DynamicObject *pMetadata) const
       VERIFY((pResult = xml.query(current, XPath2Result::ITERATOR_RESULT)) != NULL);
       for (int num = 1; pResult->iterateNext(); num++)
       {
-         pMetadata->setAttributeByPath(QString("NITF/TRE/RPC00B/0/LNNUMCOEF%1").arg(num, 2, 10, QChar('0')).toStdString(),
-            pResult->asDouble());
+         pMetadata->setAttributeByPath(QString("NITF/TRE/RPC00B/0/LNNUMCOEF%1")
+            .arg(num, 2, 10, QChar('0')).toStdString(), pResult->asDouble());
       }
       current = "fn:tokenize(//RPB/IMAGE/LINEDENCOEFList/LINEDENCOEF/text(), '\\s+')";
       VERIFY((pResult = xml.query(current, XPath2Result::ITERATOR_RESULT)) != NULL);
       for (int num = 1; pResult->iterateNext(); num++)
       {
-         pMetadata->setAttributeByPath(QString("NITF/TRE/RPC00B/0/LNDENCOEF%1").arg(num, 2, 10, QChar('0')).toStdString(),
-            pResult->asDouble());
+         pMetadata->setAttributeByPath(QString("NITF/TRE/RPC00B/0/LNDENCOEF%1")
+            .arg(num, 2, 10, QChar('0')).toStdString(), pResult->asDouble());
       }
       current = "fn:tokenize(//RPB/IMAGE/SAMPNUMCOEFList/SAMPNUMCOEF/text(), '\\s+')";
       VERIFY((pResult = xml.query(current, XPath2Result::ITERATOR_RESULT)) != NULL);
       for (int num = 1; pResult->iterateNext(); num++)
       {
-         pMetadata->setAttributeByPath(QString("NITF/TRE/RPC00B/0/SMPNUMCOEF%1").arg(num, 2, 10, QChar('0')).toStdString(),
-            pResult->asDouble());
+         pMetadata->setAttributeByPath(QString("NITF/TRE/RPC00B/0/SMPNUMCOEF%1")
+            .arg(num, 2, 10, QChar('0')).toStdString(), pResult->asDouble());
       }
       current = "fn:tokenize(//RPB/IMAGE/SAMPDENCOEFList/SAMPDENCOEF/text(), '\\s+')";
       VERIFY((pResult = xml.query(current, XPath2Result::ITERATOR_RESULT)) != NULL);
       for (int num = 1; pResult->iterateNext(); num++)
       {
-         pMetadata->setAttributeByPath(QString("NITF/TRE/RPC00B/0/SMPDENCOEF%1").arg(num, 2, 10, QChar('0')).toStdString(),
-            pResult->asDouble());
+         pMetadata->setAttributeByPath(QString("NITF/TRE/RPC00B/0/SMPDENCOEF%1")
+            .arg(num, 2, 10, QChar('0')).toStdString(), pResult->asDouble());
       }
       pMetadata->setAttributeByPath("NITF/TRE/RPC00B/0/SUCCESS", true);
       FactoryResource<DynamicObject> image;
       pMetadata->setAttributeByPath("NITF/Image Subheader", *image);
    }
-   catch(const XQillaException &exc)
+   catch (const XQillaException &exc)
    {
       MessageResource m(A(exc.msg), "app", "0D4EC7B3-1CA6-4039-B8D6-5808933E13C5");
       if (!current.empty())
@@ -98,7 +100,7 @@ bool QuickbirdIsd::copyToMetadata(DynamicObject *pMetadata) const
       }
       return false;
    }
-   catch(const XERCES_CPP_NAMESPACE_QUALIFIER DOMException &exc)
+   catch (const XERCES_CPP_NAMESPACE_QUALIFIER DOMException &exc)
    {
       MessageResource m(A(exc.msg), "app", "0D4EC7B3-1CA6-4039-B8D6-5808933E13C5");
       if (!current.empty())

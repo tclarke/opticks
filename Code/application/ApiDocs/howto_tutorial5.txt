@@ -57,7 +57,7 @@ The \ref DataAccessorImpl::toPixel() "toPixel()" function does not perform bound
 We'll then call \ref DataAccessorImpl::getColumn() "getColumn()" to get the data from the pixel.
 
 \skip gx
-\until gy
+\until upperRightVal;
 Next we'll apply the gradient kernels.
 
 \skipline magnitude

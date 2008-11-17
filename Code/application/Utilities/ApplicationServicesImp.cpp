@@ -35,7 +35,7 @@ ApplicationServicesImp* ApplicationServicesImp::instance()
 {
    if (spInstance == NULL)
    {
-      if(mDestroyed)
+      if (mDestroyed)
       {
          throw std::logic_error("Attempting to use ApplicationServices after "
             "destroying it.");
@@ -48,7 +48,7 @@ ApplicationServicesImp* ApplicationServicesImp::instance()
 
 void ApplicationServicesImp::destroy()
 {
-   if(mDestroyed)
+   if (mDestroyed)
    {
       throw std::logic_error("Attempting to destroy ApplicationServices after "
          "destroying it.");
@@ -69,8 +69,8 @@ ApplicationServicesImp::~ApplicationServicesImp()
 
 const string& ApplicationServicesImp::getObjectType() const
 {
-   static string type("ApplicationServicesImp");
-   return type;
+   static string sType("ApplicationServicesImp");
+   return sType;
 }
 
 bool ApplicationServicesImp::isKindOf(const string& className) const
@@ -120,14 +120,16 @@ DataVariantFactory* ApplicationServicesImp::getDataVariantFactory()
 
 SessionManager* ApplicationServicesImp::getSessionManager()
 {
-   static bool isAttached = false;
-   SessionManager *pSession = SessionManagerImp::instance();
-   if (!isAttached)
+   static bool sAttached = false;
+
+   SessionManager* pSession = SessionManagerImp::instance();
+   if (!sAttached)
    {
       pSession->attach(SIGNAL_NAME(SessionManager, Closed), 
          Signal(Service<ApplicationServices>().get(), SIGNAL_NAME(ApplicationServices, SessionClosed)));
-      isAttached = true;
+      sAttached = true;
    }
+
    return pSession;
 }
 
@@ -141,38 +143,37 @@ bool ApplicationServicesImp::getJvm(JavaVM *&pJvm, JNIEnv *&pEnv)
    string jvmLoaderLibrary = pJvmLoaderLibrary->getFullPathAndName();
 
 #if defined(SOLARIS)
-   void *pJvmLoaderLibraryHandle(dlopen(jvmLoaderLibrary.c_str(),
-                                          RTLD_NOW|RTLD_GLOBAL));
-   if(pJvmLoaderLibraryHandle == NULL)
+   void* pJvmLoaderLibraryHandle(dlopen(jvmLoaderLibrary.c_str(), RTLD_NOW | RTLD_GLOBAL));
+   if (pJvmLoaderLibraryHandle == NULL)
    {
       return false;
    }
 
    void *pGetJvm(dlsym(pJvmLoaderLibraryHandle, "getJvm"));
-   if(pGetJvm == NULL)
+   if (pGetJvm == NULL)
    {
       dlclose(pJvmLoaderLibraryHandle);
       return false;
    }
 
-   bool rval(((bool (*)(JavaVM*&,JNIEnv*&))pGetJvm)(pJvm, pEnv));
+   bool rval(((bool (*)(JavaVM*&, JNIEnv*&))pGetJvm)(pJvm, pEnv));
 
    return rval;
 #elif defined(WIN_API)
    HMODULE pJvmLoaderLibraryHandle(LoadLibrary(jvmLoaderLibrary.c_str()));
-   if(pJvmLoaderLibraryHandle == NULL)
+   if (pJvmLoaderLibraryHandle == NULL)
    {
       return false;
    }
 
    FARPROC pGetJvm(GetProcAddress(pJvmLoaderLibraryHandle, "getJvm"));
-   if(pGetJvm == NULL)
+   if (pGetJvm == NULL)
    {
       FreeLibrary(pJvmLoaderLibraryHandle);
       return false;
    }
 
-   bool rval(((bool (*)(JavaVM*&,JNIEnv*&))pGetJvm)(pJvm, pEnv));
+   bool rval(((bool (*)(JavaVM*&, JNIEnv*&))pGetJvm)(pJvm, pEnv));
 
    return rval;
 #else

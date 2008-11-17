@@ -50,7 +50,7 @@ bool PicturesPlotWidgetExporter::extractInputArgs(const PlugInArgList* pInArgLis
 
 bool PicturesPlotWidgetExporter::generateImage(QImage &image)
 {
-   PlotWidget *pPlotWidget = dynamic_cast<PlotWidget*>(mpItem);
+   PlotWidget* pPlotWidget = dynamic_cast<PlotWidget*>(mpItem);
    if (pPlotWidget == NULL)
    {
       return false;
@@ -62,7 +62,7 @@ bool PicturesPlotWidgetExporter::generateImage(QImage &image)
    // a smaller scale like in a spatial data view. if the output size is very large
    // this could result in some aliasing and jaggies...if this becomes a problem
    // for users, we can deal with that situation later.
-   if(outputSize.isValid() && image.size() != outputSize)
+   if (outputSize.isValid() && image.size() != outputSize)
    {
       image = image.scaled(outputSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
    }

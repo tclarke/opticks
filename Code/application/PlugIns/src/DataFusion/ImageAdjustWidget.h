@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef IMAGE_ADJUST_WIDGET
-#define IMAGE_ADJUST_WIDGET
+#ifndef IMAGEADJUSTWIDGET_H
+#define IMAGEADJUSTWIDGET_H
 
 #include "AttachmentPtr.h"
 #include "DesktopServices.h"
@@ -36,7 +36,7 @@ public:
    ~ImageAdjustWidget();
 
    void windowActivated(Subject& subject, const std::string& signal, const boost::any& value);
-   void layerListChanged(Subject &subject, const std::string &signal, const boost::any &value);
+   void layerListChanged(Subject& subject, const std::string& signal, const boost::any& value);
 
 protected:
    void resetWidgets();
@@ -46,7 +46,7 @@ protected slots:
    void startFlicker(); // starts timer, etc.
 
    double computeFlickerRate(int position) const;
-   void changeFlickerRate(int rate);
+   void changeFlickerRate(int position);
    void changeFlickerAlpha(int position);
 
    void stopFlicker();

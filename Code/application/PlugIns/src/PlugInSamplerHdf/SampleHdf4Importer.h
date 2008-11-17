@@ -7,11 +7,11 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#ifndef SAMPLEHDF4IMPORTER_H
+#define SAMPLEHDF4IMPORTER_H
+
 #include "AppConfig.h"
 #if defined(HDF4_SUPPORT)
-
-#ifndef SAMPLE_HDF_IMPORTER
-#define SAMPLE_HDF_IMPORTER
 
 #include "Hdf4ImporterShell.h"
 

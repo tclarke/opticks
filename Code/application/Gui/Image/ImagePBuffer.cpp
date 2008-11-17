@@ -19,34 +19,33 @@
 using namespace std;
 
 ImagePBuffer::ImagePBuffer() :
-ImageBuffer(),
-mPrevDeviceContext(0),
-mDeviceContext(0),
-mPrevRenderContext(0),
-mRenderContext(0),
-mOSDeviceContext(0),
-mOSRenderContext(0),
-mPrevBuffer(0),
-mPBuffer(0),
-mMaxColorBufferAttachments(1),
-mNextBuffer(0)
+   mDeviceContext(0),
+   mRenderContext(0),
+   mPrevDeviceContext(0),
+   mPrevRenderContext(0),
+   mOSDeviceContext(0),
+   mOSRenderContext(0),
+   mPBuffer(0),
+   mPrevBuffer(0),
+   mMaxColorBufferAttachments(1),
+   mNextBuffer(0)
 {
 }
 
-ImagePBuffer::ImagePBuffer(const ImagePBuffer &imagePBuffer) :
-ImageBuffer(imagePBuffer)
+ImagePBuffer::ImagePBuffer(const ImagePBuffer& imagePBuffer) :
+   ImageBuffer(imagePBuffer),
+   mDeviceContext(imagePBuffer.mDeviceContext),
+   mRenderContext(imagePBuffer.mRenderContext),
+   mPrevDeviceContext(imagePBuffer.mPrevDeviceContext),
+   mPrevRenderContext(imagePBuffer.mPrevRenderContext),
+   mOSDeviceContext(imagePBuffer.mOSDeviceContext),
+   mOSRenderContext(imagePBuffer.mOSRenderContext),
+   mPBuffer(imagePBuffer.mPBuffer),
+   mPrevBuffer(imagePBuffer.mPrevBuffer)
 {
-   mPrevDeviceContext = imagePBuffer.mPrevDeviceContext;
-   mDeviceContext = imagePBuffer.mDeviceContext;
-   mPrevRenderContext = imagePBuffer.mPrevRenderContext;
-   mRenderContext = imagePBuffer.mRenderContext;
-   mOSDeviceContext = imagePBuffer.mOSDeviceContext;
-   mOSRenderContext = imagePBuffer.mOSRenderContext;
-   mPrevBuffer = imagePBuffer.mPrevBuffer;
-   mPBuffer = imagePBuffer.mPBuffer;
 }
 
-ImagePBuffer& ImagePBuffer::operator =(const ImagePBuffer &imagePBuffer)
+ImagePBuffer& ImagePBuffer::operator =(const ImagePBuffer& imagePBuffer)
 {
    ImageBuffer::operator =(imagePBuffer);
 

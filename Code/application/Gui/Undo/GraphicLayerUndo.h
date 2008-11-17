@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef GRAPHICUNDO_H
-#define GRAPHICUNDO_H
+#ifndef GRAPHICLAYERUNDO_H
+#define GRAPHICLAYERUNDO_H
 
 #include "LayerUndo.h"
 #include "LocationType.h"

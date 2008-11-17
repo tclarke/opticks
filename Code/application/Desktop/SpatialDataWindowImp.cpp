@@ -71,7 +71,7 @@ void SpatialDataWindowImp::setWidget(QWidget* pWidget)
 
 SpatialDataView* SpatialDataWindowImp::getSpatialDataView() const
 {
-   SpatialDataView* pView = (SpatialDataView*) getView();
+   SpatialDataView* pView = dynamic_cast<SpatialDataView*>(getView());
    return pView;
 }
 

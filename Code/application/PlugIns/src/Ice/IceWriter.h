@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef ICE_WRITER_H
-#define ICE_WRITER_H
+#ifndef ICEWRITER_H
+#define ICEWRITER_H
 
 #include "EnumWrapper.h"
 #include "Hdf5Resource.h"

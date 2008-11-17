@@ -46,11 +46,11 @@ public:
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
 
-   void elementModified(Subject &subject, const std::string &signal, const boost::any &v);
+   void elementModified(Subject& subject, const std::string& signal, const boost::any& v);
    virtual void onElementModified() {}
-   void elementDeleted(Subject &subject, const std::string &signal, const boost::any &v);
+   void elementDeleted(Subject& subject, const std::string& signal, const boost::any& v);
 
-   LayerImp& operator= (const LayerImp& rasterLayer);
+   LayerImp& operator= (const LayerImp& rhs);
 
    virtual LayerType getLayerType() const = 0;
 
@@ -93,8 +93,8 @@ public:
 
    virtual bool load(const QString& strFilename);
 
-   bool serialize(SessionItemSerializer &serializer) const;
-   bool deserialize(SessionItemDeserializer &deserializer);
+   bool serialize(SessionItemSerializer& serializer) const;
+   bool deserialize(SessionItemDeserializer& deserializer);
    virtual bool toXml(XMLWriter* pXml) const;
    virtual bool fromXml(DOMNode* pDocument, unsigned int version);
 
@@ -107,16 +107,16 @@ public:
    double getYOffset() const;
    void setYOffset(double yOffset);
 
-   void translateWorldToData(double worldX, double worldY, double &dataX, double &dataY) const;
-   void translateDataToWorld(double dataX, double dataY, double &worldX, double &worldY) const;
-   void translateScreenToData(double screenX, double screenY, double &dataX, double &dataY) const;
-   void translateDataToScreen(double dataX, double dataY, double &screenX, double &screenY) const;
+   void translateWorldToData(double worldX, double worldY, double& dataX, double& dataY) const;
+   void translateDataToWorld(double dataX, double dataY, double& worldX, double& worldY) const;
+   void translateScreenToData(double screenX, double screenY, double& dataX, double& dataY) const;
+   void translateDataToScreen(double dataX, double dataY, double& screenX, double& screenY) const;
 
    void isFlipped(const LocationType& dataLowerLeft, const LocationType& dataUpperRight, bool& bHorizontalFlip,
       bool& bVerticalFlip) const;
 
    bool canRename() const;
-   bool rename(const std::string &newName, std::string &errorMessage);
+   bool rename(const std::string& newName, std::string& errorMessage);
 
 public slots:
    /**
@@ -229,19 +229,19 @@ private:
    { \
       return impClass::setYOffset(yOffset); \
    } \
-   void translateWorldToData(double worldX, double worldY, double &dataX, double &dataY) const \
+   void translateWorldToData(double worldX, double worldY, double& dataX, double& dataY) const \
    { \
       return impClass::translateWorldToData(worldX, worldY, dataX, dataY); \
    } \
-   void translateDataToWorld(double dataX, double dataY, double &worldX, double &worldY) const \
+   void translateDataToWorld(double dataX, double dataY, double& worldX, double& worldY) const \
    { \
       return impClass::translateDataToWorld(dataX, dataY, worldX, worldY); \
    } \
-   void translateScreenToData(double screenX, double screenY, double &dataX, double &dataY) const \
+   void translateScreenToData(double screenX, double screenY, double& dataX, double& dataY) const \
    { \
       return impClass::translateScreenToData(screenX, screenY, dataX, dataY); \
    } \
-   void translateDataToScreen(double dataX, double dataY, double &screenX, double &screenY) const \
+   void translateDataToScreen(double dataX, double dataY, double& screenX, double& screenY) const \
    { \
       return impClass::translateDataToScreen(dataX, dataY, screenX, screenY); \
    } \

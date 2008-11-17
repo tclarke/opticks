@@ -30,9 +30,9 @@ public:
    MoveObjectImp(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer, LocationType pixelCoord);
    virtual ~MoveObjectImp();
 
-   void draw(double zoomFactor) const {}
+   void draw(double zoomFactor) const;
 
-   bool hit(LocationType) const { return false; }
+   bool hit(LocationType) const;
 
    bool processMousePress(LocationType sceneCoord, Qt::MouseButton button, Qt::MouseButtons buttons,
       Qt::KeyboardModifiers modifiers);
@@ -46,9 +46,9 @@ public:
    template<typename T>
    bool applyHandleChange(const T &functor);
 
-   bool isVisible() const { return false; }
-   bool hasCornerHandles() const { return false; }
-   bool insertionUndoable() const { return false; }
+   bool isVisible() const;
+   bool hasCornerHandles() const;
+   bool insertionUndoable() const;
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
@@ -57,8 +57,8 @@ private:
    LocationType mLastCoord;
    LocationType mPressCoord;
    int mSelectedHandle;
-   GraphicObject *mpLastSelectedObject;
-   UndoGroup *mpUndoGroup;
+   GraphicObject* mpLastSelectedObject;
+   UndoGroup* mpUndoGroup;
    bool mLeftPressed;
 };
 

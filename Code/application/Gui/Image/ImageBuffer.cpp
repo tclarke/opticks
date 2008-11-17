@@ -18,7 +18,7 @@ ImageBuffer::ImageBuffer()
 
 ImageBuffer::~ImageBuffer()
 {
-   ColorBuffer *pColorBuffer = NULL;
+   ColorBuffer* pColorBuffer = NULL;
    map<ColorBuffer*, GLenum>::iterator colorBufferIter = mAttachedBuffers.begin();
    while (colorBufferIter != mAttachedBuffers.end())
    {
@@ -46,7 +46,7 @@ bool ImageBuffer::addBuffer(ColorBuffer *pColorBuffer)
    return false;
 }
 
-void ImageBuffer::removeBuffer(ColorBuffer *pColorBuffer)
+void ImageBuffer::removeBuffer(ColorBuffer* pColorBuffer)
 {
    map<ColorBuffer*, GLenum>::iterator bufferIter = mAttachedBuffers.find(pColorBuffer);
    if (bufferIter != mAttachedBuffers.end())
@@ -55,13 +55,13 @@ void ImageBuffer::removeBuffer(ColorBuffer *pColorBuffer)
    }
 }
 
-bool ImageBuffer::isBufferAttached(ColorBuffer *pColorBuffer) const
+bool ImageBuffer::isBufferAttached(ColorBuffer* pColorBuffer) const
 {
    map<ColorBuffer*, GLenum>::const_iterator bufferIter = mAttachedBuffers.find(pColorBuffer);
    return bufferIter != mAttachedBuffers.end();
 }
 
-GLenum ImageBuffer::getColorBufferId(ColorBuffer *pColorBuffer) const
+GLenum ImageBuffer::getColorBufferId(ColorBuffer* pColorBuffer) const
 {
    map<ColorBuffer*, GLenum>::const_iterator bufferIter = mAttachedBuffers.find(pColorBuffer);
    if (bufferIter != mAttachedBuffers.end())

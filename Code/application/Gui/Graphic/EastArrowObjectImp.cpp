@@ -123,12 +123,10 @@ void EastArrowObjectImp::orient()
          list<GraphicObject*>::iterator iter = viewObjects.begin();
          while (iter != viewObjects.end())
          {
-            GraphicObject* pObject = NULL;
-            pObject = *iter;
+            GraphicObject* pObject = *iter;
             if (pObject != NULL)
             {
-               View* pObjectView = NULL;
-               pObjectView = pObject->getObjectView();
+               View* pObjectView = pObject->getObjectView();
                if (pObjectView != NULL)
                {
                   if (pObjectView->isKindOf("SpatialDataView") == true)
@@ -148,9 +146,9 @@ void EastArrowObjectImp::orient()
       return;
    }
 
-   LayerList *pLayerList = pSpatialDataView->getLayerList();
+   LayerList* pLayerList = pSpatialDataView->getLayerList();
    VERIFYNRV(pLayerList != NULL);
-   RasterElement *pRaster = pLayerList->getPrimaryRasterElement();
+   RasterElement* pRaster = pLayerList->getPrimaryRasterElement();
    VERIFYNRV(pRaster != NULL);
    if (!pRaster->isGeoreferenced())
    {

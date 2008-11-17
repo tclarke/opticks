@@ -35,7 +35,7 @@ GpuProgram::GpuProgram(GpuProgramDescriptor *pGpuDescriptor) :
    REQUIRE(CgContext::instance() != NULL);
 
    // load GPU program and get profile that was used to optimize GPU code
-   switch(programType)
+   switch (programType)
    {
    case GpuProgramDescriptor::VERTEX_PROGRAM:
       mProgramId = CgContext::instance()->loadVertexProgram(programFileName);
@@ -86,7 +86,7 @@ void GpuProgram::disable()
 bool GpuProgram::setGpuParameters()
 {
    // get dynamic object that contains the input parameters for this GPU program
-   const DynamicObject *pInputParams = mpGpuProgramDescriptor->getParameters();
+   const DynamicObject* pInputParams = mpGpuProgramDescriptor->getParameters();
    if (pInputParams == NULL)
    {
       return false;
@@ -121,7 +121,7 @@ bool GpuProgram::setGpuParameters()
             // get the type of the parameter
             cgParameterType = cgGetParameterNamedType(inputParameter);
             // set the parameter's value
-            switch(cgParameterType)
+            switch (cgParameterType)
             {
             case CG_SAMPLER1D:   // fall through to next case statement
             case CG_SAMPLER2D:   // fall through to next case statement

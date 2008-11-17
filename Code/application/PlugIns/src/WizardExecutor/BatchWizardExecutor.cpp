@@ -31,15 +31,12 @@
 
 using namespace std;
 
-BatchWizardExecutor::BatchWizardExecutor()
+BatchWizardExecutor::BatchWizardExecutor() :
+   mbAbort(false),
+   mpProgress(NULL),
+   mpStep(NULL),
+   mpExecutor(NULL)
 {
-   mbInteractive = false;
-   mbAbort = false;
-   mpProgress = NULL;
-   mpStep = NULL;
-   mFilename = "";
-   mpExecutor = NULL;
-
    setName("Batch Wizard Executor");
    setVersion(APP_VERSION_NUMBER);
    setCreator("Ball Aerospace & Technologies, Corp.");
@@ -55,22 +52,10 @@ BatchWizardExecutor::~BatchWizardExecutor()
 {
 }
 
-bool BatchWizardExecutor::setBatch()
-{
-   mbInteractive = false;
-   return true;
-}
-
-bool BatchWizardExecutor::setInteractive()
-{
-   mbInteractive = true;
-   return true;
-}
-
 bool BatchWizardExecutor::hasAbort()
 {
    bool bSuccess = true;
-   if(mpExecutor != NULL)
+   if (mpExecutor != NULL)
    {
       bSuccess = mpExecutor->hasAbort();
    }
@@ -109,7 +94,7 @@ bool BatchWizardExecutor::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
    Service<ModelServices> pModel;
    VERIFY(pModel.get() != NULL);
 
-   if(!extractInputArgs(pInArgList))
+   if (!extractInputArgs(pInArgList))
    {
       return false;
    }
@@ -117,15 +102,19 @@ bool BatchWizardExecutor::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
    pStep->addProperty("batchWizardFile", mFilename);
 
    BatchFileParser fileParser;
-   if(!fileParser.setFile(mFilename))
+   if (!fileParser.setFile(mFilename))
    {
-      if(mpProgress != NULL) mpProgress->updateProgress(fileParser.getError(), 0, ERRORS);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(fileParser.getError(), 0, ERRORS);
+      }
+
       pStep->finalize(Message::Failure, fileParser.getError());
       return false;
    }
 
    BatchWizard* pBatchWizard = fileParser.read();
-   while(pBatchWizard != NULL)
+   while (pBatchWizard != NULL)
    {
       // Initialize the filesets
       pBatchWizard->initializeFilesets(mpObjFact.get());
@@ -134,7 +123,7 @@ bool BatchWizardExecutor::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
       bool bRepeatWizard = pBatchWizard->isRepeating();
 
       bool bExecutedOnce = false;
-      while((!bRepeatWizard && !bExecutedOnce) || !pBatchWizard->isComplete())
+      while ((!bRepeatWizard && !bExecutedOnce) || !pBatchWizard->isComplete())
       {
          // Load the wizard
          string wizardFilename = pBatchWizard->getWizardFilename();
@@ -142,11 +131,11 @@ bool BatchWizardExecutor::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
          bool bSuccess = false;
          FactoryResource<WizardObject> pWizard;
 
-         FactoryResource<Filename> pFilename;
-         pFilename->setFullPathAndName(wizardFilename);
+         FactoryResource<Filename> pWizardFilename;
+         pWizardFilename->setFullPathAndName(wizardFilename);
 
          XmlReader xml;
-         XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* pDocument = xml.parse(pFilename.get());
+         XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* pDocument = xml.parse(pWizardFilename.get());
          if (pDocument != NULL)
          {
             XERCES_CPP_NAMESPACE_QUALIFIER DOMElement* pRootElement = pDocument->getDocumentElement();
@@ -161,17 +150,21 @@ bool BatchWizardExecutor::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
          {
             string message = "Cannot load the wizard from the file: " + wizardFilename;
             delete pBatchWizard;
-            if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
+            if (mpProgress != NULL)
+            {
+               mpProgress->updateProgress(message, 0, ERRORS);
+            }
+
             pStep->finalize(Message::Failure, message);
             return false;
          }
 
          // Set the values in the wizard
          vector<Value*> inputValues = pBatchWizard->getInputValues();
-         for(vector<Value*>::iterator iter = inputValues.begin(); iter != inputValues.end(); ++iter)
+         for (vector<Value*>::iterator iter = inputValues.begin(); iter != inputValues.end(); ++iter)
          {
             Value* pValue = *iter;
-            if(pValue != NULL)
+            if (pValue != NULL)
             {
                string nodeName = pValue->getNodeName();
                string nodeType = pValue->getNodeType();
@@ -221,21 +214,25 @@ bool BatchWizardExecutor::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
          bool bWizardSuccess = runWizard(pWizard.get());
 
          // Cleanup after each run
-         if(pBatchWizard->doesCleanup())
+         if (pBatchWizard->doesCleanup())
          {
             pModel->clear();
          }
 
-         if(mbAbort)
+         if (mbAbort)
          {
             delete pBatchWizard;
             string message = "Batch Wizard Exector Aborted!";
-            if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ABORT);
+            if (mpProgress != NULL)
+            {
+               mpProgress->updateProgress(message, 0, ABORT);
+            }
+
             pStep->finalize(Message::Abort, message);
             return false;
          }
 
-         if(!bWizardSuccess)
+         if (!bWizardSuccess)
          {
             delete pBatchWizard;
             pStep->finalize(Message::Failure);
@@ -276,20 +273,28 @@ bool BatchWizardExecutor::extractInputArgs(PlugInArgList* pInArgList)
    PlugInArg* pArg = NULL;
 
    // Progress
-   if(!pInArgList->getArg(ProgressArg(), pArg) || (pArg == NULL))
+   if (!pInArgList->getArg(ProgressArg(), pArg) || (pArg == NULL))
    {
       string message = "Could not read the progress input value!";
-      if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(message, 0, ERRORS);
+      }
+
       mpStep->finalize(Message::Failure, message);
       return false;
    }
    mpProgress = pArg->getPlugInArgValue<Progress>();
 
    // XML filename
-   if(!pInArgList->getArg("Filename", pArg) || (pArg == NULL))
+   if (!pInArgList->getArg("Filename", pArg) || (pArg == NULL))
    {
       string message = "Could not read the filename input value!";
-      if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(message, 0, ERRORS);
+      }
+
       mpStep->finalize(Message::Failure, message);
       return false;
    }
@@ -300,10 +305,14 @@ bool BatchWizardExecutor::extractInputArgs(PlugInArgList* pInArgList)
       filename = pFilename->getFullPathAndName();
    }
 
-   if(filename.empty())
+   if (filename.empty())
    {
       string message = "The filename input value is invalid!";
-      if(mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(message, 0, ERRORS);
+      }
+
       mpStep->finalize(Message::Failure, message);
       return false;
    }
@@ -312,7 +321,8 @@ bool BatchWizardExecutor::extractInputArgs(PlugInArgList* pInArgList)
    return true;
 }
 
-WizardNode* BatchWizardExecutor::getValueNode(WizardObject* pWizard, const string& nodeName, const string& nodeType)
+WizardNode* BatchWizardExecutor::getValueNode(const WizardObject* pWizard, const string& nodeName,
+                                              const string& nodeType)
 {
    VERIFY(pWizard != NULL);
 
@@ -320,13 +330,13 @@ WizardNode* BatchWizardExecutor::getValueNode(WizardObject* pWizard, const strin
 
    // Loop through all wizard items and find value items.
    // For example, ignore algorithms, importers, etc.
-   for(vector<WizardItem*>::iterator itemIter = items.begin(); itemIter != items.end(); ++itemIter)
+   for (vector<WizardItem*>::iterator itemIter = items.begin(); itemIter != items.end(); ++itemIter)
    {
       WizardItem* pItem = *itemIter;
-      if(pItem != NULL)
+      if (pItem != NULL)
       {
          string itemType = pItem->getType();
-         if(itemType == "Value")
+         if (itemType == "Value")
          {
             const vector<WizardNode*>& nodes = pItem->getOutputNodes();
 
@@ -334,15 +344,15 @@ WizardNode* BatchWizardExecutor::getValueNode(WizardObject* pWizard, const strin
             // Really shouldn't have to do this right now, but
             // may change in the future.  Currently Values only
             // have one node.
-            for(vector<WizardNode*>::const_iterator node = nodes.begin(); node != nodes.end(); ++node)
+            for (vector<WizardNode*>::const_iterator node = nodes.begin(); node != nodes.end(); ++node)
             {
                WizardNode* pNode = *node;
-               if(pNode != NULL)
+               if (pNode != NULL)
                {
                   string currentName = pNode->getName();
                   string currentType = pNode->getType();
 
-                  if((currentName == nodeName) && (currentType == nodeType))
+                  if ((currentName == nodeName) && (currentType == nodeType))
                   {
                      return pNode;
                   }
@@ -362,7 +372,7 @@ bool BatchWizardExecutor::runWizard(WizardObject* pWizard)
    mpExecutor = new WizardExecutor;
    VERIFY(mpExecutor != NULL);
 
-   if(pWizard->isBatch())
+   if (pWizard->isBatch())
    {
       mpExecutor->setBatch();
    }
@@ -376,16 +386,16 @@ bool BatchWizardExecutor::runWizard(WizardObject* pWizard)
    // Create the input arg list
    PlugInArgList* pIn = NULL;
    mpExecutor->getInputSpecification(pIn);
-   if(pIn != NULL)
+   if (pIn != NULL)
    {
       // Setup input parameters.
       PlugInArg* pArg = NULL;
-      if(pIn->getArg(ProgressArg(), pArg) && (pArg != NULL))
+      if (pIn->getArg(ProgressArg(), pArg) && (pArg != NULL))
       {
          pArg->setActualValue(mpProgress);
       }
 
-      if(pIn->getArg("Wizard", pArg) && (pArg != NULL))
+      if (pIn->getArg("Wizard", pArg) && (pArg != NULL))
       {
          pArg->setActualValue(pWizard);
       }

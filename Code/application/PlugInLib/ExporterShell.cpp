@@ -47,14 +47,13 @@ bool ExporterShell::getInputSpecification(PlugInArgList*& pArgList)
 
 ValidationResultType ExporterShell::validate(const PlugInArgList* pArgList, string& errorMessage) const
 {
-   FileDescriptor *pFileDescriptor =
-      pArgList->getPlugInArgValueUnsafe<FileDescriptor>(ExportDescriptorArg());
-   if((pFileDescriptor == NULL) || (pFileDescriptor->getFilename().getFullPathAndName().empty()))
+   FileDescriptor* pFileDescriptor = pArgList->getPlugInArgValueUnsafe<FileDescriptor>(ExportDescriptorArg());
+   if ((pFileDescriptor == NULL) || (pFileDescriptor->getFilename().getFullPathAndName().empty()))
    {
       errorMessage = "No output file specified.";
       return VALIDATE_FAILURE;
    }
-   else if(pFileDescriptor->getFilename().isDirectory())
+   else if (pFileDescriptor->getFilename().isDirectory())
    {
       errorMessage = "Save location is a directory.";
       return VALIDATE_FAILURE;

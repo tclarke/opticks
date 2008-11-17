@@ -147,9 +147,9 @@ void NorthArrowObjectImp::orient()
       return;
    }
 
-   LayerList *pLayerList = pSpatialDataView->getLayerList();
+   LayerList* pLayerList = pSpatialDataView->getLayerList();
    VERIFYNRV(pLayerList != NULL);
-   RasterElement *pRaster = pLayerList->getPrimaryRasterElement();
+   RasterElement* pRaster = pLayerList->getPrimaryRasterElement();
    VERIFYNRV(pLayerList != NULL);
    if (!pRaster->isGeoreferenced())
    {

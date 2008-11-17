@@ -38,12 +38,12 @@ bool SubjectImpPrivate::attach(Subject &subject, const string &signal, const Slo
       mpSubject = &subject;
    }
 
-   MapType::iterator pSlotVec=mSlots.find(signal);
+   MapType::iterator pSlotVec = mSlots.find(signal);
    if (pSlotVec != mSlots.end())
    {
-      list<SafeSlot> &slotVec = pSlotVec->second;
+      list<SafeSlot>& slotVec = pSlotVec->second;
       list<SafeSlot>::iterator pSlot;
-      for (pSlot=slotVec.begin(); pSlot!=slotVec.end(); ++pSlot)
+      for (pSlot = slotVec.begin(); pSlot != slotVec.end(); ++pSlot)
       {
          if (*pSlot == slot)
          {
@@ -53,8 +53,8 @@ bool SubjectImpPrivate::attach(Subject &subject, const string &signal, const Slo
    }
 
    mSlots[signal].push_back(slot);
-   SafeSlot &mappedSlot(mSlots[signal].back());
-   SlotInvalidator *pInvalidator = mappedSlot.getInvalidator();
+   SafeSlot& mappedSlot(mSlots[signal].back());
+   SlotInvalidator* pInvalidator = mappedSlot.getInvalidator();
    if (pInvalidator)
    {
       pInvalidator->activate(&mappedSlot);
@@ -64,7 +64,7 @@ bool SubjectImpPrivate::attach(Subject &subject, const string &signal, const Slo
    {
       slot.callAttachMethod(subject, signal);
    }
-   catch(boost::bad_any_cast &exc)
+   catch (boost::bad_any_cast &exc)
    {
       string msg = "Bad cast while calling processing attached method for signal " + signal + "\n" + exc.what();
       VERIFYRV_MSG(false, true, msg.c_str());
@@ -79,14 +79,14 @@ bool SubjectImpPrivate::detach(Subject &subject, const string &signal, const Slo
    MapType::iterator pSlotVec = mSlots.find(signal);
    if (pSlotVec != mSlots.end())
    {
-      list<SafeSlot> &slotVec = pSlotVec->second;
+      list<SafeSlot>& slotVec = pSlotVec->second;
       if (slot == SafeSlot())
       {
          bool shouldCallDetachMethod = true;
          list<SafeSlot>::iterator pSlot;
-         for (pSlot=slotVec.begin(); pSlot!=slotVec.end(); ++pSlot)
+         for (pSlot = slotVec.begin(); pSlot != slotVec.end(); ++pSlot)
          {
-            SlotInvalidator *pInvalidator = pSlot->getInvalidator();
+            SlotInvalidator* pInvalidator = pSlot->getInvalidator();
             if (pInvalidator)
             {
                pInvalidator->deactivate();
@@ -99,9 +99,10 @@ bool SubjectImpPrivate::detach(Subject &subject, const string &signal, const Slo
                {
                   slotCopy.callDetachMethod(subject, signal);
                }
-               catch(boost::bad_any_cast &exc)
+               catch (boost::bad_any_cast &exc)
                {
-                  string msg = "Bad cast while calling processing detached method for signal " + signal + "\n" + exc.what();
+                  string msg = "Bad cast while calling processing detached method for signal " + signal +
+                     "\n" + exc.what();
                   VERIFYNR_MSG(false, msg.c_str());
                   shouldCallDetachMethod = false;
                }
@@ -113,7 +114,7 @@ bool SubjectImpPrivate::detach(Subject &subject, const string &signal, const Slo
          list<SafeSlot>::iterator pSlot = find(slotVec.begin(), slotVec.end(), slot);
          if (pSlot != slotVec.end())
          {
-            SlotInvalidator *pInvalidator = pSlot->getInvalidator();
+            SlotInvalidator* pInvalidator = pSlot->getInvalidator();
             if (pInvalidator)
             {
                pInvalidator->deactivate();
@@ -124,9 +125,10 @@ bool SubjectImpPrivate::detach(Subject &subject, const string &signal, const Slo
             {
                slotCopy.callDetachMethod(subject, signal);
             }
-            catch(boost::bad_any_cast &exc)
+            catch (boost::bad_any_cast &exc)
             {
-               string msg = "Bad cast while calling processing detached method for signal " + signal + "\n" + exc.what();
+               string msg = "Bad cast while calling processing detached method for signal " + signal +
+                  "\n" + exc.what();
                VERIFYNR_MSG(false, msg.c_str());
             }
          }
@@ -151,13 +153,14 @@ public:
    }
    ~PopRecursion() 
    { 
-      mRecursions.pop_back(); 
+      mRecursions.pop_back();
    }
 private:
-   vector<string> &mRecursions;
+   vector<string>& mRecursions;
 };
 
-void SubjectImpPrivate::notify(Subject &subject, const string &signal, const string &originalSignal, const boost::any &data)
+void SubjectImpPrivate::notify(Subject &subject, const string &signal, const string &originalSignal,
+                               const boost::any &data)
 {
    if (signal.empty())
    {
@@ -168,7 +171,7 @@ void SubjectImpPrivate::notify(Subject &subject, const string &signal, const str
    MapType::iterator pSlotVec = mSlots.find(signal);
    if (pSlotVec != mSlots.end())
    {
-      list<SafeSlot> &slotVec = pSlotVec->second;
+      list<SafeSlot>& slotVec = pSlotVec->second;
 
       // Scope the recursion popper
       {
@@ -193,7 +196,7 @@ void SubjectImpPrivate::notify(Subject &subject, const string &signal, const str
                   slotCopy.update(subject, signal, data);
                }
             }
-            catch(boost::bad_any_cast &exc)
+            catch (boost::bad_any_cast &exc)
             {
                string msg = "Bad cast while calling processing signal " + originalSignal + "\n" + exc.what();
                VERIFYNRV_MSG(false, msg.c_str());
@@ -223,7 +226,7 @@ const list<SafeSlot>& SubjectImpPrivate::getSlots(const string &signal)
    MapType::iterator pSlotVec = mSlots.find(signal);
    if (pSlotVec != mSlots.end())
    {
-      list<SafeSlot> &slotVec = pSlotVec->second;
+      list<SafeSlot>& slotVec = pSlotVec->second;
       removeEmptySlots(signal, slotVec);
       return slotVec;
    }
@@ -237,7 +240,7 @@ void SubjectImpPrivate::removeEmptySlots(const string &recursion, list<SafeSlot>
 {
    if (count(mRecursions.begin(), mRecursions.end(), recursion) == 0)
    {
-      for(list<SafeSlot>::iterator pSlot=slotVec.begin(); pSlot!=slotVec.end(); )
+      for (list<SafeSlot>::iterator pSlot = slotVec.begin(); pSlot != slotVec.end(); )
       {
          if (pSlot->isValid() == false)
          {

@@ -34,8 +34,7 @@ class ImportOptionsDlg : public QDialog
    Q_OBJECT
 
 public:
-   ImportOptionsDlg(Importer* pImporter, const std::vector<ImportDescriptor*>& descriptors,
-      QWidget* pParent = NULL);
+   ImportOptionsDlg(Importer* pImporter, const std::vector<ImportDescriptor*>& descriptors, QWidget* pParent = NULL);
    ~ImportOptionsDlg();
 
    void setCurrentDataset(ImportDescriptor* pImportDescriptor);

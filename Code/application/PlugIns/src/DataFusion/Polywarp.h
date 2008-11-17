@@ -58,15 +58,15 @@ const bool FILTER = false;
  *         zoomFactor == 1.
  */
 template<class T>
-void polywarp( const Vector<T>& XS, const Vector<T>& YS, const Vector<T>& XP,
-               const Vector<T>& YP, Vector<T> &KX, Vector<T> &KY,
-               int zoomFactor,
-               ProgressTracker &progressTracker)
+void polywarp(const Vector<T>& XS, const Vector<T>& YS, const Vector<T>& XP, const Vector<T>& YP, Vector<T>& KX,
+              Vector<T>& KY, int zoomFactor, ProgressTracker& progressTracker)
 {
    //--Out of 500,000 runs, the average approximate run time is 1.8 ms
 
-   int i, j, k; //loop iterators
-   int NumFitPoints = (int)XS.size(); //number of points used in the fit					
+   int i;
+   int j;
+   int k;
+   int NumFitPoints = static_cast<int>(XS.size());    //number of points used in the fit
    int degree = 1; //degree of polynomial fit
    int ReqNumFitPoints = static_cast<int>(pow( static_cast<double>(degree + 1), 2 ));
    int GarbageFilterOM = 5; //order of magnitude (+ or -) considered garbage
@@ -75,48 +75,45 @@ void polywarp( const Vector<T>& XS, const Vector<T>& YS, const Vector<T>& XP,
    {
       throw FusionException("Must supply more than 0 fit points!", __LINE__, __FILE__);
    }
-   
+
    // -- EXCEPTIONS
 
    if ((NumFitPoints != (int)YS.size()) || (XP.size() != YP.size()) || (NumFitPoints != (int)XP.size()))
    {
-      throw FusionException(
-         std::string("Input Vectors must be the same size and the number of fit points must match!" ),
-                     __LINE__,
-                     __FILE__ );
+      throw FusionException(string("Input Vectors must be the same size and the number of fit points must match!"),
+         __LINE__, __FILE__);
    }
 
    //make sure there is at least one possible solution
-   double MagXS, MagXP, MagYS, MagYP; //magnitudes of the input vectors
-   MagXS = XS.magnitude();
-   MagXP = XP.magnitude();
-   MagYS = YS.magnitude();
-   MagYP = YP.magnitude();
+   double MagXS = XS.magnitude();
+   double MagXP = XP.magnitude();
+   double MagYS = YS.magnitude();
+   double MagYP = YP.magnitude();
 
    if ((MagXP == 0.0 || MagYP == 0.0) && (MagXS != 0.0))
    {
-      throw FusionException(std::string( "No possible solutions for KX" ), __LINE__, __FILE__ );
+      throw FusionException(string("No possible solutions for KX"), __LINE__, __FILE__);
    }
 
    if ((MagXP == 0.0 || MagYP == 0.0) && (MagYS != 0.0))
    {
-      throw FusionException(std::string( "No possible solutions for KY" ), __LINE__, __FILE__ );
+      throw FusionException(string("No possible solutions for KY"), __LINE__, __FILE__);
    }
 
    //make sure there are not infinite solutions
    if (MagXS == 0.0 && (MagXP == 0.0 || MagYP == 0.0))
    {
-      throw FusionException(std::string( "Infinite solutions for KX" ), __LINE__, __FILE__ );
+      throw FusionException(string("Infinite solutions for KX"), __LINE__, __FILE__);
    }
 
    if (MagYS == 0.0 && (MagXP == 0.0 || MagYP == 0.0))
    {
-      throw FusionException(std::string( "Infinite solutions for KY" ), __LINE__, __FILE__ );
+      throw FusionException(string("Infinite solutions for KY"), __LINE__, __FILE__);
    }
 
    if (ReqNumFitPoints > NumFitPoints)
    {
-      throw FusionException(std::string( "Number of points must be greater than (degree+1)^2" ), __LINE__, __FILE__ );
+      throw FusionException(string("Number of points must be greater than (degree + 1) ^ 2"), __LINE__, __FILE__);
    }
 
    // -- START MATH
@@ -154,19 +151,19 @@ void polywarp( const Vector<T>& XS, const Vector<T>& YS, const Vector<T>& XP,
             ut[i][column] = u2i[k];
          }
       }
-      int progress = int((100/NumFitPoints)*(i+1));
+      int progress = (100 / NumFitPoints) * (i + 1);
       progressTracker.report("Computing polynomial warp matrices", progress, NORMAL);
    }
 
    //----- big u
-   Matrix<T> uu = ~ut * ut; 
-   Matrix<T> kk = uu.invert(); 
+   Matrix<T> uu = ~ut * ut;
+   Matrix<T> kk = uu.invert();
 
    //----- solve equation
    kk = ut * kk;
 
-   Matrix<T> XSMatrix( 1, XS.size() );
-   Matrix<T> YSMatrix( 1, YS.size() );
+   Matrix<T> XSMatrix(1, XS.size());
+   Matrix<T> YSMatrix(1, YS.size());
 
    //read input vectors into matrix for multiplication
    for (i = 0; i < (int)XS.size(); i++)
@@ -178,8 +175,8 @@ void polywarp( const Vector<T>& XS, const Vector<T>& YS, const Vector<T>& XP,
    XSMatrix = XSMatrix * kk;
    YSMatrix = YSMatrix * kk;
 
-   Vector<T> returnKX( static_cast<size_t>(pow( static_cast<double>(degree + 1), 2)) );
-   Vector<T> returnKY( static_cast<size_t>(pow( static_cast<double>(degree + 1), 2)) );  
+   Vector<T> returnKX(static_cast<size_t>(pow(static_cast<double>(degree + 1), 2)));
+   Vector<T> returnKY(static_cast<size_t>(pow(static_cast<double>(degree + 1), 2)));
 
    //if you just set this to KX and KY, you get run-time errors
    for (i = 0; i < XSMatrix.getNumColumns(); i++)
@@ -187,32 +184,36 @@ void polywarp( const Vector<T>& XS, const Vector<T>& YS, const Vector<T>& XP,
       returnKX[i] = XSMatrix[0][i];
       returnKY[i] = YSMatrix[0][i];
    }
-   
+
    //filter out very small "garbage" values
    if (FILTER)
    {
       for (i = 0; i < XSMatrix.getNumColumns(); i++)
+      {
+         if (abs(log10(abs(returnKX[i]))) >= (GarbageFilterOM - 1))
          {
-            if ( abs(log10(abs(returnKX[i]))) >= (GarbageFilterOM - 1))
-               returnKX[i]=(T)0;
-            if ( abs(log10(abs(returnKY[i]))) >= (GarbageFilterOM - 1))
-               returnKY[i]=(T)0;
+            returnKX[i] = (T)0;
          }
+
+         if (abs(log10(abs(returnKY[i]))) >= (GarbageFilterOM - 1))
+         {
+            returnKY[i] = (T)0;
+         }
+      }
    }
-   
+
    const int DIM = 2;
    unsigned int ui;
    for (ui = 0; ui < returnKX.size(); ui++)
    {
-      returnKX[ui] = (returnKX[ui] / pow(static_cast<double>(zoomFactor), static_cast<int>(ui/DIM))) / 
-                      pow(static_cast<double>(zoomFactor), static_cast<int>(ui%DIM));
+      returnKX[ui] = (returnKX[ui] / pow(static_cast<double>(zoomFactor), static_cast<int>(ui/DIM))) /
+         pow(static_cast<double>(zoomFactor), static_cast<int>(ui%DIM));
    }
    for (ui = 0; ui < returnKY.size(); ui++)
    {
       returnKY[ui] = (returnKY[ui] / pow(static_cast<double>(zoomFactor), static_cast<int>(ui/DIM))) /
-                      pow(static_cast<double>(zoomFactor), static_cast<int>(ui%DIM));
+         pow(static_cast<double>(zoomFactor), static_cast<int>(ui%DIM));
    }
-
 
    KX = returnKX;
    KY = returnKY;

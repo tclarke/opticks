@@ -53,7 +53,8 @@ vector<ImportDescriptor*> SampleHdf4Importer::getImportDescriptors(const string&
    bool bSuccess = getFileData(parsedFile);
    if (bSuccess == true)
    {
-      const Hdf4Dataset* pDataset = dynamic_cast<const Hdf4Dataset*>(parsedFile.getRootGroup()->getElement("EV_500_RefSB"));
+      const Hdf4Dataset* pDataset =
+         dynamic_cast<const Hdf4Dataset*>(parsedFile.getRootGroup()->getElement("EV_500_RefSB"));
       if ((pDataset != NULL) && (mpModel.get() != NULL))
       {
          Hdf4FileResource pFile(filename.c_str());
@@ -88,19 +89,22 @@ vector<ImportDescriptor*> SampleHdf4Importer::getImportDescriptors(const string&
                         if (success == SUCCEED && numDims == 3 && strDataType == "unsigned short")
                         {
                            // Bands
-                           vector<DimensionDescriptor> bands = RasterUtilities::generateDimensionVector(dimSizes[0], true, false, true);
+                           vector<DimensionDescriptor> bands =
+                              RasterUtilities::generateDimensionVector(dimSizes[0], true, false, true);
 
                            pDescriptor->setBands(bands);
                            pFileDescriptor->setBands(bands);
 
                            // Rows
-                           vector<DimensionDescriptor> rows = RasterUtilities::generateDimensionVector(dimSizes[1], true, false, true);
+                           vector<DimensionDescriptor> rows =
+                              RasterUtilities::generateDimensionVector(dimSizes[1], true, false, true);
 
                            pDescriptor->setRows(rows);
                            pFileDescriptor->setRows(rows);
 
                            // Columns
-                           vector<DimensionDescriptor> columns = RasterUtilities::generateDimensionVector(dimSizes[2], true, false, true);
+                           vector<DimensionDescriptor> columns =
+                              RasterUtilities::generateDimensionVector(dimSizes[2], true, false, true);
 
                            pDescriptor->setColumns(columns);
                            pFileDescriptor->setColumns(columns);
@@ -122,13 +126,14 @@ vector<ImportDescriptor*> SampleHdf4Importer::getImportDescriptors(const string&
                      if (pMetadata.get() != NULL)
                      {
                         const Hdf4Dataset::AttributeContainer& attributes = pDataset->getAttributes();
-                        for (Hdf4Dataset::AttributeContainer::const_iterator it = attributes.begin(); it != attributes.end(); ++it)
+                        for (Hdf4Dataset::AttributeContainer::const_iterator it = attributes.begin();
+                           it != attributes.end(); ++it)
                         {
                            Hdf4Attribute* pAttribute = it->second;
                            if (pAttribute != NULL)
                            {
                               const string& name = pAttribute->getName();
-                              const DataVariant &var = pAttribute->getVariant();
+                              const DataVariant& var = pAttribute->getVariant();
                               const unsigned short* pValue = var.getPointerToValue<unsigned short>();
                               if (name == "_FillValue" && pValue != NULL)
                               {

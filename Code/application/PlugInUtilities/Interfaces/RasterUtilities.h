@@ -101,7 +101,7 @@ namespace RasterUtilities
    /**
     * Returns a subset DimensionDescriptor vector.
     *
-    * @param origVector
+    * @param origValues
     *        The DimensionDescriptor vector that should be subset.
     * @param start
     *        The DimensionDescriptor that specifies the start of the subset.
@@ -123,11 +123,8 @@ namespace RasterUtilities
     *
     * @return A new DimensionDescriptor vector that has been subset as specified.
     */
-   std::vector<DimensionDescriptor> subsetDimensionVector(
-      const std::vector<DimensionDescriptor>& origVector,
-      const DimensionDescriptor& start,
-      const DimensionDescriptor& stop,
-      unsigned int skipFactor = 0);
+   std::vector<DimensionDescriptor> subsetDimensionVector(const std::vector<DimensionDescriptor>& origValues,
+      const DimensionDescriptor& start, const DimensionDescriptor& stop, unsigned int skipFactor = 0);
 
    /**
     * Returns a FileDescriptor to go with a passed in DataDescriptor.
@@ -359,9 +356,8 @@ namespace RasterUtilities
     *         FileDescriptor.  Note that original numbers for 
     *         rows, columns, and bands will go from 0 to n.
     */
-   RasterDataDescriptor *generateRasterDataDescriptor(
-      const std::string &name, DataElement *pParent, unsigned int rows, 
-      unsigned int columns, unsigned int bands, InterleaveFormatType interleave,
+   RasterDataDescriptor* generateRasterDataDescriptor(const std::string& name, DataElement* pParent,
+      unsigned int rows, unsigned int columns, unsigned int bands, InterleaveFormatType interleave,
       EncodingType encoding, ProcessingLocation location);
 
    /**
@@ -385,9 +381,8 @@ namespace RasterUtilities
     *         FileDescriptor.  Note that original numbers for 
     *         rows, and columns will go from 0 to n.
     */
-   RasterDataDescriptor *generateRasterDataDescriptor(
-      const std::string &name, DataElement *pParent, unsigned int rows, 
-      unsigned int columns, EncodingType encoding, ProcessingLocation location);
+   RasterDataDescriptor* generateRasterDataDescriptor(const std::string& name, DataElement* pParent,
+      unsigned int rows, unsigned int columns, EncodingType encoding, ProcessingLocation location);
 
    /**
     * Generate a populated RasterDataDescriptor with RasterFileDescriptor

@@ -40,13 +40,13 @@ XmlRpcAnnotationCallback::XmlRpcAnnotationCallback(LayerType layerType,
       XmlRpcCallback(url, method, params, pParent), mpLayer(NULL), mpObject(NULL),
       mRegistrar(callbackRegistrar)
 {
-   const XmlRpcParam *pNameParam = params["name"];
-   if(pNameParam != NULL)
+   const XmlRpcParam* pNameParam = params["name"];
+   if (pNameParam != NULL)
    {
       mObjectName = pNameParam->value().toString();
    }
    getGraphicLayerAndObject(layerType, mObjectName, mpLayer, mpObject, NULL);
-   if((mpLayer == NULL) || (mpObject == NULL))
+   if ((mpLayer == NULL) || (mpObject == NULL))
    {
       throw XmlRpcMethodFault(303);
    }
@@ -59,23 +59,23 @@ XmlRpcAnnotationCallback::~XmlRpcAnnotationCallback()
 
 void XmlRpcAnnotationCallback::processModified(Subject &subject, const string &signal, const boost::any &val)
 {
-   GraphicLayer *pLayer = dynamic_cast<GraphicLayer*>(&subject);
-   if(pLayer == NULL)
+   GraphicLayer* pLayer = dynamic_cast<GraphicLayer*>(&subject);
+   if (pLayer == NULL)
    {
       return;
    }
-   std::list<GraphicObject*> objects;
+   list<GraphicObject*> objects;
    pLayer->getObjects(objects);
    bool found = false;
-   for(std::list<GraphicObject*>::iterator it = objects.begin(); it != objects.end(); ++it)
+   for (list<GraphicObject*>::iterator it = objects.begin(); it != objects.end(); ++it)
    {
-      if(*it == mpObject)
+      if (*it == mpObject)
       {
          found = true;
          break;
       }
    }
-   if(!found)
+   if (!found)
    {
       XmlRpcParams params;
       params.push_back(new XmlRpcParam("string", QString("deleted")));
@@ -101,7 +101,7 @@ bool XmlRpcAnnotationCallback::getGraphicLayerAndObject(LayerType layerType, con
    // 7 - the (optional) object index
    // 8 - the (optional) object name
    QRegExp regexp("(\\w+(\\s+\\w*)?)(\\[((((\\w+):)?(\\d+))|(\\w+(\\s+\\w*)?))\\])?");
-   if(!regexp.exactMatch(name))
+   if (!regexp.exactMatch(name))
    {
       return false;
    }
@@ -111,89 +111,89 @@ bool XmlRpcAnnotationCallback::getGraphicLayerAndObject(LayerType layerType, con
    string objName = regexp.cap(8).toStdString();
 
    // get the layer
-   if(pView == NULL)
+   if (pView == NULL)
    {
-      WorkspaceWindow *pWindow = Service<DesktopServices>()->getCurrentWorkspaceWindow();
-      if(pWindow != NULL)
+      WorkspaceWindow* pWindow = Service<DesktopServices>()->getCurrentWorkspaceWindow();
+      if (pWindow != NULL)
       {
          pView = dynamic_cast<SpatialDataView*>(pWindow->getView());
       }
    }
-   if(pView == NULL)
+   if (pView == NULL)
    {
       return false;
    }
-   LayerList *pLayerList = pView->getLayerList();
-   if(pLayerList == NULL)
+   LayerList* pLayerList = pView->getLayerList();
+   if (pLayerList == NULL)
    {
       return false;
    }
    vector<Layer*> graphicLayers;
    pLayerList->getLayers(layerType, graphicLayers);
-   for(vector<Layer*>::iterator lit = graphicLayers.begin(); lit != graphicLayers.end(); ++lit)
+   for (vector<Layer*>::iterator lit = graphicLayers.begin(); lit != graphicLayers.end(); ++lit)
    {
-      if(*lit != NULL)
+      if (*lit != NULL)
       {
          string testLayerName = (*lit)->getName();
-         if(testLayerName == layerName)
+         if (testLayerName == layerName)
          {
             pLayer = static_cast<GraphicLayer*>(*lit);
             break;
          }
       }
    }
-   if(pLayer == NULL)
+   if (pLayer == NULL)
    {
-      if(createNewObject)
+      if (createNewObject)
       {
          pLayer = static_cast<GraphicLayer*>(pView->createLayer(layerType, NULL, layerName));
       }
-      if(pLayer == NULL)
+      if (pLayer == NULL)
       {
          return false;
       }
    }
 
-   if(objName.empty() && objType.empty())
+   if (objName.empty() && objType.empty())
    {
       // caller only wants the layer, not an object
       return true;
    }
    // get the object
-   if(!objName.empty() && objType.empty())
+   if (!objName.empty() && objType.empty())
    {
       // specified an object name
       pObject = pLayer->getObjectByName(objName);
    }
-   else if(!objType.empty())
+   else if (!objType.empty())
    {
       // specified an object type and index
       list<GraphicObject*> objects;
       GraphicObjectType type = StringUtilities::fromXmlString<GraphicObjectType>(objType);
       pLayer->getObjects(type, objects);
-      if(objects.size() > objIdx)
+      if (objects.size() > objIdx)
       {
          list<GraphicObject*>::iterator it = objects.begin();
-         for(unsigned int i = 0; i < objIdx; i++, ++it) ; // empty body
+         for (unsigned int i = 0; i < objIdx; i++, ++it) ; // empty body
          pObject = *it;
       }
    }
-   else if(objType.empty())
+   else if (objType.empty())
    {
       // specified an object index
       list<GraphicObject*> objects;
       pLayer->getObjects(objects);
-      if(objects.size() > objIdx)
+      if (objects.size() > objIdx)
       {
          list<GraphicObject*>::iterator it = objects.begin();
-         for(unsigned int i = 0; i < objIdx; i++, ++it) ; // empty body
+         for (unsigned int i = 0; i < objIdx; i++, ++it) ; // empty body
          pObject = *it;
       }
    }
-   if(pObject == NULL && createNewObject)
+   if (pObject == NULL && createNewObject)
    {
       VERIFY((pObject = pLayer->addObject(newObjectType)) != NULL);
-      if(!objName.empty())
+      if (!objName.empty())
       {  
          pObject->setName(objName.c_str());
       }

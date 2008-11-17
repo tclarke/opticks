@@ -17,11 +17,9 @@ namespace
 EnviField* parseEnviField(vector<string>::iterator& lineIterator)
 {
    string line = *lineIterator;
-   string tag, value;
-   EnviField* pField = new EnviField;
-   int position;
+   EnviField* pField = new EnviField();
 
-   position = line.find("{");
+   string::size_type position = line.find("{");
    if (position < 0)
    {
       position = line.find("=");
@@ -44,16 +42,16 @@ EnviField* parseEnviField(vector<string>::iterator& lineIterator)
    }
    else
    {
-      int position2 = line.find ("=");
+      string::size_type position2 = line.find("=");
       pField->mTag = StringUtilities::toLower(StringUtilities::stripWhitespace(line.substr(0, position2)));
-      for (int i = 0; i <= position; i++)
+      for (string::size_type i = 0; i <= position; ++i)
       {
          (*lineIterator)[i] = ' ';
       }
 
-      for (;;) // escape condition within the loop
+      for ( ; ; ) // escape condition within the loop
       {
-         EnviField *pChild = parseEnviField(lineIterator);
+         EnviField* pChild = parseEnviField(lineIterator);
          if (pChild != NULL)
          {
             pField->mChildren.push_back(pChild);
@@ -85,7 +83,7 @@ EnviField::~EnviField()
    }
 }
 
-bool EnviField::populateFromHeader(const std::string& filename)
+bool EnviField::populateFromHeader(const string& filename)
 {
    if (filename.empty())
    {
@@ -116,7 +114,7 @@ bool EnviField::populateFromHeader(const std::string& filename)
    vector<string> headerText;      // stores the lines in the ENVI header file
    headerText.push_back("ENVI");
 
-   while(feof(pFp) == 0)
+   while (feof(pFp) == 0)
    {
       if (fgets(pBuffer, 2047, pFp) == NULL)
       {
@@ -145,7 +143,7 @@ bool EnviField::populateFromHeader(const std::string& filename)
          }
       }
 
-      while((i >= 0) && isspace(pBuffer[i]))
+      while ((i >= 0) && isspace(pBuffer[i]))
       {
          pBuffer[i--] = 0;
       }

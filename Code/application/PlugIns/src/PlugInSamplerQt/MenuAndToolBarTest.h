@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef MENUANDTOOLBARTEST_H__
-#define MENUANDTOOLBARTEST_H__
+#ifndef MENUANDTOOLBARTEST_H
+#define MENUANDTOOLBARTEST_H
 
 #include "ViewerShell.h"
 #include "MenuAndToolBarTestGui.h"
@@ -17,19 +17,19 @@
 class MenuAndToolBarTest : public QObject, public ViewerShell
 {
    Q_OBJECT
+
 public:
     MenuAndToolBarTest();
     ~MenuAndToolBarTest();
 
-public:
-    bool execute( PlugInArgList *, PlugInArgList * );
+    bool execute(PlugInArgList*, PlugInArgList*);
     QWidget* getWidget() const;
 
 public slots:
    void dialogClosed();
 
 private:
-   MenuAndToolBarTestGui *mpGui;
+   MenuAndToolBarTestGui* mpGui;
 };
 
 #endif

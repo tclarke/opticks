@@ -46,9 +46,10 @@ bool CloseNotificationTest::execute( PlugInArgList* inputArgList, PlugInArgList*
 
 void CloseNotificationTest::processSessionClosed(Subject &pSubject, const std::string &signal, const boost::any &data)
 {
-   if(signal == ApplicationServices::signalSessionClosed())
+   if (signal == ApplicationServices::signalSessionClosed())
    {
-      QMessageBox::information( NULL, "Close Notification Test", "A Close Event was caught. This application is closing!", "OK" );
+      QMessageBox::information(NULL, "Close Notification Test",
+         "A Close Event was caught. This application is closing!", "OK");
    }
 }
 

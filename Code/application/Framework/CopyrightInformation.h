@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef COPYRIGHTINFORMATION_H__
-#define COPYRIGHTINFORMATION_H__
+#ifndef COPYRIGHTINFORMATION_H
+#define COPYRIGHTINFORMATION_H
 
 #include "PlugInShell.h"
 

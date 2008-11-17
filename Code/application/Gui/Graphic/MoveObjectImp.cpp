@@ -38,18 +38,17 @@ namespace
    class MoveHandles
    {
    public:
-      MoveHandles(GraphicObject *pObject, LocationType coord, 
-         int handle, bool maintainAspect)
-         : mHandle(handle), mMaintainAspect(maintainAspect)
+      MoveHandles(GraphicObject* pObject, LocationType coord, int handle, bool maintainAspect) :
+         mHandle(handle),
+         mMaintainAspect(maintainAspect)
       {
-         LocationType startCoord = 
-            dynamic_cast<GraphicObjectImp*>(pObject)->getHandle(handle);
+         LocationType startCoord = dynamic_cast<GraphicObjectImp*>(pObject)->getHandle(handle);
          mRelCoord = coord - startCoord;
       }
 
-      void operator()(GraphicObject *pObj) const
+      void operator()(GraphicObject* pObj) const
       {
-         GraphicObjectImp *pObjImp = dynamic_cast<GraphicObjectImp*>(pObj);
+         GraphicObjectImp* pObjImp = dynamic_cast<GraphicObjectImp*>(pObj);
          VERIFYNRV(pObjImp != NULL);
          LocationType adjustedCoord = pObjImp->getHandle(mHandle) + mRelCoord;
          LocationType handlePos = pObjImp->getHandle(mHandle);
@@ -99,7 +98,7 @@ namespace
       RotateHandles(GraphicObject *pObject, LocationType coord, int handle)
          : mpObject(pObject)
       {
-         GraphicObjectImp *pObjImp = dynamic_cast<GraphicObjectImp*>(mpObject);
+         GraphicObjectImp* pObjImp = dynamic_cast<GraphicObjectImp*>(mpObject);
          double startRot = pObject->getRotation();
          pObjImp->rotateHandle(handle, coord);
          double stopRot = pObject->getRotation();
@@ -114,16 +113,18 @@ namespace
          }
       }
    private:
-      GraphicObject *mpObject;
+      GraphicObject* mpObject;
       double mDeltaRot;
    };
 
    class HitHandle
    {
    public:
-      HitHandle(const GraphicLayer *pLayer, LocationType coord) : 
-         mpLayer(dynamic_cast<const GraphicLayerImp*>(pLayer)), 
-         mCoord(coord), mpObject(NULL), mHandle(-1)
+      HitHandle(const GraphicLayer* pLayer, LocationType coord) : 
+         mpLayer(dynamic_cast<const GraphicLayerImp*>(pLayer)),
+         mpObject(NULL),
+         mCoord(coord),
+         mHandle(-1)
       {
       }
 
@@ -151,8 +152,8 @@ namespace
       }
 
    private:
-      const GraphicLayerImp *mpLayer;
-      GraphicObject *mpObject;
+      const GraphicLayerImp* mpLayer;
+      GraphicObject* mpObject;
       LocationType mCoord;
       int mHandle;
    };
@@ -161,8 +162,8 @@ namespace
 MoveObjectImp::MoveObjectImp(const string& id, GraphicObjectType type, GraphicLayer* pLayer,
                              LocationType pixelCoord) :
    GraphicObjectImp(id, type, pLayer, pixelCoord),
-   mpLastSelectedObject(NULL),
    mSelectedHandle(-1),
+   mpLastSelectedObject(NULL),
    mpUndoGroup(NULL),
    mLeftPressed(false)
 {
@@ -176,13 +177,22 @@ MoveObjectImp::~MoveObjectImp()
    }
 }
 
+void MoveObjectImp::draw(double zoomFactor) const
+{
+}
+
+bool MoveObjectImp::hit(LocationType) const
+{
+   return false;
+}
+
 bool MoveObjectImp::processMousePress(LocationType sceneCoord, 
                                  Qt::MouseButton button,
                                  Qt::MouseButtons buttons,
                                  Qt::KeyboardModifiers modifiers)
 {
-   GraphicLayer *pLayer = getLayer();
-   GraphicLayerImp *pLayerImp = dynamic_cast<GraphicLayerImp*>(pLayer);
+   GraphicLayer* pLayer = getLayer();
+   GraphicLayerImp* pLayerImp = dynamic_cast<GraphicLayerImp*>(pLayer);
 
    VERIFY(pLayerImp != NULL);
 
@@ -230,13 +240,13 @@ bool MoveObjectImp::processMouseMove(LocationType sceneCoord,
    if (mLeftPressed) // use this rather than buttons & Qt::LeftButton because
       // we can get mousemove event with the button pressed without the user clicking within the layer
    {  
-      GraphicLayerImp *pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
+      GraphicLayerImp* pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
       VERIFY(pLayer != NULL);
       bool bLayerLocked = pLayer->getLayerLocked();
 
       if (mpLastSelectedObject == NULL)
       {
-         ViewImp *pView = dynamic_cast<ViewImp*>(pLayer->getView());
+         ViewImp* pView = dynamic_cast<ViewImp*>(pLayer->getView());
          VERIFY(pView != NULL);
 
          LocationType llWorld;
@@ -257,7 +267,8 @@ bool MoveObjectImp::processMouseMove(LocationType sceneCoord,
             switch (getGraphicObjectType())
             {
             case MOVE_OBJECT:
-               applyHandleChange(::MoveHandles(mpLastSelectedObject, sceneCoord, mSelectedHandle, modifiers & Qt::ShiftModifier));
+               applyHandleChange(::MoveHandles(mpLastSelectedObject, sceneCoord, mSelectedHandle,
+                  modifiers & Qt::ShiftModifier));
                break;
             case ROTATE_OBJECT:
                applyHandleChange(::RotateHandles(mpLastSelectedObject, sceneCoord, mSelectedHandle));
@@ -290,10 +301,10 @@ bool MoveObjectImp::processMouseRelease(LocationType sceneCoord,
    {
       if (mpLastSelectedObject == NULL)
       {
-         GraphicLayerImp *pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
+         GraphicLayerImp* pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
          VERIFY(pLayer != NULL);
          pLayer->selectObjects(mPressCoord, sceneCoord);
-         ViewImp *pView = dynamic_cast<ViewImp*>(pLayer->getView());
+         ViewImp* pView = dynamic_cast<ViewImp*>(pLayer->getView());
          VERIFY(pView != NULL);
          pView->setSelectionBox(QRect());
       }
@@ -344,6 +355,21 @@ bool MoveObjectImp::applyHandleChange(const T &functor)
    }
 
    return true;
+}
+
+bool MoveObjectImp::isVisible() const
+{
+   return false;
+}
+
+bool MoveObjectImp::hasCornerHandles() const
+{
+   return false;
+}
+
+bool MoveObjectImp::insertionUndoable() const
+{
+   return false;
 }
 
 const string& MoveObjectImp::getObjectType() const

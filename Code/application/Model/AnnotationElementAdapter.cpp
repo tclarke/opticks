@@ -23,8 +23,8 @@ AnnotationElementAdapter::~AnnotationElementAdapter()
 
 const string& AnnotationElementAdapter::getObjectType() const
 {
-   static string type("AnnotationElementAdapter");
-   return type;
+   static string sType("AnnotationElementAdapter");
+   return sType;
 }
 
 bool AnnotationElementAdapter::isKindOf(const string& className) const

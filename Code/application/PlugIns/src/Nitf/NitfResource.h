@@ -25,22 +25,23 @@ namespace Nitf
    public:
       struct Args
       {
+         Args(std::string filename, std::string access = "r") :
+            mFilename(filename),
+            mAccess(access) {}
+
          std::string mFilename;
          std::string mAccess;
-         Args(std::string filename, std::string access="r") : mFilename(filename), mAccess(access) {}
       };
 
       ossimNitfFile* obtainResource(const Args &args) const;
-      void releaseResource(const Args &args, ossimNitfFile* pHandler) const;
+      void releaseResource(const Args& args, ossimNitfFile* pFile) const;
    };
-   
+
    class OssimFileResource : public Resource<ossimNitfFile, Nitf::OssimFileObject>
    {
    public:
       OssimFileResource(const std::string& filename, const std::string& args = "r") :
-         Resource<ossimNitfFile, Nitf::OssimFileObject>(OssimFileObject::Args(filename.c_str(), args.c_str()))
-      {
-      }
+         Resource<ossimNitfFile, Nitf::OssimFileObject>(OssimFileObject::Args(filename.c_str(), args.c_str())) {}
    };
 
    class OssimImageHandlerObject
@@ -48,21 +49,21 @@ namespace Nitf
    public:
       struct Args
       {
+         Args(const std::string& filename) :
+            mFilename(filename) {}
+
          std::string mFilename;
-         Args(const std::string &filename) : mFilename(filename) {}
       };
 
-      ossimImageHandler *obtainResource(const Args &args) const;
-      void releaseResource(const Args &args, ossimImageHandler *pHandler);
+      ossimImageHandler* obtainResource(const Args& args) const;
+      void releaseResource(const Args& args, ossimImageHandler* pHandler);
    };
 
    class OssimImageHandlerResource : public Resource<ossimImageHandler, Nitf::OssimImageHandlerObject>
    {
    public:
-      OssimImageHandlerResource(const std::string &filename = "") : 
-         Resource<ossimImageHandler, Nitf::OssimImageHandlerObject>(OssimImageHandlerObject::Args(filename))
-      {
-      }
+      OssimImageHandlerResource(const std::string& filename = "") : 
+         Resource<ossimImageHandler, Nitf::OssimImageHandlerObject>(OssimImageHandlerObject::Args(filename)) {}
    };
 }
 #endif

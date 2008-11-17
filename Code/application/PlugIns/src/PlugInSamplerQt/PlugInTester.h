@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef PLUG_IN_TESTER_H
-#define PLUG_IN_TESTER_H
+#ifndef PLUGINTESTER_H
+#define PLUGINTESTER_H
 
 #include "AlgorithmShell.h"
 #include "DesktopServices.h"

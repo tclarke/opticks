@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef MAXTRIX_FUNCTIONS_H
-#define MAXTRIX_FUNCTIONS_H
+#ifndef MATRIXFUNCTIONS_H
+#define MATRIXFUNCTIONS_H
 
 #include "Resource.h"
 
@@ -103,7 +103,10 @@ namespace MatrixFunctions
        *
        *  @return   A pointer to the underlying T**.
        */
-      operator T**() { return reinterpret_cast<T**>(get()); }
+      operator T**()
+      {
+         return reinterpret_cast<T**>(get());
+      }
 
       /**
        *  Returns a const pointer to the underlying T**.
@@ -114,7 +117,10 @@ namespace MatrixFunctions
        *
        *  @return   A const pointer to the underlying T**.
        */
-      operator const T**() const { return reinterpret_cast<const T**>(const_cast<T*>(get())); }
+      operator const T**() const
+      {
+         return reinterpret_cast<const T**>(const_cast<T*>(get()));
+      }
 
       /**
        *  Returns a pointer to a row.
@@ -183,7 +189,7 @@ namespace MatrixFunctions
          pMatrix = new T*[numRows];
          pMatrix[0] = new T[numRows * numCols];
       }
-      catch(const std::bad_alloc&)
+      catch (const std::bad_alloc&)
       {
          delete[] pMatrix[0];
          delete[] pMatrix;
@@ -331,7 +337,8 @@ namespace MatrixFunctions
     *
     *  @see isMatrixSymmetric()
     */
-   bool getEigenvalues(const double** pSymmetricMatrix, double* pEigenvalues, double** pEigenvectors, const int& numRows);
+   bool getEigenvalues(const double** pSymmetricMatrix, double* pEigenvalues, double** pEigenvectors,
+      const int& numRows);
 
    /**
     *  Inverts a square matrix.

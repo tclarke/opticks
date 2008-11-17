@@ -139,14 +139,16 @@ void IceWriter::writeCube(const string& hdfPath,
    ICEVERIFY(HdfUtilities::writeAttribute(*dataId, "InterleaveFormat", interleaveString));
 
    //Write out original numbers
-   vector<unsigned int> originalRowNums, originalColNums, originalBandNums;
+   vector<unsigned int> originalRowNums;
+   vector<unsigned int> originalColNums;
+   vector<unsigned int> originalBandNums;
    originalRowNums.reserve(rows.size());
    originalColNums.reserve(cols.size());
    originalBandNums.reserve(bands.size());
 
-   for (vector<DimensionDescriptor>::const_iterator row = rows.begin(); row != rows.end(); ++row)
+   for (vector<DimensionDescriptor>::const_iterator rowIter = rows.begin(); rowIter != rows.end(); ++rowIter)
    {
-      originalRowNums.push_back((*row).getOriginalNumber());
+      originalRowNums.push_back((*rowIter).getOriginalNumber());
    }
 
    for (vector<DimensionDescriptor>::const_iterator col = cols.begin(); col != cols.end(); ++col)
@@ -242,14 +244,18 @@ void IceWriter::writeCube(const string& hdfPath,
    {
       if (!rows.empty() && !cols.empty())
       {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This functionality should be moved into a method in a new RasterElementExporterShell class (dsulgrov)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This functionality should be moved into a method " \
+   "in a new RasterElementExporterShell class (dsulgrov)")
          list<GcpPoint> gcps;
-         unsigned int startRow, startCol, endRow, endCol;
-         startRow = rows.front().getActiveNumber();
-         endRow = rows.back().getActiveNumber();
-         startCol = cols.front().getActiveNumber();
-         endCol = cols.back().getActiveNumber();
-         GcpPoint urPoint, ulPoint, lrPoint, llPoint, centerPoint;
+         unsigned int startRow = rows.front().getActiveNumber();
+         unsigned int endRow = rows.back().getActiveNumber();
+         unsigned int startCol = cols.front().getActiveNumber();
+         unsigned int endCol = cols.back().getActiveNumber();
+         GcpPoint urPoint;
+         GcpPoint ulPoint;
+         GcpPoint lrPoint;
+         GcpPoint llPoint;
+         GcpPoint centerPoint;
          ulPoint.mPixel = LocationType(startCol, startRow);
          urPoint.mPixel = LocationType(endCol, startRow);
          llPoint.mPixel = LocationType(startCol, endRow);
@@ -264,11 +270,10 @@ void IceWriter::writeCube(const string& hdfPath,
 
          //reset the coordinates, because on import they are required to be in
          //on-disk numbers not active numbers
-         unsigned int diskStartRow, diskStartCol, diskEndRow, diskEndCol;
-         diskStartRow = rows.front().getOnDiskNumber();
-         diskEndRow = rows.back().getOnDiskNumber();
-         diskStartCol = cols.front().getOnDiskNumber();
-         diskEndCol = cols.back().getOnDiskNumber();
+         unsigned int diskStartRow = rows.front().getOnDiskNumber();
+         unsigned int diskEndRow = rows.back().getOnDiskNumber();
+         unsigned int diskStartCol = cols.front().getOnDiskNumber();
+         unsigned int diskEndCol = cols.back().getOnDiskNumber();
          ulPoint.mPixel = LocationType(diskStartCol, diskStartRow);
          urPoint.mPixel = LocationType(diskEndCol, diskStartRow);
          llPoint.mPixel = LocationType(diskStartCol, diskEndRow);
@@ -750,8 +755,10 @@ void IceWriter::writeBipCubeData(const string& hdfPath,
    hsize_t compSpace[3];
 
    dimSpace[0] = rows.size();
-   compSpace[1] = dimSpace[1] = cols.size();
-   compSpace[2] = dimSpace[2] = bands.size();
+   dimSpace[1] = cols.size();
+   dimSpace[2] = bands.size();
+   compSpace[1] = cols.size();
+   compSpace[2] = bands.size();
 
    unsigned int rowSize = cols.size() * bands.size() * bpe;
    unsigned int rowsInChunk = mChunkSize/rowSize; // determine number of rows that fit into a chunk
@@ -788,7 +795,8 @@ void IceWriter::writeBipCubeData(const string& hdfPath,
 
    Hdf5DataSpaceResource mspaceId(H5Screate_simple(3, counts, NULL));
    ICEVERIFY(*mspaceId >= 0);
-   offset[1] = offset[2] = 0; // reset to beginning of rows and bands
+   offset[1] = 0;
+   offset[2] = 0; // reset to beginning of rows and bands
 
    unsigned int numChunks = rows.size() / rowsInChunk;
    if (rows.size() % rowsInChunk != 0)
@@ -935,8 +943,10 @@ void IceWriter::writeBsqCubeData(const string& hdfPath,
    dimSpace[2] = cols.size();
 
    // compress in chunks
-   compSpace[0] = counts[0] = 1; //only try to fit 1 band into a chunk
-   compSpace[2] = counts[2] = cols.size();
+   compSpace[0] = 1;
+   counts[0] = 1; //only try to fit 1 band into a chunk
+   compSpace[2] = cols.size();
+   counts[2] = cols.size();
 
    unsigned int rowSize = cols.size() * bpe;
    unsigned int rowsInChunk = mChunkSize/rowSize; // determine number of rows that fit into a chunk
@@ -948,7 +958,8 @@ void IceWriter::writeBsqCubeData(const string& hdfPath,
    {
       rowsInChunk = 1;
    }
-   compSpace[1] = counts[1] = rowsInChunk;
+   compSpace[1] = rowsInChunk;
+   counts[1] = rowsInChunk;
 
    createDatasetForCube(dimSpace, compSpace, pDescriptor->getDataType(), mFileHandle, hdfPath, dataId);
    Hdf5DataSpaceResource dSpaceId(H5Dget_space(*dataId));
@@ -1048,7 +1059,7 @@ void IceWriter::createDatasetForCube(hsize_t dimSpace[3],
    bool bCompressible = true;
    hid_t hdfType = 0;
    Hdf5TypeResource hdfTypeRes;
-   switch(encoding)
+   switch (encoding)
    {
    case INT1SBYTE:
       hdfType = H5T_NATIVE_CHAR;

@@ -22,8 +22,8 @@ RasterFileDescriptorAdapter::~RasterFileDescriptorAdapter()
 // TypeAwareObject
 const string& RasterFileDescriptorAdapter::getObjectType() const
 {
-   static string type("RasterFileDescriptorAdapter");
-   return type;
+   static string sType("RasterFileDescriptorAdapter");
+   return sType;
 }
 
 bool RasterFileDescriptorAdapter::isKindOf(const string& className) const

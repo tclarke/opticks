@@ -25,8 +25,8 @@
 
 class BitMask;
 
-namespace DrawUtil {
-
+namespace DrawUtil
+{
 template<class T>
 T minimum(T t1, T t2)
 {
@@ -135,13 +135,11 @@ private:
       ~TextTextureImp();
    private:
       TextTextureImp();
-      TextTextureImp(const TextTextureImp &original);
+      TextTextureImp(const TextTextureImp& rhs);
       const TextTextureImp &operator=(const TextTextureImp &rhs);
    };
 
-
-   TextTextureImp *mImp;
-
+   TextTextureImp* mImp;
 };
 
 
@@ -174,19 +172,21 @@ double linePointDistance(LocationType p1, LocationType p2, LocationType target, 
 
 bool lineHit(LocationType p1, LocationType p2, LocationType target, double qualifier = 1.0);
 
-int isBetween(float x, float x1, float x2);
-
 inline bool isBetween(double x, double x1, double x2)
 {
    if (x2 < x1)
    {
       if ((x2 < x) && (x <= x1))
+      {
          return true;
+      }
    }
    else
    {
       if ((x1 < x) && (x <= x2))
+      {
          return true;
+      }
    }
 
    return false;
@@ -218,10 +218,16 @@ LocationType getRotatedCoordinate(const LocationType& coord, const LocationType&
                                   double dRotation);
 
 template <class itemType>
-inline const itemType& MAX(const itemType &left, const itemType &right) { return left > right ? left : right; }
+inline const itemType& MAX(const itemType& left, const itemType& right)
+{
+   return left > right ? left : right;
+}
 
 template <class itemType>
-inline const itemType& MIN(const itemType &left, const itemType &right) { return left < right ? left : right; }
+inline const itemType& MIN(const itemType& left, const itemType& right)
+{
+   return left < right ? left : right;
+}
 
 /**
  * Updates the bounding box to include the vertex.
@@ -341,7 +347,7 @@ public:
    void operator()(int x, int y);
 
 private:
-   BitMask *mpMask;
+   BitMask* mpMask;
 };
 
 
@@ -436,15 +442,32 @@ void drawPixelLine(LocationType p0, LocationType p1, T &drawer)
       switch (oct)
       {
          // draw as appropriate for the given octant
-         case 0:     drawer(x0+x, y0+y); break;
-         case 1:     drawer(x0+y, y0+x); break;
-         case 2:     drawer(x0-y, y0+x); break;
-         case 3:     drawer(x0-x, y0+y); break;
-         case 4:     drawer(x0-x, y0-y); break;
-         case 5:     drawer(x0-y, y0-x); break;
-         case 6:     drawer(x0+y, y0-x); break;
-         case 7:     drawer(x0+x, y0-y); break;
-         default: break;
+         case 0:
+            drawer(x0 + x, y0 + y);
+            break;
+         case 1:
+            drawer(x0 + y, y0 + x);
+            break;
+         case 2:
+            drawer(x0 - y, y0 + x);
+            break;
+         case 3:
+            drawer(x0 - x, y0 + y);
+            break;
+         case 4:
+            drawer(x0 - x, y0 - y);
+            break;
+         case 5:
+            drawer(x0 - y, y0 - x);
+            break;
+         case 6:
+            drawer(x0 + y, y0 - x);
+            break;
+         case 7:
+            drawer(x0 + x, y0 - y);
+            break;
+         default:
+            break;
       }
    }
 }

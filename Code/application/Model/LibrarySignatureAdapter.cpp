@@ -11,7 +11,8 @@
 
 using namespace std;
 
-LibrarySignatureAdapter::LibrarySignatureAdapter(const DataDescriptorImp& descriptor, const string& id, unsigned int index, const SignatureLibrary *pLib) :
+LibrarySignatureAdapter::LibrarySignatureAdapter(const DataDescriptorImp& descriptor, const string& id,
+                                                 unsigned int index, const SignatureLibrary* pLib) :
    LibrarySignatureImp(descriptor, id, index, pLib)
 {
 }
@@ -24,8 +25,8 @@ LibrarySignatureAdapter::~LibrarySignatureAdapter()
 // TypeAwareObject
 const string& LibrarySignatureAdapter::getObjectType() const
 {
-   static string type("LibrarySignatureAdapter");
-   return type;
+   static string sType("LibrarySignatureAdapter");
+   return sType;
 }
 
 bool LibrarySignatureAdapter::isKindOf(const string& className) const

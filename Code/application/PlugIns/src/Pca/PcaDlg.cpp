@@ -91,7 +91,7 @@ PcaDlg::PcaDlg(const vector<string> &aoiList, unsigned int ulBands, QWidget* par
    mpComponentsSpin->setSingleStep(1);
    mpComponentsSpin->setFixedWidth(60);
 
-   mpFromEigenPlot = new QCheckBox("from Eigen Plot",this);
+   mpFromEigenPlot = new QCheckBox("from Eigen Plot", this);
    mpFromEigenPlot->setChecked(false);
 
    QHBoxLayout* pNumCompLayout = new QHBoxLayout();
@@ -146,7 +146,7 @@ PcaDlg::PcaDlg(const vector<string> &aoiList, unsigned int ulBands, QWidget* par
    mpRoiCombo->setEditable(false);
    mpRoiCombo->setMinimumWidth(150);
 
-   for(vector<string>::const_iterator iter = aoiList.begin(); iter != aoiList.end(); iter++)
+   for (vector<string>::const_iterator iter = aoiList.begin(); iter != aoiList.end(); ++iter)
    {
       mpRoiCombo->addItem(QString::fromStdString(*iter));
    }
@@ -208,7 +208,7 @@ PcaDlg::~PcaDlg()
 QString PcaDlg::getCalcMethod() const
 {
    QString strMethod;
-   if(mpCalculateRadio->isChecked())
+   if (mpCalculateRadio->isChecked())
    {
       strMethod = mpMethodCombo->currentText();
    }
@@ -219,9 +219,9 @@ QString PcaDlg::getCalcMethod() const
 QString PcaDlg::getTransformFilename() const
 {
    QString strFilename;
-   if(mpFileRadio->isChecked())
+   if (mpFileRadio->isChecked())
    {
-      strFilename =mpFileEdit->text();
+      strFilename = mpFileEdit->text();
    }
 
    return strFilename;
@@ -240,7 +240,7 @@ EncodingType PcaDlg::getOutputDataType() const
    EncodingType eDataType;
 
    QString strDataType = mpDataCombo->currentText();
-   if(!strDataType.isEmpty())
+   if (!strDataType.isEmpty())
    {
       string dataType = strDataType.toStdString();
 
@@ -261,7 +261,7 @@ int PcaDlg::getMaxScaleValue() const
 QString PcaDlg::getRoiName() const
 {
    QString strRoiName;
-   if(mpRoiCheck->isChecked())
+   if (mpRoiCheck->isChecked())
    {
       strRoiName = mpRoiCombo->currentText();
    }
@@ -273,22 +273,23 @@ void PcaDlg::browse()
 {
    QString strFilename = QFileDialog::getOpenFileName(this, "Select PCA Transform File", QString(),
       "PCA files (*.pca*);;All Files (*.*)");
-   if(strFilename.isEmpty())
+   if (strFilename.isEmpty())
    {
       return;
    }
 
    FILE* pFile = fopen(strFilename.toStdString().c_str(), "rt");
-   if(pFile == NULL) 
+   if (pFile == NULL)
    {
       QMessageBox::critical(this, "PCA", "Unable to open file:\n" + strFilename);
       return; 
    }
 
-   int lnumBands = 0, lnumComponents = 0;
+   int lnumBands = 0;
+   int lnumComponents = 0;
    int numFieldsRead = 0;
    numFieldsRead = fscanf(pFile, "%d\n", &lnumBands);
-   if(numFieldsRead != 1)
+   if (numFieldsRead != 1)
    {
       QMessageBox::critical(this, "PCA", "Unable to read from file:\n" + strFilename);
       fclose(pFile);
@@ -296,7 +297,7 @@ void PcaDlg::browse()
    }
 
    numFieldsRead = fscanf(pFile, "%d\n", &lnumComponents);
-   if(numFieldsRead != 1)
+   if (numFieldsRead != 1)
    {
       QMessageBox::critical(this, "PCA", "Unable to read from file:\n" + strFilename);
       fclose(pFile);
@@ -304,7 +305,7 @@ void PcaDlg::browse()
    }
 
    unsigned int ulMaxBands = mpComponentsSpin->maximum();
-   if(lnumBands != ulMaxBands)
+   if (lnumBands != ulMaxBands)
    {
       QString message;
       message.sprintf("File-> %s\ncontains PCA results for %d bands.\nThere are %d bands loaded for this image.",
@@ -326,7 +327,7 @@ void PcaDlg::updateMaxScaleValue()
    int ulMaxValue = 0;
 
    EncodingType eDataType = getOutputDataType();
-   switch(eDataType)
+   switch (eDataType)
    {
       case INT1UBYTE:
          ulMaxValue = 255;
@@ -349,6 +350,9 @@ void PcaDlg::updateMaxScaleValue()
       case FLT4BYTES:
       case FLT8BYTES:
          ulMaxValue = 2147483647;
+         break;
+
+      default:
          break;
    }
 

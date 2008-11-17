@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef FLICKER_CONTROLS_H
-#define FLICKER_CONTROLS_H
+#ifndef FLICKERCONTROLS_H
+#define FLICKERCONTROLS_H
 
 #include <QtCore/QObject>
 #include <QtGui/QAction>
@@ -32,23 +32,23 @@ public:
    FlickerControls();
    ~FlickerControls();
 
-   void windowHidden(Subject& subject, const std::string &signal, const boost::any& v);
-   void windowShown(Subject& subject, const std::string &signal, const boost::any& v);
+   void windowHidden(Subject& subject, const std::string& signal, const boost::any& v);
+   void windowShown(Subject& subject, const std::string& signal, const boost::any& v);
 
-   bool execute(PlugInArgList *pInputArgList, PlugInArgList *pOutputArgList);
-   bool getInputSpecification(PlugInArgList*& pIn) { return true; }
-   bool getOutputSpecification(PlugInArgList*& pOut) { return true; }
+   bool execute(PlugInArgList* pInputArgList, PlugInArgList* pOutputArgList);
+   bool getInputSpecification(PlugInArgList*& pArgList);
+   bool getOutputSpecification(PlugInArgList*& pArgList);
 
-   bool setBatch() { return false; }
+   bool setBatch();
 
-   bool serialize(SessionItemSerializer &serializer) const;
-   bool deserialize(SessionItemDeserializer &deserializer);
+   bool serialize(SessionItemSerializer& serializer) const;
+   bool deserialize(SessionItemDeserializer& deserializer);
 
 protected slots:
    void displayFlickerWindow(bool bDisplay);
    bool createFlickerWindow();
    void createMenuItem();
-   void attachToFlickerWindow(DockWindow *pFlickerWindow);
+   void attachToFlickerWindow(DockWindow* pFlickerWindow);
 
 private:
    Service<DesktopServices> mpDesktop;

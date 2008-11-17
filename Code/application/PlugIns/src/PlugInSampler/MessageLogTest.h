@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef MESSAGELOGTEST_H__
-#define MESSAGELOGTEST_H__
+#ifndef MESSAGELOGTEST_H
+#define MESSAGELOGTEST_H
 
 #include "AlgorithmShell.h"
 
@@ -19,9 +19,9 @@ public:
    ~MessageLogTestPlugin();
 
 public:
-   bool getInputSpecification( PlugInArgList *& );
-   bool getOutputSpecification( PlugInArgList *& );
-   bool execute( PlugInArgList *, PlugInArgList * );
+   bool getInputSpecification(PlugInArgList*& pArgList);
+   bool getOutputSpecification(PlugInArgList*& pArgList);
+   bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
 };
 
 #endif

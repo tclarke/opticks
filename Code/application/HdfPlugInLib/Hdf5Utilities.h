@@ -7,9 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef HDF5_UTILITIES_H
-#define HDF5_UTILITIES_H
-
+#ifndef HDF5UTILITIES_H
+#define HDF5UTILITIES_H
 
 #include "HdfUtilities.h"
 
@@ -184,7 +183,8 @@ namespace HdfUtilities
       {
          return false;
       }
-      Hdf5AttributeResource attrId(H5Acreate(dataDescriptor, attributeName.c_str(), *fileTypeId, *spaceId, H5P_DEFAULT));
+      Hdf5AttributeResource attrId(H5Acreate(dataDescriptor, attributeName.c_str(), *fileTypeId,
+         *spaceId, H5P_DEFAULT));
       if (*attrId < 0)
       {
          return false;
@@ -249,8 +249,7 @@ namespace HdfUtilities
       const void* pData = pWriter->getWriteBuffer();
       if (pData != NULL)
       {
-         herr_t writeStatus = H5Dwrite(*dataSet, *memTypeId, H5S_ALL,
-            *spaceId, H5P_DEFAULT, pData);
+         herr_t writeStatus = H5Dwrite(*dataSet, *memTypeId, H5S_ALL, *spaceId, H5P_DEFAULT, pData);
          return writeStatus == 0;
       }
       return false;
@@ -278,4 +277,4 @@ namespace HdfUtilities
 
 }
 
-#endif // _HDF5_H
+#endif

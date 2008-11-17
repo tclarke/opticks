@@ -42,7 +42,7 @@ using namespace std;
 ScriptPlugIn::ScriptPlugIn(int scriptIndex)
 {
    // set description values
-   if(static_cast<int>(gDescriptors.size()) <= scriptIndex)
+   if (static_cast<int>(gDescriptors.size()) <= scriptIndex)
    {
       setName("RunScript");
       setVersion(APP_VERSION_NUMBER);
@@ -74,30 +74,15 @@ ScriptPlugIn::~ScriptPlugIn()
 {
 }
 
-bool ScriptPlugIn::isInputValid(PlugInArgList *)
-{
-   return true;
-}
-
-bool ScriptPlugIn::setBatch()
-{
-   return true;
-}
-
-bool ScriptPlugIn::setInteractive()
-{
-   return true;
-}
-
 bool ScriptPlugIn::getInputSpecification(PlugInArgList *&pArgList)
 {
-   if(mDescriptor.mScriptPath == "")
+   if (mDescriptor.mScriptPath == "")
    {
       Service<PlugInManagerServices> pPlugInManager;
       VERIFY(pPlugInManager.get() != NULL);
       pArgList = pPlugInManager->getPlugInArgList();
       VERIFY(pArgList != NULL);
-      PlugInArg *p1 = pPlugInManager->getPlugInArg();
+      PlugInArg* p1 = pPlugInManager->getPlugInArg();
       VERIFY(p1 != NULL);
       p1->setName("ScriptPath");
       p1->setType("Filename");
@@ -105,10 +90,8 @@ bool ScriptPlugIn::getInputSpecification(PlugInArgList *&pArgList)
       pArgList->addArg(*p1);
       return true;
    }
-   else
-   {
-      return false;
-   }
+
+   return false;
 }
 
 bool ScriptPlugIn::getOutputSpecification(PlugInArgList *&pArgList)
@@ -117,7 +100,7 @@ bool ScriptPlugIn::getOutputSpecification(PlugInArgList *&pArgList)
    VERIFY(pPlugInManager.get() != NULL);
    pArgList = pPlugInManager->getPlugInArgList();
    VERIFY(pArgList != NULL);
-   PlugInArg *p1 = pPlugInManager->getPlugInArg();
+   PlugInArg* p1 = pPlugInManager->getPlugInArg();
    VERIFY(p1 != NULL);
    p1->setName("ReturnPath");
    p1->setType("Filename");
@@ -135,13 +118,13 @@ bool ScriptPlugIn::getOutputSpecification(PlugInArgList *&pArgList)
 static void setEnvironmentVariable(const char *pName, const char *pValue)
 {
    stringstream command;
-   if((pName == NULL) || (pValue == NULL))
+   if ((pName == NULL) || (pValue == NULL))
    {
       return;
    }
    string buffer2(pValue);
 #if defined(WIN_API)
-   for (unsigned int i=0; i<buffer2.size(); ++i)
+   for (unsigned int i = 0; i < buffer2.size(); ++i)
    {
       if (buffer2[i] == '/')
       {
@@ -150,7 +133,7 @@ static void setEnvironmentVariable(const char *pName, const char *pValue)
    }
 #endif
    command << pName << "=" << buffer2;
-   putenv(const_cast<char*>(command.str().c_str()));
+   putenv(command.str().c_str());
 }
 
 static void setEnvironmentOption(const Filename* pSettingValue, const string& environName)
@@ -160,7 +143,7 @@ static void setEnvironmentOption(const Filename* pSettingValue, const string& en
    {
       value = pSettingValue->getFullPathAndName();
    }
-   if(!value.empty())
+   if (!value.empty())
    {
 #if defined(WIN_API)
       vector<char> buffer(value.size() + 1);
@@ -181,12 +164,12 @@ bool ScriptPlugIn::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList
    VERIFY(pOutArgList != NULL);
 
    string scriptPath = mDescriptor.mScriptPath;
-   PlugInArg *pArg = NULL;
+   PlugInArg* pArg = NULL;
    pInArgList->getArg("ScriptPath", pArg);
-   if(pArg != NULL)
+   if (pArg != NULL)
    {
-      Filename *pFilename = pArg->getPlugInArgValue<Filename>();
-      if(pFilename != NULL)
+      Filename* pFilename = pArg->getPlugInArgValue<Filename>();
+      if (pFilename != NULL)
       {
          scriptPath = pFilename->getFullPathAndName().c_str();
          pStep->addProperty("Script File", scriptPath);
@@ -216,7 +199,7 @@ bool ScriptPlugIn::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList
    system(scriptPath.c_str());
 #endif
 
-   if(!success)
+   if (!success)
    {
       pStep->finalize(Message::Failure, "Script Failed");
    }
@@ -264,7 +247,7 @@ bool ScriptPlugIn::populateOutputArgList(PlugInArgList *pOutArgList)
    string filename = tempPath + SLASH + "script_output_" + userName + ".txt";
 
    FileResource pFile(filename.c_str(), "r");
-   if(pFile.get() == NULL)
+   if (pFile.get() == NULL)
    {
       // Not necessarily a bug, so don't use VERIFY
       return false;
@@ -272,7 +255,7 @@ bool ScriptPlugIn::populateOutputArgList(PlugInArgList *pOutArgList)
 
    const int BUFFER_SIZE = 1024;
    char buffer[BUFFER_SIZE];
-   if(fgets(buffer, BUFFER_SIZE, pFile) == NULL)
+   if (fgets(buffer, BUFFER_SIZE, pFile) == NULL)
    {
       return false;
    }
@@ -284,10 +267,10 @@ bool ScriptPlugIn::populateOutputArgList(PlugInArgList *pOutArgList)
    pFilename->setFullPathAndName(output.c_str());
 
    FileResource pOutput(pFilename->getFullPathAndName().c_str(), "r");
-   if(pOutput.get() != NULL)
+   if (pOutput.get() != NULL)
    {
       output = pFilename->getFullPathAndName();
-      PlugInArg *pArg = NULL;
+      PlugInArg* pArg = NULL;
       VERIFY(pOutArgList->getArg("ReturnPath", pArg) && (pArg != NULL));
       pArg->setActualValue(pFilename.release());
    }
@@ -296,7 +279,7 @@ bool ScriptPlugIn::populateOutputArgList(PlugInArgList *pOutArgList)
       output = buffer;
    }
 
-   PlugInArg *pArg = NULL;
+   PlugInArg* pArg = NULL;
    VERIFY(pOutArgList->getArg("ReturnString", pArg) && (pArg != NULL));
    pArg->setActualValue(&output);
 
@@ -304,11 +287,6 @@ bool ScriptPlugIn::populateOutputArgList(PlugInArgList *pOutArgList)
 }
 
 bool ScriptPlugIn::initialize()
-{
-   return false;
-}
-
-bool ScriptPlugIn::abort()
 {
    return false;
 }

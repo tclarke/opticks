@@ -351,8 +351,8 @@ void PerspectiveViewImp::zoomToBox(const LocationType& worldLowerLeft, const Loc
          dScreenBeginY = dTemp;
       }
 
-      double xZoom = (dScreenEndX - dScreenBeginX) / (double) width();
-      double yZoom = (dScreenEndY - dScreenBeginY) / (double) height();
+      double xZoom = (dScreenEndX - dScreenBeginX) / static_cast<double>(width());
+      double yZoom = (dScreenEndY - dScreenBeginY) / static_cast<double>(height());
       mDist *= max(xZoom, yZoom);
 
       if (mDist < mFrontPlane)
@@ -389,7 +389,7 @@ void PerspectiveViewImp::zoomToInset()
 
    if (zoomMode == RELATIVE_MODE)
    {
-      zoomMultiplier *= (unsigned int) (getZoomPercentage() / 100.0);
+      zoomMultiplier *= static_cast<unsigned int>(getZoomPercentage() / 100.0);
    }
 
    LocationType insetPoint = getInsetLocation();
@@ -654,8 +654,8 @@ void PerspectiveViewImp::resizeEvent(QResizeEvent* e)
    // Do not call the base class method since it now does nothing
 
    double dZoom = getZoomPercentage();
-   
-   mFullDistance = (fabs((double) height()) / 2.0) / (tan(PI / 180.0 * (mFov / 2.0)));
+
+   mFullDistance = (fabs(static_cast<double>(height())) / 2.0) / (tan(PI / 180.0 * (mFov / 2.0)));
    if (mFullDistance < mFrontPlane)
    {
       mFullDistance = mFrontPlane;
@@ -703,6 +703,9 @@ void PerspectiveViewImp::keyPressEvent(QKeyEvent* e)
          case Qt::Key_Right:
             ViewImp::pan(QPoint(0, 0), QPoint(width(), 0));
             updateGL();
+            break;
+
+         default:
             break;
       }
    }
@@ -906,7 +909,7 @@ void PerspectiveViewImp::mouseMoveEvent(QMouseEvent* e)
          // during direct zoom
          if (fabs(mag) > 50.0)
          {
-            mag = mag>0.0 ? 50 : -50;
+            mag = mag > 0.0 ? 50 : -50;
          }
          double zoomMult = 1.0 + mag / 100.0;
          double zoomFact = getZoomPercentage() * zoomMult;
@@ -931,7 +934,7 @@ void PerspectiveViewImp::mouseReleaseEvent(QMouseEvent* e)
 
       string mouseMode = "";
 
-      const MouseMode* pMouseMode = getCurrentMouseMode();
+      const MouseModeImp* pMouseMode = dynamic_cast<const MouseModeImp*>(getCurrentMouseMode());
       if (pMouseMode != NULL)
       {
          pMouseMode->getName(mouseMode);
@@ -943,7 +946,7 @@ void PerspectiveViewImp::mouseReleaseEvent(QMouseEvent* e)
          QCursor mouseCursor(Qt::ArrowCursor);
          if (pMouseMode != NULL)
          {
-            mouseCursor = ((MouseModeImp*) pMouseMode)->getCursor();
+            mouseCursor = pMouseMode->getCursor();
          }
 
          setCursor(mouseCursor);
@@ -975,7 +978,7 @@ void PerspectiveViewImp::mouseReleaseEvent(QMouseEvent* e)
             QCursor mouseCursor(Qt::OpenHandCursor);
             if (pMouseMode != NULL)
             {
-               mouseCursor = (static_cast<const MouseModeImp*>(pMouseMode))->getCursor();
+               mouseCursor = pMouseMode->getCursor();
             }
 
             setCursor(mouseCursor);
@@ -1056,7 +1059,8 @@ void PerspectiveViewImp::updateMatrices(int width, int height)
    makeCurrent();
 
    // Save current matrices
-   double modelMatrix[16], projectionMatrix[16];
+   double modelMatrix[16];
+   double projectionMatrix[16];
    int viewPort[4];
    glGetIntegerv(GL_VIEWPORT, viewPort);
    glGetDoublev(GL_PROJECTION_MATRIX, projectionMatrix);
@@ -1077,7 +1081,7 @@ void PerspectiveViewImp::updateMatrices(int width, int height)
    // Projection matrix
    glMatrixMode(GL_PROJECTION);
    glLoadIdentity();
-   gluPerspective(mFov, (double) width / (double) height, mFrontPlane, mBackPlane);
+   gluPerspective(mFov, static_cast<double>(width) / static_cast<double>(height), mFrontPlane, mBackPlane);
 
    // Model matrix
    glMatrixMode(GL_MODELVIEW);
@@ -1149,7 +1153,8 @@ void PerspectiveViewImp::drawInset()
    }
 
    // Save the current matrices
-   double modelMatrix[16], projectionMatrix[16];
+   double modelMatrix[16];
+   double projectionMatrix[16];
    int viewPort[4];
    glGetIntegerv(GL_VIEWPORT, viewPort);
    glGetDoublev(GL_PROJECTION_MATRIX, projectionMatrix);
@@ -1231,7 +1236,7 @@ void PerspectiveViewImp::drawInset()
 
    // Zoom label
    QString strZoom;
-   strZoom.sprintf("%d%c", (int) (zoomMultiplier * 100.0), '%');
+   strZoom.sprintf("%d%c", static_cast<int>(zoomMultiplier * 100.0), '%');
 
    int screenX = writellx + 4;
    int screenY = writelly + 3;
@@ -1359,7 +1364,7 @@ bool PerspectiveViewImp::fromXml(DOMNode* pDocument, unsigned int version)
       return false;
    }
 
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
+   DOMElement* pElem = static_cast<DOMElement*>(pDocument);
    mDist = StringUtilities::fromXmlString<double>(A(pElem->getAttribute(X("distance"))));
    mFullDistance = StringUtilities::fromXmlString<double>(A(pElem->getAttribute(X("fullDistance"))));
    mCenter = StringUtilities::fromXmlString<LocationType>(A(pElem->getAttribute(X("center"))));

@@ -38,7 +38,7 @@ FeatureProxyConnector *FeatureProxyConnector::instance()
    std::vector<PlugIn*> proxyInstances = pPlugInManager->getPlugInInstances(FeatureManager::PLUGIN_NAME);
    VERIFY(proxyInstances.size() == 1); // we should never have more than 1 proxy manager
 
-   FeatureManager *pManager = dynamic_cast<FeatureManager*>(proxyInstances.front());
+   FeatureManager* pManager = dynamic_cast<FeatureManager*>(proxyInstances.front());
    VERIFY(pManager != NULL);
 
    return pManager->getProxy();
@@ -51,6 +51,7 @@ FeatureProxyConnector::FeatureProxyConnector(const QString &executable, QObject 
    mExecutable(executable),
    mpServer(NULL),
    mpSocket(NULL),
+   mpConnectionTimer(NULL),
    mLastReplyIsError(false)
 {
    mpProcess = new QProcess(this);
@@ -63,11 +64,11 @@ FeatureProxyConnector::FeatureProxyConnector(const QString &executable, QObject 
 FeatureProxyConnector::~FeatureProxyConnector()
 {
    terminate();
-   if(mpServer != NULL)
+   if (mpServer != NULL)
    {
       mpServer->close();
    }
-   if(mpSocket != NULL)
+   if (mpSocket != NULL)
    {
       mpSocket->close();
    }
@@ -85,12 +86,12 @@ bool FeatureProxyConnector::initialize()
    mpConnectionTimer->setInterval(CONNECTION_TIMEOUT);
    VERIFYNR(connect(mpConnectionTimer, SIGNAL(timeout()), this, SLOT(abortConnection())));
 
-   if(mpProcess->state() != QProcess::NotRunning)
+   if (mpProcess->state() != QProcess::NotRunning)
    {
       terminate();
    }
    mpServer = new QTcpServer(this);
-   if(!mpServer->listen(QHostAddress::LocalHost))
+   if (!mpServer->listen(QHostAddress::LocalHost))
    {
       terminate();
       return false;
@@ -104,13 +105,13 @@ bool FeatureProxyConnector::initialize()
    }
 
    mpProcess->start(mExecutable, args);
-   if(!mpProcess->waitForStarted())
+   if (!mpProcess->waitForStarted())
    {
       terminate();
       return false;
    }
 
-   if(!mpServer->waitForNewConnection(3000))
+   if (!mpServer->waitForNewConnection(3000))
    {
       terminate();
       return false;
@@ -145,12 +146,12 @@ bool FeatureProxyConnector::processReply()
       mPartialResponse.clear();
    }
 
-   while(!mLastReplyIsError && !lines.empty())
+   while (!mLastReplyIsError && !lines.empty())
    {
       QString line = lines.takeFirst();
-      if(!mInitialized)
+      if (!mInitialized)
       {
-         if(line != APP_VERSION_NUMBER)
+         if (line != APP_VERSION_NUMBER)
          {
             terminate();
             return false;
@@ -161,9 +162,9 @@ bool FeatureProxyConnector::processReply()
       else
       {
          QStringList args = line.split(" ", QString::SkipEmptyParts);
-         if(!args.empty())
+         if (!args.empty())
          {
-            if(args.front() == "ERROR")
+            if (args.front() == "ERROR")
             {
                args.pop_front();
                mResponses.clear();
@@ -174,19 +175,19 @@ bool FeatureProxyConnector::processReply()
             }
             else
             {
-               switch(mPendingCommand)
+               switch (mPendingCommand)
                {
                case OPEN_DATA_SOURCE:
-                  if(args.front() == "SUCCESS")
+                  if (args.front() == "SUCCESS")
                   {
                      args.pop_front();
                      QString response = args.join(" ");
                      mResponses.enqueue(response);
                      emit dataSourceOpen(response);
-                     break;
                   }
+                  break;
                case CLOSE_DATA_SOURCE:
-                  if(args.front() == "SUCCESS")
+                  if (args.front() == "SUCCESS")
                   {
                      args.pop_front();
                      QString response = args.join(" ");
@@ -195,7 +196,7 @@ bool FeatureProxyConnector::processReply()
                   }
                   break;
                case GET_FEATURE_CLASS_PROPERTIES:
-                  if(args.front() == "SUCCESS" && args.size() >= 2)
+                  if (args.front() == "SUCCESS" && args.size() >= 2)
                   {
                      args.pop_front();
                      QString response = args.join(" ");
@@ -205,7 +206,7 @@ bool FeatureProxyConnector::processReply()
                   break;
                case QUERY:
                   mResponses.enqueue(args.join(" "));
-                  if(args.front() != "END")
+                  if (args.front() != "END")
                   {
                      continue; // don't reset mPendingCommand until we hit the end
                   }
@@ -231,7 +232,7 @@ bool FeatureProxyConnector::terminate()
       mStream << "END" << endl;
       QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
       success = mpProcess->waitForFinished(500);
-      if(!success)
+      if (!success)
       {
          mpProcess->terminate();
       }
@@ -247,7 +248,7 @@ bool FeatureProxyConnector::openDataSource(const ArcProxyLib::ConnectionParamete
       return mShapelibProxy.openDataSource(connParams, handle, errorMessage);
    }
 
-   if(mpProcess->state() != QProcess::Running)
+   if (mpProcess->state() != QProcess::Running)
    {
       errorMessage = "ArcGIS must be installed to use that connection type.";
       return false;
@@ -260,12 +261,12 @@ bool FeatureProxyConnector::openDataSource(const ArcProxyLib::ConnectionParamete
    mpConnectionTimer->start();
 
    // run the event loop until we get some sort of a reply
-   while(mPendingCommand == OPEN_DATA_SOURCE)
+   while (mPendingCommand == OPEN_DATA_SOURCE)
    {
       QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
    }
    mpConnectionTimer->stop();
-   if(mLastReplyIsError)
+   if (mLastReplyIsError)
    {
       errorMessage = mResponses.dequeue().toStdString();
    }
@@ -283,7 +284,7 @@ bool FeatureProxyConnector::closeDataSource(const std::string &handle, std::stri
       return mShapelibProxy.closeDataSource(handle, errorMessage);
    }
 
-   if(mpProcess->state() == QProcess::Running)
+   if (mpProcess->state() == QProcess::Running)
    {
       mResponses.clear();
       mLastReplyIsError = false;
@@ -292,12 +293,12 @@ bool FeatureProxyConnector::closeDataSource(const std::string &handle, std::stri
       VERIFY(mpConnectionTimer != NULL);
       mpConnectionTimer->start();
 
-      while(mPendingCommand == CLOSE_DATA_SOURCE)
+      while (mPendingCommand == CLOSE_DATA_SOURCE)
       {
          QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
       }
       mpConnectionTimer->stop();
-      if(mLastReplyIsError)
+      if (mLastReplyIsError)
       {
          errorMessage = mResponses.dequeue().toStdString();
       }
@@ -315,7 +316,7 @@ bool FeatureProxyConnector::getFeatureClassProperties(
       return mShapelibProxy.getFeatureClassProperties(handle, properties, errorMessage);
    }
 
-   if(mpProcess->state() != QProcess::Running)
+   if (mpProcess->state() != QProcess::Running)
    {
       return false;
    }
@@ -326,13 +327,13 @@ bool FeatureProxyConnector::getFeatureClassProperties(
    VERIFY(mpConnectionTimer != NULL);
    mpConnectionTimer->start();
 
-   while(mPendingCommand == GET_FEATURE_CLASS_PROPERTIES)
+   while (mPendingCommand == GET_FEATURE_CLASS_PROPERTIES)
    {
       QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
    }
    mpConnectionTimer->stop();
 
-   if(mLastReplyIsError)
+   if (mLastReplyIsError)
    {
       errorMessage = mResponses.dequeue().toStdString();
       return false;
@@ -350,14 +351,14 @@ bool FeatureProxyConnector::query(const std::string &handle,
       return mShapelibProxy.query(handle, errorMessage, whereClause, labelFormat, minClip, maxClip);
    }
 
-   if(mpProcess->state() != QProcess::Running)
+   if (mpProcess->state() != QProcess::Running)
    {
       return false;
    }
    mResponses.clear();
    mLastReplyIsError = false;
    QString clipString;
-   if(minClip.mX != 0.0 || minClip.mY != 0.0 || maxClip.mX != 0.0 || maxClip.mY != 0.0)
+   if (minClip.mX != 0.0 || minClip.mY != 0.0 || maxClip.mX != 0.0 || maxClip.mY != 0.0)
    {
       clipString = QString(" CLIP %1 %2 %3 %4").arg(minClip.mY)
                                               .arg(minClip.mX)
@@ -382,12 +383,12 @@ bool FeatureProxyConnector::query(const std::string &handle,
 
    bool readingResponses = true;
    QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-   while(!mLastReplyIsError && readingResponses)
+   while (!mLastReplyIsError && readingResponses)
    {
-      while(!mResponses.empty())
+      while (!mResponses.empty())
       {
          QString response = mResponses.dequeue();
-         if(response == "END")
+         if (response == "END")
          {
             readingResponses = false;
             break;
@@ -398,11 +399,16 @@ bool FeatureProxyConnector::query(const std::string &handle,
       }
       QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
    }
-   if(mLastReplyIsError)
+   if (mLastReplyIsError)
    {
       errorMessage = mResponses.dequeue().toStdString();
    }
    return !mLastReplyIsError;
+}
+
+bool FeatureProxyConnector::isInitialized() const
+{
+   return mInitialized;
 }
 
 void FeatureProxyConnector::proxyExited()
@@ -416,8 +422,8 @@ std::vector<ArcProxyLib::ConnectionType>
    FeatureProxyConnector::getAvailableConnectionTypes() const
 {
    std::vector<ArcProxyLib::ConnectionType> types;
-   
-   if(mpProcess->state() == QProcess::Running)
+
+   if (mpProcess->state() == QProcess::Running)
    {
       types.push_back(ArcProxyLib::SHP_CONNECTION); // should be first to prefer SHP over SHAPELIB
       types.push_back(ArcProxyLib::SDE_CONNECTION);

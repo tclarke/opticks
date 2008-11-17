@@ -38,40 +38,61 @@
 
 using namespace std;
 
-#define ICEWARNING(expr, msg) if (expr) { mWarnings.push_back(msg); }
-#define ICEWARNING_RET(expr, msg, rv) if (expr) { mWarnings.push_back(msg); return rv; }
-#define ICEERROR_RET(expr, msg, rv) if (expr) { mErrors.push_back(msg); return rv; }
-#define ICEERROR(expr, msg) if (expr) { mErrors.push_back(msg); }
+#define ICEWARNING(expr, msg) \
+   if (expr) \
+   { \
+      mWarnings.push_back(msg); \
+   }
+
+#define ICEWARNING_RET(expr, msg, rv) \
+   if (expr) \
+   { \
+      mWarnings.push_back(msg); \
+      return rv; \
+   }
+
+#define ICEERROR_RET(expr, msg, rv) \
+   if (expr) \
+   { \
+      mErrors.push_back(msg); \
+      return rv; \
+   }
+
+#define ICEERROR(expr, msg) \
+   if (expr) \
+   { \
+      mErrors.push_back(msg); \
+   }
 
 #define PARSE_ATTRIBUTE(hdf5element_var, attr_name, var_name, var_type) \
-if (!parseError) \
-{ \
-   Hdf5Attribute* pTempAttr = hdf5element_var->getAttribute(attr_name); \
-   if (pTempAttr != NULL) \
+   if (!parseError) \
    { \
-      if (!pTempAttr->getValueAs<var_type>(var_name)) \
+      Hdf5Attribute* pTempAttr = hdf5element_var->getAttribute(attr_name); \
+      if (pTempAttr != NULL) \
+      { \
+         if (!pTempAttr->getValueAs<var_type>(var_name)) \
+         { \
+            parseError = true; \
+         } \
+      } \
+      else \
       { \
          parseError = true; \
       } \
-   } \
-   else \
-   { \
-      parseError = true; \
-   } \
-}
+   }
 
 #define PARSE_ATTRIBUTE_DEFAULT(hdf5element_var, attr_name, var_name, var_type, var_default) \
-if (!parseError) \
-{ \
-   PARSE_ATTRIBUTE(hdf5element_var, attr_name, var_name, var_type); \
-   if (parseError) \
+   if (!parseError) \
    { \
-      warningMessage += "The value \"" + string(attr_name) + "\" could not be read and will be set to " + \
-         StringUtilities::toDisplayString<var_type>(var_default) + ".\n"; \
-      var_name = var_default; \
-      parseError = false; \
-   } \
-}
+      PARSE_ATTRIBUTE(hdf5element_var, attr_name, var_name, var_type); \
+      if (parseError) \
+      { \
+         warningMessage += "The value \"" + string(attr_name) + "\" could not be read and will be set to " + \
+            StringUtilities::toDisplayString<var_type>(var_default) + ".\n"; \
+         var_name = var_default; \
+         parseError = false; \
+      } \
+   }
 
 IceReader::IceReader(Hdf5File& iceFile) : mIceFile(iceFile)
 {
@@ -122,7 +143,7 @@ void IceReader::readFormatDescriptor()
    mIceFileValid = FULLY_SUPPORTED;
 }
 
-IceReader::ValidityType IceReader::isValidIceFile()
+IceReader::ValidityType IceReader::getIceFileValidity()
 {
    return mIceFileValid;
 }
@@ -361,7 +382,9 @@ bool IceReader::parseDimensionDescriptors(const Hdf5Group* pCube, RasterDataDesc
    {
       pAttr->getValueAs<string>(interleaveStr);
    }
-   unsigned int numRows = 0, numColumns = 0, numBands = 0;
+   unsigned int numRows = 0;
+   unsigned int numColumns = 0;
+   unsigned int numBands = 0;
 
    bool parseError;
    InterleaveFormatType interleave = StringUtilities::fromXmlString<InterleaveFormatType>(interleaveStr, &parseError);
@@ -371,7 +394,7 @@ bool IceReader::parseDimensionDescriptors(const Hdf5Group* pCube, RasterDataDesc
 
    pFileDescriptor->setInterleaveFormat(interleave);
    pDescriptor->setInterleaveFormat(interleave);
-   switch(interleave)
+   switch (interleave)
    {
    case BIP: // row, column, band
       numRows = static_cast<unsigned int>(dimensions[0]);
@@ -393,7 +416,9 @@ bool IceReader::parseDimensionDescriptors(const Hdf5Group* pCube, RasterDataDesc
          "will use user-provided values.", true);
    }
 
-   vector<unsigned int> originalRows, originalCols, originalBands;
+   vector<unsigned int> originalRows;
+   vector<unsigned int> originalCols;
+   vector<unsigned int> originalBands;
    if (mIceDescriptor.getSupportedFeature(IceFormatDescriptor::ORIGINAL_NUMBERS_IN_DATASET))
    {
       const Hdf5Group* pOriginalGroup = dynamic_cast<const Hdf5Group*>(pCube->getElement("OriginalNumbers"));
@@ -460,7 +485,9 @@ bool IceReader::parseDimensionDescriptors(const Hdf5Group* pCube, RasterDataDesc
    ICEWARNING(!orgColumnsCorrect,
       "Original column numbers could not be detected in the file or were improperly formatted.");
 
-   vector<DimensionDescriptor> rows, columns, bands;
+   vector<DimensionDescriptor> rows;
+   vector<DimensionDescriptor> columns;
+   vector<DimensionDescriptor> bands;
    unsigned int originalNumber = 0;
    unsigned int t;
    for (t = 0; t < numRows; ++t)
@@ -529,16 +556,29 @@ bool IceReader::parseClassification(const Hdf5Group* pCube, RasterDataDescriptor
       {
          bool parseError = false;
          FactoryResource<Classification> pClassification;
-         string level, system, codewords, control, releasing, reason, declassType;
-         string declassEx, downgradeLevel, countryCode, desc, authority, authorityType;
-         string secControlNum, copyNumber, numberOfCopies;
+         string level;
+         string system;
+         string codewords;
+         string control;
+         string releasing;
+         string reason;
+         string declassType;
+         string declassEx;
+         string downgradeLevel;
+         string countryCode;
+         string desc;
+         string authority;
+         string authorityType;
+         string secControlNum;
+         string copyNumber;
+         string numberOfCopies;
          FactoryResource<DateTime> pDeclassDate(NULL);
          FactoryResource<DateTime> pDowngradeDate(NULL);
          FactoryResource<DateTime> pSourceDate(NULL);
          PARSE_ATTRIBUTE(pClassificationGroup, "Level", level, string);
          bool parsedLevel = !parseError;
 
-          //set classification level here so even if the rest can't be parsed we preserve it.
+         //set classification level here so even if the rest can't be parsed we preserve it.
          pClassification->setLevel(level);
          PARSE_ATTRIBUTE(pClassificationGroup, "System", system, string);
          PARSE_ATTRIBUTE(pClassificationGroup, "Codewords", codewords, string);
@@ -950,9 +990,9 @@ bool IceReader::loadCubeStatistics(RasterElement* pElement)
                if (pCubeStat != NULL)
                {
                   pCubeStat->setStatisticsResolution(pValues->mStatResolution);
-                  StatisticsMetadata::badValueType * pBadValues =
-                     reinterpret_cast<StatisticsMetadata::badValueType *>(pValues->mBadValues.p);
-                  vector<StatisticsMetadata::badValueType> badValues;
+                  StatisticsMetadata::BadValueType* pBadValues =
+                     reinterpret_cast<StatisticsMetadata::BadValueType *>(pValues->mBadValues.p);
+                  vector<StatisticsMetadata::BadValueType> badValues;
                   badValues.reserve(pValues->mBadValues.len);
                   for (size_t i = 0; i < pValues->mBadValues.len; ++i)
                   {
@@ -991,12 +1031,12 @@ bool IceReader::loadCubeStatistics(RasterElement* pElement)
                Statistics* pCubeStat = pElement->getStatistics(loadedBand);
                DO_IF(pCubeStat == NULL, return false);
 
-               StatisticsValues::binCenterType* pBinCenters =
-                  reinterpret_cast<StatisticsValues::binCenterType *>(pValues->mpBinCenters.p);
-               StatisticsValues::histogramType* pHistogramCounts =
-                  reinterpret_cast<StatisticsValues::histogramType *>(pValues->mpHistogramCounts.p);
-               StatisticsValues::percentileType* pPercentiles =
-                  reinterpret_cast<StatisticsValues::percentileType*>(pValues->mpPercentiles.p);
+               StatisticsValues::BinCenterType* pBinCenters =
+                  reinterpret_cast<StatisticsValues::BinCenterType *>(pValues->mpBinCenters.p);
+               StatisticsValues::HistogramType* pHistogramCounts =
+                  reinterpret_cast<StatisticsValues::HistogramType *>(pValues->mpHistogramCounts.p);
+               StatisticsValues::PercentileType* pPercentiles =
+                  reinterpret_cast<StatisticsValues::PercentileType*>(pValues->mpPercentiles.p);
                if (pValues->mpBinCenters.len != 256 || pValues->mpHistogramCounts.len != 256 ||
                   pValues->mpPercentiles.len != 1001)
                {
@@ -1008,15 +1048,15 @@ bool IceReader::loadCubeStatistics(RasterElement* pElement)
                //Ice files. When these versions are no longer supported by the importer this check can come out.
                if (currentRow == 0)
                {
-                  const unsigned int *pCubeHistogramCounts = NULL;
-                  const double *pCubeBinCenters = NULL;
+                  const unsigned int* pCubeHistogramCounts = NULL;
+                  const double* pCubeBinCenters = NULL;
 
-                  pCubeStat->getHistogram(pCubeBinCenters ,pCubeHistogramCounts);
+                  pCubeStat->getHistogram(pCubeBinCenters, pCubeHistogramCounts);
                   if (pHistogramCounts != NULL && pCubeHistogramCounts != NULL)
                   {
                      for (unsigned int i = 0; i < 256; ++i)
                      {
-                        if (pCubeHistogramCounts[i] !=  pHistogramCounts[i])
+                        if (pCubeHistogramCounts[i] != pHistogramCounts[i])
                         {
                            //the data read from the file isn't correct, so don't continue reading
                            //statistics out.

@@ -7,11 +7,11 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#ifndef HYPERIONIMPORTER_H
+#define HYPERIONIMPORTER_H
+
 #include "AppConfig.h"
 #if defined(HDF4_SUPPORT)
-
-#ifndef HYPERION_IMPORTER_H
-#define HYPERION_IMPORTER_H
 
 #include "Hdf4ImporterShell.h"
 #include "Testable.h"
@@ -51,6 +51,6 @@ private:
    std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename);
 };
 
-#endif   // HYPERIONIMPORTER_H
+#endif   // HDF4_SUPPORT
 
-#endif // HDF4_SUPPORT
+#endif   // HYPERIONIMPORTER_H

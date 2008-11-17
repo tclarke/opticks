@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef __PROGRESSIMP_H
-#define __PROGRESSIMP_H
+#ifndef PROGRESSIMP_H
+#define PROGRESSIMP_H
 
 #include "SubjectImp.h"
 #include "PlugIn.h"

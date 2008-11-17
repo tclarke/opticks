@@ -41,8 +41,6 @@ using namespace std;
 template <class T>
 class ApplyScaleFactor
 {
-private:
-   T mFactor;
 public:
    ApplyScaleFactor(const T& factor) : mFactor(factor)
    {
@@ -52,6 +50,9 @@ public:
    {
       element *= mFactor;
    }
+
+private:
+   T mFactor;
 };
 
 namespace
@@ -67,8 +68,6 @@ namespace
    vector<double> createWavelengthVector(void* pData, size_t column, size_t colCount, size_t numElements,
                                          EncodingType type)
    {
-      int dataSize = HdfUtilities::getDataSize(type);
-
       vector<double> wavelengths;
       bool bTruncated = false;
       for (size_t ui = 0; ui < numElements; ++ui)
@@ -113,7 +112,8 @@ vector<ImportDescriptor*> HyperionImporter::getImportDescriptors(const string& f
       pFn->setFullPathAndName(filename);
       const string& baseName = pFn->getFileName();
 
-      const Hdf4Dataset* pPrimaryDataset = dynamic_cast<const Hdf4Dataset*>(parsedFile.getRootGroup()->getElement(baseName));
+      const Hdf4Dataset* pPrimaryDataset =
+         dynamic_cast<const Hdf4Dataset*>(parsedFile.getRootGroup()->getElement(baseName));
       if ((pPrimaryDataset != NULL) && (mpModel.get() != NULL))
       {
          ImportDescriptor* pImportDescriptor = mpModel->createImportDescriptor(filename, "RasterElement", NULL);
@@ -140,7 +140,7 @@ vector<ImportDescriptor*> HyperionImporter::getImportDescriptors(const string& f
                      if (pAttribute != NULL)
                      {
                         const string& name = pAttribute->getName();
-                        const DataVariant &var = pAttribute->getVariant();
+                        const DataVariant& var = pAttribute->getVariant();
 
                         if (var.isValid())
                         {
@@ -196,34 +196,40 @@ vector<ImportDescriptor*> HyperionImporter::getImportDescriptors(const string& f
                      if (pAttribute != NULL)
                      {
                         const string& name = pAttribute->getName();
-                        const DataVariant &var = pAttribute->getVariant();
+                        const DataVariant& var = pAttribute->getVariant();
 
                         if (var.isValid())
                         {
-                           if ((name == "Number of Along Track Pixels") && (var.getTypeName() == TypeConverter::toString<int>()))
+                           if ((name == "Number of Along Track Pixels") &&
+                              (var.getTypeName() == TypeConverter::toString<int>()))
                            {
                               int numRows = 0;
                               var.getValue(numRows);
 
-                              vector<DimensionDescriptor> rows = RasterUtilities::generateDimensionVector(numRows, true, false, true);
+                              vector<DimensionDescriptor> rows =
+                                 RasterUtilities::generateDimensionVector(numRows, true, false, true);
                               pDescriptor->setRows(rows);
                               pFileDescriptor->setRows(rows);
                            }
-                           else if ((name == "Number of Cross Track Pixels") && (var.getTypeName() == TypeConverter::toString<int>()))
+                           else if ((name == "Number of Cross Track Pixels") &&
+                              (var.getTypeName() == TypeConverter::toString<int>()))
                            {
                               int numColumns = 0;
                               var.getValue(numColumns);
 
-                              vector<DimensionDescriptor> columns = RasterUtilities::generateDimensionVector(numColumns, true, false, true);
+                              vector<DimensionDescriptor> columns =
+                                 RasterUtilities::generateDimensionVector(numColumns, true, false, true);
                               pDescriptor->setColumns(columns);
                               pFileDescriptor->setColumns(columns);
                            }
-                           else if ((name == "Number of Bands") && (var.getTypeName() == TypeConverter::toString<int>()))
+                           else if ((name == "Number of Bands") &&
+                              (var.getTypeName() == TypeConverter::toString<int>()))
                            {
                               int numBands = 0;
                               var.getValue(numBands);
 
-                              vector<DimensionDescriptor> bands = RasterUtilities::generateDimensionVector(numBands, true, false, true);
+                              vector<DimensionDescriptor> bands =
+                                 RasterUtilities::generateDimensionVector(numBands, true, false, true);
                               pDescriptor->setBands(bands);
                               pFileDescriptor->setBands(bands);
                            }
@@ -249,7 +255,8 @@ vector<ImportDescriptor*> HyperionImporter::getImportDescriptors(const string& f
                   Hdf4Group* pRootGroup = parsedFile.getRootGroup();
                   if (pRootGroup != NULL)
                   {
-                     pCenterDataset = dynamic_cast<const Hdf4Dataset*>(pRootGroup->getElement("Spectral Center Wavelengths"));
+                     pCenterDataset =
+                        dynamic_cast<const Hdf4Dataset*>(pRootGroup->getElement("Spectral Center Wavelengths"));
                   }
 
                   if (pCenterDataset != NULL)
@@ -278,7 +285,8 @@ vector<ImportDescriptor*> HyperionImporter::getImportDescriptors(const string& f
                            pDescriptor->getBandCount(), dataType);
                         if (inMicrons == false)
                         {
-                           for_each(wavelengthCenters.begin(), wavelengthCenters.end(), ApplyScaleFactor<double>(1e-3f));
+                           for_each(wavelengthCenters.begin(), wavelengthCenters.end(),
+                              ApplyScaleFactor<double>(1e-3f));
                         }
 
                         string pCenterPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME, 

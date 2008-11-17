@@ -23,8 +23,8 @@ GraphicElementAdapter::~GraphicElementAdapter()
 
 const string& GraphicElementAdapter::getObjectType() const
 {
-   static string type = "GraphicElementAdapter";
-   return type;
+   static string sType = "GraphicElementAdapter";
+   return sType;
 }
 
 bool GraphicElementAdapter::isKindOf(const string& className) const

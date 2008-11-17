@@ -8,7 +8,7 @@
  */
 
 /**
- * Module Manager 
+ * Module Manager
  *
  * This ModuleManager is provided so that the main app, Batch and BatchEditor
  * as well as any components soley belong to the Core application
@@ -69,10 +69,10 @@
 #include <string>
 using namespace std;
 
-const char *ModuleManager::mspName = "Application";
-const char *ModuleManager::mspVersion = APP_VERSION_NUMBER;
-const char *ModuleManager::mspDescription = "Plug-ins built into the application";
-const char *ModuleManager::mspValidationKey = "none";
+const char* ModuleManager::mspName = "Application";
+const char* ModuleManager::mspVersion = APP_VERSION_NUMBER;
+const char* ModuleManager::mspDescription = "Plug-ins built into the application";
+const char* ModuleManager::mspValidationKey = "none";
 
 unsigned int ModuleManager::getTotalPlugIns()
 {
@@ -82,7 +82,6 @@ unsigned int ModuleManager::getTotalPlugIns()
 PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
 {
    PlugIn* pPlugIn = NULL;
-
    switch (plugInNumber)
    {
       case 0:

@@ -47,15 +47,15 @@ const QString OptionsNitfExporter::FILE_NUMBER_OF_COPIES = "Number of Copies";
 const QString OptionsNitfExporter::DESCRIPTION = "Description/Comments";
 
 OptionsNitfExporter::OptionsNitfExporterElement::OptionsNitfExporterElement(const QString& name,
-   const string& originalValue, const unsigned int& maxLength,
+   const string& originalValue, unsigned int maxLength,
    const QString& defaultValue, QWidget* pSelf, QWidget* pOther) :
    mName(name),
-   mDefaultValue(defaultValue),
    mOriginalValue(originalValue),
+   mDefaultValue(defaultValue),
+   mModifiedValueIsTruncated(false),
    mMaxLength(maxLength),
    mpSelf(pSelf),
-   mpOther(pOther),
-   mModifiedValueIsTruncated(false)
+   mpOther(pOther)
 {
    mpLabel = new QLabel(mName);
    setValue(originalValue);
@@ -88,8 +88,8 @@ void OptionsNitfExporter::OptionsNitfExporterElement::setValue(const string& new
 OptionsNitfExporter::OptionsNitfExporter(const Classification* const pClassification, QWidget* pParent) :
    QWidget(pParent),
    mDateTimeFormat("%Y%m%d"),
-   mQDateFormat("yyyyMMdd"),
    mDateParseFormat("%4d%2d%2d"),
+   mQDateFormat("yyyyMMdd"),
    mpClassification(pClassification)
 {
    // Initialization
@@ -214,8 +214,8 @@ void OptionsNitfExporter::dateModified(const QDate& newDate)
 }
 
 bool OptionsNitfExporter::createLineEditElement(const QString& name, const QString& toolTip,
-   const string& originalValue, const unsigned int& maxLength,
-   const QString& defaultValue, const QString& inputMask)
+                                                const string& originalValue, unsigned int maxLength,
+                                                const QString& defaultValue, const QString& inputMask)
 {
    QLineEdit* pLineEdit = new QLineEdit(this);
    if (maxLength > 0)
@@ -249,7 +249,7 @@ bool OptionsNitfExporter::createLineEditElement(const QString& name, const QStri
 
 bool OptionsNitfExporter::createComboBoxElement(const QString& name, const QString& toolTip,
    const string& originalValue, const QStringList& availableValues,
-   const unsigned int& maxLength)
+   unsigned int maxLength)
 {
    QComboBox* pComboBox = new QComboBox(this);
    OptionsNitfExporterElement element(name, originalValue, maxLength, QString(), pComboBox);
@@ -262,7 +262,7 @@ bool OptionsNitfExporter::createComboBoxElement(const QString& name, const QStri
 }
 
 bool OptionsNitfExporter::createDateEditElement(const QString& name, const QString& toolTip,
-   const DateTime* pOriginalValue, const unsigned int& maxLength)
+                                                const DateTime* pOriginalValue, unsigned int maxLength)
 {
    QDateEdit* pDateEdit = new QDateEdit(this);
    string originalValue;
@@ -276,7 +276,9 @@ bool OptionsNitfExporter::createDateEditElement(const QString& name, const QStri
       pDateEdit->setEnabled(false);
    }
 
-   int year, month, day;
+   int year;
+   int month;
+   int day;
    sscanf(originalValue.c_str(), mDateParseFormat.c_str(), &year, &month, &day);
 
    QDate originalDate(year, month, day);
@@ -329,6 +331,9 @@ bool OptionsNitfExporter::createElements()
          classificationLevels.append("R");
          break;
       }
+
+      default:
+         break;
    }
 
    classificationLevels.append("U");

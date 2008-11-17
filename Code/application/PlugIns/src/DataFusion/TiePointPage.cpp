@@ -463,6 +463,31 @@ void TiePointPage::setViews(SpatialDataView* pPrimary, SpatialDataView* pSeconda
    }
 }
 
+const TiePointList* TiePointPage::getTiePoints() const
+{
+   return mpTiePoints;
+}
+
+string TiePointPage::getPreferredPrimaryMouseMode() const
+{
+   return "LayerMode";
+}
+
+string TiePointPage::getPreferredSecondaryMouseMode() const
+{
+   return "LayerMode";
+}
+
+Layer* TiePointPage::getPreferredPrimaryActiveLayer() const
+{
+   return mpPrimaryGcpLayer;
+}
+
+Layer* TiePointPage::getPreferredSecondaryActiveLayer() const
+{
+   return mpSecondaryGcpLayer;
+}
+
 void TiePointPage::showEvent(QShowEvent* pEvt)
 {
    SpatialDataView* pPrimaryView = getPrimaryView();
@@ -521,7 +546,7 @@ GcpLayer* TiePointPage::createFusionGcpLayer(SpatialDataView* pView)
    GcpLayer* pFusionGcpLayer = NULL;
    if (vect.size() > 0)
    {
-      for(vector<Layer*>::iterator it = vect.begin(); it != vect.end(); ++it)
+      for (vector<Layer*>::iterator it = vect.begin(); it != vect.end(); ++it)
       {
          GcpLayer* pLayer = static_cast<GcpLayer*>(*it);
          if (pLayer != NULL)
@@ -704,8 +729,8 @@ void TiePointPage::deriveTiePoint()
       vector<TiePoint> tiePoints = mpTiePoints->getTiePoints();
       TiePoint newPt;
       // compensate for adding 1 in populateListBox()
-      newPt.mReferencePoint.mX = (int) xPrimary.toDouble();
-      newPt.mReferencePoint.mY = (int) yPrimary.toDouble();
+      newPt.mReferencePoint.mX = static_cast<int>(xPrimary.toDouble());
+      newPt.mReferencePoint.mY = static_cast<int>(yPrimary.toDouble());
       newPt.mMissionOffset.mX = xSecondary.toFloat();
       newPt.mMissionOffset.mY = ySecondary.toFloat();
 
@@ -784,8 +809,10 @@ void TiePointPage::removeTiePoint()
 
       VERIFYNRV(pItem != NULL);
 
-      QString px = pItem->text(PRI_X), py = pItem->text(PRI_Y);
-      QString sx = pItem->text(SEC_X), sy = pItem->text(SEC_Y);
+      QString px = pItem->text(PRI_X);
+      QString py = pItem->text(PRI_Y);
+      QString sx = pItem->text(SEC_X);
+      QString sy = pItem->text(SEC_Y);
 
       GcpList* pPrimary = dynamic_cast<GcpList*>(mpPrimaryGcpLayer->getDataElement());
       VERIFYNRV(pPrimary != NULL);

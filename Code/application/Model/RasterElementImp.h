@@ -29,26 +29,26 @@ public:
    RasterElementImp(const DataDescriptorImp& descriptor, const std::string& id);
    ~RasterElementImp();
 
-   virtual double getPixelValue(DimensionDescriptor pColumn, DimensionDescriptor pRow,
-      DimensionDescriptor pBand = DimensionDescriptor(), ComplexComponent component = COMPLEX_MAGNITUDE) const;
+   virtual double getPixelValue(DimensionDescriptor columnDim, DimensionDescriptor rowDim,
+      DimensionDescriptor bandDim = DimensionDescriptor(), ComplexComponent component = COMPLEX_MAGNITUDE) const;
 
-   virtual DataAccessor getDataAccessor(DataRequest *pRequest = NULL);
-   virtual DataAccessor getDataAccessor(DataRequest *pRequest = NULL) const;
+   virtual DataAccessor getDataAccessor(DataRequest* pRequestIn = NULL);
+   virtual DataAccessor getDataAccessor(DataRequest* pRequestIn = NULL) const;
 
    virtual void incrementDataAccessor(DataAccessorImpl &da);
    virtual void updateData();
    virtual uint64_t sanitizeData(double value = 0.0);
 
 
-   void setTerrain(RasterElement* pSpatial);
+   void setTerrain(RasterElement* pTerrain);
    const RasterElement* getTerrain() const;
 
    Statistics* getStatistics(DimensionDescriptor band) const;
 
    RasterElement *createChip(DataElement *pParent, const std::string &appendName,
-      const std::vector<DimensionDescriptor> &rows,
-      const std::vector<DimensionDescriptor> &columns,
-      const std::vector<DimensionDescriptor> &bands = std::vector<DimensionDescriptor>()) const;
+      const std::vector<DimensionDescriptor>& selectedRows,
+      const std::vector<DimensionDescriptor>& selectedColumns,
+      const std::vector<DimensionDescriptor>& selectedBands = std::vector<DimensionDescriptor>()) const;
    RasterElement* rotateAndFlip(const std::string& appendName, int angle, bool horizontalFlip, bool verticalFlip,
       const AoiElement* pAoi = NULL) const;
    bool transpose();
@@ -89,15 +89,15 @@ public:
    std::vector<LocationType> convertGeocoordsToPixels(
       const std::vector<LocationType>& geocoords, bool quick = false) const;
    bool isGeoreferenced() const;
-   void setGeoreferencePlugin(Georeference *pGeoPlugin);
+   void setGeoreferencePlugin(Georeference* pGeo);
    Georeference *getGeoreferencePlugin() const;
    void updateGeoreferenceData();
 
 protected:
-   RasterElement *createChipInternal(DataElement *pParent, const std::string &fullName,
-      const std::vector<DimensionDescriptor> &rows,
-      const std::vector<DimensionDescriptor> &columns,
-      const std::vector<DimensionDescriptor> &bands = std::vector<DimensionDescriptor>()) const;
+   RasterElement* createChipInternal(DataElement* pParent, const std::string& name,
+      const std::vector<DimensionDescriptor>& selectedRows,
+      const std::vector<DimensionDescriptor>& selectedColumns,
+      const std::vector<DimensionDescriptor>& selectedBands = std::vector<DimensionDescriptor>()) const;
 
    bool createMemoryMappedPager(bool bUseDataDescriptor);
 
@@ -115,7 +115,7 @@ protected:
     * accessor can be obtained for this object, and a writable BIP
     * accessor with one concurrent row can be obtained for pChipSensor.
     *
-    * @param pChipRaster
+    * @param pChipElement
     *        The Raster to copy data into.
     * @param selectedRows
     *        The rows of this object to copy
@@ -126,9 +126,9 @@ protected:
     *
     * @return True if the operation was successful, false otherwise.
     */
-   bool copyDataBip(RasterElement *pChipRaster, const std::vector<DimensionDescriptor> &selectedRows,
-      const std::vector<DimensionDescriptor> &selectedColumns,
-      const std::vector<DimensionDescriptor> &selectedBands, bool &abort, Progress *pProgress) const;
+   bool copyDataBip(RasterElement* pChipElement, const std::vector<DimensionDescriptor>& selectedRows,
+      const std::vector<DimensionDescriptor>& selectedColumns, const std::vector<DimensionDescriptor>& selectedBands,
+      bool& abort, Progress* pProgress) const;
 
    /**
     * Copy data from this object to pChipRaster, using the DimensionDescriptors
@@ -138,7 +138,7 @@ protected:
     * accessor can be obtained for this object, and a writable BSQ
     * accessor with one concurrent row can be obtained for pChipRaster.
     *
-    * @param pChipRaster
+    * @param pChipElement
     *        The RasterElement to copy data into.
     * @param selectedRows
     *        The rows of this object to copy
@@ -149,9 +149,9 @@ protected:
     *
     * @return True if the operation was successful, false otherwise.
     */
-   bool copyDataBsq(RasterElement *pChipRaster, const std::vector<DimensionDescriptor> &selectedRows,
-      const std::vector<DimensionDescriptor> &selectedColumns,
-      const std::vector<DimensionDescriptor> &selectedBands, bool &abort, Progress *pProgress) const;
+   bool copyDataBsq(RasterElement* pChipElement, const std::vector<DimensionDescriptor>& selectedRows,
+      const std::vector<DimensionDescriptor>& selectedColumns, const std::vector<DimensionDescriptor>& selectedBands,
+      bool& abort, Progress* pProgress) const;
 
    /**
     * Appends to the basename of name.
@@ -213,7 +213,7 @@ private:
 
    mutable bool mModified;
 
-   Georeference *mpGeoPlugin;
+   Georeference* mpGeoPlugin;
 };
 
 #define RASTERELEMENTADAPTEREXTENSION_CLASSES \
@@ -325,7 +325,8 @@ private:
    { \
       return impClass::convertPixelToGeocoord(pixel, quick); \
    } \
-   std::vector<LocationType> convertPixelsToGeocoords(const std::vector<LocationType>& pixels, bool quick = false) const \
+   std::vector<LocationType> convertPixelsToGeocoords(const std::vector<LocationType>& pixels, \
+                                                      bool quick = false) const \
    { \
       return impClass::convertPixelsToGeocoords(pixels, quick); \
    } \
@@ -333,7 +334,8 @@ private:
    { \
       return impClass::convertGeocoordToPixel(geocoord, quick); \
    } \
-   std::vector<LocationType> convertGeocoordsToPixels(const std::vector<LocationType>& geocoords, bool quick = false) const \
+   std::vector<LocationType> convertGeocoordsToPixels(const std::vector<LocationType>& geocoords, \
+                                                      bool quick = false) const \
    { \
       return impClass::convertGeocoordsToPixels(geocoords, quick); \
    } \

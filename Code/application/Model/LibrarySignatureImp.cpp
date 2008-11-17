@@ -20,7 +20,8 @@
 
 using namespace std;
 
-LibrarySignatureImp::LibrarySignatureImp(const DataDescriptorImp& descriptor, const string& id, unsigned int index, const SignatureLibrary *pLib) :
+LibrarySignatureImp::LibrarySignatureImp(const DataDescriptorImp& descriptor, const string& id,
+                                         unsigned int index, const SignatureLibrary* pLib) :
    SignatureImp(descriptor, id),
    mSignatureIndex(index),
    mpLibrary(pLib)
@@ -38,13 +39,13 @@ DataElement* LibrarySignatureImp::copy(const string& name, DataElement* pParent)
 
 const string& LibrarySignatureImp::getObjectType() const
 {
-   static string type("LibrarySignatureImp");
-   return type;
+   static string sType("LibrarySignatureImp");
+   return sType;
 }
 
 bool LibrarySignatureImp::isKindOf(const string& className) const
 {
-   if ((className == getObjectType())  || (className == "LibrarySignature"))
+   if ((className == getObjectType()) || (className == "LibrarySignature"))
    {
       return true;
    }
@@ -68,39 +69,40 @@ void LibrarySignatureImp::getElementTypes(vector<string>& classList)
    SignatureImp::getElementTypes(classList);
 }
 
-const DataVariant &LibrarySignatureImp::getData(string name) const
+const DataVariant& LibrarySignatureImp::getData(string name) const
 {
    if (name == "Reflectance")
    {
-      static DataVariant reflectance;
-      const double *pReflectance = NULL;
-      if (mpLibrary == NULL || (pReflectance = mpLibrary->getOrdinateData(mSignatureIndex)) == NULL)
+      static DataVariant sReflectance;
+      sReflectance = DataVariant();
+
+      if (mpLibrary != NULL)
       {
-         reflectance = DataVariant();
+         const double* pReflectance = mpLibrary->getOrdinateData(mSignatureIndex);
+         if (pReflectance != NULL)
+         {
+            sReflectance = vector<double>(&pReflectance[0], &pReflectance[mpLibrary->getAbscissa().size()]);
+         }
       }
-      else
-      {
-         reflectance = vector<double>(&pReflectance[0], &pReflectance[mpLibrary->getAbscissa().size()]);
-      }
-      return reflectance;
+
+      return sReflectance;
    }
    else if (name == "Wavelength")
    {
-      static DataVariant wavelength;
+      static DataVariant sWavelength;
       if (mpLibrary == NULL)
       {
-         wavelength = DataVariant();
+         sWavelength = DataVariant();
       }
       else
       {
-         wavelength = mpLibrary->getAbscissa();
+         sWavelength = mpLibrary->getAbscissa();
       }
-      return wavelength;
+
+      return sWavelength;
    }
-   else
-   {
-      return SignatureImp::getData(name);
-   }
+
+   return SignatureImp::getData(name);
 }
 
 void LibrarySignatureImp::setData(string name, const DataVariant &data)
@@ -112,24 +114,26 @@ void LibrarySignatureImp::setData(string name, const DataVariant &data)
    SignatureImp::setData(name, data);
 }
 
-const Units *LibrarySignatureImp::getUnits(string name) const
+const Units* LibrarySignatureImp::getUnits(string name) const
 {
    if (name == "Reflectance")
    {
-      const Units *pUnits = NULL;
+      const Units* pUnits = NULL;
       if (mpLibrary != NULL)
       {
-         const RasterElement *pRaster = mpLibrary->getOriginalOrdinateData();
-         const RasterDataDescriptor *pDesc = NULL;
-         if (pRaster && (pDesc = dynamic_cast<const RasterDataDescriptor*>(pRaster->getDataDescriptor())) != NULL)
+         const RasterElement* pRaster = mpLibrary->getOriginalOrdinateData();
+         if (pRaster != NULL)
          {
-            pUnits = pDesc->getUnits();
+            const RasterDataDescriptor* pDesc = dynamic_cast<const RasterDataDescriptor*>(pRaster->getDataDescriptor());
+            if (pDesc != NULL)
+            {
+               pUnits = pDesc->getUnits();
+            }
          }
       }
+
       return pUnits;
    }
-   else
-   {
-      return SignatureImp::getUnits(name);
-   }
+
+   return SignatureImp::getUnits(name);
 }

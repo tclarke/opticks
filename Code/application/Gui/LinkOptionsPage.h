@@ -57,9 +57,9 @@ private:
 
    QStackedWidget* mpStack;
    QWidget* mpViewWidget;
-   QRadioButton *mpAutolinkRadio;
-   QRadioButton *mpMirrorRadio;
-   QRadioButton *mpGeoRadio;
+   QRadioButton* mpAutolinkRadio;
+   QRadioButton* mpMirrorRadio;
+   QRadioButton* mpGeoRadio;
    QRadioButton* mpUnlinkRadio;
    QCheckBox* mpTwoWayCheck;
    QWidget* mpLayerWidget;

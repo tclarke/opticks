@@ -75,7 +75,7 @@ bool WindowImp::deserialize(SessionItemDeserializer &deserializer)
 {
    XmlReader xml(NULL, false);
    DOMNode* pRoot = deserializer.deserialize(xml, getObjectType().c_str());
-   if(!fromXml(pRoot, XmlBase::VERSION))
+   if (!fromXml(pRoot, XmlBase::VERSION))
    {
       return false;
    }
@@ -84,7 +84,7 @@ bool WindowImp::deserialize(SessionItemDeserializer &deserializer)
 
 bool WindowImp::toXml(XMLWriter* pXml) const
 {
-   if(!SessionItemImp::toXml(pXml))
+   if (!SessionItemImp::toXml(pXml))
    {
       return false;
    }
@@ -94,7 +94,7 @@ bool WindowImp::toXml(XMLWriter* pXml) const
 
 void WindowImp::enableSessionItemDrops(Window::SessionItemDropFilter *pFilter)
 {
-   if(pFilter == NULL)
+   if (pFilter == NULL)
    {
       mAcceptAllSessionItemDrops = true;
    }
@@ -106,26 +106,26 @@ void WindowImp::enableSessionItemDrops(Window::SessionItemDropFilter *pFilter)
 
 void WindowImp::dragEnterEvent(QDragEnterEvent *pEvent)
 {
-   if(pEvent->mimeData()->hasFormat("text/x-session-id"))
+   if (pEvent->mimeData()->hasFormat("text/x-session-id"))
    {
       QByteArray encoded = pEvent->mimeData()->data("text/x-session-id");
       QDataStream stream(&encoded, QIODevice::ReadOnly);
       bool accepted = mAcceptAllSessionItemDrops;
-      while(!accepted && !stream.atEnd())
+      while (!accepted && !stream.atEnd())
       {
          QString id;
          stream >> id;
-         SessionItem *pItem = Service<SessionManager>()->getSessionItem(id.toStdString());
-         if(pItem != NULL)
+         SessionItem* pItem = Service<SessionManager>()->getSessionItem(id.toStdString());
+         if (pItem != NULL)
          {
-            for(vector<Window::SessionItemDropFilter*>::iterator filter = mSessionItemDropFilters.begin();
+            for (vector<Window::SessionItemDropFilter*>::iterator filter = mSessionItemDropFilters.begin();
                !accepted && filter != mSessionItemDropFilters.end(); ++filter)
             {
                accepted = (*filter)->accept(pItem);
             }
          }
       }
-      if(accepted)
+      if (accepted)
       {
          pEvent->acceptProposedAction();
       }
@@ -134,18 +134,18 @@ void WindowImp::dragEnterEvent(QDragEnterEvent *pEvent)
 
 void WindowImp::dropEvent(QDropEvent *pEvent)
 {
-   if(pEvent->mimeData()->hasFormat("text/x-session-id"))
+   if (pEvent->mimeData()->hasFormat("text/x-session-id"))
    {
       vector<SessionItem*> droppedItems;
       QByteArray encoded = pEvent->mimeData()->data("text/x-session-id");
       QDataStream stream(&encoded, QIODevice::ReadOnly);
       bool accepted = false;
-      while(!stream.atEnd())
+      while (!stream.atEnd())
       {
          QString id;
          stream >> id;
-         SessionItem *pItem = Service<SessionManager>()->getSessionItem(id.toStdString());
-         if(pItem != NULL)
+         SessionItem* pItem = Service<SessionManager>()->getSessionItem(id.toStdString());
+         if (pItem != NULL)
          {
             accepted = true;
             droppedItems.push_back(pItem);
@@ -153,7 +153,7 @@ void WindowImp::dropEvent(QDropEvent *pEvent)
          }
       }
       notify(SIGNAL_NAME(Window, SessionItemsDropped), boost::any(droppedItems));
-      if(accepted)
+      if (accepted)
       {
          pEvent->acceptProposedAction();
       }

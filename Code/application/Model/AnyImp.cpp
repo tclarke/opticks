@@ -38,8 +38,8 @@ void AnyImp::setData(AnyData* pData)
 
    if (mpData != NULL)
    {
-      Subject *pSubject = dynamic_cast<Subject*>(mpData);
-      if(pSubject != NULL)
+      Subject* pSubject = dynamic_cast<Subject*>(mpData);
+      if (pSubject != NULL)
       {
          pSubject->detach(SIGNAL_NAME(Subject, Modified),
                            Signal(dynamic_cast<Subject*>(this),
@@ -49,8 +49,8 @@ void AnyImp::setData(AnyData* pData)
    }
 
    mpData = pData;
-   Subject *pSubject = dynamic_cast<Subject*>(mpData);
-   if(pSubject != NULL)
+   Subject* pSubject = dynamic_cast<Subject*>(mpData);
+   if (pSubject != NULL)
    {
       pSubject->attach(SIGNAL_NAME(Subject, Modified),
                         Signal(dynamic_cast<Subject*>(this),
@@ -94,12 +94,12 @@ DataElement* AnyImp::copy(const string& name, DataElement* pParent) const
 
 bool AnyImp::serialize(SessionItemSerializer &serializer) const
 {
-   if(!DataElementImp::serialize(serializer))
+   if (!DataElementImp::serialize(serializer))
    {
       return false;
    }
-   AnyDataExt1 *pExt1 = dynamic_cast<AnyDataExt1*>(mpData);
-   if(pExt1 != NULL)
+   AnyDataExt1* pExt1 = dynamic_cast<AnyDataExt1*>(mpData);
+   if (pExt1 != NULL)
    {
       serializer.endBlock();
       return pExt1->serialize(serializer);
@@ -109,12 +109,12 @@ bool AnyImp::serialize(SessionItemSerializer &serializer) const
 
 bool AnyImp::deserialize(SessionItemDeserializer &deserializer)
 {
-   if(!DataElementImp::deserialize(deserializer))
+   if (!DataElementImp::deserialize(deserializer))
    {
       return false;
    }
-   AnyDataExt1 *pExt1 = dynamic_cast<AnyDataExt1*>(mpData);
-   if(pExt1 != NULL)
+   AnyDataExt1* pExt1 = dynamic_cast<AnyDataExt1*>(mpData);
+   if (pExt1 != NULL)
    {
       deserializer.nextBlock();
       return pExt1->deserialize(deserializer);
@@ -124,7 +124,7 @@ bool AnyImp::deserialize(SessionItemDeserializer &deserializer)
 
 bool AnyImp::toXml(XMLWriter* pXml) const
 {
-   if(!DataElementImp::toXml(pXml))
+   if (!DataElementImp::toXml(pXml))
    {
       return false;
    }
@@ -134,7 +134,7 @@ bool AnyImp::toXml(XMLWriter* pXml) const
 
 bool AnyImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   if(!DataElementImp::fromXml(pDocument, version))
+   if (!DataElementImp::fromXml(pDocument, version))
    {
       return false;
    }

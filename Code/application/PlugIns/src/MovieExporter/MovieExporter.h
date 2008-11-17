@@ -32,12 +32,15 @@ public:
    class Args
    {
    public:
+      Args(AVOutputFormat* pOutputFormat = NULL) :
+         mpOutputFormat(pOutputFormat)
+      {
+      }
+
       AVOutputFormat* mpOutputFormat;
-      Args(AVOutputFormat* pOutputFormat = NULL) : 
-         mpOutputFormat(pOutputFormat) {}
    };
 
-   AVFormatContext* obtainResource(const Args &args) const 
+   AVFormatContext* obtainResource(const Args& args) const
    {
       AVFormatContext* pFormat(NULL);
       if (args.mpOutputFormat == NULL)
@@ -50,11 +53,11 @@ public:
       return pFormat;
    }
 
-   void releaseResource(const Args &args, AVFormatContext *pFormat) const 
-   { 
+   void releaseResource(const Args& args, AVFormatContext* pFormat) const
+   {
       if (pFormat != NULL)
       {
-         for (int i = 0; i < pFormat->nb_streams; i++)
+         for (int i = 0; i < pFormat->nb_streams; ++i)
          {
             av_freep(&pFormat->streams[i]->codec);
             av_freep(&pFormat->streams[i]);
@@ -68,9 +71,15 @@ public:
 class AvFormatContextResource : public Resource<AVFormatContext, AvFormatContextObject>
 {
 public:
-   AvFormatContextResource(AVOutputFormat* pOutputFormat) : 
-      Resource<AVFormatContext, AvFormatContextObject>(AvFormatContextObject::Args(pOutputFormat)) {}
-      operator AVFormatContext*() { return get(); }
+   AvFormatContextResource(AVOutputFormat* pOutputFormat) :
+      Resource<AVFormatContext, AvFormatContextObject>(AvFormatContextObject::Args(pOutputFormat))
+   {
+   }
+
+   operator AVFormatContext*()
+   {
+      return get();
+   }
 };
 
 class AvStreamObject
@@ -79,13 +88,17 @@ public:
    class Args
    {
    public:
+      Args(AVFormatContext* pFormat = NULL, CodecID videoCodec = CODEC_ID_NONE) :
+         mpFormat(pFormat),
+         mVideoCodec(videoCodec)
+      {
+      }
+
       AVFormatContext* mpFormat;
       CodecID mVideoCodec;
-      Args(AVFormatContext* pFormat = NULL, CodecID videoCodec = CODEC_ID_NONE) : 
-         mpFormat(pFormat), mVideoCodec(videoCodec) {}
    };
 
-   AVStream* obtainResource(const Args &args) const 
+   AVStream* obtainResource(const Args& args) const
    {
       AVStream* pVideoStream(NULL);
       if (args.mpFormat == NULL || args.mVideoCodec == CODEC_ID_NONE)
@@ -95,7 +108,7 @@ public:
       pVideoStream = av_new_stream(args.mpFormat, 0);
       VERIFYRV(pVideoStream, NULL);
 
-      AVCodecContext *pCodecContext = pVideoStream->codec;
+      AVCodecContext* pCodecContext = pVideoStream->codec;
       pCodecContext->codec_id = args.mVideoCodec;
       pCodecContext->codec_type = CODEC_TYPE_VIDEO;
 
@@ -110,7 +123,7 @@ public:
          /* needed to avoid using macroblocks in which some coeffs overflow
          this doesn't happen with normal video, it just happens here as the
          motion of the chroma plane doesn't match the luma plane */
-         pCodecContext->mb_decision=2;
+         pCodecContext->mb_decision = 2;
       }
       // some formats want stream headers to be separate
       std::string format = args.mpFormat->oformat->name;
@@ -122,11 +135,11 @@ public:
       return pVideoStream;
    }
 
-   void releaseResource(const Args &args, AVStream *pStream) const 
-   { 
+   void releaseResource(const Args& args, AVStream* pStream) const
+   {
       if (pStream != NULL)
       {
-         avcodec_close(pStream->codec); 
+         avcodec_close(pStream->codec);
       }
    }
 };
@@ -134,9 +147,15 @@ public:
 class AvStreamResource : public Resource<AVStream, AvStreamObject>
 {
 public:
-   AvStreamResource(AVFormatContext *pFormat = NULL, CodecID videoCodec = CODEC_ID_NONE) : 
-      Resource<AVStream, AvStreamObject>(AvStreamObject::Args(pFormat, videoCodec)) {}
-   operator AVStream*() { return get(); }
+   AvStreamResource(AVFormatContext* pFormat = NULL, CodecID videoCodec = CODEC_ID_NONE) :
+      Resource<AVStream, AvStreamObject>(AvStreamObject::Args(pFormat, videoCodec))
+   {
+   }
+
+   operator AVStream*()
+   {
+      return get();
+   }
 };
 
 /**
@@ -152,30 +171,30 @@ public:
 
    bool getInputSpecification(PlugInArgList*& pInArgList);
    bool getOutputSpecification(PlugInArgList*& pOutArgList);
-   bool execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList);
+   bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
    ValidationResultType validate(const PlugInArgList* pArgList, std::string& errorMessage) const;
-   QWidget* getExportOptionsWidget(const PlugInArgList *pInArgList);
+   QWidget* getExportOptionsWidget(const PlugInArgList* pInArgList);
 
 protected:
-   bool setAvCodecOptions(AVCodecContext *pContext, PlugInArgList *pInArgList);
-   bool open_video(AVFormatContext *pFormat, AVStream *pVideoStream);
-   AVFrame *alloc_picture(int pixFmt, int width, int height);
-   bool write_video_frame(AVFormatContext *pFormat, AVStream *pVideoStream);
+   bool setAvCodecOptions(AVCodecContext* pContext);
+   bool open_video(AVFormatContext* pFormat, AVStream* pVideoStream);
+   AVFrame* alloc_picture(int pixFmt, int width, int height);
+   bool write_video_frame(AVFormatContext* pFormat, AVStream* pVideoStream);
 
-   virtual AVOutputFormat *getOutputFormat() const = 0;
+   virtual AVOutputFormat* getOutputFormat() const = 0;
 
    virtual boost::rational<int> convertToValidFrameRate(const boost::rational<int>& frameRate) const;
 
 private:
-   void log_error(const std::string &msg);
+   void log_error(const std::string& msg);
 
-   Progress *mpProgress;
+   Progress* mpProgress;
    StepResource mpStep;
-   AVFrame *mpPicture;
-   uint8_t *mpVideoOutbuf;
+   AVFrame* mpPicture;
+   uint8_t* mpVideoOutbuf;
    int mFrameCount;
    int mVideoOutbufSize;
-   
+
    std::auto_ptr<OptionsMovieExporter> mpOptionWidget;
 };
 

@@ -18,13 +18,12 @@
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
 
-WizardItemImp::WizardItemImp(string name, string type)
-{
-   mName = name;
-   mType = type;
-   mbBatch = false;
-   mbModeSupported = false;
-}
+WizardItemImp::WizardItemImp(string name, string type) :
+   mName(name),
+   mType(type),
+   mbBatch(false),
+   mbModeSupported(false)
+{}
 
 WizardItemImp::~WizardItemImp()
 {
@@ -33,12 +32,12 @@ WizardItemImp::~WizardItemImp()
    clearOutputNodes();
 }
 
-WizardItemImp& WizardItemImp::operator =(const WizardItemImp& item)
+WizardItemImp& WizardItemImp::operator=(const WizardItemImp& item)
 {
    if (this != &item)
    {
-      mName = item.mName.c_str();
-      mType = item.mType.c_str();
+      mName = item.mName;
+      mType = item.mType;
       mbBatch = item.mbBatch;
       mbModeSupported = item.mbModeSupported;
       mCoord = item.mCoord;
@@ -46,19 +45,14 @@ WizardItemImp& WizardItemImp::operator =(const WizardItemImp& item)
       // Input nodes
       clearInputNodes();
 
-      int i = 0;
-
-      int iNodes = 0;
-      iNodes = item.mInputNodes.size();
-      for (i = 0; i < iNodes; i++)
+      vector<WizardNode*>::const_iterator iter;
+      for (iter = item.mInputNodes.begin(); iter != item.mInputNodes.end(); ++iter)
       {
-         WizardNode* pExistNode = NULL;
-         pExistNode = item.mInputNodes.at(i);
-
+         WizardNodeImp* pExistNode = static_cast<WizardNodeImp*>(*iter);
          if (pExistNode != NULL)
          {
-            const string &nodeName = pExistNode->getName();
-            const string &nodeType = static_cast<WizardNodeImp*>(pExistNode)->getOriginalType();
+            const string& nodeName = pExistNode->getName();
+            const string& nodeType = pExistNode->getOriginalType();
             string nodeDescription = "";
 
             WizardNodeExt1* pExistNodeExt1 = dynamic_cast<WizardNodeExt1*>(pExistNode);
@@ -67,12 +61,10 @@ WizardItemImp& WizardItemImp::operator =(const WizardItemImp& item)
                nodeDescription = pExistNodeExt1->getDescription();
             }
 
-
-            WizardNode* pNode = NULL;
-            pNode = addInputNode(nodeName, nodeType, nodeDescription);
+            WizardNodeImp* pNode = static_cast<WizardNodeImp*>(addInputNode(nodeName, nodeType, nodeDescription));
             if (pNode != NULL)
             {
-               *((WizardNodeImp*) pNode) = *((WizardNodeImp*) pExistNode);
+               *pNode = *pExistNode;
             }
          }
       }
@@ -80,16 +72,13 @@ WizardItemImp& WizardItemImp::operator =(const WizardItemImp& item)
       // Output nodes
       clearOutputNodes();
 
-      iNodes = item.mOutputNodes.size();
-      for (i = 0; i < iNodes; i++)
+      for (iter = item.mOutputNodes.begin(); iter != item.mOutputNodes.end(); ++iter)
       {
-         WizardNode* pExistNode = NULL;
-         pExistNode = item.mOutputNodes.at(i);
-         WizardNodeExt1* pExistNodeExt1 = dynamic_cast<WizardNodeExt1*>(pExistNode);
+         WizardNodeImp* pExistNode = static_cast<WizardNodeImp*>(*iter);
          if (pExistNode != NULL)
          {
-            const string &nodeName = pExistNode->getName();
-            const string &nodeType = static_cast<WizardNodeImp*>(pExistNode)->getOriginalType();
+            const string& nodeName = pExistNode->getName();
+            const string& nodeType = pExistNode->getOriginalType();
             string nodeDescription = "";
 
             WizardNodeExt1* pExistNodeExt1 = dynamic_cast<WizardNodeExt1*>(pExistNode);
@@ -98,12 +87,10 @@ WizardItemImp& WizardItemImp::operator =(const WizardItemImp& item)
                nodeDescription = pExistNodeExt1->getDescription();
             }
 
-
-            WizardNode* pNode = NULL;
-            pNode = addOutputNode(nodeName, nodeType, nodeDescription);
+            WizardNodeImp* pNode = static_cast<WizardNodeImp*>(addOutputNode(nodeName, nodeType, nodeDescription));
             if (pNode != NULL)
             {
-               *((WizardNodeImp*) pNode) = *((WizardNodeImp*) pExistNode);
+               *pNode = *pExistNode;
             }
          }
       }
@@ -178,8 +165,7 @@ double WizardItemImp::getYPosition() const
 
 WizardNode* WizardItemImp::addInputNode(const string& name, const string& type, const string& description)
 {
-   WizardNode* pNode = NULL;
-   pNode = new WizardNodeImp(this, name, type, description);
+   WizardNode* pNode = new WizardNodeImp(this, name, type, description);
    if (pNode != NULL)
    {
       mInputNodes.push_back(pNode);
@@ -192,9 +178,7 @@ WizardNode* WizardItemImp::addInputNode(const string& name, const string& type, 
 
 int WizardItemImp::getNumInputNodes() const
 {
-   int iCount = 0;
-   iCount = mInputNodes.size();
-
+   int iCount = mInputNodes.size();
    return iCount;
 }
 
@@ -205,19 +189,14 @@ WizardNode* WizardItemImp::getInputNode(const string& name, const string& type) 
       return NULL;
    }
 
-   vector<WizardNode*>::const_iterator iter;
-   iter = mInputNodes.begin();
+   vector<WizardNode*>::const_iterator iter = mInputNodes.begin();
    while (iter != mInputNodes.end())
    {
-      WizardNode* pNode = NULL;
-      pNode = *iter;
+      WizardNode* pNode = *iter;
       if (pNode != NULL)
       {
-         string nodeName = "";
-         string nodeType = "";
-
-         nodeName = pNode->getName();
-         nodeType = pNode->getType();
+         string nodeName = pNode->getName();
+         string nodeType = pNode->getType();
 
          if ((nodeName == name) && (nodeType == type))
          {
@@ -243,10 +222,9 @@ bool WizardItemImp::isInputNode(WizardNode* pNode) const
       return false;
    }
 
-   for (unsigned int i = 0; i < mInputNodes.size(); i++)
+   for (unsigned int i = 0; i < mInputNodes.size(); ++i)
    {
-      WizardNode* pCurrentNode = NULL;
-      pCurrentNode = mInputNodes.at(i);
+      WizardNode* pCurrentNode = mInputNodes.at(i);
       if (pCurrentNode == pNode)
       {
          return true;
@@ -263,20 +241,23 @@ bool WizardItemImp::removeInputNode(WizardNode* pNode, bool bDeleteValue)
       return false;
    }
 
-   vector<WizardNode*>::iterator iter;
-   iter = mInputNodes.begin();
+   vector<WizardNode*>::iterator iter = mInputNodes.begin();
    while (iter != mInputNodes.end())
    {
-      WizardNode* pCurrentNode = NULL;
-      pCurrentNode = *iter;
+      WizardNode* pCurrentNode = *iter;
       if (pCurrentNode == pNode)
       {
-         if (bDeleteValue == true)
+         WizardNodeImp* pNodeImp = static_cast<WizardNodeImp*>(pNode);
+         if (pNodeImp != NULL)
          {
-            ((WizardNodeImp*) pNode)->deleteValue();
+            if (bDeleteValue == true)
+            {
+               pNodeImp->deleteValue();
+            }
+
+            delete pNodeImp;
          }
 
-         delete ((WizardNodeImp*) pNode);
          mInputNodes.erase(iter);
          WizardItemChangeType eChange = ItemNodeRemoved;
          notify(SIGNAL_NAME(Subject, Modified), boost::any(&eChange));
@@ -313,8 +294,7 @@ void WizardItemImp::clearInputNodes()
 
 WizardNode* WizardItemImp::addOutputNode(const string& name, const string& type, const string& description)
 {
-   WizardNode* pNode = NULL;
-   pNode = new WizardNodeImp(this, name, type, description);
+   WizardNode* pNode = new WizardNodeImp(this, name, type, description);
    if (pNode != NULL)
    {
       mOutputNodes.push_back(pNode);
@@ -327,9 +307,7 @@ WizardNode* WizardItemImp::addOutputNode(const string& name, const string& type,
 
 int WizardItemImp::getNumOutputNodes() const
 {
-   int iCount = 0;
-   iCount = mOutputNodes.size();
-
+   int iCount = mOutputNodes.size();
    return iCount;
 }
 
@@ -340,19 +318,14 @@ WizardNode* WizardItemImp::getOutputNode(const string& name, const string& type)
       return NULL;
    }
 
-   vector<WizardNode*>::const_iterator iter;
-   iter = mOutputNodes.begin();
+   vector<WizardNode*>::const_iterator iter = mOutputNodes.begin();
    while (iter != mOutputNodes.end())
    {
-      WizardNode* pNode = NULL;
-      pNode = *iter;
+      WizardNode* pNode = *iter;
       if (pNode != NULL)
       {
-         string nodeName = "";
-         string nodeType = "";
-
-         nodeName = pNode->getName();
-         nodeType = pNode->getType();
+         string nodeName = pNode->getName();
+         string nodeType = pNode->getType();
 
          if ((nodeName == name) && (nodeType == type))
          {
@@ -378,10 +351,9 @@ bool WizardItemImp::isOutputNode(WizardNode* pNode) const
       return false;
    }
 
-   for (unsigned int i = 0; i < mOutputNodes.size(); i++)
+   for (unsigned int i = 0; i < mOutputNodes.size(); ++i)
    {
-      WizardNode* pCurrentNode = NULL;
-      pCurrentNode = mOutputNodes.at(i);
+      WizardNode* pCurrentNode = mOutputNodes.at(i);
       if (pCurrentNode == pNode)
       {
          return true;
@@ -398,20 +370,23 @@ bool WizardItemImp::removeOutputNode(WizardNode* pNode, bool bDeleteValue)
       return false;
    }
 
-   vector<WizardNode*>::iterator iter;
-   iter = mOutputNodes.begin();
+   vector<WizardNode*>::iterator iter = mOutputNodes.begin();
    while (iter != mOutputNodes.end())
    {
-      WizardNode* pCurrentNode = NULL;
-      pCurrentNode = *iter;
+      WizardNode* pCurrentNode = *iter;
       if (pCurrentNode == pNode)
       {
-         if (bDeleteValue == true)
+         WizardNodeImp* pNodeImp = static_cast<WizardNodeImp*>(pNode);
+         if (pNodeImp != NULL)
          {
-            ((WizardNodeImp*) pNode)->deleteValue();
+            if (bDeleteValue == true)
+            {
+               pNodeImp->deleteValue();
+            }
+
+            delete pNodeImp;
          }
 
-         delete ((WizardNodeImp*) pNode);
          mOutputNodes.erase(iter);
          WizardItemChangeType eChange = ItemNodeRemoved;
          notify(SIGNAL_NAME(Subject, Modified), boost::any(&eChange));
@@ -453,7 +428,7 @@ bool WizardItemImp::isItemConnected(WizardItem* pItem, bool bInputNode) const
       return false;
    }
 
-   if (pItem == (WizardItem*) this)
+   if (static_cast<WizardItemImp*>(pItem) == this)
    {
       return true;
    }
@@ -461,16 +436,12 @@ bool WizardItemImp::isItemConnected(WizardItem* pItem, bool bInputNode) const
    vector<WizardItem*> connectedItems;
    getConnectedItems(bInputNode, connectedItems);
 
-   unsigned int uiCount = 0;
-   uiCount = connectedItems.size();
-   for (unsigned int i = 0; i < uiCount; i++)
+   for (unsigned int i = 0; i < connectedItems.size(); ++i)
    {
-      WizardItem* pConnectedItem = NULL;
-      pConnectedItem = connectedItems.at(i);
+      WizardItemImp* pConnectedItem = static_cast<WizardItemImp*>(connectedItems.at(i));
       if (pConnectedItem != NULL)
       {
-         bool bConnected = false;
-         bConnected = ((WizardItemImp*) pConnectedItem)->isItemConnected(pItem, bInputNode);
+         bool bConnected = pConnectedItem->isItemConnected(pItem, bInputNode);
          if (bConnected == true)
          {
             return true;
@@ -495,36 +466,25 @@ void WizardItemImp::getConnectedItems(bool bInputNode, vector<WizardItem*>& conn
       nodes = mOutputNodes;
    }
 
-   vector<WizardNode*>::iterator iter;
-   iter = nodes.begin();
+   vector<WizardNode*>::iterator iter = nodes.begin();
    while (iter != nodes.end())
    {
-      WizardNode* pNode = NULL;
-      pNode = *iter;
+      WizardNode* pNode = *iter;
       if (pNode != NULL)
       {
          const vector<WizardNode*>& connectedNodes = pNode->getConnectedNodes();
-
-         int iCount = 0;
-         iCount = connectedNodes.size();
-         for (int i = 0; i < iCount; i++)
+         for (unsigned int i = 0; i < connectedNodes.size(); ++i)
          {
-            WizardNode* pConnectedNode = NULL;
-            pConnectedNode = connectedNodes.at(i);
+            WizardNodeImp* pConnectedNode = static_cast<WizardNodeImp*>(connectedNodes.at(i));
             if (pConnectedNode != NULL)
             {
-               WizardItem* pConnectedItem = NULL;
-               pConnectedItem = ((WizardNodeImp*) pConnectedNode)->getItem();
+               WizardItem* pConnectedItem = pConnectedNode->getItem();
                if (pConnectedItem != NULL)
                {
                   bool bContains = false;
-
-                  int iConnectedCount = 0;
-                  iConnectedCount = connectedItems.size();
-                  for (int j = 0; j < iConnectedCount; j++)
+                  for (unsigned int j = 0; j < connectedItems.size(); ++j)
                   {
-                     WizardItem* pCurrentConnectedItem = NULL;
-                     pCurrentConnectedItem = connectedItems.at(j);
+                     WizardItem* pCurrentConnectedItem = connectedItems.at(j);
                      if (pCurrentConnectedItem == pConnectedItem)
                      {
                         bContains = true;
@@ -548,12 +508,10 @@ vector<WizardConnection> WizardItemImp::getConnections(const vector<WizardItem*>
 {
    vector<WizardConnection> connections;
 
-   int iCount = 0;
-   iCount = items.size();
-   for (int i = 0; i < iCount; i++)
+   int iCount = items.size();
+   for (int i = 0; i < iCount; ++i)
    {
-      WizardItem* pOutputItem = NULL;
-      pOutputItem = items.at(i);
+      WizardItem* pOutputItem = items.at(i);
       if (pOutputItem == NULL)
       {
          continue;
@@ -561,12 +519,10 @@ vector<WizardConnection> WizardItemImp::getConnections(const vector<WizardItem*>
 
       vector<WizardNode*> outputNodes = pOutputItem->getOutputNodes();
 
-      int iOutputNodes = 0;
-      iOutputNodes = outputNodes.size();
-      for (int j = 0; j < iOutputNodes; j++)
+      int iOutputNodes = outputNodes.size();
+      for (int j = 0; j < iOutputNodes; ++j)
       {
-         WizardNode* pOutputNode = NULL;
-         pOutputNode = outputNodes.at(j);
+         WizardNode* pOutputNode = outputNodes.at(j);
          if (pOutputNode == NULL)
          {
             continue;
@@ -574,28 +530,24 @@ vector<WizardConnection> WizardItemImp::getConnections(const vector<WizardItem*>
 
          vector<WizardNode*> connectedNodes = pOutputNode->getConnectedNodes();
 
-         int iConnectedNodes = 0;
-         iConnectedNodes = connectedNodes.size();
-         for (int k = 0; k < iConnectedNodes; k++)
+         int iConnectedNodes = connectedNodes.size();
+         for (int k = 0; k < iConnectedNodes; ++k)
          {
-            WizardNode* pConnectedNode = NULL;
-            pConnectedNode = connectedNodes.at(k);
+            WizardNode* pConnectedNode = connectedNodes.at(k);
             if (pConnectedNode == NULL)
             {
                continue;
             }
 
-            WizardItem* pConnectedItem = NULL;
-            pConnectedItem = ((WizardNodeImp*) pConnectedNode)->getItem();
+            WizardItem* pConnectedItem = static_cast<WizardNodeImp*>(pConnectedNode)->getItem();
             if (pConnectedItem == NULL)
             {
                continue;
             }
 
-            for (int l = 0; l < iCount; l++)
+            for (int l = 0; l < iCount; ++l)
             {
-               WizardItem* pInputItem = NULL;
-               pInputItem = items.at(l);
+               WizardItem* pInputItem = items.at(l);
                if (pInputItem != pConnectedItem)
                {
                   continue;
@@ -603,12 +555,10 @@ vector<WizardConnection> WizardItemImp::getConnections(const vector<WizardItem*>
 
                vector<WizardNode*> inputNodes = pConnectedItem->getInputNodes();
 
-               int iInputNodes = 0;
-               iInputNodes = inputNodes.size();
-               for (int m = 0; m < iInputNodes; m++)
+               int iInputNodes = inputNodes.size();
+               for (int m = 0; m < iInputNodes; ++m)
                {
-                  WizardNode* pInputNode = NULL;
-                  pInputNode = inputNodes.at(m);
+                  WizardNode* pInputNode = inputNodes.at(m);
                   if (pInputNode != pConnectedNode)
                   {
                      continue;
@@ -634,9 +584,8 @@ vector<WizardConnection> WizardItemImp::getConnections(const vector<WizardItem*>
 
 void WizardItemImp::setConnections(vector<WizardItem*>& items, const vector<WizardConnection>& connections)
 {
-   int iConnections = 0;
-   iConnections = connections.size();
-   for (int i = 0; i < iConnections; i++)
+   int iConnections = connections.size();
+   for (int i = 0; i < iConnections; ++i)
    {
       WizardConnection connection = connections.at(i);
       int iInputItemIndex = connection.miInputItemIndex;
@@ -644,17 +593,14 @@ void WizardItemImp::setConnections(vector<WizardItem*>& items, const vector<Wiza
       int iOutputItemIndex = connection.miOutputItemIndex;
       int iOutputNodeIndex = connection.miOutputNodeIndex;
 
-      int iItems = 0;
-      iItems = items.size();
+      int iItems = items.size();
       if ((iInputItemIndex >= iItems) || (iOutputItemIndex >= iItems))
       {
          continue;
       }
 
-      WizardItem* pOutputItem = NULL;
-      WizardItem* pInputItem = NULL;
-      pOutputItem = items.at(iOutputItemIndex);
-      pInputItem = items.at(iInputItemIndex);
+      WizardItem* pOutputItem = items.at(iOutputItemIndex);
+      WizardItem* pInputItem = items.at(iInputItemIndex);
 
       if ((pOutputItem == NULL) || (pInputItem == NULL))
       {
@@ -672,61 +618,69 @@ void WizardItemImp::setConnections(vector<WizardItem*>& items, const vector<Wiza
          continue;
       }
 
-      WizardNode* pOutputNode = NULL;
-      WizardNode* pInputNode = NULL;
-      pOutputNode = outputNodes.at(iOutputNodeIndex);
-      pInputNode = inputNodes.at(iInputNodeIndex);
+      WizardNodeImp* pOutputNode = static_cast<WizardNodeImp*>(outputNodes.at(iOutputNodeIndex));
+      WizardNodeImp* pInputNode = static_cast<WizardNodeImp*>(inputNodes.at(iInputNodeIndex));
 
       if ((pOutputNode == NULL) || (pInputNode == NULL))
       {
          continue;
       }
 
-      ((WizardNodeImp*) pOutputNode)->addConnectedNode(pInputNode);
-      ((WizardNodeImp*) pInputNode)->addConnectedNode(pOutputNode);
+      pOutputNode->addConnectedNode(pInputNode);
+      pInputNode->addConnectedNode(pOutputNode);
    }
 }
 
-bool WizardItemImp::toXml(XMLWriter* xml) const
+bool WizardItemImp::toXml(XMLWriter* pXml) const
 {
-   xml->addAttr("name",mName);
-   xml->addAttr("type",mType);
-   xml->addAttr("batch", StringUtilities::toXmlString<bool>(mbBatch));
-   xml->addAttr("batchSupported", StringUtilities::toXmlString<bool>(mbModeSupported));
+   pXml->addAttr("name", mName);
+   pXml->addAttr("type", mType);
+   pXml->addAttr("batch", StringUtilities::toXmlString<bool>(mbBatch));
+   pXml->addAttr("batchSupported", StringUtilities::toXmlString<bool>(mbModeSupported));
 
-   xml->addText(StringUtilities::toXmlString(mCoord), xml->addElement("location"));
+   pXml->addText(StringUtilities::toXmlString(mCoord), pXml->addElement("location"));
 
    vector<WizardNode*>::const_iterator iter;
-   for(iter = mInputNodes.begin(); iter != mInputNodes.end(); iter++)
+   for (iter = mInputNodes.begin(); iter != mInputNodes.end(); ++iter)
    {
       WizardNode* pNode(*iter);
-      if(pNode == NULL)
+      if (pNode == NULL)
+      {
          continue;
-      xml->pushAddPoint(xml->addElement("input"));
-      bool rval(pNode->toXml(xml));
-      xml->popAddPoint();
-      if(!rval)
+      }
+
+      pXml->pushAddPoint(pXml->addElement("input"));
+      bool rval(pNode->toXml(pXml));
+      pXml->popAddPoint();
+      if (!rval)
+      {
          return false;
+      }
    }
 
-   for(iter = mOutputNodes.begin(); iter != mOutputNodes.end(); iter++)
+   for (iter = mOutputNodes.begin(); iter != mOutputNodes.end(); ++iter)
    {
       WizardNode* pNode(*iter);
-      if(pNode == NULL)
+      if (pNode == NULL)
+      {
          continue;
-      xml->pushAddPoint(xml->addElement("output"));
-      bool rval(pNode->toXml(xml));
-      xml->popAddPoint();
-      if(!rval)
+      }
+
+      pXml->pushAddPoint(pXml->addElement("output"));
+      bool rval(pNode->toXml(pXml));
+      pXml->popAddPoint();
+      if (!rval)
+      {
          return false;
+      }
    }
 
    return true;
 }
 
-bool WizardItemImp::fromXml(DOMNode* document, unsigned int version)
+bool WizardItemImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   DOMElement *elmnt(static_cast<DOMElement*>(document));
+   DOMElement* elmnt(static_cast<DOMElement*>(pDocument));
 
    mName = A(elmnt->getAttribute(X("name")));
    mType = A(elmnt->getAttribute(X("type")));
@@ -738,24 +692,26 @@ bool WizardItemImp::fromXml(DOMNode* document, unsigned int version)
 
    mInputNodes.clear();
    mOutputNodes.clear();
-   for(DOMNode *chld = document->getFirstChild();
-                chld != NULL;
-                chld = chld->getNextSibling())
+   for (DOMNode* chld = pDocument->getFirstChild(); chld != NULL; chld = chld->getNextSibling())
    {
-      if(XMLString::equals(chld->getNodeName(), X("location")))
+      if (XMLString::equals(chld->getNodeName(), X("location")))
       {
          mCoord = StringUtilities::fromXmlString<LocationType>(A(chld->getTextContent()));
       }
-      else if(XMLString::equals(chld->getNodeName(), X("input"))
+      else if (XMLString::equals(chld->getNodeName(), X("input"))
            || XMLString::equals(chld->getNodeName(), X("output")))
       {
-         WizardNode *pNode(new WizardNodeImp(this, "", "", ""));
-         if(pNode->fromXml(chld, version))
+         WizardNode* pNode(new WizardNodeImp(this, "", "", ""));
+         if (pNode->fromXml(chld, version))
          {
-            if(XMLString::equals(chld->getNodeName(), X("input")))
+            if (XMLString::equals(chld->getNodeName(), X("input")))
+            {
                mInputNodes.push_back(pNode);
+            }
             else
+            {
                mOutputNodes.push_back(pNode);
+            }
          }
          else
          {
@@ -771,8 +727,8 @@ bool WizardItemImp::fromXml(DOMNode* document, unsigned int version)
 
 const string& WizardItemImp::getObjectType() const
 {
-   static string type("WizardItemImp");
-   return type;
+   static string sType("WizardItemImp");
+   return sType;
 }
 
 bool WizardItemImp::isKindOf(const string& className) const
@@ -780,7 +736,7 @@ bool WizardItemImp::isKindOf(const string& className) const
    if ((className == getType()) || (className == "WizardItem"))
    {
       return true;
-      }
+   }
 
    return SubjectImp::isKindOf(className);
 }

@@ -199,10 +199,10 @@ bool PlotManager::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    if (mpWindowAction != NULL)
    {
       bool created = true;
-      DockWindow* pWindow  = static_cast<DockWindow*>(mpDesktop->createWindow(PLOT_MANAGER_NAME, DOCK_WINDOW));
+      DockWindow* pWindow = static_cast<DockWindow*>(mpDesktop->createWindow(PLOT_MANAGER_NAME, DOCK_WINDOW));
       if (pWindow == NULL)
       {
-         pWindow  = static_cast<DockWindow*>(mpDesktop->getWindow(PLOT_MANAGER_NAME, DOCK_WINDOW));
+         pWindow = static_cast<DockWindow*>(mpDesktop->getWindow(PLOT_MANAGER_NAME, DOCK_WINDOW));
          created = false;
       }
       if (pWindow != NULL)

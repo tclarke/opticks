@@ -49,10 +49,10 @@ AspamManager::~AspamManager()
 {
    notify(SIGNAL_NAME(Subject, Deleted));
    vector<DataElement*> aspamElements = Service<ModelServices>()->getElements("Aspam");
-   for(vector<DataElement*>::iterator element = aspamElements.begin(); element != aspamElements.end(); ++element)
+   for (vector<DataElement*>::iterator element = aspamElements.begin(); element != aspamElements.end(); ++element)
    {
-      Any *pAnyElement = dynamic_cast<Any*>(*element);
-      if(model_cast<AspamAdapter*>(*element) != NULL)
+      Any* pAnyElement = dynamic_cast<Any*>(*element);
+      if (model_cast<AspamAdapter*>(*element) != NULL)
       {
          pAnyElement->setData(NULL);
       }
@@ -79,28 +79,30 @@ bool AspamManager::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
    return true;
 }
 
-bool AspamManager::initializeAspam(Any *pAspamContainer)
+bool AspamManager::initializeAspam(Any* pAspamContainer)
 {
    VERIFY(pAspamContainer != NULL);
-   if(pAspamContainer->getData() != NULL)
+   if (pAspamContainer->getData() != NULL)
    {
       // already initialized
       return false;
    }
-   pAspamContainer->setData(new AspamAdapter);
+
+   AspamAdapter* pData = new AspamAdapter;
+   pAspamContainer->setData(pData);
    notify(SIGNAL_NAME(AspamManager, AspamInitialized), boost::any(pAspamContainer));
    return pAspamContainer->getData() != NULL;
 }
 
 const string& AspamManager::getObjectType() const
 {
-   static string type("AspamManager");
-   return type;
+   static string sType("AspamManager");
+   return sType;
 }
 
 bool AspamManager::isKindOf(const string& className) const
 {
-   if(className == getObjectType())
+   if (className == getObjectType())
    {
       return true;
    }
@@ -108,16 +110,16 @@ bool AspamManager::isKindOf(const string& className) const
    return SubjectImp::isKindOf(className);
 }
 
-bool AspamManager::serialize(SessionItemSerializer &serializer) const
+bool AspamManager::serialize(SessionItemSerializer& serializer) const
 {
    XMLWriter xml("AspamManager");
    vector<DataElement*> aspamElements = Service<ModelServices>()->getElements("Aspam");
-   for(vector<DataElement*>::iterator element = aspamElements.begin(); element != aspamElements.end(); ++element)
+   for (vector<DataElement*>::iterator element = aspamElements.begin(); element != aspamElements.end(); ++element)
    {
-      if(*element != NULL)
+      if (*element != NULL)
       {
-         FileDescriptor *pFileDescriptor = (*element)->getDataDescriptor()->getFileDescriptor();
-         if(pFileDescriptor != NULL)
+         FileDescriptor* pFileDescriptor = (*element)->getDataDescriptor()->getFileDescriptor();
+         if (pFileDescriptor != NULL)
          {
             xml.pushAddPoint(xml.addElement("Aspam"));
             xml.addAttr("filename", XmlBase::PathToURL(pFileDescriptor->getFilename().getFullPathAndName()));
@@ -129,40 +131,42 @@ bool AspamManager::serialize(SessionItemSerializer &serializer) const
    return serializer.serialize(xml);
 }
 
-bool AspamManager::deserialize(SessionItemDeserializer &deserializer)
+bool AspamManager::deserialize(SessionItemDeserializer& deserializer)
 {
    XmlReader reader(NULL, false);
-   DOMElement *pRoot = deserializer.deserialize(reader, "AspamManager");
-   if(pRoot == NULL)
+   DOMElement* pRoot = deserializer.deserialize(reader, "AspamManager");
+   if (pRoot == NULL)
    {
       return false;
    }
-   for(DOMNode *pChld = pRoot->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
+
+   for (DOMNode* pChld = pRoot->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
    {
-      if(XMLString::equals(pChld->getNodeName(), X("Aspam")))
+      if (XMLString::equals(pChld->getNodeName(), X("Aspam")))
       {
-         DOMElement *pElmnt = static_cast<DOMElement*>(pChld);
+         DOMElement* pElmnt = static_cast<DOMElement*>(pChld);
          string filename = A(pElmnt->getAttribute(X("filename")));
-         AspamImporter *pImporter = new AspamImporter();
+         AspamImporter* pImporter = new AspamImporter();
          if (pImporter->getImportDescriptors(filename).size() != 1)
          {
             return false;
          }
-         PlugInArgList *pInputSpec;
-         if(!pImporter->getInputSpecification(pInputSpec))
+         PlugInArgList* pInputSpec = NULL;
+         if (!pImporter->getInputSpecification(pInputSpec))
          {
             return false;
          }
          string aspamId = A(pElmnt->getAttribute(X("aspamId")));
-         DataElement *pElement = dynamic_cast<DataElement*>(Service<SessionManager>()->getSessionItem(aspamId));
+         DataElement* pElement = dynamic_cast<DataElement*>(Service<SessionManager>()->getSessionItem(aspamId));
          pInputSpec->setPlugInArgValueLoose(Importer::ImportElementArg(), pElement);
          bool trueValue(true);
          pInputSpec->setPlugInArgValue(Importer::SessionLoadArg(), &trueValue);
-         if(!pImporter->execute(pInputSpec, NULL))
+         if (!pImporter->execute(pInputSpec, NULL))
          {
             return false;
          }
       }
    }
+
    return true;
 }

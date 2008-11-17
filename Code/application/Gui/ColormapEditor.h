@@ -61,26 +61,26 @@ private:
    void histogramDeleted(Subject &subject, const std::string &signal, const boost::any& v);
    ColorMap::Gradient makeGradient() const;
 
-   QVBoxLayout *mpVboxLayout;
-   QHBoxLayout *mpHboxLayout;
-   QLabel *mpPrimariesLabel;
-   QSpinBox *mpPrimariesSpinBox;
-   QSpacerItem *mpSpacerItem;
-   QLabel *mpIndicesLabel;
-   QSpinBox *mpIndicesSpinBox;
-   QFrame *mpPrimaryView;
-   QSlider *mpRangeMinSlider;
-   QLabel *mpDisplay;
-   QSlider *mpRangeMaxSlider;
-   QHBoxLayout *mpHboxLayout1;
-   QPushButton *mpSaveButton;
-   QPushButton *mpApplyButton;
-   QPushButton *mpLoadButton;
-   QSpacerItem *mpSpacerItem1;
-   QPushButton *mpOkButton;
-   QPushButton *mpCloseButton;
-   QGridLayout *mpPrimaryLayout;
-   QPushButton *mpUniformButton;
+   QVBoxLayout* mpVboxLayout;
+   QHBoxLayout* mpHboxLayout;
+   QLabel* mpPrimariesLabel;
+   QSpinBox* mpPrimariesSpinBox;
+   QSpacerItem* mpSpacerItem;
+   QLabel* mpIndicesLabel;
+   QSpinBox* mpIndicesSpinBox;
+   QFrame* mpPrimaryView;
+   QSlider* mpRangeMinSlider;
+   QLabel* mpDisplay;
+   QSlider* mpRangeMaxSlider;
+   QHBoxLayout* mpHboxLayout1;
+   QPushButton* mpSaveButton;
+   QPushButton* mpApplyButton;
+   QPushButton* mpLoadButton;
+   QSpacerItem* mpSpacerItem1;
+   QPushButton* mpOkButton;
+   QPushButton* mpCloseButton;
+   QGridLayout* mpPrimaryLayout;
+   QPushButton* mpUniformButton;
 
    struct Primary
    {

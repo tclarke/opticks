@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef IMAGE_LOADER_H
-#define IMAGE_LOADER_H
+#ifndef IMAGELOADER_H
+#define IMAGELOADER_H
 
 #include "ColorBuffer.h"
 
@@ -21,7 +21,6 @@
  *  graphics card.
  *
  */
-
 class ImageLoader
 {
 public:
@@ -52,7 +51,7 @@ public:
     */
    virtual ColorBuffer* getColorBuffer() const;
 
-    /**
+   /**
     *  Writes to the current color buffer.
     *
     *  @param   xCoord
@@ -101,11 +100,11 @@ public:
     *
     *  @see     write()
     */
-   virtual void read(GLint xCoord, GLint yCoord, GLsizei width, GLsizei height, 
-                     GLenum textureFormat, GLenum dataType, GLvoid *pPixels);
+   virtual void read(GLint xCoord, GLint yCoord, GLsizei width, GLsizei height,
+      GLenum textureFormat, GLenum dataType, GLvoid *pPixels);
 
 private:
-   ColorBuffer *mpColorBuffer;
+   ColorBuffer* mpColorBuffer;
 };
 
-#endif /* IMAGE_LOADER_H */
+#endif

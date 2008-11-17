@@ -194,7 +194,7 @@ private:
    bool mShowMeasurements;
    AttachmentPtr<Layer> mpActiveLayer;
    LayerImp* mpDrawLayer;
-   QTimer *mpPanTimer;
+   QTimer* mpPanTimer;
    int mPanKey;
    bool mShiftPressed;
    PanLimitType mPanLimit;

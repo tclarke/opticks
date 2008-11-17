@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef PROGRESS_TRACKER_H
-#define PROGRESS_TRACKER_H
+#ifndef PROGRESSTRACKER_H
+#define PROGRESSTRACKER_H
 
 #include <vector>
 #include <string>
@@ -30,13 +28,20 @@ public:
     *  @param message
     *         The message to associate with this exception.
     */
-   AlgorithmAbort(std::string message) : mMessage(message) {}
+   AlgorithmAbort(std::string message) :
+      mMessage(message)
+   {
+   }
+
    /**
     *  Access the message.
     *
     *  @return The message associated with this exception.
     */
-   std::string getText() const { return mMessage; }
+   std::string getText() const
+   {
+      return mMessage;
+   }
 
 private:
    std::string mMessage;
@@ -171,7 +176,7 @@ public:
       std::string mComponent;
       std::string mKey;
       int mWeight;
-      mutable Stage *mpParent;
+      mutable Stage* mpParent;
       std::vector<Stage> mSubStages;
       std::vector<Stage>::iterator mCurrentSubStage;
       int mSubStageWeight;
@@ -293,7 +298,7 @@ public:
     */
    bool getStatus(std::string &text, int& percent, ReportingLevel &level)
    {
-      if(mpProgress != NULL)
+      if (mpProgress != NULL)
       {
          mpProgress->getProgress(text, percent, level);
       }
@@ -307,11 +312,14 @@ public:
    }
 
    /**
-   *  Get the Progress object associated with the current step.
-   *
-   *  @return Pointer to the current Progress or NULL if there is no current Progress.
-   */
-   Progress *getCurrentProgress() const { return mpProgress; }
+    *  Get the Progress object associated with the current step.
+    *
+    *  @return Pointer to the current Progress or NULL if there is no current Progress.
+    */
+   Progress* getCurrentProgress() const
+   {
+      return mpProgress;
+   }
 
    /**
     *  Abort the process tracked by this %ProgressTracker.
@@ -358,14 +366,14 @@ public:
     */
    ~ProgressSubdivision()
    {
-      if(mStageCount > 0)
+      if (mStageCount > 0)
       {
          mpTracker->upALevel();
       }
    }
 
 private:
-   ProgressTracker *mpTracker;
+   ProgressTracker* mpTracker;
    int mStageCount;
 };
 
