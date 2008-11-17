@@ -546,9 +546,6 @@ def create_builder(opticks_depends, arcsdk, build_in_debug,
 
 def prep_to_run(opticks_depends, build_debug, arch,
                 visualstudio, build_dir, verbosity):
-    #chdir to the directory where the script resides
-    os.chdir(os.path.abspath(os.path.dirname(sys.argv[0])))
-
     try:
         builder = create_builder(opticks_depends, False,
             build_debug, visualstudio, None, arch, verbosity)
