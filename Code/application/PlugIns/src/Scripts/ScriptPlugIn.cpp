@@ -133,7 +133,11 @@ static void setEnvironmentVariable(const char *pName, const char *pValue)
    }
 #endif
    command << pName << "=" << buffer2;
-   putenv(command.str().c_str());
+#if defined(WIN_API)
+   _putenv(command.str().c_str());
+#else
+   putenv(const_cast<char*>(command.str().c_str()));
+#endif
 }
 
 static void setEnvironmentOption(const Filename* pSettingValue, const string& environName)
