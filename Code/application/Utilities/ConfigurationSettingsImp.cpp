@@ -171,7 +171,7 @@ void ConfigurationSettingsImp::validateInitialization()
          _putenv(internalPath.c_str());
    #else
          internalPath = path + ":" + internalPath;
-         putenv(internalPath.c_str());
+         putenv(const_cast<char*>(internalPath.c_str()));
    #endif
       }
    }
