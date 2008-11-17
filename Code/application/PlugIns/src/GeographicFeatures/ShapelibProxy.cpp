@@ -32,7 +32,7 @@ namespace
       }
 
    private:
-      const ShapelibProxy::ShapelibHandle &mHandle;
+      const ShapelibProxy::ShapelibHandle& mHandle;
    };
 
    class ShapelibFormatStringProcessor : public ArcProxyLib::FormatStringProcessor
@@ -53,7 +53,7 @@ namespace
       }
 
    private:
-      const ShapelibProxy::ShapelibHandle &mHandle;
+      const ShapelibProxy::ShapelibHandle& mHandle;
       int mFeature;
    };
 }
@@ -122,8 +122,8 @@ bool ShapelibProxy::getFeatureClassProperties(const std::string &handle,
       return false;
    }
 
-   ShapelibHandle &shapelibHandle = iter->second;
-   
+   ShapelibHandle& shapelibHandle = iter->second;
+
    int count = 0;
    ArcProxyLib::FeatureType featureType = ArcProxyLib::UNKNOWN;
    if (!getTypeAndCount(shapelibHandle, errorMessage, featureType, count))
@@ -170,7 +170,7 @@ bool ShapelibProxy::query(const std::string &handle, std::string &errorMessage,
       errorMessage = "Could not find handle";
       return false;
    }
-   ShapelibHandle &shapelibHandle = iter->second;
+   ShapelibHandle& shapelibHandle = iter->second;
 
    if (!whereClause.empty())
    {
@@ -189,7 +189,7 @@ bool ShapelibProxy::query(const std::string &handle, std::string &errorMessage,
 
    for (int i = 0; i < count; ++i)
    {
-      SHPObject *pShpObject = SHPReadObject(shapelibHandle.getShpHandle(), i);
+      SHPObject* pShpObject = SHPReadObject(shapelibHandle.getShpHandle(), i);
       if (pShpObject == NULL)
       {
          continue;

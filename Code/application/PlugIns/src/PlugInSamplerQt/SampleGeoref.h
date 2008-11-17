@@ -63,9 +63,9 @@ private:
    bool mRotate;
 
    AttachmentPtr<Animation> mpAnimation;
-   RasterElement *mpRaster;
+   RasterElement* mpRaster;
 
-   SampleGeorefGui *mpGui;
+   SampleGeorefGui* mpGui;
 };
 
-#endif // SAMPLEGEOREF_H
+#endif

@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef COLOR_BUFFER_H
-#define COLOR_BUFFER_H
+#ifndef COLORBUFFER_H
+#define COLORBUFFER_H
 
 #include "glCommon.h"
 
@@ -32,28 +32,22 @@ public:
     *
     *    @param   textureTarget
     *             The target of the texture object. (Ex: GL_TEXTURE_2D)
-    *
     *    @param   internalFormat
     *             The internal format of the texture object. (Ex: GL_RGB16)
-    *
     *    @param   width
     *             The width of the texture object.
-    *
     *    @param   height
     *             The height of the texture object.
-    *
     *    @param   textureFormat
     *             The format of the texture object. (Ex: GL_LUMINANCE)
-    *
     *    @param   dataType
     *             The type of data the color buffer will contain. (Ex: GL_UNSIGNED_SHORT)
-    *
     *    @param   alpha
     *             The alpha value for the buffer which resides between 0 and 255.
     */
-   ColorBuffer(GLenum textureTarget, GLint internalFormat, int width, int height, 
-                       GLenum textureFormat, GLenum dataType, unsigned int alpha = 255);
-   
+   ColorBuffer(GLenum textureTarget, GLint internalFormat, int width, int height, GLenum textureFormat,
+      GLenum dataType, unsigned int alpha = 255);
+
    /**
     *    Constructor method that creates a ColorBuffer object to be attached to a ImagePBuffer object.
     *    
@@ -101,7 +95,7 @@ public:
     *
     *  @return   The width of the texture object.
     */
-   int getWidth () const;
+   int getWidth() const;
 
    /**
     *  Gets the height of the OpenGL texture object.

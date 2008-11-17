@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef SECOND_MOMENT_H
-#define SECOND_MOMENT_H
+#ifndef SECONDMOMENT_H
+#define SECONDMOMENT_H
 
 #include "AlgorithmShell.h"
 #include "AlgorithmPattern.h"
@@ -39,7 +39,7 @@ class SecondMomentAlgorithm : public AlgorithmPattern
 public:
    SecondMomentAlgorithm(RasterElement* pRasterElement, Progress* pProgress, bool interactive);
    void setFile(const Filename* pSmmFile, bool loadIfExists);
-   std::string getFilename() const { return mSmmFile; }
+   std::string getFilename() const;
    RasterElement* getSecondMomentElement() const;
    RasterElement* getInverseSecondMomentElement() const;
 
@@ -50,8 +50,8 @@ private:
    bool initialize(void* pAlgorithmData); // from AlgorithmPattern. Sets the private data from the gui or arg-list
    bool canAbort() const;                 // from AlgorithmPattern. Returns true.
    bool doAbort();                        // from AlgorithmPattern. Aborts computation of the SMM.
-   bool readMatrixFromDisk (std::string fname, RasterElement* pElement) const;
-   bool writeMatrixToDisk (std::string fname, const RasterElement* pElement) const;
+   bool readMatrixFromDisk(std::string filename, RasterElement* pElement) const;
+   bool writeMatrixToDisk(std::string filename, const RasterElement* pElement) const;
 
    Input mInput;
    std::string mSmmFile;
@@ -64,6 +64,12 @@ private:
 
 class SecondMoment : public AlgorithmPlugIn
 {
+public:
+   SecondMoment();
+   ~SecondMoment();
+
+   bool hasAbort();
+
 private:
    bool canRunBatch() const;
    bool canRunInteractive() const;
@@ -81,11 +87,6 @@ private:
    Input mInput;
    RasterElement* mpRasterElement;
    bool mLoadIfExists;
-
-public:
-   SecondMoment();
-   ~SecondMoment();
-   bool hasAbort();
 };
 
 #endif

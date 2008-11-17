@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef ZOOM_PAN_WIDGET_H
-#define ZOOM_PAN_WIDGET_H
+#ifndef ZOOMPANWIDGET_H
+#define ZOOMPANWIDGET_H
 
 #include <QtCore/QPoint>
 #include <QtGui/QWidget>
@@ -170,14 +170,11 @@ protected slots:
    void updateMouseCursor();
 
 private:
-   void translateDataToWorld(const std::vector<LocationType> &data, 
-      std::vector<LocationType> &world) const;
-   void translateWorldToData(const std::vector<LocationType> &world,
-      std::vector<LocationType> &data) const;
-
+   void translateDataToWorld(const std::vector<LocationType>& data, std::vector<LocationType>& world) const;
+   void translateWorldToData(const std::vector<LocationType>& world, std::vector<LocationType>& data) const;
 
    SpatialDataViewImp* mpView;
-   Layer *mpLayer;
+   Layer* mpLayer;
 
    QPoint mMouseStart;
    QPoint mMouseCurrent;

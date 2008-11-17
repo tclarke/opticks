@@ -35,7 +35,7 @@ int Feature::addVertex(double dX, double dY, double dZ)
    mVertices.push_back(vertex);
    notify(SIGNAL_NAME(Feature, VertexAdded), boost::any(vertex));
 
-   int iIndex = static_cast<int>(mVertices.size() - 1);
+   int iIndex = static_cast<int>(mVertices.size()) - 1;
    return iIndex;
 }
 

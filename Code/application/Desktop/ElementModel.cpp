@@ -61,22 +61,24 @@ QStringList ElementModel::mimeTypes() const
    return SessionItemModel::mimeTypes() << "text/x-session-id";
 }
 
-QMimeData *ElementModel::mimeData(const QModelIndexList &indexes) const
+QMimeData* ElementModel::mimeData(const QModelIndexList &indexes) const
 {
-   QMimeData *pMimeData = SessionItemModel::mimeData(indexes);
+   QMimeData* pMimeData = SessionItemModel::mimeData(indexes);
    QByteArray encodedData;
    QDataStream stream(&encodedData, QIODevice::WriteOnly);
    foreach(QModelIndex index, indexes)
    {
-      if(index.isValid())
+      if (index.isValid())
       {
-         SessionItemModel::SessionItemWrapper *pWrapper = reinterpret_cast<SessionItemModel::SessionItemWrapper*>(index.internalPointer());
-         if(pWrapper != NULL)
+         SessionItemModel::SessionItemWrapper* pWrapper =
+            reinterpret_cast<SessionItemModel::SessionItemWrapper*>(index.internalPointer());
+         if (pWrapper != NULL)
          {
             stream << QString::fromStdString(pWrapper->getSessionItem()->getId());
          }
       }
    }
+
    pMimeData->setData("text/x-session-id", encodedData);
    return pMimeData;
 }

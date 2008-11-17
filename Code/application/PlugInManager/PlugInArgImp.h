@@ -60,10 +60,10 @@ public:
     *           String representation of the data type for this Argument.
     *  @param   name
     *           Name of this Argument.
-    *  @param   defaultValue
+    *  @param   pDefaultValue
     *           Pointer to the default value for this Argument.
     */
-   PlugInArgImp(const std::string& type, const std::string& name, const void *defaultValue);
+   PlugInArgImp(const std::string& type, const std::string& name, const void* pDefaultValue);
 
    /**
     *  Constructor for the Plug-In Argument.
@@ -75,13 +75,12 @@ public:
     *           String representation of the data type for this Argument.
     *  @param   name
     *           Name of this Argument.
-    *  @param   defaultValue
+    *  @param   pDefaultValue
     *           Pointer to the default value for this Argument.
-    *  @param   actualValue
+    *  @param   pActualValue
     *           Pointer to the actual value for this Argument.
     */
-   PlugInArgImp(const std::string& type, const std::string& name,
-      const void *defaultValue, const void *actualValue);
+   PlugInArgImp(const std::string& type, const std::string& name, const void* pDefaultValue, const void* pActualValue);
 
    /**
     *  Destructor for the Plug-In Argument.
@@ -96,13 +95,13 @@ public:
    bool isDefaultSet() const;
    void* getActualValue() const;
    bool isActualSet() const;
-   void setDefaultValue(const void* pDefValue, bool tryDeepCopy = true);
+   void setDefaultValue(const void* pValue, bool tryDeepCopy = true);
    void setActualValue(const void* pValue, bool tryDeepCopy = true);
    void setName(const std::string& name);
    bool setType(const std::string& type);
 
-   void setDescription(const std::string &description);
-   const std::string &getDescription() const;
+   void setDescription(const std::string& description);
+   const std::string& getDescription() const;
 
    /**
     *  Get this object's type.
@@ -161,11 +160,11 @@ private:
 
    std::string mType;
    std::string mName;
-   bool        mDefaultSet;
-   void*       mpDefaultValueShallowCopy;
+   bool mDefaultSet;
+   void* mpDefaultValueShallowCopy;
    DataVariant mDefaultValueDeepCopy;
-   bool        mActualSet;
-   void*       mpActualValueShallowCopy;
+   bool mActualSet;
+   void* mpActualValueShallowCopy;
    DataVariant mActualValueDeepCopy;
    std::string mDescription;
 

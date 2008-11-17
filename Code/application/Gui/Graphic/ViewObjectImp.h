@@ -48,7 +48,7 @@ protected slots:
 
 private:
    ViewImp* mpView;
-   TextObjectImp *mpInvalidText;
+   TextObjectImp* mpInvalidText;
    mutable bool mUpdateBounds;
 };
 

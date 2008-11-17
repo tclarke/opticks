@@ -65,10 +65,10 @@ bool CustomElementPlugIn::serialize(SessionItemSerializer &serializer) const
 {
    XMLWriter xml("CustomElementPlugIn");
    vector<DataElement*> elements = Service<ModelServices>()->getElements("CustomElement");
-   for(vector<DataElement*>::iterator element = elements.begin(); element != elements.end(); ++element)
+   for (vector<DataElement*>::iterator element = elements.begin(); element != elements.end(); ++element)
    {
-      CustomElementData *pData = model_cast<CustomElementData*>(*element);
-      if(pData != NULL)
+      CustomElementData* pData = model_cast<CustomElementData*>(*element);
+      if (pData != NULL)
       {
          xml.pushAddPoint(xml.addElement("CustomElement"));
          xml.addAttr("dataElementId", (*element)->getId());
@@ -82,23 +82,23 @@ bool CustomElementPlugIn::serialize(SessionItemSerializer &serializer) const
 bool CustomElementPlugIn::deserialize(SessionItemDeserializer &deserializer)
 {
    XmlReader reader(NULL, false);
-   DOMElement *pRoot = deserializer.deserialize(reader, "CustomElementPlugIn");
-   if(pRoot == NULL)
+   DOMElement* pRoot = deserializer.deserialize(reader, "CustomElementPlugIn");
+   if (pRoot == NULL)
    {
       return false;
    }
-   for(DOMNode *pChld = pRoot->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
+   for (DOMNode *pChld = pRoot->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
    {
-      if(XMLString::equals(pChld->getNodeName(), X("CustomElement")))
+      if (XMLString::equals(pChld->getNodeName(), X("CustomElement")))
       {
-         DOMElement *pElmnt = static_cast<DOMElement*>(pChld);
+         DOMElement* pElmnt = static_cast<DOMElement*>(pChld);
          string elementId = A(pElmnt->getAttribute(X("dataElementId")));
-         Any *pElement = dynamic_cast<Any*>(Service<SessionManager>()->getSessionItem(elementId));
-         if(pElement == NULL)
+         Any* pElement = dynamic_cast<Any*>(Service<SessionManager>()->getSessionItem(elementId));
+         if (pElement == NULL)
          {
             return false;
          }
-         CustomElementData *pData = new CustomElementData(StringUtilities::fromXmlString<int>(
+         CustomElementData* pData = new CustomElementData(StringUtilities::fromXmlString<int>(
             A(pElmnt->getAttribute(X("value")))));
          pElement->setData(pData);
       }

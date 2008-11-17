@@ -40,8 +40,8 @@ MeasurementToolBar::MeasurementToolBar(const string& id, QWidget* parent) :
    mpEndPointsLabelAction(NULL),
    mpLocationUnits(NULL),
    mpDistanceUnits(NULL),
-   mpMeasurementsLayer(NULL),
-   mbToolbarEnabled(false)
+   mbToolbarEnabled(false),
+   mpMeasurementsLayer(NULL)
 {
    Icons* pIcons = Icons::instance();
    REQUIRE(pIcons != NULL);
@@ -132,8 +132,8 @@ MeasurementToolBar::MeasurementToolBar(const string& id, QWidget* parent) :
    VERIFYNR(connect(mpBearingLabelAction, SIGNAL(toggled(bool)), this, SLOT(setDrawBearingLabel(bool))));
    VERIFYNR(connect(mpDistanceLabelAction, SIGNAL(toggled(bool)), this, SLOT(setDrawDistanceLabel(bool))));
    VERIFYNR(connect(mpEndPointsLabelAction, SIGNAL(toggled(bool)), this, SLOT(setDrawEndPointsLabel(bool))));
-   VERIFYNR(connect(mpLocationUnits, SIGNAL(valueChanged(GeocoordType,DmsFormatType)), 
-      this, SLOT(setLocationUnit(GeocoordType,DmsFormatType))));
+   VERIFYNR(connect(mpLocationUnits, SIGNAL(valueChanged(GeocoordType, DmsFormatType)), 
+      this, SLOT(setLocationUnit(GeocoordType, DmsFormatType))));
    VERIFYNR(connect(mpDistanceUnits, SIGNAL(valueChanged(DistanceUnits)), 
       this, SLOT(setDistanceUnit(DistanceUnits))));
 
@@ -202,7 +202,7 @@ bool MeasurementToolBar::setMeasurementsLayer(Layer* pLayer)
          bool bShow = pView->isMeasurementsLayerShown();
          mpShowAction->setChecked(bShow);
 
-         LayerList *pLayerList = pView->getLayerList();
+         LayerList* pLayerList = pView->getLayerList();
          if (pLayerList != NULL)
          {
             RasterElement* pElement = pLayerList->getPrimaryRasterElement();
@@ -243,8 +243,7 @@ void MeasurementToolBar::measurementsLayerDeleted(Subject& subject, const string
 
 void MeasurementToolBar::setDrawMode(bool on)
 {
-   GraphicLayerImp *pGraphic = dynamic_cast<GraphicLayerImp*>(
-      mpMeasurementsLayer);
+   GraphicLayerImp* pGraphic = dynamic_cast<GraphicLayerImp*>(mpMeasurementsLayer);
    if (pGraphic != NULL)
    {
       if (on)
@@ -404,7 +403,7 @@ void MeasurementToolBar::updateRaster()
       SpatialDataViewImp* pView = dynamic_cast<SpatialDataViewImp*> (mpMeasurementsLayer->getView());
       if (pView != NULL)
       {
-         LayerList *pLayerList = pView->getLayerList();
+         LayerList* pLayerList = pView->getLayerList();
          if (pLayerList != NULL)
          {
             RasterElement* pElement = pLayerList->getPrimaryRasterElement();

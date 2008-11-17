@@ -31,14 +31,14 @@
  */
 struct WizardConnection
 {
-   WizardConnection()
+   WizardConnection() :
+      mpInputNode(NULL),
+      mpOutputNode(NULL),
+      miInputItemIndex(-1),
+      miInputNodeIndex(-1),
+      miOutputItemIndex(-1),
+      miOutputNodeIndex(-1)
    {
-      mpInputNode = NULL;
-      mpOutputNode = NULL;
-      miInputItemIndex = -1;
-      miInputNodeIndex = -1;
-      miOutputItemIndex = -1;
-      miOutputNodeIndex = -1;
    }
 
    WizardNode* mpInputNode;

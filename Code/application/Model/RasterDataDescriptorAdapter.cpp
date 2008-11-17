@@ -30,8 +30,8 @@ RasterDataDescriptorAdapter::~RasterDataDescriptorAdapter()
 // TypeAwareObject
 const string& RasterDataDescriptorAdapter::getObjectType() const
 {
-   static string type("RasterDataDescriptorAdapter");
-   return type;
+   static string sType("RasterDataDescriptorAdapter");
+   return sType;
 }
 
 bool RasterDataDescriptorAdapter::isKindOf(const string& className) const

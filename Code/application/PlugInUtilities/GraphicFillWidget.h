@@ -32,7 +32,7 @@ public:
    void setFillStyle(FillStyle style);
    FillStyle getFillStyle() const;
 
-   void setHatchStyle(SymbolType style);
+   void setHatchStyle(SymbolType hatch);
    SymbolType getHatchStyle() const;
 
 signals:

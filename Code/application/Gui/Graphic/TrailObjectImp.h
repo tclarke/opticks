@@ -16,13 +16,11 @@
 class TrailObjectImp : public RectangleObjectImp
 {
 public:
-   TrailObjectImp(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer, 
-      LocationType pixelCoord);
+   TrailObjectImp(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer, LocationType pixelCoord);
    ~TrailObjectImp();
 
    void setStencilBufferSize(int rows, int columns);
-   void addToStencil(LocationType lowerLeft, LocationType lowerRight,
-      LocationType upperLeft, LocationType upperRight);
+   void addToStencil(LocationType lowerLeft, LocationType lowerRight, LocationType upperLeft, LocationType upperRight);
    void clearStencil();
 
    void drawVector(double zoomFactor) const;

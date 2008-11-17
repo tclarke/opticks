@@ -143,7 +143,8 @@ bool Nitf::Mod26aParser::toDynamicObject(istream &input, size_t numBytes, Dynami
    bool ok(true);
    bool success(true);
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Allow all blanks for classified fields since we do not have descriptions of them (dadkins)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Allow all blanks for classified fields " \
+   "since we do not have descriptions of them (dadkins)")
    readField<string>(input, output, success, MOD26A::FIELD1, 1, errorMessage, buf, true);
    readField<unsigned int>(input, output, success, MOD26A::FIELD2, 2, errorMessage, buf, true);
    readField<double>(input, output, success, MOD26A::FIELD3, 10, errorMessage, buf, true);
@@ -207,7 +208,8 @@ Nitf::TreState Nitf::Mod26aParser::isTreValid(const DynamicObject& tre, ostream&
    unsigned int totalFields = tre.getNumAttributes();
    if (status != INVALID && totalFields != numFields)
    {
-      reporter << "Total fields in the Dynamic Object(" << totalFields <<") did not match the number found(" << numFields << ") ";
+      reporter << "Total fields in the Dynamic Object(" << totalFields
+         << ") did not match the number found(" << numFields << ") ";
       status = INVALID;
    }
 
@@ -232,16 +234,16 @@ bool Nitf::Mod26aParser::fromDynamicObject(const DynamicObject& input, ostream& 
 
    try
    {
-      output << sizeString(       dv_cast<string>(input.getAttribute (MOD26A::FIELD1)), 1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute (MOD26A::FIELD2)), 2, -1);
-      output <<   toString(       dv_cast<double>(input.getAttribute (MOD26A::FIELD3)), 10, 3);
-      output <<   toString(       dv_cast<double>(input.getAttribute (MOD26A::FIELD4)), 5, 3);
-      output <<   toString(       dv_cast<double>(input.getAttribute (MOD26A::FIELD5)), 4, 2);
-      output <<   toString(       dv_cast<double>(input.getAttribute (MOD26A::FIELD6)), 8, 3);
-      output <<   toString(       dv_cast<double>(input.getAttribute (MOD26A::FIELD7)), 8, 3);
-      output <<   toString(       dv_cast<double>(input.getAttribute (MOD26A::FIELD8)), 8, 3);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute (MOD26A::FIELD9)), 1, -1);
-      output << sizeString(       dv_cast<string>(input.getAttribute (MOD26A::FIELD10)), 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(MOD26A::FIELD1)), 1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(MOD26A::FIELD2)), 2, -1);
+      output << toString(dv_cast<double>(input.getAttribute(MOD26A::FIELD3)), 10, 3);
+      output << toString(dv_cast<double>(input.getAttribute(MOD26A::FIELD4)), 5, 3);
+      output << toString(dv_cast<double>(input.getAttribute(MOD26A::FIELD5)), 4, 2);
+      output << toString(dv_cast<double>(input.getAttribute(MOD26A::FIELD6)), 8, 3);
+      output << toString(dv_cast<double>(input.getAttribute(MOD26A::FIELD7)), 8, 3);
+      output << toString(dv_cast<double>(input.getAttribute(MOD26A::FIELD8)), 8, 3);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(MOD26A::FIELD9)), 1, -1);
+      output << sizeString(dv_cast<string>(input.getAttribute(MOD26A::FIELD10)), 1);
    }
    catch (const bad_cast&)
    {

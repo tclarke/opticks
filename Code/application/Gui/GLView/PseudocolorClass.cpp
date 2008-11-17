@@ -13,20 +13,20 @@
 #include "Undo.h"
 #include "View.h"
 
-PseudocolorClass::PseudocolorClass(PseudocolorLayer* pLayer)
+PseudocolorClass::PseudocolorClass(PseudocolorLayer* pLayer) :
+   mpLayer(pLayer),
+   miValue(-1),
+   mbDisplayed(true)
 {
-   mpLayer = pLayer;
-   miValue = -1;
-   mstrName = QString();
-   mbDisplayed = true;
 }
 
-PseudocolorClass::PseudocolorClass(PseudocolorClass& rhs)
+PseudocolorClass::PseudocolorClass(PseudocolorClass& rhs) :
+   mpLayer(NULL),
+   miValue(rhs.miValue),
+   mstrName(rhs.mstrName),
+   mColor(rhs.mColor),
+   mbDisplayed(rhs.mbDisplayed)
 {
-   miValue = rhs.miValue;
-   mstrName = rhs.mstrName;
-   mbDisplayed = rhs.mbDisplayed;
-   mColor = rhs.mColor;
 }
 
 PseudocolorClass::~PseudocolorClass()

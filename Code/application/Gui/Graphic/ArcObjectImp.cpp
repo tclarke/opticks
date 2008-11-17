@@ -52,23 +52,28 @@ void ArcObjectImp::draw(double zoomFactor) const
    LineStyle eLineStyle = getLineStyle();
    ArcRegion eArcRegion = getArcRegion();
 
-   int lineStart, lineStop, gonStart, gonStop;
+   int lineStart;
+   int lineStop;
+   int gonStart;
+   int gonStop;
    int i;
 
-   int iStart = (int) getStartAngle();
+   int iStart = static_cast<int>(getStartAngle());
    if (iStart < 0)
    {
       iStart--;
    }
 
-   int iStop = (int) getStopAngle();
+   int iStop = static_cast<int>(getStopAngle());
    if (iStop < 0)
    {
       iStop--;
    }
 
-   lineStart = gonStart = iStart;
-   lineStop = gonStop = iStop;
+   lineStart = iStart;
+   lineStop = iStop;
+   gonStart = iStart;
+   gonStop = iStop;
 
    if (lineStart == lineStop) // full ellipse
    {
@@ -106,7 +111,7 @@ void ArcObjectImp::draw(double zoomFactor) const
 
       for (i = gonStart; i <= gonStop; i += step)
       {
-         LocationType point = getLocation((double) i);
+         LocationType point = getLocation(static_cast<double>(i));
          glVertex2f(point.mX, point.mY);
 
          if ((gonStop - i) < step)
@@ -131,7 +136,7 @@ void ArcObjectImp::draw(double zoomFactor) const
 #if defined(WIN_API)
       glEnable(GL_LINE_SMOOTH);
 #else
-      if(lineWidth == 1.0)
+      if (lineWidth == 1.0)
       {
          glEnable(GL_LINE_SMOOTH);
       }
@@ -168,7 +173,7 @@ void ArcObjectImp::draw(double zoomFactor) const
       glBegin (GL_LINE_STRIP);
       for (i = lineStart; i <= lineStop; i += step)
       {
-         LocationType point = getLocation((double) i);
+         LocationType point = getLocation(static_cast<double>(i));
          glVertex2f(point.mX, point.mY);
 
          if ((lineStop - i) < step)
@@ -184,7 +189,7 @@ void ArcObjectImp::draw(double zoomFactor) const
             glVertex2f(center.mX, center.mY);
          }
 
-         LocationType point = getLocation((double) lineStart);
+         LocationType point = getLocation(static_cast<double>(lineStart));
          glVertex2f(point.mX, point.mY);
       }
 
@@ -207,7 +212,7 @@ bool ArcObjectImp::setProperty(const GraphicProperty* pProperty)
       return false;
    }
 
-   const BoundingBoxProperty *pBBoxProp = dynamic_cast<const BoundingBoxProperty*>(pProperty);
+   const BoundingBoxProperty* pBBoxProp = dynamic_cast<const BoundingBoxProperty*>(pProperty);
    if (pBBoxProp != NULL && pBBoxProp->hasPixelCoords())
    {
       LocationType ll = pBBoxProp->getLlCorner();
@@ -325,13 +330,13 @@ void ArcObjectImp::updateHandles()
 
 bool ArcObjectImp::hit(LocationType pixelCoord) const
 {
-   int iStart = (int) getStartAngle();
+   int iStart = static_cast<int>(getStartAngle());
    if (iStart < 0)
    {
       iStart--;
    }
 
-   int iStop = (int) getStopAngle();
+   int iStop = static_cast<int>(getStopAngle());
    if (iStop < 0)
    {
       iStop--;
@@ -371,7 +376,7 @@ bool ArcObjectImp::hit(LocationType pixelCoord) const
       int iIndex = 0;
       for (i = iStart, iIndex = 0; i <= iStop; i++, iIndex++)
       {
-         LocationType arcPoint = getLocation((double) i);
+         LocationType arcPoint = getLocation(static_cast<double>(i));
          pXVertices[iIndex] = arcPoint.mX;
          pYVertices[iIndex] = arcPoint.mY;
       }
@@ -420,8 +425,7 @@ bool ArcObjectImp::hit(LocationType pixelCoord) const
          LocationType basePoint;
          for (int i = iStart; i <= iStop; i++)
          {
-            LocationType currentPoint = getLocation((double) i);
-
+            LocationType currentPoint = getLocation(static_cast<double>(i));
             if (i != iStart)
             {
                bHit = DrawUtil::lineHit(currentPoint, basePoint, pixelCoord, 2.0/size);
@@ -438,8 +442,8 @@ bool ArcObjectImp::hit(LocationType pixelCoord) const
          // Check the arc region lines
          if (bHit == false)
          {
-            LocationType startPoint = getLocation((double) iStart);
-            LocationType stopPoint = getLocation((double) iStop);
+            LocationType startPoint = getLocation(static_cast<double>(iStart));
+            LocationType stopPoint = getLocation(static_cast<double>(iStop));
 
             if (eArcRegion == ARC_CENTER)
             {
@@ -500,8 +504,8 @@ LocationType ArcObjectImp::getLocation(double dAngle) const
    double dYRadius = getYRadius();
 
    LocationType location;
-   location.mX = center.mX + dXRadius * DrawUtil::sCirclePoints[(int) dAngle].mX;
-   location.mY = center.mY + dYRadius * DrawUtil::sCirclePoints[(int) dAngle].mY;
+   location.mX = center.mX + dXRadius * DrawUtil::sCirclePoints[static_cast<int>(dAngle)].mX;
+   location.mY = center.mY + dYRadius * DrawUtil::sCirclePoints[static_cast<int>(dAngle)].mY;
 
    return location;
 }
@@ -514,7 +518,8 @@ double ArcObjectImp::getAngle(LocationType point) const
    double dXRadius = getXRadius();
    double dYRadius = getYRadius();
 
-   float xVertices[DrawUtil::VERTEX_COUNT], yVertices[DrawUtil::VERTEX_COUNT];
+   float xVertices[DrawUtil::VERTEX_COUNT];
+   float yVertices[DrawUtil::VERTEX_COUNT];
    map<int, double> indexDistances;
 
    for (int i = 0; i < DrawUtil::VERTEX_COUNT; i++)
@@ -537,15 +542,12 @@ double ArcObjectImp::getAngle(LocationType point) const
       }
       else
       {
+         double m1 = (ellipsePoint.mY - center.mY) / (ellipsePoint.mX - center.mX);
+         double b1 = center.mY - m1 * center.mX;
+         double m2 = -1.0 / m1;
+         double b2 = point.mY - m2 * point.mX;
+
          LocationType intersection;
-         double m1, m2;   // slopes for y = mx + b
-         double b1, b2;   // y-intercepts for y = mx + b
-
-         m1 = (ellipsePoint.mY - center.mY) / (ellipsePoint.mX - center.mX);
-         b1 = center.mY - m1 * center.mX;
-         m2 = -1.0 / m1;
-         b2 = point.mY - m2 * point.mX;
-
          intersection.mX = (b2 - b1) / (m1 - m2);
          intersection.mY = m1 * intersection.mX + b1;
 
@@ -564,7 +566,7 @@ double ArcObjectImp::getAngle(LocationType point) const
          int iOldIndex = -1;
 
          map<int, double>::iterator iter;
-         for (iter = indexDistances.begin(); iter != indexDistances.end(); iter++)
+         for (iter = indexDistances.begin(); iter != indexDistances.end(); ++iter)
          {
             double dCurrentDistance = iter->second;
             if (dDistance < dCurrentDistance)
@@ -585,8 +587,7 @@ double ArcObjectImp::getAngle(LocationType point) const
    double dOldDistance = 1e38;
    int iIndex = -1;
 
-   map<int, double>::iterator iter;
-   for (iter = indexDistances.begin(); iter != indexDistances.end(); iter++)
+   for (map<int, double>::iterator iter = indexDistances.begin(); iter != indexDistances.end(); ++iter)
    {
       int iCurrentIndex = iter->first;
       LocationType point1(xVertices[iCurrentIndex], yVertices[iCurrentIndex]);
@@ -683,8 +684,7 @@ bool ArcObjectImp::replicateObject(const GraphicObject* pObject)
       return false;
    }
 
-   const GraphicObjectImp *pEllipse = 
-      dynamic_cast<const ArcObjectImp*>(pObject)->mpEllipse.get();
+   const GraphicObjectImp* pEllipse = dynamic_cast<const ArcObjectImp*>(pObject)->mpEllipse.get();
    if (pEllipse != NULL)
    {
       bSuccess = mpEllipse->replicateObject(dynamic_cast<const GraphicObject*>(pEllipse));
@@ -781,13 +781,13 @@ bool ArcObjectImp::isKindOf(const string& className) const
 
 void ArcObjectImp::updateBoundingBox()
 {
-   int iStart = (int) getStartAngle();
+   int iStart = static_cast<int>(getStartAngle());
    if (iStart < 0)
    {
       iStart--;
    }
 
-   int iStop = (int) getStopAngle();
+   int iStop = static_cast<int>(getStopAngle());
    if (iStop < 0)
    {
       iStop--;
@@ -804,7 +804,7 @@ void ArcObjectImp::updateBoundingBox()
 
    for (int i = iStart; i <= iStop; i++)
    {
-      LocationType currentPoint = getLocation((double) i);
+      LocationType currentPoint = getLocation(static_cast<double>(i));
       if (currentPoint.mX < llCorner.mX)
       {
          llCorner.mX = currentPoint.mX;

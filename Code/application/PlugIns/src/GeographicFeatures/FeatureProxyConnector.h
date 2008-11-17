@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef FEATUREPROXYCONNECTOR_H__
-#define FEATUREPROXYCONNECTOR_H__
+#ifndef FEATUREPROXYCONNECTOR_H
+#define FEATUREPROXYCONNECTOR_H
 
 #include "EnumWrapper.h"
 #include "Feature.h"
@@ -100,8 +100,8 @@ public:
       ArcProxyLib::FeatureClassProperties &properties, std::string &errorMessage);
    bool query(const std::string &handle, std::string &errorMessage,
       const std::string &whereClause = "", const std::string &labelFormat = "",
-      LocationType minClip=LocationType(), LocationType maxClip=LocationType());
-   bool isInitialized() const { return mInitialized; }
+      LocationType minClip = LocationType(), LocationType maxClip = LocationType());
+   bool isInitialized() const;
 
    std::vector<ArcProxyLib::ConnectionType> getAvailableConnectionTypes() const;
 
@@ -133,11 +133,11 @@ private:
    CommandsType mPendingCommand;
    bool mInitialized;
    QString mExecutable;
-   QProcess *mpProcess;
+   QProcess* mpProcess;
    QTextStream mStream;
-   QTcpServer *mpServer;
-   QTcpSocket *mpSocket;
-   QTimer *mpConnectionTimer;
+   QTcpServer* mpServer;
+   QTcpSocket* mpSocket;
+   QTimer* mpConnectionTimer;
 
    QQueue<QString> mResponses;
    QString mPartialResponse;

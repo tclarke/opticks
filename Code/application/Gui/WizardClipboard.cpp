@@ -41,23 +41,20 @@ void WizardClipboard::setItems(const vector<WizardItem*>& items)
    clearItems();
    vector<WizardConnection> connections = WizardItemImp::getConnections(items);
 
-   int iItems = 0;
-   iItems = items.size();
+   int iItems = items.size();
    for (int i = 0; i < iItems; i++)
    {
-      WizardItem* pExistItem = NULL;
-      pExistItem = items.at(i);
+      WizardItemImp* pExistItem = static_cast<WizardItemImp*>(items.at(i));
       if (pExistItem != NULL)
       {
-         string itemName = pExistItem->getName().c_str();
-         string itemType = pExistItem->getType().c_str();
+         const string& itemName = pExistItem->getName();
+         const string& itemType = pExistItem->getType();
 
-         WizardItem* pItem = NULL;
-         pItem = new WizardItemImp(itemName, itemType);
+         WizardItemImp* pItem = new WizardItemImp(itemName, itemType);
          if (pItem != NULL)
          {
-            *((WizardItemImp*) pItem) = *((WizardItemImp*) pExistItem);
-            mItems.push_back(pItem);
+            *pItem = *pExistItem;
+            mItems.push_back(static_cast<WizardItem*>(pItem));
          }
       }
    }
@@ -72,19 +69,15 @@ const vector<WizardItem*>& WizardClipboard::getItems() const
 
 void WizardClipboard::clearItems()
 {
-   int iItems = 0;
-   iItems = mItems.size();
+   int iItems = mItems.size();
    for (int i = 0; i < iItems; i++)
    {
-      WizardItem* pItem = NULL;
-      pItem = mItems.at(i);
+      WizardItemImp* pItem = static_cast<WizardItemImp*>(mItems.at(i));
       if (pItem != NULL)
       {
-         delete ((WizardItemImp*) pItem);
+         delete pItem;
       }
    }
 
    mItems.clear();
 }
-
- 

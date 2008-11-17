@@ -579,9 +579,13 @@ bool assertionLogger(std::ostream &outputer, std::string code, std::string file,
 }
 
 #define testableAssert(outputer,code) \
-((code)?true:assertionLogger(outputer, #code, __FILE__, __LINE__))
+((code) ? true : assertionLogger(outputer, #code, __FILE__, __LINE__))
 
-#define issea(outputer,x) if (success) success &= testableAssert(outputer, x)
+#define issea(outputer,x) \
+   if (success) \
+   { \
+      success &= testableAssert(outputer, x); \
+   }
 
 bool SioImporter::runOperationalTests(Progress *pProgress, std::ostream& failure)
 {
@@ -592,13 +596,14 @@ bool SioImporter::ensureStatisticsReadProperly(Progress *pProgress, std::ostream
 {
    bool success = true;
    success &= setBatch();
-   PlugInArgList *pInList = NULL, *pOutList = NULL;
+   PlugInArgList* pInList = NULL;
+   PlugInArgList* pOutList = NULL;
    issea(failure, getInputSpecification(pInList) != false);
    issea(failure, getOutputSpecification(pOutList) != false);
    PlugInArg* pRasterElementArg = NULL;
    issea(failure, pInList->getArg(ImportElementArg(), pRasterElementArg) != false);
 
-   string testFilePath = getTestDataPath() + "tipjul5bands.sio";;
+   string testFilePath = getTestDataPath() + "tipjul5bands.sio";
 
    RasterElement* pRasterElement = NULL;
    if (success)
@@ -632,8 +637,8 @@ bool SioImporter::ensureStatisticsReadProperly(Progress *pProgress, std::ostream
 
       const vector<DimensionDescriptor>& loadedBands = pDescriptor->getBands();
       issea(failure, loadedBands.size() == 5);
-      int i = 0, iNumBandsWithStats = 0;
-      for (i=0; i < 5; ++i)
+      int iNumBandsWithStats = 0;
+      for (int i = 0; i < 5; ++i)
       {
          // we don't want to do an assert yet... only when we know 4 bands have computed statistics
          Statistics* pStatistics = pRasterElement->getStatistics(loadedBands[i]);
@@ -641,7 +646,10 @@ bool SioImporter::ensureStatisticsReadProperly(Progress *pProgress, std::ostream
          {
             if (pStatistics->areStatisticsCalculated() == true)
             {
-               if (success) iNumBandsWithStats++;
+               if (success)
+               {
+                  iNumBandsWithStats++;
+               }
             }
          }
       }
@@ -656,14 +664,25 @@ bool SioImporter::ensureStatisticsReadProperly(Progress *pProgress, std::ostream
       pRasterElement = NULL;
    }
    Service<PlugInManagerServices> pPim;
-   if (pInList) { pPim->destroyPlugInArgList(pInList); }
-   if (pOutList) { pPim->destroyPlugInArgList(pOutList); }
+   if (pInList)
+   {
+      pPim->destroyPlugInArgList(pInList);
+   }
+
+   if (pOutList)
+   {
+      pPim->destroyPlugInArgList(pOutList);
+   }
+
    return success;
 }
 
 bool SioImporter::runAllTests(Progress *pProgress, std::ostream& failure)
 {
    bool success = runOperationalTests(pProgress, failure);
-   if (success) success = ensureStatisticsReadProperly(pProgress, failure);
+   if (success)
+   {
+      success = ensureStatisticsReadProperly(pProgress, failure);
+   }
    return success;
 }

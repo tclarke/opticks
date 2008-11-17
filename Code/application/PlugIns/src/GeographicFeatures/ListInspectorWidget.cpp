@@ -23,31 +23,31 @@ ListInspectorWidget::ListInspectorWidget(QWidget *pInspector, QWidget *pParent) 
    mpSplitter = new QSplitter(this);
    mpSplitter->setHandleWidth(10);
 
-   QHBoxLayout *pLayout = new QHBoxLayout(this);
+   QHBoxLayout* pLayout = new QHBoxLayout(this);
    pLayout->setMargin(10);
    pLayout->setSpacing(5);
 
    pLayout->addWidget(mpSplitter);
 
    mpInspector->setDisabled(true);
-   QLayout *pInspectorLayout = mpInspector->layout();
+   QLayout* pInspectorLayout = mpInspector->layout();
    if (pInspectorLayout != NULL)
    {
       pInspectorLayout->setMargin(0);
    }
 
-   QWidget *pListCompositeWidget = new QWidget(mpSplitter);
+   QWidget* pListCompositeWidget = new QWidget(mpSplitter);
    mpListWidget = new QListWidget(pListCompositeWidget);
    VERIFYNR(connect(mpListWidget, SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem*)), 
       this, SLOT(setDisplayedItem(QListWidgetItem*))));
 
-   QGridLayout *pListLayout = new QGridLayout(pListCompositeWidget);
+   QGridLayout* pListLayout = new QGridLayout(pListCompositeWidget);
    pListLayout->setMargin(0);
    pListLayout->setSpacing(5);
    pListLayout->addWidget(mpListWidget, 0, 0, 1, 3);
 
-   QPushButton *pAddButton = new QPushButton("Add", pListCompositeWidget);
-   QPushButton *pRemoveButton = new QPushButton("Remove", pListCompositeWidget);
+   QPushButton* pAddButton = new QPushButton("Add", pListCompositeWidget);
+   QPushButton* pRemoveButton = new QPushButton("Remove", pListCompositeWidget);
    connect(pAddButton, SIGNAL(clicked()), this, SIGNAL(addItems()));
    connect(pRemoveButton, SIGNAL(clicked()), this, SLOT(removeDisplayedItem()));
 
@@ -68,7 +68,7 @@ ListInspectorWidget::~ListInspectorWidget()
 
 QListWidgetItem *ListInspectorWidget::addItem(const std::string &text)
 {
-   QListWidgetItem *pItem = new QListWidgetItem(QString::fromStdString(text), mpListWidget);
+   QListWidgetItem* pItem = new QListWidgetItem(QString::fromStdString(text), mpListWidget);
    mpListWidget->addItem(pItem);
    return pItem;
 }
@@ -151,7 +151,7 @@ void ListInspectorWidget::setHideList(bool hidden)
       }
    }
 
-   QWidget *pWidget = mpSplitter->widget(0);
+   QWidget* pWidget = mpSplitter->widget(0);
    VERIFYNRV(pWidget != NULL);
    pWidget->setHidden(hidden);
 }

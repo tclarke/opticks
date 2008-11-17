@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef CLOSENOTIFICATIONTEST_H__
-#define CLOSENOTIFICATIONTEST_H__
+#ifndef CLOSENOTIFICATIONTEST_H
+#define CLOSENOTIFICATIONTEST_H
 
 #include "AlgorithmShell.h"
 #include "AttachmentPtr.h"

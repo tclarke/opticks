@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef __FILEFNDRIMP_H
-#define __FILEFNDRIMP_H
+#ifndef FILEFINDERIMP_H
+#define FILEFINDERIMP_H
 
 #include "AppConfig.h"
 #include "FileFinder.h"
@@ -41,4 +39,4 @@ private:
    QFileInfoList::const_iterator mCurrentEntry;
 };
 
-#endif   // __FILEFNDRIMP_H
+#endif

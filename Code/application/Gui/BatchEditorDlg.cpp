@@ -465,13 +465,13 @@ bool BatchEditorDlg::saveAs()
    dlg.selectFile(strDefaultFile);
 
    QString strFilename;
-   if(dlg.exec() == QDialog::Accepted)
+   if (dlg.exec() == QDialog::Accepted)
    {
       strFilename = dlg.selectedFiles().front();
    }
    if (strFilename.isEmpty() == true)
    {
-       return false;
+      return false;
    }
 
    QString strCurrentFilename = mXmlFilename;
@@ -522,12 +522,9 @@ void BatchEditorDlg::add()
          string filesetName = strFileset.toStdString();
 
          // Do not add the file set if it already exists in the batch file
-         int iCount = 0;
-         iCount = mFilesets.size();
-         for (int i = 0; i < iCount; i++)
+         for (unsigned int i = 0; i < mFilesets.size(); i++)
          {
-            BatchFileset* pCurrentFileset = NULL;
-            pCurrentFileset = mFilesets.at(i);
+            BatchFileset* pCurrentFileset = mFilesets.at(i);
             if (pCurrentFileset != NULL)
             {
                string currentName = pCurrentFileset->getName();
@@ -540,8 +537,7 @@ void BatchEditorDlg::add()
             }
          }
 
-         BatchFileset* pFileset = NULL;
-         pFileset = new BatchFileset();
+         BatchFileset* pFileset = new BatchFileset();
          if (pFileset != NULL)
          {
             pFileset->setName(filesetName);
@@ -582,9 +578,7 @@ void BatchEditorDlg::add()
       if (strWizardFile.isEmpty() == false)
       {
          // Do not add the wizard file if it already exists in the batch file
-         int iCount = 0;
-         iCount = mpViewCombo->count();
-         for (int i = 0; i < iCount; i++)
+         for (int i = 0; i < mpViewCombo->count(); i++)
          {
             QString strCurrentFile = mpViewCombo->itemText(i);
             if (strCurrentFile == strWizardFile)
@@ -852,12 +846,11 @@ bool BatchEditorDlg::execute(bool bBatch)
    bool bSuccess = false;
 
 #if defined(WIN_API)
-   HINSTANCE hinst = (HINSTANCE) 0;
-   hinst = ShellExecute(NULL, NULL, strExecutable.toStdString().c_str(), strInput.toStdString().c_str(),
+   HINSTANCE hinst = ShellExecute(NULL, NULL, strExecutable.toStdString().c_str(), strInput.toStdString().c_str(),
       NULL, SW_SHOWNORMAL);
 
    // Handle less than 32 indicates failure
-   bSuccess = hinst > (HINSTANCE) 32;
+   bSuccess = reinterpret_cast<int>(hinst) > 32;
 #else
    QString command = strExecutable + " " + strInput + "&";
    system(command.toStdString().c_str());

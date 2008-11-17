@@ -99,8 +99,7 @@ class BandCustomSelectionDialog : public QDialog
    Q_OBJECT 
 
 public:
-   BandCustomSelectionDialog(QWidget* pParent,
-      QStringListModel* pBandList, QString badBandsDir);
+   BandCustomSelectionDialog(QWidget* pParent, QStringListModel* pBandList, QString badBandsDir);
 
    bool isSubsetSelected();
    QString getBadBandFile();

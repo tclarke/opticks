@@ -79,7 +79,8 @@ protected:
     * build of Qt is supported. This requires at least PNG support. If no extension
     * is specified, PNG is assumed.
     */
-   MuHttpServer::Response getRequest(const QString &uri, const QString &contentType, const QString &body, const FormValueMap &form);
+   MuHttpServer::Response getRequest(const QString &uri, const QString &contentType, const QString &body,
+      const FormValueMap &form);
 };
 
 #endif

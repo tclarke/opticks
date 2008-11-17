@@ -53,7 +53,7 @@ int main(int argc, char** argv)
    pArgumentList->registerOption("?");
    pArgumentList->set(argc, argv);
 
-   BatchApplication* pApp = new BatchApplication(qApp);
+   BatchApplication batchApp(qApp);
 
    // Display application information
    bool bProductionRelease = false;
@@ -86,7 +86,7 @@ int main(int argc, char** argv)
       {
          configSettingsErrorMsg = "Unable to locate configuration settings";
       }
-      pApp->reportError(configSettingsErrorMsg);
+      batchApp.reportError(configSettingsErrorMsg);
       SystemServicesImp::instance()->WriteLogInfo(string(APP_NAME) + " Batch shutdown");
       return -1;
    }
@@ -94,7 +94,7 @@ int main(int argc, char** argv)
    {
       if (!configSettingsErrorMsg.empty())
       {
-         pApp->reportWarning(configSettingsErrorMsg);
+         batchApp.reportWarning(configSettingsErrorMsg);
       }
    }
 
@@ -138,9 +138,11 @@ int main(int argc, char** argv)
       (pArgumentList->exists("?") == true))
    {
       string dlm = pArgumentList->getDelimiter();
-      cout << endl << "batch " << dlm << "input:filename.batchwiz " << dlm << "input:filename.batchwiz " << dlm << "generate:filename.wiz" << endl;
+      cout << endl << "batch " << dlm << "input:filename.batchwiz " << dlm << "input:filename.batchwiz " <<
+         dlm << "generate:filename.wiz" << endl;
       cout << "     " << dlm << "input       The batch file to process" << endl;
-      cout << "     " << dlm << "generate    Generates a batch file based on the given wizard 'filename.batchwiz'" << endl;
+      cout << "     " << dlm << "generate    Generates a batch file based on the given wizard 'filename.batchwiz'" <<
+         endl;
       cout << "     " << dlm << "brief       Displays brief output messages" << endl;
       cout << "     " << dlm << "processors  Sets number of available processors" << endl;
       //cout << "     " << dlm << "test        Runs a set of operational tests" << endl;
@@ -153,23 +155,17 @@ int main(int argc, char** argv)
 
    // Run the application
    int iSuccess = -1;
-
-   if (pApp != NULL)
+   if (pArgumentList->exists("version") == true)
    {
-      if (pArgumentList->exists("version")==true) 
-      {
-         iSuccess = pApp->version(argc,argv);
-      }
-      else if (pArgumentList->exists("test")==true)
-      {
-         iSuccess = pApp->test(argc, argv);
-      }
-      else
-      {
-         iSuccess = pApp->run(argc, argv);
-      }
-
-      delete pApp;
+      iSuccess = batchApp.version(argc, argv);
+   }
+   else if (pArgumentList->exists("test") == true)
+   {
+      iSuccess = batchApp.test(argc, argv);
+   }
+   else
+   {
+      iSuccess = batchApp.run(argc, argv);
    }
 
    // Display developer's release information again if necessary

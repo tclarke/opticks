@@ -67,10 +67,10 @@ namespace
       VERIFYNRV(pSrcAcc.isValid());
       T lowerRightVal = *reinterpret_cast<T*>(pSrcAcc->getColumn());
 
-      double gx = -1.0 * upperLeftVal + -2.0 * leftVal + -1.0 * lowerLeftVal + 1.0 * upperRightVal + 2.0 * rightVal + 1.0 * lowerRightVal;
-     
-      double gy = -1.0 * lowerLeftVal + -2.0 * downVal + -1.0 * lowerRightVal + 1.0 * upperLeftVal + 2.0 * upVal + 1.0 * upperRightVal;
-
+      double gx = -1.0 * upperLeftVal + -2.0 * leftVal + -1.0 * lowerLeftVal + 1.0 * upperRightVal + 2.0 *
+         rightVal + 1.0 * lowerRightVal;
+      double gy = -1.0 * lowerLeftVal + -2.0 * downVal + -1.0 * lowerRightVal + 1.0 * upperLeftVal + 2.0 *
+         upVal + 1.0 * upperRightVal;
       double magnitude = sqrt(gx * gx + gy * gy);
 
       *pData = static_cast<T>(magnitude);
@@ -82,7 +82,8 @@ Tutorial5::Tutorial5()
    setDescriptorId("{BE00BBC3-A1E3-4b0d-8780-1B5D9A8620CC}");
    setName("Tutorial 5");
    setVersion("Sample");
-   setDescription("Calculate and return an edge detection raster element for first band of the provided raster element.");
+   setDescription("Calculate and return an edge detection raster element for first band "
+      "of the provided raster element.");
    setCreator("Opticks Community");
    setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setProductionStatus(false);
@@ -118,8 +119,8 @@ bool Tutorial5::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
    {
       return false;
    }
-   Progress *pProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
-   RasterElement *pCube = pInArgList->getPlugInArgValue<RasterElement>(Executable::DataElementArg());
+   Progress* pProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
+   RasterElement* pCube = pInArgList->getPlugInArgValue<RasterElement>(Executable::DataElementArg());
    if (pCube == NULL)
    {
       std::string msg = "A raster cube must be specified.";
@@ -130,7 +131,7 @@ bool Tutorial5::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
       }
       return false;
    }
-   RasterDataDescriptor *pDesc = static_cast<RasterDataDescriptor*>(pCube->getDataDescriptor());
+   RasterDataDescriptor* pDesc = static_cast<RasterDataDescriptor*>(pCube->getDataDescriptor());
    VERIFY(pDesc != NULL);
    if (pDesc->getDataType() == INT4SCOMPLEX || pDesc->getDataType() == FLT8COMPLEX)
    {
@@ -147,8 +148,8 @@ bool Tutorial5::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
    pRequest->setInterleaveFormat(BSQ);
    DataAccessor pSrcAcc = pCube->getDataAccessor(pRequest.release());
 
-   ModelResource<RasterElement> pResultCube(RasterUtilities::createRasterElement(pCube->getName() + "_Edge_Detection_Result", 
-      pDesc->getRowCount(), pDesc->getColumnCount(), pDesc->getDataType()));
+   ModelResource<RasterElement> pResultCube(RasterUtilities::createRasterElement(pCube->getName() +
+      "_Edge_Detection_Result", pDesc->getRowCount(), pDesc->getColumnCount(), pDesc->getDataType()));
    if (pResultCube.get() == NULL)
    {
       std::string msg = "A raster cube could not be created.";
@@ -191,21 +192,22 @@ bool Tutorial5::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
       }
       for (unsigned int col = 0; col < pDesc->getColumnCount(); ++col)
       {
-         switchOnEncoding(pDesc->getDataType(), edgeDetection, pDestAcc->getColumn(), pSrcAcc, row, col, pDesc->getRowCount(),
-            pDesc->getColumnCount());
-
+         switchOnEncoding(pDesc->getDataType(), edgeDetection, pDestAcc->getColumn(), pSrcAcc, row, col,
+            pDesc->getRowCount(), pDesc->getColumnCount());
          pDestAcc->nextColumn();
       }
-      
+
       pDestAcc->nextRow();
    }
-   
+
    if (!isBatch())
    {
-      SpatialDataWindow *pWindow = static_cast<SpatialDataWindow*>(Service<DesktopServices>()->createWindow(
-         pResultCube->getName(), SPATIAL_DATA_WINDOW));
-      
-      SpatialDataView *pView = (pWindow == NULL) ? NULL : pWindow->getSpatialDataView();
+      Service<DesktopServices> pDesktop;
+
+      SpatialDataWindow* pWindow = static_cast<SpatialDataWindow*>(pDesktop->createWindow(pResultCube->getName(),
+         SPATIAL_DATA_WINDOW));
+
+      SpatialDataView* pView = (pWindow == NULL) ? NULL : pWindow->getSpatialDataView();
       if (pView == NULL)
       {
          std::string msg = "Unable to create view.";

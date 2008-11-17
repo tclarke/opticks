@@ -41,9 +41,9 @@ public:
    int getSupportedRequestVersion() const;
 
 private:
-   ConvertToBsqPager(void);
+   ConvertToBsqPager();
 
-   RasterElement *mpRaster;
+   RasterElement* mpRaster;
    unsigned int mBytesPerElement;
    unsigned int mSkipBytes; //< Number of bytes between data in a single band.
 };

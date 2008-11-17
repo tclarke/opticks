@@ -6,8 +6,9 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
-#ifndef GPU_RESOURCE_MANAGER_H
-#define GPU_RESOURCE_MANAGER_H
+
+#ifndef GPURESOURCEMANAGER_H
+#define GPURESOURCEMANAGER_H
 
 #include "glCommon.h"
 #include "Service.h"

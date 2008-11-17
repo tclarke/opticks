@@ -45,7 +45,8 @@ const unsigned int* ImageObjectImp::getImage(int& iWidth, int& iHeight, ColorTyp
       return mpImageData->getImageData(iWidth, iHeight, transparent);
    }
 
-   iWidth = iHeight = 0;
+   iWidth = 0;
+   iHeight = 0;
    transparent = ColorType();
    return NULL;
 }
@@ -62,9 +63,11 @@ void ImageObjectImp::draw(double zoomFactor) const
       mNeedUpdate = false;
    }
 
-   int dataWidth = 0, dataHeight = 0;
+   int dataWidth = 0;
+   int dataHeight = 0;
    unsigned int textureId = 0;
-   int textureWidth = 0, textureHeight = 0;
+   int textureWidth = 0;
+   int textureHeight = 0;
 
    ColorType transparent;
    textureId = mpImageData->getTexture(textureWidth, textureHeight);
@@ -72,7 +75,7 @@ void ImageObjectImp::draw(double zoomFactor) const
 
    if (textureId == 0)
    {
-     return;
+      return;
    }
 
    LocationType llCorner = getLlCorner();
@@ -88,18 +91,14 @@ void ImageObjectImp::draw(double zoomFactor) const
    glEnable(GL_BLEND);
    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-   double maxS, maxT;
-   double sOffset, tOffset;
-
-   maxS = dataWidth / (double) textureWidth;
-   maxT = dataHeight / (double) textureHeight;
+   double maxS = dataWidth / static_cast<double>(textureWidth);
+   double maxT = dataHeight / static_cast<double>(textureHeight);
 
    // image is centered in the texture. compute
-   sOffset = (textureWidth - dataWidth) / 2 / (double)(textureWidth);
-   tOffset = (textureHeight - dataHeight) / 2 / (double)(textureHeight);
+   double sOffset = (textureWidth - dataWidth) / 2 / static_cast<double>(textureWidth);
+   double tOffset = (textureHeight - dataHeight) / 2 / static_cast<double>(textureHeight);
 
-   double dAlpha = -1.0;
-   dAlpha = getAlpha();
+   double dAlpha = getAlpha();
    if (dAlpha == -1.0)
    {
       dAlpha = 255.0;
@@ -186,7 +185,7 @@ void ImageObjectImp::draw(double zoomFactor) const
    glDisable(GL_TEXTURE_2D);
    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-   if(mpImageData != NULL)
+   if (mpImageData != NULL)
    {
       mpImageData->glContextPop();
    }
@@ -210,7 +209,7 @@ bool ImageObjectImp::isKindOf(const string& className) const
 
 void ImageObjectImp::temporaryGlContextChange()
 {
-   if(mpImageData != NULL)
+   if (mpImageData != NULL)
    {
       mpImageData->glContextPush();
    }
@@ -221,7 +220,7 @@ bool ImageObjectImp::setImageData(const QImage& image, ColorType transparent)
 {
    int iWidth = image.width();
    int iHeight = image.height();
-   auto_ptr<unsigned int> pData(new (nothrow) unsigned int [iWidth * iHeight]);
+   auto_ptr<unsigned int> pData(new (nothrow) unsigned int[iWidth * iHeight]);
    if (pData.get() == NULL)
    {
       return false;
@@ -246,7 +245,6 @@ bool ImageObjectImp::setImageData(const QImage& image, ColorType transparent)
 
    for (int i = 0; i < iHeight; i++)
    {
-      QRgb* pSourcePixel = (QRgb*) image.scanLine(i);
       unsigned int* pDestPixel = &pData.get()[i * iWidth];
       for (int j = 0; j < iWidth; j++)
       {
@@ -259,7 +257,6 @@ bool ImageObjectImp::setImageData(const QImage& image, ColorType transparent)
             *pDestPixel <<= 8;
          }
 
-         pSourcePixel++;
          pDestPixel++;
       }
    }
@@ -276,7 +273,7 @@ bool ImageObjectImp::setImageData(const unsigned int* pData, int iWidth, int iHe
    {
       mpImageData = new ImageData(pData, iWidth, iHeight, transparent);
    }
-   catch(std::bad_alloc exc)
+   catch (bad_alloc exc)
    {
       return false;
    }
@@ -321,16 +318,19 @@ void ImageObjectImp::updateBoundingBox()
 }
 
 ImageObjectImp::ImageData::ImageData(const unsigned int* pData, int iWidth, int iHeight, ColorType transparent) :
-   mpData(NULL), mTextureWidth(0), mTextureHeight(0), mWidth(0), mHeight(0), mReferenceCount(0),
-   mTransparent(transparent), mTextureId(0)
+   mpData(NULL),
+   mWidth(iWidth),
+   mHeight(iHeight),
+   mTextureWidth(0),
+   mTextureHeight(0),
+   mReferenceCount(0),
+   mTransparent(transparent),
+   mTextureId(0)
 {
    int pixelCount = iWidth * iHeight;
 
-   mpData = auto_ptr<unsigned int>(new unsigned int [pixelCount]);
-      memcpy(mpData.get(), pData, pixelCount * 4);
-
-   mWidth = iWidth;
-   mHeight = iHeight;
+   mpData = auto_ptr<unsigned int>(new unsigned int[pixelCount]);
+   memcpy(mpData.get(), pData, pixelCount * 4);
 
    // set alpha values
    int i;
@@ -364,8 +364,8 @@ ImageObjectImp::ImageData::ImageData(const unsigned int* pData, int iWidth, int 
 
          if (Endian::getSystemEndian() == BIG_ENDIAN)
          {
-            mpData.get()[i] = ((mpData.get()[i]&0xff00)<<16) | (mpData.get()[i]&0xff0000) |
-               ((mpData.get()[i]&0xff000000)>>16) | (mpData.get()[i] & 0xff);
+            mpData.get()[i] = ((mpData.get()[i] & 0xff00) << 16) | (mpData.get()[i] & 0xff0000) |
+               ((mpData.get()[i] & 0xff000000) >> 16) | (mpData.get()[i] & 0xff);
          }
       }
    }
@@ -373,15 +373,15 @@ ImageObjectImp::ImageData::ImageData(const unsigned int* pData, int iWidth, int 
    {
       for (i = 0; i < pixelCount; i++)
       {
-         mpData.get()[i] = ((mpData.get()[i]&0xff00) << 16) | (mpData.get()[i]&0xff0000) |
-            ((mpData.get()[i]&0xff000000) >> 16) | (mpData.get()[i] & 0xff);
+         mpData.get()[i] = ((mpData.get()[i] & 0xff00) << 16) | (mpData.get()[i] & 0xff0000) |
+            ((mpData.get()[i] & 0xff000000) >> 16) | (mpData.get()[i] & 0xff);
       }
    }
 }
 
 ImageObjectImp::ImageData::~ImageData()
 {
-   while(!mTextureIdStack.empty())
+   while (!mTextureIdStack.empty())
    {
       // this does not attempt to delete any textures
       // except the top level texture since the GLContext
@@ -428,9 +428,10 @@ unsigned int ImageObjectImp::ImageData::getTexture(int &iWidth, int &iHeight) co
 static void fillTextureBorder(unsigned int *pTexData, const unsigned int *pData, int textureWidth, int textureHeight,
       int width, int height, int rowOffset, int columnOffset)
 {
-   int i, j;
-   unsigned int *dest=NULL;
-   const unsigned int*source = NULL;
+   int i;
+   int j;
+   unsigned int* dest = NULL;
+   const unsigned int* source = NULL;
 
 // Fill in the texture's blank areas with replications of the images border pixels
 // 123
@@ -439,53 +440,53 @@ static void fillTextureBorder(unsigned int *pTexData, const unsigned int *pData,
 
    // Region 2
    source = &pData[0];
-   dest=&pTexData[columnOffset];
-   for(j=0; j<=rowOffset; ++j)
+   dest = &pTexData[columnOffset];
+   for (j = 0; j <= rowOffset; ++j)
    {
-      memcpy(dest, source, 4*width);
+      memcpy(dest, source, 4 * width);
       dest += textureWidth;
    }
 
    // Region 7
    source = &pData[width * (height-1)];
-   dest=&pTexData[textureWidth * (textureHeight-rowOffset) + columnOffset];
-   for (j=textureHeight-rowOffset; j<textureHeight; ++j)
+   dest = &pTexData[textureWidth * (textureHeight-rowOffset) + columnOffset];
+   for (j = textureHeight - rowOffset; j < textureHeight; ++j)
    {
       memcpy(dest, source, 4*width);
       dest += textureWidth;
    }
 
-   for(j=0; j<=rowOffset; ++j)
+   for (j = 0; j <= rowOffset; ++j)
    {
       // Region 1
-      dest=&pTexData[textureWidth * j];
-      std::fill(dest, &dest[columnOffset + 1], pData[0]);
+      dest = &pTexData[textureWidth * j];
+      fill(dest, &dest[columnOffset + 1], pData[0]);
 
       // Region 3
-      dest=&pTexData[textureWidth * (j+1) - columnOffset - 1];
-      std::fill(dest, &dest[columnOffset + 1], pData[width-1]);
+      dest = &pTexData[textureWidth * (j+1) - columnOffset - 1];
+      fill(dest, &dest[columnOffset + 1], pData[width-1]);
    }
 
-   for (i=rowOffset; i<rowOffset+height; ++i)
+   for (i = rowOffset; i < rowOffset + height; ++i)
    {
       // Region 4
-      dest=&pTexData[textureWidth * i];
-      std::fill(dest, &dest[columnOffset + 1], pData[width*(i-rowOffset)]);
+      dest = &pTexData[textureWidth * i];
+      fill(dest, &dest[columnOffset + 1], pData[width * (i - rowOffset)]);
 
       // Region 5
-      dest=&pTexData[textureWidth * (i+1) - columnOffset - 1];
-      std::fill(dest, &dest[columnOffset + 1], pData[width*(i-rowOffset)+width-1]);
+      dest = &pTexData[textureWidth * (i+1) - columnOffset - 1];
+      fill(dest, &dest[columnOffset + 1], pData[width * (i - rowOffset) + width - 1]);
    }
 
-   for (j=textureHeight-rowOffset; j<textureHeight; ++j)
+   for (j = textureHeight - rowOffset; j < textureHeight; ++j)
    {
       // Region 6
-      dest=&pTexData[textureWidth * j];
-      std::fill(dest, &dest[columnOffset + 1], pData[0]);
+      dest = &pTexData[textureWidth * j];
+      fill(dest, &dest[columnOffset + 1], pData[0]);
 
       // Region 8
-      dest=&pTexData[textureWidth * (j+1) - columnOffset - 1];
-      std::fill(dest, &dest[columnOffset + 1], pData[width-1]);
+      dest = &pTexData[textureWidth * (j + 1) - columnOffset - 1];
+      fill(dest, &dest[columnOffset + 1], pData[width - 1]);
    }
 }
 
@@ -497,8 +498,7 @@ void ImageObjectImp::ImageData::generateTextures()
       mTextureId = 0;
    }
 
-   const unsigned int* pData = NULL;
-   pData = mpData.get();
+   const unsigned int* pData = mpData.get();
    if (pData == NULL)
    {
       return;
@@ -507,13 +507,13 @@ void ImageObjectImp::ImageData::generateTextures()
    int pixelCount = mHeight * mWidth;
 
    // Round height and width up to the next larger powers of 2
-   mTextureWidth = pow(2.0, 1.0 + floor((log10((double) (mWidth + 2)) / log10(2.0)))) + 0.5;
-   mTextureHeight = pow(2.0, 1.0 + floor((log10((double) (mHeight + 2)) / log10(2.0)))) + 0.5;
+   mTextureWidth = pow(2.0, 1.0 + floor((log10(static_cast<double>(mWidth + 2)) / log10(2.0)))) + 0.5;
+   mTextureHeight = pow(2.0, 1.0 + floor((log10(static_cast<double>(mHeight + 2)) / log10(2.0)))) + 0.5;
    int bufSize = mTextureWidth * mTextureHeight; // rgb for each texel
-   auto_ptr<unsigned int> pTexData(new unsigned int [bufSize]);
+   auto_ptr<unsigned int> pTexData(new unsigned int[bufSize]);
 
-   unsigned int *dest = NULL;
-   const unsigned int *source = NULL;
+   unsigned int* dest = NULL;
+   const unsigned int* source = NULL;
 
    memset(pTexData.get(), 0xff, mTextureWidth * mTextureHeight * 4);
 
@@ -525,7 +525,7 @@ void ImageObjectImp::ImageData::generateTextures()
       mWidth, mHeight, rowOffset, columnOffset);
 
    // Fill the center of the texture with the image: Region I
-   for(j = 0; j < mHeight; j++)
+   for (j = 0; j < mHeight; j++)
    {
       dest = &pTexData.get()[mTextureWidth * (j + rowOffset) + columnOffset];
       source = &pData[mWidth * j];
@@ -535,10 +535,10 @@ void ImageObjectImp::ImageData::generateTextures()
    glEnable(GL_TEXTURE_2D);
    glGenTextures (1, &mTextureId);
    glBindTexture(GL_TEXTURE_2D, mTextureId);
-   glTexParameterf(GL_TEXTURE_2D,  GL_TEXTURE_WRAP_S, GL_CLAMP);
-   glTexParameterf(GL_TEXTURE_2D,  GL_TEXTURE_WRAP_T, GL_CLAMP);
+   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,   GL_LINEAR);
+   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
    gluBuild2DMipmaps(GL_TEXTURE_2D, 4, mTextureWidth, mTextureHeight, GL_RGBA, GL_UNSIGNED_BYTE, pTexData.get());
    glDisable(GL_TEXTURE_2D);
@@ -552,12 +552,12 @@ void ImageObjectImp::ImageData::glContextPush()
 
 void ImageObjectImp::ImageData::glContextPop()
 {
-   if(mTextureIdStack.empty())
+   if (mTextureIdStack.empty())
    {
       // no corresponding push
       return;
    }
-   if(mTextureId != 0)
+   if (mTextureId != 0)
    {
       glDeleteTextures(1, &mTextureId);
    }

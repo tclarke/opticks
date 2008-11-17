@@ -94,7 +94,7 @@ protected:
    static unsigned int sKeyboardNumber;
 
 private:
-   typedef struct
+   struct PointType
    {
       float x;
       float y;
@@ -102,11 +102,11 @@ private:
       float heading;
       float pitch;
       float roll;
-   } PointType;
+   };
 
    double mDist;           // distance from centerpoint of view display
    double mFullDistance;
-   LocationType mCenter;        // centerpoint of view display
+   LocationType mCenter;   // centerpoint of view display
    double mHeading;
    double mPitch;
    double mFov;

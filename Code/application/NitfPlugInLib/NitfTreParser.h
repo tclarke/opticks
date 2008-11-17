@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef TRE_PARSER_H
-#define TRE_PARSER_H
+#ifndef NITFTREPARSER_H
+#define NITFTREPARSER_H
 
 #include <iostream>
 
@@ -28,11 +28,11 @@ namespace Nitf
    */
    enum TreStateEnum
    {
-      VALID    = 0,  /**< A TRE is valid if all fields are present (and the correct type) and 
-                        the values of each field are within their prescribed ranges. */
-      SUSPECT  = 1,  /**< A TRE is suspect if all of its fields are present (and the correct type)
-                        but the values of one or more fields are outside their prescribed ranges. */
-      INVALID  = 2,   /**< A TRE is invalid if fields are missing. */
+      VALID = 0,     /**< A TRE is valid if all fields are present (and the correct type) and
+                          the values of each field are within their prescribed ranges. */
+      SUSPECT = 1,   /**< A TRE is suspect if all of its fields are present (and the correct type)
+                          but the values of one or more fields are outside their prescribed ranges. */
+      INVALID = 2,   /**< A TRE is invalid if fields are missing. */
       UNTESTED = 3   /**< A TRE has not been tested. */
    };
 
@@ -48,9 +48,10 @@ namespace Nitf
     */
    enum TreExportStatusEnum
    {
-      REMOVE, /**< Remove any existing TRE of the name without adding any generated ones. */
-      REPLACE, /**< Remove any existing TRE of the name while adding the one populated by TreParser::exportMetadata(). */
-      UNCHANGED /**< Let any TREs of the same name be exported without modifications. */
+      REMOVE,     /**< Remove any existing TRE of the name without adding any generated ones. */
+      REPLACE,    /**< Remove any existing TRE of the name while adding the one populated by
+                       TreParser::exportMetadata(). */
+      UNCHANGED   /**< Let any TREs of the same name be exported without modifications. */
    };
 
    /**
@@ -83,7 +84,10 @@ namespace Nitf
        *
        * @return Returns the type used for TRE parser plug-ins.
        */
-      static std::string Type() { return "NITF Tagged Record Extension Parser"; }
+      static std::string Type()
+      {
+         return "NITF Tagged Record Extension Parser";
+      }
 
       /**
        * The type that should be returned from PlugIn::getSubtype()
@@ -94,7 +98,10 @@ namespace Nitf
        *
        * @see TreParser::exportMetadata()
        */
-      static std::string NormalSubtype() { return ""; }
+      static std::string NormalSubtype()
+      {
+         return "";
+      }
 
       /**
        * The type that should be returned from PlugIn::getSubtype()
@@ -105,7 +112,10 @@ namespace Nitf
        *
        * @see TreParser::exportMetadata()
        */
-      static std::string CreateOnExportSubtype() { return "Create on export"; }
+      static std::string CreateOnExportSubtype()
+      {
+         return "Create on export";
+      }
 
       /**
        * Examine the TRE to determine if it is valid.

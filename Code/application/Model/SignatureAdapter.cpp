@@ -24,8 +24,8 @@ SignatureAdapter::~SignatureAdapter()
 // TypeAwareObject
 const string& SignatureAdapter::getObjectType() const
 {
-   static string type("SignatureAdapter");
-   return type;
+   static string sType("SignatureAdapter");
+   return sType;
 }
 
 bool SignatureAdapter::isKindOf(const string& className) const

@@ -76,8 +76,8 @@ public:
    bool isInitialized();
    const char* getInitializationErrorMsg();
 
-   bool setSetting(const std::string &key, const DataVariant &var, bool setIfSame = false);
-   const DataVariant &getSetting(const std::string& key) const;
+   bool setSetting(const std::string& key, const DataVariant& var, bool setIfSame = false);
+   const DataVariant& getSetting(const std::string& key) const;
    bool isUserSetting(const std::string& key) const;
    void deleteUserSetting(const std::string& key);
    void deleteSessionSetting(const std::string& key);
@@ -95,8 +95,8 @@ public:
 
    const std::string& getObjectType() const
    {
-      static std::string type = "ConfigurationSettingsImp";
-      return type;
+      static std::string sType = "ConfigurationSettingsImp";
+      return sType;
    }
 
    bool isKindOf(const std::string& className) const
@@ -118,15 +118,15 @@ protected:
    bool serialize() const;
    bool loadSettings(std::string& errorMessage);
    void deserializeMruFiles();
-   void applicationClosed(Subject& subject, const std::string& signal, const boost::any &args);
+   void applicationClosed(Subject& subject, const std::string& signal, const boost::any& args);
    void initDeploymentValues();
    bool parseDeploymentFile(std::string& errorMessage, std::string& deploymentDebugMsg);
 
    /**
-   *  Find the user's documents directory
-   *
-   *  @return The documents directory for the user
-   */
+    *  Find the user's documents directory
+    *
+    *  @return The documents directory for the user
+    */
    static std::string locateUserDocs();
 
    /**

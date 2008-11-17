@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef TUTORIAL4_H__
-#define TUTORIAL4_H__
+#ifndef TUTORIAL4_H
+#define TUTORIAL4_H
 
 #include "ExecutableShell.h"
 
@@ -18,9 +18,9 @@ public:
    Tutorial4();
    virtual ~Tutorial4();
 
-   virtual bool getInputSpecification(PlugInArgList *&pInArgList);
-   virtual bool getOutputSpecification(PlugInArgList *&pOutArgList);
-   virtual bool execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList);
+   virtual bool getInputSpecification(PlugInArgList*& pInArgList);
+   virtual bool getOutputSpecification(PlugInArgList*& pOutArgList);
+   virtual bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
 };
 
 #endif

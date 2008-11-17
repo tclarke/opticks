@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef GLCONTEXTSAVE_H__
-#define GLCONTEXTSAVE_H__
+#ifndef GLCONTEXTSAVE_H
+#define GLCONTEXTSAVE_H
 
 #include "glCommon.h"
 
@@ -16,17 +16,22 @@
 
 class GlContextSave
 {
-   QGLContext *mpCurrentContext;
-
 public:
-   GlContextSave() : mpCurrentContext(const_cast<QGLContext*>(QGLContext::currentContext())) {}
+   GlContextSave() :
+      mpCurrentContext(const_cast<QGLContext*>(QGLContext::currentContext()))
+   {
+   }
+
    ~GlContextSave()
    {
-      if(mpCurrentContext != NULL)
+      if (mpCurrentContext != NULL)
       {
          mpCurrentContext->makeCurrent();
       }
    }
+
+private:
+   QGLContext* mpCurrentContext;
 };
 
 #endif

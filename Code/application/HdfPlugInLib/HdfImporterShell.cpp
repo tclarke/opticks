@@ -166,7 +166,7 @@ bool HdfImporterShell::createRasterPagerPlugIn(const string& pagerName,
          // whether the PlugIn succeeds or fails, we still need to do this part
          pPlugInManager->destroyPlugInArgList(pInArgs);
 
-         RasterPager *pPager = dynamic_cast<RasterPager*>(pPlugIn);
+         RasterPager* pPager = dynamic_cast<RasterPager*>(pPlugIn);
          if (pPager == NULL || success == false)
          {
             pPlugInManager->destroyPlugIn(pPlugIn);

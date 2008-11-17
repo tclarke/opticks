@@ -62,7 +62,7 @@ namespace
 
       unsigned int objectNum = 1;
       const list<GraphicObject*>& objects = pGroup->getObjects();
-      for(list<GraphicObject*>::const_iterator iter = objects.begin(); iter != objects.end(); ++iter)
+      for (list<GraphicObject*>::const_iterator iter = objects.begin(); iter != objects.end(); ++iter)
       {
          const GraphicObject* pObject = *iter;
          VERIFYRV(pObject != NULL, objectTypeName);
@@ -81,8 +81,8 @@ GraphicObjectImp::GraphicObjectImp(const string& id, GraphicObjectType type, Gra
    SessionItemImp(id, getGraphicObjectName(type, pLayer)),
    mDisplayListDirty(true),
    mBitMaskDirty(true),
-   mType(type),
-   mpLayer(pLayer)
+   mpLayer(pLayer),
+   mType(type)
 {
    addProperty("BoundingBox");
    addProperty("Rotation");
@@ -334,8 +334,7 @@ bool GraphicObjectImp::setProperty(const GraphicProperty* pProp)
 
    string propertyName = pProp->getName();
 
-   GraphicProperty* pOldProp = NULL;
-   pOldProp = getProperty(propertyName);
+   GraphicProperty* pOldProp = getProperty(propertyName);
    if (pOldProp == NULL)
    {
       return false;
@@ -346,12 +345,11 @@ bool GraphicObjectImp::setProperty(const GraphicProperty* pProp)
       LocationType ll = static_cast<const BoundingBoxProperty*>(pProp)->getLlCorner();
       LocationType ur = static_cast<const BoundingBoxProperty*>(pProp)->getUrCorner();
 
-      const RasterElement *pRaster = getGeoreferenceElement();
-
+      const RasterElement* pRaster = getGeoreferenceElement();
       if (pRaster != NULL)
       {
          bool changed = false;
-         const BoundingBoxProperty* pBoundingBox = (const BoundingBoxProperty*) pProp;
+         const BoundingBoxProperty* pBoundingBox = static_cast<const BoundingBoxProperty*>(pProp);
          if (pBoundingBox->geoCoordsMatchPixelCoords() == false &&
             (pBoundingBox->hasGeoCoords() || pBoundingBox->hasPixelCoords()))
          {
@@ -421,9 +419,14 @@ void GraphicObjectImp::setProperties(const vector<GraphicProperty*>& properties)
    }
 }
 
+const vector<GraphicProperty*>& GraphicObjectImp::getProperties() const
+{
+   return mProperties;
+}
+
 void GraphicObjectImp::updateGeo()
 {
-   BoundingBoxProperty *pProp = dynamic_cast<BoundingBoxProperty*>(getProperty("BoundingBox"));
+   BoundingBoxProperty* pProp = dynamic_cast<BoundingBoxProperty*>(getProperty("BoundingBox"));
    VERIFYNRV(pProp != NULL);
    
    LocationType llGeo = pProp->getLlLatLong();
@@ -435,11 +438,16 @@ void GraphicObjectImp::updateGeo()
 
 void GraphicObjectImp::enableGeo()
 {
-   BoundingBoxProperty *pProp = dynamic_cast<BoundingBoxProperty*>(getProperty("BoundingBox"));
+   BoundingBoxProperty* pProp = dynamic_cast<BoundingBoxProperty*>(getProperty("BoundingBox"));
    VERIFYNRV(pProp != NULL);
    
    BoundingBoxProperty newProp(pProp->getLlCorner(), pProp->getUrCorner());
    setProperty(&newProp);
+}
+
+void GraphicObjectImp::setHandles(const vector<LocationType>& handles)
+{
+   mHandles = handles;
 }
 
 const vector<LocationType>& GraphicObjectImp::getHandles() const
@@ -467,7 +475,7 @@ void GraphicObjectImp::moveHandle(int handle, LocationType point, bool bMaintain
    {
       updateHandles();
    }
-   GraphicLayer *pLayer = getLayer();
+   GraphicLayer* pLayer = getLayer();
    if (pLayer != NULL)
    {
       point = pLayer->correctCoordinate(point);
@@ -486,21 +494,16 @@ void GraphicObjectImp::rotateHandle(int handle, LocationType delta)
    center.mX = (llCorner.mX + urCorner.mX)/2.0;
    center.mY = (llCorner.mY + urCorner.mY)/2.0;
 
-   double ax, ay, bx, by;
+   double ax = mHandles[handle].mX - center.mX;
+   double ay = mHandles[handle].mY - center.mY;
+   double bx = delta.mX - center.mX;
+   double by = delta.mY - center.mY;
 
-   ax = mHandles[handle].mX - center.mX;
-   ay = mHandles[handle].mY - center.mY;
-
-   bx = delta.mX - center.mX;
-   by = delta.mY - center.mY;
-
-   double theta = 0.0;
-   theta = (180.0 / PI) * acos(((ax * bx) + (ay * by)) /
+   double theta = (180.0 / PI) * acos(((ax * bx) + (ay * by)) /
       (sqrt((ax * ax) + (ay * ay)) * sqrt((bx * bx) + (by * by))));
 
-   double direction = 0.0;
-   direction = (ax * by) - (ay * bx);
-   if(direction < 0.0)
+   double direction = (ax * by) - (ay * bx);
+   if (direction < 0.0)
    {
       theta = -theta;
    }
@@ -514,9 +517,8 @@ void GraphicObjectImp::updateHandles()
 
    if (hasCornerHandles())
    {
-      LocationType llCorner, urCorner;
-      llCorner = getLlCorner();
-      urCorner = getUrCorner();
+      LocationType llCorner = getLlCorner();
+      LocationType urCorner = getUrCorner();
 
       LocationType point;
       point.mX = llCorner.mX;
@@ -544,7 +546,8 @@ void GraphicObjectImp::move(LocationType delta)
    LocationType llCorner = getLlCorner();
    LocationType urCorner = getUrCorner();
 
-   LocationType newLlCorner = llCorner + delta, newUrCorner = urCorner + delta;
+   LocationType newLlCorner = llCorner + delta;
+   LocationType newUrCorner = urCorner + delta;
 
    setBoundingBox(newLlCorner, newUrCorner);
    updateHandles();
@@ -587,7 +590,8 @@ const BitMask* GraphicObjectImp::getPixels(int iStartColumn, int iStartRow, int 
 
    double dAngle = getRotation();
    LocationType point;
-   double modelMatrix[16], projectionMatrix[16];
+   double modelMatrix[16];
+   double projectionMatrix[16];
    int viewPort[4];
 
    for (int i = iStartRow; i <= iEndRow; i++)
@@ -632,7 +636,7 @@ const BitMask* GraphicObjectImp::getPixels(int iStartColumn, int iStartRow, int 
       }
    }
 
-   return (BitMask*) &mPixelMask;
+   return static_cast<BitMask*>(&mPixelMask);
 }
 
 void GraphicObjectImp::rotateViewMatrix() const
@@ -668,8 +672,7 @@ LocationType GraphicObjectImp::getLlCorner() const
 {
    LocationType llCorner(-1.0, -1.0);
 
-   BoundingBoxProperty* pBoundBox = NULL;
-   pBoundBox = (BoundingBoxProperty*) getProperty("BoundingBox");
+   BoundingBoxProperty* pBoundBox = dynamic_cast<BoundingBoxProperty*>(getProperty("BoundingBox"));
    if (pBoundBox != NULL)
    {
       llCorner = pBoundBox->getLlCorner();
@@ -682,8 +685,7 @@ LocationType GraphicObjectImp::getUrCorner() const
 {
    LocationType urCorner(-1.0, -1.0);
 
-   BoundingBoxProperty* pBoundBox = NULL;
-   pBoundBox = (BoundingBoxProperty*) getProperty("BoundingBox");
+   BoundingBoxProperty* pBoundBox = dynamic_cast<BoundingBoxProperty*>(getProperty("BoundingBox"));
    if (pBoundBox != NULL)
    {
       urCorner = pBoundBox->getUrCorner();
@@ -801,8 +803,7 @@ double GraphicObjectImp::getRotation() const
 {
    double dRotation = 0.0;
 
-   RotationProperty* pRotation = NULL;
-   pRotation = (RotationProperty*) getProperty("Rotation");
+   RotationProperty* pRotation = dynamic_cast<RotationProperty*>(getProperty("Rotation"));
    if (pRotation != NULL)
    {
       dRotation = pRotation->getRotation();
@@ -831,8 +832,7 @@ bool GraphicObjectImp::getLineState(bool* pSuccess) const
 
    bool bLine = false;
 
-   LineOnProperty* pLineOn = NULL;
-   pLineOn = (LineOnProperty*) getProperty("LineOn");
+   LineOnProperty* pLineOn = dynamic_cast<LineOnProperty*>(getProperty("LineOn"));
    if (pLineOn != NULL)
    {
       bLine = pLineOn->getState();
@@ -855,8 +855,7 @@ ColorType GraphicObjectImp::getLineColor() const
 {
    ColorType lineColor;
 
-   LineColorProperty* pLineColor = NULL;
-   pLineColor = (LineColorProperty*) getProperty("LineColor");
+   LineColorProperty* pLineColor = dynamic_cast<LineColorProperty*>(getProperty("LineColor"));
    if (pLineColor != NULL)
    {
       lineColor = pLineColor->getColor();
@@ -880,8 +879,7 @@ double GraphicObjectImp::getLineWidth() const
 {
    double dWidth = -1.0;
 
-   LineWidthProperty* pLineWidth = NULL;
-   pLineWidth = (LineWidthProperty*) getProperty("LineWidth");
+   LineWidthProperty* pLineWidth = dynamic_cast<LineWidthProperty*>(getProperty("LineWidth"));
    if (pLineWidth != NULL)
    {
       dWidth = pLineWidth->getWidth();
@@ -905,8 +903,7 @@ LineStyle GraphicObjectImp::getLineStyle() const
 {
    LineStyle eStyle;
 
-   LineStyleProperty* pLineStyle = NULL;
-   pLineStyle = (LineStyleProperty*) getProperty("LineStyle");
+   LineStyleProperty* pLineStyle = dynamic_cast<LineStyleProperty*>(getProperty("LineStyle"));
    if (pLineStyle != NULL)
    {
       eStyle = pLineStyle->getStyle();
@@ -930,8 +927,7 @@ ArcRegion GraphicObjectImp::getArcRegion() const
 {
    ArcRegion eRegion;
 
-   ArcRegionProperty* pArcRegion = NULL;
-   pArcRegion = (ArcRegionProperty*) getProperty("ArcRegion");
+   ArcRegionProperty* pArcRegion = dynamic_cast<ArcRegionProperty*>(getProperty("ArcRegion"));
    if (pArcRegion != NULL)
    {
       eRegion = pArcRegion->getRegion();
@@ -983,8 +979,7 @@ double GraphicObjectImp::getStartAngle() const
 {
    double dStart = -1.0;
 
-   WedgeProperty* pWedge = NULL;
-   pWedge = (WedgeProperty*) getProperty("Wedge");
+   WedgeProperty* pWedge = dynamic_cast<WedgeProperty*>(getProperty("Wedge"));
    if (pWedge != NULL)
    {
       dStart = pWedge->getStartAngle();
@@ -997,8 +992,7 @@ double GraphicObjectImp::getStopAngle() const
 {
    double dStop = -1.0;
 
-   WedgeProperty* pWedge = NULL;
-   pWedge = (WedgeProperty*) getProperty("Wedge");
+   WedgeProperty* pWedge = dynamic_cast<WedgeProperty*>(getProperty("Wedge"));
    if (pWedge != NULL)
    {
       dStop = pWedge->getStopAngle();
@@ -1038,8 +1032,7 @@ bool GraphicObjectImp::getFillState(bool* pSuccess) const
 
    bool bFill = false;
 
-   FillStyleProperty* pFillStyle = NULL;
-   pFillStyle = (FillStyleProperty*) getProperty("FillStyle");
+   FillStyleProperty* pFillStyle = dynamic_cast<FillStyleProperty*>(getProperty("FillStyle"));
    if (pFillStyle != NULL)
    {
       FillStyle eFill = EMPTY_FILL;
@@ -1068,8 +1061,7 @@ ColorType GraphicObjectImp::getFillColor() const
 {
    ColorType fillColor;
 
-   FillColorProperty* pFillColor = NULL;
-   pFillColor = (FillColorProperty*) getProperty("FillColor");
+   FillColorProperty* pFillColor = dynamic_cast<FillColorProperty*>(getProperty("FillColor"));
    if (pFillColor != NULL)
    {
       fillColor = pFillColor->getColor();
@@ -1093,8 +1085,7 @@ FillStyle GraphicObjectImp::getFillStyle() const
 {
    FillStyle eStyle;
 
-   FillStyleProperty* pFillStyle = NULL;
-   pFillStyle = (FillStyleProperty*) getProperty("FillStyle");
+   FillStyleProperty* pFillStyle = dynamic_cast<FillStyleProperty*>(getProperty("FillStyle"));
    if (pFillStyle != NULL)
    {
       eStyle = pFillStyle->getFillStyle();
@@ -1118,8 +1109,7 @@ SymbolType GraphicObjectImp::getHatchStyle() const
 {
    SymbolType eHatch;
 
-   HatchStyleProperty* pHatchStyle = NULL;
-   pHatchStyle = (HatchStyleProperty*) getProperty("HatchStyle");
+   HatchStyleProperty* pHatchStyle = dynamic_cast<HatchStyleProperty*>(getProperty("HatchStyle"));
    if (pHatchStyle != NULL)
    {
       eHatch = pHatchStyle->getHatchStyle();
@@ -1143,8 +1133,7 @@ double GraphicObjectImp::getApex() const
 {
    double dApex = -1.0;
 
-   ApexProperty* pApex = NULL;
-   pApex = (ApexProperty*) getProperty("Apex");
+   ApexProperty* pApex = dynamic_cast<ApexProperty*>(getProperty("Apex"));
    if (pApex != NULL)
    {
       dApex = pApex->getApex();
@@ -1166,8 +1155,7 @@ bool GraphicObjectImp::setText(const string& objectText)
 
 string GraphicObjectImp::getText() const
 {
-   TextStringProperty* pText = NULL;
-   pText = (TextStringProperty*) getProperty("TextString");
+   TextStringProperty* pText = dynamic_cast<TextStringProperty*>(getProperty("TextString"));
    if (pText != NULL)
    {
       return pText->getString();
@@ -1192,8 +1180,7 @@ QFont GraphicObjectImp::getFont() const
 {
    QFont textFont;
 
-   FontProperty* pFont = NULL;
-   pFont = (FontProperty*) getProperty("Font");
+   FontProperty* pFont = dynamic_cast<FontProperty*>(getProperty("Font"));
    if (pFont != NULL)
    {
       textFont = pFont->getFont().toQFont();
@@ -1217,8 +1204,7 @@ ColorType GraphicObjectImp::getTextColor() const
 {
    ColorType textColor;
 
-   TextColorProperty* pTextColor = NULL;
-   pTextColor = (TextColorProperty*) getProperty("TextColor");
+   TextColorProperty* pTextColor = dynamic_cast<TextColorProperty*>(getProperty("TextColor"));
    if (pTextColor != NULL)
    {
       textColor = pTextColor->getColor();
@@ -1267,8 +1253,7 @@ double GraphicObjectImp::getScale() const
 {
    double dScale = -1.0;
 
-   ScaleProperty* pScale = NULL;
-   pScale = (ScaleProperty*) getProperty("Scale");
+   ScaleProperty* pScale = dynamic_cast<ScaleProperty*>(getProperty("Scale"));
    if (pScale != NULL)
    {
       dScale = pScale->getScale();
@@ -1292,7 +1277,7 @@ LatLonPoint GraphicObjectImp::getLatLon() const
 {
    LatLonPoint latLonPoint;
 
-   LatLonProperty* pProp = (LatLonProperty*) getProperty("LatLon");
+   LatLonProperty* pProp = dynamic_cast<LatLonProperty*>(getProperty("LatLon"));
    if (pProp != NULL)
    {
       latLonPoint = pProp->getLatLon();
@@ -1382,14 +1367,11 @@ bool GraphicObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
    }
 
    // Properties
-   for(DOMNode *pChild = pDocument->getFirstChild();
-                pChild != NULL;
-                pChild = pChild->getNextSibling())
+   for (DOMNode* pChild = pDocument->getFirstChild(); pChild != NULL; pChild = pChild->getNextSibling())
    {
       string propertyName(A(pChild->getNodeName()));
 
-      GraphicProperty* pProperty = NULL;
-      pProperty = createProperty(propertyName);
+      GraphicProperty* pProperty = createProperty(propertyName);
       if (pProperty != NULL)
       {
          try
@@ -1562,6 +1544,9 @@ void GraphicObjectImp::adjustHandles(int handle, LocationType point, bool bMaint
             mHandles[5].mY = oldPoint.mY + (DrawUtil::sign(dHeight) * fabs(dWidth * dSlope) / 2);
             mHandles[6].mY = oldPoint.mY + (DrawUtil::sign(dHeight) * fabs(dWidth * dSlope) / 2);
             break;
+
+         default:
+            break;
       }
    }
 
@@ -1634,7 +1619,7 @@ void GraphicObjectImp::adjustHandles(int handle, LocationType point, bool bMaint
    }
 }
 
-bool GraphicObjectImp::setImageFile(const char *pFilename)
+bool GraphicObjectImp::setImageFile(const char* pFilename)
 {
    if ((getGraphicObjectType() == FILE_IMAGE_OBJECT) && (pFilename != NULL))
    {
@@ -1649,8 +1634,7 @@ const char* GraphicObjectImp::getImageFile() const
 {
    const char* pFilename = NULL;
 
-   FileNameProperty* pProperty = NULL;
-   pProperty = (FileNameProperty*) getProperty("Filename");
+   FileNameProperty* pProperty = dynamic_cast<FileNameProperty*>(getProperty("Filename"));
    if (pProperty != NULL)
    {
       const string& filename = pProperty->getFileName();
@@ -1663,12 +1647,21 @@ const char* GraphicObjectImp::getImageFile() const
    return pFilename;
 }
 
+bool GraphicObjectImp::setObjectImage(const unsigned int* pData, int width, int height, ColorType transparent)
+{
+   return false;
+}
+
+const unsigned int* GraphicObjectImp::getObjectImage(int& width, int& height, ColorType& transparent) const
+{
+   return NULL;
+}
+
 double GraphicObjectImp::getAlpha() const
 {
    double dAlpha = -1.0;
 
-   AlphaProperty* pAlpha = NULL;
-   pAlpha = (AlphaProperty*) getProperty("Alpha");
+   AlphaProperty* pAlpha = dynamic_cast<AlphaProperty*>(getProperty("Alpha"));
    if (pAlpha != NULL)
    {
       dAlpha = pAlpha->getAlpha();
@@ -1718,7 +1711,7 @@ View* GraphicObjectImp::getObjectView() const
 {
    if (getGraphicObjectType() == VIEW_OBJECT)
    {
-      return static_cast<const ViewObjectImp *>(this)->getView();
+      return static_cast<const ViewObjectImp*>(this)->getView();
    }
 
    return NULL;
@@ -1729,7 +1722,7 @@ GraphicLayer* GraphicObjectImp::getLayer() const
    return const_cast<GraphicLayer*>(mpLayer.get());
 }
 
-void GraphicObjectImp::setLayer(GraphicLayer *pLayer)
+void GraphicObjectImp::setLayer(GraphicLayer* pLayer)
 {
    mpLayer.reset(pLayer);
 }
@@ -1741,7 +1734,7 @@ bool GraphicObjectImp::canRename() const
 
 void GraphicObjectImp::drawLabel() const
 {
-   GraphicLayerImp *pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
+   GraphicLayerImp* pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
    if (pLayer != NULL)
    {
       if (pLayer->getShowLabels()) 
@@ -1847,7 +1840,7 @@ bool GraphicObjectImp::processMouseRelease(LocationType screenCoord,
    {
       screenCoord = getLayer()->correctCoordinate(screenCoord);
       setBoundingBox(getLlCorner(), screenCoord);
-      GraphicLayerImp *pLayerImp = dynamic_cast<GraphicLayerImp*>(getLayer());
+      GraphicLayerImp* pLayerImp = dynamic_cast<GraphicLayerImp*>(getLayer());
       if (pLayerImp != NULL)
       {
          pLayerImp->completeInsertion();
@@ -1906,17 +1899,17 @@ SymbolType GraphicObjectImp::getPixelSymbol() const
 
 }
 
-bool GraphicObjectImp::setSymbolName(const string &symbolName)
+bool GraphicObjectImp::setSymbolName(const string& symbolName)
 {
    GraphicSymbolProperty symbolProp(symbolName);
    return setProperty(&symbolProp);
 }
 
-const string &GraphicObjectImp::getSymbolName() const
+const string& GraphicObjectImp::getSymbolName() const
 {
    static string empty;
    
-   GraphicSymbolProperty *pSymbol = dynamic_cast<GraphicSymbolProperty*>(getProperty("GraphicSymbol"));
+   GraphicSymbolProperty* pSymbol = dynamic_cast<GraphicSymbolProperty*>(getProperty("GraphicSymbol"));
    if (pSymbol != NULL)
    {
       return pSymbol->getSymbolName();
@@ -1933,7 +1926,7 @@ bool GraphicObjectImp::setSymbolSize(unsigned int symbolSize)
 
 unsigned int GraphicObjectImp::getSymbolSize() const
 {
-   GraphicSymbolSizeProperty *pSymbol = dynamic_cast<GraphicSymbolSizeProperty*>(getProperty("GraphicSymbolSize"));
+   GraphicSymbolSizeProperty* pSymbol = dynamic_cast<GraphicSymbolSizeProperty*>(getProperty("GraphicSymbolSize"));
    if (pSymbol != NULL)
    {
       return pSymbol->getSymbolSize();
@@ -1970,7 +1963,7 @@ bool GraphicObjectImp::setLineScaled(bool scaled)
 bool GraphicObjectImp::getLineScaled() const
 {
    bool scaled = false;
-   LineScaledProperty *pScaled = static_cast<LineScaledProperty*>(getProperty("LineScaled"));
+   LineScaledProperty* pScaled = static_cast<LineScaledProperty*>(getProperty("LineScaled"));
    if (pScaled != NULL)
    {
       scaled = pScaled->getScaled();
@@ -1993,20 +1986,20 @@ void GraphicObjectImp::subjectModified()
    notify(SIGNAL_NAME(Subject, Modified));
 }
 
-GraphicElement *GraphicObjectImp::getElement() const
+GraphicElement* GraphicObjectImp::getElement() const
 {
-   GraphicLayer *pLayer = getLayer();
+   GraphicLayer* pLayer = getLayer();
    if (pLayer != NULL)
    {
       return dynamic_cast<GraphicElement*>(pLayer->getDataElement());
    }
+
    return NULL;
 }
 
-
-const RasterElement *GraphicObjectImp::getGeoreferenceElement() const
+const RasterElement* GraphicObjectImp::getGeoreferenceElement() const
 {
-   GraphicElementImp *pElement = dynamic_cast<GraphicElementImp*>(getElement());
+   GraphicElementImp* pElement = dynamic_cast<GraphicElementImp*>(getElement());
    if (pElement == NULL)
    {
       return NULL;
@@ -2038,4 +2031,3 @@ void GraphicObjectImp::setName(const string& newName)
       notify(SIGNAL_NAME(Subject, Modified));
    }
 }
-

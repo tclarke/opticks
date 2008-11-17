@@ -22,15 +22,15 @@ class Georeference;
 class PlugInArgList;
 class RasterElement;
 
-class GeoreferencePlugIn : public AlgorithmShell 
+class GeoreferencePlugIn : public AlgorithmShell
 {
 public:
-    GeoreferencePlugIn();
-    ~GeoreferencePlugIn();
+   GeoreferencePlugIn();
+   ~GeoreferencePlugIn();
 
-    bool execute(PlugInArgList* pInParam, PlugInArgList* pOutParam);
-    bool getInputSpecification(PlugInArgList*& pArgList);
-    bool getOutputSpecification(PlugInArgList*& pArgList);
+   bool execute(PlugInArgList* pInParam, PlugInArgList* pOutParam);
+   bool getInputSpecification(PlugInArgList*& pArgList);
+   bool getOutputSpecification(PlugInArgList*& pArgList);
 
 protected:
    void preparePluginVectors();
@@ -44,8 +44,8 @@ private:
 
    bool mDisplayLayer;
    Progress* mpProgress;
-   RasterElement *mpRaster;
-   SpatialDataView *mpView;
+   RasterElement* mpRaster;
+   SpatialDataView* mpView;
    string mResultsName;
 
    std::vector<PlugIn*> mlstPlugins;

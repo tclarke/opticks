@@ -59,11 +59,18 @@ bool FeatureClass::open(string &errorMessage)
       return false;
    }
 
-   FeatureProxyConnector *pProxy = FeatureProxyConnector::instance();
+   FeatureProxyConnector* pProxy = FeatureProxyConnector::instance();
    if (VERIFYNR(pProxy != NULL))
    {
-      if (!pProxy->openDataSource(mConnection, mFeatureClassId, errorMessage)) return false;
-      if (!pProxy->getFeatureClassProperties(mFeatureClassId, mProperties, errorMessage)) return false;
+      if (!pProxy->openDataSource(mConnection, mFeatureClassId, errorMessage))
+      {
+         return false;
+      }
+
+      if (!pProxy->getFeatureClassProperties(mFeatureClassId, mProperties, errorMessage))
+      {
+         return false;
+      }
    }
 
    return true;
@@ -76,7 +83,7 @@ bool FeatureClass::close(string &errorMessage)
       return true; // nothing to close
    }
 
-   FeatureProxyConnector *pProxy = FeatureProxyConnector::instance();
+   FeatureProxyConnector* pProxy = FeatureProxyConnector::instance();
    VERIFY(pProxy != NULL);
 
    if (!pProxy->closeDataSource(mFeatureClassId, errorMessage))
@@ -100,7 +107,7 @@ bool FeatureClass::setParentElement(GraphicElement *pParentElement)
    return true;
 }
 
-bool FeatureClass::setConnectionParameters(const ArcProxyLib::ConnectionParameters &connection)
+bool FeatureClass::setConnectionParameters(const ArcProxyLib::ConnectionParameters& connection)
 {
    if (mConnection != connection)
    {
@@ -167,16 +174,18 @@ pair<LocationType, LocationType> FeatureClass::getClipping() const
       {
          if (mpParentElement != NULL)
          {
-            const RasterElement *pGrandParent = dynamic_cast<RasterElement*>(mpParentElement->getParent());
+            const RasterElement* pGrandParent = dynamic_cast<RasterElement*>(mpParentElement->getParent());
             if (pGrandParent != NULL)
             {
-               const RasterDataDescriptor *pDesc = dynamic_cast<const RasterDataDescriptor*>(pGrandParent->getDataDescriptor());
+               const RasterDataDescriptor* pDesc =
+                  dynamic_cast<const RasterDataDescriptor*>(pGrandParent->getDataDescriptor());
                if (pDesc != NULL)
                {
-                  LocationType ll = pGrandParent->convertPixelToGeocoord(LocationType(0,0));
+                  LocationType ll = pGrandParent->convertPixelToGeocoord(LocationType(0, 0));
                   LocationType lr = pGrandParent->convertPixelToGeocoord(LocationType(pDesc->getColumnCount(), 0));
                   LocationType ul = pGrandParent->convertPixelToGeocoord(LocationType(0, pDesc->getRowCount()));
-                  LocationType ur = pGrandParent->convertPixelToGeocoord(LocationType(pDesc->getColumnCount(), pDesc->getRowCount()));
+                  LocationType ur = pGrandParent->convertPixelToGeocoord(LocationType(pDesc->getColumnCount(),
+                     pDesc->getRowCount()));
 
                   clipping.first.mX = min(ll.mX, ul.mX);
                   clipping.first.mX = min(clipping.first.mX, lr.mX);
@@ -246,7 +255,7 @@ const string &FeatureClass::getLayerName() const
 bool FeatureClass::update(Progress *pProgress, string &errorMessage)
 {
    VERIFY(mpParentElement != NULL);
-   GraphicGroup *pGroup = mpParentElement->getGroup();
+   GraphicGroup* pGroup = mpParentElement->getGroup();
    VERIFY(pGroup != NULL);
 
    GraphicObjectExt1* pGroupExt1 = dynamic_cast<GraphicObjectExt1*>(pGroup);
@@ -261,10 +270,14 @@ bool FeatureClass::update(Progress *pProgress, string &errorMessage)
 
    UndoGroup undoGroup(pView, "Update Geographic Features");
 
-   if (pProgress) pProgress->updateProgress("Removing old shapes", 0, NORMAL);
+   if (pProgress)
+   {
+      pProgress->updateProgress("Removing old shapes", 0, NORMAL);
+   }
+
    pGroup->removeAllObjects(true);
 
-   FeatureProxyConnector *pProxy = FeatureProxyConnector::instance();
+   FeatureProxyConnector* pProxy = FeatureProxyConnector::instance();
    VERIFY(pProxy != NULL);
    if (mFeatureClassId.empty())
    {
@@ -323,14 +336,14 @@ void FeatureClass::addFeature(const ArcProxyLib::Feature &feature)
 {
    VERIFYNRV(mpLoadGroup != NULL && mpLoadQueryOptions != NULL);
 
-   if(mpLoadProgress != NULL)
+   if (mpLoadProgress != NULL)
    {
       mpLoadProgress->updateProgress("Inserting shapes...", mProgressBase + mProgress, NORMAL);
       mProgress = (mProgress+1) % mProgressSize;
    }
 
    GraphicObjectType grobType(VIEW_OBJECT); // VIEW_OBJECT not supported so we use this as a NULL
-   switch(feature.getType())
+   switch (feature.getType())
    {
    case ArcProxyLib::POINT: // fall through
    case ArcProxyLib::MULTIPOINT:
@@ -348,13 +361,13 @@ void FeatureClass::addFeature(const ArcProxyLib::Feature &feature)
    }
    if (grobType != VIEW_OBJECT)
    {
-      GraphicObject *pGraphic = mpLoadGroup->addObject(grobType, LocationType(0, 0));
+      GraphicObject* pGraphic = mpLoadGroup->addObject(grobType, LocationType(0, 0));
 
       pGraphic->setName(feature.getLabel());
 
       vector<pair<double, double> >::const_iterator currentVertex = feature.getVertices().begin();
       vector<LocationType>::size_type previousIndex = 0;
-      for(vector<size_t>::const_iterator path = feature.getPaths().begin();
+      for (vector<size_t>::const_iterator path = feature.getPaths().begin();
                                          path != feature.getPaths().end(); ++path)
       {
          vector<pair<double, double> >::const_iterator endVertex = currentVertex + (*path - previousIndex);
@@ -412,7 +425,7 @@ bool FeatureClass::fromDynamicObject(const DynamicObject *pDynObj)
 
    VERIFY(mConnection.fromDynamicObject(pDynObj->getAttribute(CONNECTION_KEY).getPointerToValue<DynamicObject>()));
 
-   const DynamicObject *pQueries = pDynObj->getAttribute(QUERY_KEY).getPointerToValue<DynamicObject>();
+   const DynamicObject* pQueries = pDynObj->getAttribute(QUERY_KEY).getPointerToValue<DynamicObject>();
    VERIFY(pQueries != NULL);
 
    vector<string> attributeNames;

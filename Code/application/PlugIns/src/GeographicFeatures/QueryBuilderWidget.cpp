@@ -20,14 +20,14 @@
 
 QueryBuilderWidget::QueryBuilderWidget(QWidget *pParent) : QWidget(pParent)
 {
-   QLabel *pMatchLabel1 = new QLabel("Match", this);
-   QLabel *pMatchLabel2 = new QLabel("of the following rules:", this);
+   QLabel* pMatchLabel1 = new QLabel("Match", this);
+   QLabel* pMatchLabel2 = new QLabel("of the following rules:", this);
 
    mpCombineCombo = new QComboBox(this);
    mpCombineCombo->addItem("any", "OR");
    mpCombineCombo->addItem("all", "AND");
 
-   QPushButton *pAddButton = new QPushButton("Add", this);
+   QPushButton* pAddButton = new QPushButton("Add", this);
    mpAllShapesLabel = new QLabel("Include all shapes");
 
    mpFieldModel = new QStringListModel(this);
@@ -36,7 +36,7 @@ QueryBuilderWidget::QueryBuilderWidget(QWidget *pParent) : QWidget(pParent)
 
    mpRulesWidget = new QWidget(this);
 
-   QGridLayout *pLayout = new QGridLayout(this);
+   QGridLayout* pLayout = new QGridLayout(this);
    pLayout->setColumnStretch(2, 10);
 
    pLayout->addWidget(pMatchLabel1, 0, 0);
@@ -103,7 +103,7 @@ void QueryBuilderWidget::setQuery(const std::string &queryString)
       std::string compare = (*iter++).toStdString();
       std::string value = (*iter++).toStdString();
       value = QString::fromStdString(value).replace("%~", ",").toStdString();
-      QueryBuilderWidgetElement *pElement = addQueryElement();
+      QueryBuilderWidgetElement* pElement = addQueryElement();
       if (NN(pElement))
       {
          pElement->setQueryElement(field, compare, value);
@@ -129,7 +129,7 @@ void QueryBuilderWidget::setFields(const std::vector<std::string> &fields)
 
 QueryBuilderWidgetElement *QueryBuilderWidget::addQueryElement()
 {
-   QueryBuilderWidgetElement *pElement = new QueryBuilderWidgetElement(mpFieldModel);
+   QueryBuilderWidgetElement* pElement = new QueryBuilderWidgetElement(mpFieldModel);
    VERIFYNR(connect(pElement, SIGNAL(removeButtonPressed()), 
       this, SLOT(elementRemoveButtonPressed())));
 
@@ -141,7 +141,7 @@ QueryBuilderWidgetElement *QueryBuilderWidget::addQueryElement()
 
 void QueryBuilderWidget::elementRemoveButtonPressed()
 {
-   QObject *pSender = sender();
+   QObject* pSender = sender();
 
    mpRulesLayout->removeWidget(dynamic_cast<QWidget*>(pSender));
 
@@ -181,9 +181,9 @@ QueryBuilderWidgetElement::QueryBuilderWidgetElement(QStringListModel *pFieldMod
 
    mpValueEdit = new QLineEdit(this);
 
-   QPushButton *pRemoveButton = new QPushButton("Remove", this);
+   QPushButton* pRemoveButton = new QPushButton("Remove", this);
 
-   QHBoxLayout *pLayout = new QHBoxLayout(this);
+   QHBoxLayout* pLayout = new QHBoxLayout(this);
    pLayout->setMargin(0); // intended to be placed in another layout
    pLayout->addWidget(mpFieldCombo);
    pLayout->addWidget(mpCompareCombo);

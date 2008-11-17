@@ -290,7 +290,7 @@ Nitf::TreState Nitf::Use00aParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID && totalFields != numFields)
    {
       reporter << "Total fields in the Dyanmic Object(" <<
-         totalFields <<") did not match the number found(" << numFields << ") ";
+         totalFields << ") did not match the number found(" << numFields << ") ";
       status = INVALID;
    }
 
@@ -315,30 +315,30 @@ bool Nitf::Use00aParser::fromDynamicObject(const DynamicObject& input, ostream& 
 
    try
    {
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(USE00A::ANGLE_TO_NORTH)), 3, -1);
-      output <<   toString( dv_cast<double>(input.getAttribute(USE00A::MEAN_GSD)), 5, 1);
-      output << sizeString( dv_cast<string>(input.getAttribute (USE00A::RESERVED1)), 1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(USE00A::DYNAMIC_RANGE)), 5, -1);
-      output << sizeString( dv_cast<string>(input.getAttribute (USE00A::RESERVED2)), 3);
-      output << sizeString( dv_cast<string>(input.getAttribute (USE00A::RESERVED3)), 1);
-      output << sizeString( dv_cast<string>(input.getAttribute (USE00A::RESERVED4)), 3);
-      output <<   toString( dv_cast<double>(input.getAttribute(USE00A::OBL_ANG)), 5, 2);
-      output <<   toString( dv_cast<double>(input.getAttribute(USE00A::ROLL_ANG)), 6, 2, ZERO_FILL, POS_SIGN_TRUE);
-      output << sizeString( dv_cast<string>(input.getAttribute (USE00A::RESERVED5)), 12);
-      output << sizeString( dv_cast<string>(input.getAttribute (USE00A::RESERVED6)), 15);
-      output << sizeString( dv_cast<string>(input.getAttribute (USE00A::RESERVED7)), 4);
-      output << sizeString( dv_cast<string>(input.getAttribute (USE00A::RESERVED8)), 1);
-      output << sizeString( dv_cast<string>(input.getAttribute (USE00A::RESERVED9)), 3);
-      output << sizeString( dv_cast<string>(input.getAttribute (USE00A::RESERVED10)), 1);
-      output << sizeString( dv_cast<string>(input.getAttribute (USE00A::RESERVED11)), 1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(USE00A::N_REF)), 2, -1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(USE00A::REV_NUM)), 5, -1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(USE00A::N_SEG)), 3, -1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(USE00A::MAX_LP_SEG)), 6, -1);
-      output << sizeString( dv_cast<string>(input.getAttribute (USE00A::RESERVED12)), 6);
-      output << sizeString( dv_cast<string>(input.getAttribute (USE00A::RESERVED13)), 6);
-      output <<   toString( dv_cast<double>(input.getAttribute(USE00A::SUN_EL)), 5, 1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute(USE00A::SUN_AZ)), 5, 1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(USE00A::ANGLE_TO_NORTH)), 3, -1);
+      output << toString(dv_cast<double>(input.getAttribute(USE00A::MEAN_GSD)), 5, 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(USE00A::RESERVED1)), 1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(USE00A::DYNAMIC_RANGE)), 5, -1);
+      output << sizeString(dv_cast<string>(input.getAttribute(USE00A::RESERVED2)), 3);
+      output << sizeString(dv_cast<string>(input.getAttribute(USE00A::RESERVED3)), 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(USE00A::RESERVED4)), 3);
+      output << toString(dv_cast<double>(input.getAttribute(USE00A::OBL_ANG)), 5, 2);
+      output << toString(dv_cast<double>(input.getAttribute(USE00A::ROLL_ANG)), 6, 2, ZERO_FILL, POS_SIGN_TRUE);
+      output << sizeString(dv_cast<string>(input.getAttribute(USE00A::RESERVED5)), 12);
+      output << sizeString(dv_cast<string>(input.getAttribute(USE00A::RESERVED6)), 15);
+      output << sizeString(dv_cast<string>(input.getAttribute(USE00A::RESERVED7)), 4);
+      output << sizeString(dv_cast<string>(input.getAttribute(USE00A::RESERVED8)), 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(USE00A::RESERVED9)), 3);
+      output << sizeString(dv_cast<string>(input.getAttribute(USE00A::RESERVED10)), 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(USE00A::RESERVED11)), 1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(USE00A::N_REF)), 2, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(USE00A::REV_NUM)), 5, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(USE00A::N_SEG)), 3, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(USE00A::MAX_LP_SEG)), 6, -1);
+      output << sizeString(dv_cast<string>(input.getAttribute(USE00A::RESERVED12)), 6);
+      output << sizeString(dv_cast<string>(input.getAttribute(USE00A::RESERVED13)), 6);
+      output << toString(dv_cast<double>(input.getAttribute(USE00A::SUN_EL)), 5, 1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(USE00A::SUN_AZ)), 5, 1);
    }
    catch (const bad_cast&)
    {

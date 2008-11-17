@@ -42,35 +42,35 @@ const double CENTER_LINE_HEIGHT = 0.05;
 ScaleBarObjectImp::ScaleBarObjectImp(const string& id, GraphicObjectType type, GraphicLayer* pLayer,
                                      LocationType pixelCoord) :
    FilledObjectImp(id, type, pLayer, pixelCoord),
-   mpGroup(GROUP_OBJECT, pLayer, pixelCoord),
-   mNeedsLayout(true)
+   mXgsd(1.0),
+   mYgsd(1.0),
+   mNeedsLayout(true),
+   mpGroup(GROUP_OBJECT, pLayer, pixelCoord)
 {
-   mpGeoreference.addSignal(SIGNAL_NAME(RasterElement, GeoreferenceModified), 
+   mpGeoreference.addSignal(SIGNAL_NAME(RasterElement, GeoreferenceModified),
       Slot(this, &ScaleBarObjectImp::georeferenceModified));
-
-   mXgsd = 1.0;
-   mYgsd = 1.0;
 
    double lineWidth = 1.0;
    double barWidth = 1e-2;
 
-   ColorType blackColor(0,0,0);
-   ColorType whiteColor(255,255,255);
+   ColorType blackColor(0, 0, 0);
+   ColorType whiteColor(255, 255, 255);
 
    int longLength = 0;
 
    int i = 0;
-   LocationType llObjCorner, urObjCorner;
-   LocationType llCorner, urCorner;
+   LocationType llObjCorner;
+   LocationType urObjCorner;
+   LocationType llCorner;
+   LocationType urCorner;
 
-   for(i = 0; i < 6; i++)
+   for (i = 0; i < 6; ++i)
    {
       int j = 0;
-      RectangleObjectImp *pRect = dynamic_cast<RectangleObjectImp*>(
-         mpGroup->addObject(RECTANGLE_OBJECT, pixelCoord));
+      RectangleObjectImp* pRect = dynamic_cast<RectangleObjectImp*>(mpGroup->addObject(RECTANGLE_OBJECT, pixelCoord));
       REQUIRE(pRect != NULL);
 
-      if((i+1)%2)
+      if ((i + 1) % 2)
       {
          pRect->setFillColor(whiteColor);
       }
@@ -87,8 +87,7 @@ ScaleBarObjectImp::ScaleBarObjectImp(const string& id, GraphicObjectType type, G
    }
 
    //define center line
-   LineObjectImp *pCenterLine = dynamic_cast<LineObjectImp*>(
-      mpGroup->addObject(LINE_OBJECT, pixelCoord));
+   LineObjectImp* pCenterLine = dynamic_cast<LineObjectImp*>(mpGroup->addObject(LINE_OBJECT, pixelCoord));
    REQUIRE(pCenterLine != NULL);
 
    pCenterLine->setLineColor(blackColor);
@@ -98,8 +97,7 @@ ScaleBarObjectImp::ScaleBarObjectImp(const string& id, GraphicObjectType type, G
       SIGNAL(propertyModified(GraphicProperty*)));
 
    //define left line
-   LineObjectImp *pLeftLine = dynamic_cast<LineObjectImp*>(
-      mpGroup->addObject(LINE_OBJECT, pixelCoord));
+   LineObjectImp* pLeftLine = dynamic_cast<LineObjectImp*>(mpGroup->addObject(LINE_OBJECT, pixelCoord));
    REQUIRE(pLeftLine != NULL);
 
    pLeftLine->setLineColor(blackColor);
@@ -109,8 +107,7 @@ ScaleBarObjectImp::ScaleBarObjectImp(const string& id, GraphicObjectType type, G
       SIGNAL(propertyModified(GraphicProperty*)));
 
    //define right line
-   LineObjectImp *pRightLine = dynamic_cast<LineObjectImp*>(
-      mpGroup->addObject(LINE_OBJECT, urCorner));
+   LineObjectImp* pRightLine = dynamic_cast<LineObjectImp*>(mpGroup->addObject(LINE_OBJECT, urCorner));
    REQUIRE(pRightLine != NULL);
 
    pRightLine->setLineColor(blackColor);
@@ -121,8 +118,7 @@ ScaleBarObjectImp::ScaleBarObjectImp(const string& id, GraphicObjectType type, G
 
    //left text initialize
    string leftValue = "0";
-   TextObjectImp *pLeftText = dynamic_cast<TextObjectImp*>(
-      mpGroup->addObject(TEXT_OBJECT, pixelCoord));
+   TextObjectImp* pLeftText = dynamic_cast<TextObjectImp*>(mpGroup->addObject(TEXT_OBJECT, pixelCoord));
    REQUIRE(pLeftText != NULL);
 
    pLeftText->setTextColor(blackColor);
@@ -133,8 +129,7 @@ ScaleBarObjectImp::ScaleBarObjectImp(const string& id, GraphicObjectType type, G
 
    //define center text
    string centerValue = "1";
-   TextObjectImp *pCenterText = dynamic_cast<TextObjectImp*>(
-      mpGroup->addObject(TEXT_OBJECT, pixelCoord));
+   TextObjectImp* pCenterText = dynamic_cast<TextObjectImp*>(mpGroup->addObject(TEXT_OBJECT, pixelCoord));
    REQUIRE(pCenterText != NULL);
 
    pCenterText->setTextColor(blackColor);
@@ -146,8 +141,7 @@ ScaleBarObjectImp::ScaleBarObjectImp(const string& id, GraphicObjectType type, G
    //define right text
    string rightValue = "2";
    TextStringProperty rightText(rightValue);
-   TextObjectImp *pRightText = dynamic_cast<TextObjectImp*>(
-      mpGroup->addObject(TEXT_OBJECT, pixelCoord));
+   TextObjectImp* pRightText = dynamic_cast<TextObjectImp*>(mpGroup->addObject(TEXT_OBJECT, pixelCoord));
    REQUIRE(pRightText != NULL);
 
    pRightText->setTextColor(blackColor);
@@ -167,13 +161,13 @@ ScaleBarObjectImp::ScaleBarObjectImp(const string& id, GraphicObjectType type, G
    // Set GSD
    if (pLayer != NULL)
    {
-      SpatialDataView *pView = dynamic_cast<SpatialDataView*>(pLayer->getView());
+      SpatialDataView* pView = dynamic_cast<SpatialDataView*>(pLayer->getView());
       if (pView != NULL)
       {
-         LayerList *pLayerList = pView->getLayerList();
+         LayerList* pLayerList = pView->getLayerList();
          VERIFYNRV(pLayerList != NULL);
 
-         RasterElement *pRaster = pLayerList->getPrimaryRasterElement();
+         RasterElement* pRaster = pLayerList->getPrimaryRasterElement();
          if (pRaster != NULL && pRaster->isGeoreferenced())
          {
             mXgsd = GeoAlgorithms::getXaxisGSD(pRaster);
@@ -300,16 +294,17 @@ void ScaleBarObjectImp::updateLayout()
    TextStringProperty rightText((string)rightEnd + units);
    TextStringProperty leftText("0" + units);
 
-   double width=0.0, height=0.0;
+   double width = 0.0;
+   double height = 0.0;
 
    int i = 0;
    list<GraphicObject*> objects = mpGroup->getObjects();
    list<GraphicObject*>::iterator it = objects.begin();
 
-   for (i = 0; it != objects.end(); it++, i++)
+   for (i = 0; it != objects.end(); ++it, ++i)
    {
-      GraphicObjectImp *pObj = dynamic_cast<GraphicObjectImp*>(*it);
-      TextObjectImp *pText = NULL;
+      GraphicObjectImp* pObj = dynamic_cast<GraphicObjectImp*>(*it);
+      TextObjectImp* pText = NULL;
 
       if (pObj == NULL)
       {
@@ -319,7 +314,7 @@ void ScaleBarObjectImp::updateLayout()
       LocationType llObjCorner = pObj->getLlCorner();
       LocationType urObjCorner = pObj->getUrCorner();
 
-      switch(i)
+      switch (i)
       {
          case 0:
             // big, stretchy rectangle
@@ -473,6 +468,9 @@ void ScaleBarObjectImp::updateLayout()
             pObj->setBoundingBox(llObjCorner, urObjCorner);
             break;
          }
+
+         default:
+            break;
       }
    }
 
@@ -480,9 +478,9 @@ void ScaleBarObjectImp::updateLayout()
    mNeedsLayout = false;
 }
 
-bool ScaleBarObjectImp::setProperty (const GraphicProperty* pProp)
+bool ScaleBarObjectImp::setProperty(const GraphicProperty* pProp)
 {
-   GraphicObjectImp *pCurrentObject = NULL;
+   GraphicObjectImp* pCurrentObject = NULL;
    list<GraphicObject*> objects;
    objects = mpGroup->getObjects();
    int i = 0;
@@ -502,12 +500,12 @@ bool ScaleBarObjectImp::setProperty (const GraphicProperty* pProp)
       return bSuccess;
    }
 
-   for(i = 0; it!=objects.end(); it++, i++)
+   for (i = 0; it!=objects.end(); ++it, ++i)
    {
       pCurrentObject = dynamic_cast<GraphicObjectImp*>(*it);
       if (pCurrentObject != NULL)
-      {   
-         switch(i)
+      {
+         switch (i)
          {
             case 0:        //movable rectangle
             case 2:        //white rectangle 1
@@ -541,6 +539,8 @@ bool ScaleBarObjectImp::setProperty (const GraphicProperty* pProp)
                   pCurrentObject->setProperty(pProp);
                }
                break;
+            default:
+               break;
          }//end switch
       }//end if
    }//end for
@@ -568,12 +568,12 @@ GraphicProperty* ScaleBarObjectImp::getProperty(const string& name) const
    list<GraphicObject*> groupObjects = mpGroup->getObjects();
    list<GraphicObject*>::const_iterator iter = groupObjects.begin();
 
-   for (int i = 0; iter != groupObjects.end(); iter++, i++)
+   for (int i = 0; iter != groupObjects.end(); ++iter, ++i)
    {
       GraphicObjectImp* pObject = NULL;
       pObject = dynamic_cast<GraphicObjectImp*>(*iter);
       if (pObject != NULL)
-      {   
+      {
          switch (i)
          {
             case 0:        //movable rectangle
@@ -610,6 +610,9 @@ GraphicProperty* ScaleBarObjectImp::getProperty(const string& name) const
                   pProperty = pObject->getProperty(name);
                }
                break;
+
+            default:
+               break;
          }
 
          if (pProperty != NULL)
@@ -637,7 +640,7 @@ bool ScaleBarObjectImp::hit(LocationType pixelCoord) const
 
 bool ScaleBarObjectImp::replicateObject(const GraphicObject* pObject)
 {
-   const ScaleBarObjectImp *pScaleBar = dynamic_cast<const ScaleBarObjectImp*>(pObject);
+   const ScaleBarObjectImp* pScaleBar = dynamic_cast<const ScaleBarObjectImp*>(pObject);
    if (pScaleBar == NULL)
    {
       return false;
@@ -769,7 +772,7 @@ void ScaleBarObjectImp::updateGeoreferenceAttachment()
 {
    if (mpGeoreference.get() == NULL)
    {
-      const RasterElement *pGeoreference = getGeoreferenceElement();
+      const RasterElement* pGeoreference = getGeoreferenceElement();
       if (pGeoreference != NULL)
       {
          mpGeoreference.reset(const_cast<RasterElement*>(pGeoreference));

@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef __SUBJECTADAPTER_H
-#define __SUBJECTADAPTER_H
+#ifndef SUBJECTADAPTER_H
+#define SUBJECTADAPTER_H
 
 #include "Subject.h"
 #include "SubjectImp.h"

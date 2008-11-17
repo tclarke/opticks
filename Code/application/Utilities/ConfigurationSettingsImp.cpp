@@ -58,7 +58,7 @@ ConfigurationSettingsImp* ConfigurationSettingsImp::instance()
 {
    if (spInstance == NULL)
    {
-      if(mDestroyed)
+      if (mDestroyed)
       {
          throw std::logic_error("Attempting to use ConfigurationSettings after "
             "destroying it.");
@@ -71,7 +71,7 @@ ConfigurationSettingsImp* ConfigurationSettingsImp::instance()
 
 void ConfigurationSettingsImp::destroy()
 {
-   if(mDestroyed)
+   if (mDestroyed)
    {
       throw std::logic_error("Attempting to destroy ConfigurationSettings after "
          "destroying it.");
@@ -81,23 +81,22 @@ void ConfigurationSettingsImp::destroy()
    mDestroyed = true;
 }
 
-ConfigurationSettingsImp::ConfigurationSettingsImp() : mpReleaseDate(new DateTimeImp()), mIsInitialized(false)
-{
-   mCreator = APP_SPONSOR;
-   mProduct = APP_NAME;
-   mVersion = APP_VERSION_NUMBER;
-   mNeedToLoadMruFiles = true;
+ConfigurationSettingsImp::ConfigurationSettingsImp() :
+   mCreator(APP_SPONSOR),
+   mProduct(APP_NAME),
+   mVersion(APP_VERSION_NUMBER),
+   mpReleaseDate(new DateTimeImp()),
 #if defined(_DEBUG)
-   mProductionRelease = false;
+   mProductionRelease(false),
 #else
-   mProductionRelease = APP_IS_PRODUCTION_RELEASE;
+   mProductionRelease(APP_IS_PRODUCTION_RELEASE),
 #endif
-   mReleaseType = RT_NORMAL;
-   mUserDocs = locateUserDocs();
-
-   mpReleaseDate->set(APP_RELEASE_DATE_YEAR,
-                      APP_RELEASE_DATE_MONTH,
-                      APP_RELEASE_DATE_DAY);
+   mReleaseType(RT_NORMAL),
+   mNeedToLoadMruFiles(true),
+   mUserDocs(locateUserDocs()),
+   mIsInitialized(false)
+{
+   mpReleaseDate->set(APP_RELEASE_DATE_YEAR, APP_RELEASE_DATE_MONTH, APP_RELEASE_DATE_DAY);
 
    string errorMessage;
    if (!parseDeploymentFile(errorMessage, mDeploymentDebugMsg))
@@ -108,16 +107,15 @@ ConfigurationSettingsImp::ConfigurationSettingsImp() : mpReleaseDate(new DateTim
    }
 
    Service<ApplicationServices> pApp;
-   pApp->attach(SIGNAL_NAME(ApplicationServices, ApplicationClosed), Slot(this, &ConfigurationSettingsImp::applicationClosed));
+   pApp->attach(SIGNAL_NAME(ApplicationServices, ApplicationClosed),
+      Slot(this, &ConfigurationSettingsImp::applicationClosed));
 
    // Load the values into config settings
    string settingErrorMsg;
    if (!loadSettings(settingErrorMsg))
    {
       mIsInitialized = false;
-      mInitializationErrorMsg = settingErrorMsg + " The application "
-         "will be shut "
-         "down.\n\n" + mDeploymentDebugMsg;
+      mInitializationErrorMsg = settingErrorMsg + " The application will be shut down.\n\n" + mDeploymentDebugMsg;
       return;
    }
 
@@ -138,17 +136,15 @@ void ConfigurationSettingsImp::validateInitialization()
    else
    {
       mIsInitialized = false;
-      mInitializationErrorMsg = "The Support Files setting could not be found. The "
-         "application will be shut "
-         "down.\n\n" + mDeploymentDebugMsg;
+      mInitializationErrorMsg = "The Support Files setting could not be found. "
+         "The application will be shut down.\n\n" + mDeploymentDebugMsg;
       return;
    }
    if (!QFile::exists(QString::fromStdString(supportFilesPath)))
    {
       mIsInitialized = false;
       mInitializationErrorMsg = "The Support Files directory of " + supportFilesPath + 
-         " does not exist. The application will be shut "
-         "down.\n\n" + mDeploymentDebugMsg;
+         " does not exist. The application will be shut down.\n\n" + mDeploymentDebugMsg;
       return;
    }
 
@@ -162,20 +158,20 @@ void ConfigurationSettingsImp::validateInitialization()
       string internalPath = pInternalPath->getFullPathAndName();
       if (!internalPath.empty())
       {
-         char *pPath = NULL;
-         pPath = getenv("PATH");
+         char* pPath = getenv("PATH");
 
          string path = "PATH=";
-         if (pPath!=NULL) {
-            path = path + pPath;
+         if (pPath != NULL)
+         {
+            path = path + string(pPath);
          }
 
    #if defined(WIN_API)
-         internalPath = path+";"+internalPath;
-         _putenv(const_cast<char*>(internalPath.c_str()));
+         internalPath = path + ";" + internalPath;
+         _putenv(internalPath.c_str());
    #else
-         internalPath = path+":"+internalPath;
-         putenv(const_cast<char*>(internalPath.c_str()));
+         internalPath = path + ":" + internalPath;
+         putenv(internalPath.c_str());
    #endif
       }
    }
@@ -197,7 +193,8 @@ ConfigurationSettingsImp::~ConfigurationSettingsImp()
    notify(SIGNAL_NAME(Subject, Deleted));
 
    Service<ApplicationServices> pApp;
-   pApp->detach(SIGNAL_NAME(ApplicationServices, ApplicationClosed), Slot(this, &ConfigurationSettingsImp::applicationClosed));
+   pApp->detach(SIGNAL_NAME(ApplicationServices, ApplicationClosed),
+      Slot(this, &ConfigurationSettingsImp::applicationClosed));
 
    // Delete the data descriptors in the MRU file vector
    vector<MruFile>::iterator iter;
@@ -241,7 +238,7 @@ void ConfigurationSettingsImp::initDeploymentValues()
 #if defined(WIN_API)
    char path[MAX_PATH];
    HRESULT retValue = SHGetFolderPath(NULL, CSIDL_APPDATA | CSIDL_FLAG_CREATE, NULL, SHGFP_TYPE_CURRENT, path);
-   if(SUCCEEDED(retValue))
+   if (SUCCEEDED(retValue))
    {
       userSettingsPath = QString::fromAscii(path);
    }
@@ -271,7 +268,7 @@ void ConfigurationSettingsImp::initDeploymentValues()
    }
 }
 
-string expandDeploymentPathVar(const std::string& originalValue, const std::string& relativeRoot, std::string& errorMessage)
+string expandDeploymentPathVar(const string& originalValue, const string& relativeRoot, string& errorMessage)
 {
    errorMessage.clear();
    vector<string> ignoredExpansions;
@@ -333,7 +330,7 @@ bool ConfigurationSettingsImp::parseDeploymentFile(string& errorMessage, string&
    }
 
    //parse data out of .dep file here.
-   std::map<string, string> parsedDepMap;
+   map<string, string> parsedDepMap;
    bool appHomePathReadFromDep = false;
    bool plugInPathReadFromDep = false;
    bool userConfigPathReadFromDep = false;
@@ -372,7 +369,8 @@ bool ConfigurationSettingsImp::parseDeploymentFile(string& errorMessage, string&
          {
             if (iter.second().GetType() == YAML::CT_SCALAR)
             {
-               string key, value;
+               string key;
+               string value;
                iter.first() >> key;
                iter.second() >> value;
                parsedDepMap.insert(make_pair(key, value));
@@ -384,9 +382,8 @@ bool ConfigurationSettingsImp::parseDeploymentFile(string& errorMessage, string&
       {
          errorMessage = QString("Error while parsing %1 deployment file. "
             "Found '%2' problem at line %3 and column %4. "
-            "The application will be shut"
-            "down.").arg(depFileInfo.absoluteFilePath()). \
-            arg(QString::fromStdString(ex.msg)).arg(ex.line).arg(ex.column).toStdString();
+            "The application will be shut down.").arg(depFileInfo.absoluteFilePath()).arg(
+            QString::fromStdString(ex.msg)).arg(ex.line).arg(ex.column).toStdString();
          return false;
       }
       catch (YAML::Exception&)
@@ -406,7 +403,7 @@ bool ConfigurationSettingsImp::parseDeploymentFile(string& errorMessage, string&
          if (!pathErrorMsg.empty())
          {
             errorMessage = QString("Error while parsing %1 deployment file. "
-               "The value for AppHomePath is invalid. %2" 
+               "The value for AppHomePath is invalid. %2"
                "The application will be shut "
                "down.").arg(depFileInfo.absoluteFilePath()).arg(QString::fromStdString(pathErrorMsg)).toStdString();
             return false;
@@ -420,7 +417,7 @@ bool ConfigurationSettingsImp::parseDeploymentFile(string& errorMessage, string&
          if (!pathErrorMsg.empty())
          {
             errorMessage = QString("Error while parsing %1 deployment file. "
-               "The value for PlugInPath is invalid. %2" 
+               "The value for PlugInPath is invalid. %2"
                "The application will be shut "
                "down").arg(depFileInfo.absoluteFilePath()).arg(QString::fromStdString(pathErrorMsg)).toStdString();
             return false;
@@ -436,7 +433,7 @@ bool ConfigurationSettingsImp::parseDeploymentFile(string& errorMessage, string&
          if (!pathErrorMsg.empty())
          {
             errorMessage = QString("Error while parsing %1 deployment file. "
-               "The value for UserConfigPath is invalid. %2" 
+               "The value for UserConfigPath is invalid. %2"
                "The application will be shut "
                "down").arg(depFileInfo.absoluteFilePath()).arg(QString::fromStdString(pathErrorMsg)).toStdString();
             return false;
@@ -450,7 +447,7 @@ bool ConfigurationSettingsImp::parseDeploymentFile(string& errorMessage, string&
          if (!pathErrorMsg.empty())
          {
             errorMessage = QString("Error while parsing %1 deployment file. "
-               "The value for AdditionalDefaultPath is invalid. %2" 
+               "The value for AdditionalDefaultPath is invalid. %2"
                "The application will be shut "
                "down").arg(depFileInfo.absoluteFilePath()).arg(QString::fromStdString(pathErrorMsg)).toStdString();
             return false;
@@ -495,7 +492,8 @@ bool ConfigurationSettingsImp::parseDeploymentFile(string& errorMessage, string&
       }
       if (addDefaultsPathReadFromDep)
       {
-         deploymentInfoMsg += QString("     AdditionalDefaultPath = %1\n").arg(QString::fromStdString(mAdditionalDefaultDir));
+         deploymentInfoMsg +=
+            QString("     AdditionalDefaultPath = %1\n").arg(QString::fromStdString(mAdditionalDefaultDir));
       }
       deploymentInfoMsg += QString("\n");
    }
@@ -507,11 +505,9 @@ bool ConfigurationSettingsImp::parseDeploymentFile(string& errorMessage, string&
          "as the Opticks executable.\n");
    }
 
-   if (!appHomePathReadFromDep || !plugInPathReadFromDep ||
-       !userConfigPathReadFromDep || !addDefaultsPathReadFromDep)
+   if (!appHomePathReadFromDep || !plugInPathReadFromDep || !userConfigPathReadFromDep || !addDefaultsPathReadFromDep)
    {
-      deploymentInfoMsg += QString("The settings below were resolved using the application "
-         "defaults.\n");
+      deploymentInfoMsg += QString("The settings below were resolved using the application defaults.\n");
       if (!appHomePathReadFromDep)
       {
          deploymentInfoMsg += QString("     AppHomePath - This was defaulted as one directory "
@@ -553,7 +549,6 @@ string ConfigurationSettingsImp::getPlugInPath() const
    return mPlugInPath;
 }
 
-
 string ConfigurationSettingsImp::getUserDocs() const
 {
    return mUserDocs;
@@ -592,7 +587,7 @@ string ConfigurationSettingsImp::getUserName() const
       username = pUserName;
    }
 
-   delete pUserName;
+   delete [] pUserName;
 #else
    struct passwd* userEntry = getpwuid(getuid());
    if (userEntry != NULL)
@@ -608,7 +603,7 @@ string ConfigurationSettingsImp::getUserName() const
 
 string ConfigurationSettingsImp::getOperatingSystemName() const
 {
-   std::string os;
+   string os;
 #if defined(WIN_API)
    os = "Windows";
 #elif defined(SOLARIS)
@@ -663,13 +658,11 @@ const char* ConfigurationSettingsImp::getInitializationErrorMsg()
       return NULL;
    }
 
-   const char* pErrorMsg = NULL;
-   pErrorMsg = mInitializationErrorMsg.c_str();
-
+   const char* pErrorMsg = mInitializationErrorMsg.c_str();
    return pErrorMsg;
 }
 
-bool ConfigurationSettingsImp::setSetting(const std::string &key, const DataVariant &var, bool setIfSame)
+bool ConfigurationSettingsImp::setSetting(const string& key, const DataVariant& var, bool setIfSame)
 {
    bool same = false;
 
@@ -699,23 +692,23 @@ bool ConfigurationSettingsImp::setSetting(const std::string &key, const DataVari
    return success;
 }
 
-const DataVariant &ConfigurationSettingsImp::getSetting(const string& key) const
+const DataVariant& ConfigurationSettingsImp::getSetting(const string& key) const
 {
-   static DataVariant empty;
+   static DataVariant sEmpty;
 
    const string strKey = translateKey(key);
 
-   const DataVariant &sessionValue = mpSessionSettings->getAttributeByPath(strKey);
+   const DataVariant& sessionValue = mpSessionSettings->getAttributeByPath(strKey);
    if (sessionValue.isValid())
    {
       return sessionValue;
    }
-   const DataVariant &userValue = mpUserSettings->getAttributeByPath(strKey);
+   const DataVariant& userValue = mpUserSettings->getAttributeByPath(strKey);
    if (userValue.isValid())
    {
       return userValue;
    }
-   const DataVariant &defaultValue = mpDefaultSettings->getAttributeByPath(strKey);
+   const DataVariant& defaultValue = mpDefaultSettings->getAttributeByPath(strKey);
    if (defaultValue.isValid())
    {
       return defaultValue;
@@ -726,19 +719,19 @@ const DataVariant &ConfigurationSettingsImp::getSetting(const string& key) const
       return mPlugInPathVariant;
    }
 
-   return empty;
+   return sEmpty;
 }
 
 bool ConfigurationSettingsImp::isUserSetting(const string& key) const
 {
    const string strKey = translateKey(key);
 
-   const DataVariant &sessionValue = mpSessionSettings->getAttributeByPath(strKey);
+   const DataVariant& sessionValue = mpSessionSettings->getAttributeByPath(strKey);
    if (sessionValue.isValid())
    {
       return false;
    }
-   const DataVariant &userValue = mpUserSettings->getAttributeByPath(strKey);
+   const DataVariant& userValue = mpUserSettings->getAttributeByPath(strKey);
    return userValue.isValid();
 }
 
@@ -753,7 +746,7 @@ void ConfigurationSettingsImp::deleteUserSetting(const string& key)
    }
 }
 
-void ConfigurationSettingsImp::deleteSessionSetting(const std::string& key)
+void ConfigurationSettingsImp::deleteSessionSetting(const string& key)
 {
    const string strKey = translateKey(key);
 
@@ -866,7 +859,7 @@ void ConfigurationSettingsImp::deserializeMruFiles()
    FactoryResource<Filename> pFilename;
    pFilename->setFullPathAndName(getUserSettingsFilePath());
    XmlReader xmlReader(NULL, false);
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *pDomDoc(NULL);
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* pDomDoc(NULL);
    pDomDoc = xmlReader.parse(pFilename.get());
 
    if (pDomDoc == NULL)
@@ -875,7 +868,7 @@ void ConfigurationSettingsImp::deserializeMruFiles()
       return;
    }
 
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMNodeList *pConfList(NULL);
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMNodeList* pConfList(NULL);
    pConfList = pDomDoc->getElementsByTagName(X("ConfigurationSettings"));
    if (pConfList == NULL || pConfList->getLength() != 1)
    {
@@ -883,19 +876,19 @@ void ConfigurationSettingsImp::deserializeMruFiles()
       return;
    }
 
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMNodeList *pSettingsNodes(NULL);
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMNodeList* pSettingsNodes(NULL);
    pSettingsNodes = (pConfList->item(0))->getChildNodes();
    for (unsigned int i = 0; i < pSettingsNodes->getLength(); i++)
    {
       string name;
-      XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *pSettingsNode = pSettingsNodes->item(i);
+      XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pSettingsNode = pSettingsNodes->item(i);
       int nodeType = pSettingsNode->getNodeType();
       string elementName = A(pSettingsNode->getNodeName());
       if ((nodeType == XERCES_CPP_NAMESPACE_QUALIFIER DOMNode::ELEMENT_NODE) &&
           (elementName == "group") && (pSettingsNode->hasAttributes()))
       {
-         XERCES_CPP_NAMESPACE_QUALIFIER DOMNamedNodeMap *pAttr = pSettingsNode->getAttributes();
-         XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *pNameAttr = pAttr->getNamedItem(X("name"));
+         XERCES_CPP_NAMESPACE_QUALIFIER DOMNamedNodeMap* pAttr = pSettingsNode->getAttributes();
+         XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pNameAttr = pAttr->getNamedItem(X("name"));
          if (pNameAttr != NULL)
          {
             name = A(pNameAttr->getNodeValue());
@@ -908,46 +901,41 @@ void ConfigurationSettingsImp::deserializeMruFiles()
       if (name == "MRUFiles")
       {
          Service<ModelServices> pModel;
-         for(XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *pMruFileNode = 
-                                    pSettingsNode->getFirstChild();
-                      pMruFileNode != NULL;
-                      pMruFileNode = pMruFileNode->getNextSibling())
+         for (XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pMruFileNode = pSettingsNode->getFirstChild();
+            pMruFileNode != NULL;
+            pMruFileNode = pMruFileNode->getNextSibling())
          {
-            if(XERCES_CPP_NAMESPACE_QUALIFIER XMLString::equals(pMruFileNode->getNodeName(),
-                                                                X("attribute")))
+            if (XERCES_CPP_NAMESPACE_QUALIFIER XMLString::equals(pMruFileNode->getNodeName(), X("attribute")))
             {
                vector<ImportDescriptor*> descriptors;
-               if(!static_cast<XERCES_CPP_NAMESPACE_QUALIFIER DOMElement*>(
-                        pMruFileNode)->hasAttribute(X("name")))
+               if (!static_cast<XERCES_CPP_NAMESPACE_QUALIFIER DOMElement*>(pMruFileNode)->hasAttribute(X("name")))
                {
                   continue;
                }
-               for(XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *pDescriptorNode = 
-                                             pMruFileNode->getFirstChild();
-                           pDescriptorNode != NULL;
-                           pDescriptorNode = pDescriptorNode->getNextSibling())
+               for (XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pDescriptorNode = pMruFileNode->getFirstChild();
+                  pDescriptorNode != NULL;
+                  pDescriptorNode = pDescriptorNode->getNextSibling())
                {
-                  if(XERCES_CPP_NAMESPACE_QUALIFIER XMLString::equals(pDescriptorNode->getNodeName(),
-                                                                X("DataDescriptor")))
+                  if (XERCES_CPP_NAMESPACE_QUALIFIER XMLString::equals(pDescriptorNode->getNodeName(),
+                     X("DataDescriptor")))
                   {
-                     XERCES_CPP_NAMESPACE_QUALIFIER DOMElement *pElement =
-                           static_cast<XERCES_CPP_NAMESPACE_QUALIFIER DOMElement*>(pDescriptorNode);
-                     if(! (pElement->hasAttribute(X("type")) &&
-                           pElement->hasAttribute(X("version"))))
+                     XERCES_CPP_NAMESPACE_QUALIFIER DOMElement* pElement =
+                        static_cast<XERCES_CPP_NAMESPACE_QUALIFIER DOMElement*>(pDescriptorNode);
+                     if (!(pElement->hasAttribute(X("type")) && pElement->hasAttribute(X("version"))))
                      {
                         continue;
                      }
                      string mruName = A(pElement->getAttribute(X("name")));
                      string type = A(pElement->getAttribute(X("type")));
                      unsigned int version = atoi(A(pElement->getAttribute(X("version"))));
-                     DataDescriptor *pDescriptor = pModel->createDataDescriptor(mruName, type, NULL);
-                     if(pDescriptor == NULL)
+                     DataDescriptor* pDescriptor = pModel->createDataDescriptor(mruName, type, NULL);
+                     if (pDescriptor == NULL)
                      {
                         continue;
                      }
                      try
                      {
-                        if(pDescriptor->fromXml(pElement, version))
+                        if (pDescriptor->fromXml(pElement, version))
                         {
                            ImportDescriptor* pImportDescriptor = pModel->createImportDescriptor(pDescriptor);
                            if (pImportDescriptor != NULL)
@@ -956,7 +944,7 @@ void ConfigurationSettingsImp::deserializeMruFiles()
                            }
                         }
                      }
-                     catch(XmlBase::XmlException &)
+                     catch (XmlBase::XmlException&)
                      {
                         // do nothing
                      }
@@ -981,7 +969,7 @@ void ConfigurationSettingsImp::deserializeMruFiles()
    mNeedToLoadMruFiles = false;
 }
 
-void ConfigurationSettingsImp::applicationClosed(Subject& subject, const std::string& signal, const boost::any &args)
+void ConfigurationSettingsImp::applicationClosed(Subject& subject, const string& signal, const boost::any& args)
 {
    serialize();
 }
@@ -1017,7 +1005,7 @@ string ConfigurationSettingsImp::locateUserDocs()
 #if defined(WIN_API)
    char path[MAX_PATH];
    HRESULT retValue = SHGetFolderPath(NULL, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, NULL, SHGFP_TYPE_CURRENT, path);
-   if(SUCCEEDED(retValue))
+   if (SUCCEEDED(retValue))
    {
       userFolderPath = QString::fromAscii(path);
    }
@@ -1172,7 +1160,7 @@ DynamicObject* ConfigurationSettingsImp::deserialize(const Filename* pFilename) 
    }
    FactoryResource<DynamicObject> pObj;
    XmlReader xmlReader(NULL, false);
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *pDomDoc(NULL);
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* pDomDoc(NULL);
    pDomDoc = xmlReader.parse(pFilename);
 
    if (pDomDoc == NULL)
@@ -1180,26 +1168,26 @@ DynamicObject* ConfigurationSettingsImp::deserialize(const Filename* pFilename) 
       return NULL;
    }
 
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMNodeList *pConfList(NULL);
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMNodeList* pConfList(NULL);
    pConfList = pDomDoc->getElementsByTagName(X("ConfigurationSettings"));
    if (pConfList == NULL || pConfList->getLength() != 1)
    {
       return NULL;
    }
 
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMNodeList *pSettingsNodes(NULL);
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMNodeList* pSettingsNodes(NULL);
    pSettingsNodes = (pConfList->item(0))->getChildNodes();
    for (unsigned int i = 0; i < pSettingsNodes->getLength(); i++)
    {
       string name;
-      XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *pSettingsNode = pSettingsNodes->item(i);
+      XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pSettingsNode = pSettingsNodes->item(i);
       int nodeType = pSettingsNode->getNodeType();
       string elementName = A(pSettingsNode->getNodeName());
       if ((nodeType == XERCES_CPP_NAMESPACE_QUALIFIER DOMNode::ELEMENT_NODE) &&
           (elementName == "group") && (pSettingsNode->hasAttributes()))
       {
-         XERCES_CPP_NAMESPACE_QUALIFIER DOMNamedNodeMap *pAttr = pSettingsNode->getAttributes();
-         XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *pNameAttr = pAttr->getNamedItem(X("name"));
+         XERCES_CPP_NAMESPACE_QUALIFIER DOMNamedNodeMap* pAttr = pSettingsNode->getAttributes();
+         XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pNameAttr = pAttr->getNamedItem(X("name"));
          if (pNameAttr != NULL)
          {
             name = A(pNameAttr->getNodeValue());
@@ -1220,7 +1208,7 @@ DynamicObject* ConfigurationSettingsImp::deserialize(const Filename* pFilename) 
 
 void ConfigurationSettingsImp::updateProductionStatus()
 {
-   if(mReleaseType != RT_NORMAL && mReleaseType != RT_PROTO)
+   if (mReleaseType != RT_NORMAL && mReleaseType != RT_PROTO)
    {
       mProductionRelease = false;
       return;
@@ -1232,18 +1220,19 @@ void ConfigurationSettingsImp::updateProductionStatus()
    mProductionRelease = APP_IS_PRODUCTION_RELEASE;
 #endif
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Re-enable checking of plug-in production status to determine application production status. (kstreith)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Re-enable checking of plug-in production status " \
+   "to determine application production status. (kstreith)")
    /*
-   if(mProductionRelease)
+   if (mProductionRelease)
    {
       // search all plugins until we get a false
       Service<PlugInManagerServices> pPlugInManager;
       vector<PlugInDescriptor*> plugins = pPlugInManager->getPlugInDescriptors();
-      for(vector<PlugInDescriptor*>::const_iterator plugin = plugins.begin();
-          mProductionRelease && (plugin != plugins.end());
-          ++plugin)
+      for (vector<PlugInDescriptor*>::const_iterator plugin = plugins.begin();
+         mProductionRelease && (plugin != plugins.end());
+         ++plugin)
       {
-         PlugInDescriptor *pDesc = *plugin;
+         PlugInDescriptor* pDesc = *plugin;
          if (pDesc == NULL)
          {
             continue;
@@ -1288,14 +1277,14 @@ bool ConfigurationSettingsImp::serializeSettings(const string& filename, const D
    pSettings->toXml(&xmlWriter);
    xmlWriter.popAddPoint();
 
-   if(saveMru && !mMruFiles.empty())
+   if (saveMru && !mMruFiles.empty())
    {
       xmlWriter.pushAddPoint(xmlWriter.addElement("group"));
       xmlWriter.addAttr("name", "MRUFiles");
       for (vector<MruFile>::const_iterator iter = mMruFiles.begin(); iter != mMruFiles.end(); ++iter)
       {
          MruFile mruFile = *iter;
-         if(mruFile.mName.empty() || mruFile.mImporterName.empty() || mruFile.mDescriptors.empty())
+         if (mruFile.mName.empty() || mruFile.mImporterName.empty() || mruFile.mDescriptors.empty())
          {
             continue;
          }
@@ -1303,10 +1292,9 @@ bool ConfigurationSettingsImp::serializeSettings(const string& filename, const D
          xmlWriter.addAttr("name", mruFile.mName);
          xmlWriter.addAttr("importer", mruFile.mImporterName);
 
-         vector<ImportDescriptor*>::iterator descriptorIter;
-         for (descriptorIter = mruFile.mDescriptors.begin();
-              descriptorIter != mruFile.mDescriptors.end();
-              ++descriptorIter)
+         for (vector<ImportDescriptor*>::iterator descriptorIter = mruFile.mDescriptors.begin();
+            descriptorIter != mruFile.mDescriptors.end();
+            ++descriptorIter)
          {
             ImportDescriptor* pImportDescriptor = *descriptorIter;
             if (pImportDescriptor != NULL)

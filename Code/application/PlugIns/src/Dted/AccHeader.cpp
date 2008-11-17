@@ -6,8 +6,6 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
- 
-
 
 #include <memory>
 #include <string>
@@ -18,14 +16,17 @@
 
 #include "AccHeader.h"
 
-AccHeader::AccHeader()
+AccHeader::AccHeader() :
+   mTotalHeaderSize(0)
 {
-   mTotalHeaderSize = 0;
 }
 
 bool AccHeader::readHeader(FILE* pInputFile)
 {
-   if (pInputFile == NULL) return false;
+   if (pInputFile == NULL)
+   {
+      return false;
+   }
 
    size_t beforeRead = ftell(pInputFile);
    /* DL06252003: We're not doing anything with this stuff, but it's a good idea to
@@ -34,12 +35,18 @@ bool AccHeader::readHeader(FILE* pInputFile)
 
    memset(&mAcc, '\0', ACC_SIZE);
 
-   if (0 == fread(&mAcc, sizeof(char), ACC_SIZE, pInputFile)) return false;
+   if (0 == fread(&mAcc, sizeof(char), ACC_SIZE, pInputFile))
+   {
+      return false;
+   }
+
    mTotalHeaderSize = ftell(pInputFile);
    
    size_t afterRead = ftell(pInputFile);
    if ((afterRead - beforeRead) != ACC_PROPER_TOTAL) // we've read the wrong # of bytes!
+   {
       return false;
+   }
 
    // we've succeded and are done
    return true;
@@ -49,5 +56,3 @@ size_t AccHeader::getTotalHeaderSize()
 {
    return mTotalHeaderSize;
 }
-
- 

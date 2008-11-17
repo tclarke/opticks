@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef DMSFORMATCOMBOBOX_H
-#define DMSFORMATCOMBOBOX_H
+#ifndef DMSFORMATTYPECOMBOBOX_H
+#define DMSFORMATTYPECOMBOBOX_H
 
 #include "TypesFile.h"
 

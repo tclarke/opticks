@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef MENUANDTOOLBARTESTGUI_H__
-#define MENUANDTOOLBARTESTGUI_H__
+#ifndef MENUANDTOOLBARTESTGUI_H
+#define MENUANDTOOLBARTESTGUI_H
 
 #include <QtCore/QVariant>
 #include <QtCore/QObject>

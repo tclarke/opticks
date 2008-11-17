@@ -223,7 +223,7 @@ Nitf::TreState Nitf::BlockaParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID && totalFields != numFields)
    {
       reporter << "Total fields in the Dynamic Object(" <<
-         totalFields <<") did not match the number found(" << numFields << ") ";
+         totalFields << ") did not match the number found(" << numFields << ") ";
       status = INVALID;
    }
 
@@ -247,17 +247,17 @@ bool Nitf::BlockaParser::fromDynamicObject(const DynamicObject& input, ostream& 
 
    try
    {
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(BLOCKA::BLOCK_INSTANCE)), 2, -1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(BLOCKA::N_GRAY)), 5, -1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(BLOCKA::L_LINES)), 5, -1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(BLOCKA::LAYOVER_ANGLE)), 3, -1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(BLOCKA::SHADOW_ANGLE)), 3, -1);
-      output << sizeString( dv_cast<string>(input.getAttribute (BLOCKA::RESERVED1)), 16);
-      output << sizeString( dv_cast<string>(input.getAttribute (BLOCKA::FRLC_LOC)), 21);
-      output << sizeString( dv_cast<string>(input.getAttribute (BLOCKA::LRLC_LOC)), 21);
-      output << sizeString( dv_cast<string>(input.getAttribute (BLOCKA::LRFC_LOC)), 21);
-      output << sizeString( dv_cast<string>(input.getAttribute (BLOCKA::FRFC_LOC)), 21);
-      output <<   toString( dv_cast<double>(input.getAttribute(BLOCKA::RESERVED2)), 5, 1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(BLOCKA::BLOCK_INSTANCE)), 2, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(BLOCKA::N_GRAY)), 5, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(BLOCKA::L_LINES)), 5, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(BLOCKA::LAYOVER_ANGLE)), 3, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(BLOCKA::SHADOW_ANGLE)), 3, -1);
+      output << sizeString(dv_cast<string>(input.getAttribute(BLOCKA::RESERVED1)), 16);
+      output << sizeString(dv_cast<string>(input.getAttribute(BLOCKA::FRLC_LOC)), 21);
+      output << sizeString(dv_cast<string>(input.getAttribute(BLOCKA::LRLC_LOC)), 21);
+      output << sizeString(dv_cast<string>(input.getAttribute(BLOCKA::LRFC_LOC)), 21);
+      output << sizeString(dv_cast<string>(input.getAttribute(BLOCKA::FRFC_LOC)), 21);
+      output << toString(dv_cast<double>(input.getAttribute(BLOCKA::RESERVED2)), 5, 1);
    }
    catch (const bad_cast&)
    {
@@ -284,21 +284,21 @@ TreExportStatus Nitf::BlockaParser::exportMetadata(const RasterDataDescriptor &d
    //     b) When not chipping then adding a BLOCKA is optional to get  more accurate corner coordinates.
 
 
-   const DynamicObject *pMetadata = descriptor.getMetadata();
+   const DynamicObject* pMetadata = descriptor.getMetadata();
    VERIFYRV(pMetadata != NULL, REMOVE);
    try
    {
 
       try
       {
-         const DataVariant &nitfMetadata = pMetadata->getAttribute(Nitf::NITF_METADATA);
-         const DynamicObject *pExistingBlocka =
+         const DataVariant& nitfMetadata = pMetadata->getAttribute(Nitf::NITF_METADATA);
+         const DynamicObject* pExistingBlocka =
             getTagHandle(dv_cast<DynamicObject>(nitfMetadata), "BLOCKA", FindFirst());
 
-         const DynamicObject *pExistingRpc00a =
+         const DynamicObject* pExistingRpc00a =
             getTagHandle(dv_cast<DynamicObject>(nitfMetadata), "RPC00A", FindFirst());
 
-         const DynamicObject *pExistingRpc00b =
+         const DynamicObject* pExistingRpc00b =
             getTagHandle(dv_cast<DynamicObject>(nitfMetadata), "RPC00B", FindFirst());
 
          if (pExistingBlocka || pExistingRpc00a || pExistingRpc00b)
@@ -311,7 +311,7 @@ TreExportStatus Nitf::BlockaParser::exportMetadata(const RasterDataDescriptor &d
          return REMOVE;
       }
 
-      const vector<DimensionDescriptor> &exportRows = exportDescriptor.getRows();
+      const vector<DimensionDescriptor>& exportRows = exportDescriptor.getRows();
       VERIFYRV(!exportRows.empty(), REMOVE);
 
       DimensionDescriptor lastRow = exportRows.back();
@@ -326,7 +326,7 @@ TreExportStatus Nitf::BlockaParser::exportMetadata(const RasterDataDescriptor &d
       // Get the RasterElement out of ModelServices
 
       Service<ModelServices> pModel;
-      RasterElement *pRaster = dynamic_cast<RasterElement*>
+      RasterElement* pRaster = dynamic_cast<RasterElement*>
          (pModel->getElement(descriptor.getName(), descriptor.getType(), descriptor.getParent()));
       VERIFYRV(pRaster != NULL, REMOVE);
 
@@ -336,13 +336,13 @@ TreExportStatus Nitf::BlockaParser::exportMetadata(const RasterDataDescriptor &d
       }
 
       // Find the active numbers of the exported corners.  Get the DimensionDescriptors
-      const vector<DimensionDescriptor> &exportCols = exportDescriptor.getColumns();
+      const vector<DimensionDescriptor>& exportCols = exportDescriptor.getColumns();
       VERIFYRV(!exportCols.empty(), REMOVE);
 
       // getOnDiskNumber() returns pixel index of file being created
       DimensionDescriptor firstRow = exportRows.front();
       DimensionDescriptor firstCol = exportCols.front();
-      DimensionDescriptor lastCol  = exportCols.back();
+      DimensionDescriptor lastCol = exportCols.back();
 
       LocationType ulGeo = pRaster->convertPixelToGeocoord
          (LocationType(firstCol.getActiveNumber(), firstRow.getActiveNumber()));
@@ -351,10 +351,10 @@ TreExportStatus Nitf::BlockaParser::exportMetadata(const RasterDataDescriptor &d
          (LocationType(firstCol.getActiveNumber(), lastRow.getActiveNumber()));
 
       LocationType urGeo = pRaster->convertPixelToGeocoord
-         (LocationType(lastCol.getActiveNumber(),  firstRow.getActiveNumber()));
+         (LocationType(lastCol.getActiveNumber(), firstRow.getActiveNumber()));
 
       LocationType lrGeo = pRaster->convertPixelToGeocoord(
-         LocationType(lastCol.getActiveNumber(),  lastRow.getActiveNumber()));
+         LocationType(lastCol.getActiveNumber(), lastRow.getActiveNumber()));
 
       string blank;
 
@@ -366,20 +366,20 @@ TreExportStatus Nitf::BlockaParser::exportMetadata(const RasterDataDescriptor &d
 
       // llGeo.mX is lat, llGeo.mY is lon
 
-      string ll_lat  = toString( llGeo.mX, 10, 6, ZERO_FILL, POS_SIGN_TRUE);
-      string ll_long = toString( llGeo.mY, 11, 6, ZERO_FILL, POS_SIGN_TRUE);
+      string ll_lat = toString(llGeo.mX, 10, 6, ZERO_FILL, POS_SIGN_TRUE);
+      string ll_long = toString(llGeo.mY, 11, 6, ZERO_FILL, POS_SIGN_TRUE);
       string ll_latlong = ll_lat + ll_long;
 
-      string lr_lat  = toString( lrGeo.mX, 10, 6, ZERO_FILL, POS_SIGN_TRUE);
-      string lr_long = toString( lrGeo.mY, 11, 6, ZERO_FILL, POS_SIGN_TRUE);
+      string lr_lat = toString(lrGeo.mX, 10, 6, ZERO_FILL, POS_SIGN_TRUE);
+      string lr_long = toString(lrGeo.mY, 11, 6, ZERO_FILL, POS_SIGN_TRUE);
       string lr_latlong = lr_lat + lr_long;
 
-      string ul_lat  = toString( ulGeo.mX, 10, 6, ZERO_FILL, POS_SIGN_TRUE);
-      string ul_long = toString( ulGeo.mY, 11, 6, ZERO_FILL, POS_SIGN_TRUE);
+      string ul_lat = toString(ulGeo.mX, 10, 6, ZERO_FILL, POS_SIGN_TRUE);
+      string ul_long = toString(ulGeo.mY, 11, 6, ZERO_FILL, POS_SIGN_TRUE);
       string ul_latlong = ul_lat + ul_long;
 
-      string ur_lat  = toString( urGeo.mX, 10, 6, ZERO_FILL, POS_SIGN_TRUE);
-      string ur_long = toString( urGeo.mY, 11, 6, ZERO_FILL, POS_SIGN_TRUE);
+      string ur_lat = toString(urGeo.mX, 10, 6, ZERO_FILL, POS_SIGN_TRUE);
+      string ur_long = toString(urGeo.mY, 11, 6, ZERO_FILL, POS_SIGN_TRUE);
       string ur_latlong = ur_lat + ur_long;
 
       tre.setAttribute(Nitf::TRE::BLOCKA::BLOCK_INSTANCE, 1U);

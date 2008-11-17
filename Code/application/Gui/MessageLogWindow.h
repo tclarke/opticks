@@ -49,8 +49,8 @@ protected slots:
 
 private:
    std::map<MessageLog*, QTreeView*> mLogs;
-   QComboBox *mpLogs;
-   MessageLogWindowModel *mpModel;
+   QComboBox* mpLogs;
+   MessageLogWindowModel* mpModel;
    AttachmentPtr<MessageLogMgr> mpMsgLogMgr;
    AttachmentPtr<ApplicationServices> mpAppSrvcs;
 };
@@ -63,9 +63,14 @@ class MessageLogWindowModel : public QAbstractItemModel
    class DataElement
    {
    public:
-      Message *mpMessage;
+      Message* mpMessage;
       bool mIsProperties;
-      DataElement(Message *pMessage, bool isProperties=false) : mpMessage(pMessage), mIsProperties(isProperties) {}
+
+      DataElement(Message* pMessage, bool isProperties = false) :
+         mpMessage(pMessage),
+         mIsProperties(isProperties)
+      {
+      }
    };
 
 public:
@@ -92,7 +97,7 @@ protected:
 
 private:
    QStringList mHeaderNames;
-   const MessageLog *mpLog;
+   const MessageLog* mpLog;
    mutable QHash<const DynamicObject*, const Message*> mPropertyCache;
 };
 

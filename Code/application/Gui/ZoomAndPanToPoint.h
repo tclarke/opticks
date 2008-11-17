@@ -29,7 +29,7 @@ class ZoomAndPanToPointDlg : public QDialog
 {
    Q_OBJECT
 
- public:
+public:
    ZoomAndPanToPointDlg(RasterElement* pRaster, GeocoordType coordType = GEOCOORD_GENERAL, QWidget* parent = 0);
    ~ZoomAndPanToPointDlg() {}
 
@@ -38,7 +38,7 @@ class ZoomAndPanToPointDlg : public QDialog
 
    LocationType getCenter() const;
 
- private:
+private:
    QLineEdit* mpLatitudeEdit;
    QLineEdit* mpLongitudeEdit;
    QLineEdit* mpZoneEdit;
@@ -47,9 +47,9 @@ class ZoomAndPanToPointDlg : public QDialog
    QPushButton* mpOK;
    GeocoordType mCoordType;
 
-   RasterElement *mpRaster;
+   RasterElement* mpRaster;
 
- private slots:
+private slots:
    void allowOk();
 
    void latModified();

@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef EXECUTABLE_AGENT_ADAPTER_H
-#define EXECUTABLE_AGENT_ADAPTER_H
+#ifndef EXECUTABLEAGENTADAPTER_H
+#define EXECUTABLEAGENTADAPTER_H
 
 #include "ExecutableAgent.h"
 #include "ExecutableAgentImp.h"

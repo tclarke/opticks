@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef NITF_ICHIPB_PARSER_H
-#define NITF_ICHIPB_PARSER_H
+#ifndef NITFICHIPBPARSER_H
+#define NITFICHIPBPARSER_H
 
 #include "NitfTreParserShell.h"
 

@@ -26,11 +26,12 @@
 #include <vector>
 using namespace std;
 
-std::map<std::string, QString> FilePlugInDlg::mLastPlugIns = std::map<std::string, QString>();
+map<string, QString> FilePlugInDlg::mLastPlugIns = map<string, QString>();
 
-FilePlugInDlg::FilePlugInDlg(const std::vector<PlugInDescriptor*> &availablePlugins, 
-                             const std::string plugInKey, QWidget* parent) :
-   QFileDialog(parent), mPlugInKey(plugInKey)
+FilePlugInDlg::FilePlugInDlg(const vector<PlugInDescriptor*>& availablePlugins, const string plugInKey,
+                             QWidget* parent) :
+   QFileDialog(parent),
+   mPlugInKey(plugInKey)
 {
    // Plug-in label
    mpPlugInLabel = new QLabel(this);
@@ -66,10 +67,11 @@ FilePlugInDlg::FilePlugInDlg(const std::vector<PlugInDescriptor*> &availablePlug
    setFileMode(QFileDialog::ExistingFile);
    enableOptions(false);
 
-   for (std::vector<PlugInDescriptor*>::const_iterator iter = availablePlugins.begin();
-      iter != availablePlugins.end(); ++iter)
+   for (vector<PlugInDescriptor*>::const_iterator iter = availablePlugins.begin();
+      iter != availablePlugins.end();
+      ++iter)
    {
-      PlugInDescriptor *pDescriptor = *iter;
+      PlugInDescriptor* pDescriptor = *iter;
       LOG_IF(pDescriptor == NULL, continue);
 
       QString strPlugIn = QString::fromStdString(pDescriptor->getName());
@@ -93,15 +95,18 @@ FilePlugInDlg::FilePlugInDlg(const std::vector<PlugInDescriptor*> &availablePlug
    // Set the path bookmarks
    QList<QUrl> bookmarks;
    vector<Filename*> pathBookmarks = Service<ConfigurationSettings>()->getSettingPathBookmarks();
-   for(vector<Filename*>::iterator pathBookmark = pathBookmarks.begin(); pathBookmark != pathBookmarks.end(); ++pathBookmark)
+   for (vector<Filename*>::iterator pathBookmark = pathBookmarks.begin();
+      pathBookmark != pathBookmarks.end();
+      ++pathBookmark)
    {
-      Filename *pPath = *pathBookmark;
-      if(pPath != NULL && pPath->isDirectory())
+      Filename* pPath = *pathBookmark;
+      if (pPath != NULL && pPath->isDirectory())
       {
          QUrl url = QUrl::fromLocalFile(QString::fromStdString(pPath->getFullPathAndName()));
          bookmarks.push_back(url);
       }
    }
+
    setSidebarUrls(bookmarks);
 
    // Set the initial directory
@@ -114,7 +119,7 @@ FilePlugInDlg::FilePlugInDlg(const std::vector<PlugInDescriptor*> &availablePlug
       directory = pWorkingDir->getFullPathAndName();
    }
 
-   if(!directory.empty())
+   if (!directory.empty())
    {
       setDirectory(QString::fromStdString(directory));
    }
@@ -144,7 +149,7 @@ void FilePlugInDlg::setSelectedPlugIn(const QString& strPlugIn)
    }
 
    int idx = mpPlugInCombo->findText(strPlugIn);
-   if(idx != -1)
+   if (idx != -1)
    {
       mpPlugInCombo->setCurrentIndex(idx);
       updateFileFilters(strPlugIn);
@@ -241,7 +246,7 @@ void FilePlugInDlg::updateFileFilters(const QString& strPlugIn)
 void FilePlugInDlg::accept()
 {
    QStringList selected = selectedFiles();
-   if(!selected.isEmpty() && !QFileInfo(selected.front()).isDir())
+   if (!selected.isEmpty() && !QFileInfo(selected.front()).isDir())
    {
       // Set the current plug-in to the selected plug-in
       mLastPlugIns[mPlugInKey] = getSelectedPlugIn();
@@ -279,14 +284,13 @@ void FilePlugInDlg::accept()
    QFileDialog::accept();
 }
 
-std::vector<PlugInDescriptor*> FilePlugInDlg::getPlugInNames(const std::string &plugInType, std::string subtype)
+vector<PlugInDescriptor*> FilePlugInDlg::getPlugInNames(const string& plugInType, string subtype)
 {
-   std::vector<PlugInDescriptor*> selectedDescriptors;
-   std::vector<PlugInDescriptor*> descriptors = Service<PlugInManagerServices>()->getPlugInDescriptors(plugInType);
-   for (std::vector<PlugInDescriptor*>::const_iterator iter = descriptors.begin();
-      iter != descriptors.end(); ++iter)
+   vector<PlugInDescriptor*> selectedDescriptors;
+   vector<PlugInDescriptor*> descriptors = Service<PlugInManagerServices>()->getPlugInDescriptors(plugInType);
+   for (vector<PlugInDescriptor*>::const_iterator iter = descriptors.begin(); iter != descriptors.end(); ++iter)
    {
-      PlugInDescriptor *pDescriptor = *iter;
+      PlugInDescriptor* pDescriptor = *iter;
       LOG_IF(pDescriptor == NULL, continue);
 
       if (pDescriptor->getSubtype() == subtype || subtype.empty())
@@ -302,7 +306,7 @@ bool FilePlugInDlg::isDefaultPlugIn() const
    return (getSelectedPlugIn() != mLastPlugIns[mPlugInKey]);
 }
 
-void FilePlugInDlg::setPlugInLabel(const QString &label)
+void FilePlugInDlg::setPlugInLabel(const QString& label)
 {
    mpPlugInLabel->setText(label + ":  ");
 }

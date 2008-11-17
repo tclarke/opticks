@@ -28,7 +28,7 @@ public:
    ~GeoTIFFExporter();
 
    bool abort();
-   bool hasAbort() { return true; };
+   bool hasAbort();
    bool execute(PlugInArgList* pInParam, PlugInArgList* pOutParam);
    bool getInputSpecification(PlugInArgList*& pArgList);
    bool getOutputSpecification(PlugInArgList*& pArgList);
@@ -36,10 +36,10 @@ public:
    QWidget* getExportOptionsWidget(const PlugInArgList *pInArgList);
 
 private:
-   bool CreateGeoTIFF(TIFF *out);
-   bool applyWorldFile(TIFF* out);
-   void updateProgress(int current, int total, std::string ProgressString, ReportingLevel l = NORMAL);
-   bool writeCube(TIFF* out);
+   bool CreateGeoTIFF(TIFF* pOut);
+   bool applyWorldFile(TIFF* pOut);
+   void updateProgress(int current, int total, std::string progressString, ReportingLevel l = NORMAL);
+   bool writeCube(TIFF* pOut);
 
    Step* mpStep;
    std::auto_ptr<OptionsTiffExporter> mpOptionWidget;

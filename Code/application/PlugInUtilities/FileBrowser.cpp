@@ -26,10 +26,12 @@ FileBrowser::FileBrowser(QWidget* pParent) :
    mExistingFile(true)
 {
    // Filename edit
-   mpFileEdit = new QLineEdit(this);
    QCompleter* pCompleter = new QCompleter(this);
-   pCompleter->setModel(new QDirModel(QStringList(), QDir::NoDotAndDotDot | QDir::AllDirs | QDir::AllEntries,
-      QDir::Name | QDir::DirsFirst, pCompleter));
+   QDirModel* pDirModel = new QDirModel(QStringList(), QDir::NoDotAndDotDot | QDir::AllDirs | QDir::AllEntries,
+      QDir::Name | QDir::DirsFirst, pCompleter);
+   pCompleter->setModel(pDirModel);
+
+   mpFileEdit = new QLineEdit(this);
    mpFileEdit->setCompleter(pCompleter);
    mpFileEdit->installEventFilter(this);
 

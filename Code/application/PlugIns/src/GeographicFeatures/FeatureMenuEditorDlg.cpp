@@ -35,20 +35,20 @@ FeatureMenuEditorDlg::FeatureMenuEditorDlg(QWidget *pParent) : QDialog(pParent)
 {
    setWindowTitle("Feature Menu Editor");
 
-   const DynamicObject *pOptionsSetting = FeatureManager::getSettingOptions();
+   const DynamicObject* pOptionsSetting = FeatureManager::getSettingOptions();
    if (pOptionsSetting != NULL)
    {
       mpOptionsSet->merge(pOptionsSetting);
    }
 
-   FeatureClassWidget *pInspectorWidget = new FeatureClassWidget(this);
+   FeatureClassWidget* pInspectorWidget = new FeatureClassWidget(this);
    
-   FeatureProxyConnector *pProxy = FeatureProxyConnector::instance();
+   FeatureProxyConnector* pProxy = FeatureProxyConnector::instance();
    std::vector<ArcProxyLib::ConnectionType> availableTypes = pProxy->getAvailableConnectionTypes();
    pInspectorWidget->setAvailableConnectionTypes(availableTypes);
 
    mpListInspector = new ListInspectorWidget(pInspectorWidget, this);
-   QLayout *pListInspectorLayout = mpListInspector->layout();
+   QLayout* pListInspectorLayout = mpListInspector->layout();
    if (pListInspectorLayout != NULL)
    {
       pListInspectorLayout->setMargin(0);
@@ -63,13 +63,13 @@ FeatureMenuEditorDlg::FeatureMenuEditorDlg(QWidget *pParent) : QDialog(pParent)
    VERIFYNR(connect(mpListInspector, SIGNAL(removeItem(QListWidgetItem*)), 
       this, SLOT(removeItem(QListWidgetItem*))));
 
-   QDialogButtonBox *pButtons = new QDialogButtonBox(
+   QDialogButtonBox* pButtons = new QDialogButtonBox(
       QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, this);
 
    QFrame* pHLine = new QFrame(this);
    pHLine->setFrameStyle(QFrame::HLine | QFrame::Sunken);
 
-   QVBoxLayout *pLayout = new QVBoxLayout(this);
+   QVBoxLayout* pLayout = new QVBoxLayout(this);
    pLayout->setMargin(10);
    pLayout->setSpacing(5);
    pLayout->addWidget(mpListInspector);
@@ -123,7 +123,7 @@ void FeatureMenuEditorDlg::loadInspector(QWidget *pInspector, QListWidgetItem *p
       return;
    }
 
-   FeatureClassWidget *pInspectorWidget = dynamic_cast<FeatureClassWidget*>(pInspector);
+   FeatureClassWidget* pInspectorWidget = dynamic_cast<FeatureClassWidget*>(pInspector);
    VERIFYNRV(pInspectorWidget != NULL);
 
    string name = pItem->text().toStdString();
@@ -136,7 +136,7 @@ void FeatureMenuEditorDlg::loadInspector(QWidget *pInspector, QListWidgetItem *p
 
 void FeatureMenuEditorDlg::saveInspector(QWidget *pInspector, QListWidgetItem *pItem)
 {
-   FeatureClassWidget *pInspectorWidget = dynamic_cast<FeatureClassWidget*>(pInspector);
+   FeatureClassWidget* pInspectorWidget = dynamic_cast<FeatureClassWidget*>(pInspector);
 
    if (pItem == NULL)
    {
@@ -173,4 +173,8 @@ void FeatureMenuEditorDlg::removeItem(QListWidgetItem *pItem)
 
    mpOptionsSet->removeAttribute(pItem->text().toStdString());
 }
+
+
+
+
 

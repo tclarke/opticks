@@ -27,11 +27,12 @@
 
 using namespace std;
 
-EnviLibraryExporter::EnviLibraryExporter() : mbAbort(false),
-                                             mpProgress(NULL),
-                                             mpSignatureSet(NULL),
-                                             mpFileDescriptor(NULL),
-                                             mpStep(NULL)
+EnviLibraryExporter::EnviLibraryExporter() :
+   mbAbort(false),
+   mpProgress(NULL),
+   mpSignatureSet(NULL),
+   mpFileDescriptor(NULL),
+   mpStep(NULL)
 {
    setName("ENVI Library Exporter");
    setCreator("Ball Aerospace & Technologies Corp.");
@@ -116,7 +117,11 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
    if (!extractSignatures(*mpSignatureSet, signatures))
    {
       message = "Cannot extract all of the signatures from the library!";
-      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);  
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(message, 0, ERRORS);
+      }
+
       pStep->finalize(Message::Failure, message);
       return false;
    }
@@ -124,7 +129,11 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
    if (signatures.empty() == true)
    {
       message = "The signature set contains no signatures!";
-      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);  
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(message, 0, ERRORS);
+      }
+
       pStep->finalize(Message::Failure, message);
       return false;
    }
@@ -142,13 +151,17 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
       Signature* pSignature = signatures[i];
       if (pSignature != NULL)
       {
-         const DataVariant &variant = pSignature->getData("Wavelength");
+         const DataVariant& variant = pSignature->getData("Wavelength");
          vector<double> currentWaves;
          variant.getValue(currentWaves);
          if ((currentWaves != spectrumWaves) && (spectrumWaves.empty() == false))
          {
             message = "Error ENVI Library Exporter004: All signatures must have the same wavelengths!";
-            if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);  
+            if (mpProgress != NULL)
+            {
+               mpProgress->updateProgress(message, 0, ERRORS);
+            }
+
             pStep->finalize(Message::Failure, message);
             return false;
          }
@@ -160,7 +173,11 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
             if (currentScalingFactor != scalingFactor && scalingFactor > -1.0 )
             {
                message = "Error ENVI Library Exporter012: All signatures must have the same scaling factor!";
-               if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);  
+               if (mpProgress != NULL)
+               {
+                  mpProgress->updateProgress(message, 0, ERRORS);
+               }
+
                pStep->finalize(Message::Failure, message);
                return false;
             }
@@ -169,7 +186,11 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
             if (currentUnitType != unitType && unitType != DISTANCE)
             {
                message = "Error ENVI Library Exporter013: All signatures must be in the same type of units!";
-               if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);  
+               if (mpProgress != NULL)
+               {
+                  mpProgress->updateProgress(message, 0, ERRORS);
+               }
+
                pStep->finalize(Message::Failure, message);
                return false;
             }
@@ -187,14 +208,14 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
    unsigned int numValues = spectrumWaves.size();
 
    // Get the name of the spectral information file
-    const string& filename = mpFileDescriptor->getFilename();
+   const string& filename = mpFileDescriptor->getFilename();
    string headerFile = filename;
- 
+
    // Build the name of the hdr file
-   int iPos = filename.rfind(".");
-   if (iPos != string::npos)
+   string::size_type pos = filename.rfind(".");
+   if (pos != string::npos)
    {
-      headerFile = filename.substr(0, iPos);
+      headerFile = filename.substr(0, pos);
    }
    headerFile += ".hdr";
 
@@ -204,7 +225,11 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
    if (QFile::exists(QString::fromStdString(headerFile)) && !QFile::exists(QString::fromStdString(filename)))
    {
       message = "Header file exists in the current directory and may describe another unrelated data file!";
-      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);  
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(message, 0, ERRORS);
+      }
+
       pStep->finalize(Message::Failure, message);
       return false;
    }
@@ -214,20 +239,31 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
    if (pFp == NULL)
    {
       message = "Could not open the library file for writing!";
-      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);  
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(message, 0, ERRORS);
+      }
+
       pStep->finalize(Message::Failure, message);
       return false;
    }
 
    message = "Exporting signature data...";
-   if (mpProgress != NULL) mpProgress->updateProgress(message, 0, NORMAL);
+   if (mpProgress != NULL)
+   {
+      mpProgress->updateProgress(message, 0, NORMAL);
+   }
 
    for (unsigned int i = 0; i < numSignatures; ++i)
    {
       if (mbAbort)
       {
          message = "ENVI signature library export aborted!";
-         if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ABORT);
+         if (mpProgress != NULL)
+         {
+            mpProgress->updateProgress(message, 0, ABORT);
+         }
+
          pStep->finalize(Message::Abort);
 
          fclose(pFp);
@@ -242,8 +278,7 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
          DataVariant reflectanceVariant = pSignature->getData("Reflectance");
          reflectanceVariant.getValue(spectrumValues);
 
-         int iValues = spectrumValues.size();
-         for (int j = 0; j < iValues; j++)
+         for (vector<double>::size_type j = 0; j < spectrumValues.size(); j++)
          {
             float fValue = static_cast<float>(spectrumValues[j]);
             fwrite(&fValue, sizeof(float), 1, pFp);
@@ -259,18 +294,26 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
    fclose(pFp);
 
    // Open the header file
-   if ((pFp = fopen(headerFile.c_str(), "w")) == NULL)
+   pFp = fopen(headerFile.c_str(), "w");
+   if (pFp == NULL)
    {
       message = "Could not open the header file for writing!";
-      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);  
-      pStep->finalize(Message::Failure, message);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(message, 0, ERRORS);
+      }
 
+      pStep->finalize(Message::Failure, message);
       remove(filename.c_str());
       return false;
    }
 
    message = "Exporting header data...";
-   if (mpProgress != NULL) mpProgress->updateProgress(message, 50, NORMAL);
+   if (mpProgress != NULL)
+   {
+      mpProgress->updateProgress(message, 50, NORMAL);
+   }
+
    pStep->finalize(Message::Failure, message);
 
    // Write the header information
@@ -301,9 +344,12 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
       if (mbAbort)
       {
          message = "ENVI signature library export aborted!";
-         if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ABORT);
-         pStep->finalize(Message::Failure, message);
+         if (mpProgress != NULL)
+         {
+            mpProgress->updateProgress(message, 0, ABORT);
+         }
 
+         pStep->finalize(Message::Failure, message);
          fclose(pFp);
          remove(filename.c_str());
          remove(headerFile.c_str());
@@ -342,9 +388,12 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
       if (mbAbort)
       {
          message = "ENVI signature library export aborted!";
-         if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ABORT);
-         pStep->finalize(Message::Failure, message);
+         if (mpProgress != NULL)
+         {
+            mpProgress->updateProgress(message, 0, ABORT);
+         }
 
+         pStep->finalize(Message::Failure, message);
          fclose(pFp);
          remove(filename.c_str());
          remove(headerFile.c_str());
@@ -368,9 +417,12 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
    fclose(pFp);
 
    message = "ENVI signature library export complete!";
-   if (mpProgress != NULL) mpProgress->updateProgress(message, 100, NORMAL);
-   pStep->finalize(Message::Success);
+   if (mpProgress != NULL)
+   {
+      mpProgress->updateProgress(message, 100, NORMAL);
+   }
 
+   pStep->finalize(Message::Success);
    return true;
 }
 
@@ -399,7 +451,11 @@ bool EnviLibraryExporter::extractPlugInArgs(PlugInArgList* pArgList)
    if (!pArgList->getArg(ExportItemArg(), pArg) || (pArg == NULL))
    {
       string message = "Could not read the signature set input value!";
-      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(message, 0, ERRORS);
+      }
+
       mpStep->finalize(Message::Failure, message);
       return false;
    }
@@ -408,16 +464,24 @@ bool EnviLibraryExporter::extractPlugInArgs(PlugInArgList* pArgList)
    if (mpSignatureSet == NULL)
    {
       string message = "The signature set input value is invalid!";
-      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);  
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(message, 0, ERRORS);
+      }
+
       mpStep->finalize(Message::Failure, message);
       return false;
    }
 
-    // File descriptor
+   // File descriptor
    if (!pArgList->getArg(ExportDescriptorArg(), pArg) || (pArg == NULL))
    {
       string message = "Could not read the file descriptor input value!";
-      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(message, 0, ERRORS);
+      }
+
       mpStep->finalize(Message::Failure, message);
       return false;
    }
@@ -426,7 +490,11 @@ bool EnviLibraryExporter::extractPlugInArgs(PlugInArgList* pArgList)
    if (mpFileDescriptor == NULL)
    {
       string message = "The file descriptor input value is invalid!";
-      if (mpProgress != NULL) mpProgress->updateProgress(message, 0, ERRORS);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(message, 0, ERRORS);
+      }
+
       mpStep->finalize(Message::Failure, message);
       return false;
    }
@@ -434,19 +502,19 @@ bool EnviLibraryExporter::extractPlugInArgs(PlugInArgList* pArgList)
    return true;
 }
 
-bool EnviLibraryExporter::extractSignatures(SignatureSet &signatureSet, vector<Signature*>& signatures)
+bool EnviLibraryExporter::extractSignatures(SignatureSet& signatureSet, vector<Signature*>& signatures)
 {
-   std::vector<Signature*> setSigs = signatureSet.getSignatures();
+   vector<Signature*> setSigs = signatureSet.getSignatures();
 
-   for (std::vector<Signature*>::iterator iter = setSigs.begin(); iter != setSigs.end(); ++iter)
+   for (vector<Signature*>::iterator iter = setSigs.begin(); iter != setSigs.end(); ++iter)
    {
       Signature* pCurrentSignature = *iter;
       if (pCurrentSignature != NULL)
       {
-         SignatureSet *pCurrentSigSet = dynamic_cast<SignatureSet*>(pCurrentSignature);
+         SignatureSet* pCurrentSigSet = dynamic_cast<SignatureSet*>(pCurrentSignature);
          if (pCurrentSigSet != NULL)
          {
-            if (extractSignatures(*pCurrentSigSet, signatures) ==false)
+            if (extractSignatures(*pCurrentSigSet, signatures) == false)
             {
                return false;
             }

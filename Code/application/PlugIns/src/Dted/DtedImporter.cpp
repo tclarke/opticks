@@ -71,9 +71,8 @@ vector<ImportDescriptor*> DtedImporter::getImportDescriptors(const string& filen
 
       if (bSuccess == true)
       {
-         RasterDataDescriptor* pDescriptor =
-            RasterUtilities::generateRasterDataDescriptor(filename, NULL,
-               mUhl_h.getLongCount(), mUhl_h.getLatCount(), 1, BIP, INT2UBYTES, IN_MEMORY);
+         RasterDataDescriptor* pDescriptor = RasterUtilities::generateRasterDataDescriptor(filename, NULL,
+            mUhl_h.getLongCount(), mUhl_h.getLatCount(), 1, BIP, INT2UBYTES, IN_MEMORY);
          if (pDescriptor != NULL)
          {
             // Classification
@@ -165,7 +164,7 @@ vector<ImportDescriptor*> DtedImporter::getImportDescriptors(const string& filen
    return descriptors;
 }
 
-unsigned char DtedImporter::getFileAffinity(const std::string& filename)
+unsigned char DtedImporter::getFileAffinity(const string& filename)
 {
    if (getImportDescriptors(filename).empty())
    {

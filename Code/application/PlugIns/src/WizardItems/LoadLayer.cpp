@@ -30,10 +30,10 @@ using namespace std;
 // LoadLayer //
 ///////////////
 
-LoadLayer::LoadLayer()
+LoadLayer::LoadLayer() :
+   mpFilename(NULL),
+   mpView(NULL)
 {
-   mpFilename = NULL;
-   mpView = NULL;
 }
 
 LoadLayer::~LoadLayer()
@@ -44,7 +44,7 @@ bool LoadLayer::getInputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
 
-   if(mbInteractive)
+   if (mbInteractive)
    {
       VERIFY(DesktopItems::getInputSpecification(pArgList) && (pArgList != NULL));
       VERIFY(pArgList->addArg<Filename>("Filename", NULL));
@@ -58,7 +58,7 @@ bool LoadLayer::getOutputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
 
-   if(mbInteractive)
+   if (mbInteractive)
    {
       Service<PlugInManagerServices> pPlugInManager;
 
@@ -72,7 +72,7 @@ bool LoadLayer::getOutputSpecification(PlugInArgList*& pArgList)
       // Add args
       VERIFY(pArgList->addArg<string>("Layer Name", NULL));
 
-      if(!modelType.empty())
+      if (!modelType.empty())
       {
          PlugInArg* pArg = pPlugInManager->getPlugInArg();
          VERIFY(pArg != NULL);
@@ -92,7 +92,7 @@ bool LoadLayer::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    pStep->addProperty("Item", getName());
    mpStep = pStep.get();
 
-   if(!extractInputArgs(pInArgList))
+   if (!extractInputArgs(pInArgList))
    {
       reportError("Unable to extract input arguments.", "BF8BE1FB-9978-44d6-A849-CE822A224860");
       return false;
@@ -111,22 +111,22 @@ bool LoadLayer::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
       importer->getInArgList().setPlugInArgValue("View", mpView);
    }
    importer->execute();
-   Layer *pLayer = importer->getOutArgList().getPlugInArgValue<Layer>("Layer");
-   if(pLayer == NULL)
+   Layer* pLayer = importer->getOutArgList().getPlugInArgValue<Layer>("Layer");
+   if (pLayer == NULL)
    {
       reportError("Could not load the layer!", "2399B97B-2D00-46ae-8B0E-F83DD91F938D");
       return false;
    }
 
    // Set the output values
-   if(pOutArgList != NULL)
+   if (pOutArgList != NULL)
    {
       PlugInArg* pArg = NULL;
 
       // Layer name
       string layerName = pLayer->getName();
 
-      if(pOutArgList->getArg("Layer Name", pArg) && (pArg != NULL) && !layerName.empty())
+      if (pOutArgList->getArg("Layer Name", pArg) && (pArg != NULL) && !layerName.empty())
       {
          pArg->setActualValue(&layerName);
       }
@@ -137,10 +137,10 @@ bool LoadLayer::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
       }
 
       // Data Element
-      if(pOutArgList->getArg("Layer Element", pArg) && (pArg != NULL))
+      if (pOutArgList->getArg("Layer Element", pArg) && (pArg != NULL))
       {
          DataElement* pElement = pLayer->getDataElement();
-         if(pElement != NULL)
+         if (pElement != NULL)
          {
             pArg->setActualValue(pElement);
          }
@@ -163,7 +163,7 @@ bool LoadLayer::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 
 bool LoadLayer::extractInputArgs(PlugInArgList* pInArgList)
 {
-   if(!DesktopItems::extractInputArgs(pInArgList))
+   if (!DesktopItems::extractInputArgs(pInArgList))
    {
       return false;
    }
@@ -171,7 +171,7 @@ bool LoadLayer::extractInputArgs(PlugInArgList* pInArgList)
    PlugInArg* pArg = NULL;
 
    // Filename
-   if(!pInArgList->getArg("Filename", pArg) || (pArg == NULL))
+   if (!pInArgList->getArg("Filename", pArg) || (pArg == NULL))
    {
       reportError("Could not read the filename input value!", "AACDEFFD-1D64-4e56-8D0B-F748507EBCF8");
       return false;
@@ -180,17 +180,17 @@ bool LoadLayer::extractInputArgs(PlugInArgList* pInArgList)
    mpFilename = pArg->getPlugInArgValue<Filename>();
    if (mpFilename == NULL)
    {
-      reportError("The filename input value is NULL!","AE49DE8D-6AC7-4621-8730-B7BE1E119B6F");
+      reportError("The filename input value is NULL!", "AE49DE8D-6AC7-4621-8730-B7BE1E119B6F");
       return false;
    }
 
-   if(mpStep != NULL)
+   if (mpStep != NULL)
    {
       mpStep->addProperty("filename", mpFilename->getFullPathAndName());
    }
 
    // Data set
-   if(!pInArgList->getArg("View", pArg) || (pArg == NULL))
+   if (!pInArgList->getArg("View", pArg) || (pArg == NULL))
    {
       reportError("Could not read the view input value!", "5E96A945-49FD-4ca5-8758-AD91063FD53A");
       return false;

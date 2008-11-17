@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #ifndef ENVIFIELD_H
 #define ENVIFIELD_H
 
@@ -27,4 +25,4 @@ struct EnviField
    std::vector<EnviField*> mChildren;
 };
 
-#endif // ENVIFIELD_H
+#endif

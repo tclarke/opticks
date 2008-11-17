@@ -492,12 +492,12 @@ const list<GcpPoint>& RasterFileDescriptorImp::getGcps() const
 void RasterFileDescriptorImp::setBandFiles(const vector<string>& bandFiles)
 {
    clearBandFiles();
-   for(vector<string>::const_iterator bandFileName = bandFiles.begin();
+   for (vector<string>::const_iterator bandFileName = bandFiles.begin();
                                       bandFileName != bandFiles.end();
                                       ++bandFileName)
    {
-      Filename *pBandFile = new FilenameImp(*bandFileName);
-      if(pBandFile != NULL)
+      Filename* pBandFile = new FilenameImp(*bandFileName);
+      if (pBandFile != NULL)
       {
          mBandFiles.push_back(pBandFile);
       }
@@ -508,13 +508,13 @@ void RasterFileDescriptorImp::setBandFiles(const vector<string>& bandFiles)
 void RasterFileDescriptorImp::setBandFiles(const vector<const Filename*>& bandFiles)
 {
    clearBandFiles();
-   for(vector<const Filename*>::const_iterator bandFileName = bandFiles.begin();
+   for (vector<const Filename*>::const_iterator bandFileName = bandFiles.begin();
                                                bandFileName != bandFiles.end();
                                                ++bandFileName)
    {
       VERIFYNRV(*bandFileName != NULL);
-      Filename *pBandFile = new FilenameImp(**bandFileName);
-      if(pBandFile != NULL)
+      Filename* pBandFile = new FilenameImp(**bandFileName);
+      if (pBandFile != NULL)
       {
          mBandFiles.push_back(pBandFile);
       }
@@ -633,7 +633,7 @@ bool RasterFileDescriptorImp::toXml(XMLWriter* pXml) const
 
       // Bands
       pXml->pushAddPoint(pXml->addElement("bands"));
-      for(vector<DimensionDescriptor>::const_iterator iter = mBands.begin();
+      for (vector<DimensionDescriptor>::const_iterator iter = mBands.begin();
          bSuccess && iter != mBands.end();
          ++iter)
       {
@@ -647,7 +647,7 @@ bool RasterFileDescriptorImp::toXml(XMLWriter* pXml) const
       // Pixel size
       stringstream buf;
       buf << mXPixelSize << " " << mYPixelSize;
-      pXml->addText(buf.str().c_str(),pXml->addElement("pixelSize"));
+      pXml->addText(buf.str().c_str(), pXml->addElement("pixelSize"));
 
       // Units
       pXml->pushAddPoint(pXml->addElement("units"));
@@ -659,11 +659,11 @@ bool RasterFileDescriptorImp::toXml(XMLWriter* pXml) const
 
 
       // Band files
-      for(vector<const Filename*>::const_iterator bandFile = mBandFiles.begin();
+      for (vector<const Filename*>::const_iterator bandFile = mBandFiles.begin();
                                                   bandFile != mBandFiles.end();
                                                   ++bandFile)
       {
-         if(*bandFile != NULL)
+         if (*bandFile != NULL)
          {
             pXml->pushAddPoint(pXml->addElement("bandFile"));
             pXml->addText(StringUtilities::toXmlString(**bandFile));
@@ -680,7 +680,7 @@ bool RasterFileDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version)
    VERIFY(pDocument != NULL);
 
    bool success = FileDescriptorImp::fromXml(pDocument, version);
-   if(!success)
+   if (!success)
    {
       return false;
    }
@@ -706,23 +706,23 @@ bool RasterFileDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version)
       A(pElement->getAttribute(X("interleaveFormat"))), &error);
    success = !error;
 
-   for(DOMNode* pChild = pDocument->getFirstChild(); success && pChild != NULL; pChild = pChild->getNextSibling())
+   for (DOMNode* pChild = pDocument->getFirstChild(); success && pChild != NULL; pChild = pChild->getNextSibling())
    {
-      if(XMLString::equals(pChild->getNodeName(), X("pixelSize")))
+      if (XMLString::equals(pChild->getNodeName(), X("pixelSize")))
       {
-         DOMNode *pGchld(pChild->getFirstChild());
+         DOMNode* pGchld(pChild->getFirstChild());
          LocationType pixelSize(1.0, 1.0);
          XmlReader::StrToLocation(pGchld->getNodeValue(), pixelSize);
          mXPixelSize = pixelSize.mX;
          mYPixelSize = pixelSize.mY;
       }
-      else if(XMLString::equals(pChild->getNodeName(), X("rows")))
+      else if (XMLString::equals(pChild->getNodeName(), X("rows")))
       {
-         for(DOMNode* pGrandchild = pChild->getFirstChild();
+         for (DOMNode* pGrandchild = pChild->getFirstChild();
             success && pGrandchild != NULL;
             pGrandchild = pGrandchild->getNextSibling())
          {
-            if(XMLString::equals(pGrandchild->getNodeName(), X("row")))
+            if (XMLString::equals(pGrandchild->getNodeName(), X("row")))
             {
                // Create the row descriptor
                DimensionDescriptor descriptor;
@@ -731,13 +731,13 @@ bool RasterFileDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version)
             }
          }
       }
-      else if(XMLString::equals(pChild->getNodeName(), X("columns")))
+      else if (XMLString::equals(pChild->getNodeName(), X("columns")))
       {
-         for(DOMNode* pGrandchild = pChild->getFirstChild();
+         for (DOMNode* pGrandchild = pChild->getFirstChild();
             success && pGrandchild != NULL;
             pGrandchild = pGrandchild->getNextSibling())
          {
-            if(XMLString::equals(pGrandchild->getNodeName(), X("column")))
+            if (XMLString::equals(pGrandchild->getNodeName(), X("column")))
             {
                // Create the column descriptor
                DimensionDescriptor descriptor;
@@ -773,7 +773,7 @@ bool RasterFileDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version)
             }
          }
       }
-      else if(XMLString::equals(pChild->getNodeName(), X("units")))
+      else if (XMLString::equals(pChild->getNodeName(), X("units")))
       {
          success = mUnits.fromXml(pChild, version);
       }
@@ -786,8 +786,8 @@ bool RasterFileDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version)
 
 const string& RasterFileDescriptorImp::getObjectType() const
 {
-   static string type("RasterFileDescriptorImp");
-   return type;
+   static string sType("RasterFileDescriptorImp");
+   return sType;
 }
 
 bool RasterFileDescriptorImp::isKindOf(const string& className) const
@@ -820,7 +820,7 @@ void RasterFileDescriptorImp::clearBandFiles()
 {
    if (!mBandFiles.empty())
    {
-      for(vector<const Filename*>::iterator bandFile = mBandFiles.begin(); bandFile != mBandFiles.end(); ++bandFile)
+      for (vector<const Filename*>::iterator bandFile = mBandFiles.begin(); bandFile != mBandFiles.end(); ++bandFile)
       {
          delete dynamic_cast<const FilenameImp*>(*bandFile);
       }
@@ -845,19 +845,20 @@ void XmlUtilities::serializeDimensionDescriptor(const DimensionDescriptor& desc,
    }
 }
 
-void XmlUtilities::deserializeDimensionDescriptor(DimensionDescriptor& desc, XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pNode)
+void XmlUtilities::deserializeDimensionDescriptor(DimensionDescriptor& desc,
+                                                  XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pNode)
 {
    XERCES_CPP_NAMESPACE_QUALIFIER DOMElement* pElement = static_cast<XERCES_CPP_NAMESPACE_QUALIFIER DOMElement*>(pNode);
    XmlReader::StringStreamAssigner<unsigned int> valueParser;
-   if(pElement->hasAttribute(X("originalNumber")))
+   if (pElement->hasAttribute(X("originalNumber")))
    {
       desc.setOriginalNumber(valueParser(A(pElement->getAttribute(X("originalNumber")))));
    }
-   if(pElement->hasAttribute(X("onDiskNumber")))
+   if (pElement->hasAttribute(X("onDiskNumber")))
    {
       desc.setOnDiskNumber(valueParser(A(pElement->getAttribute(X("onDiskNumber")))));
    }
-   if(pElement->hasAttribute(X("activeNumber")))
+   if (pElement->hasAttribute(X("activeNumber")))
    {
       desc.setActiveNumber(valueParser(A(pElement->getAttribute(X("activeNumber")))));
    }

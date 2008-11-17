@@ -140,7 +140,7 @@ DmsFormatType MeasurementLayerImp::getGeoFormat() const
 
 bool MeasurementLayerImp::toXml(XMLWriter* pXml) const
 {
-   if(Service<SessionManager>()->isSessionSaving())
+   if (Service<SessionManager>()->isSessionSaving())
    {
       if (pXml == NULL || !AnnotationLayerImp::toXml(pXml))
       {

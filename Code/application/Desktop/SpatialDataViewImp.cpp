@@ -101,8 +101,8 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
    mpAoiAction(NULL),
    mpGcpAction(NULL),
    mpTiePointAction(NULL),
-   mpOriginLL(NULL),
    mpOriginUL(NULL),
+   mpOriginLL(NULL),
    mpSmoothAction(NULL)
 {
    // Measurements layer
@@ -152,7 +152,7 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
    pOriginSeparatorAction->setSeparator(true);
 
    // Origin
-   QMenu* pOriginMenu = new QMenu("Origin",this);
+   QMenu* pOriginMenu = new QMenu("Origin", this);
    if (pOriginMenu != NULL)
    {
       string originContext = shortcutContext + "/Origin";
@@ -407,8 +407,8 @@ SpatialDataViewImp::~SpatialDataViewImp()
 
 const string& SpatialDataViewImp::getObjectType() const
 {
-   static string type("SpatialDataViewImp");
-   return type;
+   static string sType("SpatialDataViewImp");
+   return sType;
 }
 
 bool SpatialDataViewImp::isKindOf(const string& className) const
@@ -599,12 +599,12 @@ View* SpatialDataViewImp::copy(QGLContext* drawContext, QWidget* parent) const
       *dynamic_cast<SpatialDataViewImp*>(pView) = *this;
    }
 
-   return (View*) pView;
+   return static_cast<View*>(pView);
 }
 
 bool SpatialDataViewImp::copy(View *pView) const
 {
-   SpatialDataViewImp *pViewImp = dynamic_cast<SpatialDataViewImp*>(pView);
+   SpatialDataViewImp* pViewImp = dynamic_cast<SpatialDataViewImp*>(pView);
    if (pViewImp != NULL)
    {
       UndoLock lock(pView);
@@ -1188,7 +1188,7 @@ bool SpatialDataViewImp::deleteLayer(Layer* pLayer, bool bClearUndo)
    UndoGroup group(dynamic_cast<View*>(this), actionText);
 
    // Disconnect
-   LayerImp *pLayerImp = dynamic_cast<LayerImp*>(pLayer);
+   LayerImp* pLayerImp = dynamic_cast<LayerImp*>(pLayer);
    disconnect(pLayerImp, SIGNAL(modified()), this, SLOT(refresh()));
    disconnect(pLayerImp, SIGNAL(modified()), this, SLOT(notifyLayerModified()));
    disconnect(pLayerImp, SIGNAL(extentsModified()), this, SLOT(updateExtents()));
@@ -1372,7 +1372,8 @@ QImage SpatialDataViewImp::getLayerImage(Layer* pLayer, ColorType& transparent, 
    }
 
    // Save matrices
-   double modelMatrix[16], projectionMatrix[16];
+   double modelMatrix[16];
+   double projectionMatrix[16];
    int viewPort[4];
    glGetIntegerv(GL_VIEWPORT, viewPort);
    glGetDoublev(GL_PROJECTION_MATRIX, projectionMatrix);
@@ -1382,11 +1383,12 @@ QImage SpatialDataViewImp::getLayerImage(Layer* pLayer, ColorType& transparent, 
    {
       // Set to draw to an off screen buffer
       makeCurrent();
-      int w=width(), h=height();
+      int w = width();
+      int h = height();
       if (bbox[0] > 0 && bbox[0] <= w && bbox[1] > 0 && bbox[1] <= h)
       {
-         w=bbox[0];
-         h=bbox[1];
+         w = bbox[0];
+         h = bbox[1];
       }
       QGLFramebufferObject fbo(w, h);
       fbo.bind();
@@ -1421,7 +1423,8 @@ QImage SpatialDataViewImp::getLayerImage(Layer* pLayer, ColorType& transparent, 
       // Initialize the bounding box
       bbox[0] = iWidth;
       bbox[1] = iHeight;
-      bbox[2] = bbox[3] = 0;
+      bbox[2] = 0;
+      bbox[3] = 0;
 
       // Scan the buffer to find the actual bounding box that contains all pixels not equal to the background color
       unsigned int backgroundCpack = clrBackground.red() + (clrBackground.green() << 8) + (clrBackground.blue() << 16);
@@ -1509,7 +1512,8 @@ QImage SpatialDataViewImp::getLayerImage(Layer* pLayer, ColorType& transparent, 
       // Initialize the bounding box
       bbox[0] = iWidth;
       bbox[1] = iHeight;
-      bbox[2] = bbox[3] = 0;
+      bbox[2] = 0;
+      bbox[3] = 0;
 
       // Scan the buffer to find the actual bounding box that contains all pixels not equal to the background color
       unsigned int backgroundCpack = clrBackground.red() + (clrBackground.green() << 8) + (clrBackground.blue() << 16);
@@ -1580,7 +1584,7 @@ QImage SpatialDataViewImp::getLayerImage(Layer* pLayer, ColorType& transparent, 
 
 void SpatialDataViewImp::generateFullImage()
 {
-   RasterLayerImp *pRasterLayer = dynamic_cast<RasterLayerImp*>(getTopMostLayer(RASTER));
+   RasterLayerImp* pRasterLayer = dynamic_cast<RasterLayerImp*>(getTopMostLayer(RASTER));
    if (pRasterLayer)
    {
       pRasterLayer->generateFullImage();
@@ -1900,10 +1904,10 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
    }
 
    bool geoCanExtrapolate = false;
-   RasterElement *pPrimaryRasterElement = mpLayerList->getPrimaryRasterElement();
+   RasterElement* pPrimaryRasterElement = mpLayerList->getPrimaryRasterElement();
    if (pPrimaryRasterElement)
    {
-      GeoreferenceExt1 *pGeoExt1 = dynamic_cast<GeoreferenceExt1*>(pPrimaryRasterElement->getGeoreferencePlugin());
+      GeoreferenceExt1* pGeoExt1 = dynamic_cast<GeoreferenceExt1*>(pPrimaryRasterElement->getGeoreferencePlugin());
       if (pGeoExt1 != NULL)
       {
          geoCanExtrapolate = pGeoExt1->canExtrapolate();
@@ -1949,7 +1953,7 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
                DataElement* pElement = pLayer->getDataElement();
                if (pElement != NULL)
                {
-                  RasterElement *pRaster = dynamic_cast<RasterElement*>(pElement);
+                  RasterElement* pRaster = dynamic_cast<RasterElement*>(pElement);
                   if (pRaster != NULL)
                   {
                      // Get the original pixel coordinates
@@ -1994,7 +1998,8 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
                               if (pTerrain != NULL)
                               {
                                  // Do not need a valid band for elevation information
-                                 double dValue = pTerrain->getPixelValue(columnDim, rowDim, DimensionDescriptor(), eComponent);
+                                 double dValue = pTerrain->getPixelValue(columnDim, rowDim, DimensionDescriptor(),
+                                    eComponent);
 
                                  const Units* pElevationUnits = NULL;
 
@@ -2059,7 +2064,8 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
                                     RasterElement* pDisplayedRaster = pRasterLayer->getDisplayedRasterElement(RED);
                                     if (pDisplayedRaster != NULL)
                                     {
-                                       dRedValue = pDisplayedRaster->getPixelValue(columnDim, rowDim, redBand, eComponent);
+                                       dRedValue = pDisplayedRaster->getPixelValue(columnDim, rowDim, redBand,
+                                          eComponent);
                                     }
 
                                     // Multiply the value by the units scale factor
@@ -2081,7 +2087,8 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
                                     RasterElement* pDisplayedRaster = pRasterLayer->getDisplayedRasterElement(GREEN);
                                     if (pDisplayedRaster != NULL)
                                     {
-                                       dGreenValue = pDisplayedRaster->getPixelValue(columnDim, rowDim, greenBand, eComponent);
+                                       dGreenValue = pDisplayedRaster->getPixelValue(columnDim, rowDim, greenBand,
+                                          eComponent);
                                     }
 
                                     // Multiply the value by the units scale factor
@@ -2103,7 +2110,8 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
                                     RasterElement* pDisplayedRaster = pRasterLayer->getDisplayedRasterElement(BLUE);
                                     if (pDisplayedRaster != NULL)
                                     {
-                                       dBlueValue = pDisplayedRaster->getPixelValue(columnDim, rowDim, blueBand, eComponent);
+                                       dBlueValue = pDisplayedRaster->getPixelValue(columnDim, rowDim, blueBand,
+                                          eComponent);
                                     }
 
                                     // Multiply the value by the units scale factor
@@ -2131,7 +2139,7 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
                               ComplexComponent eComponent = RasterLayer::getSettingComplexComponent();
                               DimensionDescriptor bandDim;
 
-                              RasterLayer *pRasterLayer = dynamic_cast<RasterLayer*>(pLayer);
+                              RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(pLayer);
                               if (pRasterLayer != NULL)
                               {
                                  eComponent = pRasterLayer->getComplexComponent();
@@ -2144,7 +2152,7 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
                               int numRows = pDescriptor->getRowCount();
                               int numCols = pDescriptor->getColumnCount();
 
-                              std::vector<int> badValues;
+                              vector<int> badValues;
 
                               Statistics* pStatistics = pRaster->getStatistics(bandDim);
                               if (pStatistics != NULL)
@@ -2152,13 +2160,15 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
                                  badValues = pStatistics->getBadValues();
                               }
 
-                              if ((dataCoord.mX >= 0) && (dataCoord.mX < numCols) && (dataCoord.mY >= 0) && (dataCoord.mY < numRows))
+                              if ((dataCoord.mX >= 0) && (dataCoord.mX < numCols) && (dataCoord.mY >= 0) &&
+                                 (dataCoord.mY < numRows))
                               {
                                  DimensionDescriptor column = pDescriptor->getActiveColumn(dataCoord.mX);
                                  DimensionDescriptor row = pDescriptor->getActiveRow(dataCoord.mY);
 
                                  double dValue = pRaster->getPixelValue(column, row, bandDim, eComponent);
-                                 if (std::find(badValues.begin(), badValues.end(), roundDouble(dValue)) == badValues.end())
+                                 if (std::find(badValues.begin(), badValues.end(),
+                                    roundDouble(dValue)) == badValues.end())
                                  {
                                     pBar->setResultValue(strLayerName, dValue, pDescriptor->getUnits());
                                  }
@@ -2193,6 +2203,7 @@ void SpatialDataViewImp::updateExtents()
    {
    case NO_LIMIT:       // fall through
    case MAX_EXTENTS:
+   default:
       layers = getDisplayedLayers();   // get extents from all displayed layers
       break;
 
@@ -2215,7 +2226,10 @@ void SpatialDataViewImp::updateExtents()
    double dMinY = 1e38;
    double dMaxX = -1e38;
    double dMaxY = -1e38;
-   double x1, y1, x4, y4;
+   double x1;
+   double y1;
+   double x4;
+   double y4;
 
    if (layers.size() == 0)
    {
@@ -2225,7 +2239,7 @@ void SpatialDataViewImp::updateExtents()
    vector<Layer*>::iterator it = layers.begin();
    for (; it != layers.end(); ++it)
    {
-      LayerImp *pImp = dynamic_cast<LayerImp*>(*it);
+      LayerImp* pImp = dynamic_cast<LayerImp*>(*it);
       VERIFYNRV(pImp != NULL);
       if (pImp->getExtents(x1, y1, x4, y4))
       {
@@ -2309,10 +2323,10 @@ void SpatialDataViewImp::drawOrigin()
    qglColor(Qt::white);
    glLineWidth (1.0);
    glBegin(GL_LINES);
-   glVertex2f(  0.0,   0.0);
-   glVertex2f(  0.0, -10.0);
-   glVertex2f(  0.0,   0.0);
-   glVertex2f(-10.0,   0.0);
+   glVertex2f(0.0, 0.0);
+   glVertex2f(0.0, -10.0);
+   glVertex2f(0.0, 0.0);
+   glVertex2f(-10.0, 0.0);
    glEnd();
 }
 
@@ -2348,20 +2362,20 @@ void SpatialDataViewImp::drawAxis(float fX, float fY)
    glBegin(GL_LINES);
 
    // draw the arrow for the x axis
-   glVertex2f( 0.0,  0.0);
-   glVertex2f(15.0 * flippedMultiplier,  0.0);
+   glVertex2f(0.0, 0.0);
+   glVertex2f(15.0 * flippedMultiplier, 0.0);
    glVertex2f(10.0 * flippedMultiplier, -3.0 * flippedMultiplier);
-   glVertex2f(15.0 * flippedMultiplier,  0.0);
-   glVertex2f(10.0 * flippedMultiplier,  3.0 * flippedMultiplier);
-   glVertex2f(15.0 * flippedMultiplier,  0.0);
+   glVertex2f(15.0 * flippedMultiplier, 0.0);
+   glVertex2f(10.0 * flippedMultiplier, 3.0 * flippedMultiplier);
+   glVertex2f(15.0 * flippedMultiplier, 0.0);
 
    // draw an arrow for y axis
-   glVertex2f( 0.0,  0.0);
-   glVertex2f( 0.0, 15.0);
+   glVertex2f(0.0, 0.0);
+   glVertex2f(0.0, 15.0);
    glVertex2f(-3.0, 10.0);
-   glVertex2f( 0.0, 15.0);
-   glVertex2f( 3.0, 10.0);
-   glVertex2f( 0.0, 15.0);
+   glVertex2f(0.0, 15.0);
+   glVertex2f(3.0, 10.0);
+   glVertex2f(0.0, 15.0);
    glEnd();
 
    // Draw the X and Y labels
@@ -2497,15 +2511,15 @@ void SpatialDataViewImp::toolTipEvent(QHelpEvent* pEvent)
       return;
    }
 
-   LayerList *pLayerList = getLayerList();
+   LayerList* pLayerList = getLayerList();
    VERIFYNRV(pLayerList != NULL);
 
-   RasterElement *pRaster = pLayerList->getPrimaryRasterElement();
+   RasterElement* pRaster = pLayerList->getPrimaryRasterElement();
    if (pRaster != NULL && pRaster->isGeoreferenced())
    {
       LocationType dataCoord(dX, dY);
 
-      Layer *pLayer = pLayerList->getLayer(RASTER, pRaster);
+      Layer* pLayer = pLayerList->getLayer(RASTER, pRaster);
       if (pLayer != NULL)
       {
          pLayer->translateWorldToData(dX, dY, dataCoord.mX, dataCoord.mY);
@@ -2513,7 +2527,7 @@ void SpatialDataViewImp::toolTipEvent(QHelpEvent* pEvent)
 
       GeocoordType geocoordType = LatLonLayer::getSettingGeocoordType();
       DmsFormatType dmsFormat = LatLonLayer::getSettingFormat();
-      LatLonLayer *pLatLonLayer = dynamic_cast<LatLonLayer*>(pLayerList->getLayer(LAT_LONG, pRaster));
+      LatLonLayer* pLatLonLayer = dynamic_cast<LatLonLayer*>(pLayerList->getLayer(LAT_LONG, pRaster));
       if (pLatLonLayer != NULL)
       {
          geocoordType = pLatLonLayer->getGeocoordType();
@@ -2889,7 +2903,7 @@ void SpatialDataViewImp::setInsetPoint(const LocationType &worldCoord)
    if (mbLinking == false)
    {
       PerspectiveViewImp::setInsetPoint(worldCoord);
-      LayerList *pLayerList = getLayerList();
+      LayerList* pLayerList = getLayerList();
       VERIFYNRV(pLayerList != NULL);
       RasterElement* pRaster = pLayerList->getPrimaryRasterElement();
       if (pRaster != NULL && pRaster->isGeoreferenced())
@@ -2908,7 +2922,7 @@ void SpatialDataViewImp::setInsetPointGeo(const LocationType &geoCoord)
    if (mbLinking == false)
    {
       LocationType worldCoord;
-      LayerList *pLayerList = getLayerList();
+      LayerList* pLayerList = getLayerList();
       VERIFYNRV(pLayerList != NULL);
       RasterElement* pRaster = pLayerList->getPrimaryRasterElement();
       if (pRaster != NULL && pRaster->isGeoreferenced())
@@ -2926,15 +2940,15 @@ bool SpatialDataViewImp::canLinkWithView(View *pView, LinkType type)
 {
    if (type == GEOCOORD_LINK)
    {
-      SpatialDataViewImp *pSpatial = dynamic_cast<SpatialDataViewImp*>(pView);
+      SpatialDataViewImp* pSpatial = dynamic_cast<SpatialDataViewImp*>(pView);
       if (pSpatial != NULL)
       {
-         LayerList *pLayerList = getLayerList();
-         LayerList *pOtherLayerList = pSpatial->getLayerList();
+         LayerList* pLayerList = getLayerList();
+         LayerList* pOtherLayerList = pSpatial->getLayerList();
          VERIFY(pOtherLayerList != NULL && pLayerList != NULL);
 
-         RasterElement *pRaster = pLayerList->getPrimaryRasterElement();
-         RasterElement *pOtherRaster = pLayerList->getPrimaryRasterElement();
+         RasterElement* pRaster = pLayerList->getPrimaryRasterElement();
+         RasterElement* pOtherRaster = pLayerList->getPrimaryRasterElement();
 
          if (pRaster != NULL && pRaster->isGeoreferenced() && 
             pOtherRaster != NULL && pOtherRaster->isGeoreferenced())
@@ -3010,7 +3024,10 @@ double SpatialDataViewImp::limitZoomPercentage(double dPercent)
    double newPixSize = dPercent * 0.01;
 
    // get scene size
-   double minX, minY, maxX, maxY;
+   double minX;
+   double minY;
+   double maxX;
+   double maxY;
    getExtents(minX, minY, maxX, maxY);   // this will depend on the current pan limit
    double sceneWidth = abs(maxX-minX+1);
    double sceneHeight = abs(maxY-minY+1);
@@ -3081,7 +3098,8 @@ LocationType SpatialDataViewImp::limitPanCenter(LocationType center)
       return center;
    }
 
-   LocationType mins, maxs;
+   LocationType mins;
+   LocationType maxs;
    getExtents(mins.mX, mins.mY, maxs.mX, maxs.mY);
 
    center.clampMinimum(mins);
@@ -3515,7 +3533,7 @@ void SpatialDataViewImp::setOrigin(QAction* pAction)
          refresh();
       }
    }
-   else if (pAction = mpOriginUL)
+   else if (pAction == mpOriginUL)
    {
       if (getDataOrigin() != UPPER_LEFT)
       {
@@ -3648,19 +3666,13 @@ bool SpatialDataViewImp::fromXml(DOMNode* pDocument, unsigned int version)
       return false;
    }
 
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
-   setTextureMode(StringUtilities::fromXmlString<TextureMode>(
-      A(pElem->getAttribute(X("textureMode")))));
-   mShowMeasurements = StringUtilities::fromXmlString<bool>(
-      A(pElem->getAttribute(X("showMeasurements"))));
-   mPanKey = StringUtilities::fromXmlString<int>(
-      A(pElem->getAttribute(X("panKey"))));
-   setPanLimit(StringUtilities::fromXmlString<PanLimitType>(
-      A(pElem->getAttribute(X("panLimit")))));
-   setMinimumZoom(StringUtilities::fromXmlString<double>(
-      A(pElem->getAttribute(X("minZoom")))));
-   setMaximumZoom(StringUtilities::fromXmlString<double>(
-      A(pElem->getAttribute(X("maxZoom")))));
+   DOMElement* pElem = static_cast<DOMElement*>(pDocument);
+   setTextureMode(StringUtilities::fromXmlString<TextureMode>(A(pElem->getAttribute(X("textureMode")))));
+   mShowMeasurements = StringUtilities::fromXmlString<bool>(A(pElem->getAttribute(X("showMeasurements"))));
+   mPanKey = StringUtilities::fromXmlString<int>(A(pElem->getAttribute(X("panKey"))));
+   setPanLimit(StringUtilities::fromXmlString<PanLimitType>(A(pElem->getAttribute(X("panLimit")))));
+   setMinimumZoom(StringUtilities::fromXmlString<double>(A(pElem->getAttribute(X("minZoom")))));
+   setMaximumZoom(StringUtilities::fromXmlString<double>(A(pElem->getAttribute(X("maxZoom")))));
 
    if (pElem->hasAttribute(X("activeLayerId")))
    {
@@ -3674,7 +3686,8 @@ bool SpatialDataViewImp::fromXml(DOMNode* pDocument, unsigned int version)
 
    if (pElem->hasAttribute(X("drawLayerId")))
    {
-      mpDrawLayer = dynamic_cast<LayerImp*>(SessionManagerImp::instance()->getSessionItem(A(pElem->getAttribute(X("drawLayerId")))));
+      mpDrawLayer = dynamic_cast<LayerImp*>(SessionManagerImp::instance()->getSessionItem(
+         A(pElem->getAttribute(X("drawLayerId")))));
    }
    else
    {
@@ -3700,14 +3713,14 @@ bool SpatialDataViewImp::fromXml(DOMNode* pDocument, unsigned int version)
    }
 
    VERIFY(mpLayerList != NULL);
-   mpLayerList->setPrimaryRasterElement(
-      dynamic_cast<RasterElement*>(SessionManagerImp::instance()->getSessionItem(A(pElem->getAttribute(X("primary"))))));
+   mpLayerList->setPrimaryRasterElement(dynamic_cast<RasterElement*>(
+      SessionManagerImp::instance()->getSessionItem(A(pElem->getAttribute(X("primary"))))));
    for (DOMNode *pNode = pElem->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())
    {
-      if (XMLString::equals(pNode->getNodeName(),X("layer")))
+      if (XMLString::equals(pNode->getNodeName(), X("layer")))
       {
-         DOMElement *pLayerElement = static_cast<DOMElement*>(pNode);
-         Layer *pLayer = dynamic_cast<Layer*>(
+         DOMElement* pLayerElement = static_cast<DOMElement*>(pNode);
+         Layer* pLayer = dynamic_cast<Layer*>(
             SessionManagerImp::instance()->getSessionItem(A(pLayerElement->getAttribute(X("id")))));
          if (pLayer != NULL)
          {
@@ -3912,25 +3925,25 @@ void SpatialDataViewImp::previousBand()
 }
 
 bool SpatialDataViewImp::linkView(View *pView, LinkType type)
-{   
+{
    if (type != NO_LINK && getViewLinkType(pView) == NO_LINK)
    {
       SpatialDataView* pSourceView = dynamic_cast<SpatialDataView*>(pView);
       if (pSourceView != NULL)
       {
-         if (pSourceView->getMaximumZoom() != 0 || pSourceView->getMinimumZoom() != 0 || pSourceView->getPanLimit() != NO_LIMIT)
+         if (pSourceView->getMaximumZoom() != 0 || pSourceView->getMinimumZoom() != 0 ||
+            pSourceView->getPanLimit() != NO_LIMIT)
          {
-            int buttonPressed;
-            buttonPressed = QMessageBox::information(this, QString::fromStdString(this->getDisplayName()), 
-               "Zoom/Pan limits will be disabled for this " + QString::fromStdString(pSourceView->getDisplayName()) + " view. Do you want to continue linking the views?", 
-               QMessageBox::Ok, QMessageBox::Cancel);
+            int buttonPressed = QMessageBox::information(this, QString::fromStdString(getDisplayName()),
+               "Zoom/Pan limits will be disabled for this " + QString::fromStdString(pSourceView->getDisplayName()) +
+               " view. Do you want to continue linking the views?", QMessageBox::Ok, QMessageBox::Cancel);
 
             if (buttonPressed == QMessageBox::Cancel)
             {
                return false;
             }
          }
-            
+
          pSourceView->setMaximumZoom(0);
          pSourceView->setMinimumZoom(0);
          pSourceView->setPanLimit(NO_LIMIT);
@@ -3942,11 +3955,11 @@ bool SpatialDataViewImp::linkView(View *pView, LinkType type)
 
 void SpatialDataViewImp::setAoiMode()
 {
-  Service<DesktopServices> pDesktop;
-  AoiToolBar* pToolbar = static_cast<AoiToolBar*>(pDesktop->getWindow("AOI", TOOLBAR));
+   Service<DesktopServices> pDesktop;
 
-  if (pToolbar != NULL)
-  {
-     pToolbar->setSelectionTool(pToolbar->getSelectionTool(), DRAW);
-  } 
+   AoiToolBar* pToolbar = static_cast<AoiToolBar*>(pDesktop->getWindow("AOI", TOOLBAR));
+   if (pToolbar != NULL)
+   {
+      pToolbar->setSelectionTool(pToolbar->getSelectionTool(), DRAW);
+   }
 }

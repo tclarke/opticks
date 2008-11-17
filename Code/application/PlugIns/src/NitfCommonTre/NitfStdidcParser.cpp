@@ -173,8 +173,14 @@ bool Nitf::StdidcParser::toDynamicObject(istream& input, size_t numBytes, Dynami
    dtg.resize(15);
    memcpy(&dtg[0], &buf[0], 15);
 
-   bool dateValid(false), timeValid(false);
-   unsigned short year(0), month(0), day(0), hour, min, sec;
+   bool dateValid(false);
+   bool timeValid(false);
+   unsigned short year(0);
+   unsigned short month(0);
+   unsigned short day(0);
+   unsigned short hour;
+   unsigned short min;
+   unsigned short sec;
 
    if (success)
    {
@@ -301,7 +307,7 @@ Nitf::TreState Nitf::StdidcParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID && totalFields != numFields)
    {
       reporter << "Total fields in the Dynamic Object(" <<
-         totalFields <<") did not match the number found(" << numFields << ") ";
+         totalFields << ") did not match the number found(" << numFields << ") ";
       status = INVALID;
    }
 
@@ -326,7 +332,7 @@ bool Nitf::StdidcParser::fromDynamicObject(const DynamicObject& input, ostream& 
 
    try
    {
-      const DateTime *pMissionDTG = dv_cast<DateTime>(&input.getAttribute(STDIDC::ACQUISITION_DATE));
+      const DateTime* pMissionDTG = dv_cast<DateTime>(&input.getAttribute(STDIDC::ACQUISITION_DATE));
       if (pMissionDTG == NULL)
       {
          return false;
@@ -337,23 +343,23 @@ bool Nitf::StdidcParser::fromDynamicObject(const DynamicObject& input, ostream& 
       boost::to_upper(yyyymmddhhmmss);
       output << sizeString(yyyymmddhhmmss, 14);
 
-      output << sizeString( dv_cast<string>(input.getAttribute (STDIDC::MISSION)), 14);
-      output << sizeString( dv_cast<string>(input.getAttribute (STDIDC::PASS)), 2);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(STDIDC::OP_NUM)), 3, -1);
-      output << sizeString( dv_cast<string>(input.getAttribute (STDIDC::START_SEGMENT)), 2);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(STDIDC::REPRO_NUM)), 2, -1);
-      output << sizeString( dv_cast<string>(input.getAttribute (STDIDC::REPLAY_REGEN)), 3);
-      output << sizeString( dv_cast<string>(input.getAttribute (STDIDC::BLANK_FILL)), 1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(STDIDC::START_COLUMN)), 3, -1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(STDIDC::START_ROW)), 5, -1);
-      output << sizeString( dv_cast<string>(input.getAttribute (STDIDC::END_SEGMENT)), 2);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(STDIDC::END_COLUMN)), 3, -1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(STDIDC::END_ROW)), 5, -1);
-      output << sizeString( dv_cast<string>(input.getAttribute (STDIDC::COUNTRY)), 2);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(STDIDC::WAC)), 4, -1);
-      output << sizeString( dv_cast<string>(input.getAttribute (STDIDC::LOCATION)), 11);
-      output << sizeString( dv_cast<string>(input.getAttribute (STDIDC::RESERVED2)), 5);
-      output << sizeString( dv_cast<string>(input.getAttribute (STDIDC::RESERVED3)), 8);
+      output << sizeString(dv_cast<string>(input.getAttribute(STDIDC::MISSION)), 14);
+      output << sizeString(dv_cast<string>(input.getAttribute(STDIDC::PASS)), 2);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(STDIDC::OP_NUM)), 3, -1);
+      output << sizeString(dv_cast<string>(input.getAttribute(STDIDC::START_SEGMENT)), 2);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(STDIDC::REPRO_NUM)), 2, -1);
+      output << sizeString(dv_cast<string>(input.getAttribute(STDIDC::REPLAY_REGEN)), 3);
+      output << sizeString(dv_cast<string>(input.getAttribute(STDIDC::BLANK_FILL)), 1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(STDIDC::START_COLUMN)), 3, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(STDIDC::START_ROW)), 5, -1);
+      output << sizeString(dv_cast<string>(input.getAttribute(STDIDC::END_SEGMENT)), 2);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(STDIDC::END_COLUMN)), 3, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(STDIDC::END_ROW)), 5, -1);
+      output << sizeString(dv_cast<string>(input.getAttribute(STDIDC::COUNTRY)), 2);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(STDIDC::WAC)), 4, -1);
+      output << sizeString(dv_cast<string>(input.getAttribute(STDIDC::LOCATION)), 11);
+      output << sizeString(dv_cast<string>(input.getAttribute(STDIDC::RESERVED2)), 5);
+      output << sizeString(dv_cast<string>(input.getAttribute(STDIDC::RESERVED3)), 8);
    }
    catch (const bad_cast&)
    {

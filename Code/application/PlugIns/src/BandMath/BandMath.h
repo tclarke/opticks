@@ -7,6 +7,9 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#ifndef BANDMATH_H
+#define BANDMATH_H
+
 #ifdef BandMath_EXPORTS
 #define BandMath_API __declspec(dllexport)
 #else
@@ -34,14 +37,28 @@ class Step;
 
 class BandMath : public AlgorithmShell
 {
+public:
+   BandMath();
+   ~BandMath();
+
+   bool isInputValid(PlugInArgList&);
+   bool setBatch();
+   bool setInteractive();
+   bool getInputSpecification(PlugInArgList*&);
+   bool getOutputSpecification(PlugInArgList*&);
+   bool execute(PlugInArgList*, PlugInArgList*);
+   bool initialize();
+
 private:
-   Step *mpStep;
+   Step* mpStep;
    bool mbInteractive;   //default to interactive mode
    bool mbDisplayResults;
 
    std::string mstrProgressString;
    ReportingLevel meGabbiness;
-   int mCubeRows, mCubeColumns, mCubeBands;
+   int mCubeRows;
+   int mCubeColumns;
+   int mCubeBands;
 
    bool mbGuiIsNeeded;
    bool mbDegrees;
@@ -58,13 +75,13 @@ private:
    Service<UtilityServices> mpUtilities;
 
    // Source data
-   RasterElement *mpCube;
-   RasterElement *mpCube2;
-   RasterElement *mpCube3;
-   RasterElement *mpCube4;
-   RasterElement *mpCube5;
+   RasterElement* mpCube;
+   RasterElement* mpCube2;
+   RasterElement* mpCube3;
+   RasterElement* mpCube4;
+   RasterElement* mpCube5;
 
-   Progress *mpProgress; 
+   Progress* mpProgress; 
    std::string mResultsName;
    std::string mExpression;
 
@@ -72,20 +89,10 @@ private:
 
    bool mbError;
 
-   bool parse(PlugInArgList *, PlugInArgList *);
+   bool parse(PlugInArgList*, PlugInArgList*);
    void displayErrorMessage();
    bool createReturnValue(std::string partialResultsName);
    bool createReturnGuiElement();
-
-public:
-   BandMath();
-   ~BandMath();
-
-   bool isInputValid(PlugInArgList &);
-   bool setBatch();
-   bool setInteractive();
-   bool getInputSpecification(PlugInArgList *&);
-   bool getOutputSpecification(PlugInArgList *&);
-   bool execute(PlugInArgList *, PlugInArgList *);
-   bool initialize();
 };
+
+#endif

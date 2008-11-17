@@ -15,21 +15,21 @@
 #include <vector>
 using namespace std;
 
-ColorBuffer::ColorBuffer(GLenum textureTarget, GLint internalFormat, int width, int height, 
-                                         GLenum textureFormat, GLenum dataType, unsigned int alpha) :
+ColorBuffer::ColorBuffer(GLenum textureTarget, GLint internalFormat, int width, int height, GLenum textureFormat,
+                         GLenum dataType, unsigned int alpha) :
    mTextureObjectId(0),
    mWidth(width),
    mHeight(height),
-   mAlpha(alpha),
-   mTextureTarget(textureTarget),
-   mTextureFormat(textureFormat),
    mInternalFormat(internalFormat),
-   mDataType(dataType)
+   mTextureFormat(textureFormat),
+   mTextureTarget(textureTarget),
+   mDataType(dataType),
+   mAlpha(alpha)
 {
    // allocate GPU texture memory
    Service<GpuResourceManager> pGpuResourceManager;
-   mTextureObjectId = pGpuResourceManager->allocateTexture(textureTarget, internalFormat, width, height, 
-                                                           textureFormat, dataType);
+   mTextureObjectId = pGpuResourceManager->allocateTexture(textureTarget, internalFormat, width, height,
+      textureFormat, dataType);
 
    if (isTextureResident() == false)
    {
@@ -42,11 +42,11 @@ ColorBuffer::ColorBuffer(int width, int height, GLenum textureFormat, GLenum dat
    mTextureObjectId(0),
    mWidth(width),
    mHeight(height),
-   mAlpha(alpha),
-   mTextureTarget(GL_TEXTURE_RECTANGLE_ARB),
-   mTextureFormat(textureFormat),
    mInternalFormat(GL_LUMINANCE),
-   mDataType(dataType)
+   mTextureFormat(textureFormat),
+   mTextureTarget(GL_TEXTURE_RECTANGLE_ARB),
+   mDataType(dataType),
+   mAlpha(alpha)
 {
    // NOTE: Since the OpenGL FBO extension is not supported, do not need to allocate
    //       texture memory on the graphics card. The pbuffer extension allows the use

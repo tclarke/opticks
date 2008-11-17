@@ -94,8 +94,7 @@ FusionAlgorithmInputsPage::FusionAlgorithmInputsPage(QWidget* pParent) :
    pColorLayout->addWidget(mpSecondaryCheck);
 
    QString tip = "Copies the color map from the primary or secondary image to the respective image\n"
-                 "chip after fusion. All histogram stretches are preserved in the chip's color\n"
-                 "map.";
+      "chip after fusion. All histogram stretches are preserved in the chip's color\nmap.";
    pColorMapGroup->setToolTip(tip);
 
    // Optimization check box
@@ -145,17 +144,17 @@ bool FusionAlgorithmInputsPage::copyColormap(const SpatialDataView& view)
    return false;
 }
 
-void FusionAlgorithmInputsPage::attached(Subject &subject, const string &signal, const Slot &slot)
+void FusionAlgorithmInputsPage::attached(Subject& subject, const string& signal, const Slot& slot)
 {
    aoiLayerAttached(subject, signal, boost::any());
 }
 
-void FusionAlgorithmInputsPage::detached(Subject &subject, const string &signal, const Slot &slot)
+void FusionAlgorithmInputsPage::detached(Subject& subject, const string& signal, const Slot& slot)
 {
    aoiLayerDetached(subject, signal, boost::any());
 }
 
-void FusionAlgorithmInputsPage::aoiLayerAttached(Subject &subject, const string &signal, const boost::any &v)
+void FusionAlgorithmInputsPage::aoiLayerAttached(Subject& subject, const string& signal, const boost::any& v)
 {
    AoiLayer* pAoiLayer = dynamic_cast<AoiLayer*>(&subject);
    if (pAoiLayer != NULL && mpAoiLayer == pAoiLayer)
@@ -168,7 +167,7 @@ void FusionAlgorithmInputsPage::aoiLayerAttached(Subject &subject, const string 
    }
 }
 
-void FusionAlgorithmInputsPage::aoiLayerDetached(Subject &subject, const string &signal, const boost::any &v)
+void FusionAlgorithmInputsPage::aoiLayerDetached(Subject& subject, const string& signal, const boost::any& v)
 {
    AoiLayer* pAoiLayer = dynamic_cast<AoiLayer*>(&subject);
    if (pAoiLayer != NULL && mpAoiLayer == pAoiLayer)
@@ -181,7 +180,7 @@ void FusionAlgorithmInputsPage::aoiLayerDetached(Subject &subject, const string 
    }
 }
 
-void FusionAlgorithmInputsPage::aoiLayerDeleted(Subject &subject, const string &signal, const boost::any &v)
+void FusionAlgorithmInputsPage::aoiLayerDeleted(Subject& subject, const string& signal, const boost::any& v)
 {
    AoiLayer* pAoiLayer = dynamic_cast<AoiLayer*>(&subject);
    if (pAoiLayer != NULL && mpAoiLayer == pAoiLayer)
@@ -211,7 +210,7 @@ void FusionAlgorithmInputsPage::aoiLayerDeleted(Subject &subject, const string &
    }
 }
 
-void FusionAlgorithmInputsPage::aoiModified(Subject &subject, const string &signal, const boost::any &v)
+void FusionAlgorithmInputsPage::aoiModified(Subject& subject, const string& signal, const boost::any& v)
 {
    AoiElement* pAoi = dynamic_cast<AoiElement*>(&subject);
    if (pAoi != NULL)
@@ -222,7 +221,7 @@ void FusionAlgorithmInputsPage::aoiModified(Subject &subject, const string &sign
       int x2 = std::max(ll.mX, ur.mX);
       int y1 = std::min(ll.mY, ur.mY);
       int y2 = std::max(ll.mY, ur.mY);
-      if(!pAoi->getGroup()->getObjects().empty())
+      if (!pAoi->getGroup()->getObjects().empty())
       {
          // if the AOI has elements, reset the bounding box to start from 1 instead of 0
          x1++;
@@ -260,6 +259,21 @@ void FusionAlgorithmInputsPage::setViews(SpatialDataView* pPrimary, SpatialDataV
    createFusionAoiLayer(pPrimary);
 }
 
+bool FusionAlgorithmInputsPage::sbs() const
+{
+   return mpSbsOption != NULL && mpSbsOption->isChecked();
+}
+
+bool FusionAlgorithmInputsPage::flicker() const
+{
+   return mpFlickerOption != NULL && mpFlickerOption->isChecked();
+}
+
+bool FusionAlgorithmInputsPage::openOverlayTools() const
+{
+   return mpRunOverlayOption != NULL && mpRunOverlayOption->isChecked();
+}
+
 bool FusionAlgorithmInputsPage::getRoiBoundingBox(int& x1, int& y1, int& x2, int& y2) const
 {
    bool success = false;
@@ -278,6 +292,16 @@ bool FusionAlgorithmInputsPage::getRoiBoundingBox(int& x1, int& y1, int& x2, int
 bool FusionAlgorithmInputsPage::inMemory() const
 {
    return mpOnDiskButton != NULL && mpOnDiskButton->isChecked() == false;
+}
+
+string FusionAlgorithmInputsPage::getPreferredPrimaryMouseMode() const
+{
+   return "LayerMode";
+}
+
+Layer* FusionAlgorithmInputsPage::getPreferredPrimaryActiveLayer() const
+{
+   return mpAoiLayer;
 }
 
 void FusionAlgorithmInputsPage::createFusionAoiLayer(SpatialDataView* pView)
@@ -333,7 +357,7 @@ void FusionAlgorithmInputsPage::createFusionAoiLayer(SpatialDataView* pView)
             VERIFYNRV(mpAoiLayer != NULL); // Something went really wrong if mpAoiLayer is NULL
          }
          // set tool to be RED
-         mpAoiLayer->setColor(ColorType(255,0,0));
+         mpAoiLayer->setColor(ColorType(255, 0, 0));
          // set tool to be border
          mpAoiLayer->setSymbol(BOX);
       }

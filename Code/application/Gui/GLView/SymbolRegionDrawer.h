@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef SYMBOL_REGION_DRAWER_H
-#define SYMBOL_REGION_DRAWER_H
+#ifndef SYMBOLREGIONDRAWER_H
+#define SYMBOLREGIONDRAWER_H
 
 #include <QtGui/QColor>
 
@@ -41,7 +41,7 @@ public:
    int mVisStartRow;
    int mVisEndRow;
    double mPixelSize;
-   const Oper &mOper;
+   const Oper& mOper;
 };
 
 template<class Oper> 
@@ -195,9 +195,7 @@ void drawSolid(const DrawInfo<Oper> &info)
       prevDraw = false;
       for (xx = info.mVisStartColumn; xx <= info.mVisEndColumn; xx++)
       {
-         bool bDraw = false;
-         bDraw = info.mOper(yy,xx);
-
+         bool bDraw = info.mOper(yy, xx);
          if (bDraw == true && prevDraw == false)
          {
             start = xx;
@@ -402,23 +400,26 @@ void drawHorizontalLine(const DrawInfo<Oper> &info)
    int pixelSizeY = std::max(1, (int)(floor(pixelSizeF/2.0)));
    int pixelSizeX = std::max(1, (int)floor(pixelSizeF));
 
-   if (pixelSizeF < 1.0) pixelSizeF = 1.0;
+   if (pixelSizeF < 1.0)
+   {
+      pixelSizeF = 1.0;
+   }
 
    glBegin(GL_LINES);
 
    bool prevDraw = false;
    int start, stop;
 
-   for (yy = info.mVisStartRow; yy <= info.mVisEndRow; yy+=pixelSizeY)
+   for (yy = info.mVisStartRow; yy <= info.mVisEndRow; yy += pixelSizeY)
    {
-      for (xx = info.mVisStartColumn; xx <= info.mVisEndColumn; xx+=pixelSizeX)
+      for (xx = info.mVisStartColumn; xx <= info.mVisEndColumn; xx += pixelSizeX)
       {
          bool bDraw = false;
          int yyy, xxx;
          int i, j;
-         for (j=0, yyy=yy; j<pixelSizeY && !bDraw && yyy<=info.mVisEndRow; ++j, ++yyy)
+         for (j = 0, yyy = yy; j < pixelSizeY && !bDraw && yyy <= info.mVisEndRow; ++j, ++yyy)
          {
-            for (i=0, xxx=xx; i<pixelSizeX && !bDraw && xxx<=info.mVisEndColumn; ++i, ++xxx)
+            for (i = 0, xxx = xx; i < pixelSizeX && !bDraw && xxx <= info.mVisEndColumn; ++i, ++xxx)
             {
                bDraw |= info.mOper(yyy, xxx);
             }
@@ -683,9 +684,9 @@ void drawPoints(const DrawInfo<Oper> &info)
       for (xx = info.mVisStartColumn; xx <= info.mVisEndColumn; xx += pixelSize)
       {
          bool drawn = false;
-         for (int i=0; i<pixelSize && !drawn; ++i)
+         for (int i = 0; i < pixelSize && !drawn; ++i)
          {
-            for (int j=0; j<pixelSize && !drawn; ++j)
+            for (int j = 0; j < pixelSize && !drawn; ++j)
             {
                if (info.mOper(yy+i, xx+j))
                {

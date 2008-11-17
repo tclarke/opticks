@@ -51,9 +51,16 @@ bool TiePointTesterAlgorithm::processAll()
    StepResource pStep("Run Tie Point Tester", "app", "AFB5C331-DD5E-4d1b-9A8C-4D3206E586FE");
    pStep->addProperty("Cube", getRasterElement()->getName());
 
-   RasterElement *pCube[2] = { NULL, NULL };
-   if (findCubes(pCube) != 2) return false;
-   if (pCube[0] == NULL || pCube[1] == NULL) return false;
+   RasterElement* pCube[2] = { NULL, NULL };
+   if (findCubes(pCube) != 2)
+   {
+      return false;
+   }
+
+   if (pCube[0] == NULL || pCube[1] == NULL)
+   {
+      return false;
+   }
 
    const RasterDataDescriptor* pDescriptor0 = dynamic_cast<const RasterDataDescriptor*>(pCube[0]->getDataDescriptor());
    const RasterDataDescriptor* pDescriptor1 = dynamic_cast<const RasterDataDescriptor*>(pCube[1]->getDataDescriptor());
@@ -67,7 +74,7 @@ bool TiePointTesterAlgorithm::processAll()
    computeTiePoints(xSize, ySize, points);
 
    Service<ModelServices> pModel;
-   TiePointList *pList = static_cast<TiePointList*>(pModel->getElement("TiePointList", "TiePointList", pCube[0]));
+   TiePointList* pList = static_cast<TiePointList*>(pModel->getElement("TiePointList", "TiePointList", pCube[0]));
    if (pList == NULL)
    {
       DataDescriptor* pTiePointDescriptor = pModel->createDataDescriptor("TiePointList", "TiePointList", pCube[0]);
@@ -96,14 +103,14 @@ void TiePointTesterAlgorithm::addLayer(RasterElement *pCube, TiePointList *pList
    REQUIRE(pList != NULL);
 
    Service<DesktopServices> pDesktop;
-   SpatialDataWindow *pWindow = static_cast<SpatialDataWindow*>(pDesktop->getWindow(pCube->getName(), 
+   SpatialDataWindow* pWindow = static_cast<SpatialDataWindow*>(pDesktop->getWindow(pCube->getName(), 
       SPATIAL_DATA_WINDOW));
-   SpatialDataView *pView = static_cast<SpatialDataView*>(pWindow->getView());
+   SpatialDataView* pView = static_cast<SpatialDataView*>(pWindow->getView());
    INVARIANT(pView != NULL);
-   TiePointLayer *pLayer = static_cast<TiePointLayer*>(pView->createLayer(TIEPOINT_LAYER, pList, pList->getName()));
+   TiePointLayer* pLayer = static_cast<TiePointLayer*>(pView->createLayer(TIEPOINT_LAYER, pList, pList->getName()));
    if (pLayer == NULL)
    {
-      LayerList *pLayerList = pView->getLayerList();
+      LayerList* pLayerList = pView->getLayerList();
       INVARIANT(pLayerList != NULL);
       pLayer = static_cast<TiePointLayer*>(pLayerList->getLayer(TIEPOINT_LAYER, pList, pList->getName()));
    }
@@ -116,9 +123,9 @@ void TiePointTesterAlgorithm::addLayer(RasterElement *pCube, TiePointList *pList
 void TiePointTesterAlgorithm::computeTiePoints(size_t xSize, size_t ySize, std::vector<TiePoint>& points)
 {
    const int noise = 300;
-   for (size_t x = 0; x<xSize; x+=2)
+   for (size_t x = 0; x < xSize; x += 2)
    {
-      for (size_t y = 0; y<ySize; y+=2)
+      for (size_t y = 0; y < ySize; y += 2)
       {
          TiePoint point;
          point.mReferencePoint.mX = static_cast<int>(x);
@@ -130,7 +137,7 @@ void TiePointTesterAlgorithm::computeTiePoints(size_t xSize, size_t ySize, std::
          point.mConfidence = 0;
          point.mPhi = 0;
          points.push_back(point);
-         reportProgress(NORMAL, (int)(100*x/xSize), "Adding tie points");
+         reportProgress(NORMAL, static_cast<int>(100 * x / xSize), "Adding tie points");
       }
    }
 }
@@ -144,15 +151,15 @@ int TiePointTesterAlgorithm::findCubes(RasterElement *pCube[2])
    SpatialDataWindow *pWindow[2];
    int windowsFound = 0;
    std::vector<Window*>::iterator ppWindow;
-   for (ppWindow=windows.begin(); ppWindow!=windows.end()&&windowsFound<2; ++ppWindow)
+   for (ppWindow = windows.begin(); ppWindow != windows.end() && windowsFound < 2; ++ppWindow)
    {
       INVARIANT(*ppWindow != NULL);
       if ((*ppWindow)->isKindOf("SpatialDataWindow"))
       {
          pWindow[windowsFound] = static_cast<SpatialDataWindow*>(*ppWindow);
-         SpatialDataView *pView = static_cast<SpatialDataView*>(pWindow[windowsFound]->getView());
+         SpatialDataView* pView = static_cast<SpatialDataView*>(pWindow[windowsFound]->getView());
          INVARIANT(pView != NULL);
-         const LayerList *pLayerList = pView->getLayerList();
+         const LayerList* pLayerList = pView->getLayerList();
          pCube[windowsFound] = pLayerList->getPrimaryRasterElement();
          ++windowsFound;
       }
@@ -196,12 +203,12 @@ TiePointTesterAlgorithm::TiePointTesterAlgorithm(RasterElement &rasterElement,
  *       Initialization data to run the algorithm on
  *  @return true if the data were valid, false otherwise
  */
-bool TiePointTesterAlgorithm::initialize(void *pAlgorithmData)
+bool TiePointTesterAlgorithm::initialize(void* pAlgorithmData)
 {
    bool success = true;
    REQUIRE(pAlgorithmData != NULL);
 
-   mInputs = *(TiePointTesterInputs*)pAlgorithmData;
+   mInputs = *(reinterpret_cast<TiePointTesterInputs*>(pAlgorithmData));
 
    return success;
 }

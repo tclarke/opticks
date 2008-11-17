@@ -486,7 +486,7 @@ bool AxisImp::toXml(XMLWriter* pXml) const
 {
    pXml->addAttr("title", mTitle.toStdString());
    pXml->pushAddPoint(pXml->addElement("titleFont"));
-   if(!mTitleFont.toXml(pXml))
+   if (!mTitleFont.toXml(pXml))
    {
       return false;
    }

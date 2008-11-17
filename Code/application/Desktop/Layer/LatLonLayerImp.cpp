@@ -7,7 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
 #include <QtGui/QApplication>
 
 #include "AppConfig.h"
@@ -37,33 +36,31 @@ XERCES_CPP_NAMESPACE_USE
 /**
   * The static methods are documented below near their definitions.
   */
-static LocationType adjustSegment (LocationType outside, LocationType inside, const vector<LocationType> &border);
-static double computeSpacing (double range);
-static double getStep (double diff);
+static LocationType adjustSegment(LocationType outside, LocationType inside, const vector<LocationType>& border);
+static double computeSpacing(double range);
+static double getStep(double diff);
 
 LatLonLayerImp::LatLonLayerImp(const string& id, const string& layerName, DataElement* pElement) :
    LayerImp(id, layerName, pElement),
+   mGeocoordType(LatLonLayer::getSettingGeocoordType()),
+   mFormat(LatLonLayer::getSettingFormat()),
+   mStyle(LatLonLayer::getSettingGridlineStyle()),
+   mColor(COLORTYPE_TO_QCOLOR(LatLonLayer::getSettingGridlineColor())),
+   mWidth(LatLonLayer::getSettingGridlineWidth()),
+   mCubeSize(LocationType(0.0, 0.0)),
+   mMaxCoord(LocationType(0.0, 0.0)),
+   mMinCoord(LocationType(0.0, 0.0)),
+   mZone(0),
+   mHemisphere('N'),
+   mComputeTickSpacing(true),
+   mTickSpacing(0.0, 0.0),
    mComputedTickSpacing(0.0, 0.0),
    mComputedTickSpacingDirty(true),
    mBorderDirty(true),
-   mCubeSize(LocationType(0.0, 0.0)),
-   mMinCoord(LocationType(0.0, 0.0)),
-   mMaxCoord(LocationType(0.0, 0.0)),
-   mFont(QApplication::font()),
-   mZone(0),
-   mHemisphere('N'),
-   mTickSpacing(0.0, 0.0),
-   mComputeTickSpacing(true)
+   mFont(LatLonLayerImp::getDefaultFont())
 {
-   mpElement.addSignal(SIGNAL_NAME(RasterElement, GeoreferenceModified), Slot(this, &LatLonLayerImp::georeferenceModified));
-
-   ColorType color = LatLonLayer::getSettingGridlineColor();
-   mColor = COLORTYPE_TO_QCOLOR(color);
-   mStyle = LatLonLayer::getSettingGridlineStyle();
-   mWidth = LatLonLayer::getSettingGridlineWidth();
-   mFont = LatLonLayerImp::getDefaultFont();
-   mGeocoordType = LatLonLayer::getSettingGeocoordType();
-   mFormat = LatLonLayer::getSettingFormat();
+   mpElement.addSignal(SIGNAL_NAME(RasterElement, GeoreferenceModified),
+      Slot(this, &LatLonLayerImp::georeferenceModified));
 
    addPropertiesPage(PropertiesLatLonLayer::getName());
 
@@ -75,17 +72,15 @@ LatLonLayerImp::LatLonLayerImp(const string& id, const string& layerName, DataEl
    connect(this, SIGNAL(autoTickSpacingChanged(bool)), this, SIGNAL(modified()));
    connect(this, SIGNAL(coordTypeChanged(const GeocoordType&)), this, SIGNAL(modified()));
    connect(this, SIGNAL(formatChanged(const DmsFormatType&)), this, SIGNAL(modified()));
-
 }
 
 LatLonLayerImp::~LatLonLayerImp()
-{
-}
+{}
 
 const string& LatLonLayerImp::getObjectType() const
 {
-   static string type("LatLonLayerImp");
-   return type;
+   static string sType("LatLonLayerImp");
+   return sType;
 }
 
 bool LatLonLayerImp::isKindOf(const string& className) const
@@ -98,14 +93,13 @@ bool LatLonLayerImp::isKindOf(const string& className) const
    return LayerImp::isKindOf(className);
 }
 
-void LatLonLayerImp::georeferenceModified(Subject &subject,
-   const std::string &signal, const boost::any &data)
+void LatLonLayerImp::georeferenceModified(Subject& subject, const string& signal, const boost::any& data)
 {
    setBorderDirty(true);
    setTickSpacingDirty(true);
 }
 
-LatLonLayerImp& LatLonLayerImp::operator= (const LatLonLayerImp& latLonLayer)
+LatLonLayerImp& LatLonLayerImp::operator=(const LatLonLayerImp& latLonLayer)
 {
    if (this != &latLonLayer)
    {
@@ -147,16 +141,22 @@ void LatLonLayerImp::draw()
 {
    const int stepCount = 100;
    LocationType tickSpacing;
-   LocationType start, stop, stepSize;
-   int xCount, yCount;
-   int i, j;
+   LocationType start;
+   LocationType stop;
+   LocationType stepSize;
+   int xCount;
+   int yCount;
+   int i;
+   int j;
    vector<LocationType> stepValues;
    stepValues.reserve(stepCount+2);
-   LocationType geoVertex, pixelVertex;
-   LocationType geoDraw;
-   bool haveX = false, haveY = false;
+   LocationType geoVertex;
+   LocationType pixelVertex;
+   bool haveX = false;
+   bool haveY = false;
 
-   double modelMatrix[16], projectionMatrix[16];
+   double modelMatrix[16];
+   double projectionMatrix[16];
    int viewPort[4];
    glGetIntegerv(GL_VIEWPORT, viewPort);
    glGetDoublev(GL_PROJECTION_MATRIX, projectionMatrix);
@@ -218,7 +218,7 @@ void LatLonLayerImp::draw()
 
    setBoundingBox(boundingBox);
 
-   RasterElement *pRaster = dynamic_cast<RasterElement*>(getDataElement());
+   RasterElement* pRaster = dynamic_cast<RasterElement*>(getDataElement());
    if (pRaster == NULL)
    {
       return;
@@ -226,14 +226,21 @@ void LatLonLayerImp::draw()
 
    struct LineAttributeRestorer
    {
-      LineAttributeRestorer() { glPushAttrib(GL_LINE_BIT); }
-      ~LineAttributeRestorer() { glPopAttrib(); }
+      LineAttributeRestorer()
+      {
+         glPushAttrib(GL_LINE_BIT);
+      }
+
+      ~LineAttributeRestorer()
+      {
+         glPopAttrib();
+      }
    } lineAttributeRestorer;
 
    glColor4ub(mColor.red(), mColor.green(), mColor.blue(), mColor.alpha());
    glLineWidth(mWidth);
 
-   tickSpacing = getTickSpacing ();
+   tickSpacing = getTickSpacing();
    if (tickSpacing.mX != 0.0)
    {
       haveX = true;
@@ -258,8 +265,8 @@ void LatLonLayerImp::draw()
    stop.mX = ceil(mMaxCoord.mX / tickSpacing.mX) * tickSpacing.mX;
    stop.mY = ceil(mMaxCoord.mY / tickSpacing.mY) * tickSpacing.mY;
 
-   stepSize.mX = (mMaxCoord.mX - mMinCoord.mX) / (double)(stepCount-1);
-   stepSize.mY = (mMaxCoord.mY - mMinCoord.mY) / (double)(stepCount-1);
+   stepSize.mX = (mMaxCoord.mX - mMinCoord.mX) / static_cast<double>(stepCount - 1);
+   stepSize.mY = (mMaxCoord.mY - mMinCoord.mY) / static_cast<double>(stepCount - 1);
 
    xCount = 1.5 + (stop.mX - start.mX) / tickSpacing.mX;
    yCount = 1.5 + (stop.mY - start.mY) / tickSpacing.mY;
@@ -301,7 +308,7 @@ void LatLonLayerImp::draw()
 
       if (haveX)
       {
-         for (i=0; i<xCount; i++)
+         for (i = 0; i < xCount; ++i)
          {
             onOff = false;
             isInData = false;
@@ -372,7 +379,7 @@ void LatLonLayerImp::draw()
                }
 
                // add rest of locations in data
-               for (int loc = left+1; loc <= right; ++loc)
+               for (int loc = left + 1; loc <= right; ++loc)
                {
                   geoVertex.mY = stepValues[loc].mY;
                   LocationType geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
@@ -474,11 +481,11 @@ void LatLonLayerImp::draw()
 
       if (haveY)
       {
-         for (i=0; i<yCount; i++)
+         for (i = 0; i < yCount; ++i)
          {
             onOff = false;
             isInData = false;
-            geoVertex.mY = start.mY + (double)i * tickSpacing.mY;
+            geoVertex.mY = start.mY + static_cast<double>(i) * tickSpacing.mY;
             vertices.clear();
             vertices.reserve(numSteps);
 
@@ -506,7 +513,7 @@ void LatLonLayerImp::draw()
                ++bottom;
                geoVertex.mX = stepValues[bottom].mX;
                LocationType geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
-               pixelVertex = pRaster->convertGeocoordToPixel (geoDraw);
+               pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
                pixelVertex.mX += 0.5;
                pixelVertex.mY += 0.5;
                isInData = DrawUtil::isWithin(pixelVertex, &(*mBoundingBox.begin()), 4);
@@ -643,27 +650,27 @@ void LatLonLayerImp::draw()
 
       if (haveX)
       {
-         for (i=0; i<xCount; i++)
+         for (i = 0; i < xCount; ++i)
          {
-            geoVertex.mX = start.mX + (double)i * tickSpacing.mX;
-            for (j=0; j<yCount; j++)
+            geoVertex.mX = start.mX + static_cast<double>(i) * tickSpacing.mX;
+            for (j = 0; j < yCount; ++j)
             {
-               geoVertex.mY = start.mY + (double)j * tickSpacing.mY;
+               geoVertex.mY = start.mY + static_cast<double>(j) * tickSpacing.mY;
                LocationType geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
-               pixelVertex = pRaster->convertGeocoordToPixel (geoDraw);
+               pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
                if (DrawUtil::isWithin(pixelVertex, &(*mBoundingBox.begin()), 4))
                {
                   vector<LocationType> verticalSegment;
-                  geoVertex.mY -= tickSpacing.mY/20.0;
-                  LocationType geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
-                  pixelVertex = pRaster->convertGeocoordToPixel (geoDraw);
+                  geoVertex.mY -= tickSpacing.mY / 20.0;
+                  geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
+                  pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
                   pixelVertex.mX += 0.5;
                   pixelVertex.mY += 0.5;
                   verticalSegment.push_back(pixelVertex);
 
-                  geoVertex.mY += tickSpacing.mY/10.0;
+                  geoVertex.mY += tickSpacing.mY / 10.0;
                   geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
-                  pixelVertex = pRaster->convertGeocoordToPixel (geoDraw);
+                  pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
                   pixelVertex.mX += 0.5;
                   pixelVertex.mY += 0.5;
                   verticalSegment.push_back(pixelVertex);
@@ -672,8 +679,8 @@ void LatLonLayerImp::draw()
                   {
                      if (bProductView)
                      {
-                        gluProject(it->mX, it->mY, 0.0, modelMatrix,
-                           projectionMatrix, viewPort, &it->mX, &it->mY, &winZ);
+                        gluProject(it->mX, it->mY, 0.0, modelMatrix, projectionMatrix, viewPort,
+                           &it->mX, &it->mY, &winZ);
                      }
                      glVertex2f(it->mX, it->mY);
                   }
@@ -684,27 +691,27 @@ void LatLonLayerImp::draw()
 
       if (haveY)
       {
-         for (i=0; i<yCount; i++)
+         for (i = 0; i < yCount; ++i)
          {
-            geoVertex.mY = start.mY + (double)i * tickSpacing.mY;
-            for (j=0; j<xCount; j++)
+            geoVertex.mY = start.mY + static_cast<double>(i) * tickSpacing.mY;
+            for (j = 0; j < xCount; ++j)
             {
-               geoVertex.mX = start.mX + (double)j * tickSpacing.mX;
+               geoVertex.mX = start.mX + static_cast<double>(j) * tickSpacing.mX;
                LocationType geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
-               pixelVertex = pRaster->convertGeocoordToPixel (geoDraw);
+               pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
                if (DrawUtil::isWithin(pixelVertex, &(*mBoundingBox.begin()), 4))
                {
                   vector<LocationType> horizontalSegment;
-                  geoVertex.mX -= tickSpacing.mX/20.0;
-                  LocationType geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
-                  pixelVertex = pRaster->convertGeocoordToPixel (geoDraw);
+                  geoVertex.mX -= tickSpacing.mX / 20.0;
+                  geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
+                  pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
                   pixelVertex.mX += 0.5;
                   pixelVertex.mY += 0.5;
                   horizontalSegment.push_back(pixelVertex);
 
-                  geoVertex.mX += tickSpacing.mX/10.0;
+                  geoVertex.mX += tickSpacing.mX / 10.0;
                   geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
-                  pixelVertex = pRaster->convertGeocoordToPixel (geoDraw);
+                  pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
                   pixelVertex.mX += 0.5;
                   pixelVertex.mY += 0.5;
                   horizontalSegment.push_back(pixelVertex);
@@ -713,8 +720,8 @@ void LatLonLayerImp::draw()
                   {
                      if (bProductView)
                      {
-                        gluProject(it->mX, it->mY, 0.0, modelMatrix,
-                           projectionMatrix, viewPort, &it->mX, &it->mY, &winZ);
+                        gluProject(it->mX, it->mY, 0.0, modelMatrix, projectionMatrix, viewPort,
+                           &it->mX, &it->mY, &winZ);
                      }
                      glVertex2f(it->mX, it->mY);
                   }
@@ -762,21 +769,13 @@ void LatLonLayerImp::setLatLonFormat(const DmsFormatType& newFormat)
       mbLinking = true;
 
       vector<Layer*> linkedLayers = getLinkedLayers();
-
-      vector<Layer*>::iterator iter = linkedLayers.begin();
-      while (iter != linkedLayers.end())
+      for (vector<Layer*>::iterator iter = linkedLayers.begin(); iter != linkedLayers.end(); ++iter)
       {
-         Layer* pLayer = NULL;
-         pLayer = *iter;
+         LatLonLayer* pLayer = dynamic_cast<LatLonLayer*>(*iter);
          if (pLayer != NULL)
          {
-            if (pLayer->isKindOf("LatLonLayer") == true)
-            {
-               ((LatLonLayer*) pLayer)->setLatLonFormat(newFormat);
-            }
+            pLayer->setLatLonFormat(newFormat);
          }
-
-         ++iter;
       }
 
       mbLinking = false;
@@ -799,7 +798,7 @@ void LatLonLayerImp::reset()
    setLatLonFormat(LatLonLayer::getSettingFormat());
 }
 
-void LatLonLayerImp::drawLabel(const LocationType& location, const LocationType& textOffset, 
+void LatLonLayerImp::drawLabel(const LocationType& location, const LocationType& textOffset,
                                const string& text, const BorderType& borderType, const double modelMatrix[16],
                                const double projectionMatrix[16], const int viewPort[4], bool adjustForRotation)
 {
@@ -913,13 +912,15 @@ LocationType LatLonLayerImp::getTickSpacing() const
    if (mComputeTickSpacing)
    {
       if (mComputedTickSpacingDirty)
-         ((LatLonLayerImp*) this)->computeTickSpacing();
+      {
+         const_cast<LatLonLayerImp*>(this)->computeTickSpacing();
+      }
 
       return mComputedTickSpacing;
    }
    else if (mBorderDirty == true)
    {
-      ((LatLonLayerImp*) this)->computeBorder();
+      const_cast<LatLonLayerImp*>(this)->computeBorder();
    }
 
    return mTickSpacing;
@@ -928,6 +929,11 @@ LocationType LatLonLayerImp::getTickSpacing() const
 bool LatLonLayerImp::getAutoTickSpacing() const
 {
    return mComputeTickSpacing;
+}
+
+GeocoordType LatLonLayerImp::getGeocoordType() const
+{
+   return mGeocoordType;
 }
 
 DmsFormatType LatLonLayerImp::getLatLonFormat() const
@@ -1026,7 +1032,7 @@ QFont LatLonLayerImp::getDefaultFont()
 
 bool LatLonLayerImp::toXml(XMLWriter* pXml) const
 {
-   if(!LayerImp::toXml(pXml))
+   if (!LayerImp::toXml(pXml))
    {
       return false;
    }
@@ -1064,14 +1070,14 @@ bool LatLonLayerImp::toXml(XMLWriter* pXml) const
 
    pXml->addFontElement("font", mFont);
 
-   return true;;
+   return true;
 }
 
 bool LatLonLayerImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
    stringstream str;
    DO_IF(!LayerImp::fromXml(pDocument, version), return false);
-   DOMElement *pElement = dynamic_cast<DOMElement*>(pDocument);
+   DOMElement* pElement = dynamic_cast<DOMElement*>(pDocument);
    VERIFY(pElement != NULL);
    mGeocoordType = StringUtilities::fromXmlString<GeocoordType>(A(pElement->getAttribute(X("geocoordType"))));
    mFormat = StringUtilities::fromXmlString<DmsFormatType>(A(pElement->getAttribute(X("dmsFormatType"))));
@@ -1123,27 +1129,20 @@ void LatLonLayerImp::setColor(const QColor& newColor)
 
       mColor = newColor;
       emit colorChanged(mColor);
-      notify(SIGNAL_NAME(LatLonLayer, ColorChanged), boost::any(
-         ColorType(mColor.red(),mColor.green(),mColor.blue())));
+      notify(SIGNAL_NAME(LatLonLayer, ColorChanged), boost::any(QCOLOR_TO_COLORTYPE(mColor)));
 
       mbLinking = true;
 
       vector<Layer*> linkedLayers = getLinkedLayers();
 
       vector<Layer*>::iterator iter = linkedLayers.begin();
-      while (iter != linkedLayers.end())
+      for (vector<Layer*>::iterator iter = linkedLayers.begin(); iter != linkedLayers.end(); ++iter)
       {
-         Layer* pLayer = NULL;
-         pLayer = *iter;
+         LatLonLayerImp* pLayer = dynamic_cast<LatLonLayerImp*>(*iter);
          if (pLayer != NULL)
          {
-            if (pLayer->isKindOf("LatLonLayer") == true)
-            {
-               ((LatLonLayerAdapter*) pLayer)->LatLonLayerImp::setColor(newColor);
-            }
+            pLayer->setColor(newColor);
          }
-
-         ++iter;
       }
 
       mbLinking = false;
@@ -1172,17 +1171,13 @@ void LatLonLayerImp::setFont(const QFont& font)
       mbLinking = true;
 
       vector<Layer*> linkedLayers = getLinkedLayers();
-
-      vector<Layer*>::iterator iter = linkedLayers.begin();
-      while (iter != linkedLayers.end())
+      for (vector<Layer*>::iterator iter = linkedLayers.begin(); iter != linkedLayers.end(); ++iter)
       {
          LatLonLayerImp* pLayer = dynamic_cast<LatLonLayerImp*>(*iter);
          if (pLayer != NULL)
          {
             pLayer->setFont(font);
          }
-
-         ++iter;
       }
 
       mbLinking = false;
@@ -1211,30 +1206,22 @@ void LatLonLayerImp::setStyle(const LatLonStyle& newStyle)
       mbLinking = true;
 
       vector<Layer*> linkedLayers = getLinkedLayers();
-
-      vector<Layer*>::iterator iter = linkedLayers.begin();
-      while (iter != linkedLayers.end())
+      for (vector<Layer*>::iterator iter = linkedLayers.begin(); iter != linkedLayers.end(); ++iter)
       {
-         Layer* pLayer = NULL;
-         pLayer = *iter;
+         LatLonLayer* pLayer = dynamic_cast<LatLonLayer*>(*iter);
          if (pLayer != NULL)
          {
-            if (pLayer->isKindOf("LatLonLayer") == true)
-            {
-               ((LatLonLayer*) pLayer)->setStyle(newStyle);
-            }
+            pLayer->setStyle(newStyle);
          }
-
-         ++iter;
       }
 
       mbLinking = false;
    }
 }
 
-void LatLonLayerImp::setWidth(unsigned int uiWidth)
+void LatLonLayerImp::setWidth(unsigned int width)
 {
-   if (uiWidth == mWidth)
+   if (width == mWidth)
    {
       return;
    }
@@ -1244,31 +1231,23 @@ void LatLonLayerImp::setWidth(unsigned int uiWidth)
       View* pView = getView();
       if (pView != NULL)
       {
-         pView->addUndoAction(new SetLatLonWidth(dynamic_cast<LatLonLayer*>(this), mWidth, uiWidth));
+         pView->addUndoAction(new SetLatLonWidth(dynamic_cast<LatLonLayer*>(this), mWidth, width));
       }
 
-      mWidth = uiWidth;
+      mWidth = width;
       emit widthChanged(mWidth);
       notify(SIGNAL_NAME(LatLonLayer, WidthChanged), boost::any(mWidth));
 
       mbLinking = true;
 
       vector<Layer*> linkedLayers = getLinkedLayers();
-
-      vector<Layer*>::iterator iter = linkedLayers.begin();
-      while (iter != linkedLayers.end())
+      for (vector<Layer*>::iterator iter = linkedLayers.begin(); iter != linkedLayers.end(); ++iter)
       {
-         Layer* pLayer = NULL;
-         pLayer = *iter;
+         LatLonLayer* pLayer = dynamic_cast<LatLonLayer*>(*iter);
          if (pLayer != NULL)
          {
-            if (pLayer->isKindOf("LatLonLayer") == true)
-            {
-               ((LatLonLayer*) pLayer)->setWidth(uiWidth);
-            }
+            pLayer->setWidth(mWidth);
          }
-
-         ++iter;
       }
 
       mbLinking = false;
@@ -1300,21 +1279,13 @@ void LatLonLayerImp::setTickSpacing(const LocationType& spacing)
       mbLinking = true;
 
       vector<Layer*> linkedLayers = getLinkedLayers();
-
-      vector<Layer*>::iterator iter = linkedLayers.begin();
-      while (iter != linkedLayers.end())
+      for (vector<Layer*>::iterator iter = linkedLayers.begin(); iter != linkedLayers.end(); ++iter)
       {
-         Layer* pLayer = NULL;
-         pLayer = *iter;
+         LatLonLayer* pLayer = dynamic_cast<LatLonLayer*>(*iter);
          if (pLayer != NULL)
          {
-            if (pLayer->isKindOf("LatLonLayer") == true)
-            {
-               ((LatLonLayer*) pLayer)->setTickSpacing(spacing);
-            }
+            pLayer->setTickSpacing(spacing);
          }
-
-         ++iter;
       }
 
       mbLinking = false;
@@ -1344,21 +1315,13 @@ void LatLonLayerImp::setAutoTickSpacing(bool compute)
       mbLinking = true;
 
       vector<Layer*> linkedLayers = getLinkedLayers();
-
-      vector<Layer*>::iterator iter = linkedLayers.begin();
-      while (iter != linkedLayers.end())
+      for (vector<Layer*>::iterator iter = linkedLayers.begin(); iter != linkedLayers.end(); ++iter)
       {
-         Layer* pLayer = NULL;
-         pLayer = *iter;
+         LatLonLayer* pLayer = dynamic_cast<LatLonLayer*>(*iter);
          if (pLayer != NULL)
          {
-            if (pLayer->isKindOf("LatLonLayer") == true)
-            {
-               ((LatLonLayer*) pLayer)->setAutoTickSpacing(compute);
-            }
+            pLayer->setAutoTickSpacing(compute);
          }
-
-         ++iter;
       }
 
       mbLinking = false;
@@ -1373,8 +1336,7 @@ void LatLonLayerImp::computeBorder()
       return;
    }
 
-   const RasterDataDescriptor* pDescriptor =
-      dynamic_cast<const RasterDataDescriptor*>(pRaster->getDataDescriptor());
+   const RasterDataDescriptor* pDescriptor = dynamic_cast<const RasterDataDescriptor*>(pRaster->getDataDescriptor());
    if (pDescriptor == NULL)
    {
       return;
@@ -1386,21 +1348,20 @@ void LatLonLayerImp::computeBorder()
    mZone = 100;
    mCubeSize.mX = cols;
    mCubeSize.mY = rows;
-   mMaxCoord = LocationType (-numeric_limits<double>::max(), -numeric_limits<double>::max());
-   mMinCoord = LocationType (numeric_limits<double>::max(), numeric_limits<double>::max());
+   mMaxCoord = LocationType(-numeric_limits<double>::max(), -numeric_limits<double>::max());
+   mMinCoord = LocationType(numeric_limits<double>::max(), numeric_limits<double>::max());
 
    vector<LocationType> borderPixels;
-   borderPixels.push_back(LocationType(0,      0));
-   borderPixels.push_back(LocationType(0,      rows/2));
-   borderPixels.push_back(LocationType(0,      rows));
-   borderPixels.push_back(LocationType(cols/2, rows));
-   borderPixels.push_back(LocationType(cols,   rows));
-   borderPixels.push_back(LocationType(cols,   rows/20));
-   borderPixels.push_back(LocationType(cols,   0));
-   borderPixels.push_back(LocationType(cols/2,0));
+   borderPixels.push_back(LocationType(0, 0));
+   borderPixels.push_back(LocationType(0, rows / 2));
+   borderPixels.push_back(LocationType(0, rows));
+   borderPixels.push_back(LocationType(cols / 2, rows));
+   borderPixels.push_back(LocationType(cols, rows));
+   borderPixels.push_back(LocationType(cols, rows / 2));
+   borderPixels.push_back(LocationType(cols, 0));
+   borderPixels.push_back(LocationType(cols / 2, 0));
 
-   for (vector<LocationType>::const_iterator iter = borderPixels.begin();
-      iter != borderPixels.end(); ++iter)
+   for (vector<LocationType>::const_iterator iter = borderPixels.begin(); iter != borderPixels.end(); ++iter)
    {
       LocationType latlon = pRaster->convertPixelToGeocoord(*iter, true);
 
@@ -1434,28 +1395,31 @@ void LatLonLayerImp::computeBorder()
    mBorderDirty = false;
 }
 
-void LatLonLayerImp::computeTickSpacing ()
+void LatLonLayerImp::computeTickSpacing()
 {
-   LocationType diff;
+   if (mBorderDirty)
+   {
+      computeBorder();
+   }
 
    if (mBorderDirty)
-      computeBorder ();
-   if (mBorderDirty)
+   {
       return;
-   
-//NOTE: new code for UTM/MGRS
+   }
+
+   LocationType diff;
    diff.mX = mMaxCoord.mX - mMinCoord.mX;
    diff.mY = mMaxCoord.mY - mMinCoord.mY;
 
    if (mGeocoordType== GEOCOORD_LATLON)
    {
-      mComputedTickSpacing.mX = computeSpacing (diff.mX);
-      mComputedTickSpacing.mY = computeSpacing (diff.mY);
+      mComputedTickSpacing.mX = computeSpacing(diff.mX);
+      mComputedTickSpacing.mY = computeSpacing(diff.mY);
    }
    else
    {
-      mComputedTickSpacing.mX = getStep (diff.mX);
-      mComputedTickSpacing.mY = getStep (diff.mY);
+      mComputedTickSpacing.mX = getStep(diff.mX);
+      mComputedTickSpacing.mY = getStep(diff.mY);
    }
 
    mComputedTickSpacingDirty = false;
@@ -1484,7 +1448,7 @@ void LatLonLayerImp::computeTickSpacing ()
   *
   * @return The intersection point of the line segment with the edge of the cube
   */
-static LocationType adjustSegment (LocationType outside, LocationType inside, const vector<LocationType> &border)
+static LocationType adjustSegment(LocationType outside, LocationType inside, const vector<LocationType>& border)
 {
    enum { BELOW, BETWEEN, ABOVE } xRegion = BETWEEN, yRegion = BETWEEN;
    enum { XABOVE, XBELOW, YABOVE, YBELOW } intersectLine = XBELOW;
@@ -1493,14 +1457,22 @@ static LocationType adjustSegment (LocationType outside, LocationType inside, co
    double f;
 
    if (outside.mX < border[0].mX)
+   {
       xRegion = BELOW;
+   }
    else if (outside.mX > border[1].mX)
+   {
       xRegion = ABOVE;
+   }
 
    if (outside.mY < border[1].mY)
+   {
       yRegion = BELOW;
+   }
    else if (outside.mY > border[2].mY)
+   {
       yRegion = ABOVE;
+   }
 
    delta.mX = outside.mX - inside.mX;
    delta.mY = outside.mY - inside.mY;
@@ -1535,34 +1507,50 @@ static LocationType adjustSegment (LocationType outside, LocationType inside, co
          {
             if (yRegion == BELOW) // region 7
             {
-               if (outside.mY + delta.mY*(border[0].mX-outside.mX)/delta.mX >= border[1].mY)
+               if (outside.mY + delta.mY * (border[0].mX - outside.mX) / delta.mX >= border[1].mY)
+               {
                   intersectLine = XBELOW;
+               }
                else
+               {
                   intersectLine = YBELOW;
+               }
             }
             else // yRegion == ABOVE: region 1
             {
-               if (outside.mY + delta.mY*(border[0].mX-outside.mX)/delta.mX <= border[2].mY)
+               if (outside.mY + delta.mY * (border[0].mX - outside.mX) / delta.mX <= border[2].mY)
+               {
                   intersectLine = XBELOW;
+               }
                else
+               {
                   intersectLine = YABOVE;
+               }
             }
          }
          else // xRegion == ABOVE // region 3 or 9
          {
             if (yRegion == BELOW) // region 9
             {
-               if (inside.mY + delta.mY*(border[1].mX-inside.mX)/delta.mX >= border[1].mY)
+               if (inside.mY + delta.mY * (border[1].mX - inside.mX) / delta.mX >= border[1].mY)
+               {
                   intersectLine = XABOVE;
+               }
                else
+               {
                   intersectLine = YBELOW;
+               }
             }
             else // yRegion == ABOVE: region 3
             {
-               if (inside.mY + delta.mY*(border[1].mX-inside.mX)/delta.mX <= border[2].mY)
+               if (inside.mY + delta.mY * (border[1].mX - inside.mX) / delta.mX <= border[2].mY)
+               {
                   intersectLine = XABOVE;
+               }
                else
+               {
                   intersectLine = YABOVE;
+               }
             }
          }
       }
@@ -1577,7 +1565,7 @@ static LocationType adjustSegment (LocationType outside, LocationType inside, co
       break;
    case XBELOW:
       f = (border[0].mX-inside.mX) / delta.mX;
-      intersection.mY = f*delta.mY + inside.mY;
+      intersection.mY = f * delta.mY + inside.mY;
       intersection.mX = border[0].mX;
       break;
    case YABOVE:
@@ -1589,6 +1577,8 @@ static LocationType adjustSegment (LocationType outside, LocationType inside, co
       f = (border[1].mY-inside.mY) / delta.mY;
       intersection.mX = f * delta.mX + inside.mX;
       intersection.mY = border[1].mY;
+      break;
+   default:
       break;
    }
 
@@ -1604,16 +1594,16 @@ static LocationType adjustSegment (LocationType outside, LocationType inside, co
   *
   * @return The tick spacing.
   */
-static double computeSpacing (double range)
+static double computeSpacing(double range)
 {
    double baseValues[] = {60.0, 30.0, 15.0, 10.0, 5.0, 2.0, 1.0};
-   int baseValueCount = sizeof (baseValues)/sizeof (baseValues[0]);
+   int baseValueCount = sizeof(baseValues) / sizeof(baseValues[0]);
    double spacing = 0.0;
    int i;
 
    // Treat baseValues as degrees. Break if one of them 
    // would result in 5+ tick marks.
-   for (i=0; i<baseValueCount; i++)
+   for (i = 0; i < baseValueCount; ++i)
    {
       if (5.0 * baseValues[i] < range)
       {
@@ -1626,7 +1616,7 @@ static double computeSpacing (double range)
    {
       // Treat baseValues as minute. Break if one of them 
       // would result in 5+ tick marks.
-      for (i=0; i<baseValueCount; i++)
+      for (i = 0; i < baseValueCount; ++i)
       {
          if (5.0 * (baseValues[i] / 60.0) < range)
          {
@@ -1637,7 +1627,7 @@ static double computeSpacing (double range)
 
       if (i == baseValueCount)
       {
-         for (i=0; i<baseValueCount; i++)
+         for (i = 0; i < baseValueCount; ++i)
          {
             // Treat baseValues as seconds. Break if one of them 
             // would result in 5+ tick marks.
@@ -1668,26 +1658,29 @@ static double computeSpacing (double range)
   *
   * @return The tick spacing.
   */
-static double getStep (double diff)
+static double getStep(double diff)
 {
-   double logdiff, scaleddiff;
-   double powdiff;
-  
-   logdiff = floor (log10 (diff));
-   powdiff = pow (10.0, logdiff);
-   scaleddiff = diff / powdiff;
-  
+   double logdiff = floor(log10 (diff));
+   double powdiff = pow(10.0, logdiff);
+   double scaleddiff = diff / powdiff;
+
    if (scaleddiff < 0.95)
+   {
       return powdiff * 0.1;
+   }
    if (scaleddiff < 1.9)
+   {
       return 0.2 * powdiff;
+   }
    if (scaleddiff < 4.75)
+   {
       return 0.5 * powdiff;
-    
+   }
+
    return powdiff;
 }
 
-void LatLonLayerImp::setBoundingBox(const vector<LocationType> &boundingBox)
+void LatLonLayerImp::setBoundingBox(const vector<LocationType>& boundingBox)
 {
    if (boundingBox != mBoundingBox)
    {
@@ -1705,7 +1698,7 @@ LocationType LatLonLayerImp::convertPointToLatLon(const GeocoordType& type, cons
 {
    LocationType coord;
    char buffer[256];
-   switch(type)
+   switch (type)
    {
       case GEOCOORD_LATLON:
          coord = point;
@@ -1721,13 +1714,17 @@ LocationType LatLonLayerImp::convertPointToLatLon(const GeocoordType& type, cons
 
       case GEOCOORD_MGRS:
       {
-         sprintf(buffer, "%d%s%05d%05d", mZone, mMapGrid.c_str(), (int)point.mX, (int)point.mY);
+         snprintf(buffer, 255, "%d%s%05d%05d", mZone, mMapGrid.c_str(), static_cast<int>(point.mX),
+            static_cast<int>(point.mY));
 
          MgrsPoint mgrsPoint(buffer);
          LatLonPoint latLonPoint = mgrsPoint.getLatLonCoordinates();
          coord = latLonPoint.getCoordinates();
          break;
       }
+
+      default:
+         break;
    }
 
    return coord;
@@ -1757,21 +1754,13 @@ void LatLonLayerImp::setGeocoordType(const GeocoordType& eGeocoord)
       mbLinking = true;
 
       vector<Layer*> linkedLayers = getLinkedLayers();
-
-      vector<Layer*>::iterator iter = linkedLayers.begin();
-      while (iter != linkedLayers.end())
+      for (vector<Layer*>::iterator iter = linkedLayers.begin(); iter != linkedLayers.end(); ++iter)
       {
-         Layer* pLayer = NULL;
-         pLayer = *iter;
+         LatLonLayer* pLayer = dynamic_cast<LatLonLayer*>(*iter);
          if (pLayer != NULL)
          {
-            if (pLayer->isKindOf("LatLonLayer") == true)
-            {
-               ((LatLonLayer*) pLayer)->setGeocoordType(eGeocoord);
-            }
+            pLayer->setGeocoordType(eGeocoord);
          }
-
-         ++iter;
       }
 
       mbLinking = false;
@@ -1879,7 +1868,7 @@ void LatLonLayerImp::clipToView(vector<LocationType>& vertices, const vector<Loc
       LocationType secondClosestPixel = vertices[secondClosestPoint];
       gluProject(secondClosestPixel.mX, secondClosestPixel.mY, 0.0, modelMatrix, projectionMatrix, viewPort,
          &secondClosestPixel.mX, &secondClosestPixel.mY, &winZ);
-      
+
       // get points in ascending mX order
       LocationType first;
       LocationType second;
@@ -1954,13 +1943,13 @@ bool LatLonLayerImp::isCloseTo(const LocationType& point1, const LocationType& p
 {
    double xDiff = point2.mX - point1.mX;
    double yDiff = point2.mY - point1.mY;
-   double distance  = sqrt(xDiff * xDiff + yDiff * yDiff);
+   double distance = sqrt(xDiff * xDiff + yDiff * yDiff);
 
    return distance <= tolerance;
 }
 
-vector<LocationType> LatLonLayerImp::findVisibleLineSegment(const LocationType pixel1, 
-   const LocationType pixel2, const vector<LocationType>& box)
+vector<LocationType> LatLonLayerImp::findVisibleLineSegment(const LocationType pixel1, const LocationType pixel2,
+                                                            const vector<LocationType>& box)
 {
    vector<LocationType> line;
    if (box.size() != 4)

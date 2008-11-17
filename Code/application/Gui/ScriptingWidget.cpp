@@ -211,14 +211,14 @@ void ScriptingWidget::keyPressEvent(QKeyEvent* e)
             else if (e->key() == Qt::Key_Down)
             {
                // Let user go one past the end of the stack to clear command line.
-               if (mCommandIndex < (int) (mCommandStack.count()))
+               if (mCommandIndex < mCommandStack.count())
                {
                   mCommandIndex++;
                }
             }
 
             QString strCommand;
-            if (mCommandIndex >= 0 && mCommandIndex < (int) (mCommandStack.count()))
+            if (mCommandIndex >= 0 && mCommandIndex < mCommandStack.count())
             {
                strCommand = mCommandStack[mCommandIndex];
             }

@@ -26,9 +26,9 @@ const QString GraphicSymbolWidget::NO_SYMBOL = "No symbol";
 GraphicSymbolWidget::GraphicSymbolWidget(QWidget *pParent) : QWidget(pParent)
 {
    Service<DesktopServices> pDesktop;
-   const vector<string> &symbolNames = pDesktop->getAvailableSymbolNames();
+   const vector<string>& symbolNames = pDesktop->getAvailableSymbolNames();
    
-   QLabel *pSymbolListLabel = new QLabel("Available symbols:", this);
+   QLabel* pSymbolListLabel = new QLabel("Available symbols:", this);
    mpSymbolList = new QListWidget(this);
    mpSymbolList->setSelectionMode(QAbstractItemView::SingleSelection);
    mpSymbolList->setWrapping(true);
@@ -47,12 +47,12 @@ GraphicSymbolWidget::GraphicSymbolWidget(QWidget *pParent) : QWidget(pParent)
    mpSymbolPreview->setAlignment(Qt::AlignCenter);
    mpSymbolPreview->setWordWrap(true);
    
-   QLabel *pSymbolSizeLabel = new QLabel("Symbol size:", this);
+   QLabel* pSymbolSizeLabel = new QLabel("Symbol size:", this);
    mpSymbolSizeSpin = new QSpinBox(this);
    mpSymbolSizeSpin->setRange(0, 500);
 
    // Layout
-   QGridLayout *pLayout = new QGridLayout(this);
+   QGridLayout* pLayout = new QGridLayout(this);
    pLayout->setMargin(0);
    pLayout->setSpacing(5);
    pLayout->addWidget(pSymbolListLabel, 0, 0, Qt::AlignTop);
@@ -96,7 +96,7 @@ void GraphicSymbolWidget::setSymbolName(const QString &name)
 
    VERIFYNRV(items.size() == 1);
 
-   QListWidgetItem *pOldItem = getSelectedItem();
+   QListWidgetItem* pOldItem = getSelectedItem();
    if (pOldItem != NULL)
    {
       mpSymbolList->setItemSelected(pOldItem, false);
@@ -108,7 +108,7 @@ QString GraphicSymbolWidget::getSymbolName() const
 {
    QString name;
 
-   QListWidgetItem *pItem = getSelectedItem();
+   QListWidgetItem* pItem = getSelectedItem();
    if (pItem != NULL)
    {
       QString qName = pItem->text();
@@ -148,7 +148,7 @@ QListWidgetItem *GraphicSymbolWidget::getSelectedItem() const
 
 void GraphicSymbolWidget::updateSelection()
 {
-   QListWidgetItem *pItem = getSelectedItem();
+   QListWidgetItem* pItem = getSelectedItem();
    if (pItem == NULL || pItem->text() == NO_SYMBOL)
    {
       mpSymbolPreview->setText("No symbol selected");

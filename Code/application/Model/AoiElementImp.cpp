@@ -25,14 +25,12 @@ using namespace std;
 
 AoiElementImp::AoiElementImp(const DataDescriptorImp& descriptor, const string& id) :
    GraphicElementImp(descriptor, id),
-   mToggledAllPoints(false),
-   mBitMaskDirty(true)
-{
-}
+   mBitMaskDirty(true),
+   mToggledAllPoints(false)
+{}
 
 AoiElementImp::~AoiElementImp()
-{
-}
+{}
 
 void AoiElementImp::clearPoints()
 {
@@ -40,11 +38,11 @@ void AoiElementImp::clearPoints()
    pStep->addProperty("action", "Clear Points");
    pStep->addProperty("name", getName());
 
-   GraphicGroupImp *pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
+   GraphicGroupImp* pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
    if (pGroup != NULL)
    {
       pGroup->removeAllObjects(true);
-      GraphicLayer *pLayer = pGroup->getLayer();
+      GraphicLayer* pLayer = pGroup->getLayer();
       if (pLayer != NULL)
       {
          pLayer->deselectAllObjects();
@@ -62,7 +60,7 @@ void AoiElementImp::toggleAllPoints()
 
    mToggledAllPoints = !mToggledAllPoints;
 
-   Subject *pGroup = dynamic_cast<Subject*>(getGroup());
+   Subject* pGroup = dynamic_cast<Subject*>(getGroup());
    VERIFYNRV(pGroup != NULL);
    groupModified(*pGroup, SIGNAL_NAME(Subject, Modified), boost::any());
 
@@ -90,28 +88,27 @@ ModeType AoiElementImp::correctedDrawMode(ModeType mode)
 
 size_t AoiElementImp::getPixelCount() const
 {
-   const BitMask *pMask = getSelectedPoints();
-   if(pMask != NULL)
+   const BitMask* pMask = getSelectedPoints();
+   if (pMask != NULL)
    {
       return pMask->getCount();
    }
    return 0;
 }
 
-const BitMask *AoiElementImp::getSelectedPoints() const
+const BitMask* AoiElementImp::getSelectedPoints() const
 {
    if (mBitMaskDirty)
    {
       mpBitMask->clear();
-      const GraphicGroup *pGroup = getGroup();
+      const GraphicGroup* pGroup = getGroup();
       VERIFYRV(pGroup != NULL, NULL);
-      const list<GraphicObject*> &objects = pGroup->getObjects();
-      for (list<GraphicObject*>::const_iterator iter = objects.begin(); 
-         iter != objects.end(); ++iter)
+      const list<GraphicObject*>& objects = pGroup->getObjects();
+      for (list<GraphicObject*>::const_iterator iter = objects.begin(); iter != objects.end(); ++iter)
       {
-         GraphicObject *pObj = *iter;
+         GraphicObject* pObj = *iter;
          VERIFYRV(pObj != NULL, NULL);
-         const BitMask *pMask = pObj->getPixels();
+         const BitMask* pMask = pObj->getPixels();
          BitMaskImp maskDuplicate;
          if (pMask == NULL)
          {
@@ -149,15 +146,15 @@ bool AoiElementImp::getAllPointsToggled() const
    return mToggledAllPoints;
 }
 
-GraphicObject * AoiElementImp::addPoints(const vector<LocationType> &points)
+GraphicObject* AoiElementImp::addPoints(const vector<LocationType>& points)
 {
    StepResource pStep("ChangeAOI", "app", "1AB6C122-2652-48B6-9421-AEFACAFD658C");
    pStep->addProperty("action", "Add Points");
    pStep->addProperty("name", getName());
 
-   GraphicGroup *pGroup = getGroup();
+   GraphicGroup* pGroup = getGroup();
    VERIFYRV(pGroup != NULL, NULL);
-   GraphicObject *pObj = pGroup->addObject(MULTIPOINT_OBJECT);
+   GraphicObject* pObj = pGroup->addObject(MULTIPOINT_OBJECT);
 
    pObj->setDrawMode(correctedDrawMode(DRAW));
    pObj->addVertices(points);
@@ -167,7 +164,7 @@ GraphicObject * AoiElementImp::addPoints(const vector<LocationType> &points)
    return pObj;
 }
 
-GraphicObject *AoiElementImp::addPoint(LocationType point)
+GraphicObject* AoiElementImp::addPoint(LocationType point)
 {
    StepResource pStep("ChangeAOI", "app", "1AB6C122-2652-48B6-9421-AEFACAFD658C");
    pStep->addProperty("action", "Add Point");
@@ -180,16 +177,16 @@ GraphicObject *AoiElementImp::addPoint(LocationType point)
    return addPoints(points);
 }
 
-GraphicObject *AoiElementImp::addPoints(const BitMask *pPoints)
+GraphicObject* AoiElementImp::addPoints(const BitMask* pPoints)
 {
    StepResource pStep("ChangeAOI", "app", "1AB6C122-2652-48B6-9421-AEFACAFD658C");
    pStep->addProperty("action", "Add Points");
    pStep->addProperty("name", getName());
 
-   GraphicGroup *pGroup = getGroup();
+   GraphicGroup* pGroup = getGroup();
    VERIFYRV(pGroup != NULL, NULL);
 
-   BitMaskObject *pMaskObj = static_cast<BitMaskObject*>(pGroup->addObject(BITMASK_OBJECT));
+   BitMaskObject* pMaskObj = static_cast<BitMaskObject*>(pGroup->addObject(BITMASK_OBJECT));
 
    pMaskObj->setDrawMode(correctedDrawMode(DRAW));
    pMaskObj->setBitMask(pPoints, true);
@@ -199,16 +196,16 @@ GraphicObject *AoiElementImp::addPoints(const BitMask *pPoints)
    return pMaskObj;
 }
 
-GraphicObject *AoiElementImp::removePoints(const vector<LocationType> &points)
+GraphicObject* AoiElementImp::removePoints(const vector<LocationType>& points)
 {
    StepResource pStep("ChangeAOI", "app", "1AB6C122-2652-48B6-9421-AEFACAFD658C");
    pStep->addProperty("action", "Remove Points");
    pStep->addProperty("name", getName());
 
-   GraphicGroup *pGroup = getGroup();
+   GraphicGroup* pGroup = getGroup();
    VERIFYRV(pGroup != NULL, NULL);
 
-   GraphicObject *pObj = pGroup->addObject(MULTIPOINT_OBJECT);
+   GraphicObject* pObj = pGroup->addObject(MULTIPOINT_OBJECT);
 
    pObj->setDrawMode(correctedDrawMode(ERASE));
    pObj->addVertices(points);
@@ -218,7 +215,7 @@ GraphicObject *AoiElementImp::removePoints(const vector<LocationType> &points)
    return pObj;
 }
 
-GraphicObject *AoiElementImp::removePoint(LocationType point)
+GraphicObject* AoiElementImp::removePoint(LocationType point)
 {
    StepResource pStep("ChangeAOI", "app", "1AB6C122-2652-48B6-9421-AEFACAFD658C");
    pStep->addProperty("action", "Remove Point");
@@ -231,16 +228,16 @@ GraphicObject *AoiElementImp::removePoint(LocationType point)
    return removePoints(points);
 }
 
-GraphicObject *AoiElementImp::removePoints(const BitMask *pPoints)
+GraphicObject* AoiElementImp::removePoints(const BitMask* pPoints)
 {
    StepResource pStep("ChangeAOI", "app", "1AB6C122-2652-48B6-9421-AEFACAFD658C");
    pStep->addProperty("action", "Remove Points");
    pStep->addProperty("name", getName());
 
-   GraphicGroup *pGroup = getGroup();
+   GraphicGroup* pGroup = getGroup();
    VERIFYRV(pGroup != NULL, NULL);
 
-   BitMaskObject *pMaskObj = static_cast<BitMaskObject*>(pGroup->addObject(BITMASK_OBJECT));
+   BitMaskObject* pMaskObj = static_cast<BitMaskObject*>(pGroup->addObject(BITMASK_OBJECT));
 
    pMaskObj->setDrawMode(correctedDrawMode(ERASE));
    pMaskObj->setBitMask(pPoints, true);
@@ -250,16 +247,16 @@ GraphicObject *AoiElementImp::removePoints(const BitMask *pPoints)
    return pMaskObj;
 }
 
-GraphicObject *AoiElementImp::togglePoints(const vector<LocationType> &points)
+GraphicObject* AoiElementImp::togglePoints(const vector<LocationType>& points)
 {
    StepResource pStep("ChangeAOI", "app", "1AB6C122-2652-48B6-9421-AEFACAFD658C");
    pStep->addProperty("action", "Toggle Points");
    pStep->addProperty("name", getName());
 
-   GraphicGroup *pGroup = getGroup();
+   GraphicGroup* pGroup = getGroup();
    VERIFYRV(pGroup != NULL, NULL);
 
-   GraphicObject *pObj = pGroup->addObject(MULTIPOINT_OBJECT);
+   GraphicObject* pObj = pGroup->addObject(MULTIPOINT_OBJECT);
 
    pObj->setDrawMode(correctedDrawMode(TOGGLE));
    pObj->addVertices(points);
@@ -269,7 +266,7 @@ GraphicObject *AoiElementImp::togglePoints(const vector<LocationType> &points)
    return pObj;
 }
 
-GraphicObject *AoiElementImp::togglePoint(LocationType point)
+GraphicObject* AoiElementImp::togglePoint(LocationType point)
 {
    StepResource pStep("ChangeAOI", "app", "1AB6C122-2652-48B6-9421-AEFACAFD658C");
    pStep->addProperty("action", "Toggle Point");
@@ -282,16 +279,16 @@ GraphicObject *AoiElementImp::togglePoint(LocationType point)
    return togglePoints(points);
 }
 
-GraphicObject *AoiElementImp::togglePoints(const BitMask *pPoints)
+GraphicObject* AoiElementImp::togglePoints(const BitMask* pPoints)
 {
    StepResource pStep("ChangeAOI", "app", "1AB6C122-2652-48B6-9421-AEFACAFD658C");
    pStep->addProperty("action", "Toggle Points");
    pStep->addProperty("name", getName());
 
-   GraphicGroup *pGroup = getGroup();
+   GraphicGroup* pGroup = getGroup();
    VERIFYRV(pGroup != NULL, NULL);
 
-   BitMaskObject *pMaskObj = static_cast<BitMaskObject*>(pGroup->addObject(BITMASK_OBJECT));
+   BitMaskObject* pMaskObj = static_cast<BitMaskObject*>(pGroup->addObject(BITMASK_OBJECT));
 
    pMaskObj->setDrawMode(correctedDrawMode(TOGGLE));
    pMaskObj->setBitMask(pPoints, true);
@@ -315,7 +312,7 @@ DataElement* AoiElementImp::copy(const string& name, DataElement* pParent) const
    return pElement;
 }
 
-void AoiElementImp::groupModified(Subject &subject, const string &signal, const boost::any &data)
+void AoiElementImp::groupModified(Subject& subject, const string& signal, const boost::any& data)
 {
    if (&subject == dynamic_cast<Subject*>(getGroup()))
    {
@@ -327,8 +324,8 @@ void AoiElementImp::groupModified(Subject &subject, const string &signal, const 
 
 const string& AoiElementImp::getObjectType() const
 {
-   static string type("AoiElementImp");
-   return type;
+   static string sType("AoiElementImp");
+   return sType;
 }
 
 bool AoiElementImp::isKindOf(const string& className) const

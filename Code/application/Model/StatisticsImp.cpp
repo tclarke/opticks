@@ -18,23 +18,19 @@
 #include "UtilityServicesImp.h"
 
 #include <algorithm>
+#include <limits>
 using namespace std;
 using namespace mta;
 XERCES_CPP_NAMESPACE_USE
-
-#define MAX(x,y) ((x) > (y) ? (x) : (y))
-#define MIN(x,y) ((x) < (y) ? (x) : (y))
 
 StatisticsImp::StatisticsImp(const RasterElementImp* pRasterElement, DimensionDescriptor band) :
    mpRasterElement(pRasterElement),
    mBand(band),
    mStatisticsResolution(0)
-{
-}
+{}
 
 StatisticsImp::~StatisticsImp()
-{
-}
+{}
 
 void StatisticsImp::setMin(double dMin)
 {
@@ -423,49 +419,53 @@ void StatisticsImp::resetAll()
 bool StatisticsImp::toXml(XMLWriter* pXml) const
 {
    pXml->addAttr("resolution", mStatisticsResolution);
-   for(map<ComplexComponent, double>::const_iterator it = mMinValues.begin(); it != mMinValues.end(); ++it)
+   for (map<ComplexComponent, double>::const_iterator it = mMinValues.begin(); it != mMinValues.end(); ++it)
    {
       pXml->pushAddPoint(pXml->addElement("minimum"));
       pXml->addAttr("component", it->first);
       pXml->addAttr("value", it->second);
       pXml->popAddPoint();
    }
-   for(map<ComplexComponent, double>::const_iterator it = mMaxValues.begin(); it != mMaxValues.end(); ++it)
+   for (map<ComplexComponent, double>::const_iterator it = mMaxValues.begin(); it != mMaxValues.end(); ++it)
    {
       pXml->pushAddPoint(pXml->addElement("maximum"));
       pXml->addAttr("component", it->first);
       pXml->addAttr("value", it->second);
       pXml->popAddPoint();
    }
-   for(map<ComplexComponent, double>::const_iterator it = mAverageValues.begin(); it != mAverageValues.end(); ++it)
+   for (map<ComplexComponent, double>::const_iterator it = mAverageValues.begin(); it != mAverageValues.end(); ++it)
    {
       pXml->pushAddPoint(pXml->addElement("average"));
       pXml->addAttr("component", it->first);
       pXml->addAttr("value", it->second);
       pXml->popAddPoint();
    }
-   for(map<ComplexComponent, double>::const_iterator it = mStandardDeviationValues.begin(); it != mStandardDeviationValues.end(); ++it)
+   for (map<ComplexComponent, double>::const_iterator it = mStandardDeviationValues.begin();
+      it != mStandardDeviationValues.end(); ++it)
    {
       pXml->pushAddPoint(pXml->addElement("stddev"));
       pXml->addAttr("component", it->first);
       pXml->addAttr("value", it->second);
       pXml->popAddPoint();
    }
-   for(map<ComplexComponent, std::vector<double> >::const_iterator it = mPercentileValues.begin(); it != mPercentileValues.end(); ++it)
+   for (map<ComplexComponent, std::vector<double> >::const_iterator it = mPercentileValues.begin();
+      it != mPercentileValues.end(); ++it)
    {
       pXml->pushAddPoint(pXml->addElement("percentile"));
       pXml->addAttr("component", it->first);
       pXml->addText(it->second);
       pXml->popAddPoint();
    }
-   for(map<ComplexComponent, std::vector<double> >::const_iterator it = mBinCenterValues.begin(); it != mBinCenterValues.end(); ++it)
+   for (map<ComplexComponent, std::vector<double> >::const_iterator it = mBinCenterValues.begin();
+      it != mBinCenterValues.end(); ++it)
    {
       pXml->pushAddPoint(pXml->addElement("center"));
       pXml->addAttr("component", it->first);
       pXml->addText(it->second);
       pXml->popAddPoint();
    }
-   for(map<ComplexComponent, std::vector<unsigned int> >::const_iterator it = mHistogramValues.begin(); it != mHistogramValues.end(); ++it)
+   for (map<ComplexComponent, std::vector<unsigned int> >::const_iterator it = mHistogramValues.begin();
+      it != mHistogramValues.end(); ++it)
    {
       pXml->pushAddPoint(pXml->addElement("histogram"));
       pXml->addAttr("component", it->first);
@@ -487,75 +487,76 @@ bool StatisticsImp::fromXml(DOMNode* pDocument, unsigned int version)
    mPercentileValues.clear();
    mBinCenterValues.clear();
    mHistogramValues.clear();
-   for(DOMNode *pNode = pDocument->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())
+   for (DOMNode *pNode = pDocument->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())
    {
-      if(XMLString::equals(pNode->getNodeName(), X("minimum")))
+      if (XMLString::equals(pNode->getNodeName(), X("minimum")))
       {
-         DOMElement *pElement = static_cast<DOMElement*>(pNode);
+         DOMElement* pElement = static_cast<DOMElement*>(pNode);
          ComplexComponent component = StringUtilities::fromXmlString<ComplexComponent>(
             A(pElement->getAttribute(X("component"))));
          double value = StringUtilities::fromXmlString<double>(
             A(pElement->getAttribute(X("value"))));
          mMinValues[component] = value;
       }
-      else if(XMLString::equals(pNode->getNodeName(), X("maximum")))
+      else if (XMLString::equals(pNode->getNodeName(), X("maximum")))
       {
-         DOMElement *pElement = static_cast<DOMElement*>(pNode);
+         DOMElement* pElement = static_cast<DOMElement*>(pNode);
          ComplexComponent component = StringUtilities::fromXmlString<ComplexComponent>(
             A(pElement->getAttribute(X("component"))));
          double value = StringUtilities::fromXmlString<double>(
             A(pElement->getAttribute(X("value"))));
          mMaxValues[component] = value;
       }
-      else if(XMLString::equals(pNode->getNodeName(), X("average")))
+      else if (XMLString::equals(pNode->getNodeName(), X("average")))
       {
-         DOMElement *pElement = static_cast<DOMElement*>(pNode);
+         DOMElement* pElement = static_cast<DOMElement*>(pNode);
          ComplexComponent component = StringUtilities::fromXmlString<ComplexComponent>(
             A(pElement->getAttribute(X("component"))));
          double value = StringUtilities::fromXmlString<double>(
             A(pElement->getAttribute(X("value"))));
          mAverageValues[component] = value;
       }
-      else if(XMLString::equals(pNode->getNodeName(), X("stddev")))
+      else if (XMLString::equals(pNode->getNodeName(), X("stddev")))
       {
-         DOMElement *pElement = static_cast<DOMElement*>(pNode);
+         DOMElement* pElement = static_cast<DOMElement*>(pNode);
          ComplexComponent component = StringUtilities::fromXmlString<ComplexComponent>(
             A(pElement->getAttribute(X("component"))));
          double value = StringUtilities::fromXmlString<double>(
             A(pElement->getAttribute(X("value"))));
          mStandardDeviationValues[component] = value;
       }
-      else if(XMLString::equals(pNode->getNodeName(), X("percentile")))
+      else if (XMLString::equals(pNode->getNodeName(), X("percentile")))
       {
-         DOMElement *pElement = static_cast<DOMElement*>(pNode);
+         DOMElement* pElement = static_cast<DOMElement*>(pNode);
          ComplexComponent component = StringUtilities::fromXmlString<ComplexComponent>(
             A(pElement->getAttribute(X("component"))));
          vector<double> values;
-         XmlReader::StrToVector<double,XmlReader::StringStreamAssigner<double> >(values, pElement->getTextContent());
+         XmlReader::StrToVector<double, XmlReader::StringStreamAssigner<double> >(values, pElement->getTextContent());
          mPercentileValues[component] = values;
       }
-      else if(XMLString::equals(pNode->getNodeName(), X("center")))
+      else if (XMLString::equals(pNode->getNodeName(), X("center")))
       {
-         DOMElement *pElement = static_cast<DOMElement*>(pNode);
+         DOMElement* pElement = static_cast<DOMElement*>(pNode);
          ComplexComponent component = StringUtilities::fromXmlString<ComplexComponent>(
             A(pElement->getAttribute(X("component"))));
          vector<double> values;
-         XmlReader::StrToVector<double,XmlReader::StringStreamAssigner<double> >(values, pElement->getTextContent());
+         XmlReader::StrToVector<double, XmlReader::StringStreamAssigner<double> >(values, pElement->getTextContent());
          mBinCenterValues[component] = values;
       }
-      else if(XMLString::equals(pNode->getNodeName(), X("histogram")))
+      else if (XMLString::equals(pNode->getNodeName(), X("histogram")))
       {
-         DOMElement *pElement = static_cast<DOMElement*>(pNode);
+         DOMElement* pElement = static_cast<DOMElement*>(pNode);
          ComplexComponent component = StringUtilities::fromXmlString<ComplexComponent>(
             A(pElement->getAttribute(X("component"))));
          vector<unsigned int> values;
-         XmlReader::StrToVector<unsigned int,XmlReader::StringStreamAssigner<unsigned int> >(values, pElement->getTextContent());
+         XmlReader::StrToVector<unsigned int, XmlReader::StringStreamAssigner<unsigned int> >(values,
+            pElement->getTextContent());
          mHistogramValues[component] = values;
       }
-      else if(XMLString::equals(pNode->getNodeName(), X("badValues")))
+      else if (XMLString::equals(pNode->getNodeName(), X("badValues")))
       {
          mBadValues.clear();
-         XmlReader::StrToVector<int,XmlReader::StringStreamAssigner<int> >(mBadValues, pNode->getTextContent());
+         XmlReader::StrToVector<int, XmlReader::StringStreamAssigner<int> >(mBadValues, pNode->getTextContent());
       }
    }
    return true;
@@ -584,7 +585,7 @@ void StatisticsImp::calculateStatistics(ComplexComponent component)
    int bandNum = pDescriptor->getBandCount();
 
 #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This is deprecated and should be changed (tclarke)")
-   mta::Cube cube((void*)NULL, eType, rowNum, colNum, bandNum);
+   mta::Cube cube(reinterpret_cast<void*>(NULL), eType, rowNum, colNum, bandNum);
 
    if (mStatisticsResolution == 0)
    {
@@ -626,12 +627,12 @@ void StatisticsImp::calculateStatistics(ComplexComponent component)
    unsigned int threadCount = ConfigurationSettings::getSettingThreadCount();
    // if there are more threads than rows in the data set, we need to clamp
    // the number of threads so we don't have idle threads.
-   if(pDescriptor != NULL)
+   if (pDescriptor != NULL)
    {
       threadCount = std::min(threadCount, pDescriptor->getRowCount());
    }
 
-   mta::MultiThreadedAlgorithm<StatisticsInput,StatisticsOutput,StatisticsThread> statisticsAlgorithm
+   mta::MultiThreadedAlgorithm<StatisticsInput, StatisticsOutput, StatisticsThread> statisticsAlgorithm
       (threadCount, statInput, statOutput, &progressReporter);
    statisticsAlgorithm.run();
 
@@ -662,19 +663,62 @@ void StatisticsImp::calculateStatistics(ComplexComponent component)
    }
 }
 
-StatisticsThread::StatisticsThread(const StatisticsInput &input, int threadCount, int threadIndex,
-   ThreadReporter &reporter) : AlgorithmThread(threadIndex, reporter), mCube(input.mCube),
-   mBandToCalculate(input.mBandToCalculate), mpRasterElement(input.mpRasterElement), 
-   mComplexComponent(input.mComplexComponent),  mResolution(input.mResolution),
-   mRowRange(getThreadRange(threadCount, mCube.getRowCount())), mMaximum(-1e38), mMinimum(1e38), mSum(0.0),
-   mSumSquared(0.0), mCount(0), mBadValues(input.mBadValues)
-{
-}
+StatisticsThread::StatisticsThread(const StatisticsInput& input, int threadCount, int threadIndex,
+                                   ThreadReporter& reporter) :
+   AlgorithmThread(threadIndex, reporter),
+   mCube(input.mCube),
+   mBandToCalculate(input.mBandToCalculate),
+   mComplexComponent(input.mComplexComponent),
+   mpRasterElement(input.mpRasterElement),
+   mResolution(input.mResolution),
+   mRowRange(getThreadRange(threadCount, mCube.getRowCount())),
+   mMaximum(-1e38),
+   mMinimum(1e38),
+   mSum(0.0),
+   mSumSquared(0.0),
+   mCount(0),
+   mBadValues(input.mBadValues)
+{}
 
 void StatisticsThread::run()
 {
    switchOnComplexEncoding(mCube.getType(), StatisticsThread::calculateStatistics, mCube.getData(),
       mComplexComponent);
+}
+
+const Cube& StatisticsThread::getCube() const
+{
+   return mCube;
+}
+
+double StatisticsThread::getMaximum() const
+{
+   return mMaximum;
+}
+
+double StatisticsThread::getMinimum() const
+{
+   return mMinimum;
+}
+
+double StatisticsThread::getSum() const
+{
+   return mSum;
+}
+
+double StatisticsThread::getSumSquared() const
+{
+   return mSumSquared;
+}
+
+int StatisticsThread::getResolution() const
+{
+   return mResolution;
+}
+
+unsigned int StatisticsThread::getCount() const
+{
+   return mCount;
 }
 
 template<class T>
@@ -718,7 +762,8 @@ void StatisticsThread::calculateStatistics(T* pData, ComplexComponent component)
    {
       firstBadValue = mBadValues.front();
    }
-   std::vector<int>::iterator badBegin=mBadValues.begin(), badEnd=mBadValues.end();
+   std::vector<int>::iterator badBegin = mBadValues.begin();
+   std::vector<int>::iterator badEnd = mBadValues.end();
 
    for (unsigned int y1 = 0; y1 < geomSizeY; y1 += mResolution)
    {
@@ -730,7 +775,7 @@ void StatisticsThread::calculateStatistics(T* pData, ComplexComponent component)
       }
 
       VERIFYNRV(da.isValid());
-      for (unsigned int x1 = 0; x1<geomSizeX; x1+=mResolution)
+      for (unsigned int x1 = 0; x1 < geomSizeX; x1 += mResolution)
       {
          source = static_cast<T*>(da->getColumn());
          double temp = ModelServices::getDataValue(*source, component);
@@ -746,8 +791,15 @@ void StatisticsThread::calculateStatistics(T* pData, ComplexComponent component)
             }
             else
             {
-               if (temp < mMinimum) { mMinimum = temp; }
-               if (temp > mMaximum) { mMaximum = temp; }
+               if (temp < mMinimum)
+               {
+                  mMinimum = temp;
+               }
+
+               if (temp > mMaximum)
+               {
+                  mMaximum = temp;
+               }
             }
 
             mSumSquared += temp*temp;
@@ -766,14 +818,24 @@ void StatisticsThread::calculateStatistics(T* pData, ComplexComponent component)
    }
 }
 
+StatisticsOutput::StatisticsOutput() :
+   mMaximum(-1e38),
+   mMinimum(1e38),
+   mAverage(0.0),
+   mStandardDeviation(0.0)
+{}
+
 bool StatisticsOutput::compileOverallResults(const vector<StatisticsThread*>& threads)
 {
-   mMaximum = -1e38;
-   mMinimum = 1e38;
+   mMaximum = -numeric_limits<double>::max();
+   mMinimum = numeric_limits<double>::max();
    mAverage = 0.0;
    mStandardDeviation = 0.0;
 
-   if (threads.size() == 0) { return false; }
+   if (threads.size() == 0)
+   {
+      return false;
+   }
 
    double totalSum = 0.0;
    double totalSquaredSum = 0.0;
@@ -786,8 +848,8 @@ bool StatisticsOutput::compileOverallResults(const vector<StatisticsThread*>& th
       pThread = *iter;
       if (pThread != NULL)
       {
-         mMaximum = MAX(mMaximum, pThread->getMaximum());
-         mMinimum = MIN(mMinimum, pThread->getMinimum());
+         mMaximum = max(mMaximum, pThread->getMaximum());
+         mMinimum = min(mMinimum, pThread->getMinimum());
          totalSum += pThread->getSum();
          totalSquaredSum += pThread->getSumSquared();
          pointCount += pThread->getCount();
@@ -824,13 +886,32 @@ HistogramThread::HistogramThread(const HistogramInput &input, int threadCount, i
    mRowRange(getThreadRange(threadCount, mCube.getRowCount())),
    mBinCounts(HISTOGRAM_SIZE),
    mBadValues(input.mStatInput.mBadValues)
-{
-}
+{}
 
 void HistogramThread::run()
 {
    switchOnComplexEncoding(mCube.getType(), HistogramThread::calculateHistogram, mCube.getData(),
       mComplexComponent);
+}
+
+const Cube& HistogramThread::getCube() const
+{
+   return mCube;
+}
+
+vector<unsigned int>& HistogramThread::getBinCounts()
+{
+   return mBinCounts;
+}
+
+double HistogramThread::getMaximum() const
+{
+   return mMaximum;
+}
+
+double HistogramThread::getMinimum() const
+{
+   return mMinimum;
 }
 
 template<class T>
@@ -879,10 +960,11 @@ void HistogramThread::calculateHistogram(T* pData, ComplexComponent component)
    {
       firstBadValue = mBadValues.front();
    }
-   std::vector<int>::iterator badBegin=mBadValues.begin(), badEnd=mBadValues.end();
+   std::vector<int>::iterator badBegin = mBadValues.begin();
+   std::vector<int>::iterator badEnd = mBadValues.end();
 
    minimum = getMinimum();
-   for (unsigned int y1 = 0; y1 < geomSizeY; y1+=mResolution)
+   for (unsigned int y1 = 0; y1 < geomSizeY; y1 += mResolution)
    {
       VERIFYNRV(da.isValid());
       int percentDone = mRowRange.computePercent(y1 + mRowRange.mFirst);
@@ -935,8 +1017,22 @@ bool HistogramOutput::compileOverallResults(const vector<HistogramThread*>& thre
    return true;
 }
 
-void HistogramOutput::sumAllThreads(const vector<HistogramThread*>& threads,
-                                    vector<unsigned int>& totalBinCounts)
+const double* HistogramOutput::getBinCenters() const
+{
+   return mBinCenters;
+}
+
+const unsigned int* HistogramOutput::getBinCounts() const
+{
+   return mBinCounts;
+}
+
+const double* HistogramOutput::getPercentiles() const
+{
+   return mPercentiles;
+}
+
+void HistogramOutput::sumAllThreads(const vector<HistogramThread*>& threads, vector<unsigned int>& totalBinCounts)
 {
    memset(&totalBinCounts[0], 0, HISTOGRAM_SIZE * sizeof(unsigned int));
 
@@ -1034,7 +1130,7 @@ void HistogramOutput::computePercentiles(const vector<unsigned int>& totalHistog
    for (percentile = 1; percentile < 1001; ++percentile)
    {
       hit = false;
-      int cutoff = (int) (0.001 * percentile * pointCount);
+      int cutoff = static_cast<int>(0.001 * percentile * pointCount);
       while (count < cutoff && bin < HISTOGRAM_SIZE - 1)
       {
          bin++;

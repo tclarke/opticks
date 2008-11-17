@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef INTERACTIVEAPPLICATION_H__
-#define INTERACTIVEAPPLICATION_H__
+#ifndef INTERACTIVEAPPLICATION_H
+#define INTERACTIVEAPPLICATION_H
 
 #include "Application.h"
 

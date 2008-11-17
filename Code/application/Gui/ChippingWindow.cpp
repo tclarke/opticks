@@ -127,11 +127,10 @@ SpatialDataView* ChippingWindow::createChipView() const
       return NULL;
    }
 
-   SpatialDataView* pChipView = NULL;
-   pChipView = (SpatialDataView*) (mpView->copy());
+   SpatialDataView* pChipView = dynamic_cast<SpatialDataView*>(mpView->copy());
    if (pChipView != NULL)
    {
-      vector<std::pair<View*,LinkType> > linkedViews;
+      vector<std::pair<View*, LinkType> > linkedViews;
       pChipView->getLinkedViews(linkedViews);
       for (unsigned int i = 0; i < linkedViews.size(); ++i)
       {
@@ -143,8 +142,7 @@ SpatialDataView* ChippingWindow::createChipView() const
          pChipView->unlinkView(linkedViews[i].first);
       }
 
-      LayerList* pLayerList = NULL;
-      pLayerList = pChipView->getLayerList();
+      LayerList* pLayerList = pChipView->getLayerList();
       if (pLayerList != NULL)
       {
          vector<Layer*> layers;
@@ -231,7 +229,8 @@ void ChippingWindow::createView()
       return;
    }
 
-   SpatialDataWindow* pWindow = static_cast<SpatialDataWindow*>(pDesktop->createWindow(pRasterChip->getName(), SPATIAL_DATA_WINDOW));
+   SpatialDataWindow* pWindow = static_cast<SpatialDataWindow*>(pDesktop->createWindow(pRasterChip->getName(),
+      SPATIAL_DATA_WINDOW));
    if (pWindow == NULL)
    {
       return;
@@ -282,9 +281,9 @@ void ChippingWindow::createView()
                RasterElement* pGrayRaster = pOrigLayer->getDisplayedRasterElement(GRAY);
                RasterElement* pRedRaster = pOrigLayer->getDisplayedRasterElement(RED);
                RasterElement* pGreenRaster = pOrigLayer->getDisplayedRasterElement(GREEN);
-               RasterElement* pBlueRaster= pOrigLayer->getDisplayedRasterElement(BLUE);
+               RasterElement* pBlueRaster = pOrigLayer->getDisplayedRasterElement(BLUE);
 
-               const RasterDataDescriptor *pDescriptor = 
+               const RasterDataDescriptor* pDescriptor = 
                   dynamic_cast<const RasterDataDescriptor*>(pRasterChip->getDataDescriptor());
                VERIFYNRV(pDescriptor != NULL);
                // Set the properties of the cube layer in the new view

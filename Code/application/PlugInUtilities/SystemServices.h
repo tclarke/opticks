@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef _SYSTEMSERVICES_H
-#define _SYSTEMSERVICES_H
+#ifndef SYSTEMSERVICES_H
+#define SYSTEMSERVICES_H
 
 #include <string>
 
@@ -25,11 +25,10 @@ public:
     *
     *  @param   message
     *           The message to write to the log
-    *
     */
-   virtual void WriteLogInfo(std::string message)    = 0;
+   virtual void WriteLogInfo(std::string message) = 0;
    virtual void WriteLogWarning(std::string message) = 0;
-   virtual void WriteLogError(std::string message)   = 0;
+   virtual void WriteLogError(std::string message) = 0;
 };
 
-#endif   // _SYSTEMSERVICES_H
+#endif

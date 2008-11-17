@@ -92,18 +92,18 @@ bool LayerImp::isKindOf(const string& className) const
    return SubjectImp::isKindOf(className);
 }
 
-void LayerImp::elementDeleted(Subject &subject, const string &signal, const boost::any &v)
+void LayerImp::elementDeleted(Subject& subject, const string& signal, const boost::any& v)
 {
    // Can't check against mpElement, since it may have already been reset
-   DataElement *pElement = dynamic_cast<DataElement*>(&subject);
-   DataElementImp *pElementImp = dynamic_cast<DataElementImp*>(&subject);
+   DataElement* pElement = dynamic_cast<DataElement*>(&subject);
+   DataElementImp* pElementImp = dynamic_cast<DataElementImp*>(&subject);
    VERIFYNRV(pElement != NULL && pElementImp != NULL);
 
    // Remove the element from the map
    mElementLayers.remove(pElement);
 }
 
-void LayerImp::elementModified(Subject &subject, const std::string &signal, const boost::any &v)
+void LayerImp::elementModified(Subject& subject, const std::string& signal, const boost::any& v)
 {
    if (&subject == mpElement.get())
    {
@@ -330,7 +330,7 @@ bool LayerImp::load(const QString& strFilename)
    return bSuccess;
 }
 
-bool LayerImp::serialize(SessionItemSerializer &serializer) const
+bool LayerImp::serialize(SessionItemSerializer& serializer) const
 {
    XMLWriter xml(getObjectType().c_str());
 
@@ -342,11 +342,11 @@ bool LayerImp::serialize(SessionItemSerializer &serializer) const
    return serializer.serialize(xml);
 }
 
-bool LayerImp::deserialize(SessionItemDeserializer &deserializer)
+bool LayerImp::deserialize(SessionItemDeserializer& deserializer)
 {
    XmlReader reader(NULL, false);
-   DOMElement *pRoot = deserializer.deserialize(reader, getObjectType().c_str());
-   if(pRoot == NULL)
+   DOMElement* pRoot = deserializer.deserialize(reader, getObjectType().c_str());
+   if (pRoot == NULL)
    {
       return false;
    }
@@ -359,10 +359,11 @@ bool LayerImp::toXml(XMLWriter* pXml) const
    pXml->addAttr("version", XmlBase::VERSION);
    pXml->addAttr("type", static_cast<string>(
       StringUtilities::toXmlString(getLayerType())));
-   if(Service<SessionManager>()->isSessionSaving())
+   if (Service<SessionManager>()->isSessionSaving())
    {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Should we make this a part of exported layers too? (tclarke)")
-      if(!SessionItemImp::toXml(pXml))
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Should we make this a part of exported layers too? " \
+   "(tclarke)")
+      if (!SessionItemImp::toXml(pXml))
       {
          return false;
       }
@@ -392,17 +393,17 @@ bool LayerImp::toXml(XMLWriter* pXml) const
    {
       pXml->addAttr("name", getName());
       string elementType(getDataElement()->getObjectType());
-      string::size_type loc(string::npos);
-      if((loc = elementType.find("Adapter")) == string::npos)
+      string::size_type loc = elementType.find("Adapter");
+      if (loc == string::npos)
       {
          loc = elementType.find("Imp");
       }
-      if(loc != string::npos)
+      if (loc != string::npos)
       {
          elementType.erase(loc, elementType.size());
       }
       pXml->pushAddPoint(pXml->addElement(elementType.c_str()));
-      if(!getDataElement()->toXml(pXml))
+      if (!getDataElement()->toXml(pXml))
       {
          return false;
       }
@@ -432,11 +433,11 @@ bool LayerImp::fromXml(DOMNode* pDocument, unsigned int version)
    {
       return false;
    }
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
+   DOMElement* pElem = static_cast<DOMElement*>(pDocument);
 
-   if(Service<SessionManager>()->isSessionLoading())
+   if (Service<SessionManager>()->isSessionLoading())
    {
-      if(!SessionItemImp::fromXml(pDocument, version))
+      if (!SessionItemImp::fromXml(pDocument, version))
       {
          return false;
       }
@@ -453,13 +454,13 @@ bool LayerImp::fromXml(DOMNode* pDocument, unsigned int version)
             return false;
          }
       }
-      for(DOMNode *pChld = pElem->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
+      for (DOMNode* pChld = pElem->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
       {
-         if(XMLString::equals(pChld->getNodeName(), X("LinkedLayer")))
+         if (XMLString::equals(pChld->getNodeName(), X("LinkedLayer")))
          {
-            Layer *pLinkedLayer = dynamic_cast<Layer*>(Service<SessionManager>()->getSessionItem(
+            Layer* pLinkedLayer = dynamic_cast<Layer*>(Service<SessionManager>()->getSessionItem(
                A(static_cast<DOMElement*>(pChld)->getAttribute(X("layerId")))));
-            if(pLinkedLayer != NULL)
+            if (pLinkedLayer != NULL)
             {
                mLinkedLayers.push_back(pLinkedLayer);
             }
@@ -470,13 +471,13 @@ bool LayerImp::fromXml(DOMNode* pDocument, unsigned int version)
    {
       setName(A(pElem->getAttribute(X("name"))));
       bool success = false;
-      for(DOMNode *pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
+      for (DOMNode* pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
       {
-         if(pChld->getNodeType() == DOMNode::ELEMENT_NODE)
+         if (pChld->getNodeType() == DOMNode::ELEMENT_NODE)
          {
-            if(mpElement.get() != NULL)
+            if (mpElement.get() != NULL)
             {
-               if(!mpElement->fromXml(pChld, version))
+               if (!mpElement->fromXml(pChld, version))
                {
                   return false;
                }
@@ -488,7 +489,7 @@ bool LayerImp::fromXml(DOMNode* pDocument, unsigned int version)
 
    if (pElem->hasAttribute(X("scale")))
    {
-      LocationType scale(1,1);
+      LocationType scale(1, 1);
       XmlReader::StrToLocation(pElem->getAttribute(X("scale")), scale);
       setXScaleFactor(scale.mX);
       setYScaleFactor(scale.mY);
@@ -496,7 +497,7 @@ bool LayerImp::fromXml(DOMNode* pDocument, unsigned int version)
 
    if (pElem->hasAttribute(X("offset")))
    {
-      LocationType offset(0,0);
+      LocationType offset(0, 0);
       XmlReader::StrToLocation(pElem->getAttribute(X("offset")), offset);
       setXOffset(offset.mX);
       setYOffset(offset.mY);
@@ -516,10 +517,10 @@ void LayerImp::removeLinkedLayer(Subject& subject, const string& signal, const b
 
 void LayerImp::setDataElement(DataElement* pElement)
 {
-   if(mpElement.get() != NULL)
+   if (mpElement.get() != NULL)
    {
       // Decrement the number of layers displaying the element
-      if(mElementLayers.contains(mpElement.get()))
+      if (mElementLayers.contains(mpElement.get()))
       {
          if (--mElementLayers[mpElement.get()] == 0)
          {
@@ -536,10 +537,10 @@ void LayerImp::setDataElement(DataElement* pElement)
    // now set the new element with reference counting
    mpElement.reset(pElement);
 
-   if(mpElement.get() != NULL)
+   if (mpElement.get() != NULL)
    {
       // Increment the number of layers displaying the element
-      if(mElementLayers.contains(mpElement.get()))
+      if (mElementLayers.contains(mpElement.get()))
       {
          mElementLayers[mpElement.get()]++;
       }
@@ -552,7 +553,7 @@ void LayerImp::setDataElement(DataElement* pElement)
 
 bool LayerImp::hasUniqueElement() const
 {
-   if(mpElement.get() == NULL)
+   if (mpElement.get() == NULL)
    {
       return false;
    }
@@ -633,34 +634,34 @@ void LayerImp::setYOffset(double yOffset)
    }
 }
 
-void LayerImp::translateWorldToData(double worldX, double worldY, double &dataX, double &dataY) const
+void LayerImp::translateWorldToData(double worldX, double worldY, double& dataX, double& dataY) const
 {
    dataX = (worldX - mXOffset) / mXScaleFactor;
    dataY = (worldY - mYOffset) / mYScaleFactor;
 }
 
-void LayerImp::translateDataToWorld(double dataX, double dataY, double &worldX, double &worldY) const
+void LayerImp::translateDataToWorld(double dataX, double dataY, double& worldX, double& worldY) const
 {
    worldX = dataX * mXScaleFactor + mXOffset;
    worldY = dataY * mYScaleFactor + mYOffset;
 }
 
-void LayerImp::translateScreenToData(double screenX, double screenY, double &dataX, double &dataY) const
+void LayerImp::translateScreenToData(double screenX, double screenY, double& dataX, double& dataY) const
 {
    double worldX = 0;
    double worldY = 0;
-   View *pView = getView();
+   View* pView = getView();
    VERIFYNRV(pView != NULL);
 
    pView->translateScreenToWorld(screenX, screenY, worldX, worldY);
    translateWorldToData(worldX, worldY, dataX, dataY);
 }
 
-void LayerImp::translateDataToScreen(double dataX, double dataY, double &screenX, double &screenY) const
+void LayerImp::translateDataToScreen(double dataX, double dataY, double& screenX, double& screenY) const
 {
    double worldX = 0;
    double worldY = 0;
-   View *pView = getView();
+   View* pView = getView();
    VERIFYNRV(pView != NULL);
 
    translateDataToWorld(dataX, dataY, worldX, worldY);
@@ -702,7 +703,7 @@ bool LayerImp::canRename() const
    return true;
 }
 
-bool LayerImp::rename(const string &newName, string &errorMessage)
+bool LayerImp::rename(const string& newName, string& errorMessage)
 {
    Layer* pLayer = dynamic_cast<Layer*>(this);
    if (pLayer == NULL)

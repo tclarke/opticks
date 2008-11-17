@@ -383,13 +383,13 @@ protected slots:
     *  wizard item represented by the given tree widget item.  If the wizard item does not
     *  have the value type, an error message is displayed.
     *
-    *  @param   pItem
+    *  @param   pTreeItem
     *           The tree widget item representing the wizard value item to edit.  Cannot be
     *           NULL.
     *
     *  @see     WizardBuilder::editItem
     */
-   void editItem(QTreeWidgetItem* pItem);
+   void editItem(QTreeWidgetItem* pTreeItem);
 
    /**
     *  Removes the currently selected items.

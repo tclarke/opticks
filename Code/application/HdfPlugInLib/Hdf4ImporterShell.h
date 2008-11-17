@@ -7,11 +7,11 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#ifndef HDF4IMPORTERSHELL_H
+#define HDF4IMPORTERSHELL_H
+
 #include "AppConfig.h"
 #if defined(HDF4_SUPPORT)
-
-#ifndef HDF4_IMPORTER_SHELL_H
-#define HDF4_IMPORTER_SHELL_H
 
 #include "HdfImporterShell.h"
 

@@ -236,7 +236,7 @@ Nitf::TreState Nitf::PatchbParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID && totalFields != numFields)
    {
       reporter << "Total fields in the Dynamic Object(" <<
-         totalFields <<") did not match the number found(" << numFields << ") ";
+         totalFields << ") did not match the number found(" << numFields << ") ";
       status = INVALID;
    }
 
@@ -261,28 +261,28 @@ bool Nitf::PatchbParser::fromDynamicObject(const DynamicObject& input, ostream& 
 
    try
    {
-      output <<   toString( dv_cast<int>(input.getAttribute(PATCHB::PAT_NO)), 4);
-      output <<   toString( dv_cast<int>(input.getAttribute(PATCHB::LAST_PAT_FLAG)), 1);
-      output <<   toString( dv_cast<int>(input.getAttribute(PATCHB::LNSTRT)), 7);
-      output <<   toString( dv_cast<int>(input.getAttribute(PATCHB::LNSTOP)), 7);
-      output <<   toString( dv_cast<int>(input.getAttribute(PATCHB::AZL)), 5);
-      output <<   toString( dv_cast<int>(input.getAttribute(PATCHB::NVL)), 5);
-      output <<   toString( dv_cast<int>(input.getAttribute(PATCHB::FVL)), 3);
-      output <<   toString( dv_cast<int>(input.getAttribute(PATCHB::NPIXEL)), 5);
-      output <<   toString( dv_cast<int>(input.getAttribute(PATCHB::FVPIX)), 5);
-      output <<   toString( dv_cast<int>(input.getAttribute(PATCHB::FRAME)), 3);
-      output <<   toString( dv_cast<double>(input.getAttribute(PATCHB::UTC)), 8, 2);
-      output <<   toString( dv_cast<double>(input.getAttribute(PATCHB::SHEAD)), 7, 3);
-      output <<   toString( dv_cast<double>(input.getAttribute(PATCHB::GRAVITY)), 7, 4);
-      output <<   toString( dv_cast<int>(input.getAttribute(PATCHB::INS_V_NC)), 5, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<int>(input.getAttribute(PATCHB::INS_V_EC)), 5, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<int>(input.getAttribute(PATCHB::INS_V_DC)), 5, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute(PATCHB::OFFLAT)), 8, 4, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute(PATCHB::OFFLONG)), 8, 4, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<int>(input.getAttribute(PATCHB::TRACK)), 3);
-      output <<   toString( dv_cast<double>(input.getAttribute(PATCHB::GSWEEP)), 6, 2);
-      output <<   toString( dv_cast<double>(input.getAttribute(PATCHB::SHEAR)), 8);
-      output <<   toString( dv_cast<int>(input.getAttribute(PATCHB::BATCH_NO)), 6);
+      output << toString(dv_cast<int>(input.getAttribute(PATCHB::PAT_NO)), 4);
+      output << toString(dv_cast<int>(input.getAttribute(PATCHB::LAST_PAT_FLAG)), 1);
+      output << toString(dv_cast<int>(input.getAttribute(PATCHB::LNSTRT)), 7);
+      output << toString(dv_cast<int>(input.getAttribute(PATCHB::LNSTOP)), 7);
+      output << toString(dv_cast<int>(input.getAttribute(PATCHB::AZL)), 5);
+      output << toString(dv_cast<int>(input.getAttribute(PATCHB::NVL)), 5);
+      output << toString(dv_cast<int>(input.getAttribute(PATCHB::FVL)), 3);
+      output << toString(dv_cast<int>(input.getAttribute(PATCHB::NPIXEL)), 5);
+      output << toString(dv_cast<int>(input.getAttribute(PATCHB::FVPIX)), 5);
+      output << toString(dv_cast<int>(input.getAttribute(PATCHB::FRAME)), 3);
+      output << toString(dv_cast<double>(input.getAttribute(PATCHB::UTC)), 8, 2);
+      output << toString(dv_cast<double>(input.getAttribute(PATCHB::SHEAD)), 7, 3);
+      output << toString(dv_cast<double>(input.getAttribute(PATCHB::GRAVITY)), 7, 4);
+      output << toString(dv_cast<int>(input.getAttribute(PATCHB::INS_V_NC)), 5, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<int>(input.getAttribute(PATCHB::INS_V_EC)), 5, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<int>(input.getAttribute(PATCHB::INS_V_DC)), 5, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(PATCHB::OFFLAT)), 8, 4, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(PATCHB::OFFLONG)), 8, 4, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<int>(input.getAttribute(PATCHB::TRACK)), 3);
+      output << toString(dv_cast<double>(input.getAttribute(PATCHB::GSWEEP)), 6, 2);
+      output << toString(dv_cast<double>(input.getAttribute(PATCHB::SHEAR)), 8);
+      output << toString(dv_cast<int>(input.getAttribute(PATCHB::BATCH_NO)), 6);
    }
    catch (const bad_cast&)
    {

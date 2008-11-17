@@ -38,14 +38,22 @@ using namespace std;
 
 void ImportAgentImp::instantiate(Progress* pProgress, bool batch)
 {
-   if (getInstantiated()) throw logic_error("ImportAgent can not be instantiated twice!");
+   if (getInstantiated())
+   {
+      throw logic_error("ImportAgent can not be instantiated twice!");
+   }
+
    ExecutableAgentImp::instantiate(pProgress, batch);
    mpElement = NULL;
 }
 
 void ImportAgentImp::instantiate(const string& importerName, Progress* pProgress, bool batch)
 {
-   if (getInstantiated()) throw logic_error("ImportAgent can not be instantiated twice!");
+   if (getInstantiated())
+   {
+      throw logic_error("ImportAgent can not be instantiated twice!");
+   }
+
    ExecutableAgentImp::instantiate(importerName, string(), pProgress, batch);
    mpElement = NULL;
 }
@@ -53,7 +61,11 @@ void ImportAgentImp::instantiate(const string& importerName, Progress* pProgress
 void ImportAgentImp::instantiate(const string& importerName, const string& filename, Progress* pProgress,
                                  bool batch)
 {
-   if (getInstantiated()) throw logic_error("ImportAgent can not be instantiated twice!");
+   if (getInstantiated())
+   {
+      throw logic_error("ImportAgent can not be instantiated twice!");
+   }
+
    ExecutableAgentImp::instantiate(importerName, string(), pProgress, batch);
    mpElement = NULL;
    setFilename(filename);
@@ -62,7 +74,11 @@ void ImportAgentImp::instantiate(const string& importerName, const string& filen
 void ImportAgentImp::instantiate(const string& importerName, const vector<ImportDescriptor*>& descriptors,
                                  Progress* pProgress, bool batch)
 {
-   if (getInstantiated()) throw logic_error("ImportAgent can not be instantiated twice!");
+   if (getInstantiated())
+   {
+      throw logic_error("ImportAgent can not be instantiated twice!");
+   }
+
    ExecutableAgentImp::instantiate(importerName, string(), pProgress, batch);
    mpElement = NULL;
    mDescriptors = descriptors;
@@ -71,7 +87,11 @@ void ImportAgentImp::instantiate(const string& importerName, const vector<Import
 void ImportAgentImp::instantiate(PlugIn* pPlugIn, const vector<ImportDescriptor*>& descriptors,
                                  Progress* pProgress, bool batch)
 {
-   if (getInstantiated()) throw logic_error("ImportAgent can not be instantiated twice!");
+   if (getInstantiated())
+   {
+      throw logic_error("ImportAgent can not be instantiated twice!");
+   }
+
    ExecutableAgentImp::instantiate(pPlugIn, string(), pProgress, batch);
    mpElement = NULL;
    mDescriptors = descriptors;
@@ -156,8 +176,11 @@ bool ImportAgentImp::isMruFileListUpdated() const
 void ImportAgentImp::setImportDescriptors(const vector<ImportDescriptor*>& descriptors)
 {
    checkInstantiate();
-   vector<ImportDescriptor*>::const_iterator descIter, foundIter;
+
    Service<ModelServices> pModel;
+
+   vector<ImportDescriptor*>::const_iterator descIter;
+   vector<ImportDescriptor*>::const_iterator foundIter;
    for (descIter = mDescriptors.begin(); descIter != mDescriptors.end(); ++descIter)
    {
       foundIter = find(descriptors.begin(), descriptors.end(), *descIter);
@@ -173,7 +196,7 @@ void ImportAgentImp::setImportDescriptors(const vector<ImportDescriptor*>& descr
 vector<ImportDescriptor*> ImportAgentImp::getImportDescriptors()
 {
    checkInstantiate();
-   if(mDescriptors.empty())
+   if (mDescriptors.empty())
    {
       Importer* pImporter = dynamic_cast<Importer*>(getPlugIn());
       if (pImporter != NULL)
@@ -392,7 +415,7 @@ bool ImportAgentImp::execute()
          success = false;
          continue;
       }
-      else if(!errorMessage.empty())
+      else if (!errorMessage.empty())
       {
          // warning from validate
          if (pProgress != NULL)
@@ -407,11 +430,11 @@ bool ImportAgentImp::execute()
       selectedDescriptors.push_back(pDescriptor);
    }
    vector<DataElement*> createdElementsVec = pModel->createElements(selectedDescriptors);
-   if(createdElementsVec.size() < selectedDescriptors.size())
+   if (createdElementsVec.size() < selectedDescriptors.size())
    {
-      if(pProgress != NULL)
+      if (pProgress != NULL)
       {
-         if(createdElementsVec.empty())
+         if (createdElementsVec.empty())
          {
             pProgress->updateProgress("Unable to create any data elements", 0, ERRORS);
             return false;
@@ -443,7 +466,7 @@ bool ImportAgentImp::execute()
    }
 
    // Load the data sets
-   while(!toVisit.empty())
+   while (!toVisit.empty())
    {
       mpElement = toVisit.front();
       toVisit.pop();
@@ -469,7 +492,7 @@ bool ImportAgentImp::execute()
       }
       else
       {
-         DataDescriptorImp *pDdi = dynamic_cast<DataDescriptorImp*>(mpElement->getDataDescriptor());
+         DataDescriptorImp* pDdi = dynamic_cast<DataDescriptorImp*>(mpElement->getDataDescriptor());
          if (pDdi != NULL)
          {
             pDdi->setImporterName(getPlugIn()->getName());
@@ -477,7 +500,7 @@ bool ImportAgentImp::execute()
          mImportedElements.push_back(mpElement);
          for (list<DataElement*>::iterator elmnt = createdElements.begin(); elmnt != createdElements.end(); ++elmnt)
          {
-            if((*elmnt)->getParent() == mpElement)
+            if ((*elmnt)->getParent() == mpElement)
             {
                toVisit.push(*elmnt);
             }

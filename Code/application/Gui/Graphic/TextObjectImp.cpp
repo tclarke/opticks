@@ -33,6 +33,10 @@ TextObjectImp::TextObjectImp(const string& id, GraphicObjectType type, GraphicLa
                              LocationType pixelCoord) :
    RectangleObjectImp(id, type, pLayer, pixelCoord),
    mTextureId(0),
+   mTextureWidth(1),
+   mTextureHeight(1),
+   mDataWidth(0),
+   mDataHeight(0),
    mUpdateTexture(true),
    mUpdateBoundingBox(true)
 {
@@ -97,14 +101,12 @@ void TextObjectImp::drawTexture() const
 
    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,   GL_LINEAR_MIPMAP_LINEAR);
+   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
    glEnable(GL_BLEND);
    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-   double maxS, maxT;
-
-   maxS = mDataWidth / (double) mTextureWidth;
-   maxT = mDataHeight / (double) mTextureHeight;
+   double maxS = mDataWidth / static_cast<double>(mTextureWidth);
+   double maxT = mDataHeight / static_cast<double>(mTextureHeight);
 
    ColorType color = getTextColor();
    glBegin(GL_QUADS);
@@ -190,7 +192,7 @@ void TextObjectImp::drawTexture() const
 
    if (!mTextureIdStack.empty())
    {
-      TextObjectImp *pNonConst = const_cast<TextObjectImp*>(this);
+      TextObjectImp* pNonConst = const_cast<TextObjectImp*>(this);
       if (mTextureId != 0)
       {
          glDeleteTextures(1, &mTextureId);
@@ -256,23 +258,20 @@ void TextObjectImp::updateTexture()
    mDataWidth = iWidth;
    mDataHeight = iHeight;
 
-   mTextureWidth = pow(2.0, ceil(log10((double) iWidth) / log10(2.0))) + 0.5;
-   mTextureHeight = pow(2.0, ceil(log10((double) iHeight) / log10(2.0))) + 0.5;
+   mTextureWidth = pow(2.0, ceil(log10(static_cast<double>(iWidth)) / log10(2.0))) + 0.5;
+   mTextureHeight = pow(2.0, ceil(log10(static_cast<double>(iHeight)) / log10(2.0))) + 0.5;
 
    int bufSize = mTextureWidth * mTextureHeight;
    vector<unsigned int> texData(bufSize, 0);
 
-   unsigned int *target;
-
-   int i, j;
-   target = &texData[0];
-   for (j=0; j<iHeight; j++)
+   unsigned int* target = &texData[0];
+   for (int j = 0; j < iHeight; j++)
    {
       target = &texData[mTextureWidth * j];
-      for (i=0; i<iWidth; i++)
+      for (int i = 0; i < iWidth; i++)
       {
-         QRgb rgb = image.pixel(i,j);
-         if (image.pixel(i,j) != 0xffffffff)
+         QRgb rgb = image.pixel(i, j);
+         if (image.pixel(i, j) != 0xffffffff)
          {
             *target = 0xffffffff;
          }
@@ -293,11 +292,11 @@ void TextObjectImp::updateTexture()
 
    glEnable(GL_TEXTURE_2D);
    glBindTexture(GL_TEXTURE_2D, mTextureId);
-   glTexParameterf(GL_TEXTURE_2D,  GL_TEXTURE_WRAP_S, GL_CLAMP);
-   glTexParameterf(GL_TEXTURE_2D,  GL_TEXTURE_WRAP_T, GL_CLAMP);
+   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,   GL_LINEAR_MIPMAP_LINEAR);
-   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,   GL_LINEAR);
+   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
    gluBuild2DMipmaps(GL_TEXTURE_2D, 4, mTextureWidth, mTextureHeight, GL_RGBA, GL_UNSIGNED_BYTE, &texData[0]);
    glDisable(GL_TEXTURE_2D);
@@ -454,7 +453,7 @@ void TextObjectImp::updateBoundingBox()
 bool TextObjectImp::processMousePress(LocationType screenCoord, Qt::MouseButton button, Qt::MouseButtons buttons,
                                       Qt::KeyboardModifiers modifiers)
 {
-   GraphicLayerImp *pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
+   GraphicLayerImp* pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
    VERIFY(pLayer != NULL);
 
    bool bValidText = false;
@@ -475,7 +474,7 @@ bool TextObjectImp::processMouseMove(LocationType screenCoord, Qt::MouseButton b
                                      Qt::KeyboardModifiers modifiers)
 {
    // should never get here
-   GraphicLayerImp *pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
+   GraphicLayerImp* pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
    VERIFY(pLayer != NULL);
    pLayer->completeInsertion(false);
 
@@ -486,7 +485,7 @@ bool TextObjectImp::processMouseRelease(LocationType screenCoord, Qt::MouseButto
                                         Qt::KeyboardModifiers modifiers)
 {
    // should never get here
-   GraphicLayerImp *pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
+   GraphicLayerImp* pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
    VERIFY(pLayer != NULL);
    pLayer->completeInsertion(false);
 

@@ -32,7 +32,7 @@ string HdfUtilities::hdf5TypeToTypeString(hid_t dataTypeId)
 
    string type = HdfUtilities::UNKNOWN_TYPE;
 
-   switch(dataType)
+   switch (dataType)
    {
    case H5T_INTEGER:
       {
@@ -198,7 +198,7 @@ bool HdfUtilities::readHdf5Attribute(hid_t attrId, DataVariant& var)
    */
    size_t numElements = 1;
    for (int i = 0; i < numDims; i++)
-      numElements *= (size_t) sizeArray[i];
+      numElements *= static_cast<size_t>(sizeArray[i]);
 
    bool success = false;
    if (hdf5Type == TypeConverter::toString<unsigned char>())
@@ -407,7 +407,7 @@ bool HdfUtilities::createGroups(const string& hdfPath, hid_t fileDescriptor, boo
    }
 
    // groupString should resemble '/group1/group2/group3'
-   while(groupString.empty() == false && groupString.size() > 1 && groupString[0] == '/')
+   while (groupString.empty() == false && groupString.size() > 1 && groupString[0] == '/')
    {
       groupsToAdd.push_front(groupString);
 

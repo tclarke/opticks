@@ -137,11 +137,11 @@ bool Nitf::AimidaParser::runAllTests(Progress* pProgress, ostream& failure)
    stringstream input4(data_error4);
    numBytes = input4.str().size();
    success = toDynamicObject(input4, numBytes, *treDO.get(), errorMessage);
-   if(success)
+   if (success)
    {
       std::stringstream tmpStream;
       status = this->isTreValid(*treDO.get(), tmpStream);  // This test should return SUSPECT
-      if(status != SUSPECT)
+      if (status != SUSPECT)
       {
          failure << "---Negative test failed: START_COLUMN should have returned SUSPECT\n";
          failure << tmpStream.str();
@@ -195,7 +195,8 @@ Nitf::TreState Nitf::AimidaParser::isTreValid(const DynamicObject& tre, ostream&
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
       &numFields, AIMIDA::REPLAY, testSet, false, true, false));
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This is a one char blank field in STDI-0002. For Classified versions this may be something else. (lbeck)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This is a one char blank field in STDI-0002.  " \
+   "For Classified versions this may be something else. (lbeck)")
    testSet.clear();
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
       &numFields, AIMIDA::RESERVED1, testSet, true, true, true));
@@ -220,7 +221,8 @@ Nitf::TreState Nitf::AimidaParser::isTreValid(const DynamicObject& tre, ostream&
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
       &numFields, AIMIDA::COUNTRY, testSet, true, true, false));
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This is a four char blank field in STDI-0002. For Classified versions this may be something else. (lbeck)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This is a four char blank field in STDI-0002.  " \
+   "For Classified versions this may be something else. (lbeck)")
    testSet.clear();
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
       &numFields, AIMIDA::RESERVED2, testSet, true, true, true));
@@ -248,7 +250,7 @@ Nitf::TreState Nitf::AimidaParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID && totalFields != numFields)
    {
       reporter << "Total fields in the Dynamic Object(" <<
-         totalFields <<") did not match the number found(" << numFields << ") ";
+         totalFields << ") did not match the number found(" << numFields << ") ";
       status = INVALID;
    }
 
@@ -271,7 +273,9 @@ bool Nitf::AimidaParser::toDynamicObject(istream& input, size_t numBytes, Dynami
    vector<char> buf;
    bool ok(true);
 
-   unsigned short yy(0), mm(0), dd(0);
+   unsigned short yy(0);
+   unsigned short mm(0);
+   unsigned short dd(0);
    bool success(true);
 
    success = readFromStream(input, buf, 7) && DtgParseDDMMMYY(string(&buf.front()), yy, mm, dd);
@@ -316,7 +320,9 @@ bool Nitf::AimidaParser::toDynamicObject(istream& input, size_t numBytes, Dynami
 
    if (success)
    {
-      yy = mm = dd = 0;
+      yy = 0;
+      mm = 0;
+      dd = 0;
       success = readFromStream(input, buf, 7) && DtgParseDDMMMYY(string(&buf.front()), yy, mm, dd);
       if (!success)
       {
@@ -359,7 +365,7 @@ bool Nitf::AimidaParser::fromDynamicObject(const DynamicObject& input, ostream& 
    try
    {
       // put date in form DDMMMYY for this TAG                  see: strftime() for format info
-      const DateTime *pAppDtgMissionDate = dv_cast<DateTime>(&input.getAttribute(AIMIDA::MISSION_DATE));
+      const DateTime* pAppDtgMissionDate = dv_cast<DateTime>(&input.getAttribute(AIMIDA::MISSION_DATE));
       if (pAppDtgMissionDate == NULL)
       {
          return false;
@@ -369,25 +375,25 @@ bool Nitf::AimidaParser::fromDynamicObject(const DynamicObject& input, ostream& 
       boost::to_upper(ddmmmyy);
       output << sizeString(ddmmmyy, 7);
 
-      output << sizeString( dv_cast<string>(input.getAttribute(AIMIDA::MISSION_NO)), 4);
-      output << sizeString( dv_cast<string>(input.getAttribute(AIMIDA::FLIGHT_NO)), 2);
-      output <<   toString( dv_cast<int>(input.getAttribute   (AIMIDA::OP_NUM)), 3);
-      output << sizeString( dv_cast<string>(input.getAttribute(AIMIDA::START_SEGMENT)), 2);
-      output <<   toString( dv_cast<int>(input.getAttribute   (AIMIDA::REPRO_NUM)), 2);
-      output << sizeString( dv_cast<string>(input.getAttribute(AIMIDA::REPLAY)), 3);
-      output << sizeString( dv_cast<string>(input.getAttribute(AIMIDA::RESERVED1)), 1);
-      output <<   toString( dv_cast<int>(input.getAttribute   (AIMIDA::START_COLUMN)), 2);
-      output <<   toString( dv_cast<int>(input.getAttribute   (AIMIDA::START_ROW)), 5);
-      output << sizeString( dv_cast<string>(input.getAttribute(AIMIDA::END_SEGMENT)), 2);
-      output <<   toString( dv_cast<int>(input.getAttribute   (AIMIDA::END_COLUMN)), 2);
-      output <<   toString( dv_cast<int>(input.getAttribute   (AIMIDA::END_ROW)), 5);
-      output << sizeString( dv_cast<string>(input.getAttribute(AIMIDA::COUNTRY)), 2);
-      output << sizeString( dv_cast<string>(input.getAttribute(AIMIDA::RESERVED2)), 4);
-      output << sizeString( dv_cast<string>(input.getAttribute(AIMIDA::LOCATION)), 11);
-      output << sizeString( dv_cast<string>(input.getAttribute(AIMIDA::TIME)), 5);
+      output << sizeString(dv_cast<string>(input.getAttribute(AIMIDA::MISSION_NO)), 4);
+      output << sizeString(dv_cast<string>(input.getAttribute(AIMIDA::FLIGHT_NO)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(AIMIDA::OP_NUM)), 3);
+      output << sizeString(dv_cast<string>(input.getAttribute(AIMIDA::START_SEGMENT)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(AIMIDA::REPRO_NUM)), 2);
+      output << sizeString(dv_cast<string>(input.getAttribute(AIMIDA::REPLAY)), 3);
+      output << sizeString(dv_cast<string>(input.getAttribute(AIMIDA::RESERVED1)), 1);
+      output << toString(dv_cast<int>(input.getAttribute(AIMIDA::START_COLUMN)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(AIMIDA::START_ROW)), 5);
+      output << sizeString(dv_cast<string>(input.getAttribute(AIMIDA::END_SEGMENT)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(AIMIDA::END_COLUMN)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(AIMIDA::END_ROW)), 5);
+      output << sizeString(dv_cast<string>(input.getAttribute(AIMIDA::COUNTRY)), 2);
+      output << sizeString(dv_cast<string>(input.getAttribute(AIMIDA::RESERVED2)), 4);
+      output << sizeString(dv_cast<string>(input.getAttribute(AIMIDA::LOCATION)), 11);
+      output << sizeString(dv_cast<string>(input.getAttribute(AIMIDA::TIME)), 5);
 
       // put date in form DDMMMYY for this TAG
-      const DateTime *pAppDtg = dv_cast<DateTime>(&input.getAttribute(AIMIDA::CREATION_DATE));
+      const DateTime* pAppDtg = dv_cast<DateTime>(&input.getAttribute(AIMIDA::CREATION_DATE));
       if (pAppDtg == NULL)
       {
          return false;

@@ -478,9 +478,7 @@ void Assign_Datum_Row(Datum_Row *destination, Datum_Row *source)
   destination->Sigma_Z = source->Sigma_Z;
 } /* End Assign_Datum_Row */
 
-
-
-int Initialize_Datums(void)
+int Initialize_Datums()
 { /* Begin Initialize_Datums */
 /*
  * The function Initialize_Datums creates the datum table from two external

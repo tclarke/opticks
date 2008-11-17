@@ -17,10 +17,10 @@
 
 FrameBuffer::FrameBuffer() :
    ImageBuffer(),
+   mFrameBufferObject(createFrameBufferObject()),
    mPreviousFrameBufferObject(0),
    mPreviousColorBufferId(0),
-   mNextColorBufferId(0),
-   mFrameBufferObject(createFrameBufferObject())
+   mNextColorBufferId(0)
 {
    // allocate memory for the view port of the FrameBuffer object (FBO)
    mPreviousViewPort.resize(4);
@@ -55,15 +55,14 @@ FrameBuffer::FrameBuffer() :
 }
 
 // copy constructor
-FrameBuffer::FrameBuffer(const FrameBuffer &frameBuffer) :
-   ImageBuffer(frameBuffer) 
+FrameBuffer::FrameBuffer(const FrameBuffer& frameBuffer) :
+   ImageBuffer(frameBuffer),
+   mFrameBufferObject(frameBuffer.mFrameBufferObject),
+   mPreviousFrameBufferObject(frameBuffer.mPreviousFrameBufferObject)
 {
-   mFrameBufferObject = frameBuffer.mFrameBufferObject;
-   mPreviousFrameBufferObject = frameBuffer.mPreviousFrameBufferObject;
-
-   for (unsigned int ii = 0; ii < 4; ii++)
+   for (unsigned int i = 0; i < 4; i++)
    {
-      mPreviousViewPort[ii] = frameBuffer.mPreviousViewPort[ii];
+      mPreviousViewPort[i] = frameBuffer.mPreviousViewPort[i];
    }
 
    mColorBufferAttachments = frameBuffer.mColorBufferAttachments;
@@ -361,7 +360,7 @@ bool FrameBuffer::attachBuffer(ColorBuffer *pColorBuffer)
 
 void FrameBuffer::detachBuffer(ColorBuffer *pColorBuffer)
 {
-    // check to make sure the FBO was created and the color buffer is valid
+   // check to make sure the FBO was created and the color buffer is valid
    if (mFrameBufferObject == 0 || pColorBuffer == NULL)
    {
       return;

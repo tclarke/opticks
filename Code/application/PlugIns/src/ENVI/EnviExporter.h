@@ -34,7 +34,7 @@ public:
    bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
 
 protected:
-   bool extractInputArgs(PlugInArgList* pArgList);
+   bool extractInputArgs(const PlugInArgList* pArgList);
    bool exportHeaderFile() const;
    bool exportDataFile() const;
 

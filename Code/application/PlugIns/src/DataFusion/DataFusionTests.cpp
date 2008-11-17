@@ -58,20 +58,16 @@ bool compareDatesFunc(ostream& stream, const char* date1Name, const char* date2N
 #define compareDates(stream, date1, date2) compareDatesFunc(stream, #date1, #date2, date1, date2)
 
 // begin PolywarpTests
-PolywarpTests::PolywarpTests(ostream& output, ProgressTracker &tracker) : Test(output, tracker)
+PolywarpTests::PolywarpTests(ostream& output, ProgressTracker& tracker) : Test(output, tracker)
 {
-   myStage = ProgressTracker::Stage("Polywarp Tests", "app",
-                                    "7EC610DE-0CC6-4a75-B65D-CAB022706268", 100);
-   mStages.push_back(ProgressTracker::Stage("Positive Shift Test", "app",
-                                            "E32556B9-4590-4670-B5E1-4BE6BEEB10D9", 20));
-   mStages.push_back(ProgressTracker::Stage("Negative Shift Test", "app",
-                                            "CF284597-EE1F-412d-9E7C-E10A313B0AA6", 20));
+   myStage = ProgressTracker::Stage("Polywarp Tests", "app", "7EC610DE-0CC6-4a75-B65D-CAB022706268", 100);
+   mStages.push_back(ProgressTracker::Stage("Positive Shift Test", "app", "E32556B9-4590-4670-B5E1-4BE6BEEB10D9", 20));
+   mStages.push_back(ProgressTracker::Stage("Negative Shift Test", "app", "CF284597-EE1F-412d-9E7C-E10A313B0AA6", 20));
    mStages.push_back(ProgressTracker::Stage("Positive Shift and Scale Test", "app",
                                             "9086D23D-D7F6-4aff-847D-47AE787731E4", 20));
    mStages.push_back(ProgressTracker::Stage("Negative Shift and Scale Test", "app",
                                             "B9C9569C-BFCD-4f5c-BD4F-58B6E4063D26", 20));
-   mStages.push_back(ProgressTracker::Stage("Variable Shift Test", "app",
-                                            "76F00BAE-E721-41b8-8E76-6C8D324D4ADA", 20));   
+   mStages.push_back(ProgressTracker::Stage("Variable Shift Test", "app", "76F00BAE-E721-41b8-8E76-6C8D324D4ADA", 20));
 }
 
 bool PolywarpTests::run(double pause)
@@ -104,39 +100,39 @@ bool PolywarpTests::run(double pause)
    return bSuccess;
 }
 
-void PolywarpTests::setupInputMatrices(Vector<double>& XP, Vector<double>& YP,
-                                       Vector<double>& XS, Vector<double>& YS,
-                                       Vector<double>& KX, Vector<double>& KY,
-                                       Vector<double>& ExpectedKX, Vector<double>& ExpectedKY)
+void PolywarpTests::setupInputMatrices(Vector<double>& xP, Vector<double>& yP,
+                                       Vector<double>& xS, Vector<double>& yS,
+                                       Vector<double>& kX, Vector<double>& kY,
+                                       Vector<double>& expectedKX, Vector<double>& expectedKY)
 {
    //Polywarp input declarations
-   XP = YP = XS = YS = Vector<double>(4);
-   KX = KY = ExpectedKX = ExpectedKY = Vector<double>(4);
+   xP = yP = xS = yS = Vector<double>(4);
+   kX = kY = expectedKX = expectedKY = Vector<double>(4);
 
-   XP[0] = 36.0;
-   XP[1] = 36.0;
-   XP[2] = 53.0;
-   XP[3] = 53.0;
+   xP[0] = 36.0;
+   xP[1] = 36.0;
+   xP[2] = 53.0;
+   xP[3] = 53.0;
 
-   YP[0] = 2.0;
-   YP[1] = 25.0;
-   YP[2] = 25.0;
-   YP[3] = 2.0;
+   yP[0] = 2.0;
+   yP[1] = 25.0;
+   yP[2] = 25.0;
+   yP[3] = 2.0;
 }
 
-bool PolywarpTests::verifyVector(ProgressTracker::Stage& s, const Vector<double>& results, std::string name)
+bool PolywarpTests::verifyVector(ProgressTracker::Stage& s, const Vector<double>& results, string name)
 {
    unsigned int i = 0;
    bool bAllGood = true;
    int workDone = 0;
    for (i = 0; i < results.size(); i++)
    {
-      workDone = int((i+1)*100/double(results.size()));
+      workDone = static_cast<int>((i+1)*100/static_cast<double>(results.size()));
       if (fabs(results.at(i)) > SMALL_VALUE)
       {
-         string msg = name + " Failed! " + "Value[" + QString::number(i).toStdString() +
-                             "] = " + QString::number(fabs(results[i])).toStdString() +
-                             " and should be smaller than " + QString::number(SMALL_VALUE).toStdString();
+         string msg = name + " Failed! " + "Value[" + QString::number(i).toStdString() + "] = " +
+            QString::number(fabs(results[i])).toStdString() + " and should be smaller than " +
+            QString::number(SMALL_VALUE).toStdString();
          mOutputStream << msg << endl;
          mProgressTracker.report(msg, workDone, WARNING);
 
@@ -155,35 +151,43 @@ bool PolywarpTests::positiveShiftTest()
    bool bSuccess = true;
 
    // POLYWARP TEST 1 - Constant Positive Shift
-   Vector<double> XP, YP, XS, YS, KX, KY, ExpectedKX, ExpectedKY;
-   setupInputMatrices(XP, YP, XS, YS, KX, KY, ExpectedKX, ExpectedKY);
+   Vector<double> xP;
+   Vector<double> yP;
+   Vector<double> xS;
+   Vector<double> yS;
+   Vector<double> kX;
+   Vector<double> kY;
+   Vector<double> expectedKX;
+   Vector<double> expectedKY;
+   setupInputMatrices(xP, yP, xS, yS, kX, kY, expectedKX, expectedKY);
 
-   double xshift = 5.0, yshift = 3.0;
-   
-   XS[0] = XP[0] + xshift;
-   XS[1] = XP[1] + xshift; 
-   XS[2] = XP[2] + xshift;
-   XS[3] = XP[3] + xshift;
-   YS[0] = YP[0] + yshift;
-   YS[1] = YP[1] + yshift; 
-   YS[2] = YP[2] + yshift;
-   YS[3] = YP[3] + yshift;
-   
-   ExpectedKX[0] = xshift;
-   ExpectedKX[1] = 0.0;
-   ExpectedKX[2] = 1.0;
-   ExpectedKX[3] = 0.0;
+   double xshift = 5.0;
+   double yshift = 3.0;
 
-   ExpectedKY[0] = yshift;
-   ExpectedKY[1] = 1.0;
-   ExpectedKY[2] = 0.0;
-   ExpectedKY[3] = 0.0;
+   xS[0] = xP[0] + xshift;
+   xS[1] = xP[1] + xshift; 
+   xS[2] = xP[2] + xshift;
+   xS[3] = xP[3] + xshift;
+   yS[0] = yP[0] + yshift;
+   yS[1] = yP[1] + yshift; 
+   yS[2] = yP[2] + yshift;
+   yS[3] = yP[3] + yshift;
+   
+   expectedKX[0] = xshift;
+   expectedKX[1] = 0.0;
+   expectedKX[2] = 1.0;
+   expectedKX[3] = 0.0;
+
+   expectedKY[0] = yshift;
+   expectedKY[1] = 1.0;
+   expectedKY[2] = 0.0;
+   expectedKY[3] = 0.0;
 
    // int workIncrement = (maxWork-minWork)/2;
-   polywarp(XS, YS, XP, YP, KX, KY, 1, mProgressTracker);
+   polywarp(xS, yS, xP, yP, kX, kY, 1, mProgressTracker);
 
-   Vector<double> resultsX = KX-ExpectedKX;
-   Vector<double> resultsY = KY-ExpectedKY;
+   Vector<double> resultsX = kX-expectedKX;
+   Vector<double> resultsY = kY-expectedKY;
 
    bSuccess = verifyVector(myStage.getActiveStage(), resultsX, "Polywarp-1: X Results");
    if (bSuccess)
@@ -200,34 +204,42 @@ bool PolywarpTests::negativeShiftTest()
    bool bSuccess = true;
 
    //POLYWARP TEST 2 - Constant Negative Shift
-   Vector<double> XP, YP, XS, YS, KX, KY, ExpectedKX, ExpectedKY;
-   setupInputMatrices(XP, YP, XS, YS, KX, KY, ExpectedKX, ExpectedKY);
+   Vector<double> xP;
+   Vector<double> yP;
+   Vector<double> xS;
+   Vector<double> yS;
+   Vector<double> kX;
+   Vector<double> kY;
+   Vector<double> expectedKX;
+   Vector<double> expectedKY;
+   setupInputMatrices(xP, yP, xS, yS, kX, kY, expectedKX, expectedKY);
 
-   double xshift = -5.25, yshift = -3.3;
+   double xshift = -5.25;
+   double yshift = -3.3;
 
-   XS[0] = XP[0] + xshift;
-   XS[1] = XP[1] + xshift; 
-   XS[2] = XP[2] + xshift;
-   XS[3] = XP[3] + xshift;
-   YS[0] = YP[0] + yshift;
-   YS[1] = YP[1] + yshift; 
-   YS[2] = YP[2] + yshift;
-   YS[3] = YP[3] + yshift;
+   xS[0] = xP[0] + xshift;
+   xS[1] = xP[1] + xshift; 
+   xS[2] = xP[2] + xshift;
+   xS[3] = xP[3] + xshift;
+   yS[0] = yP[0] + yshift;
+   yS[1] = yP[1] + yshift; 
+   yS[2] = yP[2] + yshift;
+   yS[3] = yP[3] + yshift;
 
-   ExpectedKX[0] = xshift;
-   ExpectedKX[1] = 0.0;
-   ExpectedKX[2] = 1.0;
-   ExpectedKX[3] = 0.0;
+   expectedKX[0] = xshift;
+   expectedKX[1] = 0.0;
+   expectedKX[2] = 1.0;
+   expectedKX[3] = 0.0;
 
-   ExpectedKY[0] = yshift;
-   ExpectedKY[1] = 1.0;
-   ExpectedKY[2] = 0.0;
-   ExpectedKY[3] = 0.0;
+   expectedKY[0] = yshift;
+   expectedKY[1] = 1.0;
+   expectedKY[2] = 0.0;
+   expectedKY[3] = 0.0;
 
-   polywarp (XS, YS, XP, YP, KX, KY, 1, mProgressTracker);
+   polywarp (xS, yS, xP, yP, kX, kY, 1, mProgressTracker);
 
-   Vector<double> resultsX = KX-ExpectedKX;
-   Vector<double> resultsY = KY-ExpectedKY;
+   Vector<double> resultsX = kX-expectedKX;
+   Vector<double> resultsY = kY-expectedKY;
 
    bSuccess = verifyVector(myStage.getActiveStage(), resultsX, "Polywarp-2: X Results");
    if (bSuccess)
@@ -244,34 +256,44 @@ bool PolywarpTests::positiveShiftAndScaleTest()
    bool bSuccess = true;
 
    //POLYWARP TEST 3 - Constant Positive Shift and Scale
-   Vector<double> XP, YP, XS, YS, KX, KY, ExpectedKX, ExpectedKY;
-   setupInputMatrices(XP, YP, XS, YS, KX, KY, ExpectedKX, ExpectedKY);
+   Vector<double> xP;
+   Vector<double> yP;
+   Vector<double> xS;
+   Vector<double> yS;
+   Vector<double> kX;
+   Vector<double> kY;
+   Vector<double> expectedKX;
+   Vector<double> expectedKY;
+   setupInputMatrices(xP, yP, xS, yS, kX, kY, expectedKX, expectedKY);
 
-   double xshift = 2.0, yshift = 6.3, xscale = 2.0, yscale = 3.5;
+   double xshift = 2.0;
+   double yshift = 6.3;
+   double xscale = 2.0;
+   double yscale = 3.5;
 
-   XS[0] = XP[0]*xscale + xshift;
-   XS[1] = XP[1]*xscale + xshift; 
-   XS[2] = XP[2]*xscale + xshift;
-   XS[3] = XP[3]*xscale + xshift;
-   YS[0] = YP[0]*yscale + yshift;
-   YS[1] = YP[1]*yscale + yshift; 
-   YS[2] = YP[2]*yscale + yshift;
-   YS[3] = YP[3]*yscale + yshift;
+   xS[0] = xP[0] * xscale + xshift;
+   xS[1] = xP[1] * xscale + xshift;
+   xS[2] = xP[2] * xscale + xshift;
+   xS[3] = xP[3] * xscale + xshift;
+   yS[0] = yP[0] * yscale + yshift;
+   yS[1] = yP[1] * yscale + yshift;
+   yS[2] = yP[2] * yscale + yshift;
+   yS[3] = yP[3] * yscale + yshift;
 
-   ExpectedKX[0] = xshift;
-   ExpectedKX[1] = 0.0;
-   ExpectedKX[2] = xscale;
-   ExpectedKX[3] = 0.0;
+   expectedKX[0] = xshift;
+   expectedKX[1] = 0.0;
+   expectedKX[2] = xscale;
+   expectedKX[3] = 0.0;
 
-   ExpectedKY[0] = yshift;
-   ExpectedKY[1] = yscale;
-   ExpectedKY[2] = 0.0;
-   ExpectedKY[3] = 0.0;
+   expectedKY[0] = yshift;
+   expectedKY[1] = yscale;
+   expectedKY[2] = 0.0;
+   expectedKY[3] = 0.0;
 
-   polywarp (XS, YS, XP, YP, KX, KY, 1, mProgressTracker);
+   polywarp (xS, yS, xP, yP, kX, kY, 1, mProgressTracker);
 
-   Vector<double> resultsX = KX-ExpectedKX;
-   Vector<double> resultsY = KY-ExpectedKY;
+   Vector<double> resultsX = kX-expectedKX;
+   Vector<double> resultsY = kY-expectedKY;
 
    bSuccess = verifyVector(myStage.getActiveStage(), resultsX, "Polywarp-3: X Results");
    if (bSuccess)
@@ -288,34 +310,44 @@ bool PolywarpTests::negativeShiftAndScaleTest()
    bool bSuccess = true;
 
    //POLYWARP TEST 4 - Constant Negative Shift and Scale
-   Vector<double> XP, YP, XS, YS, KX, KY, ExpectedKX, ExpectedKY;
-   setupInputMatrices(XP, YP, XS, YS, KX, KY, ExpectedKX, ExpectedKY);
+   Vector<double> xP;
+   Vector<double> yP;
+   Vector<double> xS;
+   Vector<double> yS;
+   Vector<double> kX;
+   Vector<double> kY;
+   Vector<double> expectedKX;
+   Vector<double> expectedKY;
+   setupInputMatrices(xP, yP, xS, yS, kX, kY, expectedKX, expectedKY);
 
-   double xshift = -2.0, yshift = -6.3, xscale = -2.0, yscale = -3.5;
+   double xshift = -2.0;
+   double yshift = -6.3;
+   double xscale = -2.0;
+   double yscale = -3.5;
 
-   XS[0] = XP[0]*xscale + xshift;
-   XS[1] = XP[1]*xscale + xshift; 
-   XS[2] = XP[2]*xscale + xshift;
-   XS[3] = XP[3]*xscale + xshift;
-   YS[0] = YP[0]*yscale + yshift;
-   YS[1] = YP[1]*yscale + yshift; 
-   YS[2] = YP[2]*yscale + yshift;
-   YS[3] = YP[3]*yscale + yshift;
+   xS[0] = xP[0] * xscale + xshift;
+   xS[1] = xP[1] * xscale + xshift; 
+   xS[2] = xP[2] * xscale + xshift;
+   xS[3] = xP[3] * xscale + xshift;
+   yS[0] = yP[0] * yscale + yshift;
+   yS[1] = yP[1] * yscale + yshift; 
+   yS[2] = yP[2] * yscale + yshift;
+   yS[3] = yP[3] * yscale + yshift;
 
-   ExpectedKX[0] = xshift;
-   ExpectedKX[1] = 0.0;
-   ExpectedKX[2] = xscale;
-   ExpectedKX[3] = 0.0;
+   expectedKX[0] = xshift;
+   expectedKX[1] = 0.0;
+   expectedKX[2] = xscale;
+   expectedKX[3] = 0.0;
    
-   ExpectedKY[0] = yshift;
-   ExpectedKY[1] = yscale;
-   ExpectedKY[2] = 0.0;
-   ExpectedKY[3] = 0.0;
+   expectedKY[0] = yshift;
+   expectedKY[1] = yscale;
+   expectedKY[2] = 0.0;
+   expectedKY[3] = 0.0;
 
-   polywarp (XS, YS, XP, YP, KX, KY, 1, mProgressTracker);
+   polywarp (xS, yS, xP, yP, kX, kY, 1, mProgressTracker);
 
-   Vector<double> resultsX = KX-ExpectedKX;
-   Vector<double> resultsY = KY-ExpectedKY;
+   Vector<double> resultsX = kX-expectedKX;
+   Vector<double> resultsY = kY-expectedKY;
 
    bSuccess = verifyVector(myStage.getActiveStage(), resultsX, "Polywarp-4: X Results");
    if (bSuccess)
@@ -332,32 +364,39 @@ bool PolywarpTests::varyXShiftTest()
    bool bSuccess = true;
 
    //POLYWARP TEST 5 - Varying X Shift
-   Vector<double> XP, YP, XS, YS, KX, KY, ExpectedKX, ExpectedKY;
-   setupInputMatrices(XP, YP, XS, YS, KX, KY, ExpectedKX, ExpectedKY);
+   Vector<double> xP;
+   Vector<double> yP;
+   Vector<double> xS;
+   Vector<double> yS;
+   Vector<double> kX;
+   Vector<double> kY;
+   Vector<double> expectedKX;
+   Vector<double> expectedKY;
+   setupInputMatrices(xP, yP, xS, yS, kX, kY, expectedKX, expectedKY);
 
-   XS[0] = XP[0];
-   XS[1] = XP[1] + 2.0; 
-   XS[2] = XP[2] + 2.0;
-   XS[3] = XP[3];
-   YS[0] = YP[0] + 2.0;
-   YS[1] = YP[1] + 2.0; 
-   YS[2] = YP[2];
-   YS[3] = YP[3] - 2.0;
+   xS[0] = xP[0];
+   xS[1] = xP[1] + 2.0; 
+   xS[2] = xP[2] + 2.0;
+   xS[3] = xP[3];
+   yS[0] = yP[0] + 2.0;
+   yS[1] = yP[1] + 2.0; 
+   yS[2] = yP[2];
+   yS[3] = yP[3] - 2.0;
 
-   ExpectedKX[0] = -0.173913;
-   ExpectedKX[1] = 0.0869565;
-   ExpectedKX[2] = 1.0;
-   ExpectedKX[3] = 0.0;
+   expectedKX[0] = -0.173913;
+   expectedKX[1] = 0.0869565;
+   expectedKX[2] = 1.0;
+   expectedKX[3] = 0.0;
 
-   ExpectedKY[0] = 10.8389;
-   ExpectedKY[1] = 0.815857;
-   ExpectedKY[2] = -0.245524;
-   ExpectedKY[3] = 0.00511509;
+   expectedKY[0] = 10.8389;
+   expectedKY[1] = 0.815857;
+   expectedKY[2] = -0.245524;
+   expectedKY[3] = 0.00511509;
 
-   polywarp (XS, YS, XP, YP, KX, KY, 1, mProgressTracker);
+   polywarp (xS, yS, xP, yP, kX, kY, 1, mProgressTracker);
 
-   Vector<double> resultsX = KX-ExpectedKX;
-   Vector<double> resultsY = KY-ExpectedKY;
+   Vector<double> resultsX = kX-expectedKX;
+   Vector<double> resultsY = kY-expectedKY;
 
    bSuccess = verifyVector(myStage.getActiveStage(), resultsX, "Polywarp-5: X Results");
    if (bSuccess)
@@ -370,17 +409,13 @@ bool PolywarpTests::varyXShiftTest()
 }
 
 // begin Poly2DTests
-Poly2DTests::Poly2DTests(ostream& output, ProgressTracker &tracker) : Test(output, tracker)
+Poly2DTests::Poly2DTests(ostream& output, ProgressTracker& tracker) : Test(output, tracker)
 {
-   myStage = ProgressTracker::Stage("Poly2D Tests", "app",
-                                    "DB0ADBB4-05A9-4d89-9BE9-761E160271EC", 100);
+   myStage = ProgressTracker::Stage("Poly2D Tests", "app", "DB0ADBB4-05A9-4d89-9BE9-761E160271EC", 100);
 
-   mStages.push_back(ProgressTracker::Stage("Identity Test", "app",
-                                            "ABFE1841-CD8F-4b26-80B5-F18F4593F3A7", 20));
-   mStages.push_back(ProgressTracker::Stage("Positive Shift Test", "app",
-                                            "B04EDF2C-58F4-432e-AEEE-E9E1940C0049", 20));
-   mStages.push_back(ProgressTracker::Stage("Positive Scale Test", "app",
-                                            "E1758988-7DB9-4efe-AA73-A98F3DA35A01", 20));
+   mStages.push_back(ProgressTracker::Stage("Identity Test", "app", "ABFE1841-CD8F-4b26-80B5-F18F4593F3A7", 20));
+   mStages.push_back(ProgressTracker::Stage("Positive Shift Test", "app", "B04EDF2C-58F4-432e-AEEE-E9E1940C0049", 20));
+   mStages.push_back(ProgressTracker::Stage("Positive Scale Test", "app", "E1758988-7DB9-4efe-AA73-A98F3DA35A01", 20));
    mStages.push_back(ProgressTracker::Stage("Positive Shift And Scale Test", "app",
                                             "C4D0A1F5-4040-4bb4-AE14-0FCC3DA4E081", 20));
 }
@@ -410,8 +445,8 @@ bool Poly2DTests::run(double pause)
    return bSuccess;
 }
 
-bool Poly2DTests::runTest(std::string inputFile, std::string outputFile, std::string testName,
-                          const Vector<double>& KX, const Vector<double>& KY,
+bool Poly2DTests::runTest(string inputFile, string outputFile, string testName,
+                          const Vector<double>& kX, const Vector<double>& kY,
                           unsigned int nx, unsigned int ny, unsigned int newx, unsigned int newy)
 {
    string fullPath = getTestDataPath() + "/DataFusion/";
@@ -472,7 +507,8 @@ bool Poly2DTests::runTest(std::string inputFile, std::string outputFile, std::st
    pClass->setDowngradeDate(pDowngradeDate.get());
    pClass->setSecuritySourceDate(pSecuritySrcDate.get());
 
-   ModelResource<RasterElement> pInput(RasterUtilities::createRasterElement("InputMatrix", ny, nx, FLT8BYTES, true, NULL)); 
+   ModelResource<RasterElement> pInput(RasterUtilities::createRasterElement("InputMatrix", ny, nx, FLT8BYTES,
+      true, NULL)); 
    VERIFY(pInput.get() != NULL);
 
    pInput->getDataDescriptor()->setClassification(pClass.get());
@@ -480,8 +516,8 @@ bool Poly2DTests::runTest(std::string inputFile, std::string outputFile, std::st
    FactoryResource<DataRequest> pRequest;
    pRequest->setWritable(true);
 
-   unsigned int rowIndex = 0, colIndex = 0;
-
+   unsigned int rowIndex = 0;
+   unsigned int colIndex = 0;
 
    ifstream resultsFile((fullPath+outputFile).c_str());
 
@@ -534,7 +570,7 @@ bool Poly2DTests::runTest(std::string inputFile, std::string outputFile, std::st
    try
    {
       pOutput = ModelResource<RasterElement>(poly_2D<double>(
-         NULL, pInput.get(), KX, KY, newx, newy, 0, 0, 1, mProgressTracker));
+         NULL, pInput.get(), kX, kY, newx, newy, 0, 0, 1, mProgressTracker));
    }
    // If the operation fails due to an exception (bug/unrecoverable error), provide details
    catch (AssertException& exc)
@@ -553,10 +589,10 @@ bool Poly2DTests::runTest(std::string inputFile, std::string outputFile, std::st
       return false;
    }
 
-   const Classification *pOutputClass = pOutput->getClassification();
+   const Classification* pOutputClass = pOutput->getClassification();
    if (pOutputClass == NULL)
    {
-      string msg = testName + ": pOutput->getClassification() returned NULL!";
+      msg = testName + ": pOutput->getClassification() returned NULL!";
       mOutputStream << msg << endl;
       mProgressTracker.report(msg, 100, WARNING);
       return false;
@@ -564,91 +600,91 @@ bool Poly2DTests::runTest(std::string inputFile, std::string outputFile, std::st
 
    if (pOutputClass->getLevel() != S_LEVEL)
    {
-      string msg = testName + ": pOutputClass->getLevel() != S_LEVEL";
+      msg = testName + ": pOutputClass->getLevel() != S_LEVEL";
       mOutputStream << msg << endl;
       mProgressTracker.report(msg, 100, WARNING);
       return false;
    }
    if (pOutputClass->getSystem() != S_SYSTEM)
    {
-      string msg = testName + ": pOutputClass->getSystem() != S_SYSTEM";
+      msg = testName + ": pOutputClass->getSystem() != S_SYSTEM";
       mOutputStream << msg << endl;
       mProgressTracker.report(msg, 100, WARNING);
       return false;
    }
    if (pOutputClass->getCodewords() != S_CODEWORD)
    {
-      string msg = testName + ": pOutputClass->getCodewords() != S_CODEWORD";
+      msg = testName + ": pOutputClass->getCodewords() != S_CODEWORD";
       mOutputStream << msg << endl;
       mProgressTracker.report(msg, 100, WARNING);
       return false;
    }
    if (pOutputClass->getFileControl() != S_FILECONTROL)
    {
-      string msg = testName + ": pOutputClass->getFileControl() != S_FILECONTROL";
+      msg = testName + ": pOutputClass->getFileControl() != S_FILECONTROL";
       mOutputStream << msg << endl;
       mProgressTracker.report(msg, 100, WARNING);
       return false;
    }
    if (pOutputClass->getFileReleasing() != S_FILERELEASING)
    {
-      string msg = testName + ": pOutputClass->getFileReleasing() != S_FILERELEASING";
+      msg = testName + ": pOutputClass->getFileReleasing() != S_FILERELEASING";
       mOutputStream << msg << endl;
       mProgressTracker.report(msg, 100, WARNING);
       return false;
    }
    if (pOutputClass->getDeclassificationExemption() != S_EXEMPTION)
    {
-      string msg = testName + ": pOutputClass->getDeclassificationExemption() != S_EXEMPTION";
+      msg = testName + ": pOutputClass->getDeclassificationExemption() != S_EXEMPTION";
       mOutputStream << msg << endl;
       mProgressTracker.report(msg, 100, WARNING);
       return false;
    }
    if (pOutputClass->getCountryCode() != S_COUNTRYCODE)
    {
-      string msg = testName + ": pOutputClass->getCountryCode() != S_COUNTRYCODE";
+      msg = testName + ": pOutputClass->getCountryCode() != S_COUNTRYCODE";
       mOutputStream << msg << endl;
       mProgressTracker.report(msg, 100, WARNING);
       return false;
-   } 
+   }
    if (pOutputClass->getDescription() != S_DESCRIPTION)
    {
-      string msg = testName + ": pOutputClass->getDescription() != S_DESCRIPTION";
+      msg = testName + ": pOutputClass->getDescription() != S_DESCRIPTION";
       mOutputStream << msg << endl;
       mProgressTracker.report(msg, 100, WARNING);
       return false;
    }
    if (pOutputClass->getAuthority() != S_AUTHORITY)
    {
-      string msg = testName + ": pOutputClass->getAuthority() != S_AUTHORITY";
+      msg = testName + ": pOutputClass->getAuthority() != S_AUTHORITY";
       mOutputStream << msg << endl;
       mProgressTracker.report(msg, 100, WARNING);
       return false;
    }
    if (pOutputClass->getAuthorityType() != S_AUTHORITYTYPE)
    {
-      string msg = testName + ": pOutputClass->getAuthorityType() != S_AUTHORITYTYPE";
+      msg = testName + ": pOutputClass->getAuthorityType() != S_AUTHORITYTYPE";
       mOutputStream << msg << endl;
       mProgressTracker.report(msg, 100, WARNING);
       return false;
    }
    if (pOutputClass->getSecurityControlNumber() != S_SCN)
    {
-      string msg = testName + ": pOutputClass->getSecurityControlNumber() != S_SCN";
+      msg = testName + ": pOutputClass->getSecurityControlNumber() != S_SCN";
       mOutputStream << msg << endl;
       mProgressTracker.report(msg, 100, WARNING);
       return false;
    }
    if (pOutputClass->getFileCopyNumber() != S_FILECOPYNUMBER)
    {
-      string msg = testName + ": pOutputClass->getFileCopyNumber() != S_FILECOPYNUMBER";
+      msg = testName + ": pOutputClass->getFileCopyNumber() != S_FILECOPYNUMBER";
       mOutputStream << msg << endl;
       mProgressTracker.report(msg, 100, WARNING);
       return false;
    }
    if (pOutputClass->getFileNumberOfCopies() != S_NUMCOPIES)
    {
-      string msg = testName + ": pOutputClass->getFileNumberOfCopies() != S_NUMCOPIES";
+      msg = testName + ": pOutputClass->getFileNumberOfCopies() != S_NUMCOPIES";
       mOutputStream << msg << endl;
       mProgressTracker.report(msg, 100, WARNING);
       return false;
@@ -656,7 +692,7 @@ bool Poly2DTests::runTest(std::string inputFile, std::string outputFile, std::st
    const DateTime* pOutputDate = pOutputClass->getDeclassificationDate();
    if (pOutputDate == NULL || pDeClassDate.get() == NULL)
    {
-      string msg = testName + ": pOutputClass->getDeclassificationDate() == NULL || pDeClassDate.get() == NULL";
+      msg = testName + ": pOutputClass->getDeclassificationDate() == NULL || pDeClassDate.get() == NULL";
       mOutputStream << msg << endl;
       mProgressTracker.report(msg, 100, WARNING);
       return false;
@@ -670,7 +706,7 @@ bool Poly2DTests::runTest(std::string inputFile, std::string outputFile, std::st
    pOutputDate = pOutputClass->getDowngradeDate();
    if (pOutputDate == NULL || pDowngradeDate.get() == NULL)
    {
-      string msg = testName + ": pOutputClass->getDowngradeDate() == NULL || pDowngradeDate.get() == NULL";
+      msg = testName + ": pOutputClass->getDowngradeDate() == NULL || pDowngradeDate.get() == NULL";
       mOutputStream << msg << endl;
       mProgressTracker.report(msg, 100, WARNING);
       return false;
@@ -684,7 +720,7 @@ bool Poly2DTests::runTest(std::string inputFile, std::string outputFile, std::st
    pOutputDate = pOutputClass->getSecuritySourceDate();
    if (pOutputDate == NULL || pSecuritySrcDate.get() == NULL)
    {
-      string msg = testName + ": pOutputClass->getSecuritySourceDate() == NULL || pSecuritySrcDate.get() == NULL";
+      msg = testName + ": pOutputClass->getSecuritySourceDate() == NULL || pSecuritySrcDate.get() == NULL";
       mOutputStream << msg << endl;
       mProgressTracker.report(msg, 100, WARNING);
       return false;
@@ -695,7 +731,8 @@ bool Poly2DTests::runTest(std::string inputFile, std::string outputFile, std::st
       return false;
    }
 
-   ModelResource<RasterElement> pExpected(RasterUtilities::createRasterElement("ExpectedMatrix", newy, newx, FLT8BYTES));
+   ModelResource<RasterElement> pExpected(RasterUtilities::createRasterElement("ExpectedMatrix",
+      newy, newx, FLT8BYTES));
    VERIFY(pExpected.get() != NULL);
 
    // Scope the DataAccessor since it must be destroyed before the ModelResource is destroyed.
@@ -703,12 +740,13 @@ bool Poly2DTests::runTest(std::string inputFile, std::string outputFile, std::st
       DataAccessor rmda = pExpected->getDataAccessor();
       if (!rmda.isValid())
       {
-         string msg = testName + ": Expected matrix data accessor is invalid!";
+         msg = testName + ": Expected matrix data accessor is invalid!";
          mProgressTracker.report(msg, 100, WARNING);
          return false;
       }
 
-      rowIndex = colIndex = 0;
+      rowIndex = 0;
+      colIndex = 0;
       while (!resultsFile.eof() && rowIndex < newy)
       {
          while (!resultsFile.eof() && colIndex < newx)
@@ -728,8 +766,8 @@ bool Poly2DTests::runTest(std::string inputFile, std::string outputFile, std::st
    return verifyMatrix(myStage.getActiveStage(), pOutput.get(), pExpected.get(), testName);
 }
 
-bool Poly2DTests::verifyMatrix (ProgressTracker::Stage& s, RasterElement* pResults, RasterElement* pExpected,
-                                std::string name)
+bool Poly2DTests::verifyMatrix(ProgressTracker::Stage& s, RasterElement* pResults, RasterElement* pExpected,
+                               string name)
 {
    const double MAX_PCT_ERROR = 1.0;
    double mismatches = 0.0;
@@ -757,7 +795,7 @@ bool Poly2DTests::verifyMatrix (ProgressTracker::Stage& s, RasterElement* pResul
       VERIFY(r.isValid());
       VERIFY(e.isValid());
 
-      int workDone = int(double((i+1)*100)/pDescRes->getRowCount());
+      int workDone = static_cast<int>(static_cast<double>((i+1)*100)/pDescRes->getRowCount());
 
       double* rRow = static_cast<double*>(r->getRow());
       double* eRow = static_cast<double*>(e->getRow());
@@ -786,8 +824,8 @@ bool Poly2DTests::verifyMatrix (ProgressTracker::Stage& s, RasterElement* pResul
       r->nextRow();
    }
 
-   double PercentError = 100*mismatches/(numRows*numCols);
-   bool bSuccess = (PercentError < MAX_PCT_ERROR);
+   double percentError = 100 * mismatches / (numRows * numCols);
+   bool bSuccess = (percentError < MAX_PCT_ERROR);
 
    if (!bSuccess)
    {
@@ -796,118 +834,119 @@ bool Poly2DTests::verifyMatrix (ProgressTracker::Stage& s, RasterElement* pResul
       mProgressTracker.report(msg, 0, WARNING);
    }
    return bSuccess;
-}    
+}
 
 bool Poly2DTests::identityTest()
 {
-   Vector<double> KX(4), KY(4);
+   Vector<double> kX(4);
+   Vector<double> kY(4);
 
    //POLY2D TEST 1 - Identity 
-   KX[0] = 1.0;
-   KX[1] = 0.0;
-   KX[2] = 1.0;
-   KX[3] = 0.0;
+   kX[0] = 1.0;
+   kX[1] = 0.0;
+   kX[2] = 1.0;
+   kX[3] = 0.0;
    
-   KY[0] = 1.0;
-   KY[1] = 1.0;
-   KY[2] = 0.0;
-   KY[3] = 0.0;
+   kY[0] = 1.0;
+   kY[1] = 1.0;
+   kY[2] = 0.0;
+   kY[3] = 0.0;
    
    unsigned int newx = 4;
    unsigned int newy = 4;
    unsigned int nx = 10;
    unsigned int ny = 10;
 
-   bool bSuccess =  runTest("IdentityTest.txt", "ExpectedIdentityResults.txt", "Poly2d-1",
-                            KX, KY, nx, ny, newx, newy);
+   bool bSuccess = runTest("IdentityTest.txt", "ExpectedIdentityResults.txt", "Poly2d-1", kX, kY, nx, ny, newx, newy);
    mProgressTracker.nextStage();
    return bSuccess;
 }
 
 bool Poly2DTests::positiveShiftTest()
 {
-   Vector<double> KX(4), KY(4);
+   Vector<double> kX(4);
+   Vector<double> kY(4);
 
    //POLY2D TEST 2 - Constant Positive Shift
-   KX[0] = 3.0;
-   KX[1] = 0.0;
-   KX[2] = 1.0;
-   KX[3] = 0.0;
+   kX[0] = 3.0;
+   kX[1] = 0.0;
+   kX[2] = 1.0;
+   kX[3] = 0.0;
 
-   KY[0] = 2.5;
-   KY[1] = 1.0;
-   KY[2] = 0.0;
-   KY[3] = 0.0;
+   kY[0] = 2.5;
+   kY[1] = 1.0;
+   kY[2] = 0.0;
+   kY[3] = 0.0;
 
    unsigned int newx = 5;
    unsigned int newy = 5;
    unsigned int nx = 10;
    unsigned int ny = 10;
 
-   bool bSuccess =  runTest("ShiftTest.txt", "ExpectedShiftResults.txt", "Poly2d-2",
-                            KX, KY, nx, ny, newx, newy);
+   bool bSuccess = runTest("ShiftTest.txt", "ExpectedShiftResults.txt", "Poly2d-2", kX, kY, nx, ny, newx, newy);
    mProgressTracker.nextStage();
-   return bSuccess;   
+   return bSuccess;
 }
 
 bool Poly2DTests::positiveScaleTest()
 {
-   Vector<double> KX(4), KY(4);
+   Vector<double> kX(4);
+   Vector<double> kY(4);
 
    //POLY2D TEST 3 - Constant Positive Scale
-   KX[0] = 3.0;
-   KX[1] = 0.0;
-   KX[2] = 1.0;
-   KX[3] = 0.0;
+   kX[0] = 3.0;
+   kX[1] = 0.0;
+   kX[2] = 1.0;
+   kX[3] = 0.0;
 
-   KY[0] = 2.5;
-   KY[1] = 1.0;
-   KY[2] = 0.0;
-   KY[3] = 0.0;
+   kY[0] = 2.5;
+   kY[1] = 1.0;
+   kY[2] = 0.0;
+   kY[3] = 0.0;
 
    unsigned int newx = 5;
    unsigned int newy = 5;
    unsigned int nx = 10;
    unsigned int ny = 10;
 
-   bool bSuccess =  runTest("ScaleTest.txt", "ExpectedScaleResults.txt", "Poly2d-3",
-                            KX, KY, nx, ny, newx, newy);
+   bool bSuccess = runTest("ScaleTest.txt", "ExpectedScaleResults.txt", "Poly2d-3", kX, kY, nx, ny, newx, newy);
    mProgressTracker.nextStage();
-   return bSuccess;   
+   return bSuccess;
 }
 
 bool Poly2DTests::positiveShiftAndScaleTest()
 {
-   Vector<double> KX(4), KY(4);
+   Vector<double> kX(4);
+   Vector<double> kY(4);
 
    //POLY2D TEST 4 - Constant Positive Shift and Scale
-   KX[0] = 3.0;
-   KX[1] = 0.0;
-   KX[2] = 1.0;
-   KX[3] = 0.0;
+   kX[0] = 3.0;
+   kX[1] = 0.0;
+   kX[2] = 1.0;
+   kX[3] = 0.0;
 
-   KY[0] = 2.5;
-   KY[1] = 1.0; 
-   KY[2] = 0.0;
-   KY[3] = 0.0;
+   kY[0] = 2.5;
+   kY[1] = 1.0; 
+   kY[2] = 0.0;
+   kY[3] = 0.0;
 
    unsigned int newx = 9;
    unsigned int newy = 9;
    unsigned int nx = 10;
    unsigned int ny = 10;
 
-   bool bSuccess =  runTest("ShiftandScaleTest.txt", "ExpectedShiftandScaleResults.txt", "Poly2d-4",
-                            KX, KY, nx, ny, newx, newy);
+   bool bSuccess = runTest("ShiftandScaleTest.txt", "ExpectedShiftandScaleResults.txt", "Poly2d-4",
+      kX, kY, nx, ny, newx, newy);
    mProgressTracker.nextStage();
-   return bSuccess;   
+   return bSuccess;
 }
 
-bool DataFusion::runOperationalTests(Progress *progress, std::ostream& failure)
+bool DataFusion::runOperationalTests(Progress* progress, ostream& failure)
 {
    return true;
 }
 
-bool DataFusion::runAllTests(Progress *pProgress, std::ostream& failure)
+bool DataFusion::runAllTests(Progress* pProgress, ostream& failure)
 {
    bool bSuccess = true;
    vector<ProgressTracker::Stage> vStages;

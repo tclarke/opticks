@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef __FILENAMEIMP_H
-#define __FILENAMEIMP_H
+#ifndef FILENAMEIMP_H
+#define FILENAMEIMP_H
 
 #include "Filename.h"
 
@@ -23,13 +21,13 @@ class FilenameImp : public Filename
 {
 public:
    FilenameImp();
-   FilenameImp(const std::string& pathAndName);
+   FilenameImp(const std::string& filename);
    FilenameImp(const FilenameImp& rhs);
    virtual ~FilenameImp();
 
    virtual FilenameImp& operator =(const FilenameImp& rhs);
 
-   void setFullPathAndName(const std::string& pathAndName);
+   void setFullPathAndName(const std::string& filename);
 
    std::string getFullPathAndName() const;
    std::string getPath() const;
@@ -53,4 +51,4 @@ private:
    std::string mFilename;
 };
 
-#endif   // __FILENAMEIMP_H
+#endif

@@ -80,7 +80,7 @@ public:
 
 private:
    static const QString sBookmarkListSentinal;
-   std::vector<std::pair<std::string,std::string> > mFileLocations;
+   std::vector<std::pair<std::string, std::string> > mFileLocations;
    std::string mPlugInPath;
    std::string mWizardPath;
    CustomTreeWidget* mpFileTree;

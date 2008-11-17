@@ -77,8 +77,9 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor channel, uns
 
    initializeGrayscale();
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : If no alpha, this should be GL_LUMINANCE. Fix when GpuTile can change format. (tjohnson)")
-   GLenum texFormat = ((format == GL_RGBA || format == GL_LUMINANCE_ALPHA)? GL_LUMINANCE_ALPHA : GL_LUMINANCE_ALPHA);
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : If no alpha, this should be GL_LUMINANCE. " \
+   "Fix when GpuTile can change format. (tjohnson)")
+   GLenum texFormat = ((format == GL_RGBA || format == GL_LUMINANCE_ALPHA) ? GL_LUMINANCE_ALPHA : GL_LUMINANCE_ALPHA);
    Image::initialize(tileSizeX, tileSizeY, channel, imageSizeX, imageSizeY, channels, texFormat, type, pData,
       stretchType, stretchPoints, pRasterElement, badValues);
 }
@@ -94,8 +95,9 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor channel, uns
 
    initializeGrayscale();
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : If no alpha, this should be GL_LUMINANCE. Fix when GpuTile can change format. (tjohnson)")
-   GLenum texFormat = ((format == GL_RGBA || format == GL_LUMINANCE_ALPHA)? GL_LUMINANCE_ALPHA : GL_LUMINANCE_ALPHA);
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : If no alpha, this should be GL_LUMINANCE. " \
+   "Fix when GpuTile can change format. (tjohnson)")
+   GLenum texFormat = ((format == GL_RGBA || format == GL_LUMINANCE_ALPHA) ? GL_LUMINANCE_ALPHA : GL_LUMINANCE_ALPHA);
    Image::initialize(tileSizeX, tileSizeY, channel, imageSizeX, imageSizeY, channels, texFormat, type, component,
       pData, stretchType, stretchPoints, pRasterElement, badValues);
 }
@@ -104,7 +106,8 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor channel, uns
 void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsigned int imageSizeX,
                           unsigned int imageSizeY, unsigned int channels, GLenum format, EncodingType type,
                           void* pData, StretchType stretchType, vector<double>& stretchPoints,
-                          RasterElement* pRasterElement, const vector<ColorType>& colorMap, const vector<int>& badValues)
+                          RasterElement* pRasterElement, const vector<ColorType>& colorMap,
+                          const vector<int>& badValues)
 {
    int tileSizeX = 0;
    int tileSizeY = 0;
@@ -112,8 +115,9 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor channel, uns
 
    initializeColormap(colorMap);
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : If no alpha, this should be GL_LUMINANCE. Fix when GpuTile can change format. (tjohnson)")
-   GLenum texFormat = ((format == GL_RGBA || format == GL_LUMINANCE_ALPHA)? GL_LUMINANCE_ALPHA : GL_LUMINANCE_ALPHA);
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : If no alpha, this should be GL_LUMINANCE. " \
+   "Fix when GpuTile can change format. (tjohnson)")
+   GLenum texFormat = ((format == GL_RGBA || format == GL_LUMINANCE_ALPHA) ? GL_LUMINANCE_ALPHA : GL_LUMINANCE_ALPHA);
    Image::initialize(tileSizeX, tileSizeY, channel, imageSizeX, imageSizeY, channels, texFormat, type, pData,
       stretchType, stretchPoints, pRasterElement, colorMap, badValues);
 }
@@ -130,18 +134,19 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor channel, uns
 
    initializeColormap(colorMap);
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : If no alpha, this should be GL_LUMINANCE. Fix when GpuTile can change format. (tjohnson)")
-   GLenum texFormat = ((format == GL_RGBA || format == GL_LUMINANCE_ALPHA)? GL_LUMINANCE_ALPHA : GL_LUMINANCE_ALPHA);
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : If no alpha, this should be GL_LUMINANCE. " \
+   "Fix when GpuTile can change format. (tjohnson)")
+   GLenum texFormat = ((format == GL_RGBA || format == GL_LUMINANCE_ALPHA) ? GL_LUMINANCE_ALPHA : GL_LUMINANCE_ALPHA);
    Image::initialize(tileSizeX, tileSizeY, channel, imageSizeX, imageSizeY, channels, texFormat, type, component,
       pData, stretchType, stretchPoints, pRasterElement, colorMap, badValues);
 }
 
 // RGB
-void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2, DimensionDescriptor band3,
-                          unsigned int imageSizeX, unsigned int imageSizeY, unsigned int channels, GLenum format,
-                          EncodingType type, void* pData, StretchType stretchType, vector<double>& stretchPointsRed,
-                          vector<double>& stretchPointsGreen, vector<double>& stretchPointsBlue,
-                          RasterElement* pRasterElement)
+void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2,
+                          DimensionDescriptor band3, unsigned int imageSizeX, unsigned int imageSizeY,
+                          unsigned int channels, GLenum format, EncodingType type, void* pData,
+                          StretchType stretchType, vector<double>& stretchPointsRed, vector<double>& stretchPointsGreen,
+                          vector<double>& stretchPointsBlue, RasterElement* pRasterElement)
 {
    initializeRgb();
 
@@ -153,11 +158,12 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor band1, Dimen
       pData, stretchType, stretchPointsRed, stretchPointsGreen, stretchPointsBlue, pRasterElement);
 }
 
-void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2, DimensionDescriptor band3,
-                          unsigned int imageSizeX, unsigned int imageSizeY, unsigned int channels, GLenum format,
-                          EncodingType type, ComplexComponent component, void* pData, StretchType stretchType,
-                          vector<double>& stretchPointsRed, vector<double>& stretchPointsGreen,
-                          vector<double>& stretchPointsBlue, RasterElement* pRasterElement)
+void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2,
+                          DimensionDescriptor band3, unsigned int imageSizeX, unsigned int imageSizeY,
+                          unsigned int channels, GLenum format, EncodingType type, ComplexComponent component,
+                          void* pData, StretchType stretchType, vector<double>& stretchPointsRed,
+                          vector<double>& stretchPointsGreen, vector<double>& stretchPointsBlue,
+                          RasterElement* pRasterElement)
 {
    initializeRgb();
 
@@ -169,12 +175,13 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor band1, Dimen
       component, pData, stretchType, stretchPointsRed, stretchPointsGreen, stretchPointsBlue, pRasterElement);
 }
 
-void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2, DimensionDescriptor band3,
-                          unsigned int imageSizeX, unsigned int imageSizeY, unsigned int channels, GLenum format,
-                          EncodingType type1, EncodingType type2, EncodingType type3, ComplexComponent component,
-                          void* pData, StretchType stretchType, vector<double>& stretchPointsRed,
-                          vector<double>& stretchPointsGreen, vector<double>& stretchPointsBlue,
-                          RasterElement* pRasterElement1, RasterElement* pRasterElement2, RasterElement* pRasterElement3)
+void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2,
+                          DimensionDescriptor band3, unsigned int imageSizeX, unsigned int imageSizeY,
+                          unsigned int channels, GLenum format, EncodingType type1, EncodingType type2,
+                          EncodingType type3, ComplexComponent component, void* pData, StretchType stretchType,
+                          vector<double>& stretchPointsRed, vector<double>& stretchPointsGreen,
+                          vector<double>& stretchPointsBlue, RasterElement* pRasterElement1,
+                          RasterElement* pRasterElement2, RasterElement* pRasterElement3)
 {
    initializeRgb();
 
@@ -621,7 +628,8 @@ private:
 
             if (haveRedData)
             {
-               RasterDataDescriptor *pRedRasterDescriptor = dynamic_cast<RasterDataDescriptor*>(pRedRasterElement->getDataDescriptor());
+               RasterDataDescriptor* pRedRasterDescriptor =
+                  dynamic_cast<RasterDataDescriptor*>(pRedRasterElement->getDataDescriptor());
                VERIFYNRV(pRedRasterDescriptor != NULL);
                FactoryResource<DataRequest> pRedRequest;
                pRedRequest->setRows(pRedRasterDescriptor->getActiveRow(posY), 
@@ -645,7 +653,8 @@ private:
 
             if (haveGreenData)
             {
-               RasterDataDescriptor *pGreenRasterDescriptor = dynamic_cast<RasterDataDescriptor*>(pGreenRasterElement->getDataDescriptor());
+               RasterDataDescriptor* pGreenRasterDescriptor =
+                  dynamic_cast<RasterDataDescriptor*>(pGreenRasterElement->getDataDescriptor());
                VERIFYNRV(pGreenRasterDescriptor != NULL);
 
                FactoryResource<DataRequest> pGreenRequest;
@@ -662,7 +671,8 @@ private:
                   return;
                }
 
-               populateTextureData(&texData.front(), mInfo.mRawType[1], geomSizeX, geomSizeY, daGreen, 2, 3, outputType);
+               populateTextureData(&texData.front(), mInfo.mRawType[1], geomSizeX, geomSizeY, daGreen, 2, 3,
+                  outputType);
             }
             else
             {
@@ -671,7 +681,8 @@ private:
 
             if (haveBlueData)
             {
-               RasterDataDescriptor *pBlueRasterDescriptor = dynamic_cast<RasterDataDescriptor*>(pBlueRasterElement->getDataDescriptor());
+               RasterDataDescriptor* pBlueRasterDescriptor =
+                  dynamic_cast<RasterDataDescriptor*>(pBlueRasterElement->getDataDescriptor());
                VERIFYNRV(pBlueRasterDescriptor != NULL);
 
                FactoryResource<DataRequest> pBlueRequest;
@@ -808,22 +819,23 @@ void GpuImage::initializeFilter(ImageFilterDescriptor *pDescriptor)
       // number of iterations to use to initialize the feedback buffer
       // filters can override this value through the gic file
       unsigned int numInitFrames = 20;
-      ImageFilterDescriptorExt1 *pDescriptorExt = dynamic_cast<ImageFilterDescriptorExt1*>(pDescriptor);
+      ImageFilterDescriptorExt1* pDescriptorExt = dynamic_cast<ImageFilterDescriptorExt1*>(pDescriptor);
       if (NN(pDescriptorExt))
       {
-         const unsigned int *pInitFrames = dv_cast<unsigned int>(&pDescriptorExt->getParameter("initializationIterations"));
+         const unsigned int* pInitFrames =
+            dv_cast<unsigned int>(&pDescriptorExt->getParameter("initializationIterations"));
          if (pInitFrames != NULL)
          {
             numInitFrames = *pInitFrames;
          }
       }
 
-      for (unsigned int j=0; j<tilesToUpdate.size(); ++j)
+      for (unsigned int j = 0; j < tilesToUpdate.size(); ++j)
       {
-         GpuTile *pGpuTile = static_cast<GpuTile*>(tilesToUpdate[j]);
+         GpuTile* pGpuTile = static_cast<GpuTile*>(tilesToUpdate[j]);
          bool freeze = pGpuTile->getFilterFreezeFlag(pDescriptor);
          pGpuTile->freezeFilter(pDescriptor, false);
-         for (unsigned int i = 0; i<numInitFrames; ++i)
+         for (unsigned int i = 0; i < numInitFrames; ++i)
          {
             // Apply the filter repeatedly on the current frame on each tile
             // to initialize the feedback buffer. This all happens in the GPU.
@@ -855,7 +867,7 @@ void GpuImage::enableFilters(const vector<ImageFilterDescriptor*>& descriptors)
    vector<ImageFilterDescriptor*> currentFilters;
    vector<ImageFilterDescriptor*> newFilters = descriptors;
 
-   GpuTile* pTile = dynamic_cast<GpuTile*>(pTiles->front());
+   const GpuTile* pTile = dynamic_cast<const GpuTile*>(pTiles->front());
    if (pTile != NULL)
    {
       currentFilters = pTile->getFilters();
@@ -868,8 +880,7 @@ void GpuImage::enableFilters(const vector<ImageFilterDescriptor*>& descriptors)
       ImageFilterDescriptor* pDescriptor = *currentIter;
       if (pDescriptor != NULL)
       {
-         vector<ImageFilterDescriptor*>::iterator newIter =
-            find(newFilters.begin(), newFilters.end(), pDescriptor);
+         vector<ImageFilterDescriptor*>::iterator newIter = find(newFilters.begin(), newFilters.end(), pDescriptor);
          if (newIter == newFilters.end())
          {
             disableFilter(pDescriptor);
@@ -934,7 +945,7 @@ void GpuImage::freezeFilter(ImageFilterDescriptor *pDescriptor, bool toggle)
       return;
    }
 
-  vector<Tile*>::const_iterator tileIter = pTiles->begin();
+   vector<Tile*>::const_iterator tileIter = pTiles->begin();
    while (tileIter != pTiles->end())
    {
       GpuTile* pTile = dynamic_cast<GpuTile*>(*tileIter);
@@ -959,10 +970,9 @@ void GpuImage::disableFilter(ImageFilterDescriptor *pDescriptor)
       return;
    }
 
-   unsigned int numTiles = pTiles->size();
-   for (unsigned int i = 0; i < numTiles; ++i)
+   for (vector<Tile*>::const_iterator iter = pTiles->begin(); iter != pTiles->end(); ++iter)
    {
-      GpuTile* pTile = dynamic_cast<GpuTile*> (pTiles->at(i));
+      GpuTile* pTile = dynamic_cast<GpuTile*>(*iter);
       if (pTile != NULL)
       {
          pTile->destroyFilter(pDescriptor);
@@ -1164,9 +1174,9 @@ void GpuImage::drawTiles(const vector<Tile*>& tiles, GLint textureMode)
    setCgParameterValues();
 
    // Draw the tiles
-   for (unsigned int i = 0; i < tiles.size(); ++i)
+   for (vector<Tile*>::const_iterator iter = tiles.begin(); iter != tiles.end(); ++iter)
    {
-      GpuTile* pTile = dynamic_cast<GpuTile*> (tiles[i]);
+      GpuTile* pTile = dynamic_cast<GpuTile*>(*iter);
       if (pTile != NULL)
       {
          pTile->draw(mInputTexture, textureMode);
@@ -1242,32 +1252,38 @@ void GpuImage::setCgParameterValues()
             }
             else if ((strcmp(pParameterName, "lowerValue") == 0) || (strcmp(pParameterName, "redLowerValue") == 0))
             {
-               float lowerValue = getTextureStretchValue(static_cast<float>(imageInfo.mKey.mStretchPoints1[0]), imageInfo.mRawType[0]);
+               float lowerValue = getTextureStretchValue(static_cast<float>(imageInfo.mKey.mStretchPoints1[0]),
+                  imageInfo.mRawType[0]);
                cgGLSetParameter1f(mCgParameters.at(i), lowerValue);
             }
             else if ((strcmp(pParameterName, "upperValue") == 0) || (strcmp(pParameterName, "redUpperValue") == 0))
             {
-               float upperValue = getTextureStretchValue(static_cast<float>(imageInfo.mKey.mStretchPoints1[1]), imageInfo.mRawType[0]);
+               float upperValue = getTextureStretchValue(static_cast<float>(imageInfo.mKey.mStretchPoints1[1]),
+                  imageInfo.mRawType[0]);
                cgGLSetParameter1f(mCgParameters.at(i), upperValue);
             }
             else if (strcmp(pParameterName, "greenLowerValue") == 0)
             {
-               float lowerValue = getTextureStretchValue(static_cast<float>(imageInfo.mKey.mStretchPoints2[0]), imageInfo.mRawType[1]);
+               float lowerValue = getTextureStretchValue(static_cast<float>(imageInfo.mKey.mStretchPoints2[0]),
+                  imageInfo.mRawType[1]);
                cgGLSetParameter1f(mCgParameters.at(i), lowerValue);
             }
             else if (strcmp(pParameterName, "greenUpperValue") == 0)
             {
-               float upperValue = getTextureStretchValue(static_cast<float>(imageInfo.mKey.mStretchPoints2[1]), imageInfo.mRawType[1]);
+               float upperValue = getTextureStretchValue(static_cast<float>(imageInfo.mKey.mStretchPoints2[1]),
+                  imageInfo.mRawType[1]);
                cgGLSetParameter1f(mCgParameters.at(i), upperValue);
             }
             else if (strcmp(pParameterName, "blueLowerValue") == 0)
             {
-               float lowerValue = getTextureStretchValue(static_cast<float>(imageInfo.mKey.mStretchPoints3[0]), imageInfo.mRawType[2]);
+               float lowerValue = getTextureStretchValue(static_cast<float>(imageInfo.mKey.mStretchPoints3[0]),
+                  imageInfo.mRawType[2]);
                cgGLSetParameter1f(mCgParameters.at(i), lowerValue);
             }
             else if (strcmp(pParameterName, "blueUpperValue") == 0)
             {
-               float upperValue = getTextureStretchValue(static_cast<float>(imageInfo.mKey.mStretchPoints3[1]), imageInfo.mRawType[2]);
+               float upperValue = getTextureStretchValue(static_cast<float>(imageInfo.mKey.mStretchPoints3[1]),
+                  imageInfo.mRawType[2]);
                cgGLSetParameter1f(mCgParameters.at(i), upperValue);
             }
             else if (strcmp(pParameterName, "alpha") == 0)
@@ -1348,7 +1364,7 @@ vector<Tile*> GpuImage::getTilesToUpdate(const vector<Tile*>& tilesToDraw, vecto
    {
       // band change has occurred and ALL the tiles need to be updated
       // not just the ones that are visable and will be drawn to the screen
-      const vector<Tile*> *pTileSet = getActiveTiles();
+      const vector<Tile*>* pTileSet = getActiveTiles();
       if (pTileSet != NULL)
       {
          int numTiles = pTileSet->size();
@@ -1386,7 +1402,7 @@ unsigned int GpuImage::readTiles(double xCoord, double yCoord, GLsizei width, GL
    }
 
    // get the active tile set
-   const vector<Tile*> *pTileSet = getActiveTiles();
+   const vector<Tile*>* pTileSet = getActiveTiles();
    VERIFY(pTileSet != NULL);
 
    const ImageData& imageData = getImageData();
@@ -1423,7 +1439,7 @@ unsigned int GpuImage::readTiles(double xCoord, double yCoord, GLsizei width, GL
       return 0;
    }
 
-   GpuTile *pTile = dynamic_cast<GpuTile*>(tiles.front());
+   GpuTile* pTile = dynamic_cast<GpuTile*>(tiles.front());
    if (pTile == NULL)
    {
       return 0;
@@ -1435,14 +1451,14 @@ unsigned int GpuImage::readTiles(double xCoord, double yCoord, GLsizei width, GL
       return 0;
    }
 
-   ImageFilter *pFilter = pTile->getFilter(filters.front());
+   ImageFilter* pFilter = pTile->getFilter(filters.front());
    if (pFilter == NULL)
    {
       return 0;
    }
 
    // need to get results filter buffer in order to determine how many channels there are in the texture
-   ColorBuffer *pColorBuffer = pFilter->getResultsBuffer();
+   ColorBuffer* pColorBuffer = pFilter->getResultsBuffer();
    if (pColorBuffer == NULL)
    {
       return 0;
@@ -1459,7 +1475,7 @@ unsigned int GpuImage::readTiles(double xCoord, double yCoord, GLsizei width, GL
       return 0;
    }
 
-   float *pValueData = &values[0];
+   float* pValueData = &values[0];
 
    tileWidths.reserve(numTiles);
    tileHeights.reserve(numTiles);
@@ -1533,10 +1549,10 @@ unsigned int GpuImage::readTiles(double xCoord, double yCoord, GLsizei width, GL
       pValueData = &values[0];
       for (tileNum = 0; tileNum < numTiles; tileNum++)
       {
-         for (int row=0; row<tileHeights[tileNum]; ++row)
+         for (int row = 0; row < tileHeights[tileNum]; ++row)
          {
-            memcpy((pValueData + destinationOffsets[tileNum]), &dataVector[sourceOffsets[tileNum]], 
-                     (sizeof(float) * tileWidths[tileNum]));
+            memcpy((pValueData + destinationOffsets[tileNum]), &dataVector[sourceOffsets[tileNum]],
+               (sizeof(float) * tileWidths[tileNum]));
 
             // set source and destination offsets for next pass
             sourceOffsets[tileNum] += tileWidths[tileNum];
@@ -1547,7 +1563,7 @@ unsigned int GpuImage::readTiles(double xCoord, double yCoord, GLsizei width, GL
       // get scale factor
       float scaleFactor = 1.0f/3.0f;
       float offset = 0.0;
-      switch(mInfo.mRawType[0])
+      switch (mInfo.mRawType[0])
       {
       case INT1SBYTE:
          scaleFactor = getScale<signed char>() / 3.0f;
@@ -1602,7 +1618,7 @@ void GpuImage::getTilesToRead(int xCoord, int yCoord, GLsizei width, GLsizei hei
    tiles.clear();
    tileLocations.clear();
 
-   const vector<Tile*> *pTileSet = getActiveTiles();
+   const vector<Tile*>* pTileSet = getActiveTiles();
    VERIFYNRV(pTileSet != NULL);
 
    const ImageData& imageData = getImageData();
@@ -1674,6 +1690,6 @@ unsigned int GpuImage::readTile(Tile *pTile, const LocationType &tileLocation, i
    calculatedWidth = min(x2Coord, x2TileCoord) - left;
    calculatedHeight = min(y2Coord, y2TileCoord) - top;
 
-   GpuTile *pGpuTile = static_cast<GpuTile*>(pTile);
+   GpuTile* pGpuTile = static_cast<GpuTile*>(pTile);
    return (pGpuTile->readFilterBuffer(calculatedXCoord, calculatedYCoord, calculatedWidth, calculatedHeight, pValues));
 }

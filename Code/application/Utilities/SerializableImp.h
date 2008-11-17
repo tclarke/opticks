@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef __SERILZBLIMP_H
-#define __SERILZBLIMP_H
+#ifndef SERIALIZABLEIMP_H
+#define SERIALIZABLEIMP_H
 
 #include "Serializable.h"
 

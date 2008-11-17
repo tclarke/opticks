@@ -69,7 +69,7 @@ public:
     *
     *  @default The default implementation returns \b NULL.
     */
-    QWidget* getGui(RasterElement* pRaster);
+   QWidget* getGui(RasterElement* pRaster);
 
    /**
     *  @copydoc Georeference::validateGuiInput()

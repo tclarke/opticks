@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef ASPAMIMP_H__
-#define ASPAMIMP_H__
+#ifndef ASPAMIMP_H
+#define ASPAMIMP_H
 
 #include "Aspam.h"
 #include "SubjectImp.h"
@@ -30,31 +30,31 @@ public:
    AspamImp();
    ~AspamImp();
 
-   virtual const Aspam::ParagraphA &getParagraphA() const { return mParagraphA; }
-   virtual const Aspam::ParagraphB &getParagraphB() const { return mParagraphB; }
-   virtual const Aspam::ParagraphC &getParagraphC() const { return mParagraphC; }
-   virtual const Aspam::ParagraphD &getParagraphD() const { return mParagraphD; }
-   virtual const Aspam::ParagraphE &getParagraphE() const { return mParagraphE; }
-   virtual const Aspam::ParagraphF &getParagraphF() const { return mParagraphF; }
-   virtual const Aspam::ParagraphG &getParagraphG() const { return mParagraphG; }
-   virtual const Aspam::ParagraphH &getParagraphH() const { return mParagraphH; }
-   virtual const Aspam::ParagraphI &getParagraphI() const { return mParagraphI; }
-   virtual const Aspam::ParagraphJ &getParagraphJ() const { return mParagraphJ; }
-   virtual const Aspam::ParagraphK &getParagraphK() const { return mParagraphK; }
+   virtual const Aspam::ParagraphA& getParagraphA() const;
+   virtual const Aspam::ParagraphB& getParagraphB() const;
+   virtual const Aspam::ParagraphC& getParagraphC() const;
+   virtual const Aspam::ParagraphD& getParagraphD() const;
+   virtual const Aspam::ParagraphE& getParagraphE() const;
+   virtual const Aspam::ParagraphF& getParagraphF() const;
+   virtual const Aspam::ParagraphG& getParagraphG() const;
+   virtual const Aspam::ParagraphH& getParagraphH() const;
+   virtual const Aspam::ParagraphI& getParagraphI() const;
+   virtual const Aspam::ParagraphJ& getParagraphJ() const;
+   virtual const Aspam::ParagraphK& getParagraphK() const;
 
-   virtual void setParagraphA(const Aspam::ParagraphA &val);
-   virtual void setParagraphB(const Aspam::ParagraphB &val);
-   virtual void setParagraphC(const Aspam::ParagraphC &val);
-   virtual void setParagraphD(const Aspam::ParagraphD &val);
-   virtual void setParagraphE(const Aspam::ParagraphE &val);
-   virtual void setParagraphF(const Aspam::ParagraphF &val);
-   virtual void setParagraphG(const Aspam::ParagraphG &val);
-   virtual void setParagraphH(const Aspam::ParagraphH &val);
-   virtual void setParagraphI(const Aspam::ParagraphI &val);
-   virtual void setParagraphJ(const Aspam::ParagraphJ &val);
-   virtual void setParagraphK(const Aspam::ParagraphK &val);
+   virtual void setParagraphA(const Aspam::ParagraphA& val);
+   virtual void setParagraphB(const Aspam::ParagraphB& val);
+   virtual void setParagraphC(const Aspam::ParagraphC& val);
+   virtual void setParagraphD(const Aspam::ParagraphD& val);
+   virtual void setParagraphE(const Aspam::ParagraphE& val);
+   virtual void setParagraphF(const Aspam::ParagraphF& val);
+   virtual void setParagraphG(const Aspam::ParagraphG& val);
+   virtual void setParagraphH(const Aspam::ParagraphH& val);
+   virtual void setParagraphI(const Aspam::ParagraphI& val);
+   virtual void setParagraphJ(const Aspam::ParagraphJ& val);
+   virtual void setParagraphK(const Aspam::ParagraphK& val);
 
-   AnyData *copy() const;
+   AnyData* copy() const;
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
@@ -81,91 +81,91 @@ private:
  */
 #define ASPAMADAPTER_METHODS(impClass) \
    SUBJECTADAPTER_METHODS(impClass) \
-   const Aspam::ParagraphA &getParagraphA() const \
+   const Aspam::ParagraphA& getParagraphA() const \
    { \
       return impClass::getParagraphA(); \
    } \
-   const Aspam::ParagraphB &getParagraphB() const \
+   const Aspam::ParagraphB& getParagraphB() const \
    { \
       return impClass::getParagraphB(); \
    } \
-   const Aspam::ParagraphC &getParagraphC() const \
+   const Aspam::ParagraphC& getParagraphC() const \
    { \
       return impClass::getParagraphC(); \
    } \
-   const Aspam::ParagraphD &getParagraphD() const \
+   const Aspam::ParagraphD& getParagraphD() const \
    { \
       return impClass::getParagraphD(); \
    } \
-   const Aspam::ParagraphE &getParagraphE() const \
+   const Aspam::ParagraphE& getParagraphE() const \
    { \
       return impClass::getParagraphE(); \
    } \
-   const Aspam::ParagraphF &getParagraphF() const \
+   const Aspam::ParagraphF& getParagraphF() const \
    { \
       return impClass::getParagraphF(); \
    } \
-   const Aspam::ParagraphG &getParagraphG() const \
+   const Aspam::ParagraphG& getParagraphG() const \
    { \
       return impClass::getParagraphG(); \
    } \
-   const Aspam::ParagraphH &getParagraphH() const \
+   const Aspam::ParagraphH& getParagraphH() const \
    { \
       return impClass::getParagraphH(); \
    } \
-   const Aspam::ParagraphI &getParagraphI() const \
+   const Aspam::ParagraphI& getParagraphI() const \
    { \
       return impClass::getParagraphI(); \
    } \
-   const Aspam::ParagraphJ &getParagraphJ() const \
+   const Aspam::ParagraphJ& getParagraphJ() const \
    { \
       return impClass::getParagraphJ(); \
    } \
-   const Aspam::ParagraphK &getParagraphK() const \
+   const Aspam::ParagraphK& getParagraphK() const \
    { \
       return impClass::getParagraphK(); \
    } \
-   void setParagraphA(const Aspam::ParagraphA &val) \
+   void setParagraphA(const Aspam::ParagraphA& val) \
    { \
       return impClass::setParagraphA(val); \
    } \
-   void setParagraphB(const Aspam::ParagraphB &val) \
+   void setParagraphB(const Aspam::ParagraphB& val) \
    { \
       return impClass::setParagraphB(val); \
    } \
-   void setParagraphC(const Aspam::ParagraphC &val) \
+   void setParagraphC(const Aspam::ParagraphC& val) \
    { \
       return impClass::setParagraphC(val); \
    } \
-   void setParagraphD(const Aspam::ParagraphD &val) \
+   void setParagraphD(const Aspam::ParagraphD& val) \
    { \
       return impClass::setParagraphD(val); \
    } \
-   void setParagraphE(const Aspam::ParagraphE &val) \
+   void setParagraphE(const Aspam::ParagraphE& val) \
    { \
       return impClass::setParagraphE(val); \
    } \
-   void setParagraphF(const Aspam::ParagraphF &val) \
+   void setParagraphF(const Aspam::ParagraphF& val) \
    { \
       return impClass::setParagraphF(val); \
    } \
-   void setParagraphG(const Aspam::ParagraphG &val) \
+   void setParagraphG(const Aspam::ParagraphG& val) \
    { \
       return impClass::setParagraphG(val); \
    } \
-   void setParagraphH(const Aspam::ParagraphH &val) \
+   void setParagraphH(const Aspam::ParagraphH& val) \
    { \
       return impClass::setParagraphH(val); \
    } \
-   void setParagraphI(const Aspam::ParagraphI &val) \
+   void setParagraphI(const Aspam::ParagraphI& val) \
    { \
       return impClass::setParagraphI(val); \
    } \
-   void setParagraphJ(const Aspam::ParagraphJ &val) \
+   void setParagraphJ(const Aspam::ParagraphJ& val) \
    { \
       return impClass::setParagraphJ(val); \
    } \
-   void setParagraphK(const Aspam::ParagraphK &val) \
+   void setParagraphK(const Aspam::ParagraphK& val) \
    { \
       return impClass::setParagraphK(val); \
    }

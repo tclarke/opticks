@@ -45,7 +45,7 @@ bool Nitf::UnknownTreParser::toDynamicObject(const ossimNitfRegisteredTag& input
 bool Nitf::UnknownTreParser::fromDynamicObject(const DynamicObject& input,
    ostream& output, size_t& numBytesWritten, string &errorMessage) const
 {
-   const string *pUnknownTagData = input.getAttribute(TRE::UNPARSED_TAGS).getPointerToValue<string>();
+   const string* pUnknownTagData = input.getAttribute(TRE::UNPARSED_TAGS).getPointerToValue<string>();
    if (pUnknownTagData == NULL)
    {
       return false;

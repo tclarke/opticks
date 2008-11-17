@@ -25,17 +25,6 @@
  */
 class Icons
 {
-protected:
-   /**
-    *  Creates the Icons object.
-    */
-   Icons();
-
-   /**
-    *  Destroys the only Icons object.
-    */
-   ~Icons();
-
 public:
    /**
     *  Returns a pointer to the only instance of the class.
@@ -357,6 +346,17 @@ public:
    QPixmap mRasterLayer;
    QPixmap mThresholdLayer;
    QPixmap mPseudocolorLayer;
+
+protected:
+   /**
+    *  Creates the Icons object.
+    */
+   Icons();
+
+   /**
+    *  Destroys the only Icons object.
+    */
+   ~Icons();
 
 private:
    static Icons* singleton;

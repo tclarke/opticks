@@ -181,11 +181,11 @@ bool Nitf::BandsaParser::runAllTests(Progress* pProgress, ostream& failure)
    success = toDynamicObject(input4, numBytes, *treDO.get(), errorMessage);
 
    status = INVALID;
-   if(success)
+   if (success)
    {
       std::stringstream tmpStream;
       status = this->isTreValid(*treDO.get(), tmpStream);
-      if(status != SUSPECT)
+      if (status != SUSPECT)
       {
          failure << "Error: Negative test with LNSTRT = data out of range failed: did not return SUSPECT\n";
          failure << tmpStream.str();
@@ -216,7 +216,7 @@ bool Nitf::BandsaParser::toDynamicObject(istream& input, size_t numBytes, Dynami
    readField<unsigned int>(input, output, success, BANDSA::BANDCOUNT, 4, errorMessage, buf);
    unsigned int bandcount = QString(&buf.front()).toUInt();      // BANDCOUNT == the number of bands in the cube
 
-   for(unsigned int i=0; i<bandcount; ++i)
+   for (unsigned int i = 0; i < bandcount; ++i)
    {
       stringstream bandStreamStr;
       bandStreamStr << "#" << i;
@@ -305,7 +305,7 @@ Nitf::TreState Nitf::BandsaParser::isTreValid(const DynamicObject& tre, ostream&
    status = MaxState(status, testTagValueRange<double>(tre, reporter,
       &numFields, BANDSA::FOCAL_LENGTH, 0.005F, 999.99F));
 
-   for(unsigned int i=0; i<bandcount; ++i)
+   for (unsigned int i = 0; i < bandcount; ++i)
    {
       stringstream bandStreamStr;
       bandStreamStr << "#" << i;
@@ -348,7 +348,7 @@ Nitf::TreState Nitf::BandsaParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID && totalFields != numFields)
    {
       reporter << "Total fields in the Dynamic Object(" <<
-         totalFields <<") did not match the number found(" << numFields << ") ";
+         totalFields << ") did not match the number found(" << numFields << ") ";
       status = INVALID;
    }
 
@@ -373,16 +373,16 @@ bool Nitf::BandsaParser::fromDynamicObject(const DynamicObject& input, ostream& 
 
    try
    {
-      output <<   toString( dv_cast<double>(input.getAttribute(BANDSA::ROW_SPACING)), 7, 4);
-      output << sizeString( dv_cast<string>(input.getAttribute(BANDSA::ROW_SPACING_UNITS)), 1);
-      output <<   toString( dv_cast<double>(input.getAttribute(BANDSA::COL_SPACING)), 7, 4);
-      output << sizeString( dv_cast<string>(input.getAttribute (BANDSA::COL_SPACING_UNITS)), 1);
-      output <<   toString( dv_cast<double>(input.getAttribute(BANDSA::FOCAL_LENGTH)), 6, 2);
+      output << toString(dv_cast<double>(input.getAttribute(BANDSA::ROW_SPACING)), 7, 4);
+      output << sizeString(dv_cast<string>(input.getAttribute(BANDSA::ROW_SPACING_UNITS)), 1);
+      output << toString(dv_cast<double>(input.getAttribute(BANDSA::COL_SPACING)), 7, 4);
+      output << sizeString(dv_cast<string>(input.getAttribute(BANDSA::COL_SPACING_UNITS)), 1);
+      output << toString(dv_cast<double>(input.getAttribute(BANDSA::FOCAL_LENGTH)), 6, 2);
 
       unsigned int bandcount = dv_cast<unsigned int>(input.getAttribute(BANDSA::BANDCOUNT));
-      output <<   toString( bandcount, 4);
+      output << toString(bandcount, 4);
 
-      for(unsigned int i=0; i<bandcount; ++i)
+      for (unsigned int i = 0; i < bandcount; ++i)
       {
          stringstream bandStreamStr;
          bandStreamStr << "#" << i;
@@ -391,31 +391,31 @@ bool Nitf::BandsaParser::fromDynamicObject(const DynamicObject& input, ostream& 
          string fieldName;
 
          fieldName = BANDSA::BANDPEAK + bandStr;
-         output <<   toString( dv_cast<double>(input.getAttribute(fieldName)), 5, 2);
+         output << toString(dv_cast<double>(input.getAttribute(fieldName)), 5, 2);
 
          fieldName = BANDSA::BANDLBOUND + bandStr;
-         output <<   toString( dv_cast<double>(input.getAttribute(fieldName)), 5, 2);
+         output << toString(dv_cast<double>(input.getAttribute(fieldName)), 5, 2);
 
          fieldName = BANDSA::BANDUBOUND + bandStr;
-         output <<   toString( dv_cast<double>(input.getAttribute(fieldName)), 5, 2);
+         output << toString(dv_cast<double>(input.getAttribute(fieldName)), 5, 2);
 
          fieldName = BANDSA::BANDWIDTH + bandStr;
-         output <<   toString( dv_cast<double>(input.getAttribute(fieldName)), 5, 2);
+         output << toString(dv_cast<double>(input.getAttribute(fieldName)), 5, 2);
 
          fieldName = BANDSA::BANDCALDRK + bandStr;
-         output <<   toString( dv_cast<double>(input.getAttribute(fieldName)), 6, 1);
+         output << toString(dv_cast<double>(input.getAttribute(fieldName)), 6, 1);
 
          fieldName = BANDSA::BANDCALINC + bandStr;
-         output <<   toString( dv_cast<double>(input.getAttribute(fieldName)), 5, 2);
+         output << toString(dv_cast<double>(input.getAttribute(fieldName)), 5, 2);
 
          fieldName = BANDSA::BANDRESP + bandStr;
-         output <<   toString( dv_cast<double>(input.getAttribute(fieldName)), 5, 1);
+         output << toString(dv_cast<double>(input.getAttribute(fieldName)), 5, 1);
 
          fieldName = BANDSA::BANDASD + bandStr;
-         output <<   toString( dv_cast<double>(input.getAttribute(fieldName)), 5, 2);
+         output << toString(dv_cast<double>(input.getAttribute(fieldName)), 5, 2);
 
          fieldName = BANDSA::BANDGSD + bandStr;
-         output <<   toString( dv_cast<double>(input.getAttribute(fieldName)), 5, 2);
+         output << toString(dv_cast<double>(input.getAttribute(fieldName)), 5, 2);
       }
 
    }
@@ -436,18 +436,18 @@ TreExportStatus Nitf::BandsaParser::exportMetadata(const RasterDataDescriptor &d
    // Find out if we are exporting a subset of the original bands. If so then delete the
    // band info for the excluded bands.
 
-   const DynamicObject *pMetadata = descriptor.getMetadata();
+   const DynamicObject* pMetadata = descriptor.getMetadata();
    VERIFYRV(pMetadata != NULL, REMOVE);
    try
    {
-      const DataVariant &nitfMetadata = pMetadata->getAttribute(Nitf::NITF_METADATA);
-      const DynamicObject *pExistingBandsa = getTagHandle(dv_cast<DynamicObject>(nitfMetadata), "BANDSA", FindFirst());
+      const DataVariant& nitfMetadata = pMetadata->getAttribute(Nitf::NITF_METADATA);
+      const DynamicObject* pExistingBandsa = getTagHandle(dv_cast<DynamicObject>(nitfMetadata), "BANDSA", FindFirst());
       if (!pExistingBandsa)
       {
          return UNCHANGED;
       }
 
-      const vector<DimensionDescriptor> &exportBands = exportDescriptor.getBands();
+      const vector<DimensionDescriptor>& exportBands = exportDescriptor.getBands();
 
       VERIFYRV(!exportBands.empty(), REMOVE);
 
@@ -470,53 +470,53 @@ TreExportStatus Nitf::BandsaParser::exportMetadata(const RasterDataDescriptor &d
          LOG_IF(!iter->isOriginalNumberValid(), continue);
          unsigned int origBandNum = iter->getOriginalNumber();
 
-         stringstream bandStreamStr, origBandStreamStr;
+         stringstream bandStreamStr;
          bandStreamStr << "#" << bandcount;
          string bandStr(bandStreamStr.str());
 
+         stringstream origBandStreamStr;
          origBandStreamStr << "#" << origBandNum;
          string origBandStr(origBandStreamStr.str());
-
 
          ++bandcount;
 
          string fieldName;
          string origFieldName;
 
-         fieldName      = BANDSA::BANDPEAK + bandStr;
-         origFieldName  = BANDSA::BANDPEAK + origBandStr;
+         fieldName = BANDSA::BANDPEAK + bandStr;
+         origFieldName = BANDSA::BANDPEAK + origBandStr;
          tre.setAttribute(fieldName, pExistingBandsa->getAttribute(origFieldName));
 
-         fieldName      = BANDSA::BANDLBOUND + bandStr;
-         origFieldName  = BANDSA::BANDLBOUND + origBandStr;
+         fieldName = BANDSA::BANDLBOUND + bandStr;
+         origFieldName = BANDSA::BANDLBOUND + origBandStr;
          tre.setAttribute(fieldName, pExistingBandsa->getAttribute(origFieldName));
 
-         fieldName      = BANDSA::BANDUBOUND + bandStr;
-         origFieldName  = BANDSA::BANDUBOUND + origBandStr;
+         fieldName = BANDSA::BANDUBOUND + bandStr;
+         origFieldName = BANDSA::BANDUBOUND + origBandStr;
          tre.setAttribute(fieldName, pExistingBandsa->getAttribute(origFieldName));
 
-         fieldName      = BANDSA::BANDWIDTH + bandStr;
-         origFieldName  = BANDSA::BANDWIDTH + origBandStr;
+         fieldName = BANDSA::BANDWIDTH + bandStr;
+         origFieldName = BANDSA::BANDWIDTH + origBandStr;
          tre.setAttribute(fieldName, pExistingBandsa->getAttribute(origFieldName));
 
-         fieldName      = BANDSA::BANDCALDRK + bandStr;
-         origFieldName  = BANDSA::BANDCALDRK + origBandStr;
+         fieldName = BANDSA::BANDCALDRK + bandStr;
+         origFieldName = BANDSA::BANDCALDRK + origBandStr;
          tre.setAttribute(fieldName, pExistingBandsa->getAttribute(origFieldName));
 
-         fieldName      = BANDSA::BANDCALINC + bandStr;
-         origFieldName  = BANDSA::BANDCALINC + origBandStr;
+         fieldName = BANDSA::BANDCALINC + bandStr;
+         origFieldName = BANDSA::BANDCALINC + origBandStr;
          tre.setAttribute(fieldName, pExistingBandsa->getAttribute(origFieldName));
 
-         fieldName      = BANDSA::BANDRESP + bandStr;
-         origFieldName  = BANDSA::BANDRESP + origBandStr;
+         fieldName = BANDSA::BANDRESP + bandStr;
+         origFieldName = BANDSA::BANDRESP + origBandStr;
          tre.setAttribute(fieldName, pExistingBandsa->getAttribute(origFieldName));
 
-         fieldName      = BANDSA::BANDASD + bandStr;
-         origFieldName  = BANDSA::BANDASD + origBandStr;
+         fieldName = BANDSA::BANDASD + bandStr;
+         origFieldName = BANDSA::BANDASD + origBandStr;
          tre.setAttribute(fieldName, pExistingBandsa->getAttribute(origFieldName));
 
-         fieldName      = BANDSA::BANDGSD + bandStr;
-         origFieldName  = BANDSA::BANDGSD + origBandStr;
+         fieldName = BANDSA::BANDGSD + bandStr;
+         origFieldName = BANDSA::BANDGSD + origBandStr;
          tre.setAttribute(fieldName, pExistingBandsa->getAttribute(origFieldName));
       }
 

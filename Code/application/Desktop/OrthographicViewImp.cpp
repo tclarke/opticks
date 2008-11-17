@@ -106,7 +106,8 @@ inline double magdiff2(const LocationType& temp1, const LocationType& temp2)
 LocationType OrthographicViewImp::getPixelSize() const
 {
    LocationType pixelSize;
-   LocationType temp1, temp2;
+   LocationType temp1;
+   LocationType temp2;
 
    translateWorldToScreen(0.0, 0.0, temp1.mX, temp1.mY);
    translateWorldToScreen(1.0, 0.0, temp2.mX, temp2.mY);
@@ -242,8 +243,8 @@ void OrthographicViewImp::zoomOnPoint(const QPoint& anchor, const QPoint& delta)
    double xZoom = zoomRatio * deltaX;
    double yZoom = zoomRatio * deltaY;
 
-   double xFrac = (double) anchor.x() / (double) width();
-   double yFrac = (double) anchor.y() / (double) height();
+   double xFrac = static_cast<double>(anchor.x()) / static_cast<double>(width());
+   double yFrac = static_cast<double>(anchor.y()) / static_cast<double>(height());
 
    double xDelta = mDisplayMaxX - mDisplayMinX;
    double yDelta = mDisplayMaxY - mDisplayMinY;
@@ -330,10 +331,10 @@ void OrthographicViewImp::resizeEvent(QResizeEvent *e)
    // Adjust the display extents for the aspect ratio
    if (mLockRatio == true)
    {
-      double dMinX = mDisplayMinX;
-      double dMinY = mDisplayMinY;
-      double dMaxX = mDisplayMaxX;
-      double dMaxY = mDisplayMaxY;
+      dMinX = mDisplayMinX;
+      dMinY = mDisplayMinY;
+      dMaxX = mDisplayMaxX;
+      dMaxY = mDisplayMaxY;
 
       double xRatio = width() / fabs(dMaxX - dMinX);
       double yRatio = height() / fabs(dMaxY - dMinY);
@@ -371,7 +372,8 @@ void OrthographicViewImp::updateMatrices(int width, int height)
       makeCurrent();
 
       // Save current matrices
-      double lmodelMatrix[16], lprojectionMatrix[16];
+      double lmodelMatrix[16];
+      double lprojectionMatrix[16];
       int lviewPort[4];
       glGetIntegerv(GL_VIEWPORT, lviewPort);
       glGetDoublev(GL_PROJECTION_MATRIX, lprojectionMatrix);
@@ -439,7 +441,7 @@ bool OrthographicViewImp::fromXml(DOMNode* pDocument, unsigned int version)
       return false;
    }
 
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
+   DOMElement* pElem = static_cast<DOMElement*>(pDocument);
    if (pElem == NULL)
    {
       return false;
@@ -463,4 +465,3 @@ bool OrthographicViewImp::fromXml(DOMNode* pDocument, unsigned int version)
    updateMatrices();
    return true;
 }
-

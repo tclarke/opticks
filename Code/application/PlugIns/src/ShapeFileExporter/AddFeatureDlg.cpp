@@ -114,9 +114,8 @@ vector<AoiElement*> AddFeatureDlg::getAoiElements() const
 {
    vector<AoiElement*> elements;
 
-   for (QMap<QTreeWidgetItem*, AoiElement*>::const_iterator iter = mElements.begin();
-                                                             iter != mElements.end();
-                                                             ++iter)
+   QMap<QTreeWidgetItem*, AoiElement*>::const_iterator iter;
+   for (iter = mElements.begin(); iter != mElements.end(); ++iter)
    {
       QTreeWidgetItem* pItem = iter.key();
       if (pItem != NULL)

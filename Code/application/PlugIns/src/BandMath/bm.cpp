@@ -21,9 +21,9 @@
 
 using namespace std;
 
-frmBM::frmBM(const RasterDataDescriptor* pDescriptor, const vector<RasterElement*>& cubeList,
-   QWidget* parent) :
-   QDialog(parent)
+FrmBM::FrmBM(const RasterDataDescriptor* pDescriptor, const vector<RasterElement*>& cubeList, QWidget* parent) :
+   QDialog(parent),
+   mpDescriptor(pDescriptor)
 {
    setWindowTitle("Band Math");
    setModal(true);
@@ -386,17 +386,15 @@ frmBM::frmBM(const RasterDataDescriptor* pDescriptor, const vector<RasterElement
    const vector<double>* pCenterWavelengths = NULL;
    if (pMetadata != NULL)
    {
-      string pCenterPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME, 
-         CENTER_WAVELENGTHS_METADATA_NAME, END_METADATA_NAME };
-      pCenterWavelengths = dv_cast<vector<double> >(
-         &pMetadata->getAttributeByPath(pCenterPath));
+      string pCenterPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME, CENTER_WAVELENGTHS_METADATA_NAME,
+         END_METADATA_NAME };
+      pCenterWavelengths = dv_cast<vector<double> >(&pMetadata->getAttributeByPath(pCenterPath));
    }
 
    vector<string> bandNames = RasterUtilities::getBandNames(pDescriptor);
-   
+
    // Initialize
-   for(vector<string>::size_type counter = 0;
-       counter < bandNames.size(); ++counter)
+   for (vector<string>::size_type counter = 0; counter < bandNames.size(); ++counter)
    {
       string bandName = bandNames[counter];
       QString strBandInfo;
@@ -416,7 +414,6 @@ frmBM::frmBM(const RasterDataDescriptor* pDescriptor, const vector<RasterElement
       }
       mBandList.append(strBandInfo);
    }
-   mpDescriptor = pDescriptor;
 
    for (unsigned int i = 0; i < cubeList.size(); i++)
    {
@@ -441,6 +438,6 @@ frmBM::frmBM(const RasterDataDescriptor* pDescriptor, const vector<RasterElement
    setCubeList(0);
 }
 
-frmBM::~frmBM()
+FrmBM::~FrmBM()
 {
 }

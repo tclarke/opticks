@@ -21,67 +21,67 @@ XERCES_CPP_NAMESPACE_USE
 
 namespace
 {
-   XmlRpcParam *parseValueNode(DOMNode *pValueTypeNode)
+   XmlRpcParam *parseValueNode(DOMNode* pValueTypeNode)
    {
-      if(pValueTypeNode->getNodeType() == DOMNode::TEXT_NODE)
+      if (pValueTypeNode->getNodeType() == DOMNode::TEXT_NODE)
       {
-         const XMLCh *pTextData = pValueTypeNode->getNodeValue();
-         if((pTextData != NULL) && (XMLString::stringLen(pTextData) > 0))
+         const XMLCh* pTextData = pValueTypeNode->getNodeValue();
+         if ((pTextData != NULL) && (XMLString::stringLen(pTextData) > 0))
          {
             QString buf = A(pTextData);
             return new XmlRpcParam("string", buf);
          }
       }
       string nodeName = A(pValueTypeNode->getNodeName());
-      if(nodeName == "i4" || nodeName == "int")
+      if (nodeName == "i4" || nodeName == "int")
       {
          QString buf = A(pValueTypeNode->getFirstChild()->getNodeValue());
          return new XmlRpcParam(INT_PARAM, buf.toInt());
       }
-      else if(nodeName == "boolean")
+      else if (nodeName == "boolean")
       {
          QString buf = A(pValueTypeNode->getFirstChild()->getNodeValue());
          return new XmlRpcParam(BOOLEAN_PARAM, QVariant(buf.toInt() != 0));
       }
-      else if(nodeName == "string")
+      else if (nodeName == "string")
       {
          QString buf = A(pValueTypeNode->getFirstChild()->getNodeValue());
          return new XmlRpcParam(STRING_PARAM, buf);
       }
-      else if(nodeName == "double")
+      else if (nodeName == "double")
       {
          QString buf = A(pValueTypeNode->getFirstChild()->getNodeValue());
          return new XmlRpcParam(DOUBLE_PARAM, buf.toDouble());
       }
-      else if(nodeName == "dateTime.iso8601")
+      else if (nodeName == "dateTime.iso8601")
       {
          QString buf = A(pValueTypeNode->getFirstChild()->getNodeValue());
          return new XmlRpcParam(DATE_PARAM, QDate::fromString(buf));
       }
-      else if(nodeName == "base64")
+      else if (nodeName == "base64")
       {
          QString buf = A(pValueTypeNode->getFirstChild()->getNodeValue());
          return new XmlRpcParam(BASE64_PARAM, buf);
       }
-      else if(nodeName == "array")
+      else if (nodeName == "array")
       {
-         XmlRpcArrayParam *pArray = new XmlRpcArrayParam;
-         DOMElement *pDataElement = static_cast<DOMElement*>(
+         XmlRpcArrayParam* pArray = new XmlRpcArrayParam;
+         DOMElement* pDataElement = static_cast<DOMElement*>(
             static_cast<DOMElement*>(pValueTypeNode)->getElementsByTagName(X("data"))->item(0));
-         for(DOMNode *pArrayMember = pDataElement->getFirstChild();
+         for (DOMNode *pArrayMember = pDataElement->getFirstChild();
             pArrayMember != NULL;
             pArrayMember = pArrayMember->getNextSibling())
          {
-            if(XMLString::equals(pArrayMember->getNodeName(), X("value")))
+            if (XMLString::equals(pArrayMember->getNodeName(), X("value")))
             {
-               XmlRpcParam *pValue = NULL;
-               for(DOMNode *pValueNode = pArrayMember->getFirstChild();
+               XmlRpcParam* pValue = NULL;
+               for (DOMNode *pValueNode = pArrayMember->getFirstChild();
                   pValue == NULL && pValueNode != NULL;
                   pValueNode = pValueNode->getNextSibling())
                {
                   pValue = parseValueNode(pValueNode);
                }
-               if(pValue != NULL)
+               if (pValue != NULL)
                {
                   *pArray << pValue;
                }
@@ -89,28 +89,28 @@ namespace
          }
          return pArray;
       }
-      else if(nodeName == "struct")
+      else if (nodeName == "struct")
       {
-         XmlRpcStructParam *pStruct = new XmlRpcStructParam;
-         for(DOMNode *pStructMember = pValueTypeNode->getFirstChild();
+         XmlRpcStructParam* pStruct = new XmlRpcStructParam;
+         for (DOMNode *pStructMember = pValueTypeNode->getFirstChild();
             pStructMember != NULL;
             pStructMember = pStructMember->getNextSibling())
          {
-            if(XMLString::equals(pStructMember->getNodeName(), X("member")))
+            if (XMLString::equals(pStructMember->getNodeName(), X("member")))
             {
                QString name;
-               XmlRpcParam *pValue = NULL;
-               for(DOMNode *pStructSub = pStructMember->getFirstChild();
+               XmlRpcParam* pValue = NULL;
+               for (DOMNode *pStructSub = pStructMember->getFirstChild();
                   pStructSub != NULL;
                   pStructSub = pStructSub->getNextSibling())
                {
-                  if(XMLString::equals(pStructSub->getNodeName(), X("name")))
+                  if (XMLString::equals(pStructSub->getNodeName(), X("name")))
                   {
                      name = A(pStructSub->getTextContent());
                   }
-                  else if(XMLString::equals(pStructSub->getNodeName(), X("value")))
+                  else if (XMLString::equals(pStructSub->getNodeName(), X("value")))
                   {
-                     for(DOMNode *pValueNode = pStructSub->getFirstChild();
+                     for (DOMNode *pValueNode = pStructSub->getFirstChild();
                                   pValue == NULL && pValueNode != NULL;
                                   pValueNode = pValueNode->getNextSibling())
                      {
@@ -118,7 +118,7 @@ namespace
                      }
                   }
                }
-               if(!name.isEmpty() && pValue != NULL)
+               if (!name.isEmpty() && pValue != NULL)
                {
                   pStruct->insert(name, pValue);
                }
@@ -134,27 +134,27 @@ XmlRpcMethodCall::XmlRpcMethodCall(DOMElement *pRoot)
 {
    ENSURE(pRoot != NULL);
    ENSURE(XMLString::equals(pRoot->getNodeName(), X("methodCall")));
-   for(DOMNode *pNode = pRoot->getFirstChild();
+   for (DOMNode *pNode = pRoot->getFirstChild();
                 pNode != NULL;
                 pNode = pNode->getNextSibling())
    {
-      if(XMLString::equals(pNode->getNodeName(), X("methodName")))
+      if (XMLString::equals(pNode->getNodeName(), X("methodName")))
       {
          mMethodName = A(pNode->getFirstChild()->getNodeValue());
       }
-      else if(XMLString::equals(pNode->getNodeName(), X("params")))
+      else if (XMLString::equals(pNode->getNodeName(), X("params")))
       {
          char id = 0;
-         DOMNodeList *pParams = static_cast<DOMElement*>(pNode)->getElementsByTagName(X("param"));
-         for(XMLSize_t i = 0; i < pParams->getLength(); i++)
+         DOMNodeList* pParams = static_cast<DOMElement*>(pNode)->getElementsByTagName(X("param"));
+         for (XMLSize_t i = 0; i < pParams->getLength(); i++)
          {
-            DOMNode *pValue = static_cast<DOMElement*>(pParams->item(i))->getElementsByTagName(X("value"))->item(0);
-            for(DOMNode *pValueTypeNode = pValue->getFirstChild();
+            DOMNode* pValue = static_cast<DOMElement*>(pParams->item(i))->getElementsByTagName(X("value"))->item(0);
+            for (DOMNode *pValueTypeNode = pValue->getFirstChild();
                          pValueTypeNode != NULL;
                          pValueTypeNode = pValueTypeNode->getNextSibling())
             {
-               XmlRpcParam *pParam = parseValueNode(pValueTypeNode);
-               if(pParam != NULL)
+               XmlRpcParam* pParam = parseValueNode(pValueTypeNode);
+               if (pParam != NULL)
                {
                   mParams.push_back(pParam);
                }
@@ -169,9 +169,9 @@ QString XmlRpcMethodCall::toXml() const
    XMLWriter xml("methodCall", NULL, false);
    xml.addText(mMethodName.toStdString(), xml.addElement("methodName"));
    xml.pushAddPoint(xml.addElement("params"));
-   for(XmlRpcParams::const_iterator it = mParams.begin(); it != mParams.end(); ++it)
+   for (XmlRpcParams::const_iterator it = mParams.begin(); it != mParams.end(); ++it)
    {
-      if(*it != NULL)
+      if (*it != NULL)
       {
          xml.pushAddPoint(xml.addElement("value", xml.addElement("param")));
          (*it)->toXml(xml);
@@ -182,35 +182,41 @@ QString XmlRpcMethodCall::toXml() const
    return QString(xml.writeToString().c_str());
 }
 
-XmlRpcMethodResponse::XmlRpcMethodResponse(DOMElement *pRoot)
+XmlRpcMethodResponse::XmlRpcMethodResponse(DOMElement* pRoot)
 {
    ENSURE(pRoot != NULL);
    ENSURE(XMLString::equals(pRoot->getNodeName(), X("methodResponse")));
 
-   DOMNodeList *pParamsNodes = pRoot->getElementsByTagName(X("params"));
+   DOMNodeList* pParamsNodes = pRoot->getElementsByTagName(X("params"));
    ENSURE(pParamsNodes != NULL && pParamsNodes->getLength() == 1);
-   DOMNodeList *pParamNodes = static_cast<DOMElement*>(pParamsNodes->item(0))->getElementsByTagName(X("param"));
+   DOMNodeList* pParamNodes = static_cast<DOMElement*>(pParamsNodes->item(0))->getElementsByTagName(X("param"));
    ENSURE(pParamNodes != NULL && pParamNodes->getLength() == 1);
-   DOMNodeList *pValueNodes = static_cast<DOMElement*>(pParamNodes->item(0))->getElementsByTagName(X("value"));
+   DOMNodeList* pValueNodes = static_cast<DOMElement*>(pParamNodes->item(0))->getElementsByTagName(X("value"));
    ENSURE(pValueNodes != NULL && pValueNodes->getLength() == 1);
-   DOMNodeList *pTypeNodes = pValueNodes->item(0)->getChildNodes();
+   DOMNodeList* pTypeNodes = pValueNodes->item(0)->getChildNodes();
    ENSURE(pTypeNodes != NULL && pTypeNodes->getLength() > 0);
    mpReturnValue = parseValueNode(pTypeNodes->item(0));
 }
 
-XmlRpcMethodResponse::XmlRpcMethodResponse(const XmlRpcParam *pReturnValue) : mpReturnValue(pReturnValue)
+XmlRpcMethodResponse::XmlRpcMethodResponse(const XmlRpcParam* pReturnValue) :
+   mpReturnValue(pReturnValue)
 {
+}
+
+XmlRpcMethodResponse::~XmlRpcMethodResponse()
+{
+   delete mpReturnValue;
 }
 
 QString XmlRpcMethodResponse::toXml() const
 {
    XMLWriter xml("methodResponse", NULL, false);
-   if((mpReturnValue != NULL) && mpReturnValue->isValid())
+   if ((mpReturnValue != NULL) && mpReturnValue->isValid())
    {
       xml.pushAddPoint(xml.addElement("params"));
       xml.pushAddPoint(xml.addElement("param"));
       xml.pushAddPoint(xml.addElement("value"));
-      if(!mpReturnValue->toXml(xml))
+      if (!mpReturnValue->toXml(xml))
       {
          return "";
       }
@@ -219,6 +225,11 @@ QString XmlRpcMethodResponse::toXml() const
       xml.popAddPoint();
    }
    return QString(xml.writeToString().c_str());
+}
+
+const XmlRpcParam* XmlRpcMethodResponse::returnValue()
+{
+   return mpReturnValue;
 }
 
 QMap<unsigned int, QString> XmlRpcMethodFault::sFaults;
@@ -234,7 +245,7 @@ void XmlRpcMethodFault::populateFaults()
     *  300-399 : Opticks core method call errors
     *  400-999 : Available for general use
     */
-   if(sFaults.isEmpty())
+   if (sFaults.isEmpty())
    {
       sFaults[100] = QString("Unknown method");
 
@@ -282,7 +293,7 @@ QString XmlRpcMethodFault::toXml() const
    xml.pushAddPoint(xml.addElement("value"));
    QMap<unsigned int, QString>::const_iterator fsit = sFaults.find(mFaultCode);
    QString faultString = (fsit == sFaults.end()) ? "Unknown Error" : fsit.value();
-   if(!mOtherInformation.isEmpty())
+   if (!mOtherInformation.isEmpty())
    {
       faultString += ": " + mOtherInformation;
    }

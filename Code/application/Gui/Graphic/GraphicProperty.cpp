@@ -20,13 +20,13 @@
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
 
-////////////////////////
+/////////////////////
 // GraphicProperty //
-////////////////////////
+/////////////////////
 
-GraphicProperty::GraphicProperty(const string& name)
+GraphicProperty::GraphicProperty(const string& name) :
+   mName(name)
 {
-   mName = name;
 }
 
 GraphicProperty::~GraphicProperty()
@@ -38,7 +38,7 @@ string GraphicProperty::getName() const
    return mName;
 }
 
-void GraphicProperty::setName(const std::string& name)
+void GraphicProperty::setName(const string& name)
 {
    if (name.empty() == false)
    {
@@ -64,16 +64,33 @@ bool GraphicProperty::fromXml(DOMNode* pDocument, unsigned int version)
 // AlphaProperty //
 ///////////////////
 
-AlphaProperty::AlphaProperty(double alpha)
-   : GraphicProperty("Alpha")
+AlphaProperty::AlphaProperty(double alpha) :
+   GraphicProperty("Alpha"),
+   mAlpha(alpha)
 {
-   mAlpha = alpha;
+}
+
+bool AlphaProperty::set(const GraphicProperty* pProp)
+{
+   const AlphaProperty* pAlphaProp = dynamic_cast<const AlphaProperty*>(pProp);
+   if (pAlphaProp == NULL)
+   {
+      return false;
+   }
+
+   *this = *pAlphaProp;
+   return true;
 }
 
 bool AlphaProperty::compare(const GraphicProperty* pProp) const
 {
-   if (pProp->getName() != "Alpha") return false;
-   return mAlpha == ((AlphaProperty*)pProp)->getAlpha();
+   const AlphaProperty* pAlphaProp = dynamic_cast<const AlphaProperty*>(pProp);
+   if (pAlphaProp == NULL)
+   {
+      return false;
+   }
+
+   return mAlpha == pAlphaProp->getAlpha();
 }
 
 GraphicProperty* AlphaProperty::copy() const
@@ -86,22 +103,22 @@ double AlphaProperty::getAlpha() const
    return mAlpha;
 }
 
-bool AlphaProperty::toXml(XMLWriter* xml) const
+bool AlphaProperty::toXml(XMLWriter* pXml) const
 {
-   xml->pushAddPoint(xml->addElement("Alpha"));
-   GraphicProperty::toXml(xml);
+   pXml->pushAddPoint(pXml->addElement("Alpha"));
+   GraphicProperty::toXml(pXml);
    stringstream buf;
    buf << mAlpha;
-   xml->addAttr("alpha", buf.str());
-   xml->popAddPoint();
+   pXml->addAttr("alpha", buf.str());
+   pXml->popAddPoint();
 
    return true;
 }
 
-bool AlphaProperty::fromXml(DOMNode* document, unsigned int version)
+bool AlphaProperty::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   GraphicProperty::fromXml(document, version);
-   DOMElement *elmnt(static_cast<DOMElement*>(document));
+   GraphicProperty::fromXml(pDocument, version);
+   DOMElement* elmnt(static_cast<DOMElement*>(pDocument));
    stringstream buf(A(elmnt->getAttribute(X("alpha"))));
    buf >> mAlpha;
 
@@ -112,16 +129,33 @@ bool AlphaProperty::fromXml(DOMNode* document, unsigned int version)
 // ApexProperty //
 //////////////////
 
-ApexProperty::ApexProperty(double apex)
-   : GraphicProperty("Apex")
+ApexProperty::ApexProperty(double apex) :
+   GraphicProperty("Apex"),
+   mApexPosition(apex)
 {
-   mApexPosition = apex;
+}
+
+bool ApexProperty::set(const GraphicProperty* pProp)
+{
+   const ApexProperty* pApexProp = dynamic_cast<const ApexProperty*>(pProp);
+   if (pApexProp == NULL)
+   {
+      return false;
+   }
+
+   *this = *pApexProp;
+   return true;
 }
 
 bool ApexProperty::compare(const GraphicProperty* pProp) const
 {
-   if (pProp->getName() != "Apex") return false;
-   return mApexPosition == ((ApexProperty*)pProp)->getApex();
+   const ApexProperty* pApexProp = dynamic_cast<const ApexProperty*>(pProp);
+   if (pApexProp == NULL)
+   {
+      return false;
+   }
+
+   return mApexPosition == pApexProp->getApex();
 }
 
 GraphicProperty* ApexProperty::copy() const
@@ -134,22 +168,22 @@ double ApexProperty::getApex() const
    return mApexPosition;
 }
 
-bool ApexProperty::toXml(XMLWriter* xml) const
+bool ApexProperty::toXml(XMLWriter* pXml) const
 {
-   xml->pushAddPoint(xml->addElement("Apex"));
-   GraphicProperty::toXml(xml);
+   pXml->pushAddPoint(pXml->addElement("Apex"));
+   GraphicProperty::toXml(pXml);
    stringstream buf;
    buf << mApexPosition;
-   xml->addAttr("position", buf.str());
-   xml->popAddPoint();
+   pXml->addAttr("position", buf.str());
+   pXml->popAddPoint();
 
    return true;
 }
 
-bool ApexProperty::fromXml(DOMNode* document, unsigned int version)
+bool ApexProperty::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   GraphicProperty::fromXml(document, version);
-   DOMElement *elmnt(static_cast<DOMElement*>(document));
+   GraphicProperty::fromXml(pDocument, version);
+   DOMElement* elmnt(static_cast<DOMElement*>(pDocument));
    stringstream buf(A(elmnt->getAttribute(X("position"))));
    buf >> mApexPosition;
 
@@ -160,20 +194,33 @@ bool ApexProperty::fromXml(DOMNode* document, unsigned int version)
 // ArcRegionProperty //
 ///////////////////////
 
-ArcRegionProperty::ArcRegionProperty(ArcRegion eRegion)
-   : GraphicProperty("ArcRegion")
+ArcRegionProperty::ArcRegionProperty(ArcRegion eRegion) :
+   GraphicProperty("ArcRegion"),
+   mRegion(eRegion)
 {
-   mRegion = eRegion;
 }
 
-bool ArcRegionProperty::compare(const GraphicProperty* pProp) const
+bool ArcRegionProperty::set(const GraphicProperty* pProp)
 {
-   if (pProp->getName() != "ArcRegion")
+   const ArcRegionProperty* pRegionProp = dynamic_cast<const ArcRegionProperty*>(pProp);
+   if (pRegionProp == NULL)
    {
       return false;
    }
 
-   return mRegion == ((ArcRegionProperty*) pProp)->getRegion();
+   *this = *pRegionProp;
+   return true;
+}
+
+bool ArcRegionProperty::compare(const GraphicProperty* pProp) const
+{
+   const ArcRegionProperty* pRegionProp = dynamic_cast<const ArcRegionProperty*>(pProp);
+   if (pRegionProp == NULL)
+   {
+      return false;
+   }
+
+   return mRegion == pRegionProp->getRegion();
 }
 
 GraphicProperty* ArcRegionProperty::copy() const
@@ -186,39 +233,47 @@ ArcRegion ArcRegionProperty::getRegion() const
    return mRegion;
 }
 
-bool ArcRegionProperty::toXml(XMLWriter* xml) const
+bool ArcRegionProperty::toXml(XMLWriter* pXml) const
 {
-   xml->pushAddPoint(xml->addElement("ArcRegion"));
-   GraphicProperty::toXml(xml);
-   switch(mRegion)
+   pXml->pushAddPoint(pXml->addElement("ArcRegion"));
+   GraphicProperty::toXml(pXml);
+   switch (mRegion)
    {
       case ARC_CENTER:
-         xml->addAttr("region", "center");
+         pXml->addAttr("region", "center");
          break;
       case ARC_CHORD:
-         xml->addAttr("region", "chord");
+         pXml->addAttr("region", "chord");
          break;
       case ARC_OPEN:
-         xml->addAttr("region", "open");
+         pXml->addAttr("region", "open");
+         break;
+      default:
          break;
    }
-   xml->popAddPoint();
 
+   pXml->popAddPoint();
    return true;
 }
 
-bool ArcRegionProperty::fromXml(DOMNode* document, unsigned int version)
+bool ArcRegionProperty::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   GraphicProperty::fromXml(document, version);
-   DOMElement *elmnt(static_cast<DOMElement*>(document));
+   GraphicProperty::fromXml(pDocument, version);
+   DOMElement* elmnt(static_cast<DOMElement*>(pDocument));
    string buf(A(elmnt->getAttribute(X("region"))));
 
-   if(buf == "center")
+   if (buf == "center")
+   {
       mRegion = ARC_CENTER;
-   else if(buf == "chord")
+   }
+   else if (buf == "chord")
+   {
       mRegion = ARC_CHORD;
-   else if(buf == "open")
+   }
+   else if (buf == "open")
+   {
       mRegion = ARC_OPEN;
+   }
 
    return true;
 }
@@ -227,8 +282,8 @@ bool ArcRegionProperty::fromXml(DOMNode* document, unsigned int version)
 // BoundingBoxProperty //
 /////////////////////////
 
-BoundingBoxProperty::BoundingBoxProperty(LocationType llCorner, LocationType urCorner, bool geoCoords)
-   : GraphicProperty("BoundingBox")
+BoundingBoxProperty::BoundingBoxProperty(LocationType llCorner, LocationType urCorner, bool geoCoords) :
+   GraphicProperty("BoundingBox")
 {
    if (geoCoords)
    {
@@ -242,20 +297,22 @@ BoundingBoxProperty::BoundingBoxProperty(LocationType llCorner, LocationType urC
       mUrCorner = urCorner;
       mHasGeoCoords = false;
    }
+
    mHasPixelCoords = !mHasGeoCoords;
    mGeoCoordsMatchPixelCoords = false;
 }
 
 BoundingBoxProperty::BoundingBoxProperty(LocationType llCorner, LocationType urCorner, LocationType llLatLong,
-   LocationType urLatLong, bool geoCoordsMatchPixelCoords) : GraphicProperty("BoundingBox")
+                                         LocationType urLatLong, bool geoCoordsMatchPixelCoords) :
+   GraphicProperty("BoundingBox"),
+   mLlCorner(llCorner),
+   mUrCorner(urCorner),
+   mLlLatLong(llLatLong),
+   mUrLatLong(urLatLong),
+   mHasGeoCoords(true),
+   mHasPixelCoords(true),
+   mGeoCoordsMatchPixelCoords(geoCoordsMatchPixelCoords)
 {
-   mLlCorner = llCorner;
-   mUrCorner = urCorner;
-   mLlLatLong = llLatLong;
-   mUrLatLong = urLatLong;
-   mHasGeoCoords = true;
-   mHasPixelCoords = true;
-   mGeoCoordsMatchPixelCoords = geoCoordsMatchPixelCoords;
 }
 
 bool BoundingBoxProperty::hasGeoCoords() const
@@ -293,23 +350,42 @@ LocationType BoundingBoxProperty::getUrLatLong() const
    return mUrLatLong;
 }
 
+bool BoundingBoxProperty::set(const GraphicProperty* pProp)
+{
+   const BoundingBoxProperty* pBoxProp = dynamic_cast<const BoundingBoxProperty*>(pProp);
+   if (pBoxProp == NULL)
+   {
+      return false;
+   }
+
+   *this = *pBoxProp;
+   return true;
+}
+
 bool BoundingBoxProperty::compare(const GraphicProperty* pProp) const
 {
-   if (pProp->getName() != "BoundingBox") return false;
-   LocationType llCorner = ((BoundingBoxProperty*)pProp)->getLlCorner();
-   LocationType urCorner = ((BoundingBoxProperty*)pProp)->getUrCorner();
-   LocationType llLatLong = ((BoundingBoxProperty*)pProp)->getLlLatLong();
-   LocationType urLatLong = ((BoundingBoxProperty*)pProp)->getUrLatLong();
+   const BoundingBoxProperty* pBoxProp = dynamic_cast<const BoundingBoxProperty*>(pProp);
+   if (pBoxProp == NULL)
+   {
+      return false;
+   }
+
+   LocationType llCorner = pBoxProp->getLlCorner();
+   LocationType urCorner = pBoxProp->getUrCorner();
+   LocationType llLatLong = pBoxProp->getLlLatLong();
+   LocationType urLatLong = pBoxProp->getUrLatLong();
 
    bool match = true;
    if (mHasGeoCoords)
    {
       match = match && (mLlLatLong == llLatLong && mUrLatLong == urLatLong);
    }
+
    if (mHasPixelCoords)
    {
       match = match && (mLlCorner == llCorner && mUrCorner == urCorner);
    }
+
    return match;
 }
 
@@ -318,38 +394,39 @@ GraphicProperty* BoundingBoxProperty::copy() const
    return new BoundingBoxProperty(mLlCorner, mUrCorner, mLlLatLong, mUrLatLong, mGeoCoordsMatchPixelCoords);
 }
 
-bool BoundingBoxProperty::toXml(XMLWriter* xml) const
+bool BoundingBoxProperty::toXml(XMLWriter* pXml) const
 {
-   if (xml == NULL)
+   if (pXml == NULL)
    {
       return false;
    }
 
-   xml->pushAddPoint(xml->addElement("BoundingBox"));
-   GraphicProperty::toXml(xml);
+   pXml->pushAddPoint(pXml->addElement("BoundingBox"));
+   GraphicProperty::toXml(pXml);
 
    if (mHasPixelCoords)
    {
       stringstream buf;
       buf.precision(12);
       buf << mLlCorner.mX << ' ' << mLlCorner.mY << ' ' << mUrCorner.mX << ' ' << mUrCorner.mY;
-      xml->addText(buf.str(), xml->addElement("boundingBox"));
+      pXml->addText(buf.str(), pXml->addElement("boundingBox"));
    }
+
    if (mHasGeoCoords)
    {
       stringstream buf;
       buf.precision(12);
       buf << mLlLatLong.mX << ' ' << mLlLatLong.mY << ' ' << mUrLatLong.mX << ' ' << mUrLatLong.mY;
-      xml->addText(buf.str(), xml->addElement("geoBox"));
+      pXml->addText(buf.str(), pXml->addElement("geoBox"));
    }
 
-   xml->popAddPoint();
+   pXml->popAddPoint();
    return true;
 }
 
-bool BoundingBoxProperty::fromXml(DOMNode* document, unsigned int version)
+bool BoundingBoxProperty::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   if (document == NULL)
+   if (pDocument == NULL)
    {
       return false;
    }
@@ -361,20 +438,18 @@ bool BoundingBoxProperty::fromXml(DOMNode* document, unsigned int version)
    mHasGeoCoords = false;
    mHasPixelCoords = false;
 
-   GraphicProperty::fromXml(document, version);
+   GraphicProperty::fromXml(pDocument, version);
 
-   for (DOMNode* chld = document->getFirstChild(); chld != NULL; chld = chld->getNextSibling())
+   for (DOMNode* chld = pDocument->getFirstChild(); chld != NULL; chld = chld->getNextSibling())
    {
       if (XMLString::equals(chld->getNodeName(), X("boundingBox")))
       {
-         XmlReader::StrToQuadCoord(chld->getTextContent(), mLlCorner.mX, mLlCorner.mY,
-            mUrCorner.mX, mUrCorner.mY);
+         XmlReader::StrToQuadCoord(chld->getTextContent(), mLlCorner.mX, mLlCorner.mY, mUrCorner.mX, mUrCorner.mY);
          mHasPixelCoords = true;
       }
       else if (XMLString::equals(chld->getNodeName(), X("geoBox")))
       {
-         XmlReader::StrToQuadCoord(chld->getTextContent(), mLlLatLong.mX, mLlLatLong.mY,
-            mUrLatLong.mX, mUrLatLong.mY);
+         XmlReader::StrToQuadCoord(chld->getTextContent(), mLlLatLong.mX, mLlLatLong.mY, mUrLatLong.mX, mUrLatLong.mY);
          mHasGeoCoords = true;
       }
    }
@@ -386,16 +461,33 @@ bool BoundingBoxProperty::fromXml(DOMNode* document, unsigned int version)
 // FillColorProperty //
 ///////////////////////
 
-FillColorProperty::FillColorProperty(ColorType color)
-   : GraphicProperty("FillColor")
+FillColorProperty::FillColorProperty(ColorType color) :
+   GraphicProperty("FillColor"),
+   mColor(color)
 {
-   mColor = color;
+}
+
+bool FillColorProperty::set(const GraphicProperty* pProp)
+{
+   const FillColorProperty* pColorProp = dynamic_cast<const FillColorProperty*>(pProp);
+   if (pColorProp == NULL)
+   {
+      return false;
+   }
+
+   *this = *pColorProp;
+   return true;
 }
 
 bool FillColorProperty::compare(const GraphicProperty* pProp) const
 {
-   if (pProp->getName() != "FillColor") return false;
-   return mColor == ((FillColorProperty*)pProp)->getColor();
+   const FillColorProperty* pColorProp = dynamic_cast<const FillColorProperty*>(pProp);
+   if (pColorProp == NULL)
+   {
+      return false;
+   }
+
+   return mColor == pColorProp->getColor();
 }
 
 GraphicProperty* FillColorProperty::copy() const
@@ -408,28 +500,30 @@ ColorType FillColorProperty::getColor() const
    return mColor;
 }
 
-bool FillColorProperty::toXml(XMLWriter* xml) const
+bool FillColorProperty::toXml(XMLWriter* pXml) const
 {
-   xml->pushAddPoint(xml->addElement("FillColor"));
-   GraphicProperty::toXml(xml);
+   pXml->pushAddPoint(pXml->addElement("FillColor"));
+   GraphicProperty::toXml(pXml);
    stringstream buf;
    buf << mColor.mRed << ' ' << mColor.mGreen << ' ' << mColor.mBlue;
-   xml->addText(buf.str(), xml->addElement("color"));
-   xml->popAddPoint();
+   pXml->addText(buf.str(), pXml->addElement("color"));
+   pXml->popAddPoint();
 
    return true;
 }
 
-bool FillColorProperty::fromXml(DOMNode* document, unsigned int version)
+bool FillColorProperty::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   GraphicProperty::fromXml(document, version);
+   GraphicProperty::fromXml(pDocument, version);
 
-   DOMNodeList *elmnts(static_cast<DOMElement*>(document)->getElementsByTagName(
-                                                                     X("color")));
-   double r,g,b,dummy;
+   DOMNodeList* elmnts(static_cast<DOMElement*>(pDocument)->getElementsByTagName(X("color")));
+   double r;
+   double g;
+   double b;
+   double dummy;
 
    XmlReader::StrToQuadCoord(elmnts->item(0)->getTextContent(), r, g, b, dummy);
-   mColor = ColorType(r,g,b);
+   mColor = ColorType(r, g, b);
 
    return true;
 }
@@ -438,16 +532,33 @@ bool FillColorProperty::fromXml(DOMNode* document, unsigned int version)
 // FillStyleProperty //
 ///////////////////////
 
-FillStyleProperty::FillStyleProperty(FillStyle eStyle)
-   : GraphicProperty("FillStyle")
+FillStyleProperty::FillStyleProperty(FillStyle eStyle) :
+   GraphicProperty("FillStyle"),
+   mStyle(eStyle)
 {
-   mStyle = eStyle;
+}
+
+bool FillStyleProperty::set(const GraphicProperty* pProp)
+{
+   const FillStyleProperty* pStyleProp = dynamic_cast<const FillStyleProperty*>(pProp);
+   if (pStyleProp == NULL)
+   {
+      return false;
+   }
+
+   *this = *pStyleProp;
+   return true;
 }
 
 bool FillStyleProperty::compare(const GraphicProperty* pProp) const
 {
-   if (pProp->getName() != "FillStyle") return false;
-   return mStyle == ((FillStyleProperty*)pProp)->getFillStyle();
+   const FillStyleProperty* pStyleProp = dynamic_cast<const FillStyleProperty*>(pProp);
+   if (pStyleProp == NULL)
+   {
+      return false;
+   }
+
+   return mStyle == pStyleProp->getFillStyle();
 }
 
 GraphicProperty* FillStyleProperty::copy() const
@@ -460,40 +571,48 @@ FillStyle FillStyleProperty::getFillStyle() const
    return mStyle;
 }
 
-bool FillStyleProperty::toXml(XMLWriter* xml) const
+bool FillStyleProperty::toXml(XMLWriter* pXml) const
 {
-   xml->pushAddPoint(xml->addElement("FillStyle"));
-   GraphicProperty::toXml(xml);
-   switch(mStyle)
+   pXml->pushAddPoint(pXml->addElement("FillStyle"));
+   GraphicProperty::toXml(pXml);
+   switch (mStyle)
    {
       case SOLID_FILL:
-         xml->addAttr("style", "solid");
+         pXml->addAttr("style", "solid");
          break;
       case HATCH:
-         xml->addAttr("style", "hatch");
+         pXml->addAttr("style", "hatch");
          break;
       case EMPTY_FILL:
-         xml->addAttr("style", "empty");
+         pXml->addAttr("style", "empty");
+         break;
+      default:
          break;
    }
-   xml->popAddPoint();
 
+   pXml->popAddPoint();
    return true;
 }
 
-bool FillStyleProperty::fromXml(DOMNode* document, unsigned int version)
+bool FillStyleProperty::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   GraphicProperty::fromXml(document, version);
+   GraphicProperty::fromXml(pDocument, version);
 
-   DOMElement *elmnt(static_cast<DOMElement*>(document));
+   DOMElement* elmnt(static_cast<DOMElement*>(pDocument));
    string style(A(elmnt->getAttribute(X("style"))));
 
-   if(style == "solid")
+   if (style == "solid")
+   {
       mStyle = SOLID_FILL;
-   else if(style == "hatch")
+   }
+   else if (style == "hatch")
+   {
       mStyle = HATCH;
-   else if(style == "empty")
+   }
+   else if (style == "empty")
+   {
       mStyle = EMPTY_FILL;
+   }
 
    return true;
 }
@@ -508,10 +627,27 @@ FontProperty::FontProperty(const FontImp& font) :
 {
 }
 
+bool FontProperty::set(const GraphicProperty* pProp)
+{
+   const FontProperty* pFontProp = dynamic_cast<const FontProperty*>(pProp);
+   if (pFontProp == NULL)
+   {
+      return false;
+   }
+
+   *this = *pFontProp;
+   return true;
+}
+
 bool FontProperty::compare(const GraphicProperty* pProp) const
 {
-   if (pProp->getName() != "Font") return false;
-   return mFont == ((FontProperty*)pProp)->getFont();
+   const FontProperty* pFontProp = dynamic_cast<const FontProperty*>(pProp);
+   if (pFontProp == NULL)
+   {
+      return false;
+   }
+
+   return mFont == pFontProp->getFont();
 }
 
 GraphicProperty* FontProperty::copy() const
@@ -524,31 +660,31 @@ const FontImp& FontProperty::getFont() const
    return mFont;
 }
 
-bool FontProperty::toXml(XMLWriter* xml) const
+bool FontProperty::toXml(XMLWriter* pXml) const
 {
    const QFont& font = mFont.getQFont();
 
-   xml->pushAddPoint(xml->addElement("Font"));
-   GraphicProperty::toXml(xml);
+   pXml->pushAddPoint(pXml->addElement("Font"));
+   GraphicProperty::toXml(pXml);
 
-   xml->addAttr("face", font.family().toStdString());
+   pXml->addAttr("face", font.family().toStdString());
 
    stringstream buf;
    buf << font.pointSize();
-   xml->addAttr("size", buf.str());
-   xml->addAttr("bold", (font.bold()) ? "true" : "false");
-   xml->addAttr("italic", (font.italic()) ? "true" : "false");
-   xml->addAttr("underline", (font.underline()) ? "true" : "false");
-   xml->popAddPoint();
+   pXml->addAttr("size", buf.str());
+   pXml->addAttr("bold", (font.bold()) ? "true" : "false");
+   pXml->addAttr("italic", (font.italic()) ? "true" : "false");
+   pXml->addAttr("underline", (font.underline()) ? "true" : "false");
+   pXml->popAddPoint();
 
    return true;
 }
 
-bool FontProperty::fromXml(DOMNode* document, unsigned int version)
+bool FontProperty::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   GraphicProperty::fromXml(document, version);
+   GraphicProperty::fromXml(pDocument, version);
 
-   DOMElement *elmnt(static_cast<DOMElement*>(document));
+   DOMElement* elmnt(static_cast<DOMElement*>(pDocument));
 
    string face = GraphicLayer::getSettingTextFont();
    int iSize = GraphicLayer::getSettingTextFontSize();
@@ -556,33 +692,53 @@ bool FontProperty::fromXml(DOMNode* document, unsigned int version)
    bool bItalic = GraphicLayer::getSettingTextItalics();
    bool bUnderline = GraphicLayer::getSettingTextUnderline();
 
-   if(elmnt->hasAttribute(X("face")))
+   if (elmnt->hasAttribute(X("face")))
+   {
       face = A(elmnt->getAttribute(X("face")));
-   if(elmnt->hasAttribute(X("size")))
+   }
+
+   if (elmnt->hasAttribute(X("size")))
+   {
       iSize = atoi(A(elmnt->getAttribute(X("size"))));
-   if(elmnt->hasAttribute(X("bold")))
+   }
+
+   if (elmnt->hasAttribute(X("bold")))
    {
       string tmp(A(elmnt->getAttribute(X("bold"))));
-      if(tmp == "0" || tmp == "f" || tmp == "false")
+      if (tmp == "0" || tmp == "f" || tmp == "false")
+      {
          bBold = false;
+      }
       else
+      {
          bBold = true;
+      }
    }
-   if(elmnt->hasAttribute(X("italic")))
+
+   if (elmnt->hasAttribute(X("italic")))
    {
       string tmp(A(elmnt->getAttribute(X("italic"))));
-      if(tmp == "0" || tmp == "f" || tmp == "false")
+      if (tmp == "0" || tmp == "f" || tmp == "false")
+      {
          bItalic = false;
+      }
       else
+      {
          bItalic = true;
+      }
    }
-   if(elmnt->hasAttribute(X("underline")))
+
+   if (elmnt->hasAttribute(X("underline")))
    {
       string tmp(A(elmnt->getAttribute(X("underline"))));
-      if(tmp == "0" || tmp == "f" || tmp == "false")
+      if (tmp == "0" || tmp == "f" || tmp == "false")
+      {
          bUnderline = false;
+      }
       else
+      {
          bUnderline = true;
+      }
    }
 
    mFont = QFont(QString::fromStdString(face), iSize);
@@ -597,16 +753,33 @@ bool FontProperty::fromXml(DOMNode* document, unsigned int version)
 // HatchStyleProperty //
 ////////////////////////
 
-HatchStyleProperty::HatchStyleProperty(SymbolType eHatch)
-   : GraphicProperty("HatchStyle")
+HatchStyleProperty::HatchStyleProperty(SymbolType eHatch) :
+   GraphicProperty("HatchStyle"),
+   mStyle(eHatch)
 {
-   mStyle = eHatch;
+}
+
+bool HatchStyleProperty::set(const GraphicProperty* pProp)
+{
+   const HatchStyleProperty* pHatchProp = dynamic_cast<const HatchStyleProperty*>(pProp);
+   if (pHatchProp == NULL)
+   {
+      return false;
+   }
+
+   *this = *pHatchProp;
+   return true;
 }
 
 bool HatchStyleProperty::compare(const GraphicProperty* pProp) const
 {
-   if (pProp->getName() != "HatchStyle") return false;
-   return mStyle == ((HatchStyleProperty*)pProp)->getHatchStyle();
+   const HatchStyleProperty* pHatchProp = dynamic_cast<const HatchStyleProperty*>(pProp);
+   if (pHatchProp == NULL)
+   {
+      return false;
+   }
+
+   return mStyle == pHatchProp->getHatchStyle();
 }
 
 GraphicProperty* HatchStyleProperty::copy() const
@@ -619,127 +792,163 @@ SymbolType HatchStyleProperty::getHatchStyle() const
    return mStyle;
 }
 
-bool HatchStyleProperty::toXml(XMLWriter* xml) const
+bool HatchStyleProperty::toXml(XMLWriter* pXml) const
 {
-   xml->pushAddPoint(xml->addElement("HatchStyle"));
-   GraphicProperty::toXml(xml);
-   switch(mStyle)
+   pXml->pushAddPoint(pXml->addElement("HatchStyle"));
+   GraphicProperty::toXml(pXml);
+   switch (mStyle)
    {
       case SOLID:
-         xml->addAttr("boxed","false");
-         xml->addAttr("style","solid");
+         pXml->addAttr("boxed", "false");
+         pXml->addAttr("style", "solid");
          break;
       case X:
-         xml->addAttr("boxed","false");
-         xml->addAttr("style","x");
+         pXml->addAttr("boxed", "false");
+         pXml->addAttr("style", "x");
          break;
       case CROSS_HAIR:
-         xml->addAttr("boxed","false");
-         xml->addAttr("style","cross hair");
+         pXml->addAttr("boxed", "false");
+         pXml->addAttr("style", "cross hair");
          break;
       case ASTERISK:
-         xml->addAttr("boxed","false");
-         xml->addAttr("style","asterisk");
+         pXml->addAttr("boxed", "false");
+         pXml->addAttr("style", "asterisk");
          break;
       case HORIZONTAL_LINE:
-         xml->addAttr("boxed","false");
-         xml->addAttr("style","horizontal line");
+         pXml->addAttr("boxed", "false");
+         pXml->addAttr("style", "horizontal line");
          break;
       case VERTICAL_LINE:
-         xml->addAttr("boxed","false");
-         xml->addAttr("style","vertical line");
+         pXml->addAttr("boxed", "false");
+         pXml->addAttr("style", "vertical line");
          break;
       case FORWARD_SLASH:
-         xml->addAttr("boxed","false");
-         xml->addAttr("style","forward slash");
+         pXml->addAttr("boxed", "false");
+         pXml->addAttr("style", "forward slash");
          break;
       case BACK_SLASH:
-         xml->addAttr("boxed","false");
-         xml->addAttr("style","back slash");
+         pXml->addAttr("boxed", "false");
+         pXml->addAttr("style", "back slash");
          break;
       case BOX:
-         xml->addAttr("boxed","true");
-         xml->addAttr("style","solid");
+         pXml->addAttr("boxed", "true");
+         pXml->addAttr("style", "solid");
          break;
       case BOXED_X:
-         xml->addAttr("boxed","true");
-         xml->addAttr("style","x");
+         pXml->addAttr("boxed", "true");
+         pXml->addAttr("style", "x");
          break;
       case BOXED_CROSS_HAIR:
-         xml->addAttr("boxed","true");
-         xml->addAttr("style","cross hair");
+         pXml->addAttr("boxed", "true");
+         pXml->addAttr("style", "cross hair");
          break;
       case BOXED_ASTERISK:
-         xml->addAttr("boxed","true");
-         xml->addAttr("style","asterisk");
+         pXml->addAttr("boxed", "true");
+         pXml->addAttr("style", "asterisk");
          break;
       case BOXED_HORIZONTAL_LINE:
-         xml->addAttr("boxed","true");
-         xml->addAttr("style","horizontal line");
+         pXml->addAttr("boxed", "true");
+         pXml->addAttr("style", "horizontal line");
          break;
       case BOXED_VERTICAL_LINE:
-         xml->addAttr("boxed","true");
-         xml->addAttr("style","vertical line");
+         pXml->addAttr("boxed", "true");
+         pXml->addAttr("style", "vertical line");
          break;
       case BOXED_FORWARD_SLASH:
-         xml->addAttr("boxed","true");
-         xml->addAttr("style","forward slash");
+         pXml->addAttr("boxed", "true");
+         pXml->addAttr("style", "forward slash");
          break;
       case BOXED_BACK_SLASH:
-         xml->addAttr("boxed","true");
-         xml->addAttr("style","back slash");
+         pXml->addAttr("boxed", "true");
+         pXml->addAttr("style", "back slash");
+         break;
+      default:
          break;
    }
-   xml->popAddPoint();
 
+   pXml->popAddPoint();
    return true;
 }
 
-bool HatchStyleProperty::fromXml(DOMNode* document, unsigned int version)
+bool HatchStyleProperty::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   GraphicProperty::fromXml(document, version);
+   GraphicProperty::fromXml(pDocument, version);
 
-   DOMElement *elmnt(static_cast<DOMElement*>(document));
+   DOMElement* elmnt(static_cast<DOMElement*>(pDocument));
    string style(A(elmnt->getAttribute(X("style"))));
    bool boxed(true);
    {
       string boxedS(A(elmnt->getAttribute(X("boxed"))));
-      if(boxedS == "0" || boxedS == "f" || boxedS == "false")
+      if (boxedS == "0" || boxedS == "f" || boxedS == "false")
+      {
          boxed = false;
+      }
    }
 
-   if(style == "solid" && !boxed)
+   if (style == "solid" && !boxed)
+   {
       mStyle = SOLID;
-   else if(style == "x" && !boxed)
+   }
+   else if (style == "x" && !boxed)
+   {
       mStyle = X;
-   else if(style == "cross hair" && !boxed)
+   }
+   else if (style == "cross hair" && !boxed)
+   {
       mStyle = CROSS_HAIR;
-   else if(style == "asterisk" && !boxed)
+   }
+   else if (style == "asterisk" && !boxed)
+   {
       mStyle = ASTERISK;
-   else if(style == "horizontal line" && !boxed)
+   }
+   else if (style == "horizontal line" && !boxed)
+   {
       mStyle = HORIZONTAL_LINE;
-   else if(style == "vertical line" && !boxed)
+   }
+   else if (style == "vertical line" && !boxed)
+   {
       mStyle = VERTICAL_LINE;
-   else if(style == "forward slash" && !boxed)
+   }
+   else if (style == "forward slash" && !boxed)
+   {
       mStyle = FORWARD_SLASH;
-   else if(style == "back slash" && !boxed)
+   }
+   else if (style == "back slash" && !boxed)
+   {
       mStyle = BACK_SLASH;
-   else if(style == "solid" && boxed)
+   }
+   else if (style == "solid" && boxed)
+   {
       mStyle = BOX;
-   else if(style == "x" && boxed)
+   }
+   else if (style == "x" && boxed)
+   {
       mStyle = BOXED_X;
-   else if(style == "cross hair" && boxed)
+   }
+   else if (style == "cross hair" && boxed)
+   {
       mStyle = BOXED_CROSS_HAIR;
-   else if(style == "asterisk" && boxed)
+   }
+   else if (style == "asterisk" && boxed)
+   {
       mStyle = BOXED_ASTERISK;
-   else if(style == "horizontal line" && boxed)
+   }
+   else if (style == "horizontal line" && boxed)
+   {
       mStyle = BOXED_HORIZONTAL_LINE;
-   else if(style == "vertical line" && boxed)
+   }
+   else if (style == "vertical line" && boxed)
+   {
       mStyle = BOXED_VERTICAL_LINE;
-   else if(style == "forward slash" && boxed)
+   }
+   else if (style == "forward slash" && boxed)
+   {
       mStyle = BOXED_FORWARD_SLASH;
-   else if(style == "back slash" && boxed)
+   }
+   else if (style == "back slash" && boxed)
+   {
       mStyle = BOXED_BACK_SLASH;
+   }
 
    return true;
 }
@@ -748,16 +957,38 @@ bool HatchStyleProperty::fromXml(DOMNode* document, unsigned int version)
 // LatLonProperty //
 ////////////////////
 
-bool LatLonProperty::set(const GraphicProperty *pProp)
+LatLonProperty::LatLonProperty(LatLonPoint latLonPoint) :
+   GraphicProperty("LatLon"),
+   mLatLon(latLonPoint)
 {
-   *this = *(LatLonProperty*)pProp;
+}
+
+LatLonPoint LatLonProperty::getLatLon() const
+{
+   return mLatLon;
+}
+
+bool LatLonProperty::set(const GraphicProperty* pProp)
+{
+   const LatLonProperty* pLatLonProp = dynamic_cast<const LatLonProperty*>(pProp);
+   if (pLatLonProp == NULL)
+   {
+      return false;
+   }
+
+   *this = *pLatLonProp;
    return true;
 }
 
 bool LatLonProperty::compare(const GraphicProperty* pProp) const
 {
-   if (pProp->getName() != "LatLon") return false;
-   return getLatLon() == ((LatLonProperty*)pProp)->getLatLon();
+   const LatLonProperty* pLatLonProp = dynamic_cast<const LatLonProperty*>(pProp);
+   if (pLatLonProp == NULL)
+   {
+      return false;
+   }
+
+   return mLatLon == pLatLonProp->getLatLon();
 }
 
 GraphicProperty* LatLonProperty::copy() const
@@ -765,32 +996,38 @@ GraphicProperty* LatLonProperty::copy() const
    return new LatLonProperty(mLatLon);
 }
 
-bool LatLonProperty::toXml(XMLWriter* xml) const
+bool LatLonProperty::toXml(XMLWriter* pXml) const
 {
-   xml->pushAddPoint(xml->addElement("LatLon"));
-   GraphicProperty::toXml(xml);
+   pXml->pushAddPoint(pXml->addElement("LatLon"));
+   GraphicProperty::toXml(pXml);
    stringstream buf;
-   buf << getLatLon().getLatitude().getValue() << ' '
-       << getLatLon().getLongitude().getValue();
-   xml->addText(buf.str(), xml->addElement("point"));
-   xml->popAddPoint();
+   buf << getLatLon().getLatitude().getValue() << ' ' << getLatLon().getLongitude().getValue();
+   pXml->addText(buf.str(), pXml->addElement("point"));
+   pXml->popAddPoint();
 
    return true;
 }
 
-bool LatLonProperty::fromXml(DOMNode *document, unsigned int version)
+bool LatLonProperty::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   GraphicProperty::fromXml(document, version);
+   GraphicProperty::fromXml(pDocument, version);
 
-   DOMNodeList *elmnts(static_cast<DOMElement*>(document)->getElementsByTagName(X("point")));
+   DOMNodeList* elmnts(static_cast<DOMElement*>(pDocument)->getElementsByTagName(X("point")));
    XMLStringTokenizer t(elmnts->item(0)->getTextContent());
-   string lat,lon;
-   if(t.hasMoreTokens())
-      lat = A(t.nextToken());
-   if(t.hasMoreTokens())
-      lon = A(t.nextToken());
-   mLatLon = LatLonPoint(lat, lon);
 
+   string lat;
+   string lon;
+   if (t.hasMoreTokens())
+   {
+      lat = A(t.nextToken());
+   }
+
+   if (t.hasMoreTokens())
+   {
+      lon = A(t.nextToken());
+   }
+
+   mLatLon = LatLonPoint(lat, lon);
    return true;
 }
 
@@ -798,16 +1035,33 @@ bool LatLonProperty::fromXml(DOMNode *document, unsigned int version)
 // LineColorProperty //
 ///////////////////////
 
-LineColorProperty::LineColorProperty(ColorType color)
-   : GraphicProperty("LineColor")
+LineColorProperty::LineColorProperty(ColorType color) :
+   GraphicProperty("LineColor"),
+   mColor(color)
 {
-   mColor = color;
+}
+
+bool LineColorProperty::set(const GraphicProperty* pProp)
+{
+   const LineColorProperty* pColorProp = dynamic_cast<const LineColorProperty*>(pProp);
+   if (pColorProp == NULL)
+   {
+      return false;
+   }
+
+   *this = *pColorProp;
+   return true;
 }
 
 bool LineColorProperty::compare(const GraphicProperty* pProp) const
 {
-   if (pProp->getName() != "LineColor") return false;
-   return mColor == ((LineColorProperty*)pProp)->getColor();
+   const LineColorProperty* pColorProp = dynamic_cast<const LineColorProperty*>(pProp);
+   if (pColorProp == NULL)
+   {
+      return false;
+   }
+
+   return mColor == pColorProp->getColor();
 }
 
 GraphicProperty* LineColorProperty::copy() const
@@ -820,27 +1074,30 @@ ColorType LineColorProperty::getColor() const
    return mColor;
 }
 
-bool LineColorProperty::toXml(XMLWriter* xml) const
+bool LineColorProperty::toXml(XMLWriter* pXml) const
 {
-   xml->pushAddPoint(xml->addElement("LineColor"));
-   GraphicProperty::toXml(xml);
+   pXml->pushAddPoint(pXml->addElement("LineColor"));
+   GraphicProperty::toXml(pXml);
    stringstream buf;
    buf << mColor.mRed << ' ' << mColor.mGreen << ' ' << mColor.mBlue;
-   xml->addText(buf.str(), xml->addElement("color"));
-   xml->popAddPoint();
+   pXml->addText(buf.str(), pXml->addElement("color"));
+   pXml->popAddPoint();
 
    return true;
 }
 
-bool LineColorProperty::fromXml(DOMNode* document, unsigned int version)
+bool LineColorProperty::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   GraphicProperty::fromXml(document, version);
+   GraphicProperty::fromXml(pDocument, version);
 
-   DOMNodeList *elmnts(static_cast<DOMElement*>(document)->getElementsByTagName(X("color")));
-   double r,g,b,dummy;
+   DOMNodeList* elmnts(static_cast<DOMElement*>(pDocument)->getElementsByTagName(X("color")));
+   double r;
+   double g;
+   double b;
+   double dummy;
 
    XmlReader::StrToQuadCoord(elmnts->item(0)->getTextContent(), r, g, b, dummy);
-   mColor = ColorType(r,g,b);
+   mColor = ColorType(r, g, b);
 
    return true;
 }
@@ -849,16 +1106,33 @@ bool LineColorProperty::fromXml(DOMNode* document, unsigned int version)
 // LineOnProperty //
 ////////////////////
 
-LineOnProperty::LineOnProperty(bool state)
-   : GraphicProperty("LineOn")
+LineOnProperty::LineOnProperty(bool state) :
+   GraphicProperty("LineOn"),
+   mState(state)
 {
-   mState = state;
+}
+
+bool LineOnProperty::set(const GraphicProperty* pProp)
+{
+   const LineOnProperty* pLineOnProp = dynamic_cast<const LineOnProperty*>(pProp);
+   if (pLineOnProp == NULL)
+   {
+      return false;
+   }
+
+   *this = *pLineOnProp;
+   return true;
 }
 
 bool LineOnProperty::compare(const GraphicProperty* pProp) const
 {
-   if (pProp->getName() != "LineOn") return false;
-   return mState == ((LineOnProperty*)pProp)->getState();
+   const LineOnProperty* pLineOnProp = dynamic_cast<const LineOnProperty*>(pProp);
+   if (pLineOnProp == NULL)
+   {
+      return false;
+   }
+
+   return mState == pLineOnProp->getState();
 }
 
 GraphicProperty* LineOnProperty::copy() const
@@ -871,59 +1145,64 @@ bool LineOnProperty::getState() const
    return mState;
 }
 
-bool LineOnProperty::toXml(XMLWriter* xml) const
+bool LineOnProperty::toXml(XMLWriter* pXml) const
 {
-   xml->pushAddPoint(xml->addElement("LineOn"));
-   GraphicProperty::toXml(xml);
-   xml->addAttr("on", (mState) ? "true" : "false");
-   xml->popAddPoint();
+   pXml->pushAddPoint(pXml->addElement("LineOn"));
+   GraphicProperty::toXml(pXml);
+   pXml->addAttr("on", mState ? "true" : "false");
+   pXml->popAddPoint();
 
    return true;
 }
 
-bool LineOnProperty::fromXml(DOMNode* document, unsigned int version)
+bool LineOnProperty::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   GraphicProperty::fromXml(document, version);
+   GraphicProperty::fromXml(pDocument, version);
 
-   string v(A(static_cast<DOMElement*>(document)->getAttribute(X("on"))));
-   if(v == "0" || v == "f" || v == "false")
-      mState = false;
-   else
-      mState = true;
-
-   return true;
-}
-
-////////////////////
-// LineScaledProperty //
-////////////////////
-
-LineScaledProperty::LineScaledProperty(bool scaled)
-   : GraphicProperty("LineScaled"), mScaled(scaled)
-{
-}
-
-bool LineScaledProperty::set(const GraphicProperty *pProp)
-{
-   const LineScaledProperty *pScaledProp = 
-      dynamic_cast<const LineScaledProperty*>(pProp);
-   if (pScaledProp != NULL)
+   string v(A(static_cast<DOMElement*>(pDocument)->getAttribute(X("on"))));
+   if (v == "0" || v == "f" || v == "false")
    {
-      mScaled = pScaledProp->getScaled();
-      return true;
+      mState = false;
    }
-   return false;
+   else
+   {
+      mState = true;
+   }
+
+   return true;
+}
+
+////////////////////////
+// LineScaledProperty //
+////////////////////////
+
+LineScaledProperty::LineScaledProperty(bool scaled) :
+   GraphicProperty("LineScaled"),
+   mScaled(scaled)
+{
+}
+
+bool LineScaledProperty::set(const GraphicProperty* pProp)
+{
+   const LineScaledProperty* pScaledProp = dynamic_cast<const LineScaledProperty*>(pProp);
+   if (pScaledProp == NULL)
+   {
+      return false;
+   }
+
+   mScaled = pScaledProp->getScaled();
+   return true;
 }
 
 bool LineScaledProperty::compare(const GraphicProperty* pProp) const
 {
-   const LineScaledProperty *pScaledProp = 
-      dynamic_cast<const LineScaledProperty*>(pProp);
-   if (pScaledProp != NULL)
+   const LineScaledProperty* pScaledProp = dynamic_cast<const LineScaledProperty*>(pProp);
+   if (pScaledProp == NULL)
    {
-      return mScaled == pScaledProp->getScaled();
+      return false;
    }
-   return false;
+
+   return mScaled == pScaledProp->getScaled();
 }
 
 GraphicProperty* LineScaledProperty::copy() const
@@ -936,25 +1215,29 @@ bool LineScaledProperty::getScaled() const
    return mScaled;
 }
 
-bool LineScaledProperty::toXml(XMLWriter* xml) const
+bool LineScaledProperty::toXml(XMLWriter* pXml) const
 {
-   xml->pushAddPoint(xml->addElement("LineScaled"));
-   GraphicProperty::toXml(xml);
-   xml->addAttr("scaled", (mScaled) ? "true" : "false");
-   xml->popAddPoint();
+   pXml->pushAddPoint(pXml->addElement("LineScaled"));
+   GraphicProperty::toXml(pXml);
+   pXml->addAttr("scaled", (mScaled) ? "true" : "false");
+   pXml->popAddPoint();
 
    return true;
 }
 
-bool LineScaledProperty::fromXml(DOMNode* document, unsigned int version)
+bool LineScaledProperty::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   GraphicProperty::fromXml(document, version);
+   GraphicProperty::fromXml(pDocument, version);
 
-   string v(A(static_cast<DOMElement*>(document)->getAttribute(X("scaled"))));
-   if(v == "0" || v == "f" || v == "false")
+   string v(A(static_cast<DOMElement*>(pDocument)->getAttribute(X("scaled"))));
+   if (v == "0" || v == "f" || v == "false")
+   {
       mScaled = false;
+   }
    else
+   {
       mScaled = true;
+   }
 
    return true;
 }
@@ -963,16 +1246,33 @@ bool LineScaledProperty::fromXml(DOMNode* document, unsigned int version)
 // LineStyleProperty //
 ///////////////////////
 
-LineStyleProperty::LineStyleProperty(LineStyle eStyle)
-   : GraphicProperty("LineStyle")
+LineStyleProperty::LineStyleProperty(LineStyle eStyle) :
+   GraphicProperty("LineStyle"),
+   mStyle(eStyle)
 {
-   mStyle = eStyle;
+}
+
+bool LineStyleProperty::set(const GraphicProperty* pProp)
+{
+   const LineStyleProperty* pStyleProp = dynamic_cast<const LineStyleProperty*>(pProp);
+   if (pStyleProp == NULL)
+   {
+      return false;
+   }
+
+   *this = *pStyleProp;
+   return true;
 }
 
 bool LineStyleProperty::compare(const GraphicProperty* pProp) const
 {
-   if (pProp->getName() != "LineStyle") return false;
-   return mStyle == ((LineStyleProperty*)pProp)->getStyle();
+   const LineStyleProperty* pStyleProp = dynamic_cast<const LineStyleProperty*>(pProp);
+   if (pStyleProp == NULL)
+   {
+      return false;
+   }
+
+   return mStyle == pStyleProp->getStyle();
 }
 
 GraphicProperty* LineStyleProperty::copy() const
@@ -985,49 +1285,60 @@ LineStyle LineStyleProperty::getStyle() const
    return mStyle;
 }
 
-bool LineStyleProperty::toXml(XMLWriter* xml) const
+bool LineStyleProperty::toXml(XMLWriter* pXml) const
 {
-   xml->pushAddPoint(xml->addElement("LineStyle"));
-   GraphicProperty::toXml(xml);
-   switch(mStyle)
+   pXml->pushAddPoint(pXml->addElement("LineStyle"));
+   GraphicProperty::toXml(pXml);
+   switch (mStyle)
    {
       case SOLID_LINE:
-         xml->addAttr("style", "solid");
+         pXml->addAttr("style", "solid");
          break;
       case DASHED:
-         xml->addAttr("style", "dashed");
+         pXml->addAttr("style", "dashed");
          break;
       case DOT:
-         xml->addAttr("style", "dot");
+         pXml->addAttr("style", "dot");
          break;
       case DASH_DOT:
-         xml->addAttr("style", "dash dot");
+         pXml->addAttr("style", "dash dot");
          break;
       case DASH_DOT_DOT:
-         xml->addAttr("style", "dash dot dot");
+         pXml->addAttr("style", "dash dot dot");
+         break;
+      default:
          break;
    }
-   xml->popAddPoint();
 
+   pXml->popAddPoint();
    return true;
 }
 
-bool LineStyleProperty::fromXml(DOMNode* document, unsigned int version)
+bool LineStyleProperty::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   GraphicProperty::fromXml(document, version);
+   GraphicProperty::fromXml(pDocument, version);
 
-   string style(A(static_cast<DOMElement*>(document)->getAttribute(X("style"))));
-   
-   if(style == "solid")
+   string style(A(static_cast<DOMElement*>(pDocument)->getAttribute(X("style"))));
+   if (style == "solid")
+   {
       mStyle = SOLID_LINE;
-   else if(style == "dashed")
+   }
+   else if (style == "dashed")
+   {
       mStyle = DASHED;
-   else if(style == "dot")
+   }
+   else if (style == "dot")
+   {
       mStyle = DOT;
-   else if(style == "dash dot")
+   }
+   else if (style == "dash dot")
+   {
       mStyle = DASH_DOT;
-   else if(style == "dash dot dot")
+   }
+   else if (style == "dash dot dot")
+   {
       mStyle = DASH_DOT_DOT;
+   }
 
    return true;
 }
@@ -1036,16 +1347,33 @@ bool LineStyleProperty::fromXml(DOMNode* document, unsigned int version)
 // LineWidthProperty //
 ///////////////////////
 
-LineWidthProperty::LineWidthProperty(double width)
-   : GraphicProperty("LineWidth")
+LineWidthProperty::LineWidthProperty(double width) :
+   GraphicProperty("LineWidth"),
+   mWidth(width)
 {
-   mWidth = width;
+}
+
+bool LineWidthProperty::set(const GraphicProperty* pProp)
+{
+   const LineWidthProperty* pWidthProp = dynamic_cast<const LineWidthProperty*>(pProp);
+   if (pWidthProp == NULL)
+   {
+      return false;
+   }
+
+   *this = *pWidthProp;
+   return true;
 }
 
 bool LineWidthProperty::compare(const GraphicProperty* pProp) const
 {
-   if (pProp->getName() != "LineWidth") return false;
-   return mWidth == ((LineWidthProperty*)pProp)->getWidth();
+   const LineWidthProperty* pWidthProp = dynamic_cast<const LineWidthProperty*>(pProp);
+   if (pWidthProp == NULL)
+   {
+      return false;
+   }
+
+   return mWidth == pWidthProp->getWidth();
 }
 
 GraphicProperty* LineWidthProperty::copy() const
@@ -1058,22 +1386,22 @@ double LineWidthProperty::getWidth() const
    return mWidth;
 }
 
-bool LineWidthProperty::toXml(XMLWriter* xml) const
+bool LineWidthProperty::toXml(XMLWriter* pXml) const
 {
-   xml->pushAddPoint(xml->addElement("LineWidth"));
-   GraphicProperty::toXml(xml);
+   pXml->pushAddPoint(pXml->addElement("LineWidth"));
+   GraphicProperty::toXml(pXml);
    stringstream buf;
    buf << mWidth;
-   xml->addAttr("width", buf.str());
-   xml->popAddPoint();
+   pXml->addAttr("width", buf.str());
+   pXml->popAddPoint();
 
    return true;
 }
 
-bool LineWidthProperty::fromXml(DOMNode* document, unsigned int version)
+bool LineWidthProperty::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   GraphicProperty::fromXml(document, version);
-   DOMElement *elmnt(static_cast<DOMElement*>(document));
+   GraphicProperty::fromXml(pDocument, version);
+   DOMElement* elmnt(static_cast<DOMElement*>(pDocument));
    stringstream buf(A(elmnt->getAttribute(X("width"))));
    buf >> mWidth;
 
@@ -1084,16 +1412,33 @@ bool LineWidthProperty::fromXml(DOMNode* document, unsigned int version)
 // RotationProperty //
 //////////////////////
 
-RotationProperty::RotationProperty(double rotate)
-   : GraphicProperty("Rotation")
+RotationProperty::RotationProperty(double rotate) :
+   GraphicProperty("Rotation"),
+   mRotate(rotate)
 {
-   mRotate = rotate;
+}
+
+bool RotationProperty::set(const GraphicProperty* pProp)
+{
+   const RotationProperty* pRotationProp = dynamic_cast<const RotationProperty*>(pProp);
+   if (pRotationProp == NULL)
+   {
+      return false;
+   }
+
+   *this = *pRotationProp;
+   return true;
 }
 
 bool RotationProperty::compare(const GraphicProperty* pProp) const
 {
-   if (pProp->getName() != "Rotation") return false;
-   return mRotate == ((RotationProperty*)pProp)->getRotation();
+   const RotationProperty* pRotationProp = dynamic_cast<const RotationProperty*>(pProp);
+   if (pRotationProp == NULL)
+   {
+      return false;
+   }
+
+   return mRotate == pRotationProp->getRotation();
 }
 
 GraphicProperty* RotationProperty::copy() const
@@ -1106,22 +1451,22 @@ double RotationProperty::getRotation() const
    return mRotate;
 }
 
-bool RotationProperty::toXml(XMLWriter* xml) const
+bool RotationProperty::toXml(XMLWriter* pXml) const
 {
-   xml->pushAddPoint(xml->addElement("Rotation"));
-   GraphicProperty::toXml(xml);
+   pXml->pushAddPoint(pXml->addElement("Rotation"));
+   GraphicProperty::toXml(pXml);
    stringstream buf;
    buf << mRotate;
-   xml->addAttr("rotation", buf.str());
-   xml->popAddPoint();
+   pXml->addAttr("rotation", buf.str());
+   pXml->popAddPoint();
 
    return true;
 }
 
-bool RotationProperty::fromXml(DOMNode* document, unsigned int version)
+bool RotationProperty::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   GraphicProperty::fromXml(document, version);
-   DOMElement *elmnt(static_cast<DOMElement*>(document));
+   GraphicProperty::fromXml(pDocument, version);
+   DOMElement* elmnt(static_cast<DOMElement*>(pDocument));
    stringstream buf(A(elmnt->getAttribute(X("rotation"))));
    buf >> mRotate;
 
@@ -1132,16 +1477,33 @@ bool RotationProperty::fromXml(DOMNode* document, unsigned int version)
 // ScaleProperty //
 ///////////////////
 
-ScaleProperty::ScaleProperty(double scale)
-   : GraphicProperty("Scale")
+ScaleProperty::ScaleProperty(double scale) :
+   GraphicProperty("Scale"),
+   mScale(scale)
 {
-   mScale = scale;
+}
+
+bool ScaleProperty::set(const GraphicProperty* pProp)
+{
+   const ScaleProperty* pScaleProp = dynamic_cast<const ScaleProperty*>(pProp);
+   if (pScaleProp == NULL)
+   {
+      return false;
+   }
+
+   *this = *pScaleProp;
+   return true;
 }
 
 bool ScaleProperty::compare(const GraphicProperty* pProp) const
 {
-   if (pProp->getName() != "Scale") return false;
-   return mScale == ((ScaleProperty*)pProp)->getScale();
+   const ScaleProperty* pScaleProp = dynamic_cast<const ScaleProperty*>(pProp);
+   if (pScaleProp == NULL)
+   {
+      return false;
+   }
+
+   return mScale == pScaleProp->getScale();
 }
 
 GraphicProperty* ScaleProperty::copy() const
@@ -1154,22 +1516,22 @@ double ScaleProperty::getScale() const
    return mScale;
 }
 
-bool ScaleProperty::toXml(XMLWriter* xml) const
+bool ScaleProperty::toXml(XMLWriter* pXml) const
 {
-   xml->pushAddPoint(xml->addElement("Scale"));
-   GraphicProperty::toXml(xml);
+   pXml->pushAddPoint(pXml->addElement("Scale"));
+   GraphicProperty::toXml(pXml);
    stringstream buf;
    buf << mScale;
-   xml->addAttr("scale", buf.str());
-   xml->popAddPoint();
+   pXml->addAttr("scale", buf.str());
+   pXml->popAddPoint();
 
    return true;
 }
 
-bool ScaleProperty::fromXml(DOMNode* document, unsigned int version)
+bool ScaleProperty::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   GraphicProperty::fromXml(document, version);
-   DOMElement *elmnt(static_cast<DOMElement*>(document));
+   GraphicProperty::fromXml(pDocument, version);
+   DOMElement* elmnt(static_cast<DOMElement*>(pDocument));
    stringstream buf(A(elmnt->getAttribute(X("scale"))));
    buf >> mScale;
 
@@ -1180,10 +1542,10 @@ bool ScaleProperty::fromXml(DOMNode* document, unsigned int version)
 // TextAlignmentProperty //
 ///////////////////////////
 
-TextAlignmentProperty::TextAlignmentProperty(int iAlignment)
-   : GraphicProperty("TextAlignment")
+TextAlignmentProperty::TextAlignmentProperty(int iAlignment) :
+   GraphicProperty("TextAlignment"),
+   mAlignment(iAlignment)
 {
-   mAlignment = iAlignment;
 }
 
 int TextAlignmentProperty::getAlignment() const
@@ -1193,38 +1555,25 @@ int TextAlignmentProperty::getAlignment() const
 
 bool TextAlignmentProperty::set(const GraphicProperty* pProperty)
 {
-   if (pProperty == NULL)
+   const TextAlignmentProperty* pTextProperty = dynamic_cast<const TextAlignmentProperty*>(pProperty);
+   if (pTextProperty == NULL)
    {
       return false;
    }
 
-   if (pProperty->getName() != "TextAlignment")
-   {
-      return false;
-   }
-
-   const TextAlignmentProperty* pTextProperty = static_cast<const TextAlignmentProperty*> (pProperty);
    *this = *pTextProperty;
-
    return true;
 }
 
 bool TextAlignmentProperty::compare(const GraphicProperty* pProperty) const
 {
-   if (pProperty == NULL)
+   const TextAlignmentProperty* pTextProperty = dynamic_cast<const TextAlignmentProperty*>(pProperty);
+   if (pTextProperty == NULL)
    {
       return false;
    }
 
-   if (pProperty->getName() != "TextAlignment")
-   {
-      return false;
-   }
-
-   const TextAlignmentProperty* pTextProperty = static_cast<const TextAlignmentProperty*> (pProperty);
-   int iAlignment = pTextProperty->getAlignment();
-
-   return (iAlignment == mAlignment);
+   return mAlignment == pTextProperty->getAlignment();
 }
 
 GraphicProperty* TextAlignmentProperty::copy() const
@@ -1276,16 +1625,33 @@ bool TextAlignmentProperty::fromXml(DOMNode* pDocument, unsigned int version)
 // TextColorProperty //
 ///////////////////////
 
-TextColorProperty::TextColorProperty(ColorType color)
-   : GraphicProperty("TextColor")
+TextColorProperty::TextColorProperty(ColorType color) :
+   GraphicProperty("TextColor"),
+   mColor(color)
 {
-   mColor = color;
+}
+
+bool TextColorProperty::set(const GraphicProperty* pProp)
+{
+   const TextColorProperty* pColorProp = dynamic_cast<const TextColorProperty*>(pProp);
+   if (pColorProp == NULL)
+   {
+      return false;
+   }
+
+   *this = *pColorProp;
+   return true;
 }
 
 bool TextColorProperty::compare(const GraphicProperty* pProp) const
 {
-   if (pProp->getName() != "TextColor") return false;
-   return mColor == ((TextColorProperty*)pProp)->getColor();
+   const TextColorProperty* pColorProp = dynamic_cast<const TextColorProperty*>(pProp);
+   if (pColorProp == NULL)
+   {
+      return false;
+   }
+
+   return mColor == pColorProp->getColor();
 }
 
 GraphicProperty* TextColorProperty::copy() const
@@ -1298,25 +1664,28 @@ ColorType TextColorProperty::getColor() const
    return mColor;
 }
 
-bool TextColorProperty::toXml(XMLWriter* xml) const
+bool TextColorProperty::toXml(XMLWriter* pXml) const
 {
-   xml->pushAddPoint(xml->addElement("TextColor"));
-   GraphicProperty::toXml(xml);
+   pXml->pushAddPoint(pXml->addElement("TextColor"));
+   GraphicProperty::toXml(pXml);
    stringstream buf;
    buf << mColor.mRed << ' ' << mColor.mGreen << ' ' << mColor.mBlue;
-   xml->addText(buf.str(), xml->addElement("color"));
-   xml->popAddPoint();
+   pXml->addText(buf.str(), pXml->addElement("color"));
+   pXml->popAddPoint();
 
    return true;
 }
 
-bool TextColorProperty::fromXml(DOMNode* document, unsigned int version)
+bool TextColorProperty::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   DOMNodeList *elmnts(static_cast<DOMElement*>(document)->getElementsByTagName(X("color")));
-   double r,g,b,dummy;
+   DOMNodeList* elmnts(static_cast<DOMElement*>(pDocument)->getElementsByTagName(X("color")));
+   double r;
+   double g;
+   double b;
+   double dummy;
 
    XmlReader::StrToQuadCoord(elmnts->item(0)->getTextContent(), r, g, b, dummy);
-   mColor = ColorType(r,g,b);
+   mColor = ColorType(r, g, b);
    return true;
 }
 
@@ -1324,16 +1693,33 @@ bool TextColorProperty::fromXml(DOMNode* document, unsigned int version)
 // TextStringProperty //
 ////////////////////////
 
-TextStringProperty::TextStringProperty(const string& text)
-   : GraphicProperty("TextString")
+TextStringProperty::TextStringProperty(const string& text) :
+   GraphicProperty("TextString"),
+   mString(text)
 {
-   mString = text.c_str();
+}
+
+bool TextStringProperty::set(const GraphicProperty* pProp)
+{
+   const TextStringProperty* pTextProp = dynamic_cast<const TextStringProperty*>(pProp);
+   if (pTextProp == NULL)
+   {
+      return false;
+   }
+
+   *this = *pTextProp;
+   return true;
 }
 
 bool TextStringProperty::compare(const GraphicProperty* pProp) const
 {
-   if (pProp->getName() != "TextString") return false;
-   return mString == ((TextStringProperty*)pProp)->getString();
+   const TextStringProperty* pTextProp = dynamic_cast<const TextStringProperty*>(pProp);
+   if (pTextProp == NULL)
+   {
+      return false;
+   }
+
+   return mString == pTextProp->getString();
 }
 
 GraphicProperty* TextStringProperty::copy() const
@@ -1346,29 +1732,21 @@ const string& TextStringProperty::getString() const
    return mString;
 }
 
-static bool endsWith(const char *pText, const char *pEnding)
+bool TextStringProperty::toXml(XMLWriter* pXml) const
 {
-   unsigned int textLen = strlen(pText);
-   unsigned int endingLen = strlen(pEnding);
-   if (textLen < endingLen) return false;
-   return strcmp(&pText[textLen - endingLen], pEnding) == 0;
-}
-
-bool TextStringProperty::toXml(XMLWriter* xml) const
-{
-   xml->pushAddPoint(xml->addElement("TextString"));
-   GraphicProperty::toXml(xml);
-   xml->addText(mString, xml->addElement("string"));
-   xml->popAddPoint();
+   pXml->pushAddPoint(pXml->addElement("TextString"));
+   GraphicProperty::toXml(pXml);
+   pXml->addText(mString, pXml->addElement("string"));
+   pXml->popAddPoint();
 
    return true;
 }
 
-bool TextStringProperty::fromXml(DOMNode* document, unsigned int version)
+bool TextStringProperty::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   GraphicProperty::fromXml(document, version);
+   GraphicProperty::fromXml(pDocument, version);
 
-   DOMNodeList *elmnts(static_cast<DOMElement*>(document)->getElementsByTagName(X("string")));
+   DOMNodeList* elmnts(static_cast<DOMElement*>(pDocument)->getElementsByTagName(X("string")));
    mString = A(elmnts->item(0)->getTextContent());
 
    return true;
@@ -1378,19 +1756,37 @@ bool TextStringProperty::fromXml(DOMNode* document, unsigned int version)
 // WedgeProperty //
 ///////////////////
 
-WedgeProperty::WedgeProperty(double dStartAngle, double dStopAngle)
-   : GraphicProperty("Wedge")
+WedgeProperty::WedgeProperty(double dStartAngle, double dStopAngle) :
+   GraphicProperty("Wedge"),
+   mStartAngle(dStartAngle),
+   mStopAngle(dStopAngle)
 {
-   mStartAngle = dStartAngle;
-   mStopAngle = dStopAngle;
    normalizeAngles();
+}
+
+bool WedgeProperty::set(const GraphicProperty* pProperty)
+{
+   const WedgeProperty* pWedgeProp = dynamic_cast<const WedgeProperty*>(pProperty);
+   if (pWedgeProp == NULL)
+   {
+      return false;
+   }
+
+   *this = *pWedgeProp;
+   return true;
 }
 
 bool WedgeProperty::compare(const GraphicProperty* pProp) const
 {
-   if (pProp->getName() != "Wedge") return false;
-   double start = ((WedgeProperty*)pProp)->getStartAngle();
-   double stop = ((WedgeProperty*)pProp)->getStartAngle();
+   const WedgeProperty* pWedgeProp = dynamic_cast<const WedgeProperty*>(pProp);
+   if (pWedgeProp == NULL)
+   {
+      return false;
+   }
+
+   double start = pWedgeProp->getStartAngle();
+   double stop = pWedgeProp->getStartAngle();
+
    return mStartAngle == start && mStopAngle == stop;
 }
 
@@ -1409,26 +1805,26 @@ double WedgeProperty::getStopAngle() const
    return mStopAngle;
 }
 
-bool WedgeProperty::toXml(XMLWriter* xml) const
+bool WedgeProperty::toXml(XMLWriter* pXml) const
 {
-   xml->pushAddPoint(xml->addElement("Wedge"));
-   GraphicProperty::toXml(xml);
+   pXml->pushAddPoint(pXml->addElement("Wedge"));
+   GraphicProperty::toXml(pXml);
    stringstream buf;
    buf << mStartAngle;
-   xml->addAttr("start", buf.str());
+   pXml->addAttr("start", buf.str());
 
    buf.str("");
    buf << mStopAngle;
-   xml->addAttr("stop", buf.str());
-   xml->popAddPoint();
+   pXml->addAttr("stop", buf.str());
+   pXml->popAddPoint();
 
    return true;
 }
 
-bool WedgeProperty::fromXml(DOMNode* document, unsigned int version)
+bool WedgeProperty::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   GraphicProperty::fromXml(document, version);
-   DOMElement *elmnt(static_cast<DOMElement*>(document));
+   GraphicProperty::fromXml(pDocument, version);
+   DOMElement* elmnt(static_cast<DOMElement*>(pDocument));
    stringstream startStream(A(elmnt->getAttribute(X("start"))));
    startStream >> mStartAngle;
 
@@ -1482,16 +1878,33 @@ void WedgeProperty::normalizeAngles()
 // PaperSizeProperty //
 ///////////////////////
 
-PaperSizeProperty::PaperSizeProperty(LocationType size)
-   : GraphicProperty("PaperSize"),
+PaperSizeProperty::PaperSizeProperty(LocationType size) :
+   GraphicProperty("PaperSize"),
    mSize(size)
 {
 }
 
+bool PaperSizeProperty::set(const GraphicProperty* pProperty)
+{
+   const PaperSizeProperty* pSizeProp = dynamic_cast<const PaperSizeProperty*>(pProperty);
+   if (pSizeProp == NULL)
+   {
+      return false;
+   }
+
+   *this = *pSizeProp;
+   return true;
+}
+
 bool PaperSizeProperty::compare(const GraphicProperty* pProp) const
 {
-   if (pProp->getName() != "PaperSize") return false;
-   return mSize == ((PaperSizeProperty*)pProp)->getSize();
+   const PaperSizeProperty* pSizeProp = dynamic_cast<const PaperSizeProperty*>(pProp);
+   if (pSizeProp == NULL)
+   {
+      return false;
+   }
+
+   return mSize == pSizeProp->getSize();
 }
 
 GraphicProperty* PaperSizeProperty::copy() const
@@ -1504,48 +1917,60 @@ LocationType PaperSizeProperty::getSize() const
    return mSize;
 }
 
-bool PaperSizeProperty::toXml(XMLWriter* xml) const
+bool PaperSizeProperty::toXml(XMLWriter* pXml) const
 {
-   xml->pushAddPoint(xml->addElement("PaperSize"));
-   GraphicProperty::toXml(xml);
+   pXml->pushAddPoint(pXml->addElement("PaperSize"));
+   GraphicProperty::toXml(pXml);
    stringstream buf;
    buf << mSize.mX << ' ' << mSize.mY;
-   xml->addText(buf.str(), xml->addElement("size"));
-   xml->popAddPoint();
+   pXml->addText(buf.str(), pXml->addElement("size"));
+   pXml->popAddPoint();
 
    return true;
 }
 
-bool PaperSizeProperty::fromXml(DOMNode *document, unsigned int version)
+bool PaperSizeProperty::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   DOMNodeList *elmnts(static_cast<DOMElement*>(document)->getElementsByTagName(X("size")));
+   DOMNodeList* elmnts(static_cast<DOMElement*>(pDocument)->getElementsByTagName(X("size")));
    return XmlReader::StrToLocation(elmnts->item(0)->getTextContent(), mSize);
 }
 
-///////////////////////
-// FileName Property //
-///////////////////////
+//////////////////////
+// FileNameProperty //
+//////////////////////
 
 FileNameProperty::FileNameProperty(const string &filename) :
    GraphicProperty("Filename"),
-   mFileName(filename.c_str())
+   mFileName(filename)
 {
 }
 
-bool FileNameProperty::set(const GraphicProperty *pProp)
+const string& FileNameProperty::getFileName() const
 {
-   *this = *(FileNameProperty*)pProp;
+   return mFileName;
+}
+
+bool FileNameProperty::set(const GraphicProperty* pProp)
+{
+   const FileNameProperty* pFileNameProp = dynamic_cast<const FileNameProperty*>(pProp);
+   if (pFileNameProp == NULL)
+   {
+      return false;
+   }
+
+   *this = *pFileNameProp;
    return true;
 }
 
 bool FileNameProperty::compare(const GraphicProperty* pProp) const
 {
-   if (pProp->getName() != "Filename")
+   const FileNameProperty* pFileNameProp = dynamic_cast<const FileNameProperty*>(pProp);
+   if (pFileNameProp == NULL)
    {
       return false;
    }
 
-   return ((FileNameProperty*) pProp)->getFileName() == getFileName();
+   return mFileName == pFileNameProp->getFileName();
 }
 
 GraphicProperty* FileNameProperty::copy() const
@@ -1553,39 +1978,51 @@ GraphicProperty* FileNameProperty::copy() const
    return new FileNameProperty(mFileName);
 }
 
-bool FileNameProperty::toXml(XMLWriter* xml) const
+bool FileNameProperty::toXml(XMLWriter* pXml) const
 {
-   xml->pushAddPoint(xml->addElement("Filename"));
-   GraphicProperty::toXml(xml);
-   xml->addAttr("source", XmlBase::PathToURL(getFileName()));
-   xml->popAddPoint();
+   pXml->pushAddPoint(pXml->addElement("Filename"));
+   GraphicProperty::toXml(pXml);
+   pXml->addAttr("source", XmlBase::PathToURL(getFileName()));
+   pXml->popAddPoint();
 
    return true;
 }
 
-bool FileNameProperty::fromXml(DOMNode* document, unsigned int version)
+bool FileNameProperty::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   bool bSuccess = GraphicProperty::fromXml(document, version);
+   bool bSuccess = GraphicProperty::fromXml(pDocument, version);
    if (bSuccess == true)
    {
-      mFileName = XmlBase::URLtoPath(static_cast<DOMElement*>(document)->getAttribute(X("source")));
+      mFileName = XmlBase::URLtoPath(static_cast<DOMElement*>(pDocument)->getAttribute(X("source")));
    }
 
    return bSuccess;
 }
 
-/////////////////////
-// Symbol Property //
-/////////////////////
-PixelSymbolProperty::PixelSymbolProperty(SymbolType symbol)
-   : GraphicProperty("PixelSymbol"), mSymbol(symbol)
+/////////////////////////
+// PixelSymbolProperty //
+/////////////////////////
+
+PixelSymbolProperty::PixelSymbolProperty(SymbolType symbol) :
+   GraphicProperty("PixelSymbol"),
+   mSymbol(symbol)
 {
+}
+
+SymbolType PixelSymbolProperty::getPixelSymbol() const
+{
+   return mSymbol;
 }
 
 bool PixelSymbolProperty::compare(const GraphicProperty* pProp) const
 {
-   if (pProp->getName() != "PixelSymbol") return false;
-   return mSymbol == static_cast<const PixelSymbolProperty*>(pProp)->getPixelSymbol();
+   const PixelSymbolProperty* pSymbolProp = dynamic_cast<const PixelSymbolProperty*>(pProp);
+   if (pSymbolProp == NULL)
+   {
+      return false;
+   }
+
+   return mSymbol == pSymbolProp->getPixelSymbol();
 }
 
 GraphicProperty* PixelSymbolProperty::copy() const
@@ -1593,188 +2030,208 @@ GraphicProperty* PixelSymbolProperty::copy() const
    return new PixelSymbolProperty(mSymbol);
 }
 
-bool PixelSymbolProperty::toXml(XMLWriter* xml) const
+bool PixelSymbolProperty::toXml(XMLWriter* pXml) const
 {
-   xml->pushAddPoint(xml->addElement("PixelSymbol"));
-   GraphicProperty::toXml(xml);
-   switch(mSymbol)
+   pXml->pushAddPoint(pXml->addElement("PixelSymbol"));
+   GraphicProperty::toXml(pXml);
+   switch (mSymbol)
    {
       case SOLID:
-         xml->addAttr("boxed","false");
-         xml->addAttr("symbol","solid");
+         pXml->addAttr("boxed", "false");
+         pXml->addAttr("symbol", "solid");
          break;
       case X:
-         xml->addAttr("boxed","false");
-         xml->addAttr("symbol","x");
+         pXml->addAttr("boxed", "false");
+         pXml->addAttr("symbol", "x");
          break;
       case CROSS_HAIR:
-         xml->addAttr("boxed","false");
-         xml->addAttr("symbol","cross hair");
+         pXml->addAttr("boxed", "false");
+         pXml->addAttr("symbol", "cross hair");
          break;
       case ASTERISK:
-         xml->addAttr("boxed","false");
-         xml->addAttr("symbol","asterisk");
+         pXml->addAttr("boxed", "false");
+         pXml->addAttr("symbol", "asterisk");
          break;
       case HORIZONTAL_LINE:
-         xml->addAttr("boxed","false");
-         xml->addAttr("symbol","horizontal line");
+         pXml->addAttr("boxed", "false");
+         pXml->addAttr("symbol", "horizontal line");
          break;
       case VERTICAL_LINE:
-         xml->addAttr("boxed","false");
-         xml->addAttr("symbol","vertical line");
+         pXml->addAttr("boxed", "false");
+         pXml->addAttr("symbol", "vertical line");
          break;
       case FORWARD_SLASH:
-         xml->addAttr("boxed","false");
-         xml->addAttr("symbol","forward slash");
+         pXml->addAttr("boxed", "false");
+         pXml->addAttr("symbol", "forward slash");
          break;
       case BACK_SLASH:
-         xml->addAttr("boxed","false");
-         xml->addAttr("symbol","back slash");
+         pXml->addAttr("boxed", "false");
+         pXml->addAttr("symbol", "back slash");
          break;
       case BOX:
-         xml->addAttr("boxed","true");
-         xml->addAttr("symbol","solid");
+         pXml->addAttr("boxed", "true");
+         pXml->addAttr("symbol", "solid");
          break;
       case BOXED_X:
-         xml->addAttr("boxed","true");
-         xml->addAttr("symbol","x");
+         pXml->addAttr("boxed", "true");
+         pXml->addAttr("symbol", "x");
          break;
       case BOXED_CROSS_HAIR:
-         xml->addAttr("boxed","true");
-         xml->addAttr("symbol","cross hair");
+         pXml->addAttr("boxed", "true");
+         pXml->addAttr("symbol", "cross hair");
          break;
       case BOXED_ASTERISK:
-         xml->addAttr("boxed","true");
-         xml->addAttr("symbol","asterisk");
+         pXml->addAttr("boxed", "true");
+         pXml->addAttr("symbol", "asterisk");
          break;
       case BOXED_HORIZONTAL_LINE:
-         xml->addAttr("boxed","true");
-         xml->addAttr("symbol","horizontal line");
+         pXml->addAttr("boxed", "true");
+         pXml->addAttr("symbol", "horizontal line");
          break;
       case BOXED_VERTICAL_LINE:
-         xml->addAttr("boxed","true");
-         xml->addAttr("symbol","vertical line");
+         pXml->addAttr("boxed", "true");
+         pXml->addAttr("symbol", "vertical line");
          break;
       case BOXED_FORWARD_SLASH:
-         xml->addAttr("boxed","true");
-         xml->addAttr("symbol","forward slash");
+         pXml->addAttr("boxed", "true");
+         pXml->addAttr("symbol", "forward slash");
          break;
       case BOXED_BACK_SLASH:
-         xml->addAttr("boxed","true");
-         xml->addAttr("symbol","back slash");
+         pXml->addAttr("boxed", "true");
+         pXml->addAttr("symbol", "back slash");
          break;
       default:
          break;
    }
-   xml->popAddPoint();
 
+   pXml->popAddPoint();
    return true;
 }
 
-bool PixelSymbolProperty::fromXml(DOMNode* document, unsigned int version)
+bool PixelSymbolProperty::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   GraphicProperty::fromXml(document, version);
+   GraphicProperty::fromXml(pDocument, version);
 
-   DOMElement *elmnt(static_cast<DOMElement*>(document));
+   DOMElement* elmnt(static_cast<DOMElement*>(pDocument));
    string symbol(A(elmnt->getAttribute(X("symbol"))));
    bool boxed(true);
+
+   string boxedS(A(elmnt->getAttribute(X("boxed"))));
+   if (boxedS == "0" || boxedS == "f" || boxedS == "false")
    {
-      string boxedS(A(elmnt->getAttribute(X("boxed"))));
-      if(boxedS == "0" || boxedS == "f" || boxedS == "false")
-         boxed = false;
+      boxed = false;
    }
 
-   if(symbol == "solid" && !boxed)
+   if (!boxed)
    {
-      mSymbol = SOLID;
+      if (symbol == "solid")
+      {
+         mSymbol = SOLID;
+      }
+      else if (symbol == "x")
+      {
+         mSymbol = X;
+      }
+      else if (symbol == "cross hair")
+      {
+         mSymbol = CROSS_HAIR;
+      }
+      else if (symbol == "asterisk")
+      {
+         mSymbol = ASTERISK;
+      }
+      else if (symbol == "horizontal line")
+      {
+         mSymbol = HORIZONTAL_LINE;
+      }
+      else if (symbol == "vertical line")
+      {
+         mSymbol = VERTICAL_LINE;
+      }
+      else if (symbol == "forward slash")
+      {
+         mSymbol = FORWARD_SLASH;
+      }
+      else if (symbol == "back slash")
+      {
+         mSymbol = BACK_SLASH;
+      }
    }
-   else if(symbol == "x" && !boxed)
+   else
    {
-      mSymbol = X;
-   }
-   else if(symbol == "cross hair" && !boxed)
-   {
-      mSymbol = CROSS_HAIR;
-   }
-   else if(symbol == "asterisk" && !boxed)
-   {
-      mSymbol = ASTERISK;
-   }
-   else if(symbol == "horizontal line" && !boxed)
-   {
-      mSymbol = HORIZONTAL_LINE;
-   }
-   else if(symbol == "vertical line" && !boxed)
-   {
-      mSymbol = VERTICAL_LINE;
-   }
-   else if(symbol == "forward slash" && !boxed)
-   {
-      mSymbol = FORWARD_SLASH;
-   }
-   else if(symbol == "back slash" && !boxed)
-   {
-      mSymbol = BACK_SLASH;
-   }
-   else if(symbol == "solid" && boxed)
-   {
-      mSymbol = BOX;
-   }
-   else if(symbol == "x" && boxed)
-   {
-      mSymbol = BOXED_X;
-   }
-   else if(symbol == "cross hair" && boxed)
-   {
-      mSymbol = BOXED_CROSS_HAIR;
-   }
-   else if(symbol == "asterisk" && boxed)
-   {
-      mSymbol = BOXED_ASTERISK;
-   }
-   else if(symbol == "horizontal line" && boxed)
-   {
-      mSymbol = BOXED_HORIZONTAL_LINE;
-   }
-   else if(symbol == "vertical line" && boxed)
-   {
-      mSymbol = BOXED_VERTICAL_LINE;
-   }
-   else if(symbol == "forward slash" && boxed)
-   {
-      mSymbol = BOXED_FORWARD_SLASH;
-   }
-   else if(symbol == "back slash" && boxed)
-   {
-      mSymbol = BOXED_BACK_SLASH;
+      if (symbol == "solid")
+      {
+         mSymbol = BOX;
+      }
+      else if (symbol == "x")
+      {
+         mSymbol = BOXED_X;
+      }
+      else if (symbol == "cross hair")
+      {
+         mSymbol = BOXED_CROSS_HAIR;
+      }
+      else if (symbol == "asterisk")
+      {
+         mSymbol = BOXED_ASTERISK;
+      }
+      else if (symbol == "horizontal line")
+      {
+         mSymbol = BOXED_HORIZONTAL_LINE;
+      }
+      else if (symbol == "vertical line")
+      {
+         mSymbol = BOXED_VERTICAL_LINE;
+      }
+      else if (symbol == "forward slash")
+      {
+         mSymbol = BOXED_FORWARD_SLASH;
+      }
+      else if (symbol == "back slash")
+      {
+         mSymbol = BOXED_BACK_SLASH;
+      }
    }
 
    return true;
 }
 
-bool PixelSymbolProperty::set(const GraphicProperty *pProp)
+bool PixelSymbolProperty::set(const GraphicProperty* pProp)
 {
-   const PixelSymbolProperty *pSymbolProp = dynamic_cast<const PixelSymbolProperty*>(pProp);
+   const PixelSymbolProperty* pSymbolProp = dynamic_cast<const PixelSymbolProperty*>(pProp);
    if (pSymbolProp == NULL)
    {
       return false;
    }
+
    mSymbol = pSymbolProp->mSymbol;
    return true;
 }
 
-////////////////////////
-// Draw Mode Property //
-////////////////////////
-DrawModeProperty::DrawModeProperty(ModeType mode)
-   : GraphicProperty("DrawMode"), mMode(mode)
+//////////////////////
+// DrawModeProperty //
+//////////////////////
+
+DrawModeProperty::DrawModeProperty(ModeType mode) :
+   GraphicProperty("DrawMode"),
+   mMode(mode)
 {
+}
+
+ModeType DrawModeProperty::getDrawMode() const
+{
+   return mMode;
 }
 
 bool DrawModeProperty::compare(const GraphicProperty* pProp) const
 {
-   if (pProp->getName() != "DrawMode") return false;
-   return mMode == static_cast<const DrawModeProperty*>(pProp)->getDrawMode();
+   const DrawModeProperty* pModeProp = dynamic_cast<const DrawModeProperty*>(pProp);
+   if (pModeProp == NULL)
+   {
+      return false;
+   }
+
+   return mMode == pModeProp->getDrawMode();
 }
 
 GraphicProperty* DrawModeProperty::copy() const
@@ -1782,34 +2239,34 @@ GraphicProperty* DrawModeProperty::copy() const
    return new DrawModeProperty(mMode);
 }
 
-bool DrawModeProperty::toXml(XMLWriter* xml) const
+bool DrawModeProperty::toXml(XMLWriter* pXml) const
 {
-   xml->pushAddPoint(xml->addElement("DrawMode"));
-   GraphicProperty::toXml(xml);
-   switch(mMode)
+   pXml->pushAddPoint(pXml->addElement("DrawMode"));
+   GraphicProperty::toXml(pXml);
+   switch (mMode)
    {
       case DRAW:
-         xml->addAttr("mode", "draw");
+         pXml->addAttr("mode", "draw");
          break;
       case ERASE:
-         xml->addAttr("mode", "erase");
+         pXml->addAttr("mode", "erase");
          break;
       case TOGGLE:
-         xml->addAttr("mode", "toggle");
+         pXml->addAttr("mode", "toggle");
          break;
       default:
          break;
    }
-   xml->popAddPoint();
 
+   pXml->popAddPoint();
    return true;
 }
 
-bool DrawModeProperty::fromXml(DOMNode* document, unsigned int version)
+bool DrawModeProperty::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   GraphicProperty::fromXml(document, version);
+   GraphicProperty::fromXml(pDocument, version);
 
-   DOMElement *elmnt(static_cast<DOMElement*>(document));
+   DOMElement* elmnt(static_cast<DOMElement*>(pDocument));
    string mode(A(elmnt->getAttribute(X("mode"))));
 
    if (mode == "draw")
@@ -1830,27 +2287,40 @@ bool DrawModeProperty::fromXml(DOMNode* document, unsigned int version)
 
 bool DrawModeProperty::set(const GraphicProperty *pProp)
 {
-   const DrawModeProperty *pModeProp = dynamic_cast<const DrawModeProperty*>(pProp);
+   const DrawModeProperty* pModeProp = dynamic_cast<const DrawModeProperty*>(pProp);
    if (pModeProp == NULL)
    {
       return false;
    }
+
    mMode = pModeProp->mMode;
    return true;
 }
 
-////////////////////////
-// Graphic Symbol Property //
-////////////////////////
-GraphicSymbolProperty::GraphicSymbolProperty(const std::string &symbolName)
-   : GraphicProperty("GraphicSymbol"), mSymbolName(symbolName)
+///////////////////////////
+// GraphicSymbolProperty //
+///////////////////////////
+
+GraphicSymbolProperty::GraphicSymbolProperty(const string& symbolName) :
+   GraphicProperty("GraphicSymbol"),
+   mSymbolName(symbolName)
 {
+}
+
+const string& GraphicSymbolProperty::getSymbolName() const
+{
+   return mSymbolName;
 }
 
 bool GraphicSymbolProperty::compare(const GraphicProperty* pProp) const
 {
-   if (pProp->getName() != getName()) return false;
-   return mSymbolName == static_cast<const GraphicSymbolProperty*>(pProp)->getSymbolName();
+   const GraphicSymbolProperty* pSymbolProp = dynamic_cast<const GraphicSymbolProperty*>(pProp);
+   if (pSymbolProp == NULL)
+   {
+      return false;
+   }
+
+   return mSymbolName == pSymbolProp->getSymbolName();
 }
 
 GraphicProperty* GraphicSymbolProperty::copy() const
@@ -1858,21 +2328,21 @@ GraphicProperty* GraphicSymbolProperty::copy() const
    return new GraphicSymbolProperty(mSymbolName);
 }
 
-bool GraphicSymbolProperty::toXml(XMLWriter* xml) const
+bool GraphicSymbolProperty::toXml(XMLWriter* pXml) const
 {
-   xml->pushAddPoint(xml->addElement("GraphicSymbol"));
-   GraphicProperty::toXml(xml);
-   xml->addAttr("name", mSymbolName);
-   xml->popAddPoint();
+   pXml->pushAddPoint(pXml->addElement("GraphicSymbol"));
+   GraphicProperty::toXml(pXml);
+   pXml->addAttr("name", mSymbolName);
+   pXml->popAddPoint();
 
    return true;
 }
 
-bool GraphicSymbolProperty::fromXml(DOMNode* document, unsigned int version)
+bool GraphicSymbolProperty::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   GraphicProperty::fromXml(document, version);
+   GraphicProperty::fromXml(pDocument, version);
 
-   DOMElement *elmnt(static_cast<DOMElement*>(document));
+   DOMElement* elmnt(static_cast<DOMElement*>(pDocument));
    mSymbolName = A(elmnt->getAttribute(X("name")));
 
    return true;
@@ -1880,27 +2350,40 @@ bool GraphicSymbolProperty::fromXml(DOMNode* document, unsigned int version)
 
 bool GraphicSymbolProperty::set(const GraphicProperty *pProp)
 {
-   const GraphicSymbolProperty *pSymbolProp = dynamic_cast<const GraphicSymbolProperty*>(pProp);
+   const GraphicSymbolProperty* pSymbolProp = dynamic_cast<const GraphicSymbolProperty*>(pProp);
    if (pSymbolProp == NULL)
    {
       return false;
    }
+
    mSymbolName = pSymbolProp->mSymbolName;
    return true;
 }
 
-////////////////////////
-// Graphic Symbol Size Property //
-////////////////////////
-GraphicSymbolSizeProperty::GraphicSymbolSizeProperty(unsigned int symbolSize)
-   : GraphicProperty("GraphicSymbolSize"), mSymbolSize(symbolSize)
+///////////////////////////////
+// GraphicSymbolSizeProperty //
+///////////////////////////////
+
+GraphicSymbolSizeProperty::GraphicSymbolSizeProperty(unsigned int symbolSize) :
+   GraphicProperty("GraphicSymbolSize"),
+   mSymbolSize(symbolSize)
 {
+}
+
+const unsigned int GraphicSymbolSizeProperty::getSymbolSize() const
+{
+   return mSymbolSize;
 }
 
 bool GraphicSymbolSizeProperty::compare(const GraphicProperty* pProp) const
 {
-   if (pProp->getName() != getName()) return false;
-   return mSymbolSize == static_cast<const GraphicSymbolSizeProperty*>(pProp)->getSymbolSize();
+   const GraphicSymbolSizeProperty* pSymbolProp = dynamic_cast<const GraphicSymbolSizeProperty*>(pProp);
+   if (pSymbolProp == NULL)
+   {
+      return false;
+   }
+
+   return mSymbolSize == pSymbolProp->getSymbolSize();
 }
 
 GraphicProperty* GraphicSymbolSizeProperty::copy() const
@@ -1908,34 +2391,35 @@ GraphicProperty* GraphicSymbolSizeProperty::copy() const
    return new GraphicSymbolSizeProperty(mSymbolSize);
 }
 
-bool GraphicSymbolSizeProperty::toXml(XMLWriter* xml) const
+bool GraphicSymbolSizeProperty::toXml(XMLWriter* pXml) const
 {
-   xml->pushAddPoint(xml->addElement("GraphicSymbolSize"));
-   GraphicProperty::toXml(xml);
-   xml->addAttr("size", mSymbolSize);
-   xml->popAddPoint();
+   pXml->pushAddPoint(pXml->addElement("GraphicSymbolSize"));
+   GraphicProperty::toXml(pXml);
+   pXml->addAttr("size", mSymbolSize);
+   pXml->popAddPoint();
 
    return true;
 }
 
-bool GraphicSymbolSizeProperty::fromXml(DOMNode* document, unsigned int version)
+bool GraphicSymbolSizeProperty::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   GraphicProperty::fromXml(document, version);
+   GraphicProperty::fromXml(pDocument, version);
 
-   DOMElement *elmnt(static_cast<DOMElement*>(document));
+   DOMElement* elmnt(static_cast<DOMElement*>(pDocument));
    string symbolSize = A(elmnt->getAttribute(X("size")));
    mSymbolSize = boost::lexical_cast<unsigned int>(symbolSize);
 
    return true;
 }
 
-bool GraphicSymbolSizeProperty::set(const GraphicProperty *pProp)
+bool GraphicSymbolSizeProperty::set(const GraphicProperty* pProp)
 {
-   const GraphicSymbolSizeProperty *pSymbolProp = dynamic_cast<const GraphicSymbolSizeProperty*>(pProp);
+   const GraphicSymbolSizeProperty* pSymbolProp = dynamic_cast<const GraphicSymbolSizeProperty*>(pProp);
    if (pSymbolProp == NULL)
    {
       return false;
    }
+
    mSymbolSize = pSymbolProp->mSymbolSize;
    return true;
 }

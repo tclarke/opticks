@@ -196,12 +196,10 @@ namespace
       pFd->setDatasetLocation(datasetLocation);
       pFd->setEndian(endian);
 
-      RasterDataDescriptor *pRasterDd = dynamic_cast<RasterDataDescriptor*>(pDd);
-
+      RasterDataDescriptor* pRasterDd = dynamic_cast<RasterDataDescriptor*>(pDd);
       if (pRasterDd != NULL)
       {
-         RasterFileDescriptor *pRasterFd = 
-            dynamic_cast<RasterFileDescriptor*>(pFd);
+         RasterFileDescriptor* pRasterFd = dynamic_cast<RasterFileDescriptor*>(pFd);
          VERIFYNRV(pRasterFd != NULL);
 
          unsigned int bitsPerElement = RasterUtilities::bytesInEncoding(pRasterDd->getDataType()) * 8;
@@ -265,10 +263,10 @@ namespace
 FileDescriptor *RasterUtilities::generateFileDescriptor(DataDescriptor *pDd, 
    const std::string &filename, const std::string &datasetLocation, EndianType endian)
 {
-   const RasterDataDescriptor *pRasterDd = dynamic_cast<const RasterDataDescriptor*>(pDd);
+   const RasterDataDescriptor* pRasterDd = dynamic_cast<const RasterDataDescriptor*>(pDd);
 
    // Create the file descriptor
-   FileDescriptor *pFd = NULL;
+   FileDescriptor* pFd = NULL;
    if (pRasterDd != NULL)
    {
       FactoryResource<RasterFileDescriptor> pRasterFd;
@@ -292,7 +290,7 @@ FileDescriptor *RasterUtilities::generateAndSetFileDescriptor(DataDescriptor *pD
 {
    VERIFYRV(pDd != NULL, NULL);
 
-   const RasterDataDescriptor *pRasterDd = dynamic_cast<const RasterDataDescriptor*>(pDd);
+   const RasterDataDescriptor* pRasterDd = dynamic_cast<const RasterDataDescriptor*>(pDd);
 
    // Create the file descriptor
    if (pRasterDd != NULL)
@@ -331,10 +329,10 @@ FileDescriptor* RasterUtilities::generateFileDescriptorForExport(const DataDescr
    unsigned int colSkipFactor,
    const vector<DimensionDescriptor>& subsetBands)
 {
-   const RasterDataDescriptor *pRasterDd = dynamic_cast<const RasterDataDescriptor*>(pDd);
+   const RasterDataDescriptor* pRasterDd = dynamic_cast<const RasterDataDescriptor*>(pDd);
 
    // Create the file descriptor
-   FileDescriptor *pFd = NULL;
+   FileDescriptor* pFd = NULL;
    if (pRasterDd != NULL)
    {
       FactoryResource<RasterFileDescriptor> pRasterFd;
@@ -358,8 +356,7 @@ FileDescriptor* RasterUtilities::generateFileDescriptorForExport(const DataDescr
 
    if (pRasterDd != NULL)
    {
-      RasterFileDescriptor *pRasterFd = 
-         dynamic_cast<RasterFileDescriptor*>(pFd);
+      RasterFileDescriptor* pRasterFd = dynamic_cast<RasterFileDescriptor*>(pFd);
       VERIFY(pRasterFd != NULL);
 
       unsigned int bitsPerElement = RasterUtilities::bytesInEncoding(pRasterDd->getDataType()) * 8;
@@ -371,7 +368,8 @@ FileDescriptor* RasterUtilities::generateFileDescriptorForExport(const DataDescr
       pRasterFd->setRows(rows);
 
       // Columns
-      vector<DimensionDescriptor> columns = subsetDimensionVector(pRasterDd->getColumns(), startCol, stopCol, colSkipFactor);
+      vector<DimensionDescriptor> columns =
+         subsetDimensionVector(pRasterDd->getColumns(), startCol, stopCol, colSkipFactor);
       std::transform(columns.begin(), columns.end(), columns.begin(), SetOnDiskNumber());
       pRasterFd->setColumns(columns);
 
@@ -423,7 +421,8 @@ FileDescriptor* RasterUtilities::generateFileDescriptorForExport(const DataDescr
    if (pRasterDd != NULL)
    {
       // Bands
-      vector<DimensionDescriptor> bands = subsetDimensionVector(pRasterDd->getBands(), startBand, stopBand, bandSkipFactor);
+      vector<DimensionDescriptor> bands =
+         subsetDimensionVector(pRasterDd->getBands(), startBand, stopBand, bandSkipFactor);
       return generateFileDescriptorForExport(pDd, filename, startRow, stopRow,
          rowSkipFactor, startCol, stopCol, colSkipFactor, bands);
    }
@@ -434,24 +433,23 @@ FileDescriptor* RasterUtilities::generateFileDescriptorForExport(const DataDescr
 size_t RasterUtilities::bytesInEncoding(EncodingType encoding)
 {
    switchOnComplexEncoding(encoding, return ::sizeofType, NULL);
-
    return 0;
 }
 
-RasterDataDescriptor *RasterUtilities::generateRasterDataDescriptor(
-   const std::string &name, DataElement *pParent, unsigned int rows, 
-   unsigned int cols, EncodingType encoding, ProcessingLocation location)
+RasterDataDescriptor* RasterUtilities::generateRasterDataDescriptor(const string& name, DataElement* pParent,
+                                                                    unsigned int rows, unsigned int columns,
+                                                                    EncodingType encoding, ProcessingLocation location)
 {
-   return generateRasterDataDescriptor(name, pParent, rows, cols, 1, BIP, encoding, location);
+   return generateRasterDataDescriptor(name, pParent, rows, columns, 1, BIP, encoding, location);
 }
 
-RasterDataDescriptor *RasterUtilities::generateRasterDataDescriptor(
-   const std::string &name, DataElement *pParent, unsigned int rows, 
-   unsigned int cols, unsigned int bands, InterleaveFormatType interleave,
-   EncodingType encoding, ProcessingLocation location)
+RasterDataDescriptor* RasterUtilities::generateRasterDataDescriptor(const string& name, DataElement* pParent,
+                                                                    unsigned int rows, unsigned int columns,
+                                                                    unsigned int bands, InterleaveFormatType interleave,
+                                                                    EncodingType encoding, ProcessingLocation location)
 {
    Service<ModelServices> pModel;
-   RasterDataDescriptor *pDd = dynamic_cast<RasterDataDescriptor*>(
+   RasterDataDescriptor* pDd = dynamic_cast<RasterDataDescriptor*>(
       pModel->createDataDescriptor(name, "RasterElement", pParent));
    if (pDd == NULL)
    {
@@ -460,7 +458,7 @@ RasterDataDescriptor *RasterUtilities::generateRasterDataDescriptor(
 
    vector<DimensionDescriptor> rowDims = generateDimensionVector(rows);
    pDd->setRows(rowDims);
-   vector<DimensionDescriptor> colDims = generateDimensionVector(cols);
+   vector<DimensionDescriptor> colDims = generateDimensionVector(columns);
    pDd->setColumns(colDims);
    vector<DimensionDescriptor> bandDims = generateDimensionVector(bands);
    pDd->setBands(bandDims);
@@ -489,7 +487,8 @@ void RasterUtilities::subsetDataDescriptor(DataDescriptor* pDd,
       pRasterDd->setRows(rows);
 
       // Columns
-      vector<DimensionDescriptor> columns = subsetDimensionVector(pRasterDd->getColumns(), startCol, stopCol, colSkipFactor);
+      vector<DimensionDescriptor> columns =
+         subsetDimensionVector(pRasterDd->getColumns(), startCol, stopCol, colSkipFactor);
       pRasterDd->setColumns(columns);
 
       // Bands
@@ -528,7 +527,8 @@ void RasterUtilities::subsetDataDescriptor(DataDescriptor* pDd,
    if (pRasterDd != NULL)
    {
       // Bands
-      vector<DimensionDescriptor> bands = subsetDimensionVector(pRasterDd->getBands(), startBand, stopBand, bandSkipFactor);
+      vector<DimensionDescriptor> bands =
+         subsetDimensionVector(pRasterDd->getBands(), startBand, stopBand, bandSkipFactor);
       subsetDataDescriptor(pDd, startRow, stopRow,
          rowSkipFactor, startCol, stopCol, colSkipFactor, bands);
    }
@@ -539,7 +539,7 @@ RasterElement* RasterUtilities::createRasterElement(const std::string& name, uns
    DataElement* pParent)
 {
    RasterDataDescriptor* pDd = generateRasterDataDescriptor(name, pParent, rows, columns,
-      bands, interleave, encoding, (inMemory ? IN_MEMORY : ON_DISK) ); 
+      bands, interleave, encoding, (inMemory ? IN_MEMORY : ON_DISK));
 
    ModelResource<RasterElement> pRasterElement(pDd);
    if (pRasterElement.get() == NULL)
@@ -569,14 +569,14 @@ RasterDataDescriptor *RasterUtilities::generateUnchippedRasterDataDescriptor(
       return NULL;
    }
 
-   const RasterDataDescriptor *pOrigDescriptor = dynamic_cast<const RasterDataDescriptor*>(
+   const RasterDataDescriptor* pOrigDescriptor = dynamic_cast<const RasterDataDescriptor*>(
       pOrigElement->getDataDescriptor());
    if (pOrigDescriptor == NULL)
    {
       return NULL;
    }
 
-   const RasterFileDescriptor *pOrigFileDescriptor = dynamic_cast<const RasterFileDescriptor*>(
+   const RasterFileDescriptor* pOrigFileDescriptor = dynamic_cast<const RasterFileDescriptor*>(
       pOrigDescriptor->getFileDescriptor());
    if (pOrigFileDescriptor == NULL)
    {
@@ -635,7 +635,7 @@ vector<string> RasterUtilities::getBandNames(const RasterDataDescriptor* pDescri
    const vector<DimensionDescriptor>& activeBands = pDescriptor->getBands();
    for (unsigned int i = 0; i < activeBands.size(); ++i)
    {
-      const DimensionDescriptor &bandDim = activeBands[i];
+      const DimensionDescriptor& bandDim = activeBands[i];
       string bandName = ::getBandName(pBandNames, pBandPrefix, bandDim);
       if (bandName.empty())
       {
@@ -683,19 +683,21 @@ namespace
 
       string pWavelengthPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME, 
          CENTER_WAVELENGTHS_METADATA_NAME, END_METADATA_NAME };
-      const vector<double> *pWaveLengths = dv_cast<vector<double> >(
+      const vector<double>* pWaveLengths = dv_cast<vector<double> >(
          &pMeta->getAttributeByPath(pWavelengthPath));
       if (pWaveLengths == NULL)
       {
          return false;
       }
 
-      if(pWaveLengths->size() < 3)   // need at least 3 bands for true color
+      if (pWaveLengths->size() < 3)   // need at least 3 bands for true color
       {
          return false;
       }
 
-      int redIndex(-1), greenIndex(-1), blueIndex(-1);
+      int redIndex(-1);
+      int greenIndex(-1);
+      int blueIndex(-1);
 
       // get best blue band match
       blueIndex = RasterUtilities::findBestMatch(*pWaveLengths, BlueCenter, BlueTolerance);
@@ -760,7 +762,7 @@ int RasterUtilities::findBestMatch(const std::vector<double> &values, double val
    int bestMatch(-1);
    double leastDiff(tolerance);
    double diff;
-   for (int i=startAt; i<numValues; ++i)
+   for (int i = startAt; i < numValues; ++i)
    {
       diff = fabs(value - values[i]);
       if (diff < leastDiff)
@@ -820,7 +822,7 @@ namespace
       for (vector<string>::const_iterator iter = attributeNames.begin();
          iter != attributeNames.end(); ++iter)
       {
-         DataVariant &dimMetadataVariant = pMetadata->getAttribute(*iter);
+         DataVariant& dimMetadataVariant = pMetadata->getAttribute(*iter);
 
          if (dimMetadataVariant.getTypeName() == "DynamicObject")
          {
@@ -831,50 +833,105 @@ namespace
             }
          }
 
-         if (chipMetadataDimTemplate<char>(dimMetadataVariant, selectedDims)) continue;
-         if (chipMetadataDimTemplate<unsigned char>(dimMetadataVariant, selectedDims)) continue;
-         if (chipMetadataDimTemplate<short>(dimMetadataVariant, selectedDims)) continue;
-         if (chipMetadataDimTemplate<unsigned short>(dimMetadataVariant, selectedDims)) continue;
-         if (chipMetadataDimTemplate<int>(dimMetadataVariant, selectedDims)) continue;
-         if (chipMetadataDimTemplate<unsigned int>(dimMetadataVariant, selectedDims)) continue;
-         if (chipMetadataDimTemplate<long>(dimMetadataVariant, selectedDims)) continue;
-         if (chipMetadataDimTemplate<unsigned long>(dimMetadataVariant, selectedDims)) continue;
-         if (chipMetadataDimTemplate<int64_t>(dimMetadataVariant, selectedDims)) continue;
-         if (chipMetadataDimTemplate<uint64_t>(dimMetadataVariant, selectedDims)) continue;
-         if (chipMetadataDimTemplate<float>(dimMetadataVariant, selectedDims)) continue;
-         if (chipMetadataDimTemplate<double>(dimMetadataVariant, selectedDims)) continue;
-         if (chipMetadataDimTemplate<bool>(dimMetadataVariant, selectedDims)) continue;
-         if (chipMetadataDimTemplate<string>(dimMetadataVariant, selectedDims)) continue;
+         if (chipMetadataDimTemplate<char>(dimMetadataVariant, selectedDims))
+         {
+            continue;
+         }
+
+         if (chipMetadataDimTemplate<unsigned char>(dimMetadataVariant, selectedDims))
+         {
+            continue;
+         }
+
+         if (chipMetadataDimTemplate<short>(dimMetadataVariant, selectedDims))
+         {
+            continue;
+         }
+
+         if (chipMetadataDimTemplate<unsigned short>(dimMetadataVariant, selectedDims))
+         {
+            continue;
+         }
+
+         if (chipMetadataDimTemplate<int>(dimMetadataVariant, selectedDims))
+         {
+            continue;
+         }
+
+         if (chipMetadataDimTemplate<unsigned int>(dimMetadataVariant, selectedDims))
+         {
+            continue;
+         }
+
+         if (chipMetadataDimTemplate<long>(dimMetadataVariant, selectedDims))
+         {
+            continue;
+         }
+
+         if (chipMetadataDimTemplate<unsigned long>(dimMetadataVariant, selectedDims))
+         {
+            continue;
+         }
+
+         if (chipMetadataDimTemplate<int64_t>(dimMetadataVariant, selectedDims))
+         {
+            continue;
+         }
+
+         if (chipMetadataDimTemplate<uint64_t>(dimMetadataVariant, selectedDims))
+         {
+            continue;
+         }
+
+         if (chipMetadataDimTemplate<float>(dimMetadataVariant, selectedDims))
+         {
+            continue;
+         }
+
+         if (chipMetadataDimTemplate<double>(dimMetadataVariant, selectedDims))
+         {
+            continue;
+         }
+
+         if (chipMetadataDimTemplate<bool>(dimMetadataVariant, selectedDims))
+         {
+            continue;
+         }
+
+         if (chipMetadataDimTemplate<string>(dimMetadataVariant, selectedDims))
+         {
+            continue;
+         }
       }
 
       return;
    }
 }
 
-bool RasterUtilities::chipMetadata(
-   DynamicObject* pMetadata,                                     
-   const vector<DimensionDescriptor> &selectedRows,
-   const vector<DimensionDescriptor> &selectedColumns,
-   const vector<DimensionDescriptor> &selectedBands)
+bool RasterUtilities::chipMetadata(DynamicObject* pMetadata, const vector<DimensionDescriptor>& selectedRows,
+                                   const vector<DimensionDescriptor>& selectedColumns,
+                                   const vector<DimensionDescriptor>& selectedBands)
 {
    if (pMetadata != NULL)
    {
-      DynamicObject *pAppMetadata = pMetadata->getAttribute(SPECIAL_METADATA_NAME).getPointerToValue<DynamicObject>();
+      DynamicObject* pAppMetadata = pMetadata->getAttribute(SPECIAL_METADATA_NAME).getPointerToValue<DynamicObject>();
       if (pAppMetadata != NULL)
       {
-         DynamicObject *pRowMetadata = pAppMetadata->getAttribute(ROW_METADATA_NAME).getPointerToValue<DynamicObject>();
+         DynamicObject* pRowMetadata = pAppMetadata->getAttribute(ROW_METADATA_NAME).getPointerToValue<DynamicObject>();
          if (pRowMetadata != NULL)
          {
             chipMetadataDim(pRowMetadata, selectedRows);
          }
 
-         DynamicObject *pColumnMetadata = pAppMetadata->getAttribute(COLUMN_METADATA_NAME).getPointerToValue<DynamicObject>();
+         DynamicObject* pColumnMetadata =
+            pAppMetadata->getAttribute(COLUMN_METADATA_NAME).getPointerToValue<DynamicObject>();
          if (pColumnMetadata != NULL)
          {
             chipMetadataDim(pColumnMetadata, selectedColumns);
          }
 
-         DynamicObject *pBandMetadata = pAppMetadata->getAttribute(BAND_METADATA_NAME).getPointerToValue<DynamicObject>();
+         DynamicObject* pBandMetadata =
+            pAppMetadata->getAttribute(BAND_METADATA_NAME).getPointerToValue<DynamicObject>();
          if (pBandMetadata != NULL)
          {
             chipMetadataDim(pBandMetadata, selectedBands);

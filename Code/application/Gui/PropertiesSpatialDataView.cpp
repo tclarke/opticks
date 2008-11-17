@@ -128,8 +128,10 @@ bool PropertiesSpatialDataView::applyChanges()
          View* pView = pWindow->getView();
          if (pView != NULL)
          {
-            if (pView->getViewLinkType(mpView) != NO_LINK && (mpView->getPanLimit() != mpPanLimitCombo->getCurrentValue() || 
-               mpView->getMinimumZoom() != mpMinZoomSpin->value() || mpView->getMaximumZoom() != (mpMaxZoomSpin->value() / 100.0)))
+            if (pView->getViewLinkType(mpView) != NO_LINK &&
+               (mpView->getPanLimit() != mpPanLimitCombo->getCurrentValue() || 
+               mpView->getMinimumZoom() != mpMinZoomSpin->value() ||
+               mpView->getMaximumZoom() != (mpMaxZoomSpin->value() / 100.0)))
             {
                bLinked = true;
                mpPanLimitCombo->setCurrentValue(NO_LIMIT);

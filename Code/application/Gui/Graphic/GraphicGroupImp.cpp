@@ -40,9 +40,9 @@ XERCES_CPP_NAMESPACE_USE
 
 GraphicGroupImp::GraphicGroupImp(const string& id, GraphicObjectType type, GraphicLayer* pLayer,
                                  LocationType pixelCoord) :
-   GraphicObjectImp(id, type, pLayer, pixelCoord)
+   GraphicObjectImp(id, type, pLayer, pixelCoord),
+   mbNeedsLayout(true)
 {
-   mbNeedsLayout = true;
 }
 
 GraphicGroupImp::~GraphicGroupImp()
@@ -56,7 +56,7 @@ GraphicGroupImp& GraphicGroupImp::operator= (const GraphicGroupImp& graphicGroup
    if (this != &graphicGroup)
    {
       bool interactive = true;
-      GraphicElement *pElement = getElement();
+      GraphicElement* pElement = getElement();
       if (pElement != NULL)
       {
          interactive = pElement->getInteractive();
@@ -82,11 +82,10 @@ GraphicGroupImp& GraphicGroupImp::operator= (const GraphicGroupImp& graphicGroup
             }
 
             GraphicObject* pCloneObject = addObject(eType);
-            GraphicObjectImp *pCloneObjectImp = dynamic_cast<GraphicObjectImp*>(pCloneObject);
+            GraphicObjectImp* pCloneObjectImp = dynamic_cast<GraphicObjectImp*>(pCloneObject);
             if (pCloneObject != NULL && pCloneObject != NULL)
             {
-               bool bSuccess = false;
-               bSuccess = pCloneObjectImp->replicateObject(pObject);
+               bool bSuccess = pCloneObjectImp->replicateObject(pObject);
                if ((bSuccess == true) && (bSelected == true))
                {
                   GraphicLayer* pLayer = NULL;
@@ -131,9 +130,9 @@ void GraphicGroupImp::draw(double zoomFactor) const
    iter = mObjects.begin();
    while (iter != mObjects.end())
    {
-      GraphicObject *pObject = *iter;
+      GraphicObject* pObject = *iter;
       ++iter;
-      GraphicObjectImp *pObjectImp = dynamic_cast<GraphicObjectImp*>(pObject);
+      GraphicObjectImp* pObjectImp = dynamic_cast<GraphicObjectImp*>(pObject);
       if (pObject != NULL && pObjectImp != NULL)
       {
          pObjectImp->rotateViewMatrix();
@@ -144,7 +143,7 @@ void GraphicGroupImp::draw(double zoomFactor) const
             pObjectImp->drawLabel();
          }
          // only thrown on debug
-         catch(AssertException except)
+         catch (AssertException except)
          {
             emit const_cast<GraphicGroupImp*>(this)->abortedAdd(pObject);
             pLayer->removeObject(pObject, true);
@@ -196,11 +195,9 @@ bool GraphicGroupImp::setProperty(const GraphicProperty* pProperty)
       return bSuccess;
    }
 
-   list<GraphicObject*>::iterator it;
-   for (it = mObjects.begin(); it != mObjects.end(); it++)
+   for (list<GraphicObject*>::iterator it = mObjects.begin(); it != mObjects.end(); ++it)
    {
-      GraphicObjectImp* pObject = NULL;
-      pObject = dynamic_cast<GraphicObjectImp*> (*it);
+      GraphicObjectImp* pObject = dynamic_cast<GraphicObjectImp*>(*it);
       if (pObject != NULL)
       {
          if (pObject->hasProperty(propertyName) == true)
@@ -224,11 +221,10 @@ void GraphicGroupImp::updateBoundingBox()
    {
       return;
    }
-   list<GraphicObject*>::iterator iter;
-   for (iter = mObjects.begin(); iter != mObjects.end(); iter++)
+
+   for (list<GraphicObject*>::iterator iter = mObjects.begin(); iter != mObjects.end(); ++iter)
    {
-      GraphicObject* pObject = NULL;
-      pObject = (*iter);
+      GraphicObject* pObject = *iter;
       if (pObject == NULL)
       {
          continue;
@@ -238,12 +234,9 @@ void GraphicGroupImp::updateBoundingBox()
       LocationType urCorner = pObject->getUrCorner();
       LocationType center((llCorner.mX + urCorner.mX) / 2.0, (llCorner.mY + urCorner.mY) / 2.0);
 
-      double angle = 0.0;
-      angle = pObject->getRotation();
-
-      double cosTheta = 1.0, sinTheta = 0.0;
-      cosTheta = cos(PI / 180.0 * angle);
-      sinTheta = sin(PI / 180.0 * angle);
+      double angle = pObject->getRotation();
+      double cosTheta = cos(PI / 180.0 * angle);
+      double sinTheta = sin(PI / 180.0 * angle);
 
       vector<LocationType> corners;
       corners.push_back(llCorner);
@@ -261,14 +254,24 @@ void GraphicGroupImp::updateBoundingBox()
          );
 
          if (realPoint.mX > dMaxX)
+         {
             dMaxX = realPoint.mX;
+         }
+
          if (realPoint.mX < dMinX)
+         {
             dMinX = realPoint.mX;
+         }
 
          if (realPoint.mY > dMaxY)
+         {
             dMaxY = realPoint.mY;
+         }
+
          if (realPoint.mY < dMinY)
+         {
             dMinY = realPoint.mY;
+         }
       }
    }
 
@@ -286,33 +289,37 @@ void GraphicGroupImp::updateBoundingBox()
 class ConnectObject
 {
 public:
-   ConnectObject(GraphicGroupImp *pObj) : mpObj(pObj) {}
+   ConnectObject(GraphicGroupImp* pObj) :
+      mpObj(pObj) {}
 
-   void operator()(GraphicObject *pObj)
+   void operator()(GraphicObject* pObj)
    {
       VERIFYNR(QObject::connect(dynamic_cast<GraphicObjectImp*>(pObj), SIGNAL(propertyModified(GraphicProperty*)),
          mpObj, SLOT(updateFromProperty(GraphicProperty*))));
       VERIFYNR(QObject::connect(dynamic_cast<GraphicObjectImp*>(pObj), SIGNAL(modified()),
          mpObj, SIGNAL(modified())));
    }
+
 private:
-   GraphicGroupImp *mpObj;
+   GraphicGroupImp* mpObj;
 };
 
 class DisconnectObject
 {
 public:
-   DisconnectObject(GraphicGroupImp *pObj) : mpObj(pObj) {}
+   DisconnectObject(GraphicGroupImp* pObj) :
+      mpObj(pObj) {}
 
-   void operator()(GraphicObject *pObj)
+   void operator()(GraphicObject* pObj)
    {
       QObject::disconnect(dynamic_cast<GraphicObjectImp*>(pObj), SIGNAL(propertyModified(GraphicProperty*)),
          mpObj, SLOT(updateFromProperty(GraphicProperty*)));
       QObject::disconnect(dynamic_cast<GraphicObjectImp*>(pObj), SIGNAL(modified()),
          mpObj, SIGNAL(modified()));
    }
+
 private:
-   GraphicGroupImp *mpObj;
+   GraphicGroupImp* mpObj;
 };
 
 void GraphicGroupImp::updateLayout()
@@ -325,7 +332,7 @@ void GraphicGroupImp::updateLayout()
    LocationType llCorner = getLlCorner();
    LocationType urCorner = getUrCorner();
 
-   if (llCorner == LocationType(0,0) && urCorner == LocationType(0,0))
+   if (llCorner == LocationType(0, 0) && urCorner == LocationType(0, 0))
    {
       updateBoundingBox();
       return;
@@ -333,11 +340,9 @@ void GraphicGroupImp::updateLayout()
 
    for_each(mObjects.begin(), mObjects.end(), DisconnectObject(this));
 
-   list<GraphicObject*>::iterator iter;
-   for (iter = mObjects.begin(); iter != mObjects.end(); iter++)
+   for (list<GraphicObject*>::iterator iter = mObjects.begin(); iter != mObjects.end(); ++iter)
    {
-      GraphicObjectImp* pObject = NULL;
-      pObject = dynamic_cast<GraphicObjectImp*>(*iter);
+      GraphicObjectImp* pObject = dynamic_cast<GraphicObjectImp*>(*iter);
       if (pObject != NULL)
       {
          double dWidth = mUrCorner.mX - mLlCorner.mX;
@@ -384,11 +389,9 @@ void GraphicGroupImp::updateLayout()
 
 void GraphicGroupImp::updateHandles()
 {
-   list<GraphicObject*>::iterator iter;
-   for (iter = mObjects.begin(); iter != mObjects.end(); iter++)
+   for (list<GraphicObject*>::iterator iter = mObjects.begin(); iter != mObjects.end(); ++iter)
    {
-      GraphicObjectImp* pObject = NULL;
-      pObject = dynamic_cast<GraphicObjectImp*>(*iter);
+      GraphicObjectImp* pObject = dynamic_cast<GraphicObjectImp*>(*iter);
       if (pObject != NULL)
       {
          pObject->updateHandles();
@@ -400,8 +403,7 @@ void GraphicGroupImp::updateHandles()
 
 bool GraphicGroupImp::hit(LocationType pixelCoord) const
 {
-   GraphicObject* pObject = NULL;
-   pObject = hitObject(pixelCoord);
+   GraphicObject* pObject = hitObject(pixelCoord);
    if (pObject != NULL)
    {
       return true;
@@ -413,10 +415,10 @@ bool GraphicGroupImp::hit(LocationType pixelCoord) const
 GraphicObject* GraphicGroupImp::hitObject(const LocationType& pixelCoord) const
 {
    list<GraphicObject*>::const_reverse_iterator iter;
-   for (iter = mObjects.rbegin(); iter != mObjects.rend(); iter++)
+   for (iter = mObjects.rbegin(); iter != mObjects.rend(); ++iter)
    {
       GraphicObject* pObject = *iter;
-      GraphicObjectImp *pObjectImp = dynamic_cast<GraphicObjectImp*>(pObject);
+      GraphicObjectImp* pObjectImp = dynamic_cast<GraphicObjectImp*>(pObject);
       VERIFY(pObjectImp != NULL);
       if (pObject != NULL)
       {
@@ -452,10 +454,9 @@ GraphicObject* GraphicGroupImp::hitObject(const LocationType& pixelCoord) const
 
 void GraphicGroupImp::updateGeo()
 {
-   for (std::list<GraphicObject*>::iterator iter = mObjects.begin();
-      iter != mObjects.end(); ++iter)
+   for (list<GraphicObject*>::iterator iter = mObjects.begin(); iter != mObjects.end(); ++iter)
    {
-      GraphicObjectImp *pObject = dynamic_cast<GraphicObjectImp*>(*iter);
+      GraphicObjectImp* pObject = dynamic_cast<GraphicObjectImp*>(*iter);
       LOG_IF(pObject == NULL, continue);
       pObject->updateGeo();
    }
@@ -463,10 +464,9 @@ void GraphicGroupImp::updateGeo()
 
 void GraphicGroupImp::enableGeo()
 {
-   for (std::list<GraphicObject*>::iterator iter = mObjects.begin();
-      iter != mObjects.end(); ++iter)
+   for (list<GraphicObject*>::iterator iter = mObjects.begin(); iter != mObjects.end(); ++iter)
    {
-      GraphicObjectImp *pObject = dynamic_cast<GraphicObjectImp*>(*iter);
+      GraphicObjectImp* pObject = dynamic_cast<GraphicObjectImp*>(*iter);
       LOG_IF(pObject == NULL, continue);
       pObject->enableGeo();
    }
@@ -530,8 +530,7 @@ void GraphicGroupImp::insertObjects(list<GraphicObject*>& objects)
    for_each(objects.begin(), objects.end(), ConnectObject(this));
    mObjects.splice(mObjects.end(), objects);
 
-   list<GraphicObject*>::iterator iter;
-   for (iter = objects.begin(); iter != objects.end(); ++iter)
+   for (list<GraphicObject*>::iterator iter = objects.begin(); iter != objects.end(); ++iter)
    {
       notify(SIGNAL_NAME(GraphicGroup, ObjectAdded), boost::any(*iter));
    }
@@ -546,8 +545,7 @@ void GraphicGroupImp::insertObjects(const list<GraphicObject*>& objects)
    for_each(localCopy.begin(), localCopy.end(), ConnectObject(this));
    mObjects.splice(mObjects.end(), localCopy);
 
-   list<GraphicObject*>::const_iterator iter;
-   for (iter = objects.begin(); iter != objects.end(); ++iter)
+   for (list<GraphicObject*>::const_iterator iter = objects.begin(); iter != objects.end(); ++iter)
    {
       notify(SIGNAL_NAME(GraphicGroup, ObjectAdded), boost::any(*iter));
    }
@@ -566,8 +564,7 @@ bool GraphicGroupImp::hasObject(GraphicObject* pObject) const
    list<GraphicObject*>::const_iterator iter = mObjects.begin();
    while (iter != mObjects.end())
    {
-      GraphicObject* pCurrentObject = NULL;
-      pCurrentObject = *iter;
+      GraphicObject* pCurrentObject = *iter;
       if (pCurrentObject == pObject)
       {
          return true;
@@ -622,9 +619,9 @@ bool GraphicGroupImp::moveObjectToFront(GraphicObject* pObject)
 
 int GraphicGroupImp::getObjectStackingIndex(GraphicObject* pObject) const
 {
-   list<GraphicObject *>::const_iterator iter;
+   list<GraphicObject*>::const_iterator iter;
    int index;
-   for (index=0,iter=mObjects.begin(); iter!=mObjects.end() && *iter != pObject; iter++)
+   for (index = 0, iter = mObjects.begin(); iter != mObjects.end() && *iter != pObject; ++iter)
    {
       index++;
    }
@@ -642,7 +639,7 @@ void GraphicGroupImp::setObjectStackingIndex(GraphicObject* pObject, int index)
    {
       mObjects.erase(iter);
 
-      for (iter=mObjects.begin(); iter!=mObjects.end() && index > 0; iter++)
+      for (iter = mObjects.begin(); iter != mObjects.end() && index > 0; ++iter)
       {
          index--;
       }
@@ -687,8 +684,6 @@ bool GraphicGroupImp::removeObject(GraphicObject* pObject, bool bDelete)
       }
 
       View* pView = NULL;
-
-      GraphicLayer* pLayer = getLayer();
       if (pLayer != NULL)
       {
          pView = pLayer->getView();
@@ -781,7 +776,7 @@ bool GraphicGroupImp::replicateObject(const GraphicObject* pObject)
 
       list<GraphicObject*> newObjects;
       list<GraphicObject*>::iterator iter;
-      for (iter = objects.begin(); iter != objects.end(); iter++)
+      for (iter = objects.begin(); iter != objects.end(); ++iter)
       {
          GraphicObject* pExistingObject = *iter;
          if (pExistingObject != NULL)
@@ -797,7 +792,7 @@ bool GraphicGroupImp::replicateObject(const GraphicObject* pObject)
                {
                   // delete all newObjects
                   list<GraphicObject*>::iterator ppObject;
-                  for (ppObject=newObjects.begin(); ppObject!=newObjects.end(); ++pObject)
+                  for (ppObject = newObjects.begin(); ppObject != newObjects.end(); ++pObject)
                   {
                      delete dynamic_cast<GraphicObjectImp*>(*ppObject);
                   }
@@ -826,8 +821,7 @@ CgmObject* GraphicGroupImp::convertToCgm()
 
    double dAngle = getRotation();
 
-   list<GraphicObject*>::iterator iter;
-   for (iter = mObjects.begin(); iter != mObjects.end(); iter++)
+   for (list<GraphicObject*>::iterator iter = mObjects.begin(); iter != mObjects.end(); ++iter)
    {
       GraphicObject* pObject = *iter;
       if (pObject != NULL)
@@ -957,19 +951,17 @@ bool GraphicGroupImp::fromXml(DOMNode* pDocument, unsigned int version)
    // Deserialize the group objects
    bool bSilentError = false;
 
-   XmlReader::DomParseException *pExc(NULL);
-   for(DOMNode *chld = pDocument->getFirstChild();
-                chld != NULL;
-                chld = chld->getNextSibling())
+   XmlReader::DomParseException* pExc(NULL);
+   for (DOMNode* pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
    {
-      if (XMLString::equals(chld->getNodeName(), X("objects")))
+      if (XMLString::equals(pChld->getNodeName(), X("objects")))
       {
          DOMNode* pObjectNode = NULL;
-         for (pObjectNode = chld->getFirstChild(); pObjectNode != NULL; pObjectNode = pObjectNode->getNextSibling())
+         for (pObjectNode = pChld->getFirstChild(); pObjectNode != NULL; pObjectNode = pObjectNode->getNextSibling())
          {
-            if (XMLString::equals(pObjectNode->getNodeName(),X("Graphic")))
+            if (XMLString::equals(pObjectNode->getNodeName(), X("Graphic")))
             {
-               DOMElement *elmnt(static_cast<DOMElement*>(pObjectNode));
+               DOMElement* elmnt(static_cast<DOMElement*>(pObjectNode));
                string type(A(elmnt->getAttribute(X("type"))));
 
                View* pView = NULL;
@@ -1004,7 +996,7 @@ bool GraphicGroupImp::fromXml(DOMNode* pDocument, unsigned int version)
                         pView->addUndoAction(new AddGraphicObject(dynamic_cast<GraphicGroup*>(this), pObject));
                      }
                   }
-                  catch (XmlReader::DomParseException &exc)
+                  catch (XmlReader::DomParseException& exc)
                   {
                      pObject = NULL;
                      pExc = &exc;
@@ -1037,8 +1029,6 @@ bool GraphicGroupImp::fromXml(DOMNode* pDocument, unsigned int version)
                   strError += "\nDo you want to continue loading?";
 
                   ViewImp* pParentWidget = NULL;
-
-                  GraphicLayer* pLayer = getLayer();
                   if (pLayer != NULL)
                   {
                      pParentWidget = dynamic_cast<ViewImp*>(pLayer->getView());
@@ -1107,13 +1097,12 @@ bool GraphicGroupImp::propagateProperty(T method, U value)
    return bSuccess;
 }
 
-void GraphicGroupImp::setLayer(GraphicLayer *pLayer)
+void GraphicGroupImp::setLayer(GraphicLayer* pLayer)
 {
    GraphicObjectImp::setLayer(pLayer);
-   for (list<GraphicObject*>::iterator iter = mObjects.begin();
-      iter != mObjects.end(); ++iter)
+   for (list<GraphicObject*>::iterator iter = mObjects.begin(); iter != mObjects.end(); ++iter)
    {
-      GraphicObjectImp *pImp = dynamic_cast<GraphicObjectImp*>(*iter);
+      GraphicObjectImp* pImp = dynamic_cast<GraphicObjectImp*>(*iter);
       if (pImp != NULL)
       {
          pImp->setLayer(pLayer);
@@ -1123,10 +1112,10 @@ void GraphicGroupImp::setLayer(GraphicLayer *pLayer)
 
 void GraphicGroupImp::temporaryGlContextChange()
 {
-   for(list<GraphicObject*>::const_iterator object = mObjects.begin(); object != mObjects.end(); ++object)
+   for (list<GraphicObject*>::const_iterator object = mObjects.begin(); object != mObjects.end(); ++object)
    {
-      GraphicObjectImp *pObject = dynamic_cast<GraphicObjectImp*>(*object);
-      if(pObject != NULL)
+      GraphicObjectImp* pObject = dynamic_cast<GraphicObjectImp*>(*object);
+      if (pObject != NULL)
       {
          pObject->temporaryGlContextChange();
       }
@@ -1138,7 +1127,7 @@ void GraphicGroupImp::updateFromProperty(GraphicProperty* pProperty)
    if (dynamic_cast<BoundingBoxProperty*>(pProperty) != NULL)
    {
       bool update = true;
-      GraphicElement *pElement = getElement();
+      GraphicElement* pElement = getElement();
       if (pElement != NULL)
       {
          update = pElement->getInteractive();

@@ -187,7 +187,7 @@ bool MouseModePlugIn::eventFilter(QObject* pObject, QEvent* pEvent)
                dynamic_cast<SpatialDataView*>(pDesktop->getCurrentWorkspaceWindowView());
             if (pSpatialDataView != NULL)
             {
-               QWidget* pViewWidget  = pSpatialDataView->getWidget();
+               QWidget* pViewWidget = pSpatialDataView->getWidget();
                if (pViewWidget == pObject)
                {
                   MouseMode* pMouseMode = pSpatialDataView->getCurrentMouseMode();

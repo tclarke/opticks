@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef IMAGEFILTERDESCRIPTORIMP_H__
-#define IMAGEFILTERDESCRIPTORIMP_H__
+#ifndef IMAGEFILTERDESCRIPTORIMP_H
+#define IMAGEFILTERDESCRIPTORIMP_H
 
 #include "ImageFilterDescriptor.h"
 #include "ObjectResource.h"
@@ -90,6 +90,5 @@ private:
    { \
       return impClass::getParameter(name); \
    }
-
 
 #endif

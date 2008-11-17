@@ -36,7 +36,7 @@ public:
       return mMask.getPixel(col, row);
    }
 private:
-   const BitMask &mMask;
+   const BitMask& mMask;
 };
 }
 
@@ -57,20 +57,23 @@ BitMaskObjectImp::~BitMaskObjectImp()
 void BitMaskObjectImp::draw(double zoomFactor) const
 {
    // Draw the pixels as a bitmask
-   const BitMask *pMask = getMask();
+   const BitMask* pMask = getMask();
    if (pMask == NULL)
    {
       return;
    }
 
-   int startColumn, endColumn, startRow, endRow;
+   int startColumn;
+   int endColumn;
+   int startRow;
+   int endRow;
    pMask->getBoundingBox(startColumn, startRow, endColumn, endRow);
 
    LocationType textPosition(startColumn, startRow);
 
    RasterElement* pRaster = NULL;
 
-   GraphicLayer *pLayer = getLayer();
+   GraphicLayer* pLayer = getLayer();
    VERIFYNRV(pLayer != NULL);
 
    SpatialDataView* pSpatialDataView = dynamic_cast<SpatialDataView*> (pLayer->getView());
@@ -148,7 +151,7 @@ void BitMaskObjectImp::draw(double zoomFactor) const
 
 bool BitMaskObjectImp::hit(LocationType pixelCoord) const
 {
-   const BitMask *pMask = getMask();
+   const BitMask* pMask = getMask();
    VERIFY(pMask != NULL);
    return pMask->getPixel(static_cast<int>(pixelCoord.mX), static_cast<int>(pixelCoord.mY));
 }
@@ -187,7 +190,7 @@ bool BitMaskObjectImp::toXml(XMLWriter* pXml) const
       return false;
    }
    pXml->pushAddPoint(pXml->addElement("bitmask"));
-   BitMaskImp *pMask = const_cast<BitMaskImp*>(dynamic_cast<const BitMaskImp*>(getMask()));
+   BitMaskImp* pMask = const_cast<BitMaskImp*>(dynamic_cast<const BitMaskImp*>(getMask()));
    bool success = false;
    if (pMask != NULL)
    {
@@ -206,7 +209,7 @@ bool BitMaskObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
       return false;
    }
 
-   DOMNode *pBitmaskNode = NULL;
+   DOMNode* pBitmaskNode = NULL;
    for (pBitmaskNode = pDocument->getFirstChild();
       pBitmaskNode != NULL; pBitmaskNode = pBitmaskNode->getNextSibling())
    {
@@ -215,7 +218,7 @@ bool BitMaskObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
          break;
       }
    }
-   BitMaskImp *pMask = dynamic_cast<BitMaskImp*>(mpMask.get());
+   BitMaskImp* pMask = dynamic_cast<BitMaskImp*>(mpMask.get());
    if (pMask != NULL)
    {
       if (mpMask->fromXml(pBitmaskNode, version))

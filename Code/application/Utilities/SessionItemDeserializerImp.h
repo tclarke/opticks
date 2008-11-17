@@ -6,8 +6,9 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
-#ifndef SESSION_ITEM_DESERIALIZER_IMP_H
-#define SESSION_ITEM_DESERIALIZER_IMP_H
+
+#ifndef SESSIONITEMDESERIALIZERIMP_H
+#define SESSIONITEMDESERIALIZERIMP_H
 
 #include "AppConfig.h"
 #include "FileResource.h"

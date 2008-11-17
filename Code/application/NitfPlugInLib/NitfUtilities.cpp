@@ -325,9 +325,13 @@ bool Nitf::DtgParseDDMMMYY(const string &fDTG,
    }
 
    if (year < 48)
+   {
       year += 2000;
+   }
    else
+   {
       year += 1900;
+   }
 
    if (mmm == "JAN")
    {
@@ -434,7 +438,9 @@ bool Nitf::DtgParseCCYYMMMDDhhmmss(const string &fDTG,
    }
 
    if (year < 1900 || year > 2100)
+   {
       return false;
+   }
 
    if (mmm == "JAN")
    {
@@ -842,7 +848,7 @@ string Nitf::sizeString(const string &str, unsigned int size, char fillChar, boo
 
    if (str.size() > size) 
    {
-      string outStr(str.substr(0,size-1));
+      string outStr(str.substr(0, size - 1));
       return outStr;
    }
 

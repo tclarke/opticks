@@ -62,7 +62,8 @@ public:
 
 public slots:
    void updateForNewView(); //called by ApplicationWindow when current window is changed.
-   void setCurrentLayer(Layer* pLayer, const RasterChannelType& eColor, bool bRgb = false); //called by HistogramWindow when the layer and band change
+   void setCurrentLayer(Layer* pLayer, const RasterChannelType& eColor,
+      bool bRgb = false); //called by HistogramWindow when the layer and band change
 
 signals:
    void layerActivated(Layer* pLayer, const RasterChannelType& eColor);

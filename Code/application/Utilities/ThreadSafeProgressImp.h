@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef __THREADSAFEPROGRESSIMP_H
-#define __THREADSAFEPROGRESSIMP_H
+#ifndef THREADSAFEPROGRESSIMP_H
+#define THREADSAFEPROGRESSIMP_H
 
 #include "ProgressImp.h"
 #include "bmutex.h"
@@ -17,9 +17,7 @@ class ThreadSafeProgressImp : public ProgressImp
 {
 public:
    ThreadSafeProgressImp();
-   ThreadSafeProgressImp(std::string amProgressText,
-                         int amPercentComplete,
-                         ReportingLevel amGranularity);
+   ThreadSafeProgressImp(std::string amProgressText, int amPercentComplete, ReportingLevel amGranularity);
    virtual ~ThreadSafeProgressImp();
 
    virtual const std::string& getObjectType() const;

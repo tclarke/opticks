@@ -22,8 +22,8 @@ AnnotationElementImp::~AnnotationElementImp()
 
 const string& AnnotationElementImp::getObjectType() const
 {
-   static string type("AnnotationElementImp");
-   return type;
+   static string sType("AnnotationElementImp");
+   return sType;
 }
 
 bool AnnotationElementImp::isKindOf(const string& className) const

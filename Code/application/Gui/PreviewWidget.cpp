@@ -28,8 +28,8 @@
 #include <string>
 using namespace std;
 
-PreviewWidget::PreviewWidget(QWidget* parent) :
-   QWidget(parent),
+PreviewWidget::PreviewWidget(QWidget* pParent) :
+   QWidget(pParent),
    mpStack(NULL),
    mpProgressLabel(NULL),
    mpProgressBar(NULL),
@@ -197,7 +197,7 @@ void PreviewWidget::setActiveDataset(ImportDescriptor* pDataset)
 
    // Only show the preview if the widget is visible or if the data set is imported
    RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(pDataset->getDataDescriptor());
-   if ((isVisible() == false) || (pDataset->isImported() == false)|| (pDescriptor == NULL))
+   if ((isVisible() == false) || (pDataset->isImported() == false) || (pDescriptor == NULL))
    {
       if (pActiveDataset != NULL)
       {

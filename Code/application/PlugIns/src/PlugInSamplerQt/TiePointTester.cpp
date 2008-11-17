@@ -100,11 +100,15 @@ bool TiePointTester::parseInputArgList(PlugInArgList *pArgList)
    VERIFY(pArgList != NULL);
    mpProgress = pArgList->getPlugInArgValue<Progress>(ProgressArg());
 
-   RasterElement *pRasterElement = pArgList->getPlugInArgValue<RasterElement>(DataElementArg());
+   RasterElement* pRasterElement = pArgList->getPlugInArgValue<RasterElement>(DataElementArg());
    if (pRasterElement == NULL)
    {
-      std::string msg = "Error Tester001: The raster element input value is invalid!";
-      if (mpProgress != NULL) mpProgress->updateProgress(msg, 0, ERRORS);
+      string msg = "Error Tester001: The raster element input value is invalid!";
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(msg, 0, ERRORS);
+      }
+
       return false;
    }
 

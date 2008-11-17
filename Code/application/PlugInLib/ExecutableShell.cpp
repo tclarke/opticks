@@ -12,12 +12,12 @@
 using namespace std;
 
 ExecutableShell::ExecutableShell() :
+   mAborted(false),
    mExecuteOnStartup(false),
    mDestroyAfterExecute(true),
    mpMenuIcon(NULL),
    mBatch(true),
    mHasAbort(false),
-   mAborted(false),
    mBackground(false),
    mHasWizard(true)
 {

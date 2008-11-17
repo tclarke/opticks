@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef EXPORT_AGENT_ADAPTER_H
-#define EXPORT_AGENT_ADAPTER_H
+#ifndef EXPORTAGENTADAPTER_H
+#define EXPORTAGENTADAPTER_H
 
 #include "ExportAgent.h"
 #include "ExportAgentImp.h"

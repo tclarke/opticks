@@ -25,7 +25,7 @@
 #include "ModelServicesImp.h"
 #include "RasterElement.h"
 #include "RasterDataDescriptor.h"
-#include "SpatialDataViewAdapter.h"
+#include "SpatialDataViewImp.h"
 #include "SubjectAdapter.h"
 #include "WorkspaceWindow.h"
 
@@ -123,7 +123,7 @@ Layer* LinkDlg::duplicateLayer(Layer* pLayer, SpatialDataView* pView)
 
       if ((elementName.empty() == false) && (elementType.empty() == false))
       {
-         LayerListImp *pLayerList = dynamic_cast<LayerListImp*>(pView->getLayerList());
+         LayerListImp* pLayerList = dynamic_cast<LayerListImp*>(pView->getLayerList());
          if (pLayerList != NULL)
          {
             pRasterElement = pLayerList->getPrimaryRasterElement();
@@ -139,7 +139,7 @@ Layer* LinkDlg::duplicateLayer(Layer* pLayer, SpatialDataView* pView)
             if (pExistElement != NULL)
             {
                // Force the user to rename the new element
-               QMessageBox::warning((SpatialDataViewAdapter*) pView, APP_NAME, "The '" + strElementName +
+               QMessageBox::warning(dynamic_cast<SpatialDataViewImp*>(pView), APP_NAME, "The '" + strElementName +
                   "' element name already exists.  You must select a new name.");
 
                if (pLayerList != NULL)
@@ -304,17 +304,15 @@ void LinkDlg::accept()
             LinkType type = mpOptionsPage->getLinkType();
             if (type == GEOCOORD_LINK)
             {
-               SpatialDataViewImp *pSrcViewImp = dynamic_cast<SpatialDataViewImp*>(
-                  pSourceView);
-               SpatialDataViewImp *pDestViewImp = dynamic_cast<SpatialDataViewImp*>(
-                  pDestinationView);
+               SpatialDataViewImp* pSrcViewImp = dynamic_cast<SpatialDataViewImp*>(pSourceView);
+               SpatialDataViewImp* pDestViewImp = dynamic_cast<SpatialDataViewImp*>(pDestinationView);
                if (pSrcViewImp == NULL || pDestViewImp == NULL)
                {
                   QDialog::reject();
                   VERIFYNRV(false);
                }
-               LayerList *pSrcLayerList = pSrcViewImp->getLayerList();
-               LayerList *pDestLayerList = pDestViewImp->getLayerList();
+               LayerList* pSrcLayerList = pSrcViewImp->getLayerList();
+               LayerList* pDestLayerList = pDestViewImp->getLayerList();
                if (pSrcLayerList == NULL || pDestLayerList == NULL)
                {
                   QDialog::reject();

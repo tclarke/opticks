@@ -19,7 +19,11 @@
 
 void ExportAgentImp::instantiate(Progress* pProgress, bool batch)
 {
-   if (getInstantiated()) throw std::logic_error("ExportAgent can not be instantiated twice!");
+   if (getInstantiated())
+   {
+      throw std::logic_error("ExportAgent can not be instantiated twice!");
+   }
+
    ExecutableAgentImp::instantiate(pProgress, batch);
    mpItem = NULL;
    mpFileDescriptor = NULL;
@@ -27,7 +31,11 @@ void ExportAgentImp::instantiate(Progress* pProgress, bool batch)
 
 void ExportAgentImp::instantiate(std::string exporterName, Progress* pProgress, bool batch)
 {
-   if (getInstantiated()) throw std::logic_error("ExportAgent can not be instantiated twice!");
+   if (getInstantiated())
+   {
+      throw std::logic_error("ExportAgent can not be instantiated twice!");
+   }
+
    ExecutableAgentImp::instantiate(exporterName, std::string(), pProgress, batch);
    mpItem = NULL;
    mpFileDescriptor = NULL;
@@ -35,7 +43,11 @@ void ExportAgentImp::instantiate(std::string exporterName, Progress* pProgress, 
 
 void ExportAgentImp::instantiate(PlugIn* pPlugIn, Progress* pProgress, bool batch)
 {
-   if (getInstantiated()) throw std::logic_error("ExportAgent can not be instantiated twice!");
+   if (getInstantiated())
+   {
+      throw std::logic_error("ExportAgent can not be instantiated twice!");
+   }
+
    ExecutableAgentImp::instantiate(pPlugIn, std::string(), pProgress, batch);
    mpItem = NULL;
    mpFileDescriptor = NULL;
@@ -44,7 +56,11 @@ void ExportAgentImp::instantiate(PlugIn* pPlugIn, Progress* pProgress, bool batc
 void ExportAgentImp::instantiate(std::string exporterName, SessionItem* pItem, FileDescriptor* pFileDescriptor,
    Progress* pProgress, bool batch)
 {
-   if (getInstantiated()) throw std::logic_error("ExportAgent can not be instantiated twice!");
+   if (getInstantiated())
+   {
+      throw std::logic_error("ExportAgent can not be instantiated twice!");
+   }
+
    ExecutableAgentImp::instantiate(exporterName, std::string(), pProgress, batch);
    mpItem = pItem;
    mpFileDescriptor = pFileDescriptor;
@@ -53,14 +69,19 @@ void ExportAgentImp::instantiate(std::string exporterName, SessionItem* pItem, F
 void ExportAgentImp::instantiate(PlugIn* pPlugIn, SessionItem* pItem, FileDescriptor* pFileDescriptor,
    Progress* pProgress, bool batch)
 {
-   if (getInstantiated()) throw std::logic_error("ExportAgent can not be instantiated twice!");
+   if (getInstantiated())
+   {
+      throw std::logic_error("ExportAgent can not be instantiated twice!");
+   }
+
    ExecutableAgentImp::instantiate(pPlugIn, std::string(), pProgress, batch);
    mpItem = pItem;
    mpFileDescriptor = pFileDescriptor;
 }
 
-ExportAgentImp::ExportAgentImp()
-   : mpItem(NULL), mpFileDescriptor(NULL)
+ExportAgentImp::ExportAgentImp() :
+   mpItem(NULL),
+   mpFileDescriptor(NULL)
 {
 }
 
@@ -141,10 +162,10 @@ ValidationResultType ExportAgentImp::validate(std::string &errorMessage)
 {
    checkInstantiate();
    setupArgList();
-   PlugInArgList &inArgList = getPopulatedInArgList();
-   Exporter *pExporter = getExporter();
+   PlugInArgList& inArgList = getPopulatedInArgList();
+   Exporter* pExporter = getExporter();
    ValidationResultType result = VALIDATE_FAILURE;
-   if(pExporter != NULL)
+   if (pExporter != NULL)
    {
       result = pExporter->validate(&inArgList, errorMessage);
    }

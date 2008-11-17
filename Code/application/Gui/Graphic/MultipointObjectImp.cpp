@@ -48,7 +48,7 @@ MultipointObjectImp::MultipointObjectImp(const string& id, GraphicObjectType typ
    updateBoundingBox();
 }
 
-MultipointObjectImp::~MultipointObjectImp(void)
+MultipointObjectImp::~MultipointObjectImp()
 {
 }
 
@@ -90,9 +90,12 @@ void MultipointObjectImp::moveHandle(int handle, LocationType pixel, bool bMaint
       case MIDDLE_LEFT:
          fixedPoint = mHandles[MIDDLE_RIGHT];
          break;
+      default:
+         break;
       };
 
-      this->scaleAndTranslateAllPoints(fixedPoint, startPoint, endPoint, bMaintainAspect);
+      scaleAndTranslateAllPoints(fixedPoint, startPoint, endPoint, bMaintainAspect);
+
       // Update the group and polyline bounding box, handles
       updateBoundingBox();
       updateHandles();
@@ -100,7 +103,7 @@ void MultipointObjectImp::moveHandle(int handle, LocationType pixel, bool bMaint
    else
    {
       // Move the handle
-      if ((int) (mHandles.size()) <= handle)
+      if (static_cast<int>(mHandles.size()) <= handle)
       {
          return;
       }
@@ -115,7 +118,7 @@ void MultipointObjectImp::moveHandle(int handle, LocationType pixel, bool bMaint
       }
       mVertices[vertexNum] = pixel;
 
-      const RasterElement *pGeo = getGeoreferenceElement();
+      const RasterElement* pGeo = getGeoreferenceElement();
       if (pGeo != NULL)
       {
          if (VERIFYNR(mVertices.size() == mGeoVertices.size()))
@@ -144,7 +147,7 @@ void MultipointObjectImp::updateGeo()
 {
    VERIFYNRV(mVertices.size() == mGeoVertices.size());
 
-   const RasterElement *pGeo = getGeoreferenceElement();
+   const RasterElement* pGeo = getGeoreferenceElement();
    VERIFYNRV(pGeo != NULL);
    mVertices = pGeo->convertGeocoordsToPixels(mGeoVertices);
 
@@ -155,15 +158,14 @@ void MultipointObjectImp::updateGeo()
 
 void MultipointObjectImp::enableGeo()
 {
-   const RasterElement *pGeo = getGeoreferenceElement();
+   const RasterElement* pGeo = getGeoreferenceElement();
    VERIFYNRV(pGeo != NULL);
    mGeoVertices = pGeo->convertPixelsToGeocoords(mVertices);
 }
 
 void MultipointObjectImp::drawVector(double zoomFactor) const
 {
-   GraphicLayerImp *pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
-
+   GraphicLayerImp* pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
    if (pLayer != NULL && pLayer->mayDrawAsPixels())
    {
       ColorType color = getLineColor();
@@ -182,7 +184,7 @@ void MultipointObjectImp::drawVector(double zoomFactor) const
    else
    {
       unsigned int symbolSize = getSymbolSize();
-      const std::string &symbolName = getSymbolName();
+      const string& symbolName = getSymbolName();
       double objectRotation = getRotation();
 
       pLayer->drawSymbols(symbolName, mVertices, symbolSize, objectRotation);
@@ -216,7 +218,7 @@ bool MultipointObjectImp::addVertex(LocationType endPoint)
    setBoundingBox(llCorner, urCorner);
    mBoxMatchesVertices = true;
 
-   const RasterElement *pGeo = getGeoreferenceElement();
+   const RasterElement* pGeo = getGeoreferenceElement();
    if (pGeo != NULL)
    {
       mGeoVertices.push_back(pGeo->convertPixelToGeocoord(endPoint));
@@ -237,10 +239,10 @@ bool MultipointObjectImp::addVertex(LocationType endPoint)
    return true;
 }
 
-bool MultipointObjectImp::addVertices(const std::vector<LocationType> &vertices)
+bool MultipointObjectImp::addVertices(const vector<LocationType> &vertices)
 {
    vector<LocationType> geoVertices;
-   const RasterElement *pGeo = getGeoreferenceElement();
+   const RasterElement* pGeo = getGeoreferenceElement();
    if (pGeo != NULL)
    {
       geoVertices = pGeo->convertPixelsToGeocoords(vertices);
@@ -249,19 +251,19 @@ bool MultipointObjectImp::addVertices(const std::vector<LocationType> &vertices)
    return addVertices(vertices, geoVertices);
 }
 
-bool MultipointObjectImp::addGeoVertices(const std::vector<LocationType> &geoVertices)
+bool MultipointObjectImp::addGeoVertices(const vector<LocationType> &geoVertices)
 {
-   const RasterElement *pGeo = getGeoreferenceElement();
+   const RasterElement* pGeo = getGeoreferenceElement();
    if (pGeo == NULL)
    {
       return false;
    }
-   vector<LocationType> vertices = pGeo->convertGeocoordsToPixels(geoVertices);
 
+   vector<LocationType> vertices = pGeo->convertGeocoordsToPixels(geoVertices);
    return addVertices(vertices, geoVertices);
 }
 
-bool MultipointObjectImp::addVertices(const std::vector<LocationType> &vertices, const std::vector<LocationType> &geoVertices)
+bool MultipointObjectImp::addVertices(const vector<LocationType> &vertices, const vector<LocationType> &geoVertices)
 {
    if ((vertices == mVertices) && (geoVertices == mGeoVertices))
    {
@@ -288,7 +290,7 @@ bool MultipointObjectImp::addVertices(const std::vector<LocationType> &vertices,
       mVertices.push_back(vertices.at(i));
    }
 
-   std::copy(geoVertices.begin(), geoVertices.end(), std::back_inserter(mGeoVertices));
+   copy(geoVertices.begin(), geoVertices.end(), back_inserter(mGeoVertices));
 
    mBoxMatchesVertices = false;
    setBoundingBox(llCorner, urCorner);
@@ -319,7 +321,7 @@ void MultipointObjectImp::clearVertices()
    emit modified();
 }
 
-const std::vector<LocationType> &MultipointObjectImp::getVertices() const
+const vector<LocationType> &MultipointObjectImp::getVertices() const
 {
    return mVertices;
 }
@@ -341,7 +343,7 @@ bool MultipointObjectImp::replicateObject(const GraphicObject* pObject)
    if (pObject->getGraphicObjectType() == getGraphicObjectType())
    {
       mVertices.clear();
-      const MultipointObjectImp *pMPoint = dynamic_cast<const MultipointObjectImp*>(pObject);
+      const MultipointObjectImp* pMPoint = dynamic_cast<const MultipointObjectImp*>(pObject);
       addVertices(pMPoint->mVertices);
    }
 
@@ -399,8 +401,8 @@ void MultipointObjectImp::scaleAndTranslateAllPoints(LocationType fixedPoint, Lo
 
    if (bMaintainAspect == true)
    {
-      dScaleX = dScaleY = fabsmax(dScaleX, dScaleY);
-
+      dScaleX = fabsmax(dScaleX, dScaleY);
+      dScaleY = fabsmax(dScaleX, dScaleY);
    }
 
    LocationType fullTranslate = fixedPoint + translateFactor;
@@ -412,7 +414,7 @@ void MultipointObjectImp::scaleAndTranslateAllPoints(LocationType fixedPoint, Lo
       mVertices.at(i) = vertex + fullTranslate;
    }
 
-   const RasterElement *pGeo = getGeoreferenceElement();
+   const RasterElement* pGeo = getGeoreferenceElement();
    if (pGeo != NULL)
    {
       mGeoVertices = pGeo->convertPixelsToGeocoords(mVertices);
@@ -435,7 +437,7 @@ bool MultipointObjectImp::setProperty(const GraphicProperty* pProperty)
       LocationType oldLlCorner = getLlCorner();
       LocationType oldUrCorner = getUrCorner();
 
-      const BoundingBoxProperty *pBoundProp = static_cast<const BoundingBoxProperty*>(pProperty);
+      const BoundingBoxProperty* pBoundProp = static_cast<const BoundingBoxProperty*>(pProperty);
       LocationType newLlCorner = pBoundProp->getLlCorner();
       LocationType newUrCorner = pBoundProp->getUrCorner();
 
@@ -613,7 +615,7 @@ void MultipointObjectImp::getVertices(const DOMNode* pVertex, const string& node
    {
       if (XMLString::equals(pVertex->getNodeName(), X(nodeName.c_str())))
       {
-         DOMNode *pValue = pVertex->getFirstChild();
+         DOMNode* pValue = pVertex->getFirstChild();
          if (VERIFYNR(pValue != NULL))
          {
             LocationType pixel;
@@ -710,7 +712,7 @@ bool MultipointObjectImp::processMouseDoubleClick(LocationType screenCoord, Qt::
 {
    if (button == Qt::LeftButton)
    {
-      GraphicLayerImp *pLayerImp = dynamic_cast<GraphicLayerImp*>(getLayer());
+      GraphicLayerImp* pLayerImp = dynamic_cast<GraphicLayerImp*>(getLayer());
       if (pLayerImp != NULL)
       {
          pLayerImp->completeInsertion();

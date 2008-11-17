@@ -72,7 +72,7 @@ void DisplayToolBar::setZoomPercentage(double dPercent)
 
    if (dPercent >= 0.0)
    {
-      int iPercent = (int) (dPercent + 0.5);
+      int iPercent = static_cast<int>(dPercent + 0.5);
 
       QString strPercent = QString::number(iPercent);
       strPercent += "%";
@@ -117,6 +117,9 @@ void DisplayToolBar::zoomToComboValue(int iIndex)
       case 7:      // 10%
          dPercent = 10.0;
          break;
+
+      default:
+         return;
    }
 
    emit zoomChanged(dPercent);

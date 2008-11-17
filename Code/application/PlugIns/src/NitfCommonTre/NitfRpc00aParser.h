@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef NITF_RPC00A_PARSER_H
-#define NITF_RPC00A_PARSER_H
+#ifndef NITFRPC00APARSER_H
+#define NITFRPC00APARSER_H
 
 #include "NitfRpcParser.h"
 

@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef HDF5_PAGER
-#define HDF5_PAGER
+#ifndef HDF5PAGER_H
+#define HDF5PAGER_H
 
 #include "HdfPager.h"
 #include "Hdf5PagerFileHandle.h"

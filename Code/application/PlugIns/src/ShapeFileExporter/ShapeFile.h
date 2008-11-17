@@ -67,4 +67,4 @@ private:
    std::map<std::string, std::string> mFields;
 };
 
-#endif   // SHAPEFILE_H
+#endif

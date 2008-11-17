@@ -729,7 +729,8 @@ bool DataDescriptorWidget::applyToDataDescriptor(DataDescriptor* pDescriptor)
    QString strBadValues = getDescriptorValue("Bad Values");
    if (strBadValues.isEmpty() == false)
    {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Use a QListView to allow editing of bad values, since the fromDisplayString parser is brittle? (kstreith)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Use a QListView to allow editing of bad values, " \
+   "since the fromDisplayString parser is brittle? (kstreith)")
       bool bError = true;
       vector<int> badValues = StringUtilities::fromDisplayString<vector<int> >(strBadValues.toStdString(), &bError);
       if (bError == false)
@@ -941,7 +942,9 @@ void DataDescriptorWidget::setDisplayBandsToTrueColor()
 
    if (success)
    {
-      QString strRedBand, strGreenBand, strBlueBand;
+      QString strRedBand;
+      QString strGreenBand;
+      QString strBlueBand;
       DimensionDescriptor bandDim = pRaster->getDisplayBand(RED);
       if (bandDim.isValid())
       {

@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #ifndef GEOTIFFPAGE_H
 #define GEOTIFFPAGE_H
 
@@ -24,22 +22,22 @@ namespace GeoTiffOnDisk
 class GeoTiffPage : public RasterPage
 {
 public:
-   GeoTiffPage(GeoTiffOnDisk::CacheUnit *pCacheUnit, size_t offset,
-                      unsigned int rowSkip, unsigned int columnSkip, unsigned int bandSkip);
+   GeoTiffPage(GeoTiffOnDisk::CacheUnit* pCacheUnit, size_t offset, unsigned int rowSkip,
+      unsigned int columnSkip, unsigned int bandSkip);
    ~GeoTiffPage();
 
    // RasterPage
    void *getRawData();
-   unsigned int getNumRows()          { return mRowSkip; }
-   unsigned int getNumColumns()       { return mColumnSkip; }
-   unsigned int getNumBands()         { return mBandSkip; }
-   unsigned int getInterlineBytes()   { return 0; }
+   unsigned int getNumRows();
+   unsigned int getNumColumns();
+   unsigned int getNumBands();
+   unsigned int getInterlineBytes();
 
-   unsigned int getStartBlock() const { return mStartBlock; }
-   unsigned int getEndBlock()   const { return mEndBlock;   }
+   unsigned int getStartBlock() const;
+   unsigned int getEndBlock() const;
 
 private:
-   GeoTiffOnDisk::CacheUnit *mpCacheUnit;
+   GeoTiffOnDisk::CacheUnit* mpCacheUnit;
    unsigned int mStartBlock;
    unsigned int mEndBlock;
    size_t mOffset;

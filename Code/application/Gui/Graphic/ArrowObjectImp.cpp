@@ -45,7 +45,8 @@ void ArrowObjectImp::draw(double zoomFactor) const
    double hcTheta = h * cos(theta);
    double hsTheta = h * sin(theta);
 
-   LocationType end1, end2;
+   LocationType end1;
+   LocationType end2;
    end1.mX = urCorner.mX - hcTheta - hsTheta;
    end1.mY = urCorner.mY - hsTheta + hcTheta;
    end2.mX = urCorner.mX - hcTheta + hsTheta;
@@ -63,7 +64,7 @@ void ArrowObjectImp::draw(double zoomFactor) const
 #if defined(WIN_API)
    glEnable(GL_LINE_SMOOTH);
 #else
-   if(lineWidth == 1.0)
+   if (lineWidth == 1.0)
    {
       glEnable(GL_LINE_SMOOTH);
    }

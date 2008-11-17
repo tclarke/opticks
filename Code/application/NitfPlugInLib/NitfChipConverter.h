@@ -73,7 +73,7 @@ namespace Nitf
 
    private:
       std::vector<double> mChipCoefficients;
-      const RasterDataDescriptor &mDescriptor;
+      const RasterDataDescriptor& mDescriptor;
 
    };
 }

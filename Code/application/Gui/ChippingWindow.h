@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef CHIPPING_WINDOW_H
-#define CHIPPING_WINDOW_H
+#ifndef CHIPPINGWINDOW_H
+#define CHIPPINGWINDOW_H
 
 #include <QtGui/QDialog>
 #include <QtGui/QRadioButton>

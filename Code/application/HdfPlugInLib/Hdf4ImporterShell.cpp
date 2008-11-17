@@ -245,7 +245,9 @@ bool Hdf4ImporterShell::createRasterPager(RasterElement *pRaster) const
 
 void* Hdf4ImporterShell::loadDatasetFromFile(const Hdf4File& parsedFile, const Hdf4Dataset& dataset) const
 {
-   int32 numDims = 0, dataType = 0, numAttr = 0;
+   int32 numDims = 0;
+   int32 dataType = 0;
+   int32 numAttr = 0;
    int32 dimSizes[MAX_VAR_DIMS] = {0};
 
    char* pDatasetName = const_cast<char*>(dataset.getName().c_str());
@@ -278,7 +280,7 @@ void* Hdf4ImporterShell::loadDatasetFromFile(const Hdf4File& parsedFile, const H
 
             pBlock = ArrayResource<char>(static_cast<size_t>(numBytes));
          }
-         catch(const HdfUtilities::Exception& exc)
+         catch (const HdfUtilities::Exception& exc)
          {
             stringstream msg;
             msg << "Error " << getName() << " 019: " << exc.getText();

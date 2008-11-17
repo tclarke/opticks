@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef GRAPHICELEMENTADAPTER
-#define GRAPHICELEMENTADAPTER
+#ifndef GRAPHICELEMENTADAPTER_H
+#define GRAPHICELEMENTADAPTER_H
 
 #include "GraphicElement.h"
 #include "GraphicElementImp.h"

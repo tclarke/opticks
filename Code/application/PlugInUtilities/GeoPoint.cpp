@@ -16,29 +16,27 @@
 
 using namespace std;
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This should really be a Location<double,3> with methods to convert/access as DMS, LatLon, UTM, and GPRS (tclarke)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This should really be a Location<double, 3> " \
+   "with methods to convert/access as DMS, LatLon, UTM, and GPRS (tclarke)")
 
 ///////////////
 //  DmsPoint //
 ///////////////
 
-DmsPoint::DmsPoint(DmsType eType, double dValue)
-{
-   mType = eType;
-   mValue = dValue;
-}
+DmsPoint::DmsPoint(DmsType eType, double dValue) :
+   mType(eType),
+   mValue(dValue)
+{}
 
-DmsPoint::DmsPoint(DmsType eType, const std::string& valueText)
+DmsPoint::DmsPoint(DmsType eType, const std::string& valueText) :
+   mType(eType),
+   mValue(0.0)
 {
-   mType = eType;
-   mValue = 0.0;
-
    setValue(valueText);
 }
 
 DmsPoint::~DmsPoint()
-{
-}
+{}
 
 DmsPoint::DmsType DmsPoint::getType() const
 {
@@ -60,12 +58,19 @@ void DmsPoint::setValue(const string& valueText)
       return;
    }
 
-   double degValue=0.0, minValue=0.0, secValue=0.0;
-   char dirDelimiter[100]="N", degDelimiter[20]="d", minDelimiter[20]="m", secDelimiter[20]="s";
-   char posCapIndicator[2]="N", negCapIndicator[2]="S";
-   char posLcIndicator[2]="n", negLcIndicator[2]="s";
-   int fieldCount=0;
-   const char *format="%lg";
+   double degValue = 0.0;
+   double minValue = 0.0;
+   double secValue = 0.0;
+   char dirDelimiter[100] = "N";
+   char degDelimiter[20] = "d";
+   char minDelimiter[20] = "m";
+   char secDelimiter[20] = "s";
+   char posCapIndicator[2] = "N";
+   char negCapIndicator[2] = "S";
+   char posLcIndicator[2] = "n";
+   char negLcIndicator[2] = "s";
+   int fieldCount = 0;
+   const char* format = "%lg";
 
    if (mType == DMS_DECIMAL)
    {
@@ -130,12 +135,19 @@ void DmsPoint::setValue(const string& valueText)
    {
       mValue = fabs(degValue);
       if (fieldCount >= 4)
+      {
          mValue += minValue / 60.0;
+      }
+
       if (fieldCount >= 6)
+      {
          mValue += secValue / 3600.0;
+      }
 
       if ((dirDelimiter[0] == negCapIndicator[0] || dirDelimiter[0] == negLcIndicator[0]))
+      {
          mValue = -mValue;
+      }
    }
 
    // check for concatenated format
@@ -157,9 +169,9 @@ void DmsPoint::setValue(const string& valueText)
       }
 
       lastLoc -= 2; // back up to tens of seconds digit;
-      strVal.insert(lastLoc,"m");
+      strVal.insert(lastLoc, "m");
       lastLoc -= 2; // back up to tens of minutes digit
-      strVal.insert(lastLoc,"d");
+      strVal.insert(lastLoc, "d");
       setValue(strVal);
    }
 }
@@ -193,8 +205,8 @@ string DmsPoint::getValueText(DmsFormatType format, int precision) const
       dPositiveValue = -mValue;
    }
 
-   int iDegrees = (int) dPositiveValue;
-   int iMinutes = (int) (60.0 * (dPositiveValue - iDegrees));
+   int iDegrees = static_cast<int>(dPositiveValue);
+   int iMinutes = static_cast<int>(60.0 * (dPositiveValue - iDegrees));
    double dSeconds = fabs((dPositiveValue - iDegrees - iMinutes / 60.0) * 3600.0);
 
    dSeconds = floor(1000.0 * dSeconds + 0.45) / 1000.0;
@@ -214,15 +226,33 @@ string DmsPoint::getValueText(DmsFormatType format, int precision) const
    char direction;
    if (bPositive == true)
    {
-      if (mType == DmsPoint::DMS_DECIMAL) direction = ' ';
-      else if (mType == DmsPoint::DMS_LATITUDE) direction = 'N';
-      else if (mType == DmsPoint::DMS_LONGITUDE) direction = 'E';
+      if (mType == DmsPoint::DMS_DECIMAL)
+      {
+         direction = ' ';
+      }
+      else if (mType == DmsPoint::DMS_LATITUDE)
+      {
+         direction = 'N';
+      }
+      else if (mType == DmsPoint::DMS_LONGITUDE)
+      {
+         direction = 'E';
+      }
    }
    else
    {
-      if (mType == DmsPoint::DMS_DECIMAL) direction = '-';
-      else if (mType == DmsPoint::DMS_LATITUDE) direction = 'S';
-      else if (mType == DmsPoint::DMS_LONGITUDE) direction = 'W';
+      if (mType == DmsPoint::DMS_DECIMAL)
+      {
+         direction = '-';
+      }
+      else if (mType == DmsPoint::DMS_LATITUDE)
+      {
+         direction = 'S';
+      }
+      else if (mType == DmsPoint::DMS_LONGITUDE)
+      {
+         direction = 'W';
+      }
    }
 
    char buffer[1024];
@@ -285,19 +315,20 @@ string DmsPoint::getValueText(DmsFormatType format, int precision) const
    return strVal;
 }
 
-DmsPoint& DmsPoint::operator =(const DmsPoint &original)
+DmsPoint& DmsPoint::operator =(const DmsPoint& original)
 {
    if (this != &original)
    {
-      this->mType = original.mType;
-      this->mValue = original.mValue;
+      mType = original.mType;
+      mValue = original.mValue;
    }
+
    return *this;
 }
 
-bool DmsPoint::operator ==(const DmsPoint &rhs)
+bool DmsPoint::operator ==(const DmsPoint& rhs) const
 {
-   return (this->mType == rhs.mType) && (this->mValue == rhs.mValue);
+   return (mType == rhs.mType) && (mValue == rhs.mValue);
 }
 
 //////////////////
@@ -307,20 +338,17 @@ bool DmsPoint::operator ==(const DmsPoint &rhs)
 LatLonPoint::LatLonPoint() :
    mLatitude(DmsPoint::DMS_LATITUDE),
    mLongitude(DmsPoint::DMS_LONGITUDE)
-{
-}
+{}
 
 LatLonPoint::LatLonPoint(LocationType latLon) :
    mLatitude(DmsPoint::DMS_LATITUDE, latLon.mX),
    mLongitude(DmsPoint::DMS_LONGITUDE, latLon.mY)
-{
-}
+{}
 
 LatLonPoint::LatLonPoint(const string& latitudeText, const string& longitudeText) :
    mLatitude(DmsPoint::DMS_LATITUDE, latitudeText),
    mLongitude(DmsPoint::DMS_LONGITUDE, longitudeText)
-{
-}
+{}
 
 LatLonPoint::LatLonPoint(const string& latLonText) :
    mLatitude(DmsPoint::DMS_LATITUDE),
@@ -328,12 +356,11 @@ LatLonPoint::LatLonPoint(const string& latLonText) :
 {
    if (latLonText.empty() == false)
    {
-      int iPos = -1;
-      iPos = latLonText.find(", ");
-      if (iPos != -1)
+      string::size_type pos = latLonText.find(", ");
+      if (pos != string::npos)
       {
-         string latitudeText = latLonText.substr(0, iPos);
-         string longitudeText = latLonText.substr(iPos + 2);
+         string latitudeText = latLonText.substr(0, pos);
+         string longitudeText = latLonText.substr(pos + 2);
 
          mLatitude.setValue(latitudeText);
          mLongitude.setValue(longitudeText);
@@ -342,8 +369,7 @@ LatLonPoint::LatLonPoint(const string& latLonText) :
 }
 
 LatLonPoint::~LatLonPoint()
-{
-}
+{}
 
 LocationType LatLonPoint::getCoordinates() const
 {
@@ -385,34 +411,33 @@ string LatLonPoint::getLongitudeText(DmsFormatType format, int precision) const
    return longitudeText;
 }
 
-LatLonPoint& LatLonPoint::operator =(const LatLonPoint &original)
+LatLonPoint& LatLonPoint::operator =(const LatLonPoint& original)
 {
    if (this != &original)
    {
-      this->mLatitude = original.mLatitude;
-      this->mLongitude = original.mLongitude;
+      mLatitude = original.mLatitude;
+      mLongitude = original.mLongitude;
    }
+
    return *this;
 }
 
-bool LatLonPoint::operator ==(const LatLonPoint &rhs)
+bool LatLonPoint::operator ==(const LatLonPoint& rhs) const
 {
-   return (this->mLatitude == rhs.mLatitude) && (this->mLongitude == rhs.mLatitude);
+   return (mLatitude == rhs.mLatitude) && (mLongitude == rhs.mLatitude);
 }
 
 ///////////////
 //  UtmPoint //
 ///////////////
 
-UtmPoint::UtmPoint(LatLonPoint latLon)
+UtmPoint::UtmPoint(LatLonPoint latLon) :
+   mEasting(0.0),
+   mNorthing(0.0),
+   mZone(0),
+   mHemisphere('N')
 {
-   mEasting = 0.0;
-   mNorthing = 0.0;
-   mZone = 0;
-   mHemisphere = 'N';
-
-   MgrsEngine* pMgrsEngine = NULL;
-   pMgrsEngine = MgrsEngine::Instance();
+   MgrsEngine* pMgrsEngine = MgrsEngine::Instance();
    if (pMgrsEngine != NULL)
    {
       pMgrsEngine->Initialize_Engine();
@@ -456,17 +481,15 @@ UtmPoint::UtmPoint(LatLonPoint latLon)
    }
 }
 
-UtmPoint::UtmPoint(double dEasting, double dNorthing, int iZone, char hemisphere)
-{
-   mEasting = dEasting;
-   mNorthing = dNorthing;
-   mZone = iZone;
-   mHemisphere = hemisphere;
-}
+UtmPoint::UtmPoint(double dEasting, double dNorthing, int iZone, char hemisphere) :
+   mEasting(dEasting),
+   mNorthing(dNorthing),
+   mZone(iZone),
+   mHemisphere(hemisphere)
+{}
 
 UtmPoint::~UtmPoint()
-{
-}
+{}
 
 LocationType UtmPoint::getCoordinates() const
 {
@@ -476,8 +499,7 @@ LocationType UtmPoint::getCoordinates() const
 
 LatLonPoint UtmPoint::getLatLonCoordinates() const
 {
-   MgrsEngine* pMgrsEngine = NULL;
-   pMgrsEngine = MgrsEngine::Instance();
+   MgrsEngine* pMgrsEngine =  MgrsEngine::Instance();
    if (pMgrsEngine != NULL)
    {
       pMgrsEngine->Initialize_Engine();
@@ -598,8 +620,7 @@ string UtmPoint::getZoneText() const
 
 MgrsPoint::MgrsPoint(LatLonPoint latLon)
 {
-   MgrsEngine* pMgrsEngine = NULL;
-   pMgrsEngine = MgrsEngine::Instance();
+   MgrsEngine* pMgrsEngine = MgrsEngine::Instance();
    if (pMgrsEngine != NULL)
    {
       pMgrsEngine->Initialize_Engine();
@@ -635,14 +656,12 @@ MgrsPoint::MgrsPoint(LatLonPoint latLon)
    }
 }
 
-MgrsPoint::MgrsPoint(const string& mgrsText)
-{
-   mText = mgrsText;
-}
+MgrsPoint::MgrsPoint(const string& mgrsText) :
+   mText(mgrsText)
+{}
 
 MgrsPoint::~MgrsPoint()
-{
-}
+{}
 
 LocationType MgrsPoint::getCoordinates() const
 {
@@ -652,8 +671,7 @@ LocationType MgrsPoint::getCoordinates() const
 
 LatLonPoint MgrsPoint::getLatLonCoordinates() const
 {
-   MgrsEngine* pMgrsEngine = NULL;
-   pMgrsEngine = MgrsEngine::Instance();
+   MgrsEngine* pMgrsEngine = MgrsEngine::Instance();
    if (pMgrsEngine != NULL)
    {
       pMgrsEngine->Initialize_Engine();
@@ -697,8 +715,7 @@ double MgrsPoint::getEasting() const
       string scrCode = getScrCodeText();
       string coordsText = "";
 
-      int iLength = 0;
-      iLength = scrCode.length();
+      int iLength = scrCode.length();
       if ((iLength % 2) == 0)
       {
          coordsText = mText.substr(4);
@@ -726,8 +743,7 @@ double MgrsPoint::getNorthing() const
       string scrCode = getScrCodeText();
       string coordsText = "";
 
-      int iLength = 0;
-      iLength = scrCode.length();
+      int iLength = scrCode.length();
       if ((iLength % 2) == 0)
       {
          coordsText = mText.substr(4);
@@ -777,8 +793,7 @@ string MgrsPoint::getScrCodeText() const
    string scrCodeText = "";
    if (mText.empty() == false)
    {
-      int iLength = 0;
-      iLength = mText.length();
+      int iLength = mText.length();
       if ((iLength % 2) == 0)
       {
          scrCodeText = mText.substr(2, 2);

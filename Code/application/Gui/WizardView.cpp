@@ -26,8 +26,8 @@ int WizardView::miItemZ = 1000;
 int WizardView::miLineZ = 2000;
 int WizardView::miNodeZ = 10000;
 
-WizardView::WizardView(Q3Canvas* pViewing, QWidget* parent) :
-   Q3CanvasView(pViewing, parent),
+WizardView::WizardView(Q3Canvas* pViewing, QWidget* pParent) :
+   Q3CanvasView(pViewing, pParent),
    mpDragRect(NULL),
    mpDragConnectLine(NULL)
 {
@@ -152,18 +152,10 @@ void WizardView::itemModified(Subject &subject, const string &signal, const boos
    VERIFYNRV(pItem != NULL);
 
    // Position
-   double dXCoord = 0.0;
-   double dYCoord = 0.0;
-   dXCoord = pItem->getXPosition();
-   dYCoord = pItem->getYPosition();
-
-   WizardCanvasItem* pCanvasItem = NULL;
-   pCanvasItem = getCanvasItem(pItem);
+   WizardCanvasItem* pCanvasItem = getCanvasItem(pItem);
    if (pCanvasItem != NULL)
    {
-      WizardItemImp::WizardItemChangeType* peChange = 
-         boost::any_cast<WizardItemImp::WizardItemChangeType*>(data);
-
+      WizardItemImp::WizardItemChangeType* peChange = boost::any_cast<WizardItemImp::WizardItemChangeType*>(data);
       if (peChange != NULL)
       {
          if (*peChange == WizardItemImp::ItemName)
@@ -177,10 +169,8 @@ void WizardView::itemModified(Subject &subject, const string &signal, const boos
          else if (*peChange == WizardItemImp::ItemPosition)
          {
             // Update the item and connected lines position
-            double dXCoord = 0.0;
-            double dYCoord = 0.0;
-            dXCoord = pItem->getXPosition();
-            dYCoord = pItem->getYPosition();
+            double dXCoord = pItem->getXPosition();
+            double dYCoord = pItem->getYPosition();
 
             if ((dXCoord != pCanvasItem->x()) || (dYCoord != pCanvasItem->y()))
             {
@@ -401,7 +391,7 @@ vector<WizardItem*> WizardView::getSelectedItems() const
          bool bSelected = pCanvasItem->isSelected();
          if ((bSelected == true) && (pCanvasItem->rtti() == 2))
          {
-            WizardCanvasItem* pWizardItem = (WizardCanvasItem*) pCanvasItem;
+            WizardCanvasItem* pWizardItem = static_cast<WizardCanvasItem*>(pCanvasItem);
 
             WizardItem* pItem = pWizardItem->getWizardItem();
             if (pItem != NULL)
@@ -477,7 +467,7 @@ vector<WizardConnection> WizardView::getSelectedConnections() const
          bool bSelected = pCanvasItem->isSelected();
          if ((bSelected == true) && (pCanvasItem->rtti() == 7))
          {
-            WizardLine* pLine = (WizardLine*) pCanvasItem;
+            WizardLine* pLine = static_cast<WizardLine*>(pCanvasItem);
 
             WizardNode* pOutputNode = pLine->getOutputNode();
             WizardNode* pInputNode = pLine->getInputNode();
@@ -554,9 +544,9 @@ void WizardView::buildView(vector<WizardItem*> items, bool bClear)
          unsigned int j = 0;
 
          const vector<WizardNode*>& inputNodes = pItem->getInputNodes();
-         for (j = 0; j < inputNodes.size(); ++j)
+         for (vector<WizardNode*>::const_iterator iter = inputNodes.begin(); iter != inputNodes.end(); ++iter)
          {
-            WizardNodeImp* pNode = static_cast<WizardNodeImp*>(inputNodes[j]);
+            WizardNodeImp* pNode = static_cast<WizardNodeImp*>(*iter);
             if (pNode != NULL)
             {
                pNode->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &WizardView::nodeModified));
@@ -565,9 +555,9 @@ void WizardView::buildView(vector<WizardItem*> items, bool bClear)
          }
 
          const vector<WizardNode*>& outputNodes = pItem->getOutputNodes();
-         for (j = 0; j < outputNodes.size(); ++j)
+         for (vector<WizardNode*>::const_iterator iter = outputNodes.begin(); iter != outputNodes.end(); ++iter)
          {
-            WizardNodeImp* pNode = static_cast<WizardNodeImp*>(outputNodes[j]);
+            WizardNodeImp* pNode = static_cast<WizardNodeImp*>(*iter);
             if (pNode != NULL)
             {
                pNode->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &WizardView::nodeModified));
@@ -674,7 +664,7 @@ void WizardView::drawView(QPainter* p)
 
       int iPrintWidth = rcViewport.width();
       int iPrintHeight = rcViewport.height();
-      double pAspect = (double) iPrintWidth / (double) iPrintHeight;
+      double pAspect = static_cast<double>(iPrintWidth) / static_cast<double>(iPrintHeight);
       double ratioAspects = pAspect / dAspect;
       if (ratioAspects > 1.0)
       {
@@ -717,13 +707,13 @@ void WizardView::clear()
       {
          if (pCanvasItem->rtti() == 2)
          {
-            WizardCanvasItem* pWizardItem = (WizardCanvasItem*) pCanvasItem;
+            WizardCanvasItem* pWizardItem = static_cast<WizardCanvasItem*>(pCanvasItem);
             removeItemConnections(pWizardItem, false);
             delete pWizardItem;
          }
          else if (pCanvasItem->rtti() == 7)
          {
-            WizardLine* pLine = (WizardLine*) pCanvasItem;
+            WizardLine* pLine = static_cast<WizardLine*>(pCanvasItem);
             removeConnection(pLine, false);
          }
          else
@@ -760,7 +750,7 @@ bool WizardView::event(QEvent* pEvent)
                {
                   if (pCanvasItem->rtti() == 2)
                   {
-                     WizardCanvasItem* pWizardItem = (WizardCanvasItem*) pCanvasItem;
+                     WizardCanvasItem* pWizardItem = static_cast<WizardCanvasItem*>(pCanvasItem);
 
                      WizardNodeImp* pNode = static_cast<WizardNodeImp*>(pWizardItem->getNode(ptContents));
                      if (pNode == NULL)
@@ -839,11 +829,12 @@ bool WizardView::event(QEvent* pEvent)
                         }
                      }
 
-                     QString strTip = "<qt><table width=235 cellspacing=0><tr><td width=90><b>Name:</b></td><td width=145>" +
-                        strName + "</td></tr><tr><td width=90><b>Type:</b></td><td width=145>" + strOriginalType +
-                        "</td></tr></table><hr><table width=235 cellspacing=0><tr><td width=90><b>Current Type:</b></td>" +
-                        "<td width=145>" + strType + "</td></tr><tr><td width=90><b>Valid Types:</b></td><td width=145>" +
-                        strlValidTypes.join("<br>") + "</td></tr></table></qt>";
+                     QString strTip = "<qt><table width=235 cellspacing=0><tr><td width=90><b>Name:</b></td>"
+                        "<td width=145>" + strName + "</td></tr><tr><td width=90><b>Type:</b></td><td width=145>" +
+                        strOriginalType + "</td></tr></table><hr><table width=235 cellspacing=0><tr>"
+                        "<td width=90><b>Current Type:</b></td><td width=145>" + strType + "</td></tr><tr>"
+                        "<td width=90><b>Valid Types:</b></td><td width=145>" + strlValidTypes.join("<br>") +
+                        "</td></tr></table></qt>";
 
                      QToolTip::showText(pHelpEvent->globalPos(), strTip);
                      break;
@@ -930,16 +921,14 @@ void WizardView::viewportMousePressEvent(QMouseEvent* e)
 
             if (pCanvasItem->rtti() == 2)
             {
-               WizardCanvasItem* pWizardCanvasItem = (WizardCanvasItem*) pCanvasItem;
+               WizardCanvasItem* pWizardCanvasItem = static_cast<WizardCanvasItem*>(pCanvasItem);
 
                // Get the canvas item
-               WizardItem* pItem = NULL;
-               pItem = pWizardCanvasItem->getWizardItem();
+               WizardItem* pItem = pWizardCanvasItem->getWizardItem();
                if (pItem != NULL)
                {
                   // Get the node at the clicked point
-                  WizardNode* pNode = NULL;
-                  pNode = pWizardCanvasItem->getNode(ptContents);
+                  WizardNode* pNode = pWizardCanvasItem->getNode(ptContents);
                   if (pNode != NULL)
                   {
                      // Set the active node in the canvas item
@@ -1029,7 +1018,7 @@ void WizardView::viewportMouseDoubleClickEvent(QMouseEvent* e)
       {
          if (pCanvasItem->rtti() == 2)
          {
-            WizardCanvasItem* pWizardCanvasItem = (WizardCanvasItem*) pCanvasItem;
+            WizardCanvasItem* pWizardCanvasItem = static_cast<WizardCanvasItem*>(pCanvasItem);
 
             WizardItem* pItem = pWizardCanvasItem->getWizardItem();
             emit itemDoubleClicked(e, pItem);
@@ -1096,8 +1085,7 @@ void WizardView::viewportMouseMoveEvent(QMouseEvent* e)
                   if (pWizardItem->getActiveNode() == NULL)
                   {
                      // Move the item
-                     pWizardItem->moveBy(ptMouse.x() - mptMoveStart.x(),
-                        ptMouse.y() - mptMoveStart.y());
+                     pWizardItem->moveBy(ptMouse.x() - mptMoveStart.x(), ptMouse.y() - mptMoveStart.y());
 
                      // Notify of a position change
                      double dX = pWizardItem->x();
@@ -1211,7 +1199,7 @@ void WizardView::viewportMouseReleaseEvent(QMouseEvent* e)
          {
             if (pCanvasItem->rtti() == 2)
             {
-               pStartItem = (WizardCanvasItem*) pCanvasItem;
+               pStartItem = static_cast<WizardCanvasItem*>(pCanvasItem);
             }
          }
       }
@@ -1227,7 +1215,7 @@ void WizardView::viewportMouseReleaseEvent(QMouseEvent* e)
          {
             if (pCanvasItem->rtti() == 2)
             {
-               pEndItem = (WizardCanvasItem*) pCanvasItem;
+               pEndItem = static_cast<WizardCanvasItem*>(pCanvasItem);
             }
          }
       }
@@ -1628,7 +1616,7 @@ bool WizardView::updateConnectionPosition(WizardNode* pOutputNode, WizardNode* p
       {
          if (pCanvasItem->rtti() == 7)
          {
-            WizardLine* pCurrentLine = (WizardLine*) pCanvasItem;
+            WizardLine* pCurrentLine = static_cast<WizardLine*>(pCanvasItem);
             if (pCurrentLine != NULL)
             {
                WizardNode* pOutputLineNode = pCurrentLine->getOutputNode();
@@ -1766,7 +1754,7 @@ bool WizardView::removeConnection(WizardNode* pOutputNode, WizardNode* pInputNod
       {
          if (pCanvasItem->rtti() == 7)
          {
-            WizardLine* pLine = (WizardLine*) pCanvasItem;
+            WizardLine* pLine = static_cast<WizardLine*>(pCanvasItem);
             if (pLine != NULL)
             {
                WizardNode* pCurrentOutputNode = pLine->getOutputNode();
@@ -1815,7 +1803,7 @@ bool WizardView::removeNodeConnections(WizardNode* pNode, bool bRefresh)
       {
          if (pCanvasItem->rtti() == 7)
          {
-            WizardLine* pLine = (WizardLine*) pCanvasItem;
+            WizardLine* pLine = static_cast<WizardLine*>(pCanvasItem);
             if (pLine != NULL)
             {
                WizardNode* pOutputNode = pLine->getOutputNode();
@@ -1870,10 +1858,10 @@ bool WizardView::removeItemConnections(WizardCanvasItem* pWizardItem, bool bRefr
       WizardNode* pInputNode = inputNodes[i];
       if (pInputNode != NULL)
       {
-         const vector<WizardNode*>& outputNodes = pInputNode->getConnectedNodes();
-         for (unsigned int j = 0; j < outputNodes.size(); ++j)
+         const vector<WizardNode*>& connectedNodes = pInputNode->getConnectedNodes();
+         for (unsigned int j = 0; j < connectedNodes.size(); ++j)
          {
-            WizardNode* pOutputNode = outputNodes[j];
+            WizardNode* pOutputNode = connectedNodes[j];
             if (pOutputNode != NULL)
             {
                removeConnection(pOutputNode, pInputNode, false);
@@ -1889,10 +1877,10 @@ bool WizardView::removeItemConnections(WizardCanvasItem* pWizardItem, bool bRefr
       WizardNode* pOutputNode = outputNodes[i];
       if (pOutputNode != NULL)
       {
-         const vector<WizardNode*>& inputNodes = pOutputNode->getConnectedNodes();
-         for (unsigned int j = 0; j < inputNodes.size(); ++j)
+         const vector<WizardNode*>& connectedNodes = pOutputNode->getConnectedNodes();
+         for (unsigned int j = 0; j < connectedNodes.size(); ++j)
          {
-            WizardNode* pInputNode = inputNodes[j];
+            WizardNode* pInputNode = connectedNodes[j];
             if (pInputNode != NULL)
             {
                removeConnection(pOutputNode, pInputNode, false);
@@ -1986,7 +1974,7 @@ vector<WizardCanvasItem*> WizardView::getCanvasItems() const
          {
             if (pItem->rtti() == 2)
             {
-               items.push_back((WizardCanvasItem*) pItem);
+               items.push_back(static_cast<WizardCanvasItem*>(pItem));
             }
          }
       }

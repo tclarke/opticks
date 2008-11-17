@@ -148,16 +148,18 @@ public:
    int getNumPlugIns() const;
    Progress* getProgress(PlugIn* pPlugIn);
    bool destroyPlugIn(PlugIn* pPlugIn);
+
    SESSIONITEMACCESSOR_METHODS(SessionItemImp)
+
    /**
     * @copydoc SessionItem::serialize()
     */
-   virtual bool serialize(SessionItemSerializer &serializer) const;
+   virtual bool serialize(SessionItemSerializer& serializer) const;
 
    /**
     * @copydoc SessionItem::deserialize()
     */
-   virtual bool deserialize(SessionItemDeserializer &deserializer);
+   virtual bool deserialize(SessionItemDeserializer& deserializer);
 
 private:
    void destroyPlugIns();

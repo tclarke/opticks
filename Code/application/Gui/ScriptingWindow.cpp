@@ -22,8 +22,8 @@
 
 using namespace std;
 
-ScriptingWindow::ScriptingWindow(const string& id, QWidget* parent) :
-   DockWindowAdapter(id, "Scripting Window", parent),
+ScriptingWindow::ScriptingWindow(const string& id, QWidget* pParent) :
+   DockWindowAdapter(id, "Scripting Window", pParent),
    mpEmptyLabel(NULL),
    mpTabWidget(NULL),
    mpStack(NULL),
@@ -93,9 +93,9 @@ void ScriptingWindow::setCommandFont(const QFont& commandFont)
 
    mCommandFont = commandFont;
 
-   for (int i = 0; i < mpTabWidget->count(); i++)
+   for (int i = 0; i < mpTabWidget->count(); ++i)
    {
-      ScriptingWidget* pWidget = static_cast<ScriptingWidget*> (mpTabWidget->widget(i));
+      ScriptingWidget* pWidget = static_cast<ScriptingWidget*>(mpTabWidget->widget(i));
       if (pWidget != NULL)
       {
          pWidget->setCommandFont(mCommandFont);
@@ -117,7 +117,7 @@ void ScriptingWindow::setOutputFont(const QFont& outputFont)
 
    mOutputFont = outputFont;
 
-   for (int i = 0; i < mpTabWidget->count(); i++)
+   for (int i = 0; i < mpTabWidget->count(); ++i)
    {
       ScriptingWidget* pWidget = static_cast<ScriptingWidget*> (mpTabWidget->widget(i));
       if (pWidget != NULL)
@@ -141,7 +141,7 @@ void ScriptingWindow::setErrorFont(const QFont& errorFont)
 
    mErrorFont = errorFont;
 
-   for (int i = 0; i < mpTabWidget->count(); i++)
+   for (int i = 0; i < mpTabWidget->count(); ++i)
    {
       ScriptingWidget* pWidget = static_cast<ScriptingWidget*> (mpTabWidget->widget(i));
       if (pWidget != NULL)
@@ -158,14 +158,14 @@ QFont ScriptingWindow::getErrorFont() const
 
 void ScriptingWindow::setOutputColor(const QColor& outputColor)
 {
-   if ((outputColor == mOutputColor) ||(outputColor.isValid() == false))
+   if ((outputColor == mOutputColor) || (outputColor.isValid() == false))
    {
       return;
    }
 
    mOutputColor = outputColor;
 
-   for (int i = 0; i < mpTabWidget->count(); i++)
+   for (int i = 0; i < mpTabWidget->count(); ++i)
    {
       ScriptingWidget* pWidget = static_cast<ScriptingWidget*> (mpTabWidget->widget(i));
       if (pWidget != NULL)
@@ -182,14 +182,14 @@ QColor ScriptingWindow::getOutputColor() const
 
 void ScriptingWindow::setErrorColor(const QColor& errorColor)
 {
-   if ((errorColor == mErrorColor) ||(errorColor.isValid() == false))
+   if ((errorColor == mErrorColor) || (errorColor.isValid() == false))
    {
       return;
    }
 
    mErrorColor = errorColor;
 
-   for (int i = 0; i < mpTabWidget->count(); i++)
+   for (int i = 0; i < mpTabWidget->count(); ++i)
    {
       ScriptingWidget* pWidget = static_cast<ScriptingWidget*> (mpTabWidget->widget(i));
       if (pWidget != NULL)
@@ -213,7 +213,7 @@ void ScriptingWindow::setScrollBuffer(int maxParagraphs)
 
    mScrollBuffer = maxParagraphs;
 
-   for (int i = 0; i < mpTabWidget->count(); i++)
+   for (int i = 0; i < mpTabWidget->count(); ++i)
    {
       ScriptingWidget* pWidget = static_cast<ScriptingWidget*> (mpTabWidget->widget(i));
       if (pWidget != NULL)
@@ -235,7 +235,7 @@ ScriptingWidget* ScriptingWindow::getInterpreter(const QString& strName) const
       return NULL;
    }
 
-   for (int i = 0; i <  mpTabWidget->count(); i++)
+   for (int i = 0; i < mpTabWidget->count(); ++i)
    {
       QString strTabLabel = mpTabWidget->tabText(i);
       if (strTabLabel == strName)
@@ -262,7 +262,7 @@ void ScriptingWindow::updateInterpreters()
 
    // Remove existing tabs for removed plug-ins
    int tabs = mpTabWidget->count();
-   for (int i = 0; i <  tabs; i++)
+   for (int i = 0; i < tabs; ++i)
    {
       QString strTabLabel = mpTabWidget->tabText(i);
       if (strTabLabel.isEmpty() == false)
@@ -270,8 +270,7 @@ void ScriptingWindow::updateInterpreters()
          string tabLabel = strTabLabel.toStdString();
 
          vector<PlugInDescriptor*>::iterator plugInIter;
-         for (plugInIter = plugIns.begin();
-              plugInIter != plugIns.end(); ++plugInIter)         
+         for (plugInIter = plugIns.begin(); plugInIter != plugIns.end(); ++plugInIter)
          {
             PlugInDescriptor* pDescriptor = *plugInIter;
             if (pDescriptor == NULL)
@@ -282,7 +281,7 @@ void ScriptingWindow::updateInterpreters()
             if (plugIn == tabLabel)
             {
                break;
-            }            
+            }
          }
 
          if (plugInIter == plugIns.end())
@@ -295,8 +294,7 @@ void ScriptingWindow::updateInterpreters()
    }
 
    // Add a tab for each new plug-in
-   for (vector<PlugInDescriptor*>::iterator iter = plugIns.begin();
-        iter != plugIns.end(); ++iter)
+   for (vector<PlugInDescriptor*>::iterator iter = plugIns.begin(); iter != plugIns.end(); ++iter)
    {
       PlugInDescriptor* pDescriptor = *iter;
       if (pDescriptor == NULL)

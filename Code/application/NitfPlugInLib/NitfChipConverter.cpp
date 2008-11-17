@@ -132,19 +132,22 @@ Nitf::ChipConverter::ChipConverter(const RasterDataDescriptor &descriptor) :
    3. If first three corners are colinear, trade one for the fourth
    4. Create 2D 1st order fit from chip coords to pOrig coords
    */
-   double pXp[4], pYp[4], x[4], y[4];
+   double pXp[4];
+   double pYp[4];
+   double x[4];
+   double y[4];
 
    // look for a string that includes
    // one of the items that we know is in the ICHIPB TRE.  Get its pPrefix so we can prepend it
    // to the names we know to get the full names of the keys we want
 
-   const DynamicObject *pMetadata = mDescriptor.getMetadata();
+   const DynamicObject* pMetadata = mDescriptor.getMetadata();
    if (pMetadata == NULL)
    {
       throw string("Could not find metadata.");
    }
 
-   const DynamicObject *pNitfMetadata = pMetadata->getAttribute(Nitf::NITF_METADATA).getPointerToValue<DynamicObject>();
+   const DynamicObject* pNitfMetadata = pMetadata->getAttribute(Nitf::NITF_METADATA).getPointerToValue<DynamicObject>();
 
    if (pNitfMetadata == NULL)
    {
@@ -231,9 +234,9 @@ LocationType Nitf::ChipConverter::originalToActive(LocationType original) const
       (mChipCoefficients[2]*mChipCoefficients[3] - mChipCoefficients[0]*mChipCoefficients[5])) / 
       (mChipCoefficients[1]*mChipCoefficients[3] - mChipCoefficients[0]*mChipCoefficients[4]);
 
-   const RasterFileDescriptor *pFd = static_cast<const RasterFileDescriptor*>(
+   const RasterFileDescriptor* pFd = static_cast<const RasterFileDescriptor*>(
       mDescriptor.getFileDescriptor());
-   VERIFYRV(pFd != NULL, LocationType(0,0));
+   VERIFYRV(pFd != NULL, LocationType(0, 0));
 
    LocationType active;
    active.mY = findLoaded(pFd->getRows(), mDescriptor.getRows(), onDiskPixel.mY);

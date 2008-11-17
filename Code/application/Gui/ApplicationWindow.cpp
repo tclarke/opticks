@@ -161,9 +161,9 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    SettableSessionItemAdapter("{D21A6DE0-174B-4fd2-9886-963D8BB1FC48}"),
    mAutoTimerRetryOnLock(false),
    mClipboard(SessionItemImp::generateUniqueId(), GROUP_OBJECT, NULL, LocationType()),
+   mpWorkspace(NULL),
    mpCurrentWnd(NULL),
    mpCurrentEditView(NULL),
-   mpWorkspace(NULL),
    mpGcpEditor(NULL),
    mpUndoGroup(new QUndoGroup(this))
 {
@@ -5658,7 +5658,8 @@ const vector<PlugInDescriptor*> &ApplicationWindow::getAvailableExporters(const 
 
       string subtype = pDescriptor->getSubtype();
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove SignatureSet special case when SignatureSet no longer inherits Signature. (dsulgrov)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove SignatureSet special case when SignatureSet " \
+   "no longer inherits Signature. (dsulgrov)")
       if ((pTao->isKindOf(TypeConverter::toString<SignatureSet>()) == true) &&
          (subtype == TypeConverter::toString<Signature>()))
       {

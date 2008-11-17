@@ -21,42 +21,38 @@
 class ConvertToBipPage : public RasterPage
 {
 public:
-   ConvertToBipPage(unsigned int rows, unsigned int columns, 
-      unsigned int bands, unsigned int bytesPerElement);
-   virtual ~ConvertToBipPage(void);
+   ConvertToBipPage(unsigned int rows, unsigned int columns, unsigned int bands, unsigned int bytesPerElement);
+   virtual ~ConvertToBipPage();
 
    // RasterPage methods
    unsigned int getNumBands();
    unsigned int getNumRows();
    unsigned int getNumColumns();
    unsigned int getInterlineBytes();
-   void *getRawData();
+   void* getRawData();
 
    /**
-   * Feed the page with data for a band.
-   *
-   * This method will sprinkle the data in pData around
-   * in BIP format.
-   *
-   * @param row
-   *        The row which the data corresponds to.
-   *
-   * @param band
-   *        The band which the data corresponds to.  This
-   *        determines the initial offset.
-   *
-   * @param pData
-   *        Pointer to the (single band) data to sprinkle.
-   *        This must be of length (columns*bytes per pixel)
-   *
-   * @return True if the operation was a success, false otherwise.
-   */
-   bool feed(unsigned int row, unsigned int band, void *pData);
-
+    * Feed the page with data for a band.
+    *
+    * This method will sprinkle the data in pData around
+    * in BIP format.
+    *
+    * @param row
+    *        The row which the data corresponds to.
+    *
+    * @param band
+    *        The band which the data corresponds to.  This
+    *        determines the initial offset.
+    *
+    * @param pData
+    *        Pointer to the (single band) data to sprinkle.
+    *        This must be of length (columns*bytes per pixel)
+    *
+    * @return True if the operation was a success, false otherwise.
+    */
+   bool feed(unsigned int row, unsigned int band, void* pData);
 
 private:
-   ConvertToBipPage();
-
    std::vector<unsigned char> mCache;
 
    unsigned int mRows;
@@ -64,7 +60,6 @@ private:
    unsigned int mBands;
    unsigned int mBytesPerElement;
    unsigned int mPixelOffset;
-
 };
 
 #endif

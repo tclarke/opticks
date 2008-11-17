@@ -30,16 +30,15 @@ XERCES_CPP_NAMESPACE_USE
 DirectionalArrowObjectImp::DirectionalArrowObjectImp(const string& id, GraphicObjectType type, GraphicLayer* pLayer,
                                                      LocationType pixelCoord) :
    GraphicObjectImp(id, type, pLayer, pixelCoord),
-   mpGroup(GROUP_OBJECT, pLayer, pixelCoord)
+   mpGroup(GROUP_OBJECT, pLayer, pixelCoord),
+   mbOriented(false)
 {
-   mbOriented = false;
-
    addProperty("FillColor");
    addProperty("LineColor");
    addProperty("LineWidth");
    addProperty("TextColor");
 
-   mpGeoreference.addSignal(SIGNAL_NAME(RasterElement, GeoreferenceModified), 
+   mpGeoreference.addSignal(SIGNAL_NAME(RasterElement, GeoreferenceModified),
       Slot(this, &DirectionalArrowObjectImp::georeferenceModified));
 }
 
@@ -189,21 +188,19 @@ bool DirectionalArrowObjectImp::isOriented() const
 
 bool DirectionalArrowObjectImp::replicateObject(const GraphicObject* pObject)
 {
-   const DirectionalArrowObjectImp *pDirArrowObject = 
-      dynamic_cast<const DirectionalArrowObjectImp*>(pObject);
+   const DirectionalArrowObjectImp* pDirArrowObject = dynamic_cast<const DirectionalArrowObjectImp*>(pObject);
    if (pDirArrowObject == NULL)
    {
       return false;
    }
 
-   bool bSuccess = false;
-   bSuccess = GraphicObjectImp::replicateObject(dynamic_cast<const GraphicObject*>(pDirArrowObject));
+   bool bSuccess = GraphicObjectImp::replicateObject(dynamic_cast<const GraphicObject*>(pDirArrowObject));
    if (bSuccess == false)
    {
       return false;
    }
 
-   const GraphicGroup &group = pDirArrowObject->getGroup();
+   const GraphicGroup& group = pDirArrowObject->getGroup();
    bSuccess = mpGroup->replicateObject(&group);
    if (bSuccess == true)
    {
@@ -212,7 +209,6 @@ bool DirectionalArrowObjectImp::replicateObject(const GraphicObject* pObject)
 
    return bSuccess;
 }
-
 
 bool DirectionalArrowObjectImp::toXml(XMLWriter* pXml) const
 {
@@ -297,13 +293,18 @@ bool DirectionalArrowObjectImp::isKindOf(const string& className) const
    return GraphicObjectImp::isKindOf(className);
 }
 
+const GraphicGroup& DirectionalArrowObjectImp::getGroup() const
+{
+   return *(dynamic_cast<const GraphicGroup*>(mpGroup.get()));
+}
+
 bool DirectionalArrowObjectImp::import(const string& filename)
 {
    bool bSuccess = false;
 
    // Try to load as XML
    Service<MessageLogMgr> pMsgLog;
-   MessageLog *pLog = pMsgLog->getLog();
+   MessageLog* pLog = pMsgLog->getLog();
 
    XmlReader xml(pLog);
 
@@ -358,7 +359,7 @@ bool DirectionalArrowObjectImp::processMousePress(LocationType screenCoord,
          "update when georeferencing is performed.");
    }
 
-   GraphicLayerImp *pLayerImp = dynamic_cast<GraphicLayerImp*>(getLayer());
+   GraphicLayerImp* pLayerImp = dynamic_cast<GraphicLayerImp*>(getLayer());
    if (pLayerImp != NULL)
    {
       pLayerImp->completeInsertion();
@@ -373,7 +374,7 @@ bool DirectionalArrowObjectImp::processMouseMove(LocationType screenCoord,
                                  Qt::KeyboardModifiers modifiers)
 {
    // should never get here
-   GraphicLayerImp *pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
+   GraphicLayerImp* pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
    VERIFY(pLayer != NULL);
    pLayer->completeInsertion(false);
 
@@ -386,7 +387,7 @@ bool DirectionalArrowObjectImp::processMouseRelease(LocationType screenCoord,
                                  Qt::KeyboardModifiers modifiers)
 {
    // should never get here
-   GraphicLayerImp *pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
+   GraphicLayerImp* pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
    VERIFY(pLayer != NULL);
    pLayer->completeInsertion(false);
 
@@ -407,7 +408,7 @@ void DirectionalArrowObjectImp::updateGeoreferenceAttachment()
 {
    if (mpGeoreference.get() == NULL)
    {
-      const RasterElement *pGeoreference = getGeoreferenceElement();
+      const RasterElement* pGeoreference = getGeoreferenceElement();
       if (pGeoreference != NULL)
       {
          mpGeoreference.reset(const_cast<RasterElement*>(pGeoreference));

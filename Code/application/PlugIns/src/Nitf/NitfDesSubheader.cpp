@@ -21,7 +21,7 @@
 using namespace Nitf::DesSubheaderFieldNames;
 using namespace std;
 
-Nitf::DesSubheader::DesSubheader(const string &fileVersion, const unsigned int& index) :
+Nitf::DesSubheader::DesSubheader(const string &fileVersion, unsigned int index) :
    Header(fileVersion),
    mIndex(index)
 {
@@ -152,7 +152,7 @@ bool Nitf::DesSubheader::importMetadata(const ossimPropertyInterface *pHeader, R
    VERIFY(Header::importMetadata(pHeader, pDescriptor, pDesSubheaderMetadata.get()));
    VERIFY(pDescriptor != NULL);
 
-   DynamicObject *pMetadata = pDescriptor->getMetadata();
+   DynamicObject* pMetadata = pDescriptor->getMetadata();
    VERIFY(pMetadata != NULL);
 
    pMetadata->setAttributeByPath(getMetadataPath(), *pDesSubheaderMetadata.get());
@@ -165,7 +165,7 @@ bool Nitf::DesSubheader::exportClassificationString(const RasterDataDescriptor *
    const string& ossimName)
 {
    VERIFY(pDescriptor != NULL);
-   const Classification *pClass = pDescriptor->getClassification();
+   const Classification* pClass = pDescriptor->getClassification();
    VERIFY(pClass != NULL);
 
    string value;
@@ -241,10 +241,10 @@ bool Nitf::DesSubheader::exportClassificationDate(const RasterDataDescriptor *pD
    const string& ossimName)
 {
    VERIFY(pDescriptor != NULL);
-   const Classification *pClass = pDescriptor->getClassification();
+   const Classification* pClass = pDescriptor->getClassification();
    VERIFY(pClass != NULL);
 
-   const DateTime *pValue = NULL;
+   const DateTime* pValue = NULL;
    
    if (appName == SECURITY_DECLASS_DATE)
    {

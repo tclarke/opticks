@@ -35,7 +35,7 @@ protected:
    Progress* getProgress() const;
 
    bool mbInteractive;
-   Step *mpStep;
+   Step* mpStep;
 
 private:
    Progress* mpProgress;

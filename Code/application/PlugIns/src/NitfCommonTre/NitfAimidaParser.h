@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef NITF_AIMIDA_PARSER_H
-#define NITF_AIMIDA_PARSER_H
+#ifndef NITFAIMIDAPARSER_H
+#define NITFAIMIDAPARSER_H
 
 #include "NitfTreParserShell.h"
 

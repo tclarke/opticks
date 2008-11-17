@@ -101,10 +101,10 @@ PropertiesDlg::PropertiesDlg(SessionItem* pSessionItem, const vector<string>& di
                            const string& pageName = pProperties->getPropertiesName();
                            if (pageName.empty() == false)
                            {
-                              QLayout* pLayout = pWidget->layout();
-                              if (pLayout != NULL)
+                              QLayout* pWidgetLayout = pWidget->layout();
+                              if (pWidgetLayout != NULL)
                               {
-                                 pLayout->setMargin(10);
+                                 pWidgetLayout->setMargin(10);
                               }
                               else
                               {

@@ -76,20 +76,24 @@ bool Tutorial3::getOutputSpecification(PlugInArgList *&pOutArgList)
 bool Tutorial3::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
 {
    StepResource pStep("Tutorial 3", "app", "27170298-10CE-4E6C-AD7A-97E8058C29FF");
-   if(pInArgList == NULL || pOutArgList == NULL)
+   if (pInArgList == NULL || pOutArgList == NULL)
    {
       return false;
    }
-   Progress *pProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
-   RasterElement *pCube = pInArgList->getPlugInArgValue<RasterElement>(Executable::DataElementArg());
-   if(pCube == NULL)
+   Progress* pProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
+   RasterElement* pCube = pInArgList->getPlugInArgValue<RasterElement>(Executable::DataElementArg());
+   if (pCube == NULL)
    {
       std::string msg = "A raster cube must be specified.";
       pStep->finalize(Message::Failure, msg);
-      if(pProgress != NULL) pProgress->updateProgress(msg, 0, ERRORS);
+      if (pProgress != NULL)
+      {
+         pProgress->updateProgress(msg, 0, ERRORS);
+      }
+
       return false;
    }
-   RasterDataDescriptor *pDesc = static_cast<RasterDataDescriptor*>(pCube->getDataDescriptor());
+   RasterDataDescriptor* pDesc = static_cast<RasterDataDescriptor*>(pCube->getDataDescriptor());
    VERIFY(pDesc != NULL);
 
    FactoryResource<DataRequest> pRequest;
@@ -98,24 +102,37 @@ bool Tutorial3::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
    double min = std::numeric_limits<double>::max();
    double max = -min;
    double total = 0.0;
-   for(unsigned int row = 0; row < pDesc->getRowCount(); row++)
+   for (unsigned int row = 0; row < pDesc->getRowCount(); row++)
    {
-      if(isAborted())
+      if (isAborted())
       {
          std::string msg = getName() + " has been aborted.";
          pStep->finalize(Message::Abort, msg);
-         if(pProgress != NULL) pProgress->updateProgress(msg, 0, ABORT);
+         if (pProgress != NULL)
+         {
+            pProgress->updateProgress(msg, 0, ABORT);
+         }
+
          return false;
       }
-      if(!pAcc.isValid())
+      if (!pAcc.isValid())
       {
          std::string msg = "Unable to access the cube data.";
          pStep->finalize(Message::Failure, msg);
-         if(pProgress != NULL) pProgress->updateProgress(msg, 0, ERRORS);
+         if (pProgress != NULL)
+         {
+            pProgress->updateProgress(msg, 0, ERRORS);
+         }
+
          return false;
       }
-      if(pProgress != NULL) pProgress->updateProgress("Calculating statistics", row * 100 / pDesc->getRowCount(), NORMAL);
-      for(unsigned int col = 0; col < pDesc->getColumnCount(); col++)
+
+      if (pProgress != NULL)
+      {
+         pProgress->updateProgress("Calculating statistics", row * 100 / pDesc->getRowCount(), NORMAL);
+      }
+
+      for (unsigned int col = 0; col < pDesc->getColumnCount(); col++)
       {
          switchOnEncoding(pDesc->getDataType(), updateStatistics, pAcc->getColumn(), min, max, total);
          pAcc->nextColumn();
@@ -125,7 +142,7 @@ bool Tutorial3::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
    unsigned int count = pDesc->getColumnCount() * pDesc->getRowCount();
    double mean = total / count;
 
-   if(pProgress != NULL)
+   if (pProgress != NULL)
    {
       std::string msg = "Minimum value: " + StringUtilities::toDisplayString(min) + "\n"
                       + "Maximum value: " + StringUtilities::toDisplayString(max) + "\n"

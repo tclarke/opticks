@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef HDF5_PAGER_FILE_HANDLE
-#define HDF5_PAGER_FILE_HANDLE
+#ifndef HDF5PAGERFILEHANDLE_H
+#define HDF5PAGERFILEHANDLE_H
 
 #include <hdf5.h>
 

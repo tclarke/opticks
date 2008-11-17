@@ -111,12 +111,12 @@ bool MultiLayerMovie::populateRasterElements()
       return false;
    }
 
-   for (int row=0; row<mNumRows; ++row)
+   for (int row = 0; row < mNumRows; ++row)
    {
-      unsigned short *pData = static_cast<unsigned short*>(da1->getRow());
-      for (int col=0; col<mNumCols; ++col)
+      unsigned short* pData = static_cast<unsigned short*>(da1->getRow());
+      for (int col = 0; col < mNumCols; ++col)
       {
-         for (int band=0; band<mNumBands; ++band)
+         for (int band = 0; band < mNumBands; ++band)
          {
             *pData++ = band;
          }
@@ -133,12 +133,12 @@ bool MultiLayerMovie::populateRasterElements()
       return false;
    }
 
-   for (int row=0; row<mNumRows/2; ++row)
+   for (int row = 0; row < mNumRows / 2; ++row)
    {
-      unsigned short *pData = static_cast<unsigned short*>(da2->getRow());
-      for (int col=0; col<mNumCols/2; ++col)
+      unsigned short* pData = static_cast<unsigned short*>(da2->getRow());
+      for (int col = 0; col < mNumCols / 2; ++col)
       {
-         for (int band=0; band<mNumBands; ++band)
+         for (int band = 0; band < mNumBands; ++band)
          {
             *pData++ = mNumBands + band;
          }
@@ -155,12 +155,12 @@ bool MultiLayerMovie::populateRasterElements()
       return false;
    }
 
-   for (int row=0; row<mNumRows/4; ++row)
+   for (int row = 0; row < mNumRows / 4; ++row)
    {
-      unsigned short *pData = static_cast<unsigned short*>(da3->getRow());
-      for (int col=0; col<mNumCols/4; ++col)
+      unsigned short* pData = static_cast<unsigned short*>(da3->getRow());
+      for (int col = 0; col < mNumCols / 4; ++col)
       {
-         for (int band=0; band<mNumBands; ++band)
+         for (int band = 0; band < mNumBands; ++band)
          {
             *pData++ = 2*mNumBands + band;
          }
@@ -182,14 +182,14 @@ bool MultiLayerMovie::createWindow()
 
    VERIFY(mpWindow != NULL);
    
-   SpatialDataView *pView = mpWindow->getSpatialDataView();
+   SpatialDataView* pView = mpWindow->getSpatialDataView();
    VERIFY(pView != NULL);
 
    UndoLock lock(pView);
 
    pView->setPrimaryRasterElement(mpRaster1);
    bSuccess = createLayer(pView, mpRaster1, mpLayer1) &&
-      createLayer(pView, mpRaster2, mpLayer2, 0.5, 5, 0.5, 5)  &&
+      createLayer(pView, mpRaster2, mpLayer2, 0.5, 5, 0.5, 5) &&
       createLayer(pView, mpRaster3, mpLayer3, 2, -5, 2, -5);
 
    return bSuccess;
@@ -220,8 +220,9 @@ bool MultiLayerMovie::createLayer(SpatialDataView* pView, RasterElement* pElemen
 bool MultiLayerMovie::setupAnimations()
 {
    // Create the controller
-   AnimationController *pController =
-      Service<AnimationServices>()->createAnimationController("MultiLayerMovie", FRAME_TIME);
+   Service<AnimationServices> pServices;
+
+   AnimationController* pController = pServices->createAnimationController("MultiLayerMovie", FRAME_TIME);
    if (pController == NULL)
    {
       return false;
@@ -229,22 +230,22 @@ bool MultiLayerMovie::setupAnimations()
    pController->setCanDropFrames(false);
 
    // Set the controller into each of the views
-   SpatialDataView *pView = dynamic_cast<SpatialDataView*>(mpWindow->getView());
+   SpatialDataView* pView = dynamic_cast<SpatialDataView*>(mpWindow->getView());
    if (pView == NULL)
    {
-      Service<AnimationServices>()->destroyAnimationController(pController);
+      pServices->destroyAnimationController(pController);
       return false;
    }
 
    pView->setAnimationController(pController);
 
    // Create the animations for each layer
-   Animation *pAnimation1 = pController->createAnimation("MultiLayerMovie1");
-   Animation *pAnimation2 = pController->createAnimation("MultiLayerMovie2");
-   Animation *pAnimation3 = pController->createAnimation("MultiLayerMovie3");
+   Animation* pAnimation1 = pController->createAnimation("MultiLayerMovie1");
+   Animation* pAnimation2 = pController->createAnimation("MultiLayerMovie2");
+   Animation* pAnimation3 = pController->createAnimation("MultiLayerMovie3");
    if (pAnimation1 == NULL || pAnimation2 == NULL || pAnimation3 == NULL)
    {
-      Service<AnimationServices>()->destroyAnimationController(pController);
+      pServices->destroyAnimationController(pController);
       return false;
    }
 
@@ -253,7 +254,7 @@ bool MultiLayerMovie::setupAnimations()
    vector<AnimationFrame> frames1;
    vector<AnimationFrame> frames2;
    vector<AnimationFrame> frames3;
-   for (int i=0; i<mNumBands; ++i)
+   for (int i = 0; i < mNumBands; ++i)
    {
       AnimationFrame frame1("frame", i, static_cast<double>(i)/mNumBands);
       AnimationFrame frame2("frame", i, static_cast<double>(i+timeOffset)/(mNumBands+timeOffset));

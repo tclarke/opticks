@@ -7,19 +7,19 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #include "DataAccessor.h"
 #include "DataAccessorImpl.h"
 
-DataAccessor::DataAccessor(DataAccessorDeleter *pDeleter, DataAccessorImpl*pImpl): 
-   mpDeleter(pDeleter), mpImpl(pImpl) 
+DataAccessor::DataAccessor(DataAccessorDeleter* pDeleter, DataAccessorImpl* pImpl) :
+   mpDeleter(pDeleter),
+   mpImpl(pImpl)
 {
    incrementRefCount();
 }
 
-DataAccessor::DataAccessor(const DataAccessor &da) :
-   mpDeleter(da.mpDeleter), mpImpl(da.mpImpl)
+DataAccessor::DataAccessor(const DataAccessor& da) :
+   mpDeleter(da.mpDeleter),
+   mpImpl(da.mpImpl)
 {
    incrementRefCount();
 }
@@ -29,7 +29,7 @@ DataAccessor::~DataAccessor()
    decrementRefCount();
 }
 
-DataAccessor &DataAccessor::operator=(const DataAccessor &rhs)
+DataAccessor& DataAccessor::operator=(const DataAccessor& rhs)
 {
    if (this != &rhs)
    {
@@ -38,6 +38,7 @@ DataAccessor &DataAccessor::operator=(const DataAccessor &rhs)
       mpImpl = rhs.mpImpl;
       incrementRefCount();
    }
+
    return *this;
 }
 

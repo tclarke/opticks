@@ -135,11 +135,12 @@ bool Nitf::AimidbParser::runAllTests(Progress* pProgress, ostream& failure)
    stringstream input4(data_error4);
    numBytes = input4.str().size();
    success = toDynamicObject(input4, numBytes, *treDO.get(), errorMessage);
-   if(success)
+   if (success)
    {
       std::stringstream tmpStream;
       status = this->isTreValid(*treDO.get(), tmpStream);  // This test should return SUSPECT
-      if(status != SUSPECT) {
+      if (status != SUSPECT)
+      {
          failure << "---Negative test failed: START_TILE_COLUMN should have returned SUSPECT\n";
          failure << tmpStream.str();
          treDO->clear();
@@ -161,7 +162,7 @@ Nitf::TreState Nitf::AimidbParser::isTreValid(const DynamicObject& tre, ostream&
    if (tre.getAttribute("ACQUISITION_DATE").getPointerToValue<DateTime>() == NULL)
    {
       reporter << "Field \"" << AIMIDB::ACQUISITION_DATE << "\" missing from the Dynamic Object";
-      status = INVALID;;
+      status = INVALID;
    }
    else
    {
@@ -194,7 +195,8 @@ Nitf::TreState Nitf::AimidbParser::isTreValid(const DynamicObject& tre, ostream&
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
       &numFields, AIMIDB::REPLAY, testSet, true, true, false));
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This is a one char blank field in STDI-0002. For Classified versions this may be something else. (lbeck)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This is a one char blank field in STDI-0002.  " \
+   "For Classified versions this may be something else. (lbeck)")
    testSet.clear();
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
       &numFields, AIMIDB::RESERVED1, testSet, true, true, true));
@@ -219,7 +221,8 @@ Nitf::TreState Nitf::AimidbParser::isTreValid(const DynamicObject& tre, ostream&
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
       &numFields, AIMIDB::COUNTRY, testSet, true, true, false));
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This is a four char blank field in STDI-0002. For Classified versions this may be something else. (lbeck)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This is a four char blank field in STDI-0002.  " \
+   "For Classified versions this may be something else. (lbeck)")
    testSet.clear();
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
       &numFields, AIMIDB::RESERVED2, testSet, true, true, true));
@@ -236,7 +239,7 @@ Nitf::TreState Nitf::AimidbParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID && totalFields != numFields)
    {
       reporter << "Total fields in the Dynamic Object(" <<
-         totalFields <<") did not match the number found(" << numFields << ") ";
+         totalFields << ") did not match the number found(" << numFields << ") ";
       status = INVALID;
    }
 
@@ -257,7 +260,12 @@ bool Nitf::AimidbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
    string &errorMessage) const
 {
    vector<char> buf;
-   unsigned short yy(0), mm(0), dd(0), hh(0), min(0), ss(0);
+   unsigned short yy(0);
+   unsigned short mm(0);
+   unsigned short dd(0);
+   unsigned short hh(0);
+   unsigned short min(0);
+   unsigned short ss(0);
    bool ok(true);
 
    bool success = true;
@@ -325,7 +333,7 @@ bool Nitf::AimidbParser::fromDynamicObject(const DynamicObject& input, ostream& 
    try
    {
       // put date in form CCYYMMDDhhmmss for this TAG                   see: strftime() for format info
-      const DateTime *pAppDtgAcquisitionDate = dv_cast<DateTime>(&input.getAttribute(AIMIDB::ACQUISITION_DATE));
+      const DateTime* pAppDtgAcquisitionDate = dv_cast<DateTime>(&input.getAttribute(AIMIDB::ACQUISITION_DATE));
       if (pAppDtgAcquisitionDate == NULL)
       {
          return false;
@@ -334,23 +342,23 @@ bool Nitf::AimidbParser::fromDynamicObject(const DynamicObject& input, ostream& 
       string CCYYMMDDhhmmss = pAppDtgAcquisitionDate->getFormattedUtc("%Y%m%d%H%M%S");
       output << sizeString(CCYYMMDDhhmmss, 14);
 
-      output << sizeString( dv_cast<string>(input.getAttribute (AIMIDB::MISSION_NO)), 4);
-      output << sizeString( dv_cast<string>(input.getAttribute (AIMIDB::MISSION_IDENTIFICATION)), 10);
-      output << sizeString( dv_cast<string>(input.getAttribute (AIMIDB::FLIGHT_NO)), 2);
-      output <<   toString( dv_cast<int>(input.getAttribute    (AIMIDB::OP_NUM)), 3);
-      output << sizeString( dv_cast<string>(input.getAttribute (AIMIDB::CURRENT_SEGMENT)), 2);
-      output <<   toString( dv_cast<int>(input.getAttribute    (AIMIDB::REPRO_NUM)), 2);
-      output << sizeString( dv_cast<string>(input.getAttribute (AIMIDB::REPLAY)), 3);
-      output << sizeString( dv_cast<string>(input.getAttribute (AIMIDB::RESERVED1)), 1);
-      output <<   toString( dv_cast<int>(input.getAttribute    (AIMIDB::START_TILE_COLUMN)), 3);
-      output <<   toString( dv_cast<int>(input.getAttribute    (AIMIDB::START_TILE_ROW)), 5);
-      output << sizeString( dv_cast<string>(input.getAttribute (AIMIDB::END_SEGMENT)), 2);
-      output <<   toString( dv_cast<int>(input.getAttribute    (AIMIDB::END_TILE_COLUMN)), 3);
-      output <<   toString( dv_cast<int>(input.getAttribute    (AIMIDB::END_TILE_ROW)), 5);
-      output << sizeString( dv_cast<string>(input.getAttribute (AIMIDB::COUNTRY)), 2);
-      output << sizeString( dv_cast<string>(input.getAttribute (AIMIDB::RESERVED2)), 4);
-      output << sizeString( dv_cast<string>(input.getAttribute (AIMIDB::LOCATION)), 11);
-      output << sizeString( dv_cast<string>(input.getAttribute (AIMIDB::RESERVED3)), 13);
+      output << sizeString(dv_cast<string>(input.getAttribute(AIMIDB::MISSION_NO)), 4);
+      output << sizeString(dv_cast<string>(input.getAttribute(AIMIDB::MISSION_IDENTIFICATION)), 10);
+      output << sizeString(dv_cast<string>(input.getAttribute(AIMIDB::FLIGHT_NO)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(AIMIDB::OP_NUM)), 3);
+      output << sizeString(dv_cast<string>(input.getAttribute(AIMIDB::CURRENT_SEGMENT)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(AIMIDB::REPRO_NUM)), 2);
+      output << sizeString(dv_cast<string>(input.getAttribute(AIMIDB::REPLAY)), 3);
+      output << sizeString(dv_cast<string>(input.getAttribute(AIMIDB::RESERVED1)), 1);
+      output << toString(dv_cast<int>(input.getAttribute(AIMIDB::START_TILE_COLUMN)), 3);
+      output << toString(dv_cast<int>(input.getAttribute(AIMIDB::START_TILE_ROW)), 5);
+      output << sizeString(dv_cast<string>(input.getAttribute(AIMIDB::END_SEGMENT)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(AIMIDB::END_TILE_COLUMN)), 3);
+      output << toString(dv_cast<int>(input.getAttribute(AIMIDB::END_TILE_ROW)), 5);
+      output << sizeString(dv_cast<string>(input.getAttribute(AIMIDB::COUNTRY)), 2);
+      output << sizeString(dv_cast<string>(input.getAttribute(AIMIDB::RESERVED2)), 4);
+      output << sizeString(dv_cast<string>(input.getAttribute(AIMIDB::LOCATION)), 11);
+      output << sizeString(dv_cast<string>(input.getAttribute(AIMIDB::RESERVED3)), 13);
    }
    catch (const bad_cast&)
    {

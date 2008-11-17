@@ -201,12 +201,11 @@ bool GcpEditorDlg::setGcpLayer(Layer* pLayer)
       return false;
    }
 
-   if (pLayer->getLayerType() != GCP_LAYER)
+   GcpLayer* pGcpLayer = dynamic_cast<GcpLayer*>(pLayer);
+   if (pGcpLayer == NULL)
    {
       return false;
    }
-
-   GcpLayer* pGcpLayer = (GcpLayer*) pLayer;
 
    int iIndex = mGcpLayers.indexOf(pGcpLayer);
    if (iIndex == -1)
@@ -847,6 +846,13 @@ void GcpEditorDlg::setCoordinateFormat(int iIndex)
          pHeader->hideSection(3);
          pHeader->hideSection(4);
          pHeader->showSection(5);
+         pHeader->hideSection(6);
+         break;
+
+      default:
+         pHeader->hideSection(3);
+         pHeader->hideSection(4);
+         pHeader->hideSection(5);
          pHeader->hideSection(6);
          break;
    }

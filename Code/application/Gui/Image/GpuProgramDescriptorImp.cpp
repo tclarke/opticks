@@ -18,12 +18,11 @@ GpuProgramDescriptorImp::GpuProgramDescriptorImp()
    REQUIRE(mpInputParams.get() != NULL);
 }
 
-GpuProgramDescriptorImp::GpuProgramDescriptorImp(const GpuProgramDescriptorImp& gpuProgramDescriptor)
+GpuProgramDescriptorImp::GpuProgramDescriptorImp(const GpuProgramDescriptorImp& gpuProgramDescriptor) :
+   mName(gpuProgramDescriptor.mName),
+   mType(gpuProgramDescriptor.mType)
 {
    REQUIRE(mpInputParams.get() != NULL);
-
-   mName = gpuProgramDescriptor.mName;
-   mType = gpuProgramDescriptor.mType;
    mpInputParams->merge(gpuProgramDescriptor.mpInputParams.get());
 }
 

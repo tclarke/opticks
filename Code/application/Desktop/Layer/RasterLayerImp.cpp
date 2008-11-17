@@ -206,46 +206,46 @@ bool RasterLayerImp::isKindOf(const string& className) const
    return LayerImp::isKindOf(className);
 }
 
-void RasterLayerImp::elementModifiedGray(Subject &subject, const std::string &signal, const boost::any &v)
+void RasterLayerImp::elementModifiedGray(Subject& subject, const string& signal, const boost::any& v)
 {
    elementModified(subject, signal, v);
    setImageChanged(true);
 }
 
-void RasterLayerImp::elementModifiedRed(Subject &subject, const std::string &signal, const boost::any &v)
+void RasterLayerImp::elementModifiedRed(Subject& subject, const string& signal, const boost::any& v)
 {
    elementModified(subject, signal, v);
    setImageChanged(true);
 }
 
-void RasterLayerImp::elementModifiedGreen(Subject &subject, const std::string &signal, const boost::any &v)
+void RasterLayerImp::elementModifiedGreen(Subject& subject, const string& signal, const boost::any& v)
 {
    elementModified(subject, signal, v);
    setImageChanged(true);
 }
 
-void RasterLayerImp::elementModifiedBlue(Subject &subject, const std::string &signal, const boost::any &v)
+void RasterLayerImp::elementModifiedBlue(Subject& subject, const string& signal, const boost::any& v)
 {
    elementModified(subject, signal, v);
    setImageChanged(true);
 }
 
-void RasterLayerImp::elementDeletedGray(Subject &subject, const std::string &signal, const boost::any &data)
+void RasterLayerImp::elementDeletedGray(Subject& subject, const string& signal, const boost::any& data)
 {
    setDisplayedBand(GRAY, DimensionDescriptor());
 }
 
-void RasterLayerImp::elementDeletedRed(Subject &subject, const std::string &signal, const boost::any &data)
+void RasterLayerImp::elementDeletedRed(Subject& subject, const string& signal, const boost::any& data)
 {
    setDisplayedBand(RED, DimensionDescriptor());
 }
 
-void RasterLayerImp::elementDeletedGreen(Subject &subject, const std::string &signal, const boost::any &data)
+void RasterLayerImp::elementDeletedGreen(Subject& subject, const string& signal, const boost::any& data)
 {
    setDisplayedBand(GREEN, DimensionDescriptor());
 }
 
-void RasterLayerImp::elementDeletedBlue(Subject &subject, const std::string &signal, const boost::any &data)
+void RasterLayerImp::elementDeletedBlue(Subject& subject, const string& signal, const boost::any& data)
 {
    setDisplayedBand(BLUE, DimensionDescriptor());
 }
@@ -360,7 +360,7 @@ void RasterLayerImp::draw()
 
 bool RasterLayerImp::getExtents(double& x1, double& y1, double& x4, double& y4)
 {
-   RasterElement *pRasterElement = dynamic_cast<RasterElement*>(getDataElement());
+   RasterElement* pRasterElement = dynamic_cast<RasterElement*>(getDataElement());
    VERIFY(pRasterElement != NULL);
 
    const RasterDataDescriptor* pDescriptor =
@@ -410,7 +410,7 @@ bool RasterLayerImp::isGpuImageSupported() const
    DisplayMode eMode = getDisplayMode();
    if (eMode == GRAYSCALE_MODE)
    {
-      RasterElement *pGrayElement = getDisplayedRasterElement(GRAY);
+      RasterElement* pGrayElement = getDisplayedRasterElement(GRAY);
       if (pGrayElement)
       {
          const RasterDataDescriptor* pDescriptor =
@@ -427,9 +427,9 @@ bool RasterLayerImp::isGpuImageSupported() const
    }
    else if (eMode == RGB_MODE)
    {
-      RasterElement *pRedElement = getDisplayedRasterElement(RED);
-      RasterElement *pGreenElement = getDisplayedRasterElement(GREEN);
-      RasterElement *pBlueElement = getDisplayedRasterElement(BLUE);
+      RasterElement* pRedElement = getDisplayedRasterElement(RED);
+      RasterElement* pGreenElement = getDisplayedRasterElement(GREEN);
+      RasterElement* pBlueElement = getDisplayedRasterElement(BLUE);
       if ((pRedElement != NULL) && (pGreenElement != NULL) && (pBlueElement != NULL))
       {
          const RasterDataDescriptor* pRedDescriptor =
@@ -501,7 +501,7 @@ double RasterLayerImp::calculateThresholdForEncodingType(EncodingType type) cons
    {
       fontSize = metrics.size(0, QString::number(numeric_limits<unsigned int>::max()));
    }
-   else if  (type == FLT4BYTES ||
+   else if (type == FLT4BYTES ||
       type == FLT8COMPLEX ||
       type == FLT8BYTES ||
       type == INT4SCOMPLEX /* treat integer complex as float because we want
@@ -600,7 +600,7 @@ bool RasterLayerImp::needToDrawPixelValues() const
    }
    else if ((displayMode == RGB_MODE) &&
       (mRedBand.isValid() == false || mpRedRasterElement.get() == NULL) &&
-      (mGreenBand.isValid() == false || mpGreenRasterElement.get() == NULL) && 
+      (mGreenBand.isValid() == false || mpGreenRasterElement.get() == NULL) &&
       (mBlueBand.isValid() == false || mpBlueRasterElement.get() == NULL))
    {
       return false;
@@ -640,16 +640,20 @@ namespace
 
 void RasterLayerImp::drawPixelValues()
 {
-   ViewImp *pView = dynamic_cast<ViewImp*>(getView());
+   ViewImp* pView = dynamic_cast<ViewImp*>(getView());
    VERIFYNRV(pView != NULL);
-   SpatialDataView *pSpatialView = dynamic_cast<SpatialDataView*>(pView);
+
+   SpatialDataView* pSpatialView = dynamic_cast<SpatialDataView*>(pView);
    VERIFYNRV(pSpatialView != NULL);
 
    bool bDrawCoords = View::getSettingInsetShowCoordinates();
 
    double dHeading = 0.0;
    double dPitch = 0.0;
-   LocationType lowerLeft, upperLeft, upperRight, lowerRight;
+   LocationType lowerLeft;
+   LocationType upperLeft;
+   LocationType upperRight;
+   LocationType lowerRight;
 
    GLboolean bScissorEnable;
    glGetBooleanv(GL_SCISSOR_TEST, &bScissorEnable);
@@ -1113,7 +1117,7 @@ DimensionDescriptor RasterLayerImp::getDisplayedBand(RasterChannelType eColor) c
 
 RasterElement* RasterLayerImp::getDisplayedRasterElement(RasterChannelType eColor) const
 {
-   const DataElement *pElement = NULL;
+   const DataElement* pElement = NULL;
 
    if (eColor == GRAY)
    {
@@ -1136,7 +1140,7 @@ RasterElement* RasterLayerImp::getDisplayedRasterElement(RasterChannelType eColo
 }
 
 bool RasterLayerImp::isBandDisplayed(RasterChannelType eColor, DimensionDescriptor band,
-                                   const RasterElement* pRasterElement) const
+                                     const RasterElement* pRasterElement) const
 {
    if ((band.isValid() == true) && (pRasterElement == NULL))
    {
@@ -1181,7 +1185,7 @@ void RasterLayerImp::setDisplayedBand(RasterChannelType eColor, DimensionDescrip
 }
 
 void RasterLayerImp::setDisplayedBand(RasterChannelType eColor, DimensionDescriptor band,
-                                    RasterElement* pRasterElement)
+                                      RasterElement* pRasterElement)
 {
    if (band.isValid() && (pRasterElement == NULL))
    {
@@ -1299,8 +1303,8 @@ void RasterLayerImp::setDisplayedBand(RasterChannelType eColor, DimensionDescrip
       }
 
       emit displayedBandChanged(eColor, band);
-      notify(SIGNAL_NAME(RasterLayer, DisplayedBandChanged), boost::any(
-         std::pair<RasterChannelType,DimensionDescriptor>(eColor, band)));
+      notify(SIGNAL_NAME(RasterLayer, DisplayedBandChanged),
+         boost::any(pair<RasterChannelType, DimensionDescriptor>(eColor, band)));
 
       mbLinking = true;
 
@@ -1328,7 +1332,7 @@ bool RasterLayerImp::setColorMap(const string& name, const vector<ColorType>& co
    {
       return setColorMap(ColorMap(name.c_str(), colorTable));
    }
-   catch (std::exception &exc)
+   catch (exception& exc)
    {
       QMessageBox::warning(NULL, "Bad ColorMap", exc.what());
       return false;
@@ -1358,21 +1362,13 @@ bool RasterLayerImp::setColorMap(const ColorMap& colorMap)
       mbLinking = true;
 
       vector<Layer*> linkedLayers = getLinkedLayers();
-
-      vector<Layer*>::iterator iter = linkedLayers.begin();
-      while (iter != linkedLayers.end())
+      for (vector<Layer*>::iterator iter = linkedLayers.begin(); iter != linkedLayers.end(); ++iter)
       {
-         Layer* pLayer = NULL;
-         pLayer = *iter;
+         RasterLayerImp* pLayer = dynamic_cast<RasterLayerImp*>(*iter);
          if (pLayer != NULL)
          {
-            if (pLayer->isKindOf("RasterLayer") == true)
-            {
-               ((RasterLayerAdapter*) pLayer)->RasterLayerImp::setColorMap(colorMap);
-            }
+            pLayer->setColorMap(colorMap);
          }
-
-         ++iter;
       }
 
       mbLinking = false;
@@ -1410,21 +1406,13 @@ void RasterLayerImp::setComplexComponent(const ComplexComponent& eComponent)
       mbLinking = true;
 
       vector<Layer*> linkedLayers = getLinkedLayers();
-
-      vector<Layer*>::iterator iter = linkedLayers.begin();
-      while (iter != linkedLayers.end())
+      for (vector<Layer*>::iterator iter = linkedLayers.begin(); iter != linkedLayers.end(); ++iter)
       {
-         Layer* pLayer = NULL;
-         pLayer = *iter;
+         RasterLayer* pLayer = dynamic_cast<RasterLayer*>(*iter);
          if (pLayer != NULL)
          {
-            if (pLayer->isKindOf("RasterLayer") == true)
-            {
-               ((RasterLayer*) pLayer)->setComplexComponent(eComponent);
-            }
+            pLayer->setComplexComponent(eComponent);
          }
-
-         ++iter;
       }
 
       mbLinking = false;
@@ -1502,13 +1490,20 @@ void RasterLayerImp::getStretchValues(const RasterChannelType& eColor, double& d
          dLower = mlstBlueStretchValues[0];
          dUpper = mlstBlueStretchValues[1];
          break;
+
+      default:
+         break;
    }
 }
 
-QString RasterLayerImp::getStretchUnitsAsString(const RasterChannelType &eColor) const
+unsigned int RasterLayerImp::getAlpha() const
+{
+   return mAlpha;
+}
+
+QString RasterLayerImp::getStretchUnitsAsString(const RasterChannelType& eColor) const
 {
    RegionUnits eMethod = getStretchUnits(eColor);
-
    switch (eMethod)
    {
       case RAW_VALUE:
@@ -1521,10 +1516,15 @@ QString RasterLayerImp::getStretchUnitsAsString(const RasterChannelType &eColor)
          return "%ile";
 
       case STD_DEV:
+      {
          QChar tmpchar(0x03C3);    // Unicode sigma
          QString tmpstr;
-         tmpstr.setUnicode((const QChar*)&tmpchar, 1);
+         tmpstr.setUnicode(&tmpchar, 1);
          return tmpstr;
+      }
+
+      default:
+         break;
    }
 
    return QString();
@@ -1566,6 +1566,9 @@ double RasterLayerImp::convertStretchValue(const RasterChannelType& eColor, cons
       case STD_DEV:
          dRawValue = (dStretchValue * dStdDev) + dAverage;
          break;
+
+      default:
+         break;
    }
 
    // Convert the raw stretch value to the new value
@@ -1595,6 +1598,9 @@ double RasterLayerImp::convertStretchValue(const RasterChannelType& eColor, cons
          {
             dNewValue = (dRawValue - dAverage) / dStdDev;
          }
+         break;
+
+      default:
          break;
    }
 
@@ -2108,34 +2114,25 @@ void RasterLayerImp::setStretchType(const DisplayMode& eMode, const StretchType&
 
       mbRegenerate = true;
       emit stretchTypeChanged(eMode, eType);
-      notify(SIGNAL_NAME(RasterLayer, StretchTypeChanged), boost::any(
-         std::pair<DisplayMode,StretchType>(eMode,eType)));
+      notify(SIGNAL_NAME(RasterLayer, StretchTypeChanged), boost::any(pair<DisplayMode, StretchType>(eMode, eType)));
 
       mbLinking = true;
 
       vector<Layer*> linkedLayers = getLinkedLayers();
-
-      vector<Layer*>::iterator iter = linkedLayers.begin();
-      while (iter != linkedLayers.end())
+      for (vector<Layer*>::iterator iter = linkedLayers.begin(); iter != linkedLayers.end(); ++iter)
       {
-         Layer* pLayer = NULL;
-         pLayer = *iter;
+         RasterLayer* pLayer = dynamic_cast<RasterLayer*>(*iter);
          if (pLayer != NULL)
          {
-            if (pLayer->isKindOf("RasterLayer") == true)
-            {
-               ((RasterLayer*) pLayer)->setStretchType(eMode, eType);
-            }
+            pLayer->setStretchType(eMode, eType);
          }
-
-         ++iter;
       }
 
       mbLinking = false;
    }
 }
 
-void RasterLayerImp::setStretchUnits(const DisplayMode &eMode, const RegionUnits &eUnits)
+void RasterLayerImp::setStretchUnits(const DisplayMode& eMode, const RegionUnits& eUnits)
 {
    if (eMode == GRAYSCALE_MODE)
    {
@@ -2235,8 +2232,8 @@ void RasterLayerImp::setStretchUnits(const RasterChannelType& eColor, const Regi
 
       mbRegenerate = true;
       emit stretchUnitsChanged(eColor, eUnits);
-      notify(SIGNAL_NAME(RasterLayer, StretchUnitsChanged), boost::any(
-         std::pair<RasterChannelType,RegionUnits>(eColor,eUnits)));
+      notify(SIGNAL_NAME(RasterLayer, StretchUnitsChanged),
+         boost::any(pair<RasterChannelType, RegionUnits>(eColor, eUnits)));
 
       mbLinking = true;
 
@@ -2290,6 +2287,9 @@ void RasterLayerImp::setStretchValues(const RasterChannelType& eColor, double dL
             return;
          }
 
+         break;
+
+      default:
          break;
    }
 
@@ -2356,31 +2356,26 @@ void RasterLayerImp::setStretchValues(const RasterChannelType& eColor, double dL
             mlstBlueStretchValues.push_back(dLower);
             mlstBlueStretchValues.push_back(dUpper);
             break;
+
+         default:
+            break;
       }
 
       mbRegenerate = true;
       emit stretchValuesChanged(eColor, dLower, dUpper);
       notify(SIGNAL_NAME(RasterLayer, StretchValuesChanged), boost::any(
-         boost::tuple<RasterChannelType,double,double>(eColor,dLower,dUpper)));
+         boost::tuple<RasterChannelType, double, double>(eColor, dLower, dUpper)));
 
       mbLinking = true;
 
       vector<Layer*> linkedLayers = getLinkedLayers();
-
-      vector<Layer*>::iterator iter = linkedLayers.begin();
-      while (iter != linkedLayers.end())
+      for (vector<Layer*>::iterator iter = linkedLayers.begin(); iter != linkedLayers.end(); ++iter)
       {
-         Layer* pLayer = NULL;
-         pLayer = *iter;
+         RasterLayer* pLayer = dynamic_cast<RasterLayer*>(*iter);
          if (pLayer != NULL)
          {
-            if (pLayer->isKindOf("RasterLayer") == true)
-            {
-               ((RasterLayer*) pLayer)->setStretchValues(eColor, dLower, dUpper);
-            }
+            pLayer->setStretchValues(eColor, dLower, dUpper);
          }
-
-         ++iter;
       }
 
       mbLinking = false;
@@ -2421,21 +2416,13 @@ void RasterLayerImp::setAlpha(unsigned int alpha)
       mbLinking = true;
 
       vector<Layer*> linkedLayers = getLinkedLayers();
-
-      vector<Layer*>::iterator iter = linkedLayers.begin();
-      while (iter != linkedLayers.end())
+      for (vector<Layer*>::iterator iter = linkedLayers.begin(); iter != linkedLayers.end(); ++iter)
       {
-         Layer* pLayer = NULL;
-         pLayer = *iter;
+         RasterLayer* pLayer = dynamic_cast<RasterLayer*>(*iter);
          if (pLayer != NULL)
          {
-            if (pLayer->isKindOf("RasterLayer") == true)
-            {
-               ((RasterLayer*) pLayer)->setAlpha(alpha);
-            }
+            pLayer->setAlpha(alpha);
          }
-
-         ++iter;
       }
 
       mbLinking = false;
@@ -2574,21 +2561,13 @@ void RasterLayerImp::setDisplayMode(const DisplayMode& eMode)
       mbLinking = true;
 
       vector<Layer*> linkedLayers = getLinkedLayers();
-
-      vector<Layer*>::iterator iter = linkedLayers.begin();
-      while (iter != linkedLayers.end())
+      for (vector<Layer*>::iterator iter = linkedLayers.begin(); iter != linkedLayers.end(); ++iter)
       {
-         Layer* pLayer = NULL;
-         pLayer = *iter;
+         RasterLayer* pLayer = dynamic_cast<RasterLayer*>(*iter);
          if (pLayer != NULL)
          {
-            if (pLayer->isKindOf("RasterLayer") == true)
-            {
-               ((RasterLayer*) pLayer)->setDisplayMode(eMode);
-            }
+            pLayer->setDisplayMode(eMode);
          }
-
-         ++iter;
       }
 
       mbLinking = false;
@@ -2644,6 +2623,11 @@ vector<double> RasterLayerImp::getRawStretchValues(const RasterChannelType& eCol
    return lstStretchValues;
 }
 
+const vector<ColorType>& RasterLayerImp::getColorTable() const
+{
+   return mColorMap.getTable();
+}
+
 void RasterLayerImp::generateImage()
 {
    RasterElement* pRaster = dynamic_cast<RasterElement*>(getDataElement());
@@ -2697,7 +2681,7 @@ void RasterLayerImp::generateImage()
    {
       vector<double> lstStretchValues = getRawStretchValues(GRAY);
 
-      RasterElement *pGrayElement = getDisplayedRasterElement(GRAY);
+      RasterElement* pGrayElement = getDisplayedRasterElement(GRAY);
       if (pGrayElement == NULL)
       {
          return;
@@ -2706,7 +2690,7 @@ void RasterLayerImp::generateImage()
          dynamic_cast<const RasterDataDescriptor*>(pGrayElement->getDataDescriptor());
       VERIFYNRV(pGrayDescriptor);
       EncodingType eEncodingGray = pGrayDescriptor->getDataType();
-      std::vector<int> badValues;
+      vector<int> badValues;
 
       Statistics* pStatistics = getStatistics(GRAY);
       if (pStatistics != NULL)
@@ -2730,20 +2714,16 @@ void RasterLayerImp::generateImage()
       }
       else // using a colormap
       {
-         GLenum format = 
-            ((badValues.empty() && mColorMap.isFullyOpaque()) ? 
-               GL_RGB:
-               GL_RGBA);
-         pImage->initialize(512, 512, mGrayBand, columns, rows, bands, format,
-            eEncodingGray, eComponent, NULL, eType, lstStretchValues, pGrayElement, getColorTable(),
-            badValues);
+         GLenum format = ((badValues.empty() && mColorMap.isFullyOpaque()) ? GL_RGB : GL_RGBA);
+         pImage->initialize(512, 512, mGrayBand, columns, rows, bands, format, eEncodingGray, eComponent,
+            NULL, eType, lstStretchValues, pGrayElement, getColorTable(), badValues);
       }
    }
    else if (eMode == RGB_MODE)
    {
-      RasterElement *pRedElement = getDisplayedRasterElement(RED);
-      RasterElement *pGreenElement = getDisplayedRasterElement(GREEN);
-      RasterElement *pBlueElement = getDisplayedRasterElement(BLUE);
+      RasterElement* pRedElement = getDisplayedRasterElement(RED);
+      RasterElement* pGreenElement = getDisplayedRasterElement(GREEN);
+      RasterElement* pBlueElement = getDisplayedRasterElement(BLUE);
 
       vector<double> lstRedStretchValues = getRawStretchValues(RED);
       vector<double> lstGreenStretchValues = getRawStretchValues(GREEN);
@@ -2819,7 +2799,7 @@ void RasterLayerImp::generateImage()
    // Enable the filters after the image is initialized to ensure the tiles are created
    if ((pGpuImage != NULL) && (bGpuImage == true))
    {
-      ViewImp *pViewImp = dynamic_cast<ViewImp*>(getView());
+      ViewImp* pViewImp = dynamic_cast<ViewImp*>(getView());
       if (pViewImp != NULL)
       {
          GlContextSave contextSave;
@@ -2893,7 +2873,7 @@ double RasterLayerImp::percentileToRaw(double value, const double* pdPercentiles
       return pdPercentiles[0] + value * (pdPercentiles[1000] - pdPercentiles[0]) / 100.0;
    }
 
-   int lower = (int) (10.0 * value);
+   int lower = static_cast<int>(10.0 * value);
    if (lower < 0)
    {
       return pdPercentiles[0];
@@ -2903,7 +2883,8 @@ double RasterLayerImp::percentileToRaw(double value, const double* pdPercentiles
       return pdPercentiles[1000];
    }
 
-   return pdPercentiles[lower] + (pdPercentiles[lower + 1] - pdPercentiles[lower]) * (10.0 * value - (double) lower);
+   return pdPercentiles[lower] + (pdPercentiles[lower + 1] - pdPercentiles[lower]) *
+      (10.0 * value - static_cast<double>(lower));
 }
 
 double RasterLayerImp::rawToPercentile(double value, const double* pdPercentiles) const
@@ -3024,34 +3005,29 @@ bool RasterLayerImp::fromXml(DOMNode* pDocument, unsigned int version)
    {
       return false;
    }
-   DOMElement *pDocElmnt = static_cast<DOMElement*>(pDocument);
-   setDisplayMode(StringUtilities::fromXmlString<DisplayMode>(
-      A(pDocElmnt->getAttribute(X("displayMode")))));
+   DOMElement* pDocElmnt = static_cast<DOMElement*>(pDocument);
+   setDisplayMode(StringUtilities::fromXmlString<DisplayMode>(A(pDocElmnt->getAttribute(X("displayMode")))));
    setComplexComponent(StringUtilities::fromXmlString<ComplexComponent>(
       A(pDocElmnt->getAttribute(X("complexComponent")))));
    setStretchType(GRAYSCALE_MODE, StringUtilities::fromXmlString<StretchType>(
       A(pDocElmnt->getAttribute(X("stretchTypeGray")))));
    setStretchType(RGB_MODE, StringUtilities::fromXmlString<StretchType>(
       A(pDocElmnt->getAttribute(X("stretchTypeRgb")))));
-   setAlpha(StringUtilities::fromXmlString<unsigned int>(
-      A(pDocElmnt->getAttribute(X("alpha")))));
-   enableFastContrastStretch(StringUtilities::fromXmlString<bool>(
-      A(pDocElmnt->getAttribute(X("enableFastStretch")))));
+   setAlpha(StringUtilities::fromXmlString<unsigned int>(A(pDocElmnt->getAttribute(X("alpha")))));
+   enableFastContrastStretch(StringUtilities::fromXmlString<bool>(A(pDocElmnt->getAttribute(X("enableFastStretch")))));
    mpAnimation = NULL;
    if (pDocElmnt->hasAttribute(X("animationId")))
    {
-      setAnimation(dynamic_cast<Animation*>(
-         SessionManagerImp::instance()->getSessionItem(
-            A(pDocElmnt->getAttribute(X("animationId"))))));
+      setAnimation(dynamic_cast<Animation*>(SessionManagerImp::instance()->getSessionItem(
+         A(pDocElmnt->getAttribute(X("animationId"))))));
    }
-   for (DOMNode *pNode = pDocElmnt->getFirstChild();
-                pNode != NULL; pNode = pNode->getNextSibling())
+   for (DOMNode* pNode = pDocElmnt->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())
    {
-      if (XMLString::equals(pNode->getNodeName(),X("ChannelInfo")))
+      if (XMLString::equals(pNode->getNodeName(), X("ChannelInfo")))
       {
-         DOMElement *pElmnt = static_cast<DOMElement*>(pNode);
+         DOMElement* pElmnt = static_cast<DOMElement*>(pNode);
          DimensionDescriptor band;
-         RasterElement *pDataElement = NULL;
+         RasterElement* pDataElement = NULL;
          RegionUnits stretchUnits;
          double stretchValueMin = 0.0;
          double stretchValueMax = 0.0;
@@ -3081,10 +3057,9 @@ bool RasterLayerImp::fromXml(DOMNode* pDocument, unsigned int version)
       if (XMLString::equals(pNode->getNodeName(), X("ImageFilters")))
       {
          vector<string> filters;
-         for (DOMNode *pFiltNode = pNode->getFirstChild();
-                      pFiltNode != NULL; pFiltNode = pFiltNode->getNextSibling())
+         for (DOMNode* pFiltNode = pNode->getFirstChild(); pFiltNode != NULL; pFiltNode = pFiltNode->getNextSibling())
          {
-            if (XMLString::equals(pFiltNode->getNodeName(),X("filter")))
+            if (XMLString::equals(pFiltNode->getNodeName(), X("filter")))
             {
                string name = A(static_cast<DOMElement*>(pFiltNode)->getAttribute(X("name")));
                if (name.empty() == false)
@@ -3104,7 +3079,7 @@ bool RasterLayerImp::fromXml(DOMNode* pDocument, unsigned int version)
    return true;
 }
 
-bool RasterLayerImp::serialize(SessionItemSerializer &serializer) const
+bool RasterLayerImp::serialize(SessionItemSerializer& serializer) const
 {
    if (!LayerImp::serialize(serializer))
    {
@@ -3119,7 +3094,7 @@ bool RasterLayerImp::serialize(SessionItemSerializer &serializer) const
    return serializer.serialize(colorMapData.c_str(), colorMapData.size());
 }
 
-bool RasterLayerImp::deserialize(SessionItemDeserializer &deserializer)
+bool RasterLayerImp::deserialize(SessionItemDeserializer& deserializer)
 {
    if (!LayerImp::deserialize(deserializer))
    {
@@ -3135,8 +3110,8 @@ bool RasterLayerImp::deserialize(SessionItemDeserializer &deserializer)
    return mColorMap.loadFromBuffer(colorMapData);
 }
 
-bool RasterLayerImp::channelToXml(XMLWriter* pXml, const RasterElement* pElem, const RegionUnits &units,
-                  const DimensionDescriptor &descriptor, const std::vector<double> &values) const
+bool RasterLayerImp::channelToXml(XMLWriter* pXml, const RasterElement* pElem, const RegionUnits& units,
+                                  const DimensionDescriptor& descriptor, const vector<double>& values) const
 {
    vector<double>::const_iterator it;
    if (units.isValid())
@@ -3171,10 +3146,10 @@ bool RasterLayerImp::channelToXml(XMLWriter* pXml, const RasterElement* pElem, c
    return true;
 }
 
-bool RasterLayerImp::xmlToChannel(DOMNode* pDocument, RasterElement*& pElem, 
-                  RegionUnits &units, DimensionDescriptor &descriptor, double &minValue, double &maxValue)
+bool RasterLayerImp::xmlToChannel(DOMNode* pDocument, RasterElement*& pElem, RegionUnits& units,
+                                  DimensionDescriptor& descriptor, double& minValue, double& maxValue)
 {
-   DOMElement *pElement = static_cast<DOMElement*>(pDocument);
+   DOMElement* pElement = static_cast<DOMElement*>(pDocument);
    if (pElement->hasAttribute(X("stretchUnits")))
    {
       units = StringUtilities::fromXmlString<RegionUnits>(
@@ -3189,13 +3164,12 @@ bool RasterLayerImp::xmlToChannel(DOMNode* pDocument, RasterElement*& pElem,
    {
       pElem = NULL;
    }
-   for (DOMNode *pNode = pElement->getFirstChild();
-                pNode != NULL; pNode = pNode->getNextSibling())
+   for (DOMNode* pNode = pElement->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())
    {
-      if (XMLString::equals(pNode->getNodeName(),X("DimensionDescriptor")))
+      if (XMLString::equals(pNode->getNodeName(), X("DimensionDescriptor")))
       {
          DimensionDescriptor dd;
-         DOMElement *pElmnt = static_cast<DOMElement*>(pNode);
+         DOMElement* pElmnt = static_cast<DOMElement*>(pNode);
          if (pElmnt->hasAttribute(X("originalNumber")))
          {
             dd.setOriginalNumber(StringUtilities::fromXmlString<unsigned int>(
@@ -3213,7 +3187,7 @@ bool RasterLayerImp::xmlToChannel(DOMNode* pDocument, RasterElement*& pElem,
          }
          descriptor = dd;
       }
-      else if (XMLString::equals(pNode->getNodeName(),X("stretchValues")))
+      else if (XMLString::equals(pNode->getNodeName(), X("stretchValues")))
       {
          vector<double> values;
          XmlReader::StrToVector<double, XmlReader::StringStreamAssigner<double> >(values, pNode->getTextContent());
@@ -3230,17 +3204,17 @@ bool RasterLayerImp::xmlToChannel(DOMNode* pDocument, RasterElement*& pElem,
 
 bool RasterLayerImp::canApplyFastContrastStretch() const
 {
-   bool isLinearGrayscale = mColorMap.isDefault() && 
-      meDisplayMode == GRAYSCALE_MODE && 
+   bool isLinearGrayscale = mColorMap.isDefault() &&
+      meDisplayMode == GRAYSCALE_MODE &&
       meGrayStretchType == LINEAR &&
       mlstGrayStretchValues[1] >= mlstGrayStretchValues[0];
-   bool isLinearRgb = meDisplayMode == RGB_MODE && 
+   bool isLinearRgb = meDisplayMode == RGB_MODE &&
       meRgbStretchType == LINEAR &&
       mlstRedStretchValues[1] >= mlstRedStretchValues[0] &&
       mlstGreenStretchValues[1] >= mlstGreenStretchValues[0] &&
       mlstBlueStretchValues[1] >= mlstBlueStretchValues[0];
 
-   return getGlBlendSubtractProc() != NULL && 
+   return getGlBlendSubtractProc() != NULL &&
       (isLinearGrayscale || isLinearRgb) &&
       mAlpha == 255 &&
       mEnableFastContrastStretch;
@@ -3291,8 +3265,8 @@ void RasterLayerImp::applyFastContrastStretch(RasterChannelType element)
       return;
    }
 
-   const unsigned int *pHistogram = NULL;
-   const double *pBinCenters = NULL;
+   const unsigned int* pHistogram = NULL;
+   const double* pBinCenters = NULL;
    pStatistics->getHistogram(pBinCenters, pHistogram);
    VERIFYNRV(pBinCenters != NULL);
    VERIFYNRV(pHistogram != NULL);
@@ -3300,7 +3274,7 @@ void RasterLayerImp::applyFastContrastStretch(RasterChannelType element)
    double maxData = pStatistics->getMax(mComplexComponent);
    double range = maxData - minData;
 
-   std::vector<double> stretch = getRawStretchValues(element);
+   vector<double> stretch = getRawStretchValues(element);
 
    double scale = 128.0;
    if (fabs(stretch[1]-stretch[0]) * 1e6 > range) // catch divide by 0.0
@@ -3320,9 +3294,9 @@ void RasterLayerImp::applyFastContrastStretch(RasterChannelType element)
       }
    }
 
-   double biases[3] = {0.0,0.0,0.0};
-   double scales[3] = {0.0,0.0,0.0};
-   double fullscales[3] = {0.0,0.0,0.0};
+   double biases[3] = {0.0, 0.0, 0.0};
+   double scales[3] = {0.0, 0.0, 0.0};
+   double fullscales[3] = {0.0, 0.0, 0.0};
    switch (element)
    {
    case GRAY:
@@ -3345,6 +3319,8 @@ void RasterLayerImp::applyFastContrastStretch(RasterChannelType element)
       scales[2] = scale;
       fullscales[2] = 1.0;
       break;
+   default:
+      break;
    }
 
    GlBlendSubtractProc glBlendEquationEXT;
@@ -3360,7 +3336,11 @@ void RasterLayerImp::applyFastContrastStretch(RasterChannelType element)
       } 
       else 
       {
-         if (glBlendEquationEXT) glBlendEquationEXT(GL_FUNC_REVERSE_SUBTRACT_EXT);
+         if (glBlendEquationEXT)
+         {
+            glBlendEquationEXT(GL_FUNC_REVERSE_SUBTRACT_EXT);
+         }
+
          int x = 5;
          x = 10;
          glColor4f(-biases[0], -biases[1], -biases[2], 0.0);
@@ -3370,7 +3350,11 @@ void RasterLayerImp::applyFastContrastStretch(RasterChannelType element)
    float remainingScale;
 
    remainingScale = scale;
-   if (glBlendEquationEXT) glBlendEquationEXT(GL_FUNC_ADD_EXT);
+   if (glBlendEquationEXT)
+   {
+      glBlendEquationEXT(GL_FUNC_ADD_EXT);
+   }
+
    glBlendFunc(GL_DST_COLOR, GL_ONE);
    if (remainingScale > 2.0) 
    {
@@ -3387,18 +3371,30 @@ void RasterLayerImp::applyFastContrastStretch(RasterChannelType element)
    switch (element)
    {
    case GRAY:
-      scales[0] = scales[1] = scales[2] = remainingScale-1.0; break;
+      scales[0] = remainingScale - 1.0;
+      scales[1] = remainingScale - 1.0;
+      scales[2] = remainingScale - 1.0;
+      break;
    case RED:
-      scales[0] = remainingScale-1.0; break;
+      scales[0] = remainingScale - 1.0;
+      break;
    case GREEN:
-      scales[1] = remainingScale-1.0; break;
+      scales[1] = remainingScale - 1.0;
+      break;
    case BLUE:
-      scales[2] = remainingScale-1.0; break;
+      scales[2] = remainingScale - 1.0;
+      break;
+   default:
+      break;
    }
    glColor4f(scales[0], scales[1], scales[2], 1);
    glRectd(0.0, 0.0, size.mX, size.mY);
 
-   if (glBlendEquationEXT) glBlendEquationEXT(GL_FUNC_ADD_EXT);
+   if (glBlendEquationEXT)
+   {
+      glBlendEquationEXT(GL_FUNC_ADD_EXT);
+   }
+
    glDisable(GL_BLEND);
 }
 
@@ -3409,7 +3405,11 @@ bool RasterLayerImp::enableFastContrastStretch(bool enable)
 
 bool RasterLayerImp::generateFullResTexture()
 {
-   if (mpImage == NULL) return false;
+   if (mpImage == NULL)
+   {
+      return false;
+   }
+
    return mpImage->generateFullResTexture();
 }
 
@@ -3449,7 +3449,8 @@ void RasterLayerImp::changeStretch(QAction* pAction)
 
    RegionUnits eUnits = PERCENTILE;
    StretchType eType = LINEAR;
-   double lower = 5.0, upper = 95.0;
+   double lower = 5.0;
+   double upper = 95.0;
 
    if (pAction == mpLinear0Action)
    {
@@ -3524,7 +3525,7 @@ void RasterLayerImp::setAnimation(Animation* pAnimation)
    updateFromMovie();
 }
 
-void RasterLayerImp::movieUpdated(Subject &subject, const string &signal, const boost::any &v)
+void RasterLayerImp::movieUpdated(Subject& subject, const string& signal, const boost::any& v)
 {
    Animation* pAnimation = dynamic_cast<Animation*> (&subject);
    if (mpAnimation != NULL && pAnimation == mpAnimation)
@@ -3565,7 +3566,7 @@ void RasterLayerImp::updateFromMovie()
    }
 }
 
-void RasterLayerImp::movieDeleted(Subject &subject, const string &signal, const boost::any &v)
+void RasterLayerImp::movieDeleted(Subject& subject, const string& signal, const boost::any& v)
 {
    Animation* pAnimation = dynamic_cast<Animation*> (&subject);
    if (mpAnimation != NULL && pAnimation == mpAnimation)
@@ -3581,8 +3582,7 @@ Animation* RasterLayerImp::getAnimation() const
 
 void RasterLayerImp::displayAsTrueColor()
 {
-   RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(
-                                       getDataElement()->getDataDescriptor());
+   RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(getDataElement()->getDataDescriptor());
    if (RasterUtilities::setDisplayBandsToTrueColor(pDescriptor))
    {
       UndoGroup group(getView(), "Display As True Color");
@@ -3600,7 +3600,7 @@ unsigned int RasterLayerImp::readFilterBuffer(double xCoord, double yCoord, int 
    unsigned int numElements = 0;
 
 #if defined (CG_SUPPORTED)
-   ViewImp *pViewImp = dynamic_cast<ViewImp*>(getView());
+   ViewImp* pViewImp = dynamic_cast<ViewImp*>(getView());
    if (pViewImp != NULL)
    {
       GlContextSave contextSave;
@@ -3609,7 +3609,7 @@ unsigned int RasterLayerImp::readFilterBuffer(double xCoord, double yCoord, int 
       // make sure the image has been drawn before trying to read from it
       draw();
 
-      GpuImage *pGpuImage = dynamic_cast<GpuImage*>(getImage());
+      GpuImage* pGpuImage = dynamic_cast<GpuImage*>(getImage());
       if (pGpuImage != NULL)
       {
          numElements = pGpuImage->readTiles(xCoord, yCoord, width, height, values);

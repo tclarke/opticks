@@ -10,18 +10,15 @@
 #include "ConvertToBsqPage.h"
 #include <string.h>
 
-ConvertToBsqPage::ConvertToBsqPage(unsigned int rows, unsigned int columns, 
-   unsigned int bytesPerElement) :
-   mCache(rows * columns * bytesPerElement), mRows(rows),
-   mColumns(columns), mBytesPerElement(bytesPerElement)
+ConvertToBsqPage::ConvertToBsqPage(unsigned int rows, unsigned int columns, unsigned int bytesPerElement) :
+   mCache(rows * columns * bytesPerElement),
+   mRows(rows),
+   mColumns(columns),
+   mBytesPerElement(bytesPerElement)
 {
 }
 
-ConvertToBsqPage::ConvertToBsqPage()
-{
-}
-
-ConvertToBsqPage::~ConvertToBsqPage(void)
+ConvertToBsqPage::~ConvertToBsqPage()
 {
 }
 
@@ -45,14 +42,13 @@ unsigned int ConvertToBsqPage::getInterlineBytes()
    return 0;
 }
 
-void *ConvertToBsqPage::getRawData()
+void* ConvertToBsqPage::getRawData()
 {
    return &mCache.front();
 }
 
-bool ConvertToBsqPage::feed(unsigned int row, size_t skipBytes, void *pData)
+bool ConvertToBsqPage::feed(unsigned int row, size_t skipBytes, void* pData)
 {
-
    if (row > mRows)
    {
       return false;
@@ -65,14 +61,13 @@ bool ConvertToBsqPage::feed(unsigned int row, size_t skipBytes, void *pData)
    }
    else
    {
-
       for (unsigned int cachePos = mBytesPerElement * mColumns * row, sourcePos = 0;
          sourcePos < mColumns*(skipBytes); 
          cachePos += mBytesPerElement, sourcePos += skipBytes)
       {
-         memcpy(&mCache[cachePos], 
-            reinterpret_cast<unsigned char*>(pData) + sourcePos, mBytesPerElement);
+         memcpy(&mCache[cachePos], reinterpret_cast<unsigned char*>(pData) + sourcePos, mBytesPerElement);
       }
    }
+
    return true;
 }

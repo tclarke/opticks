@@ -1008,7 +1008,12 @@ bool Nitf::CmetaaParser::toDynamicObject(istream& input, size_t numBytes, Dynami
    dtg.resize(16);
    memcpy(&dtg[0], &buf[0], 16);
 
-   unsigned short year(0), month(0), day(0), hour(0), min(0), sec(0);
+   unsigned short year(0);
+   unsigned short month(0);
+   unsigned short day(0);
+   unsigned short hour(0);
+   unsigned short min(0);
+   unsigned short sec(0);
 
    bool dtgValid = DtgParseCCYYMMMDDhhmmss(dtg, year, month, day, hour, min, sec);
    if (dtgValid)
@@ -2296,7 +2301,7 @@ Nitf::TreState Nitf::CmetaaParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID && totalFields != numFields)
    {
       reporter << "Total fields in the Dynamic Object(" <<
-         totalFields <<") did not match the number found(" << numFields << ") ";
+         totalFields << ") did not match the number found(" << numFields << ") ";
       status = INVALID;
    }
 
@@ -2324,110 +2329,110 @@ bool Nitf::CmetaaParser::fromDynamicObject(const DynamicObject& input, ostream& 
       // This was probably an error as the first field is a count of the related TREs. Because the DO
       // will not allow two fields to have the same name it has been changed to allow the storage into the DO
 
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::NUM_RELATED_TRES)), 2);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::RELATED_TRES)), 120);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::RD_RPC_NO)), 12);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::IF_PROCESS)), 4);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::RD_CEN_FREQ)), 4);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::RD_MODE)), 5);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::RD_PATCH_NO)), 4);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::CMPLX_DOMAIN)), 5);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::CMPLX_MAG_REMAP_TYPE)), 4);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CMPLX_LIN_SCALE)), 7);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CMPLX_AVG_POWER)), 7);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::CMPLX_LINLOG_TP)), 5);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::CMPLX_PHASE_QUANT_FLAG)), 3);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::CMPLX_PHASE_QUANT_BIT_DEPTH)), 2);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::CMPLX_SIZE_1)), 2);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::CMPLX_IC_1)), 2);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::CMPLX_SIZE_2)), 2);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::CMPLX_IC_2)), 2);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::CMPLX_IC_BPP)), 5);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::CMPLX_WEIGHT)), 3);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::CMPLX_AZ_SLL)), 2);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::CMPLX_RNG_SLL)), 2);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::CMPLX_AZ_TAY_NBAR)), 2);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::CMPLX_RNG_TAY_NBAR)), 2);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::CMPLX_WEIGHT_NORM)), 3);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::CMPLX_SIGNAL_PLANE)), 1);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::IF_DC_SF_ROW)), 6);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::IF_DC_SF_COL)), 6);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::IF_PATCH_1_ROW)), 6);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::IF_PATCH_1_COL)), 6);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::IF_PATCH_2_ROW)), 6);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::IF_PATCH_2_COL)), 6);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::IF_PATCH_3_ROW)), 6);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::IF_PATCH_3_COL)), 6);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::IF_PATCH_4_ROW)), 6);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::IF_PATCH_4_COL)), 6);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::IF_DC_IS_ROW)), 8);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::IF_DC_IS_COL)), 8);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::IF_IMG_ROW_DC)), 8);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::IF_IMG_COL_DC)), 8);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::IF_TILE_1_ROW)), 6);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::IF_TILE_1_COL)), 6);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::IF_TILE_2_ROW)), 6);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::IF_TILE_2_COL)), 6);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::IF_TILE_3_ROW)), 6);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::IF_TILE_3_COL)), 6);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::IF_TILE_4_ROW)), 6);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::IF_TILE_4_COL)), 6);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::IF_RD)), 1);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::IF_RGWLK)), 1);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::IF_KEYSTN)), 1);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::IF_LINSFT)), 1);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::IF_SUBPATCH)), 1);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::IF_GEODIST)), 1);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::IF_RGFO)), 1);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::IF_BEAM_COMP)), 1);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::IF_RGRES)), 8, 3);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::IF_AZRES)), 8, 3);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::IF_RSS)), 8, 5);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::IF_AZSS)), 8, 5);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::IF_RSR)), 8, 5);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::IF_AZSR)), 8, 5);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::IF_RFFT_SAMP)), 7);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::IF_AZFFT_SAMP)), 7);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::IF_RFFT_TOT)), 7);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::IF_AZFFT_TOT)), 7);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::IF_SUBP_ROW)), 6);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::IF_SUBP_COL)), 6);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::IF_SUB_RG)), 4);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::IF_SUB_AZ)), 4);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::IF_RFFTS)), 1);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::IF_AFFTS)), 1);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::IF_RANGE_DATA)), 7);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::IF_INCPH)), 1);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::IF_SR_NAME1)), 8);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::IF_SR_AMOUNT1)), 8, 5);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::IF_SR_NAME2)), 8);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::IF_SR_AMOUNT2)), 8, 5);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::IF_SR_NAME3)), 8);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::IF_SR_AMOUNT)), 8, 5);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::AF_TYPE1)), 5);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::AF_TYPE2)), 5);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::AF_TYPE3)), 5);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::POL_TR)), 1);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::POL_RE)), 1);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::POL_REFERENCE)), 40);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::POL)), 1);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::POL_REG)), 1);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::POL_ISO_1)), 5, 2);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::POL_BAL)), 1);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::POL_BAL_MAG)), 8);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::POL_BAL_PHS)), 8, 5, ZERO_FILL, POS_SIGN_TRUE);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::POL_HCOMP)), 1);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::P_HCOMP_BASIS)), 10);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::POL_HCOMP_COEF_1)), 9);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::POL_HCOMP_COEF_2)), 9);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::POL_HCOMP_COEF_3)), 9);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::POL_AFCOMP)), 1);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::POL_SPARE_A)), 15);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::POL_SPARE_N)), 9);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::NUM_RELATED_TRES)), 2);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::RELATED_TRES)), 120);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::RD_RPC_NO)), 12);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::IF_PROCESS)), 4);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::RD_CEN_FREQ)), 4);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::RD_MODE)), 5);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::RD_PATCH_NO)), 4);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::CMPLX_DOMAIN)), 5);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::CMPLX_MAG_REMAP_TYPE)), 4);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CMPLX_LIN_SCALE)), 7);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CMPLX_AVG_POWER)), 7);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::CMPLX_LINLOG_TP)), 5);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::CMPLX_PHASE_QUANT_FLAG)), 3);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::CMPLX_PHASE_QUANT_BIT_DEPTH)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::CMPLX_SIZE_1)), 2);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::CMPLX_IC_1)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::CMPLX_SIZE_2)), 2);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::CMPLX_IC_2)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::CMPLX_IC_BPP)), 5);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::CMPLX_WEIGHT)), 3);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::CMPLX_AZ_SLL)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::CMPLX_RNG_SLL)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::CMPLX_AZ_TAY_NBAR)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::CMPLX_RNG_TAY_NBAR)), 2);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::CMPLX_WEIGHT_NORM)), 3);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::CMPLX_SIGNAL_PLANE)), 1);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_DC_SF_ROW)), 6);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_DC_SF_COL)), 6);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_PATCH_1_ROW)), 6);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_PATCH_1_COL)), 6);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_PATCH_2_ROW)), 6);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_PATCH_2_COL)), 6);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_PATCH_3_ROW)), 6);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_PATCH_3_COL)), 6);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_PATCH_4_ROW)), 6);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_PATCH_4_COL)), 6);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_DC_IS_ROW)), 8);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_DC_IS_COL)), 8);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_IMG_ROW_DC)), 8);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_IMG_COL_DC)), 8);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_TILE_1_ROW)), 6);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_TILE_1_COL)), 6);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_TILE_2_ROW)), 6);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_TILE_2_COL)), 6);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_TILE_3_ROW)), 6);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_TILE_3_COL)), 6);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_TILE_4_ROW)), 6);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_TILE_4_COL)), 6);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::IF_RD)), 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::IF_RGWLK)), 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::IF_KEYSTN)), 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::IF_LINSFT)), 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::IF_SUBPATCH)), 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::IF_GEODIST)), 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::IF_RGFO)), 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::IF_BEAM_COMP)), 1);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::IF_RGRES)), 8, 3);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::IF_AZRES)), 8, 3);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::IF_RSS)), 8, 5);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::IF_AZSS)), 8, 5);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::IF_RSR)), 8, 5);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::IF_AZSR)), 8, 5);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_RFFT_SAMP)), 7);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_AZFFT_SAMP)), 7);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_RFFT_TOT)), 7);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_AZFFT_TOT)), 7);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_SUBP_ROW)), 6);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_SUBP_COL)), 6);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_SUB_RG)), 4);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_SUB_AZ)), 4);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::IF_RFFTS)), 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::IF_AFFTS)), 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::IF_RANGE_DATA)), 7);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::IF_INCPH)), 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::IF_SR_NAME1)), 8);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::IF_SR_AMOUNT1)), 8, 5);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::IF_SR_NAME2)), 8);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::IF_SR_AMOUNT2)), 8, 5);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::IF_SR_NAME3)), 8);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::IF_SR_AMOUNT)), 8, 5);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::AF_TYPE1)), 5);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::AF_TYPE2)), 5);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::AF_TYPE3)), 5);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::POL_TR)), 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::POL_RE)), 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::POL_REFERENCE)), 40);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::POL)), 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::POL_REG)), 1);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::POL_ISO_1)), 5, 2);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::POL_BAL)), 1);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::POL_BAL_MAG)), 8);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::POL_BAL_PHS)), 8, 5, ZERO_FILL, POS_SIGN_TRUE);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::POL_HCOMP)), 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::P_HCOMP_BASIS)), 10);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::POL_HCOMP_COEF_1)), 9);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::POL_HCOMP_COEF_2)), 9);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::POL_HCOMP_COEF_3)), 9);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::POL_AFCOMP)), 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::POL_SPARE_A)), 15);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::POL_SPARE_N)), 9);
 
       // T_UTC_YYYYMMMDD and T_HHMMSSUTC are combined into one DateTime field: T_UTC_YYYYMMMDD_HHMMSS
       // put date in form CCYYMMMDDhhmmss for this TAG    see: strftime() for format info
-      const DateTime *pAppDtg = dv_cast<DateTime>(&input.getAttribute(CMETAA::T_UTC_YYYYMMMDD_HHMMSS));
+      const DateTime* pAppDtg = dv_cast<DateTime>(&input.getAttribute(CMETAA::T_UTC_YYYYMMMDD_HHMMSS));
       if (pAppDtg == NULL)
       {
          return false;
@@ -2441,64 +2446,64 @@ bool Nitf::CmetaaParser::fromDynamicObject(const DynamicObject& input, ostream& 
       // T_HHMMSSLOCAL is the local time of T_HHMMSSUTC and may not be on the same date as the UTC version
       output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::T_HHMMSSLOCAL)), 6);
 
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_SRAC)), 11, 2);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_SLANT_CONFIDENCE)), 7, 2);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_CROSS)), 11, 2);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_CROSS_CONFIDENCE)), 7, 2);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_CAAC)), 9, 4, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_CONE_CONFIDENCE)), 6);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_GPSAC)), 8, 4, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_GPSAC_CONFIDENCE)), 6);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_SQUINT)), 8, 4, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_GAAC)), 7, 4);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_GAAC_CONFIDENCE)), 6);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_INCIDENT)), 7, 4);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_SLOPE)), 7, 4);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_TILT)), 8, 4, ZERO_FILL, POS_SIGN_TRUE);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::CG_LD)), 1);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_NORTH)), 8, 4);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_NORTH_CONFIDENCE)), 6);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_EAST)), 8, 4);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_RLOS)), 8, 4);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_LOS_CONFIDENCE)), 6);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_LAYOVER)), 8, 4);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_SHADOW)), 8, 4);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_OPM)), 7, 3);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::CG_MODEL)), 5);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_AMPT_X)), 13, 3, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_AMPT_Y)), 13, 3, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_AMPT_Z)), 13, 3, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_AP_CONF_XY)), 6, 2);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_AP_CONF_Z)), 6, 2);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_APCEN_X)), 13, 3, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_APCEN_Y)), 13, 3, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_APCEN_Z)), 13, 3, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_APER_CONF_XY)), 6, 2);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_APER_CONF_Z)), 6, 2);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_FPNUV_X)), 9, 6, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_FPNUV_Y)), 9, 6, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_FPNUV_Z)), 9, 6, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_IDPNUVX)), 9, 6, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_IDPNUVY)), 9, 6, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_IDPNUVZ)), 9, 6, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_SCECN_X)), 13, 3, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_SCECN_Y)), 13, 3, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_SCECN_Z)), 13, 3, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_SC_CONF_XY)), 6, 2);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_SC_CONF_Z)), 6, 2);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_SWWD)), 8, 2);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_SNVEL_X)), 10, 3, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_SNVEL_Y)), 10, 3, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_SNVEL_Z)), 10, 3, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_SNACC_X)), 10, 6, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_SNACC_Y)), 10, 6, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_SNACC_Z)), 10, 6, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_SNATT_ROLL)), 8, 3, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_SNATT_PITCH)), 8, 3, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_SNATT_YAW)), 8, 3, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_GTP_X)), 9, 6, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_GTP_Y)), 9, 6, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CG_GTP_Z)), 9, 6, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_SRAC)), 11, 2);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_SLANT_CONFIDENCE)), 7, 2);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_CROSS)), 11, 2);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_CROSS_CONFIDENCE)), 7, 2);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_CAAC)), 9, 4, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_CONE_CONFIDENCE)), 6);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_GPSAC)), 8, 4, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_GPSAC_CONFIDENCE)), 6);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_SQUINT)), 8, 4, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_GAAC)), 7, 4);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_GAAC_CONFIDENCE)), 6);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_INCIDENT)), 7, 4);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_SLOPE)), 7, 4);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_TILT)), 8, 4, ZERO_FILL, POS_SIGN_TRUE);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::CG_LD)), 1);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_NORTH)), 8, 4);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_NORTH_CONFIDENCE)), 6);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_EAST)), 8, 4);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_RLOS)), 8, 4);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_LOS_CONFIDENCE)), 6);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_LAYOVER)), 8, 4);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_SHADOW)), 8, 4);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_OPM)), 7, 3);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::CG_MODEL)), 5);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_AMPT_X)), 13, 3, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_AMPT_Y)), 13, 3, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_AMPT_Z)), 13, 3, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_AP_CONF_XY)), 6, 2);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_AP_CONF_Z)), 6, 2);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_APCEN_X)), 13, 3, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_APCEN_Y)), 13, 3, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_APCEN_Z)), 13, 3, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_APER_CONF_XY)), 6, 2);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_APER_CONF_Z)), 6, 2);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_FPNUV_X)), 9, 6, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_FPNUV_Y)), 9, 6, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_FPNUV_Z)), 9, 6, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_IDPNUVX)), 9, 6, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_IDPNUVY)), 9, 6, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_IDPNUVZ)), 9, 6, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_SCECN_X)), 13, 3, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_SCECN_Y)), 13, 3, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_SCECN_Z)), 13, 3, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_SC_CONF_XY)), 6, 2);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_SC_CONF_Z)), 6, 2);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_SWWD)), 8, 2);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_SNVEL_X)), 10, 3, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_SNVEL_Y)), 10, 3, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_SNVEL_Z)), 10, 3, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_SNACC_X)), 10, 6, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_SNACC_Y)), 10, 6, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_SNACC_Z)), 10, 6, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_SNATT_ROLL)), 8, 3, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_SNATT_PITCH)), 8, 3, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_SNATT_YAW)), 8, 3, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_GTP_X)), 9, 6, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_GTP_Y)), 9, 6, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_GTP_Z)), 9, 6, ZERO_FILL, POS_SIGN_TRUE);
 
       // Test value for following conditionals
       string map_type = dv_cast<string>(input.getAttribute (CMETAA::CG_MAP_TYPE));
@@ -2506,88 +2511,78 @@ bool Nitf::CmetaaParser::fromDynamicObject(const DynamicObject& input, ostream& 
 
       if (map_type == "GEOD")
       {
-         output <<   toString( dv_cast<double>
-            (input.getAttribute (CMETAA::CG_PATCH_LATCEN)), 11, 7, ZERO_FILL, POS_SIGN_TRUE);
+         output << toString(dv_cast<double>
+            (input.getAttribute(CMETAA::CG_PATCH_LATCEN)), 11, 7, ZERO_FILL, POS_SIGN_TRUE);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute (CMETAA::CG_PATCH_LNGCEN)), 12, 7, ZERO_FILL, POS_SIGN_TRUE);
+         output << toString(dv_cast<double>
+            (input.getAttribute(CMETAA::CG_PATCH_LNGCEN)), 12, 7, ZERO_FILL, POS_SIGN_TRUE);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute (CMETAA::CG_PATCH_LTCORUL)), 11, 7, ZERO_FILL, POS_SIGN_TRUE);
+         output << toString(dv_cast<double>
+            (input.getAttribute(CMETAA::CG_PATCH_LTCORUL)), 11, 7, ZERO_FILL, POS_SIGN_TRUE);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute (CMETAA::CG_PATCH_LGCORUL)), 12, 7, ZERO_FILL, POS_SIGN_TRUE);
+         output << toString(dv_cast<double>
+            (input.getAttribute(CMETAA::CG_PATCH_LGCORUL)), 12, 7, ZERO_FILL, POS_SIGN_TRUE);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute (CMETAA::CG_PATCH_LTCORUR)), 11, 7, ZERO_FILL, POS_SIGN_TRUE);
+         output << toString(dv_cast<double>
+            (input.getAttribute(CMETAA::CG_PATCH_LTCORUR)), 11, 7, ZERO_FILL, POS_SIGN_TRUE);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute (CMETAA::CG_PATCH_LGCORUR)), 12, 7, ZERO_FILL, POS_SIGN_TRUE);
+         output << toString(dv_cast<double>
+            (input.getAttribute(CMETAA::CG_PATCH_LGCORUR)), 12, 7, ZERO_FILL, POS_SIGN_TRUE);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute (CMETAA::CG_PATCH_LTCORLR)), 11, 7, ZERO_FILL, POS_SIGN_TRUE);
+         output << toString(dv_cast<double>
+            (input.getAttribute(CMETAA::CG_PATCH_LTCORLR)), 11, 7, ZERO_FILL, POS_SIGN_TRUE);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute (CMETAA::CG_PATCH_LGCORLR)), 12, 7, ZERO_FILL, POS_SIGN_TRUE);
+         output << toString(dv_cast<double>
+            (input.getAttribute(CMETAA::CG_PATCH_LGCORLR)), 12, 7, ZERO_FILL, POS_SIGN_TRUE);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute (CMETAA::CG_PATCH_LTCORLL)), 11, 7, ZERO_FILL, POS_SIGN_TRUE);
+         output << toString(dv_cast<double>
+            (input.getAttribute(CMETAA::CG_PATCH_LTCORLL)), 11, 7, ZERO_FILL, POS_SIGN_TRUE);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute (CMETAA::CG_PATCH_LNGCOLL)), 12, 7, ZERO_FILL, POS_SIGN_TRUE);
+         output << toString(dv_cast<double>
+            (input.getAttribute(CMETAA::CG_PATCH_LNGCOLL)), 12, 7, ZERO_FILL, POS_SIGN_TRUE);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute (CMETAA::CG_PATCH_LAT_CONFIDENCE)), 9, 7);
+         output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_PATCH_LAT_CONFIDENCE)), 9, 7);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute (CMETAA::CG_PATCH_LON_CONFIDENCE)), 9, 7);
+         output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_PATCH_LON_CONFIDENCE)), 9, 7);
       }
       else if (map_type == "MGRS")
       {
-         output << sizeString( dv_cast<string>
-            (input.getAttribute (CMETAA::CG_MGRS_CENT)), 23);
+         output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::CG_MGRS_CENT)), 23);
 
-         output << sizeString( dv_cast<string>
-            (input.getAttribute (CMETAA::CG_MGRSCORUL)), 23);
+         output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::CG_MGRSCORUL)), 23);
 
-         output << sizeString( dv_cast<string>
-            (input.getAttribute (CMETAA::CG_MGRSCORUR)), 23);
+         output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::CG_MGRSCORUR)), 23);
 
-         output << sizeString( dv_cast<string>
-            (input.getAttribute (CMETAA::CG_MGRSCORLR)), 23);
+         output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::CG_MGRSCORLR)), 23);
 
-         output << sizeString( dv_cast<string>
-            (input.getAttribute (CMETAA::CG_MGRSCORLL)), 23);
+         output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::CG_MGRSCORLL)), 23);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute (CMETAA::CG_MGRS_CONFIDENCE)), 7, 2);
+         output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_MGRS_CONFIDENCE)), 7, 2);
 
-         output << sizeString( dv_cast<string>
-            (input.getAttribute (CMETAA::CG_MGRS_PAD)), 11);
+         output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::CG_MGRS_PAD)), 11);
       }
       else if (map_type == "NA")
       {
-         output << sizeString( dv_cast<string>
-            (input.getAttribute (CMETAA::CG_MAP_TYPE_BLANK)), 133);
+         output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::CG_MAP_TYPE_BLANK)), 133);
       }
       else
       {
          // ERROR map_type should always be one of the 3 values above.
       }
 
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::CG_SPARE_A)), 144);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::CA_CALPA)), 7);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::WF_SRTFR)), 14, 1);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::WF_ENDFR)), 14, 1);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::WF_CHRPRT)), 10, 6, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::WF_WIDTH)), 9);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::WF_CENFRQ)), 13, 1);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::WF_BW)), 13, 1);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::WF_PRF)), 7, 1);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::WF_PRI)), 9);
-      output <<   toString( dv_cast<double>(input.getAttribute (CMETAA::WF_CDP)), 7, 3);
-      output <<   toString( dv_cast<int>(input.getAttribute    (CMETAA::WF_NUMBER_OF_PULSES)), 9);
-      output << sizeString( dv_cast<string>(input.getAttribute (CMETAA::VPH_COND)), 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::CG_SPARE_A)), 144);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CA_CALPA)), 7);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::WF_SRTFR)), 14, 1);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::WF_ENDFR)), 14, 1);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::WF_CHRPRT)), 10, 6, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::WF_WIDTH)), 9);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::WF_CENFRQ)), 13, 1);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::WF_BW)), 13, 1);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::WF_PRF)), 7, 1);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::WF_PRI)), 9);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::WF_CDP)), 7, 3);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::WF_NUMBER_OF_PULSES)), 9);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::VPH_COND)), 1);
    }
    catch (const bad_cast&)
    {

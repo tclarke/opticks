@@ -81,9 +81,9 @@ public:
    }
 
 private:
-   QSpinBox *mpBufferSpin;
-   QSpinBox *mpThreadSpin;
-   QCheckBox *mpProgressClose;
+   QSpinBox* mpBufferSpin;
+   QSpinBox* mpThreadSpin;
+   QCheckBox* mpProgressClose;
 };
 
 #endif

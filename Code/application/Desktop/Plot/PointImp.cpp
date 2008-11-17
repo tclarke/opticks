@@ -30,8 +30,7 @@ PointImp::PointImp(PlotViewImp* pPlot, bool bPrimary) :
    mSymbolSize(5),
    mColor(Qt::black)
 {
-   VERIFYNR(connect(this, SIGNAL(locationChanged(const LocationType&)),
-      this, SIGNAL(extentsChanged())));
+   VERIFYNR(connect(this, SIGNAL(locationChanged(const LocationType&)), this, SIGNAL(extentsChanged())));
    VERIFYNR(connect(this, SIGNAL(symbolSizeChanged(int)), this, SIGNAL(legendPixmapChanged())));
    VERIFYNR(connect(this, SIGNAL(symbolChanged(const Point::PointSymbolType&)), this, SIGNAL(legendPixmapChanged())));
    VERIFYNR(connect(this, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(legendPixmapChanged())));
@@ -44,8 +43,7 @@ PointImp::PointImp(PlotViewImp* pPlot, bool bPrimary, LocationType point) :
    mSymbolSize(5),
    mColor(Qt::black)
 {
-   VERIFYNR(connect(this, SIGNAL(locationChanged(const LocationType&)),
-      this, SIGNAL(extentsChanged())));
+   VERIFYNR(connect(this, SIGNAL(locationChanged(const LocationType&)), this, SIGNAL(extentsChanged())));
    VERIFYNR(connect(this, SIGNAL(symbolSizeChanged(int)), this, SIGNAL(legendPixmapChanged())));
    VERIFYNR(connect(this, SIGNAL(symbolChanged(const Point::PointSymbolType&)), this, SIGNAL(legendPixmapChanged())));
    VERIFYNR(connect(this, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(legendPixmapChanged())));
@@ -58,8 +56,7 @@ PointImp::PointImp(PlotViewImp* pPlot, bool bPrimary, double dX, double dY) :
    mSymbolSize(5),
    mColor(Qt::black)
 {
-   VERIFYNR(connect(this, SIGNAL(locationChanged(const LocationType&)),
-      this, SIGNAL(extentsChanged())));
+   VERIFYNR(connect(this, SIGNAL(locationChanged(const LocationType&)), this, SIGNAL(extentsChanged())));
    VERIFYNR(connect(this, SIGNAL(symbolSizeChanged(int)), this, SIGNAL(legendPixmapChanged())));
    VERIFYNR(connect(this, SIGNAL(symbolChanged(const Point::PointSymbolType&)), this, SIGNAL(legendPixmapChanged())));
    VERIFYNR(connect(this, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(legendPixmapChanged())));
@@ -422,10 +419,10 @@ const QPixmap& PointImp::getLegendPixmap(bool bSelected) const
 
             case Point::DIAMOND_FILLED:
                p.setBrush(QBrush(Qt::SolidPattern));
-               points[0] =QPointF(rcSymbol.center().x(), rcSymbol.top());
-               points[1] =QPointF(rcSymbol.right(), rcSymbol.center().y());
-               points[2] =QPointF(rcSymbol.center().x(), rcSymbol.bottom());
-               points[3] =QPointF(rcSymbol.left(), rcSymbol.center().y());
+               points[0] = QPointF(rcSymbol.center().x(), rcSymbol.top());
+               points[1] = QPointF(rcSymbol.right(), rcSymbol.center().y());
+               points[2] = QPointF(rcSymbol.center().x(), rcSymbol.bottom());
+               points[3] = QPointF(rcSymbol.left(), rcSymbol.center().y());
                p.drawPolygon(points, 4);
                break;
 
@@ -675,10 +672,10 @@ const QPixmap& PointImp::getLegendPixmap(bool bSelected) const
 
             case Point::DIAMOND_FILLED:
                p.setBrush(QBrush(Qt::SolidPattern));
-               points[0] =QPointF(rcSymbol.center().x(), rcSymbol.top());
-               points[1] =QPointF(rcSymbol.right(), rcSymbol.center().y());
-               points[2] =QPointF(rcSymbol.center().x(), rcSymbol.bottom());
-               points[3] =QPointF(rcSymbol.left(), rcSymbol.center().y());
+               points[0] = QPointF(rcSymbol.center().x(), rcSymbol.top());
+               points[1] = QPointF(rcSymbol.right(), rcSymbol.center().y());
+               points[2] = QPointF(rcSymbol.center().x(), rcSymbol.bottom());
+               points[3] = QPointF(rcSymbol.left(), rcSymbol.center().y());
                p.drawPolygon(points, 4);
                break;
 
@@ -862,6 +859,7 @@ bool PointImp::toXml(XMLWriter* pXml) const
    {
       return false;
    }
+
    pXml->addAttr("symbolType", mSymbol);
    pXml->addAttr("symbolSize", mSymbolSize);
    pXml->addAttr("color", QCOLOR_TO_COLORTYPE(mColor));
@@ -875,17 +873,13 @@ bool PointImp::fromXml(DOMNode* pDocument, unsigned int version)
    {
       return false;
    }
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
-   mSymbol = StringUtilities::fromXmlString<Point::PointSymbolType>(
-      A(pElem->getAttribute(X("symbolType"))));
-   mSymbolSize = StringUtilities::fromXmlString<int>(
-      A(pElem->getAttribute(X("symbolSize"))));
-   ColorType color = StringUtilities::fromXmlString<ColorType>(
-      A(pElem->getAttribute(X("color"))));
-   mColor = COLORTYPE_TO_QCOLOR(color);
-   mLocation = StringUtilities::fromXmlString<LocationType>(
-      A(pElem->getAttribute(X("location"))));
 
+   DOMElement* pElem = static_cast<DOMElement*>(pDocument);
+   mSymbol = StringUtilities::fromXmlString<Point::PointSymbolType>(A(pElem->getAttribute(X("symbolType"))));
+   mSymbolSize = StringUtilities::fromXmlString<int>(A(pElem->getAttribute(X("symbolSize"))));
+   ColorType color = StringUtilities::fromXmlString<ColorType>(A(pElem->getAttribute(X("color"))));
+   mColor = COLORTYPE_TO_QCOLOR(color);
+   mLocation = StringUtilities::fromXmlString<LocationType>(A(pElem->getAttribute(X("location"))));
 
    return true;
 }

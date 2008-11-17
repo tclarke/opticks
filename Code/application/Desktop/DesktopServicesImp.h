@@ -40,7 +40,7 @@ public:
     *  Retrieves a pointer to the class.
     *
     *  @return   A pointer to the only instance of the class.
-    */ 
+    */
    static DesktopServicesImp* instance();
    static void destroy();
 
@@ -51,13 +51,14 @@ public:
 
    QWidget* getMainWidget() const;
    MenuBar* getMainMenuBar() const;
+
    /**
     *  Returns the singleton which manages GPU resources.
     *
     *  @return A pointer to the GpuResourceManager or NULL if
     *          the application is in batch mode.
     */
-   virtual GpuResourceManager *getGpuResourceManager() const;
+   virtual GpuResourceManager* getGpuResourceManager() const;
 
    /**
     *  Returns the singleton which manages GPU image filters.
@@ -65,7 +66,7 @@ public:
     *  @return A pointer to the ImageFilterManager or NULL if
     *          the application is in batch mode.
     */
-   virtual ImageFilterManager *getImageFilterManager() const;
+   virtual ImageFilterManager* getImageFilterManager() const;
 
    // Window services
    Window* createWindow(const std::string& windowName, WindowType windowType);
@@ -87,12 +88,12 @@ public:
    View* getCurrentWorkspaceWindowView() const;
    void cascadeWorkspaceWindows();
    void tileWorkspaceWindows(TilingType eType = TILE_GRID);
-   bool tileWorkspaceWindows(const std::vector<WorkspaceWindow*>& windows, 
-                             bool maxFirst = true, TilingType eType = TILE_GRID);
+   bool tileWorkspaceWindows(const std::vector<WorkspaceWindow*>& windows, bool maxFirst = true,
+      TilingType eType = TILE_GRID);
 
    // Dock window services
    DockWindowAreaType getDockWindowArea(const DockWindow& dockWindow) const;
-   bool setDockWindowArea(DockWindow *pDockWindow, DockWindowAreaType dockArea);
+   bool setDockWindowArea(DockWindow* pDockWindow, DockWindowAreaType dockArea);
 
    // View services
    View* createView(const std::string& viewName, ViewType viewType, QWidget* pParent = 0);
@@ -100,7 +101,7 @@ public:
    void deleteView(View* pView);
    bool isKindOfView(const std::string& className, const std::string& viewName);
    void getViewTypes(const std::string& className, std::vector<std::string>& classList);
-   ProductWindow *deriveProduct(View *pView);
+   ProductWindow* deriveProduct(View* pView);
 
    // Plot services
    PlotWidget* createPlotWidget(const std::string& plotName, PlotType plotType, QWidget* pParent = 0);
@@ -143,20 +144,20 @@ public:
    bool displayHelp(const QUrl& url) const;
    void setStatusBarMessage(const std::string& messageText) const;
    void useMessageBox(bool enable);
-   int showMessageBox(const std::string &title, const std::string &message, 
-      const std::string &button1=std::string(), const std::string &button2=std::string(), 
-      const std::string &button3=std::string(), int defaultButton=0, int escapeButton=-1) const;
+   int showMessageBox(const std::string& caption, const std::string& text,
+      const std::string& button0 = std::string(), const std::string& button1 = std::string(),
+      const std::string& button2 = std::string(), int defaultButton = 0, int escapeButton = -1) const;
 
-   virtual bool createProgressDialog(const std::string &caption, Progress *pProgress) const;
-   ProgressDlg* createProgressDialog(const std::string &caption, Progress *pProgress,
-      QObject *pObject, const char *pSlot) const;
+   virtual bool createProgressDialog(const std::string& caption, Progress* pProgress) const;
+   ProgressDlg* createProgressDialog(const std::string& caption, Progress* pProgress, QObject* pObject,
+      const char* pSlot) const;
 
    // Plug-in services
    void addBackgroundPlugIn(PlugIn* pPlugIn, Progress* pProgress) const;
-   virtual bool registerCallback(PlugInCallbackType eType, PlugInCallback *callback) const;
+   virtual bool registerCallback(PlugInCallbackType eType, PlugInCallback* pCallback) const;
 
-   const std::vector<std::string> &getAvailableSymbolNames() const;
-   const QImage &getSymbolImage(const std::string &symbol) const;
+   const std::vector<std::string>& getAvailableSymbolNames() const;
+   const QImage& getSymbolImage(const std::string& symbol) const;
 
 protected:
    /**
@@ -175,9 +176,9 @@ private:
 
    // these are mutable since they are really standalone singletons
    // whose lifetimes are managed by DesktopServicesImp
-   GpuResourceManager *mpGpuResourceManager;
-   ImageFilterManager *mpImageFilterManager;
+   GpuResourceManager* mpGpuResourceManager;
+   ImageFilterManager* mpImageFilterManager;
    int mDisplayMessageBox;
 };
 
-#endif   // DESKTOPSERVICESIMP_H
+#endif

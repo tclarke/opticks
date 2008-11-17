@@ -43,14 +43,14 @@ Step *ProgressTracker::Stage::getStep()
 void ProgressTracker::Stage::initialize(Stage *pParent)
 {
    mpParent = pParent;
-   if(pParent == NULL)
+   if (pParent == NULL)
    {
       mpStep = StepResource(mMessage, mComponent, mKey);
    }
    else
    {
-      Step *pStep = pParent->getStep();
-      if(pStep != NULL)
+      Step* pStep = pParent->getStep();
+      if (pStep != NULL)
       {
          mpStep = StepResource(pStep->addStep(mMessage, mComponent, mKey, false));
       }
@@ -59,7 +59,7 @@ void ProgressTracker::Stage::initialize(Stage *pParent)
 
 void ProgressTracker::Stage::finalize(Message::Result result, const std::string &failureReason)
 {
-   if(mpStep.get() != NULL)
+   if (mpStep.get() != NULL)
    {
       mpStep->finalize(result, failureReason);
    }
@@ -69,7 +69,7 @@ void ProgressTracker::Stage::subdivide(vector<ProgressTracker::Stage>& stages)
 {
    vector<ProgressTracker::Stage>::iterator pStage;
    int totalWeight = 0;
-   for(pStage = stages.begin(); pStage != stages.end(); ++pStage)
+   for (pStage = stages.begin(); pStage != stages.end(); ++pStage)
    {
       pStage->initialize(this);
       totalWeight += pStage->mWeight;
@@ -84,7 +84,7 @@ void ProgressTracker::Stage::toNextSubStage()
    mCurrentSubStage->finalize(Message::Success);
    vector<ProgressTracker::Stage>::iterator currentSubStage = mCurrentSubStage;
    ++currentSubStage;
-   if(currentSubStage != mSubStages.end())
+   if (currentSubStage != mSubStages.end())
    {
       mWeightComplete += mCurrentSubStage->mWeight;
       mCurrentSubStage = currentSubStage;
@@ -105,29 +105,25 @@ ProgressTracker::Stage &ProgressTracker::Stage::getActiveStage()
 
 int ProgressTracker::Stage::getPercentComplete(int percent) const
 {
-   if(!mSubStages.empty() && (mCurrentSubStage != mSubStages.end()))
+   if (!mSubStages.empty() && (mCurrentSubStage != mSubStages.end()))
    {
       int percentComplete = 100 * mWeightComplete + 
          mCurrentSubStage->getPercentComplete(percent) *  mCurrentSubStage->mWeight;
       return percentComplete / mSubStageWeight;
    }
-   else
-   {
-      return percent;
-   }
+
+   return percent;
 }
 
 string ProgressTracker::Stage::getActiveMessage(string message, string indent) const
 {
    indent = "-" + indent;
-   if(!mSubStages.empty() && (mCurrentSubStage != mSubStages.end()))
+   if (!mSubStages.empty() && (mCurrentSubStage != mSubStages.end()))
    {
       return mMessage + "\n" + indent + mCurrentSubStage->getActiveMessage(message, indent);
    }
-   else
-   {
-      return mMessage + "\n" + indent + message;
-   }
+
+   return mMessage + "\n" + indent + message;
 }
 
 //------------------------- ProgressTracker -----------------------------------------//
@@ -142,16 +138,16 @@ void ProgressTracker::initialize(Progress *pProgress, const string &message,
 
 void ProgressTracker::subdivideCurrentStage(vector<Stage>& stages)
 {
-   Stage &currentStage = mMainStage.getActiveStage();
+   Stage& currentStage = mMainStage.getActiveStage();
    currentStage.subdivide(stages);
 }
 
 void ProgressTracker::upALevel()
 {
-   Stage &currentStage = mMainStage.getActiveStage();
-   Stage *pParentStage = currentStage.getParent();
+   Stage& currentStage = mMainStage.getActiveStage();
+   Stage* pParentStage = currentStage.getParent();
    currentStage.finalize(Message::Success);
-   if(pParentStage != NULL)
+   if (pParentStage != NULL)
    {
       pParentStage->subdivide(vector<Stage>());
    }
@@ -159,9 +155,9 @@ void ProgressTracker::upALevel()
 
 void ProgressTracker::nextStage()
 {
-   Stage &currentStage = mMainStage.getActiveStage();
-   Stage *pParentStage = currentStage.getParent();
-   if(pParentStage != NULL)
+   Stage& currentStage = mMainStage.getActiveStage();
+   Stage* pParentStage = currentStage.getParent();
+   if (pParentStage != NULL)
    {
       pParentStage->toNextSubStage();
    }
@@ -170,11 +166,11 @@ void ProgressTracker::nextStage()
 void ProgressTracker::report(const string &text, int percent, ReportingLevel gran, bool log)
 {
    static int oldPercent = -1;
-   static Stage *pOldStage = NULL;
-   Stage &currentStage = mMainStage.getActiveStage();
-   if(mpProgress != NULL)
+   static Stage* pOldStage = NULL;
+   Stage& currentStage = mMainStage.getActiveStage();
+   if (mpProgress != NULL)
    {
-      if((&currentStage != pOldStage) || (percent != oldPercent) || (percent == 100) || (percent == 0))
+      if ((&currentStage != pOldStage) || (percent != oldPercent) || (percent == 100) || (percent == 0))
       {
          string overallMessage = mMainStage.getActiveMessage(text, ">");
          int overallPercent = mMainStage.getPercentComplete(percent);
@@ -184,9 +180,9 @@ void ProgressTracker::report(const string &text, int percent, ReportingLevel gra
          oldPercent = percent;
       }
    }
-   if(log)
+   if (log)
    {
-      switch(gran)
+      switch (gran)
       {
       case ABORT:
          currentStage.getStep()->finalize(Message::Abort, text);

@@ -23,8 +23,8 @@ WizardObjectAdapter::~WizardObjectAdapter()
 // TypeAwareObject
 const string& WizardObjectAdapter::getObjectType() const
 {
-   static string type("WizardObjectAdapter");
-   return type;
+   static string sType("WizardObjectAdapter");
+   return sType;
 }
 
 bool WizardObjectAdapter::isKindOf(const string& className) const

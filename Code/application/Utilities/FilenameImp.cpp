@@ -16,24 +16,21 @@
 
 using namespace std;
 
-FilenameImp::FilenameImp() : mFileInfo(new QFileInfo())
+FilenameImp::FilenameImp() :
+   mFileInfo(new QFileInfo())
 {
 }
 
-FilenameImp::FilenameImp(const string& filename) : mFileInfo(new QFileInfo())
+FilenameImp::FilenameImp(const string& filename) :
+   mFileInfo(new QFileInfo())
 {
-   string parsedFilename = filename;
-   if (parsedFilename.substr(0, 7) == "file://")
-   {
-      parsedFilename = XmlReader::URLtoPath(X(XStr(filename.c_str())));
-   }   
-   mFilename = parsedFilename;
+   setFullPathAndName(filename);
 }
 
-FilenameImp::FilenameImp(const FilenameImp& rhs) : mFileInfo(new QFileInfo())
+FilenameImp::FilenameImp(const FilenameImp& rhs) :
+   mFileInfo(new QFileInfo(*(rhs.mFileInfo.get()))),
+   mFilename(rhs.mFilename)
 {
-   *(mFileInfo.get()) = *(rhs.mFileInfo.get());
-   mFilename = rhs.mFilename;
 }
 
 FilenameImp::~FilenameImp()
@@ -58,9 +55,9 @@ const QFileInfo& FilenameImp::getQFileInfo() const
    {
       mFileInfo->setFile(QString::fromStdString(filename));
    }
+
    return *mFileInfo.get();
 }
-
 
 void FilenameImp::setFullPathAndName(const string& filename)
 {
@@ -69,6 +66,7 @@ void FilenameImp::setFullPathAndName(const string& filename)
    {
       parsedFilename = XmlReader::URLtoPath(X(XStr(filename.c_str())));
    }
+
    mFilename = parsedFilename;
 }
 

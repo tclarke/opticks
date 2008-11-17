@@ -78,7 +78,7 @@ bool SubjectImp::isKindOf(const string& className) const
 
 void Signal::SignalValue::update(Subject &subject, const std::string &signal, const boost::any &data) const
 {
-   SubjectImp *pSubjectImp = dynamic_cast<SubjectImp*>(&mSubject);
+   SubjectImp* pSubjectImp = dynamic_cast<SubjectImp*>(&mSubject);
    if (NN(pSubjectImp))
    {
       if (mSignalName.empty())

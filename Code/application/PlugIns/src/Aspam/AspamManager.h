@@ -55,14 +55,14 @@ public:
     *
     *  @return True if successful, false otherwise.
     */
-   bool initializeAspam(Any *pAspamContainer);
+   bool initializeAspam(Any* pAspamContainer);
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
    SUBJECTADAPTER_METHODS(SubjectImp);
 
-   bool serialize(SessionItemSerializer &serializer) const;
-   bool deserialize(SessionItemDeserializer &deserializer);
+   bool serialize(SessionItemSerializer& serializer) const;
+   bool deserialize(SessionItemDeserializer& deserializer);
 
 public: // Signals
    /**

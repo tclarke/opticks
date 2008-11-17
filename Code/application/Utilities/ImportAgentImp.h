@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef IMPORT_AGENT_IMP_H
-#define IMPORT_AGENT_IMP_H
+#ifndef IMPORTAGENTIMP_H
+#define IMPORTAGENTIMP_H
 
 #include "ExecutableAgentImp.h"
 #include <string>
@@ -83,7 +83,7 @@ private:
    void instantiate(PlugIn* pPlugIn, const std::vector<ImportDescriptor*>& descriptors, Progress* pProgress, \
                     bool batch) \
    { \
-       impClass::instantiate(pPlugIn, descriptors, pProgress, batch); \
+      impClass::instantiate(pPlugIn, descriptors, pProgress, batch); \
    } \
    void setImporterSubtype(const std::string& subtype) \
    { \

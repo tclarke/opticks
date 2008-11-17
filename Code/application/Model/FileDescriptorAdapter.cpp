@@ -22,8 +22,8 @@ FileDescriptorAdapter::~FileDescriptorAdapter()
 // TypeAwareObject
 const string& FileDescriptorAdapter::getObjectType() const
 {
-   static string type("FileDescriptorAdapter");
-   return type;
+   static string sType("FileDescriptorAdapter");
+   return sType;
 }
 
 bool FileDescriptorAdapter::isKindOf(const string& className) const

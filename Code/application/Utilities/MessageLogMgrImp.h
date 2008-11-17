@@ -59,7 +59,7 @@ private:
 
    std::map<std::string, MessageLog*> mLogMap;
    std::string mLogPath;
-   QFile *mpJournal;
+   QFile* mpJournal;
 };
 
 #endif   // MESSAGELOGMGRIMP_H

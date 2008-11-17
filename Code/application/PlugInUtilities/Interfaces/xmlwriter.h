@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #ifndef XMLWRITER_H
 #define XMLWRITER_H
 
@@ -78,21 +76,15 @@ class Font;
  */
 class XMLWriter : public XmlBase
 {
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *mpDoc;
-   std::stack<XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *> mpAddPoint;
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMImplementation *mpImpl;
-   bool mSingleChildInstance;
-   XMLCh *mpWithNamespace;
-
 public:
    //@{
    /**
     * Create an %XMLWriter.
     *
-    * @param rootElementName
+    * @param pRootElementName
     *        The name of the top level element
     *
-    * @param log
+    * @param pLog
     *        Optional MessageLog to be passed to XmlBase
     *
     * @param useNamespace
@@ -101,7 +93,7 @@ public:
     * @throw XmlBase::XmlException
     *        When unable to create the Xerces DOM document.
     */
-   XMLWriter(const char *rootElementName, MessageLog *log=NULL, bool useNamespace=true);
+   XMLWriter(const char* pRootElementName, MessageLog* pLog = NULL, bool useNamespace = true);
 
    /**
     * Create an %XMLWriter.
@@ -121,8 +113,9 @@ public:
     * @throw XmlBase::XmlException
     *        When unable to create the Xerces DOM document.
     */
-   XMLWriter(const std::string &rootElementName, const std::string &xmlNamespace, MessageLog *pLog=NULL, bool useNamespace=true);
-   
+   XMLWriter(const std::string& rootElementName, const std::string& xmlNamespace, MessageLog* pLog = NULL,
+      bool useNamespace = true);
+
    /**
     * Destroy and cleanup the %XMLWriter object.
     */
@@ -151,10 +144,9 @@ public:
     * @see std::stringstream
     */
    template <class T>
-   bool addAttr(const char *pName, T value)
+   bool addAttr(const char* pName, T value)
    {
-      return addAttr(pName, static_cast<std::string>(
-         StringUtilities::toXmlString(value)), NULL);
+      return addAttr(pName, static_cast<std::string>(StringUtilities::toXmlString(value)), NULL);
    }
 
    /**
@@ -178,7 +170,7 @@ public:
     * @see std::stringstream
     */
    template<class T>
-   bool addAttr(const char *pName, std::vector<T> value)
+   bool addAttr(const char* pName, std::vector<T> value)
    {
       std::stringstream buf;
       std::copy(value.begin(), value.end(), std::ostream_iterator<T>(buf, " "));
@@ -202,8 +194,7 @@ public:
     * @throw XmlBase::XmlException
     *        When Xerces fails to add the attribute.
     */
-   bool addAttr(const char *pName, const char *pValue,
-                XERCES_CPP_NAMESPACE_QUALIFIER DOMElement *pOwner);
+   bool addAttr(const char* pName, const char* pValue, XERCES_CPP_NAMESPACE_QUALIFIER DOMElement* pOwner);
 
    /**
     * Add a string attribute to the specified DOM node.
@@ -222,10 +213,9 @@ public:
     * @throw XmlBase::XmlException
     *        When Xerces fails to add the attribute.
     */
-   bool addAttr(const char *pName, const std::string value,
-                XERCES_CPP_NAMESPACE_QUALIFIER DOMElement *pOwner)
+   bool addAttr(const char* pName, const std::string value, XERCES_CPP_NAMESPACE_QUALIFIER DOMElement* pOwner)
    {
-      return addAttr(pName,value.c_str(),pOwner);
+      return addAttr(pName, value.c_str(), pOwner);
    }
    //@}
 
@@ -245,10 +235,10 @@ public:
     * @throw XmlBase::XmlException
     *        When Xerces fails to add the element.
     */
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMElement *addElement(const char *pName,
-                                 XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *pOwner=NULL);
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMElement* addElement(const char* pName,
+      XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pOwner = NULL);
    //@}
-   
+
    //@{
    /**
     * Add an element DOM node.
@@ -266,8 +256,8 @@ public:
     * @throw XmlBase::XmlException
     *        When Xerces fails to add the element.
     */
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMElement *addElement(const std::string &name,
-                                 XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *pOwner=NULL)
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMElement* addElement(const std::string& name,
+      XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pOwner = NULL)
    {
       return addElement(name.c_str(), pOwner);
    }
@@ -293,8 +283,8 @@ public:
     * @throw XmlBase::XmlException
     *        When Xerces fails to add the element.
     */
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMElement *addFontElement(const char *pName, const Font &font, 
-                                 XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *pOwner=NULL);
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMElement* addFontElement(const char* pName, const Font& font,
+      XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pOwner = NULL);
    //@}
 
    //@{
@@ -320,8 +310,7 @@ public:
     *        When Xerces fails to add the text node.
     */
    template<class T>
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMText *addText(T value,
-                                 XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *pOwner=NULL)
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMText* addText(T value, XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pOwner = NULL)
    {
       std::stringstream buf;
       buf << value;
@@ -350,8 +339,8 @@ public:
     * @see std::stringstream
     */
    template<class T>
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMText *addText(std::vector<T> value,
-                                 XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *pOwner=NULL)
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMText* addText(std::vector<T> value,
+      XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pOwner = NULL)
    {
       std::stringstream buf;
       std::copy(value.begin(), value.end(), std::ostream_iterator<T>(buf, " "));
@@ -374,8 +363,8 @@ public:
     * @throw XmlBase::XmlException
     *        When Xerces fails to add the text node.
     */
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMText *addText(const char *pValue,
-                                 XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *pOwner=NULL);
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMText* addText(const char* pValue,
+      XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pOwner = NULL);
 
    /**
     * Add a string value as a text DOM node.
@@ -393,8 +382,8 @@ public:
     * @throw XmlBase::XmlException
     *        When Xerces fails to add the text node.
     */
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMText *addText(const std::string value,
-                                 XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *pOwner=NULL)
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMText* addText(const std::string value,
+      XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pOwner = NULL)
    {
       return addText(value.c_str(),pOwner);
    }
@@ -416,7 +405,7 @@ public:
     *
     * @return true if the element exists, false if it does not exist
     */
-   bool elementExists(const char *pName, XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *pOwner=NULL);
+   bool elementExists(const char* pName, XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pOwner = NULL);
 
    /**
     * Remove a named element from a DOM tree.
@@ -432,7 +421,7 @@ public:
     *        If not specified, the current DOM node is used
     *        as the parent.
     */
-   void removeElement(const char *pName, XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *pOwner=NULL);
+   void removeElement(const char* pName, XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pOwner = NULL);
 
    /**
     * Remove a specified node from a DOM tree.
@@ -440,7 +429,7 @@ public:
     * \e pOwner, if specified or if it is a child of
     * the current DOM node otherwise.
     *
-    * @param chld
+    * @param pChild
     *        The DOM node to remove.
     *
     * @param pOwner
@@ -448,7 +437,8 @@ public:
     *        If not specified, the current DOM node is used
     *        as the parent.
     */
-   void removeChild(XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *chld, XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *pOwner=NULL);
+   void removeChild(XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pChild,
+      XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pOwner = NULL);
    //@}
 
    //@{
@@ -475,13 +465,13 @@ public:
    /**
     * Write a DOM tree to a file as XML.
     *
-    * @param fp
+    * @param pFp
     *        File pointer that the DOM tree will be written to.
     *
     * @throw XmlBase::XmlException
     *        When Xerces is not able to generate the XML.
     */
-   void writeToFile(FILE *fp);
+   void writeToFile(FILE* pFp);
 
    /**
     * Write a DOM tree to a string as XML.
@@ -502,13 +492,13 @@ public:
     * See the class documentation for XMLWriter for further
     * information on add points.
     *
-    * @param ap
+    * @param pNode
     *        The new current DOM node. If this is NULL, the document
     *        root is pushed onto the stack.
     *
     * @see XMLWriter
     */
-   void pushAddPoint(XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *ap=NULL);
+   void pushAddPoint(XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pNode = NULL);
 
    /**
     * Pop the current DOM node from the add point stack.
@@ -519,7 +509,7 @@ public:
     *
     * @see XMLWriter
     */
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *popAddPoint();
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* popAddPoint();
 
    /**
     * Find out what DOM node is on top of the add point stack without removing the node.
@@ -530,17 +520,24 @@ public:
     *
     * @see XMLWriter
     */
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMNode *peekAddPoint();
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* peekAddPoint();
    //@}
+
+private:
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* mpDoc;
+   std::stack<XERCES_CPP_NAMESPACE_QUALIFIER DOMNode*> mpAddPoint;
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMImplementation* mpImpl;
+   bool mSingleChildInstance;
+   XMLCh* mpWithNamespace;
 };
 
 /** Explicit template specializations can not go in the class declaration
     as this is not supported in Studio 11.
  **/
 
-template<> bool XMLWriter::addAttr<std::string>(const char *pName, std::string value);
-template<> bool XMLWriter::addAttr<char*>(const char *pName, char* pValue);
-template<> bool XMLWriter::addAttr<const char*>(const char *pName, const char *pValue);
+template<> bool XMLWriter::addAttr<std::string>(const char* pName, std::string value);
+template<> bool XMLWriter::addAttr<char*>(const char* pName, char* pValue);
+template<> bool XMLWriter::addAttr<const char*>(const char* pName, const char* pValue);
 
 /**
  *  This class is intended to be used by the XML_ADD_POINT macro and should not
@@ -549,7 +546,7 @@ template<> bool XMLWriter::addAttr<const char*>(const char *pName, const char *p
 class XmlAddPoint
 {
 public:
-   XmlAddPoint(XMLWriter &writer, const std::string &name) :
+   XmlAddPoint(XMLWriter& writer, const std::string& name) :
       mWriter(writer),
       mFirstTime(true)
    {
@@ -566,7 +563,7 @@ public:
       return firstTime;
    }
 private:
-   XMLWriter &mWriter;
+   XMLWriter& mWriter;
    bool mFirstTime;
 };
 
@@ -581,7 +578,7 @@ private:
  *  of add points.
  *
  *  @code
- *  XML_ADD_POINT(writer, my_add_point) // pushes an add point on the writer
+ *  XML_ADD_POINT (writer, my_add_point) // pushes an add point on the writer
  *  {
  *     writer.addAttribute("my_attr", myValue);
  *  } // pops the add point from the writer
@@ -593,18 +590,19 @@ private:
  *  @param name
  *             The name for the new element.
  */
-#define XML_ADD_POINT(writer,name) for(XmlAddPoint name(writer, #name); name.isFirstTime(); )
+#define XML_ADD_POINT(writer, name) \
+   for (XmlAddPoint name(writer, #name); name.isFirstTime(); )
 
 /**
  *  This method is intended to be called from the XML_ADD_CONTAINER macro and 
  *  should not be called directly.
  */
 template <class Iter>
-void writeContainerElements(XMLWriter &writer, Iter pStartIter, Iter pStopIter)
+void writeContainerElements(XMLWriter& writer, Iter pStartIter, Iter pStopIter)
 {
-   for (Iter pIter=pStartIter; pIter!=pStopIter; ++pIter)
+   for (Iter pIter = pStartIter; pIter != pStopIter; ++pIter)
    {
-      XML_ADD_POINT(writer,element)
+      XML_ADD_POINT (writer, element)
       {
          writer.addAttr("value", *pIter);
       }
@@ -615,7 +613,7 @@ void writeContainerElements(XMLWriter &writer, Iter pStartIter, Iter pStopIter)
  *  Writes a container of data to the specified XMLWriter
  * 
  *  @code
- *  XML_ADD_POINT(writer, my_data)
+ *  XML_ADD_POINT (writer, my_data)
  *  {
  *     vector<int> v(12, 65); // a vector of 12 65's
  *     XML_ADD_CONTAINER(writer, value, v.begin(), v.end());
@@ -636,10 +634,10 @@ void writeContainerElements(XMLWriter &writer, Iter pStartIter, Iter pStopIter)
  *  @param stopIter
  *             A container iterator specifying where to stop writing.
  */
-#define XML_ADD_CONTAINER(writer,name,startIter,stopIter) \
-   XML_ADD_POINT(writer,name) \
+#define XML_ADD_CONTAINER(writer, name, startIter, stopIter) \
+   XML_ADD_POINT (writer, name) \
    { \
-      writeContainerElements(writer,startIter,stopIter); \
+      writeContainerElements(writer, startIter, stopIter); \
    }
 
 #endif

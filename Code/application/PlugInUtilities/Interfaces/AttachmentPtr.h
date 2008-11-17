@@ -212,7 +212,7 @@ private:
    }
 
    std::vector<std::pair<std::string, Slot> > mSignalSlots;
-   T *mpSubject;
+   T* mpSubject;
 };
 
 #endif

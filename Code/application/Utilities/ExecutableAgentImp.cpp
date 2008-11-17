@@ -48,7 +48,11 @@ ExecutableAgentImp::~ExecutableAgentImp()
 
 void ExecutableAgentImp::instantiate(Progress* pProgress, bool batch)
 {
-   if (mInstantiated) throw logic_error("ExecutableAgent can not be instantiated twice!");
+   if (mInstantiated)
+   {
+      throw logic_error("ExecutableAgent can not be instantiated twice!");
+   }
+
    mInstantiated = true;
 
    mPlugIn = PlugInResource();
@@ -63,7 +67,11 @@ void ExecutableAgentImp::instantiate(Progress* pProgress, bool batch)
 void ExecutableAgentImp::instantiate(const string& plugInName, const string& menuCommand,
    Progress* pProgress, bool batch)
 {
-   if (mInstantiated) throw logic_error("ExecutableAgent can not be instantiated twice!");
+   if (mInstantiated)
+   {
+      throw logic_error("ExecutableAgent can not be instantiated twice!");
+   }
+
    mInstantiated = true;
 
    mPlugIn = PlugInResource(plugInName);
@@ -88,7 +96,11 @@ void ExecutableAgentImp::instantiate(const string& plugInName, const string& men
 void ExecutableAgentImp::instantiate(PlugIn* pPlugIn, const string& menuCommand,
    Progress* pProgress, bool batch)
 {
-   if (mInstantiated) throw logic_error("ExecutableAgent can not be instantiated twice!");
+   if (mInstantiated)
+   {
+      throw logic_error("ExecutableAgent can not be instantiated twice!");
+   }
+
    mInstantiated = true;
 
    mPlugIn = PlugInResource(pPlugIn);
@@ -214,8 +226,8 @@ bool ExecutableAgentImp::executePlugIn()
 
    bool bSuccess = false;
    clearArgLists(false, true);
-   PlugInArgList &inArgList = (mAutoInArg ? getPopulatedInArgList() : getInArgList());
-   PlugInArgList &outArgList = getOutArgList();
+   PlugInArgList& inArgList = (mAutoInArg ? getPopulatedInArgList() : getInArgList());
+   PlugInArgList& outArgList = getOutArgList();
    { // scope the lifetime of the lock
       SessionSaveLock lock;
       if (mSupportsRequestedBatchSetting)
@@ -442,10 +454,10 @@ void ExecutableAgentImp::populateArgValues(PlugInArgList *pArgList)
    if (pArgList != NULL)
    {
       // Window
-      PlugInArg *pWindowArg = NULL;
+      PlugInArg* pWindowArg = NULL;
       pArgList->getArg(Executable::WindowArg(), pWindowArg);
 
-      WorkspaceWindow *pWindow = NULL;
+      WorkspaceWindow* pWindow = NULL;
       string windowType = TypeConverter::toString<Window>();
       if (pWindowArg != NULL)
       {
@@ -470,10 +482,10 @@ void ExecutableAgentImp::populateArgValues(PlugInArgList *pArgList)
       }
 
       // View
-      PlugInArg *pViewArg = NULL;
+      PlugInArg* pViewArg = NULL;
       pArgList->getArg(Executable::ViewArg(), pViewArg);
 
-      View *pView = NULL;
+      View* pView = NULL;
       string viewType = TypeConverter::toString<View>();
       if (pViewArg != NULL)
       {
@@ -505,10 +517,10 @@ void ExecutableAgentImp::populateArgValues(PlugInArgList *pArgList)
       }
 
       // Layer
-      PlugInArg *pLayerArg = NULL;
+      PlugInArg* pLayerArg = NULL;
       pArgList->getArg(Executable::LayerArg(), pLayerArg);
 
-      Layer *pLayer = NULL;
+      Layer* pLayer = NULL;
       string layerType = TypeConverter::toString<Layer>();
       if (pLayerArg != NULL)
       {
@@ -543,10 +555,10 @@ void ExecutableAgentImp::populateArgValues(PlugInArgList *pArgList)
       }
 
       // Data Element
-      PlugInArg *pElementArg = NULL;
+      PlugInArg* pElementArg = NULL;
       pArgList->getArg(Executable::DataElementArg(), pElementArg);
 
-      DataElement *pElement = NULL;
+      DataElement* pElement = NULL;
       string elementType = TypeConverter::toString<DataElement>();
       if (pElementArg != NULL)
       {
@@ -559,9 +571,10 @@ void ExecutableAgentImp::populateArgValues(PlugInArgList *pArgList)
 
       if (pElement == NULL)
       {
-         RasterElement *pPrimaryRaster = NULL;
+         RasterElement* pPrimaryRaster = NULL;
+
          // Prefer the primary RasterElement of the view
-         SpatialDataView *pSpatialDataView = dynamic_cast<SpatialDataView*>(pView);
+         SpatialDataView* pSpatialDataView = dynamic_cast<SpatialDataView*>(pView);
          if (pSpatialDataView != NULL)
          {
             LayerList* pLayerList = pSpatialDataView->getLayerList();
@@ -581,7 +594,7 @@ void ExecutableAgentImp::populateArgValues(PlugInArgList *pArgList)
          // Try the element of the current layer
          if (pElement == NULL && pLayer != NULL)
          {
-            DataElement *pLayerElement = pLayer->getDataElement();
+            DataElement* pLayerElement = pLayer->getDataElement();
             if (pLayerElement != NULL && pLayerElement->isKindOf(elementType))
             {
                pElement = pLayerElement;

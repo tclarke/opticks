@@ -21,13 +21,15 @@
 #define NUM_ROWS 10
 #define NUM_COLS 5
 
-SampleRasterPage::SampleRasterPage(int row, int col) : mRow(row), mCol(col)
+SampleRasterPage::SampleRasterPage(int row, int col) :
+   mRow(row),
+   mCol(col)
 {
-   for(int row = 0; row < NUM_ROWS; row++)
+   for (int r = 0; r < NUM_ROWS; ++r)
    {
-      for(int col = 0; col < NUM_COLS; col++)
+      for (int c = 0; c < NUM_COLS; ++c)
       {
-         mData.push_back(row * NUM_COLS + col);
+         mData.push_back(r * NUM_COLS + c);
       }
    }
 }
@@ -36,7 +38,7 @@ SampleRasterPage::~SampleRasterPage()
 {
 }
 
-void *SampleRasterPage::getRawData()
+void* SampleRasterPage::getRawData()
 {
    return reinterpret_cast<void*>(&mData[mRow * NUM_COLS + mCol]);
 }
@@ -70,7 +72,7 @@ SampleRasterPager::~SampleRasterPager()
 {
 }
 
-RasterPage *SampleRasterPager::getPage(DataRequest *pOriginalRequest,
+RasterPage* SampleRasterPager::getPage(DataRequest* pOriginalRequest,
                                        DimensionDescriptor startRow,
                                        DimensionDescriptor startColumn,
                                        DimensionDescriptor startBand)
@@ -78,7 +80,7 @@ RasterPage *SampleRasterPager::getPage(DataRequest *pOriginalRequest,
    return new SampleRasterPage(startRow.getOriginalNumber(), startColumn.getOriginalNumber());
 }
 
-void SampleRasterPager::releasePage(RasterPage *pPage)
+void SampleRasterPager::releasePage(RasterPage* pPage)
 {
    delete dynamic_cast<SampleRasterPage*>(pPage);
 }
@@ -106,11 +108,11 @@ SampleRasterElementImporter::~SampleRasterElementImporter()
 {
 }
 
-unsigned char SampleRasterElementImporter::getFileAffinity(const std::string &filename)
+unsigned char SampleRasterElementImporter::getFileAffinity(const std::string& filename)
 {
    FactoryResource<Filename> pFilename;
    pFilename->setFullPathAndName(filename);
-   if(pFilename->getExtension() == "sample")
+   if (pFilename->getExtension() == "sample")
    {
       return Importer::CAN_LOAD;
    }
@@ -122,18 +124,19 @@ bool SampleRasterElementImporter::isProcessingLocationSupported(ProcessingLocati
    return location == IN_MEMORY;
 } // End isProcessingLocationSupported
 
-std::vector<ImportDescriptor*> SampleRasterElementImporter::getImportDescriptors(const std::string &filename)
+std::vector<ImportDescriptor*> SampleRasterElementImporter::getImportDescriptors(const std::string& filename)
 {
    std::vector<ImportDescriptor*> descriptors;
    ImportDescriptorResource pDesc(filename, TypeConverter::toString<RasterElement>());
    VERIFYRV(pDesc.get() != NULL, descriptors);
-   RasterDataDescriptor *pDataDesc = RasterUtilities::generateRasterDataDescriptor(filename, NULL, NUM_ROWS, NUM_COLS, INT1UBYTE, IN_MEMORY);
-   if(pDataDesc == NULL)
+   RasterDataDescriptor* pDataDesc = RasterUtilities::generateRasterDataDescriptor(filename, NULL, NUM_ROWS,
+      NUM_COLS, INT1UBYTE, IN_MEMORY);
+   if (pDataDesc == NULL)
    {
       return descriptors;
    }
    pDesc->setDataDescriptor(pDataDesc);
-   if(RasterUtilities::generateAndSetFileDescriptor(pDataDesc, filename, "", LITTLE_ENDIAN) == NULL)
+   if (RasterUtilities::generateAndSetFileDescriptor(pDataDesc, filename, "", LITTLE_ENDIAN) == NULL)
    {
       return descriptors;
    }
@@ -141,8 +144,10 @@ std::vector<ImportDescriptor*> SampleRasterElementImporter::getImportDescriptors
    return descriptors;
 } // End getImportDescriptors
 
-bool SampleRasterElementImporter::createRasterPager(RasterElement *pRaster) const
+bool SampleRasterElementImporter::createRasterPager(RasterElement* pRaster) const
 {
    VERIFY(pRaster != NULL);
-   return pRaster->setPager(new SampleRasterPager());
+
+   SampleRasterPager* pPager = new SampleRasterPager();
+   return pRaster->setPager(pPager);
 }

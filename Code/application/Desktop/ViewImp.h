@@ -58,7 +58,7 @@ public:
       void count(int &x, int &y) const;
 
    private:
-      ViewImp *mpView;
+      ViewImp* mpView;
       QSize mTotalSize;
       QSize mSubImageSize;
 
@@ -153,7 +153,7 @@ public:
    void setSelectionBox(const QRect& rcBox);
    const std::vector<LocationType>& getSelectionBox() const;
 
-   static void reorderImage(unsigned int pImage[], int width, int height);
+   static void reorderImage(unsigned int pImage[], int iWidth, int iHeight);
 
    /**
     * Determine whether this view can be linked with the specified type.
@@ -179,7 +179,7 @@ public:
 public slots:
    virtual void setClassificationText(const QString& strClassification);
    virtual void setClassificationFont(const QFont& classificationFont);
-   virtual void setClassificationColor(const QColor& clrColor);
+   virtual void setClassificationColor(const QColor& clrClassification);
    virtual void enableClassification(bool bEnable);
    virtual void enableReleaseInfo(bool bEnable);
    virtual void setBackgroundColor(const QColor& clrBackground);
@@ -281,7 +281,7 @@ protected:
             VGeo *pViewGeo = NULL;
             LinkType type = iter->second;
 
-            switch(iter->second)
+            switch (iter->second)
             {
                case MIRRORED_LINK:
                   pViewMirror = dynamic_cast<VMirror*>(pView);
@@ -355,13 +355,13 @@ private:
    bool mInset;
    bool mCrossHair;
    std::vector<std::pair<View*, LinkType> > mLinkedViews;
-   AnimationController *mpAnimationController;
+   AnimationController* mpAnimationController;
    UndoStack* mpUndoStack;
    bool mUndoBlocked;
    std::vector<UndoAction*>* mpUndoGroup;
    QString mUndoGroupText;
 
-   View::SubImageIterator *mpSubImageIterator;
+   View::SubImageIterator* mpSubImageIterator;
 
    class ViewContext : public QGLContext
    {

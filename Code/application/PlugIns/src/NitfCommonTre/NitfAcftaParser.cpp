@@ -168,11 +168,12 @@ bool Nitf::AcftaParser::runAllTests(Progress* pProgress, ostream& failure)
    stringstream input4(negdata4);
    numBytes = negdata4.size();
    success = toDynamicObject(input4, numBytes, *treDO.get(), errorMessage);
-   if(success)
+   if (success)
    {
       std::stringstream tmpStream;
       status = this->isTreValid(*treDO.get(), tmpStream);  // This test should return SUSPECT
-      if(status != SUSPECT) {
+      if (status != SUSPECT)
+      {
          failure << "---Negative test failed: should have returned SUSPECT\n";
          failure << tmpStream.str();
          treDO->clear();
@@ -251,7 +252,7 @@ Nitf::TreState Nitf::AcftaParser::isTreValid(const DynamicObject& tre, ostream& 
 
    testSet.clear();
    status = MaxState(status, testTagValidBcsASet(tre, reporter, &numFields, ACFTA::EXITLOC, testSet, true));
-   status = MaxState(status, testTagValueRange<int>(tre, reporter, &numFields, ACFTA::EXITELV,  -1000, 30000));
+   status = MaxState(status, testTagValueRange<int>(tre, reporter, &numFields, ACFTA::EXITELV, -1000, 30000));
 
    // Valid values are 0.0 to 180.0 and 999.999 so need two tests.
    // Need to use tmpstatus because if status == SUSPECT then 2nd test will be called even if 1st test == VALID
@@ -313,7 +314,9 @@ bool Nitf::AcftaParser::toDynamicObject(istream& input, size_t numBytes, Dynamic
 
    if (success)
    {
-      unsigned short yy(0), mm(0), dd(0);
+      unsigned short yy(0);
+      unsigned short mm(0);
+      unsigned short dd(0);
       success = readFromStream(input, buf, 7) && DtgParseDDMMMYY(string(&buf.front()), yy, mm, dd);
       if (success)
       {
@@ -373,14 +376,14 @@ bool Nitf::AcftaParser::fromDynamicObject(const DynamicObject& input, ostream& o
 
    try
    {
-      output << sizeString( dv_cast<string>(input.getAttribute(ACFTA::AC_MSN_ID)), 10);
-      output << sizeString( dv_cast<string>(input.getAttribute(ACFTA::SCTYPE)), 1);
-      output <<   toString( dv_cast<int>(input.getAttribute(ACFTA::SCNUM)), 4);
-      output << sizeString( dv_cast<string>(input.getAttribute(ACFTA::SENSOR_ID)), 3);
-      output <<   toString( dv_cast<int>(input.getAttribute(ACFTA::PATCH_TOT)), 4);
-      output <<   toString( dv_cast<int>(input.getAttribute(ACFTA::MTI_TOT)), 3);
+      output << sizeString(dv_cast<string>(input.getAttribute(ACFTA::AC_MSN_ID)), 10);
+      output << sizeString(dv_cast<string>(input.getAttribute(ACFTA::SCTYPE)), 1);
+      output << toString(dv_cast<int>(input.getAttribute(ACFTA::SCNUM)), 4);
+      output << sizeString(dv_cast<string>(input.getAttribute(ACFTA::SENSOR_ID)), 3);
+      output << toString(dv_cast<int>(input.getAttribute(ACFTA::PATCH_TOT)), 4);
+      output << toString(dv_cast<int>(input.getAttribute(ACFTA::MTI_TOT)), 3);
 
-      const DateTime *pAppDtg = dv_cast<DateTime>(&input.getAttribute(ACFTA::PDATE));
+      const DateTime* pAppDtg = dv_cast<DateTime>(&input.getAttribute(ACFTA::PDATE));
       if (pAppDtg == NULL)
       {
          return false;
@@ -391,20 +394,20 @@ bool Nitf::AcftaParser::fromDynamicObject(const DynamicObject& input, ostream& o
       boost::to_upper(ddmmmyy);
       output << sizeString(ddmmmyy, 7);
 
-      output <<   toString( dv_cast<int>(input.getAttribute(ACFTA::IMHOSTNO)), 3);
-      output <<   toString( dv_cast<int>(input.getAttribute(ACFTA::IMREQID)), 5);
-      output <<   toString( dv_cast<int>(input.getAttribute(ACFTA::SCENE_SOURCE)), 1);
-      output <<   toString( dv_cast<int>(input.getAttribute(ACFTA::MPLAN)), 2);
-      output << sizeString( dv_cast<string>(input.getAttribute(ACFTA::ENTLOC)), 21);
-      output <<   toString( dv_cast<int>(input.getAttribute(ACFTA::ENTELV)), 6, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output << sizeString( dv_cast<string>(input.getAttribute(ACFTA::EXITLOC)), 21);
-      output <<   toString( dv_cast<int>(input.getAttribute(ACFTA::EXITELV)), 6, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute(ACFTA::TMAP)), 7, 3);
-      output <<   toString( dv_cast<int>(input.getAttribute(ACFTA::RCS)), 3);
-      output <<   toString( dv_cast<double>(input.getAttribute(ACFTA::ROW_SPACING)), 7, 4);
-      output <<   toString( dv_cast<double>(input.getAttribute(ACFTA::COL_SPACING)), 7, 4);
-      output <<   toString( dv_cast<int>(input.getAttribute(ACFTA::SENSERIAL)), 4);
-      output << sizeString( dv_cast<string>(input.getAttribute(ACFTA::ABSWVER)), 7);
+      output << toString(dv_cast<int>(input.getAttribute(ACFTA::IMHOSTNO)), 3);
+      output << toString(dv_cast<int>(input.getAttribute(ACFTA::IMREQID)), 5);
+      output << toString(dv_cast<int>(input.getAttribute(ACFTA::SCENE_SOURCE)), 1);
+      output << toString(dv_cast<int>(input.getAttribute(ACFTA::MPLAN)), 2);
+      output << sizeString(dv_cast<string>(input.getAttribute(ACFTA::ENTLOC)), 21);
+      output << toString(dv_cast<int>(input.getAttribute(ACFTA::ENTELV)), 6, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << sizeString(dv_cast<string>(input.getAttribute(ACFTA::EXITLOC)), 21);
+      output << toString(dv_cast<int>(input.getAttribute(ACFTA::EXITELV)), 6, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(ACFTA::TMAP)), 7, 3);
+      output << toString(dv_cast<int>(input.getAttribute(ACFTA::RCS)), 3);
+      output << toString(dv_cast<double>(input.getAttribute(ACFTA::ROW_SPACING)), 7, 4);
+      output << toString(dv_cast<double>(input.getAttribute(ACFTA::COL_SPACING)), 7, 4);
+      output << toString(dv_cast<int>(input.getAttribute(ACFTA::SENSERIAL)), 4);
+      output << sizeString(dv_cast<string>(input.getAttribute(ACFTA::ABSWVER)), 7);
    }
    catch (const bad_cast&)
    {

@@ -135,7 +135,7 @@ CachedPage::UnitPtr Hdf4Pager::fetchUnit(DataRequest *pOriginalRequest)
 
    int32 lStartValue[3] = {0};
    int32 lNumValues[3] = {0};
-   switch(fileInterleave)
+   switch (fileInterleave)
    {
    case BIP:
       {
@@ -193,7 +193,9 @@ CachedPage::UnitPtr Hdf4Pager::fetchUnit(DataRequest *pOriginalRequest)
       return pUnit;
    }
 
-   pUnit.reset(new CachedPage::CacheUnit(pData.release(), startRow, concurrentRows, pageSize, startBand));
+   CachedPage::CacheUnit* pCacheUnit = new CachedPage::CacheUnit(pData.release(), startRow, concurrentRows,
+      pageSize, startBand);
+   pUnit.reset(pCacheUnit);
    return pUnit;
 }
 

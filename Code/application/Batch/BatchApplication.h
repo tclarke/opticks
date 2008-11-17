@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef BATCH_H__
-#define BATCH_H__
+#ifndef BATCHAPPLICATION_H
+#define BATCHAPPLICATION_H
 
 #include "Application.h"
 #include "SubjectAdapter.h"

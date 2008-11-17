@@ -18,7 +18,7 @@ using namespace std;
 unsigned int HdfUtilities::getDataSize(EncodingType dataType)
 {
    unsigned int dataSize = 0;
-   switch(dataType)
+   switch (dataType)
    {
    case INT1SBYTE: // fall through
    case INT1UBYTE:
@@ -54,7 +54,7 @@ vector<double> HdfUtilities::createWavelengthVector(void* pData, size_t numEleme
    bool bTruncated = false;
    for (size_t ui = 0; ui < numElements; ++ui)
    {
-      switch(type)
+      switch (type)
       {
       case INT1SBYTE:
          wavelengths.push_back(reinterpret_cast<char*>(pData)[ui]);

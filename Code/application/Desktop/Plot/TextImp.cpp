@@ -302,14 +302,12 @@ bool TextImp::fromXml(DOMNode* pDocument, unsigned int version)
    {
       return false;
    }
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
-   ColorType color = StringUtilities::fromXmlString<ColorType>(
-      A(pElem->getAttribute(X("color"))));
+   DOMElement* pElem = static_cast<DOMElement*>(pDocument);
+   ColorType color = StringUtilities::fromXmlString<ColorType>(A(pElem->getAttribute(X("color"))));
    mColor = COLORTYPE_TO_QCOLOR(color);
-   mFont.fromString(A(pElem->getAttribute(X("fron"))));
+   mFont.fromString(A(pElem->getAttribute(X("font"))));
    mText = A(pElem->getAttribute(X("text")));
-   mLocation = StringUtilities::fromXmlString<LocationType>(
-      A(pElem->getAttribute(X("location"))));
+   mLocation = StringUtilities::fromXmlString<LocationType>(A(pElem->getAttribute(X("location"))));
 
    return true;
 }

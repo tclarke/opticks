@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef GPUPROGRAMDESCRIPTORADAPTER_H__
-#define GPUPROGRAMDESCRIPTORADAPTER_H__
+#ifndef GPUPROGRAMDESCRIPTORADAPTER_H
+#define GPUPROGRAMDESCRIPTORADAPTER_H
 
 #include "GpuProgramDescriptor.h"
 #include "GpuProgramDescriptorImp.h"

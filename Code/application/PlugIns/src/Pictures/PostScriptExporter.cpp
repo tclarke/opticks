@@ -39,8 +39,7 @@ PostScriptExporter::PostScriptExporter() : mpOutFile(NULL), mWidth(72), mPos(0),
 }
 
 PostScriptExporter::~PostScriptExporter()
-{
-}
+{}
 
 bool PostScriptExporter::getInputSpecification(PlugInArgList *&pArgList)
 {
@@ -55,12 +54,16 @@ bool PostScriptExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutA
 {
    StepResource pStep("Execute PostScript Exporter", "app", "5BE7D170-BFB5-43C9-A980-06C8C376D558");
 
-   Progress *pProgress = pInArgList->getPlugInArgValue<Progress>(ProgressArg());
-   View *pView = pInArgList->getPlugInArgValue<View>(ExportItemArg());
-   if(pView == NULL)
+   Progress* pProgress = pInArgList->getPlugInArgValue<Progress>(ProgressArg());
+   View* pView = pInArgList->getPlugInArgValue<View>(ExportItemArg());
+   if (pView == NULL)
    {
       string msg = "No view specified.";
-      if(pProgress != NULL) pProgress->updateProgress(msg, 0, ERRORS);
+      if (pProgress != NULL)
+      {
+         pProgress->updateProgress(msg, 0, ERRORS);
+      }
+
       pStep->finalize(Message::Failure, msg);
       return false;
    }
@@ -68,23 +71,28 @@ bool PostScriptExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutA
    string viewName = pView->getName();
    pStep->addProperty("View Name", viewName);
 
-   FileDescriptor *pFileDescriptor = pInArgList->getPlugInArgValue<FileDescriptor>(ExportDescriptorArg());
-   if(pFileDescriptor != NULL)
+   FileDescriptor* pFileDescriptor = pInArgList->getPlugInArgValue<FileDescriptor>(ExportDescriptorArg());
+   if (pFileDescriptor != NULL)
    {
       outPath = pFileDescriptor->getFilename().getFullPathAndName();
    }
-   if(outPath.empty())
+   if (outPath.empty())
    {
       string msg = "The destination path is invalid.";
-      if(pProgress) pProgress->updateProgress(msg, 0, ERRORS);
+      if (pProgress)
+      {
+         pProgress->updateProgress(msg, 0, ERRORS);
+      }
+
       pStep->finalize(Message::Failure, msg);
       return false;
    }
    pStep->addProperty("Filename", outPath);
 
    QSize outputSize;
-   unsigned int outputWidth, outputHeight;
-   if(pInArgList->getPlugInArgValue("Output Width", outputWidth) &&
+   unsigned int outputWidth;
+   unsigned int outputHeight;
+   if (pInArgList->getPlugInArgValue("Output Width", outputWidth) &&
       pInArgList->getPlugInArgValue("Output Height", outputHeight))
    {
       pStep->addProperty("Output Width", outputWidth);
@@ -96,7 +104,7 @@ bool PostScriptExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutA
    FileResource outFile(outPath.c_str(), "wb");
    VERIFY(outFile.get() != NULL);
    mpOutFile = outFile.get();
-   if(outputSize == QSize())
+   if (outputSize == QSize())
    {
       QImage image;
       pView->getCurrentImage(image);
@@ -106,17 +114,18 @@ bool PostScriptExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutA
    else
    {
       writePostScriptHeader(outPath, QPoint(0, 0), outputSize);
-      QSize subImageSize(512,512);
+      QSize subImageSize(512, 512);
       QPoint origin(0, 0);
       int segment = 0;
-      View::SubImageIterator *pSubImage = pView->getSubImageIterator(outputSize, subImageSize);
-      int totalX, totalTiles;
+      View::SubImageIterator* pSubImage = pView->getSubImageIterator(outputSize, subImageSize);
+      int totalX;
+      int totalTiles;
       pSubImage->count(totalX, totalTiles);
       totalTiles *= totalX;
-      while(pSubImage->hasNext())
+      while (pSubImage->hasNext())
       {
          QImage subImage;
-         if(!pSubImage->next(subImage))
+         if (!pSubImage->next(subImage))
          {
             break;
          }
@@ -125,15 +134,16 @@ bool PostScriptExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutA
 
          int newX = origin.x() + subImage.width();
          int newY = origin.y();
-         if(newX >= outputSize.width())
+         if (newX >= outputSize.width())
          {
             newY += subImage.height();
             newX = 0;
          }
          origin = QPoint(newX, newY);
-         if(pProgress != NULL)
+         if (pProgress != NULL)
          {
-            int x, y;
+            int x;
+            int y;
             pSubImage->location(x, y);
             int tileNumber = y * totalX + x;
             QString msg = QString("Processing sub-image %1 of %2...").arg(y * totalX + x + 1).arg(totalTiles);
@@ -143,7 +153,7 @@ bool PostScriptExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutA
       delete pSubImage;
    }
    writePostScriptFooter();
-   if(pProgress != NULL)
+   if (pProgress != NULL)
    {
       pProgress->updateProgress("Saving product...", 99, NORMAL);
    }
@@ -198,11 +208,11 @@ void PostScriptExporter::writeImageSegment(const QImage &image,
                            w, h, h);
    // write out image data
    init85();
-   for(int y = 0; y < image.height(); y++)
+   for (int i = 0; i < image.height(); ++i)
    {
-      for(int x = 0; x < image.width(); x++)
+      for (int j = 0; j < image.width(); ++j)
       {
-         QRgb pel = image.pixel(x, y);
+         QRgb pel = image.pixel(j, i);
          put85(qRed(pel));
          put85(qGreen(pel));
          put85(qBlue(pel));
@@ -225,7 +235,7 @@ void PostScriptExporter::init85()
 
 void PostScriptExporter::put85(unsigned c)
 {
-   switch(mCount++)
+   switch (mCount++)
    {
    case 0:
       mTuple |= (c << 24);
@@ -234,14 +244,14 @@ void PostScriptExporter::put85(unsigned c)
       mTuple |= (c << 16);
       break;
    case 2:
-      mTuple |= (c <<  8);
+      mTuple |= (c << 8);
       break;
    case 3:
       mTuple |= c;
-      if(mTuple == 0)
+      if (mTuple == 0)
       {
          fputc('z', mpOutFile);
-         if(static_cast<unsigned int>(mPos++) >= mWidth)
+         if (static_cast<unsigned int>(mPos++) >= mWidth)
          {
             mPos = 0;
             fputc('\n', mpOutFile);
@@ -254,16 +264,18 @@ void PostScriptExporter::put85(unsigned c)
       mTuple = 0;
       mCount = 0;
       break;
+   default:
+      break;
    }
 }
 
 void PostScriptExporter::cleanup85()
 {
-   if(mCount > 0)
+   if (mCount > 0)
    {
       encode(mTuple, mCount);
    }
-   if(static_cast<unsigned int>(mPos) + 2 > mWidth)
+   if (static_cast<unsigned int>(mPos) + 2 > mWidth)
    {
       fputc('\n', mpOutFile);
    }
@@ -272,23 +284,24 @@ void PostScriptExporter::cleanup85()
 
 void PostScriptExporter::encode(unsigned long tuple, int count)
 {
-   char pBuf[5], *s = pBuf;
+   char pBuf[5];
+   char* s = pBuf;
    int i = 5;
    do
    {
       *s++ = tuple % 85;
       tuple /= 85;
    }
-   while(--i > 0);
+   while (--i > 0);
    i = count;
    do
    {
       fputc(*--s + '!', mpOutFile);
-      if(static_cast<unsigned int>(mPos++) >= mWidth)
+      if (static_cast<unsigned int>(mPos++) >= mWidth)
       {
          mPos = 0;
          fputc('\n', mpOutFile);
       }
    }
-   while(i-- > 0);
+   while (i-- > 0);
 }

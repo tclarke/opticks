@@ -16,8 +16,7 @@ XERCES_CPP_NAMESPACE_USE
 
 WizardObjectImp::WizardObjectImp() :
    mbBatch(false)
-{
-}
+{}
 
 WizardObjectImp::~WizardObjectImp()
 {
@@ -37,7 +36,7 @@ const string& WizardObjectImp::getName() const
    return mName;
 }
 
-WizardItem* WizardObjectImp::addItem(std::string itemName, std::string itemType)
+WizardItem* WizardObjectImp::addItem(string itemName, string itemType)
 {
    WizardItem* pItem = new WizardItemImp(itemName, itemType);
    if (pItem != NULL)
@@ -60,14 +59,13 @@ bool WizardObjectImp::removeItem(WizardItem* pItem)
       return false;
    }
 
-   vector<WizardItem*>::iterator iter;
-   for (iter = mItems.begin(); iter != mItems.end(); ++iter)
+   for (vector<WizardItem*>::iterator iter = mItems.begin(); iter != mItems.end(); ++iter)
    {
       WizardItem* pCurrentItem = *iter;
       if (pCurrentItem == pItem)
       {
          mItems.erase(iter);
-         delete (static_cast<WizardItemImp*>(pItem));
+         delete static_cast<WizardItemImp*>(pItem);
          return true;
       }
    }
@@ -101,22 +99,22 @@ bool WizardObjectImp::increaseItemOrder(WizardItem* pItem)
    bool bFound = false;
 
    vector<WizardItem*>::iterator inputIter;
-   vector<WizardItem*>::iterator iter;
-   iter = mItems.begin();
+   vector<WizardItem*>::iterator iter = mItems.begin();
    while (iter != mItems.end())
    {
-      WizardItem* pCurrentItem = NULL;
-      pCurrentItem = *iter;
-
+      WizardItem* pCurrentItem = *iter;
       if ((bFound == true) && (pCurrentItem != NULL))
       {
-         bool bConnected = false;
-         bConnected = ((WizardItemImp*) pItem)->isItemConnected(pCurrentItem, false);
-         if (bConnected == false)
+         WizardItemImp* pItemImp = static_cast<WizardItemImp*>(pItem);
+         if (pItemImp != NULL)
          {
-            iter = mItems.erase(iter);
-            mItems.insert(inputIter, pCurrentItem);
-            return true;
+            bool bConnected = pItemImp->isItemConnected(pCurrentItem, false);
+            if (bConnected == false)
+            {
+               iter = mItems.erase(iter);
+               mItems.insert(inputIter, pCurrentItem);
+               return true;
+            }
          }
       }
       else if (pCurrentItem == pItem)
@@ -141,21 +139,21 @@ bool WizardObjectImp::decreaseItemOrder(WizardItem* pItem)
    bool bFound = false;
    WizardItem* pRemoveItem = NULL;
 
-   int iCount = 0;
-   iCount = mItems.size();
+   int iCount = mItems.size();
    for (int i = iCount - 1; i >= 0; i--)
    {
-      WizardItem* pCurrentItem = NULL;
-      pCurrentItem = mItems.at(i);
-
+      WizardItem* pCurrentItem = mItems.at(i);
       if ((bFound == true) && (pCurrentItem != NULL))
       {
-         bool bConnected = false;
-         bConnected = ((WizardItemImp*) pItem)->isItemConnected(pCurrentItem, true);
-         if (bConnected == false)
+         WizardItemImp* pItemImp = static_cast<WizardItemImp*>(pItem);
+         if (pItemImp != NULL)
          {
-            pRemoveItem = pCurrentItem;
-            break;
+            bool bConnected = pItemImp->isItemConnected(pCurrentItem, true);
+            if (bConnected == false)
+            {
+               pRemoveItem = pCurrentItem;
+               break;
+            }
          }
       }
       else if (pCurrentItem == pItem)
@@ -212,47 +210,49 @@ const string& WizardObjectImp::getMenuLocation() const
    return mMenuLocation;
 }
 
-bool WizardObjectImp::toXml(XMLWriter* xml) const
+bool WizardObjectImp::toXml(XMLWriter* pXml) const
 {
-   xml->addAttr("version", XmlBase::VERSION);
-   xml->addAttr("name", mName);
-   xml->addAttr("type", "WizardObject");
-   xml->addAttr("batch", StringUtilities::toXmlString(mbBatch));
-   xml->addAttr("menuLocation", mMenuLocation);
+   pXml->addAttr("version", XmlBase::VERSION);
+   pXml->addAttr("name", mName);
+   pXml->addAttr("type", "WizardObject");
+   pXml->addAttr("batch", StringUtilities::toXmlString(mbBatch));
+   pXml->addAttr("menuLocation", mMenuLocation);
 
-   vector<WizardItem*>::const_iterator iiter;
-   for(iiter = mItems.begin(); iiter != mItems.end(); iiter++)
+   for (vector<WizardItem*>::const_iterator iiter = mItems.begin(); iiter != mItems.end(); ++iiter)
    {
       WizardItem* pItem(*iiter);
-      if(pItem == NULL)
+      if (pItem == NULL)
+      {
          continue;
-      xml->pushAddPoint(xml->addElement("item"));
-      bool rval(pItem->toXml(xml));
-      xml->popAddPoint();
-      if(!rval)
+      }
+      pXml->pushAddPoint(pXml->addElement("item"));
+      bool rval(pItem->toXml(pXml));
+      pXml->popAddPoint();
+      if (!rval)
+      {
          return false;
+      }
    }
 
    vector<WizardConnection> connections = WizardItemImp::getConnections(mItems);
-   vector<WizardConnection>::iterator citer;
-   for(citer = connections.begin(); citer != connections.end(); citer++)
+   for (vector<WizardConnection>::iterator citer = connections.begin(); citer != connections.end(); ++citer)
    {
       WizardConnection connection(*citer);
-      xml->pushAddPoint(xml->addElement("connection"));
+      pXml->pushAddPoint(pXml->addElement("connection"));
 
-      xml->addAttr("inputItem", StringUtilities::toXmlString(connection.miInputItemIndex));
-      xml->addAttr("inputNode", StringUtilities::toXmlString(connection.miInputNodeIndex));
-      xml->addAttr("outputItem", StringUtilities::toXmlString(connection.miOutputItemIndex));
-      xml->addAttr("outputNode", StringUtilities::toXmlString(connection.miOutputNodeIndex));
-      xml->popAddPoint();
+      pXml->addAttr("inputItem", StringUtilities::toXmlString(connection.miInputItemIndex));
+      pXml->addAttr("inputNode", StringUtilities::toXmlString(connection.miInputNodeIndex));
+      pXml->addAttr("outputItem", StringUtilities::toXmlString(connection.miOutputItemIndex));
+      pXml->addAttr("outputNode", StringUtilities::toXmlString(connection.miOutputNodeIndex));
+      pXml->popAddPoint();
    }
 
    return true;
 }
 
-bool WizardObjectImp::fromXml(DOMNode* document, unsigned int version)
+bool WizardObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   DOMElement *elmnt(static_cast<DOMElement*>(document));
+   DOMElement* elmnt(static_cast<DOMElement*>(pDocument));
    mName = A(elmnt->getAttribute(X("name")));
    string v(A(elmnt->getAttribute(X("batch"))));
    mbBatch = StringUtilities::fromXmlString<bool>(v);
@@ -260,14 +260,12 @@ bool WizardObjectImp::fromXml(DOMNode* document, unsigned int version)
 
    mItems.clear();
    vector<WizardConnection> connections;
-   for(DOMNode *chld = document->getFirstChild();
-                chld != NULL;
-                chld = chld->getNextSibling())
+   for (DOMNode* pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
    {
-      if(XMLString::equals(chld->getNodeName(), X("item")))
+      if (XMLString::equals(pChld->getNodeName(), X("item")))
       {
-         WizardItem *pItem(new WizardItemImp("", ""));
-         if(pItem->fromXml(chld, version))
+         WizardItem* pItem(new WizardItemImp("", ""));
+         if (pItem->fromXml(pChld, version))
          {
             mItems.push_back(pItem);
          }
@@ -277,13 +275,13 @@ bool WizardObjectImp::fromXml(DOMNode* document, unsigned int version)
             return false;
          }
       }
-      else if(XMLString::equals(chld->getNodeName(), X("connection")))
+      else if (XMLString::equals(pChld->getNodeName(), X("connection")))
       {
-         DOMElement *e(static_cast<DOMElement*>(chld));
+         DOMElement* e(static_cast<DOMElement*>(pChld));
          WizardConnection connection;
 
-         connection.miInputItemIndex  = StringUtilities::fromXmlString<int>(A(e->getAttribute(X("inputItem"))));
-         connection.miInputNodeIndex  = StringUtilities::fromXmlString<int>(A(e->getAttribute(X("inputNode"))));
+         connection.miInputItemIndex = StringUtilities::fromXmlString<int>(A(e->getAttribute(X("inputItem"))));
+         connection.miInputNodeIndex = StringUtilities::fromXmlString<int>(A(e->getAttribute(X("inputNode"))));
          connection.miOutputItemIndex = StringUtilities::fromXmlString<int>(A(e->getAttribute(X("outputItem"))));
          connection.miOutputNodeIndex = StringUtilities::fromXmlString<int>(A(e->getAttribute(X("outputNode"))));
 
@@ -298,8 +296,8 @@ bool WizardObjectImp::fromXml(DOMNode* document, unsigned int version)
 
 const string& WizardObjectImp::getObjectType() const
 {
-   static string type("WizardObjectImp");
-   return type;
+   static string sType("WizardObjectImp");
+   return sType;
 }
 
 bool WizardObjectImp::isKindOf(const string& className) const

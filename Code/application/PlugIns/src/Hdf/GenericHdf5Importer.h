@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef GENERIC_HDF5_IMPORTER_H
-#define GENERIC_HDF5_IMPORTER_H
+#ifndef GENERICHDF5IMPORTER_H
+#define GENERICHDF5IMPORTER_H
 
 #include "Hdf5ImporterShell.h"
 #include "Testable.h"
@@ -42,6 +42,6 @@ public:
    unsigned char getFileAffinity(const std::string& filename);
 
    std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename);
-}; 
+};
 
 #endif

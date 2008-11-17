@@ -20,12 +20,12 @@ class AoiElement;
 class GcpList;
 class TiePointList;
 
-const char *ModuleManager::mspName = "CoreIo";
-const char *ModuleManager::mspVersion = "1.00";
-const char *ModuleManager::mspDescription =
-         "Plug-ins related to I/O for layers, model elements, and other \"core\" types";
-const char *ModuleManager::mspValidationKey = "none";
-const char *ModuleManager::mspUniqueId = "{D83A0C6B-4125-4d53-91E1-18F0C85A966D}";
+const char* ModuleManager::mspName = "CoreIo";
+const char* ModuleManager::mspVersion = "1.00";
+const char* ModuleManager::mspDescription =
+   "Plug-ins related to I/O for layers, model elements, and other \"core\" types";
+const char* ModuleManager::mspValidationKey = "none";
+const char* ModuleManager::mspUniqueId = "{D83A0C6B-4125-4d53-91E1-18F0C85A966D}";
 
 unsigned int ModuleManager::getTotalPlugIns()
 {
@@ -34,12 +34,11 @@ unsigned int ModuleManager::getTotalPlugIns()
 
 PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
 {
-   PlugIn *pPlugIn = NULL;
-
-   switch(plugInNumber)
+   PlugIn* pPlugIn = NULL;
+   switch (plugInNumber)
    {
       case 0:
-         pPlugIn = new CgmImporter;
+         pPlugIn = new CgmImporter();
          break;
       case 1:
          pPlugIn = new LayerExporter(ANNOTATION);
@@ -54,7 +53,7 @@ PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
          pPlugIn = new LayerExporter(TIEPOINT_LAYER);
          break;
       case 5:
-         pPlugIn = new LayerImporter;
+         pPlugIn = new LayerImporter();
          break;
       case 6:
          pPlugIn = new ModelExporter(TypeConverter::toString<AoiElement>());
@@ -69,10 +68,11 @@ PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
          pPlugIn = new ModelExporter(TypeConverter::toString<TiePointList>());
          break;
       case 10:
-         pPlugIn = new ModelImporter;
+         pPlugIn = new ModelImporter();
          break;
       case 11:
-         pPlugIn = new CgmExporter;
+         pPlugIn = new CgmExporter();
+         break;
       default:
          break;
    }

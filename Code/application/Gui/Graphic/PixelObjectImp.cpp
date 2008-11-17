@@ -33,7 +33,7 @@ PixelObjectImp::~PixelObjectImp()
 
 void PixelObjectImp::draw(double zoomFactor) const
 {
-   GraphicLayerImp *pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
+   GraphicLayerImp* pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
    if (pLayer != NULL && pLayer->willDrawAsPixels())
    {
       if (mDisplayList == 0)

@@ -7,19 +7,17 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #include "CachedPage.h"
 
 const DimensionDescriptor CachedPage::CacheUnit::ALL_BANDS = DimensionDescriptor();
 
-CachedPage::CacheUnit::CacheUnit(char *pData, DimensionDescriptor startRow, int concurrentRows, size_t size, 
-   DimensionDescriptor band, unsigned int interlineBytes) :
+CachedPage::CacheUnit::CacheUnit(char* pData, DimensionDescriptor startRow, int concurrentRows, size_t size,
+                                 DimensionDescriptor band, unsigned int interlineBytes) :
    mpData(pData),
    mStartRow(startRow),
    mConcurrentRows(concurrentRows),
-   mSize(size),
    mBand(band),
+   mSize(size),
    mInterlineBytes(interlineBytes)
 {
 }

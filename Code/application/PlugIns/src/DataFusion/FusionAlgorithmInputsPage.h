@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef FUSION_ALGORITHM_INPUTS_PAGE
-#define FUSION_ALGORITHM_INPUTS_PAGE
+#ifndef FUSIONALGORITHMINPUTSPAGE_H
+#define FUSIONALGORITHMINPUTSPAGE_H
 
 #include <QtGui/QCheckBox>
 
@@ -34,27 +32,27 @@ public:
    FusionAlgorithmInputsPage(QWidget* pParent);
    ~FusionAlgorithmInputsPage();
 
-   void aoiModified(Subject &subject, const std::string &signal, const boost::any &v);
-   void aoiLayerDeleted(Subject &subject, const std::string &signal, const boost::any &v);
-   void aoiLayerAttached(Subject &subject, const std::string &signal, const boost::any &v);
-   void aoiLayerDetached(Subject &subject, const std::string &signal, const boost::any &v);
-   void attached(Subject &subject, const std::string &signal, const Slot &slot);
-   void detached(Subject &subject, const std::string &signal, const Slot &slot);
+   void aoiModified(Subject& subject, const std::string& signal, const boost::any& v);
+   void aoiLayerDeleted(Subject& subject, const std::string& signal, const boost::any& v);
+   void aoiLayerAttached(Subject& subject, const std::string& signal, const boost::any& v);
+   void aoiLayerDetached(Subject& subject, const std::string& signal, const boost::any& v);
+   void attached(Subject& subject, const std::string& signal, const Slot& slot);
+   void detached(Subject& subject, const std::string& signal, const Slot& slot);
 
    bool isValid() const;
 
    void setViews(SpatialDataView* pPrimary, SpatialDataView* pSecondary);
 
-   bool sbs() const { return mpSbsOption != NULL && mpSbsOption->isChecked(); }
-   bool flicker() const { return mpFlickerOption != NULL && mpFlickerOption->isChecked(); }
-   bool openOverlayTools() const { return mpRunOverlayOption != NULL && mpRunOverlayOption->isChecked(); }
+   bool sbs() const;
+   bool flicker() const;
+   bool openOverlayTools() const;
 
    bool getRoiBoundingBox(int& x1, int& y1, int& x2, int& y2) const;
 
    bool inMemory() const;
 
-   std::string getPreferredPrimaryMouseMode() const { return "LayerMode"; }
-   Layer* getPreferredPrimaryActiveLayer() const { return mpAoiLayer; }
+   std::string getPreferredPrimaryMouseMode() const;
+   Layer* getPreferredPrimaryActiveLayer() const;
 
    bool copyColormap(const SpatialDataView& view);
 
@@ -73,11 +71,16 @@ protected slots:
 private:
    static const std::string FUSION_ROI_NAME;
 
-   QLabel* mpCurrentMinX, *mpCurrentMinY, *mpCurrentMaxX, *mpCurrentMaxY;
+   QLabel* mpCurrentMinX;
+   QLabel* mpCurrentMinY;
+   QLabel* mpCurrentMaxX;
+   QLabel* mpCurrentMaxY;
    QGroupBox* mpProductGroup;
    QCheckBox* mpSbsOption;
-   QCheckBox* mpFlickerOption, *mpRunOverlayOption;
-   QCheckBox* mpPrimaryCheck, *mpSecondaryCheck;
+   QCheckBox* mpFlickerOption;
+   QCheckBox* mpRunOverlayOption;
+   QCheckBox* mpPrimaryCheck;
+   QCheckBox* mpSecondaryCheck;
    QPushButton* mpExecuteButton;
 
    AoiLayer* mpAoiLayer;

@@ -29,7 +29,6 @@ class Image;
  * style and layer names and values.  Only the first band of the RasterElement
  * is used.
  */
-
 class PseudocolorLayerImp : public LayerImp
 {
 #ifdef CPPTESTS // allow testing of image rendering
@@ -44,7 +43,7 @@ public:
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
-   void rasterElementDataModified(Subject &subject, const std::string &signal, const boost::any &v);
+   void rasterElementDataModified(Subject& subject, const std::string& signal, const boost::any& v);
 
    PseudocolorLayerImp& operator= (const PseudocolorLayerImp& pseudocolorLayer);
 
@@ -66,7 +65,7 @@ public:
    bool removeClass(PseudocolorClass* pClass);
    void clear();
 
-   virtual void getBoundingBox(int &x1, int &y1, int &x2, int &y2) const;
+   virtual void getBoundingBox(int& x1, int& y1, int& x2, int& y2) const;
 
    bool toXml(XMLWriter* pXml) const;
    bool fromXml(DOMNode* pDocument, unsigned int version);
@@ -79,14 +78,14 @@ public:
     *
     * The Layer owns the returned BitMask.
     */
-   virtual const BitMask *getSelectedPixels() const;
+   virtual const BitMask* getSelectedPixels() const;
 
 public slots:
    void reset();
 
 protected:
    bool canRenderAsImage() const;
-   std::pair<int,int> getValueRange(bool onlyDisplayed) const;
+   std::pair<int, int> getValueRange(bool onlyDisplayed) const;
    void generateImage();
    bool isGpuImageSupported() const;
 
@@ -100,7 +99,7 @@ private:
 
    mutable FactoryResource<BitMask> mpMask;
    int mNextID;
-   Image *mpImage;
+   Image* mpImage;
 };
 
 #define PSEUDOCOLORLAYERADAPTEREXTENSION_CLASSES \
@@ -110,8 +109,7 @@ private:
    LAYERADAPTER_METHODS(impClass) \
    int addClass() \
    { \
-      PseudocolorClass* pClass = NULL; \
-      pClass = impClass::addClass(); \
+      PseudocolorClass* pClass = impClass::addClass(); \
       if (pClass != NULL) \
       { \
          return impClass::getClassID(pClass); \
@@ -134,8 +132,7 @@ private:
          clrClass.setRgb(classColor.mRed, classColor.mGreen, classColor.mBlue); \
       } \
       \
-      PseudocolorClass* pClass = NULL; \
-      pClass = impClass::addClass(strClassName, iValue, clrClass, bDisplayed); \
+      PseudocolorClass* pClass = impClass::addClass(strClassName, iValue, clrClass, bDisplayed); \
       if (pClass != NULL) \
       { \
          return impClass::getClassID(pClass); \
@@ -169,8 +166,7 @@ private:
    { \
       bool bSuccess = false; \
       \
-      PseudocolorClass* pClass = NULL; \
-      pClass = impClass::getClassById(iID); \
+      PseudocolorClass* pClass = impClass::getClassById(iID); \
       if (pClass != NULL) \
       { \
          bSuccess = impClass::removeClass(pClass); \
@@ -185,8 +181,7 @@ private:
    bool setClassProperties(int iID, const std::string& className, int iValue, const ColorType& classColor, \
       bool bDisplayed) \
    { \
-      PseudocolorClass* pClass = NULL; \
-      pClass = impClass::getClassById(iID); \
+      PseudocolorClass* pClass = impClass::getClassById(iID); \
       if (pClass != NULL) \
       { \
          QString strClassName; \
@@ -214,8 +209,7 @@ private:
          return false; \
       } \
       \
-      PseudocolorClass* pClass = NULL; \
-      pClass = impClass::getClassById(iID); \
+      PseudocolorClass* pClass = impClass::getClassById(iID); \
       if (pClass != NULL) \
       { \
          QString strOldName = pClass->getName(); \
@@ -234,8 +228,7 @@ private:
    { \
       className.erase(); \
       \
-      PseudocolorClass* pClass = NULL; \
-      pClass = impClass::getClassById(iID); \
+      PseudocolorClass* pClass = impClass::getClassById(iID); \
       if (pClass != NULL) \
       { \
          QString strClassName = pClass->getName(); \
@@ -250,8 +243,7 @@ private:
    } \
    bool setClassValue(int iID, int iValue) \
    { \
-      PseudocolorClass* pClass = NULL; \
-      pClass = impClass::getClassById(iID); \
+      PseudocolorClass* pClass = impClass::getClassById(iID); \
       if (pClass != NULL) \
       { \
          int iOldValue = pClass->getValue(); \
@@ -268,8 +260,7 @@ private:
    { \
       int iValue = -1; \
       \
-      PseudocolorClass* pClass = NULL; \
-      pClass = impClass::getClassById(iID); \
+      PseudocolorClass* pClass = impClass::getClassById(iID); \
       if (pClass != NULL) \
       { \
          iValue = pClass->getValue(); \
@@ -279,8 +270,7 @@ private:
    } \
    bool setClassColor(int iID, const ColorType& classColor) \
    { \
-      PseudocolorClass* pClass = NULL; \
-      pClass = impClass::getClassById(iID); \
+      PseudocolorClass* pClass = impClass::getClassById(iID); \
       if (pClass != NULL) \
       { \
          QColor clrClass; \
@@ -303,8 +293,7 @@ private:
    { \
       ColorType classColor; \
       \
-      PseudocolorClass* pClass = NULL; \
-      pClass = impClass::getClassById(iID); \
+      PseudocolorClass* pClass = impClass::getClassById(iID); \
       if (pClass != NULL) \
       { \
          QColor clrClass = pClass->getColor(); \
@@ -320,8 +309,7 @@ private:
    } \
    bool setClassDisplayed(int iID, bool bDisplayed) \
    { \
-      PseudocolorClass* pClass = NULL; \
-      pClass = impClass::getClassById(iID); \
+      PseudocolorClass* pClass = impClass::getClassById(iID); \
       if (pClass != NULL) \
       { \
          bool bIsDisplayed = pClass->isDisplayed(); \
@@ -338,8 +326,7 @@ private:
    { \
       bool bDisplayed = false; \
       \
-      PseudocolorClass* pClass = NULL; \
-      pClass = impClass::getClassById(iID); \
+      PseudocolorClass* pClass = impClass::getClassById(iID); \
       if (pClass != NULL) \
       { \
          bDisplayed = pClass->isDisplayed(); \
@@ -354,6 +341,6 @@ private:
    void setSymbol(SymbolType symbol) \
    { \
       return impClass::setSymbol(symbol); \
-   } 
+   }
 
 #endif

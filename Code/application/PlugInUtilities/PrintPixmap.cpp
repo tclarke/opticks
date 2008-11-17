@@ -69,7 +69,8 @@ void PrintPixmap(QPixmap pixmap, bool displayDialog, QWidget *pParent, QPrinter 
       // will be the size of the pixmap on the paper, in printer device coords.
       int iPrintWidth = rcViewport.width();
       int iPrintHeight = rcViewport.height();
-      double pAspect = (double) iPrintWidth / (double) iPrintHeight; // aspect ratio of the paper
+      double pAspect = static_cast<double>(iPrintWidth) /
+         static_cast<double>(iPrintHeight); // aspect ratio of the paper
 
       // unless the aspect ratios of the paper and pixmap are equal, we will have unused
       // space above and below or left and right of the printed image. 

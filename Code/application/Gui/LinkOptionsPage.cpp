@@ -54,20 +54,20 @@ LinkOptionsPage::LinkOptionsPage(QWidget* parent) :
 
    // Views
    mpViewWidget = new QWidget(mpStack);
-   QGroupBox *pLinkTypeBox = new QGroupBox("Link type:", mpViewWidget);
+   QGroupBox* pLinkTypeBox = new QGroupBox("Link type:", mpViewWidget);
    mpAutolinkRadio = new QRadioButton("Automatic", pLinkTypeBox);
    mpMirrorRadio = new QRadioButton("Mirror", pLinkTypeBox);
    mpGeoRadio = new QRadioButton("Latitude/Longitude", pLinkTypeBox);
    mpUnlinkRadio = new QRadioButton("Unlink", pLinkTypeBox);
 
-   QButtonGroup *pLinkTypeGroup = new QButtonGroup(pLinkTypeBox);
+   QButtonGroup* pLinkTypeGroup = new QButtonGroup(pLinkTypeBox);
    pLinkTypeGroup->setExclusive(true);
    pLinkTypeGroup->addButton(mpAutolinkRadio);
    pLinkTypeGroup->addButton(mpMirrorRadio);
    pLinkTypeGroup->addButton(mpGeoRadio);
    pLinkTypeGroup->addButton(mpUnlinkRadio);
 
-   QVBoxLayout *pLinkTypeLayout = new QVBoxLayout(pLinkTypeBox);
+   QVBoxLayout* pLinkTypeLayout = new QVBoxLayout(pLinkTypeBox);
    pLinkTypeLayout->addWidget(mpAutolinkRadio);
    pLinkTypeLayout->addWidget(mpMirrorRadio);
    pLinkTypeLayout->addWidget(mpGeoRadio);

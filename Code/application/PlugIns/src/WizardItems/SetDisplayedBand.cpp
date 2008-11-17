@@ -24,8 +24,8 @@
 SetDisplayedBand::SetDisplayedBand() :
    mpRasterLayer(NULL),
    mRasterChannelType(GRAY),
-   mOriginalNumber(0),
-   mpRasterElement(NULL)
+   mpRasterElement(NULL),
+   mOriginalNumber(0)
 {
    setName("Set Displayed Band");
    setVersion(APP_VERSION_NUMBER);

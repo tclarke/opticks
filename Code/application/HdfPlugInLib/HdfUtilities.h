@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef HDF_UTILITIES_H
-#define HDF_UTILITIES_H
+#ifndef HDFUTILITIES_H
+#define HDFUTILITIES_H
 
 #include <string>
 #include <vector>
@@ -42,14 +40,21 @@ namespace HdfUtilities
        * @param  str
        *         Text to place into the exception. Should not be empty (but can be).
        */
-      explicit Exception(const std::string &str) : mText(str.c_str()) {}
+      explicit Exception(const std::string& str) :
+         mText(str)
+      {
+      }
 
       /**
        * Gets the message from the exception.
        *
        * @return The string that was passed in to the constructor.
        */
-      std::string getText() const { return mText; }
+      std::string getText() const
+      {
+         return mText;
+      }
+
    private:
       std::string mText;
    };

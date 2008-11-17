@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef PSEUDOCOLORUNDO_H
-#define PSEUDOCOLORUNDO_H
+#ifndef PSEUDOCOLORLAYERUNDO_H
+#define PSEUDOCOLORLAYERUNDO_H
 
 #include <QtCore/QString>
 #include <QtGui/QColor>

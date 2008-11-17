@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef __DYNMCOBJIMP_H
-#define __DYNMCOBJIMP_H
+#ifndef DYNAMICOBJECTIMP_H
+#define DYNAMICOBJECTIMP_H
 
 #include "DataVariant.h"
 #include "SerializableImp.h"
@@ -59,12 +59,12 @@ public:
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
-   virtual bool toXml(XMLWriter* pXml) const;
+   virtual bool toXml(XMLWriter* pWriter) const;
    virtual bool fromXml(DOMNode* pDocument, unsigned int version);
 
 protected:
    virtual bool setAttribute(const std::string& name, DataVariant &value, bool swap);
-   virtual bool setAttributeByPath(const std::string& name, DataVariant &value, bool swap);
+   virtual bool setAttributeByPath(const std::string& path, DataVariant& value, bool swap);
    virtual bool setAttributeByPath(const std::string pComponents[], DataVariant& value, bool swap);
    virtual bool setAttributeByPath(QStringList pathComponents, DataVariant &value, bool swap);
 
@@ -174,4 +174,4 @@ protected:
       return impClass::clear(); \
    }
 
-#endif   // __DYNMCOBJIMP_H
+#endif

@@ -35,8 +35,7 @@ void copyValue(T* pValue, void*& pCopy)
       return;
    }
 
-   T* pNewValue = NULL;
-   pNewValue = new T;
+   T* pNewValue = new T;
    if (pNewValue != NULL)
    {
       *pNewValue = *pValue;
@@ -78,7 +77,7 @@ DynamicObjectImp::~DynamicObjectImp()
    clear();
 }
 
-DynamicObjectImp& DynamicObjectImp::operator= (const DynamicObjectImp& rhs)
+DynamicObjectImp& DynamicObjectImp::operator=(const DynamicObjectImp& rhs)
 {
    if (this == &rhs)
    {
@@ -91,7 +90,7 @@ DynamicObjectImp& DynamicObjectImp::operator= (const DynamicObjectImp& rhs)
    {
       setAttribute(pPair->first, pPair->second);
    }
-   
+
    return *this;
 }
 
@@ -111,11 +110,11 @@ void DynamicObjectImp::merge(const DynamicObject* pObject)
       string name = *iter;
       if (name.empty() == false)
       {
-         const DataVariant &var = pObject->getAttribute(name);
+         const DataVariant& var = pObject->getAttribute(name);
          string type = var.getTypeName();
          if (var.isValid())
          {
-            DataVariant &myVar = getAttribute(name);
+            DataVariant& myVar = getAttribute(name);
             string myType = myVar.getTypeName();
             if (type == "DynamicObject" && myVar.isValid() && myType == "DynamicObject") // both are DOs
             {
@@ -130,54 +129,54 @@ void DynamicObjectImp::merge(const DynamicObject* pObject)
    }
 }
 
-bool DynamicObjectImp::setAttribute(const std::string& name, const DataVariant &value)
+bool DynamicObjectImp::setAttribute(const string& name, const DataVariant& value)
 {
    return setAttribute(name, const_cast<DataVariant&>(value), false);
 }
 
-bool DynamicObjectImp::adoptAttribute(const std::string& name, DataVariant &value)
+bool DynamicObjectImp::adoptAttribute(const string& name, DataVariant& value)
 {
    return setAttribute(name, value, true);
 }
 
-bool DynamicObjectImp::setAttributeByPath(QStringList pathComponents, const DataVariant &value)
+bool DynamicObjectImp::setAttributeByPath(QStringList pathComponents, const DataVariant& value)
 {
    return setAttributeByPath(pathComponents, const_cast<DataVariant&>(value), false);
 }
 
-bool DynamicObjectImp::adoptAttributeByPath(QStringList pathComponents, DataVariant &value)
+bool DynamicObjectImp::adoptAttributeByPath(QStringList pathComponents, DataVariant& value)
 {
    return setAttributeByPath(pathComponents, value, true);
 }
 
-bool DynamicObjectImp::setAttributeByPath(const std::string& path, const DataVariant &value)
+bool DynamicObjectImp::setAttributeByPath(const string& path, const DataVariant& value)
 {
    return setAttributeByPath(path, const_cast<DataVariant&>(value), false);
 }
 
-bool DynamicObjectImp::adoptAttributeByPath(const std::string& path, DataVariant &value)
+bool DynamicObjectImp::adoptAttributeByPath(const string& path, DataVariant& value)
 {
    return setAttributeByPath(path, value, true);
 }
 
-bool DynamicObjectImp::setAttributeByPath(const std::string pComponents[], const DataVariant& value)
+bool DynamicObjectImp::setAttributeByPath(const string pComponents[], const DataVariant& value)
 {
    return setAttributeByPath(pComponents, const_cast<DataVariant&>(value), false);
 }
 
-bool DynamicObjectImp::adoptAttributeByPath(const std::string pComponents[], DataVariant &value)
+bool DynamicObjectImp::adoptAttributeByPath(const string pComponents[], DataVariant& value)
 {
    return setAttributeByPath(pComponents, value, true);
 }
 
-bool DynamicObjectImp::setAttribute(const string& name, DataVariant &value, bool swap)
+bool DynamicObjectImp::setAttribute(const string& name, DataVariant& value, bool swap)
 {
    bool valueIsValid = value.isValid();
    if (valueIsValid)
    {
-      pair<map<string, DataVariant>::iterator,bool> location = 
+      pair<map<string, DataVariant>::iterator, bool> location = 
          mVariantAttributes.insert(pair<string, DataVariant>(name, DataVariant()));
-      DataVariant &mapVariant(location.first->second);
+      DataVariant& mapVariant(location.first->second);
 
       if (swap)
       {
@@ -188,8 +187,15 @@ bool DynamicObjectImp::setAttribute(const string& name, DataVariant &value, bool
          mapVariant = value;
       }
 
-      notify(location.second ? SIGNAL_NAME(DynamicObject, AttributeAdded) : SIGNAL_NAME(DynamicObject, AttributeModified), 
-         boost::any(pair<string, DataVariant*>(name, &mapVariant)));
+      if (location.second)
+      {
+         notify(SIGNAL_NAME(DynamicObject, AttributeAdded), boost::any(pair<string, DataVariant*>(name, &mapVariant)));
+      }
+      else
+      {
+         notify(SIGNAL_NAME(DynamicObject, AttributeModified),
+            boost::any(pair<string, DataVariant*>(name, &mapVariant)));
+      }
 
       DynamicObjectImp* pValue = dynamic_cast<DynamicObjectImp*>(dv_cast<DynamicObject>(&mapVariant));
       if (pValue != NULL)
@@ -202,7 +208,7 @@ bool DynamicObjectImp::setAttribute(const string& name, DataVariant &value, bool
    return valueIsValid;
 }
 
-bool DynamicObjectImp::setAttributeByPath(QStringList pathComponents, DataVariant &value, bool swap)
+bool DynamicObjectImp::setAttributeByPath(QStringList pathComponents, DataVariant& value, bool swap)
 {
    if (!value.isValid())
    {
@@ -213,7 +219,7 @@ bool DynamicObjectImp::setAttributeByPath(QStringList pathComponents, DataVarian
    pathComponents.pop_back();
 
    string loopType = "DynamicObject";
-   DynamicObject *pLoopObj = dynamic_cast<DynamicObject*>(this);
+   DynamicObject* pLoopObj = dynamic_cast<DynamicObject*>(this);
    DynamicObject* pCurObj = pLoopObj;
    for (QStringList::const_iterator iter = pathComponents.begin();
       iter != pathComponents.end(); ++iter)
@@ -226,8 +232,7 @@ bool DynamicObjectImp::setAttributeByPath(QStringList pathComponents, DataVarian
       pCurObj = pLoopObj;
       DataVariant& attrValue = pCurObj->getAttribute(iter->toStdString());
       loopType = attrValue.getTypeName();
-      pLoopObj = 
-         attrValue.getPointerToValue<DynamicObject>();
+      pLoopObj = attrValue.getPointerToValue<DynamicObject>();
 
       if ((pLoopObj != NULL) && (loopType != "DynamicObject"))
       {
@@ -240,10 +245,9 @@ bool DynamicObjectImp::setAttributeByPath(QStringList pathComponents, DataVarian
          if (pCurObj != NULL)
          {
             pCurObj->setAttribute(iter->toStdString(), *pNewObj.get());
-            DataVariant& attrValue = pCurObj->getAttribute(iter->toStdString());
-            loopType = attrValue.getTypeName();
-            pLoopObj = 
-               attrValue.getPointerToValue<DynamicObject>();
+            DataVariant& currentValue = pCurObj->getAttribute(iter->toStdString());
+            loopType = currentValue.getTypeName();
+            pLoopObj = currentValue.getPointerToValue<DynamicObject>();
          }
       }
    }
@@ -259,13 +263,13 @@ bool DynamicObjectImp::setAttributeByPath(QStringList pathComponents, DataVarian
    return pCurObjImp->setAttribute(finalName.toStdString(), value, swap);
 }
 
-bool DynamicObjectImp::setAttributeByPath(const std::string& path, DataVariant &value, bool swap)
+bool DynamicObjectImp::setAttributeByPath(const string& path, DataVariant& value, bool swap)
 {
    QStringList pathComponents = getPathComponents(path);
    return setAttributeByPath(pathComponents, value, swap);
 }
 
-bool DynamicObjectImp::setAttributeByPath(const std::string pComponents[], DataVariant& value, bool swap)
+bool DynamicObjectImp::setAttributeByPath(const string pComponents[], DataVariant& value, bool swap)
 {
    VERIFY(pComponents != NULL);
    QStringList pathComponents;
@@ -331,11 +335,11 @@ QStringList DynamicObjectImp::getPathComponents(const string& path) const
    return pathComponents;
 }
 
-const DataVariant &DynamicObjectImp::getAttribute(const std::string &name) const
+const DataVariant& DynamicObjectImp::getAttribute(const string& name) const
 {
    static DataVariant sEmptyVariant;
 
-   map<string,DataVariant>::const_iterator pPair = mVariantAttributes.find(name);
+   map<string, DataVariant>::const_iterator pPair = mVariantAttributes.find(name);
    if (pPair != mVariantAttributes.end())
    {
       return pPair->second;
@@ -345,12 +349,12 @@ const DataVariant &DynamicObjectImp::getAttribute(const std::string &name) const
    return sEmptyVariant;
 }
 
-DataVariant &DynamicObjectImp::getAttribute(const std::string &name)
+DataVariant& DynamicObjectImp::getAttribute(const string& name)
 {
    return const_cast<DataVariant&>(const_cast<const DynamicObjectImp*>(this)->getAttribute(name));
 }
 
-const DataVariant &DynamicObjectImp::getAttributeByPath(QStringList pathComponents) const
+const DataVariant& DynamicObjectImp::getAttributeByPath(QStringList pathComponents) const
 {
    static DataVariant sEmptyVariant;
 
@@ -378,29 +382,27 @@ const DataVariant &DynamicObjectImp::getAttributeByPath(QStringList pathComponen
       sEmptyVariant = DataVariant();
       return sEmptyVariant;
    }
-   else
-   {
-      return pCurrentObj->getAttribute(finalName.toStdString());
-   }
+
+   return pCurrentObj->getAttribute(finalName.toStdString());
 }
 
-DataVariant &DynamicObjectImp::getAttributeByPath(QStringList pathComponents)
+DataVariant& DynamicObjectImp::getAttributeByPath(QStringList pathComponents)
 {
    return const_cast<DataVariant&>(const_cast<const DynamicObjectImp*>(this)->getAttributeByPath(pathComponents));
 }
 
-const DataVariant &DynamicObjectImp::getAttributeByPath(const string &path) const
+const DataVariant& DynamicObjectImp::getAttributeByPath(const string& path) const
 {
    QStringList pathComponents = getPathComponents(path);
    return getAttributeByPath(pathComponents);
 }
 
-DataVariant &DynamicObjectImp::getAttributeByPath(const string &path)
+DataVariant& DynamicObjectImp::getAttributeByPath(const string& path)
 {
    return const_cast<DataVariant&>(const_cast<const DynamicObjectImp*>(this)->getAttributeByPath(path));
 }
 
-const DataVariant &DynamicObjectImp::getAttributeByPath(const std::string pComponents[]) const
+const DataVariant& DynamicObjectImp::getAttributeByPath(const string pComponents[]) const
 {
    QStringList pathComponents;
 
@@ -412,7 +414,7 @@ const DataVariant &DynamicObjectImp::getAttributeByPath(const std::string pCompo
    return getAttributeByPath(pathComponents);
 }
 
-DataVariant &DynamicObjectImp::getAttributeByPath(const std::string pComponents[])
+DataVariant& DynamicObjectImp::getAttributeByPath(const string pComponents[])
 {
    return const_cast<DataVariant&>(const_cast<const DynamicObjectImp*>(this)->getAttributeByPath(pComponents));
 }
@@ -503,11 +505,11 @@ void DynamicObjectImp::clear()
 
 const string& DynamicObjectImp::getObjectType() const
 {
-   static string type = "DynamicObjectImp";
-   return type;
+   static string sType = "DynamicObjectImp";
+   return sType;
 }
 
-bool DynamicObjectImp::isKindOf(const std::string& className) const
+bool DynamicObjectImp::isKindOf(const string& className) const
 {
    if ((className == getObjectType()) || (className == "DynamicObject"))
    {
@@ -520,16 +522,14 @@ bool DynamicObjectImp::isKindOf(const std::string& className) const
 namespace
 {
    template <class T>
-   bool serializeVector(XMLWriter* pXml, const DataVariant &var)
+   bool serializeVector(XMLWriter* pXml, const DataVariant& var)
    {
-      vector<T> *pValue = *dv_cast<vector<T> >(&var);
+      vector<T>* pValue = *dv_cast<vector<T> >(&var);
       VERIFY(pValue != NULL);
-      for(vector<T>::iterator vit=pValue->begin();
-         vit!=pValue->end();
-         ++vit)
+      for (vector<T>::iterator vit = pValue->begin(); vit != pValue->end(); ++vit)
       {
          stringstream sstr;
-         DOMElement *pElement = pXml->addElement("value");
+         DOMElement* pElement = pXml->addElement("value");
          VERIFY(pElement != NULL);
          pXml->pushAddPoint(pElement);
          sstr << *vit;
@@ -546,13 +546,13 @@ bool DynamicObjectImp::toXml(XMLWriter* pWriter) const
 
    pWriter->addAttr("version", XmlBase::VERSION);
 
-   if(mVariantAttributes.size() == 0)
+   if (mVariantAttributes.size() == 0)
    {
       return true; // don't write any output
    }
 
    bool addedTopLevel(false);
-   if(pWriter->peekAddPoint() == NULL)
+   if (pWriter->peekAddPoint() == NULL)
    {
       addedTopLevel = true;
       pWriter->pushAddPoint(pWriter->addElement("DynamicObject"));
@@ -561,11 +561,11 @@ bool DynamicObjectImp::toXml(XMLWriter* pWriter) const
    map<string, DataVariant>::const_iterator pPair;
    for (pPair = mVariantAttributes.begin(); pPair != mVariantAttributes.end(); ++pPair)
    {
-      const DataVariant &var = pPair->second;
+      const DataVariant& var = pPair->second;
       if (var.isValid())
       {
          bool bSuccess = true;
-         DOMElement *pAttribute(pWriter->addElement("attribute"));
+         DOMElement* pAttribute(pWriter->addElement("attribute"));
          pWriter->pushAddPoint(pAttribute);
          string type = var.getTypeName();
          pWriter->addAttr("name", pPair->first.c_str());
@@ -579,7 +579,7 @@ bool DynamicObjectImp::toXml(XMLWriter* pWriter) const
       }
    }
 
-   if(addedTopLevel) 
+   if (addedTopLevel) 
    {
       pWriter->popAddPoint();
    }
@@ -591,24 +591,22 @@ bool DynamicObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
    clear();
 
-   for(DOMNode *pNode = pDocument->getFirstChild();
-      pNode != NULL;
-      pNode = pNode->getNextSibling())
+   for (DOMNode* pNode = pDocument->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())
    {
-      if(XMLString::equals(pNode->getNodeName(), X("attribute")))
+      if (XMLString::equals(pNode->getNodeName(), X("attribute")))
       {
          string name;
          DataVariant var;
          try
          {
-            DOMElement *pElement(static_cast<DOMElement*>(pNode));
+            DOMElement* pElement(static_cast<DOMElement*>(pNode));
             name = A(pElement->getAttribute(X("name")));
-            if(!var.fromXml(pNode, version))
+            if (!var.fromXml(pNode, version))
             {
                return false;
             }
          }
-         catch(XmlReader::DomParseException &exc)
+         catch (XmlReader::DomParseException& exc)
          {
             throw exc;
          }
@@ -620,20 +618,24 @@ bool DynamicObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
    return true;
 }
 
-bool DynamicObjectImp::isParentOf(const DynamicObjectImp *pObject) const
+bool DynamicObjectImp::isParentOf(const DynamicObjectImp* pObject) const
 {
    if (pObject == NULL)
+   {
       return false;
+   }
 
    if (pObject == this)
+   {
       return true;
+   }
 
    // recursive, exhaustive, depth-first search
    map<string, DataVariant>::const_iterator iter;
    for (iter = mVariantAttributes.begin(); iter != mVariantAttributes.end(); ++iter)
    {
-      const DataVariant &var = iter->second;
-      const DynamicObjectImp *pCurrentObject = dynamic_cast<const DynamicObjectImp*>(dv_cast<DynamicObject>(&var));
+      const DataVariant& var = iter->second;
+      const DynamicObjectImp* pCurrentObject = dynamic_cast<const DynamicObjectImp*>(dv_cast<DynamicObject>(&var));
       if (pCurrentObject != NULL)
       {
          if (pCurrentObject->isParentOf(pObject) == true)

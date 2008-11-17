@@ -78,7 +78,7 @@ namespace
    QString logBuffer;
 };
 
-extern "C" static void av_log_callback(void *pPtr, int level, const char *pFmt, va_list vl)
+extern "C" static void av_log_callback(void* pPtr, int level, const char* pFmt, va_list vl)
 {
    if (level > av_log_level)
    {
@@ -88,6 +88,7 @@ extern "C" static void av_log_callback(void *pPtr, int level, const char *pFmt, 
 }
 
 MovieExporter::MovieExporter() :
+   mpProgress(NULL),
    mpStep(NULL),
    mpPicture(NULL),
    mpVideoOutbuf(NULL),
@@ -139,7 +140,7 @@ bool MovieExporter::getOutputSpecification(PlugInArgList*& pOutArgList)
    return true;
 }
 
-void MovieExporter::log_error(const string &msg)
+void MovieExporter::log_error(const string& msg)
 {
    if (!logBuffer.isEmpty())
    {
@@ -160,18 +161,18 @@ void MovieExporter::log_error(const string &msg)
    logBuffer.clear();
 }
 
-bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
+bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
    if (mpOptionWidget.get() != NULL)
    {
       mpOptionWidget->applyChanges();
    }
 
-   FileDescriptor *pFileDescriptor(NULL);
+   FileDescriptor* pFileDescriptor(NULL);
    string filename;
-   View *pView(NULL);
-   AnimationController *pController(NULL);
-   AVOutputFormat *pOutFormat(NULL);
+   View* pView(NULL);
+   AnimationController* pController(NULL);
+   AVOutputFormat* pOutFormat(NULL);
    unsigned int resolutionX(0);
    unsigned int resolutionY(0);
    rational<int> framerate(0);
@@ -213,7 +214,8 @@ bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
       }
       pMsg->addProperty("Animation Controller Name", pController->getName());
 
-      if ((pOutFormat = getOutputFormat()) == NULL)
+      pOutFormat = getOutputFormat();
+      if (pOutFormat == NULL)
       {
          log_error("Can't determine output format or format not supported.");
          return false;
@@ -234,9 +236,9 @@ bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
          resolutionFromInputArgs = true;
       }
 
-      if (resolutionX <= 0 || resolutionY <= 0)
+      if (resolutionX == 0 || resolutionY == 0)
       {
-         QWidget *pWidget = pView->getWidget();
+         QWidget* pWidget = pView->getWidget();
          if (pWidget != NULL)
          {
             resolutionX = pWidget->width();
@@ -270,7 +272,8 @@ bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
 
       pMsg->addProperty("Resolution", QString("%1 x %2").arg(resolutionX).arg(resolutionY).toStdString());
 
-      int framerateNum, framerateDen;
+      int framerateNum;
+      int framerateDen;
       // first, get the framerate from the arg list
       // next, try the option widget
       // next, get from the animation controller
@@ -385,8 +388,8 @@ bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
     * allow changing of:
     *    dia_size/
     */
-   AVCodecContext *pCodecContext = pVideoStream->codec;
-   if (!setAvCodecOptions(pCodecContext, pInArgList))
+   AVCodecContext* pCodecContext = pVideoStream->codec;
+   if (!setAvCodecOptions(pCodecContext))
    {
       log_error("Unable to initialize CODEC options");
       return false;
@@ -429,7 +432,7 @@ bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
    double interval = rational_cast<double>(frameSpeed / framerate);
 
    // export the frames
-   AVFrame *pTmpPicture = alloc_picture(PIX_FMT_RGBA32, pCodecContext->width, pCodecContext->height);
+   AVFrame* pTmpPicture = alloc_picture(PIX_FMT_RGBA32, pCodecContext->width, pCodecContext->height);
    QImage image(pTmpPicture->data[0], pCodecContext->width, pCodecContext->height, QImage::Format_ARGB32);
    FrameType eType = pController->getFrameType();
 
@@ -468,8 +471,7 @@ bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
       pController->setCurrentFrame(video_pts);
       if (mpProgress != NULL)
       {
-         double progressValue = (video_pts - startExport) /
-                                (stopExport - startExport) * 100.0;
+         double progressValue = (video_pts - startExport) / (stopExport - startExport) * 100.0;
          mpProgress->updateProgress("Saving movie", static_cast<int>(progressValue), NORMAL);
       }
       pView->getCurrentImage(image);
@@ -515,13 +517,13 @@ ValidationResultType MovieExporter::validate(const PlugInArgList* pArgList, stri
    {
       return result;
    }
-   View *pView = pArgList->getPlugInArgValue<View>(ExportItemArg());
+   View* pView = pArgList->getPlugInArgValue<View>(ExportItemArg());
    if (pView == NULL)
    {
       errorMessage = "No view specified. Nothing to export.";
       return VALIDATE_FAILURE;
    }
-   AnimationController *pController = pView->getAnimationController();
+   AnimationController* pController = pView->getAnimationController();
    if (pController == NULL)
    {
       errorMessage = "No animation is associated with this view. Nothing to export.";
@@ -535,7 +537,8 @@ ValidationResultType MovieExporter::validate(const PlugInArgList* pArgList, stri
    // next, try the option widget
    // next, get from the animation controller
    // finally, default to the config settings
-   int framerateNum, framerateDen;
+   int framerateNum;
+   int framerateDen;
    if (pArgList->getPlugInArgValue("Framerate Numerator", framerateNum) &&
       pArgList->getPlugInArgValue("Framerate Denominator", framerateDen))
    {
@@ -591,7 +594,8 @@ QWidget* MovieExporter::getExportOptionsWidget(const PlugInArgList* pInArgList)
 {
    if (mpOptionWidget.get() == NULL)
    {
-      mpOptionWidget = auto_ptr<OptionsMovieExporter>(new OptionsMovieExporter());
+      OptionsMovieExporter* pOptionWidget = new OptionsMovieExporter();
+      mpOptionWidget = auto_ptr<OptionsMovieExporter>(pOptionWidget);
       VERIFYRV(mpOptionWidget.get() != NULL, NULL);
       mpOptionWidget->setPromptUserToSaveSettings(true);
 
@@ -604,7 +608,7 @@ QWidget* MovieExporter::getExportOptionsWidget(const PlugInArgList* pInArgList)
          vector<boost::rational<int> > frameRates;
          try
          {
-            for (int idx = 0;; ++idx)
+            for (int idx = 0; ; ++idx)
             {
                boost::rational<int> frameRate(pCodec->supported_framerates[idx].num,
                   pCodec->supported_framerates[idx].den);
@@ -664,9 +668,9 @@ QWidget* MovieExporter::getExportOptionsWidget(const PlugInArgList* pInArgList)
    return mpOptionWidget.get();
 }
 
-bool MovieExporter::setAvCodecOptions(AVCodecContext *pContext, PlugInArgList *pInArgList)
+bool MovieExporter::setAvCodecOptions(AVCodecContext* pContext)
 {
-   if (pContext == NULL || pInArgList == NULL)
+   if (pContext == NULL)
    {
       return false;
    }
@@ -685,7 +689,7 @@ bool MovieExporter::setAvCodecOptions(AVCodecContext *pContext, PlugInArgList *p
    if (mpOptionWidget.get() != NULL)
    {
       meMethod = mpOptionWidget->getMeMethod();
-      pContext->gop_size= mpOptionWidget->getGopSize();
+      pContext->gop_size = mpOptionWidget->getGopSize();
       pContext->qcompress = mpOptionWidget->getQCompress();
       pContext->qblur = mpOptionWidget->getQBlur();
       pContext->qmin = mpOptionWidget->getQMinimum();
@@ -711,17 +715,18 @@ bool MovieExporter::setAvCodecOptions(AVCodecContext *pContext, PlugInArgList *p
    return true;
 }
 
-bool MovieExporter::open_video(AVFormatContext *pFormat, AVStream *pVideoStream)
+bool MovieExporter::open_video(AVFormatContext* pFormat, AVStream* pVideoStream)
 {
    VERIFY(pFormat && pVideoStream);
-   AVCodecContext *pCodecContext = pVideoStream->codec;
-   AVCodec *pCodec = avcodec_find_encoder(pCodecContext->codec_id);
+   AVCodecContext* pCodecContext = pVideoStream->codec;
+   AVCodec* pCodec = avcodec_find_encoder(pCodecContext->codec_id);
    if (pCodec == NULL)
    {
       return false;
    }
 
-   if ((pCodec = avcodec_find_encoder(pCodecContext->codec_id)) == NULL)
+   pCodec = avcodec_find_encoder(pCodecContext->codec_id);
+   if (pCodec == NULL)
    {
       return false;
    }
@@ -739,7 +744,8 @@ bool MovieExporter::open_video(AVFormatContext *pFormat, AVStream *pVideoStream)
    }
 
    /* allocate the encoded raw picture */
-   if ((mpPicture = alloc_picture(pCodecContext->pix_fmt, pCodecContext->width, pCodecContext->height)) == NULL)
+   mpPicture = alloc_picture(pCodecContext->pix_fmt, pCodecContext->width, pCodecContext->height);
+   if (mpPicture == NULL)
    {
       return false;
    }
@@ -747,12 +753,12 @@ bool MovieExporter::open_video(AVFormatContext *pFormat, AVStream *pVideoStream)
    return true;
 }
 
-AVFrame *MovieExporter::alloc_picture(int pixFmt, int width, int height)
+AVFrame* MovieExporter::alloc_picture(int pixFmt, int width, int height)
 {
-   AVFrame *pPicture = avcodec_alloc_frame();
+   AVFrame* pPicture = avcodec_alloc_frame();
    VERIFYRV(pPicture, NULL);
    int size = avpicture_get_size(pixFmt, width, height);
-   uint8_t *pPictureBuf = reinterpret_cast<uint8_t*>(malloc(size));
+   uint8_t* pPictureBuf = reinterpret_cast<uint8_t*>(malloc(size));
    if (pPictureBuf == NULL)
    {
       av_free(pPicture);
@@ -762,12 +768,12 @@ AVFrame *MovieExporter::alloc_picture(int pixFmt, int width, int height)
    return pPicture;
 }
 
-bool MovieExporter::write_video_frame(AVFormatContext *pFormat, AVStream *pVideoStream)
+bool MovieExporter::write_video_frame(AVFormatContext* pFormat, AVStream* pVideoStream)
 {
    VERIFY(pFormat && pVideoStream);
    int out_size = 0;
    int ret = 0;
-   AVCodecContext *pCodecContext = pVideoStream->codec;
+   AVCodecContext* pCodecContext = pVideoStream->codec;
 
    if (pFormat->oformat->flags & AVFMT_RAWPICTURE)
    {
@@ -793,7 +799,7 @@ bool MovieExporter::write_video_frame(AVFormatContext *pFormat, AVStream *pVideo
          AVPacket pkt;
          av_init_packet(&pkt);
 
-         pkt.pts= av_rescale_q(pCodecContext->coded_frame->pts, pCodecContext->time_base, pVideoStream->time_base);
+         pkt.pts = av_rescale_q(pCodecContext->coded_frame->pts, pCodecContext->time_base, pVideoStream->time_base);
          if (pCodecContext->coded_frame->key_frame)
          {
             pkt.flags |= PKT_FLAG_KEY;

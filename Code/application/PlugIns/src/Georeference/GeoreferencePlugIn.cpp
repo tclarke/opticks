@@ -38,7 +38,12 @@
 #include <algorithm>
 #include <boost/bind.hpp>
 
-GeoreferencePlugIn::GeoreferencePlugIn()
+GeoreferencePlugIn::GeoreferencePlugIn() :
+   mDisplayLayer(false),
+   mpProgress(NULL),
+   mpRaster(NULL),
+   mpView(NULL),
+   mResultsName("GEO_RESULTS")
 {
    setName("Georeference");
    setCreator("Ball Aerospace & Technologies Corp.");
@@ -48,13 +53,6 @@ GeoreferencePlugIn::GeoreferencePlugIn()
    setDescriptorId("{EB9F4BE5-4E9E-4f54-BC16-A2B33B535CEA}");
    allowMultipleInstances(true);
    setProductionStatus(APP_IS_PRODUCTION_RELEASE);
-
-   mResultsName = "GEO_RESULTS";
-   mDisplayLayer = false;
-   
-   mpProgress = NULL;
-   mpRaster = NULL;
-   mpView = NULL;
 }
 
 GeoreferencePlugIn::~GeoreferencePlugIn()
@@ -70,10 +68,10 @@ bool GeoreferencePlugIn::execute(PlugInArgList* pInParam, PlugInArgList* pOutPar
    mpRaster = pInParam->getPlugInArgValue<RasterElement>(DataElementArg());
    mpView = pInParam->getPlugInArgValue<SpatialDataView>(ViewArg());
 
-   if(mpRaster == NULL)
+   if (mpRaster == NULL)
    {
       mMessageText = "No data cube passed to the plug-in.";
-      if(mpProgress)
+      if (mpProgress)
       {
          mpProgress->updateProgress(mMessageText, 0, ERRORS);
       }
@@ -87,7 +85,7 @@ bool GeoreferencePlugIn::execute(PlugInArgList* pInParam, PlugInArgList* pOutPar
    GeocoordType eType = GEOCOORD_LATLON;
 
    PlugIn* pGeoPlugin = NULL;
-   if(!isBatch())
+   if (!isBatch())
    {
       preparePluginVectors();
 
@@ -95,7 +93,7 @@ bool GeoreferencePlugIn::execute(PlugInArgList* pInParam, PlugInArgList* pOutPar
       // pPlugin->execute() must be called before dlgGeo is destroyed
       // this->cleanUpPluginVectors() must be called after dlgGeo is destroyed
       FactoryResource<Filename> fn;
-      if(fn.get() == NULL)
+      if (fn.get() == NULL)
       {
          // the dialog could not be properly created
          pStep->finalize(Message::Failure, "Unable to allocate memory for a Filename object!");
@@ -103,29 +101,21 @@ bool GeoreferencePlugIn::execute(PlugInArgList* pInParam, PlugInArgList* pOutPar
       }
       fn->setFullPathAndName(sourceDatasetName);
       QString geoDlgTitle = QString("Georeference ") + QString::fromStdString(fn->getFileName());
-      GeoreferenceDlg *pDlgGeo = new (nothrow) GeoreferenceDlg(geoDlgTitle, mlstPluginNames, mlstPluginWidgets,
-         mpDesktop->getMainWidget());
-      if(pDlgGeo == NULL)
-      {
-         pStep->finalize(Message::Failure, "GeoreferencePlugIn could not allocate memory for the gui");
 
-         cleanUpPluginVectors();
-         return false;
-      }
-
-      pDlgGeo->setResultsName(mResultsName);
+      GeoreferenceDlg dlgGeo(geoDlgTitle, mlstPluginNames, mlstPluginWidgets, mpDesktop->getMainWidget());
+      dlgGeo.setResultsName(mResultsName);
 
       bool bInputValid = false;
       int iResult;
-      while(!bInputValid)
+      while (!bInputValid)
       {
          // Display dialog
-         iResult = pDlgGeo->exec();
+         iResult = dlgGeo.exec();
          // validate input
-         if(iResult == QDialog::Accepted)
+         if (iResult == QDialog::Accepted)
          {
-            int iGeoIndex = pDlgGeo->getGeorefAlgorithmIndex();
-            if(iGeoIndex > -1)
+            int iGeoIndex = dlgGeo.getGeorefAlgorithmIndex();
+            if (iGeoIndex > -1)
             {
                pGeoPlugin = mlstPlugins[iGeoIndex];
 
@@ -133,21 +123,21 @@ bool GeoreferencePlugIn::execute(PlugInArgList* pInParam, PlugInArgList* pOutPar
                if (pGeoPlugin != NULL)
                {
                   bInputValid = pGeoreference->validateGuiInput();
-                  if(!bInputValid)
+                  if (!bInputValid)
                   {
-                     QMessageBox::critical(pDlgGeo, "Georeference", "The current input is not valid "
+                     QMessageBox::critical(&dlgGeo, "Georeference", "The current input is not valid "
                         "for the selected Georeference plug-in!");
                   }
                }
                else
                {
-                  QMessageBox::critical(pDlgGeo, "Georeference", "The selected Georeference plug-in "
+                  QMessageBox::critical(&dlgGeo, "Georeference", "The selected Georeference plug-in "
                      "could not be found!");
                }
             }
             else
             {
-               QMessageBox::critical(pDlgGeo, "Georeference", "Please select a valid Georeference plug-in!");
+               QMessageBox::critical(&dlgGeo, "Georeference", "Please select a valid Georeference plug-in!");
             }
          }
          else // canceled
@@ -155,22 +145,19 @@ bool GeoreferencePlugIn::execute(PlugInArgList* pInParam, PlugInArgList* pOutPar
             bInputValid = true;
          }
       }
-      if(iResult == QDialog::Rejected)
+      if (iResult == QDialog::Rejected)
       {
          pStep->finalize(Message::Failure, "Georeferencing canceled");
-         delete pDlgGeo;
-         pDlgGeo = NULL;
-
          cleanUpPluginVectors();
          return false;
       }
 
       // Get results
-      mResultsName = pDlgGeo->getResultsName();
-      eType = pDlgGeo->getGeocoordType();
-      unsigned int uiGeoIndex = pDlgGeo->getGeorefAlgorithmIndex();
+      mResultsName = dlgGeo.getResultsName();
+      eType = dlgGeo.getGeocoordType();
+      unsigned int uiGeoIndex = dlgGeo.getGeorefAlgorithmIndex();
 
-      if(uiGeoIndex < mlstPlugins.size())
+      if (uiGeoIndex < mlstPlugins.size())
       {
          pGeoPlugin = mlstPlugins[uiGeoIndex];
          mlstPlugins[uiGeoIndex] = NULL;
@@ -178,39 +165,35 @@ bool GeoreferencePlugIn::execute(PlugInArgList* pInParam, PlugInArgList* pOutPar
       else
       {
          mMessageText = "GeoreferencePlugIn: Plugin selected could not be found";
-         if(mpProgress)
+         if (mpProgress)
          {
             mpProgress->updateProgress(mMessageText, 0, ERRORS);
          }
-         pStep->finalize(Message::Failure, mMessageText);
-         delete pDlgGeo;
-         pDlgGeo = NULL;
 
+         pStep->finalize(Message::Failure, mMessageText);
          cleanUpPluginVectors();
          return false;
       }
 
-      if(pGeoPlugin == NULL)
+      if (pGeoPlugin == NULL)
       {
          mMessageText = "Plugin selected could not be found";
-         if(mpProgress)
+         if (mpProgress)
          {
             mpProgress->updateProgress(mMessageText, 0, ERRORS);
          }
-         pStep->finalize(Message::Failure, mMessageText);
-         delete pDlgGeo;
-         pDlgGeo = NULL;
 
+         pStep->finalize(Message::Failure, mMessageText);
          cleanUpPluginVectors();
          return false;
       }
 
       // Execute the selected plugin
       Executable* pGeoExecutable = dynamic_cast<Executable*>(pGeoPlugin);
-      if(pGeoExecutable != NULL)
+      if (pGeoExecutable != NULL)
       {
-         PlugInArgList *pInArgList(NULL);
-         PlugInArgList *pOutArgList(NULL);
+         PlugInArgList* pInArgList(NULL);
+         PlugInArgList* pOutArgList(NULL);
          pGeoExecutable->setBatch();
          pGeoExecutable->getInputSpecification(pInArgList);
          pGeoExecutable->getOutputSpecification(pOutArgList);
@@ -223,15 +206,13 @@ bool GeoreferencePlugIn::execute(PlugInArgList* pInParam, PlugInArgList* pOutPar
 
          mpPluginManager->destroyPlugInArgList(pInArgList);
          mpPluginManager->destroyPlugInArgList(pOutArgList);
-         delete pDlgGeo;
-         pDlgGeo = NULL;
 
          cleanUpPluginVectors();
-         if(!bSuccess)
+         if (!bSuccess)
          {
             mpPluginManager->destroyPlugIn(pGeoPlugin);
             mMessageText = "Selected plug-in has failed to execute.";
-            if(mpProgress)
+            if (mpProgress)
             {
                mpProgress->updateProgress(mMessageText, 0, ERRORS);
             }
@@ -242,30 +223,25 @@ bool GeoreferencePlugIn::execute(PlugInArgList* pInParam, PlugInArgList* pOutPar
       else
       {
          mMessageText = "Georeference plugin selection has failed";
-         if(mpProgress)
+         if (mpProgress)
          {
             mpProgress->updateProgress(mMessageText, 0, ERRORS);
          }
-         pStep->finalize(Message::Failure, mMessageText);
-         delete pDlgGeo;
-         pDlgGeo = NULL;
 
+         pStep->finalize(Message::Failure, mMessageText);
          cleanUpPluginVectors();
          return false;
       }
-
-      delete pDlgGeo;
-      pDlgGeo = NULL;
 
       cleanUpPluginVectors();
    }
    else
    {
-      if(!pInParam->getPlugInArgValue("Display Layer", mDisplayLayer) ||
+      if (!pInParam->getPlugInArgValue("Display Layer", mDisplayLayer) ||
          !pInParam->getPlugInArgValue("Results Name", mResultsName))
       {
          mMessageText = "No name or Display Layer flag provided for georeferencing layer";
-         if(mpProgress)
+         if (mpProgress)
          {
             mpProgress->updateProgress(mMessageText, 0, ERRORS);
          }
@@ -277,18 +253,18 @@ bool GeoreferencePlugIn::execute(PlugInArgList* pInParam, PlugInArgList* pOutPar
    pStep->addProperty("resultsName", mResultsName);
    pStep->addProperty("geocoordType", eType);
 
-   if((!isBatch() || mDisplayLayer) && mpView != NULL)
+   if ((!isBatch() || mDisplayLayer) && mpView != NULL)
    {
       LayerList* pLayerList = mpView->getLayerList();
-      if(pLayerList != NULL)
+      if (pLayerList != NULL)
       {
          LatLonLayer* pLatLonLayer = static_cast<LatLonLayer*>(pLayerList->getLayer(LAT_LONG, mpRaster, mResultsName));
-         if(pLatLonLayer == NULL)
+         if (pLatLonLayer == NULL)
          {
             pLatLonLayer = static_cast<LatLonLayer*>(mpView->createLayer(LAT_LONG, mpRaster, mResultsName));
          }
 
-         if(pLatLonLayer != NULL)
+         if (pLatLonLayer != NULL)
          {
             pLatLonLayer->setGeocoordType(eType);
          }
@@ -296,7 +272,7 @@ bool GeoreferencePlugIn::execute(PlugInArgList* pInParam, PlugInArgList* pOutPar
    }
 
    mMessageText = "Georeference completed.";
-   if(mpProgress)
+   if (mpProgress)
    {
       mpProgress->updateProgress(mMessageText, 100, NORMAL);
    }
@@ -315,7 +291,7 @@ bool GeoreferencePlugIn::getInputSpecification(PlugInArgList*& pArgList)
    VERIFY(pArgList->addArg<RasterElement>(DataElementArg(), NULL));
    VERIFY(pArgList->addArg<SpatialDataView>(ViewArg(), NULL));
 
-   if(isBatch())
+   if (isBatch())
    {
       VERIFY(pArgList->addArg<string>("Results Name", &mResultsName));
       VERIFY(pArgList->addArg<bool>("Display Layer", &mDisplayLayer));
@@ -332,9 +308,10 @@ bool GeoreferencePlugIn::getOutputSpecification(PlugInArgList*& pArgList)
 
 void GeoreferencePlugIn::preparePluginVectors()
 {
-   vector<PlugInDescriptor*> allGeoPluginNames = mpPluginManager->getPlugInDescriptors(PlugInManagerServices::GeoreferenceType());
-   
-   for(vector<PlugInDescriptor*>::const_iterator plugin = allGeoPluginNames.begin();
+   vector<PlugInDescriptor*> allGeoPluginNames =
+      mpPluginManager->getPlugInDescriptors(PlugInManagerServices::GeoreferenceType());
+
+   for (vector<PlugInDescriptor*>::const_iterator plugin = allGeoPluginNames.begin();
                                       plugin != allGeoPluginNames.end();
                                       ++plugin)
    {
@@ -353,7 +330,7 @@ void GeoreferencePlugIn::preparePluginVectors()
       {
          continue;
       }
-      if(pCurrentPluginGeo->canHandleRasterElement(mpRaster))
+      if (pCurrentPluginGeo->canHandleRasterElement(mpRaster))
       {
          mlstPluginNames.push_back(pDescriptor->getName());
          mlstPlugins.push_back(pCurrentPlugin.release());

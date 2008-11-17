@@ -7,19 +7,19 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef ASPAMADAPTER_H__
-#define ASPAMADATPER_H__
+#ifndef ASPAMADAPTER_H
+#define ASPAMADAPTER_H
 
 #include "Aspam.h"
 #include "AspamImp.h"
 
-/**
- * Adapter class for the default Aspam model implementation.
- */
 class AspamAdapter : public Aspam, public AspamImp ASPAMADAPTEREXTENSION_CLASSES
 {
 public:
-   AspamAdapter() {}
+   AspamAdapter()
+   {
+   }
+
    ~AspamAdapter()
    {
       notify(SIGNAL_NAME(Subject, Deleted));
@@ -28,12 +28,13 @@ public:
    // TypeAwareObject
    const std::string& getObjectType() const
    {
-      static std::string type("AspamAdapter");
-      return type;
+      static std::string sType("AspamAdapter");
+      return sType;
    }
+
    bool isKindOf(const std::string& className) const
    {
-      if((className == getObjectType()) || (className == "Aspam"))
+      if ((className == getObjectType()) || (className == "Aspam"))
       {
          return true;
       }

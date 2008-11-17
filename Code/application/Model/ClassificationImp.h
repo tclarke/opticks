@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef _CLASSIFICATIONIMP
-#define _CLASSIFICATIONIMP
+#ifndef CLASSIFICATIONIMP_H
+#define CLASSIFICATIONIMP_H
 
 #include "DateTimeImp.h"
 #include "DynamicObjectImp.h"
@@ -82,21 +80,21 @@ private:
    std::string mFileReleasing;
    std::string mClassificationReason;
    std::string mDeclassificationType;
-   DateTimeImp* mDeclassificationDate;
+   DateTimeImp* mpDeclassificationDate;
    std::string mDeclassificationExemption;
    std::string mFileDowngrade;
    std::string mCountryCode;
-   DateTimeImp* mDowngradeDate;
+   DateTimeImp* mpDowngradeDate;
    std::string mDescription;
    std::string mAuthority;
    std::string mAuthorityType;
-   DateTimeImp* mSecuritySourceDate;
+   DateTimeImp* mpSecuritySourceDate;
    std::string mSecurityControlNumber;
    std::string mFileCopyNumber;
    std::string mFileNumberOfCopies;
 
-   void setDate(DateTimeImp* oldDateTime, const DateTime* newDateTime);
-   const DateTime* getDate(DateTimeImp* dateTime) const;
+   void setDate(DateTimeImp* pOldDateTime, const DateTime* pNewDateTime);
+   const DateTime* getDate(DateTimeImp* pDateTimeImp) const;
 };
 
 #define CLASSIFICATIONADAPTEREXTENSION_CLASSES \

@@ -66,7 +66,7 @@ public:
     *  @param   node
     *           The node whose values should be set in this node.
     */
-   WizardNodeImp& operator =(const WizardNodeImp& node);
+   WizardNodeImp& operator=(const WizardNodeImp& node);
 
    /**
     *  Possible types of member data modifications.
@@ -77,7 +77,15 @@ public:
     *
     *  @see     WizardItemImp::WizardItemChangeType
     */
-   enum WizardNodeChangeTypeEnum { NodeName, NodeType, NodeDescription, NodeValue, ConnectedNodeAdded, ConnectedNodeRemoved };
+   enum WizardNodeChangeTypeEnum
+   {
+      NodeName,
+      NodeType,
+      NodeDescription,
+      NodeValue,
+      ConnectedNodeAdded,
+      ConnectedNodeRemoved
+   };
 
    /**
     * @EnumWrapper WizardNodeImp::WizardNodeChangeTypeEnum.

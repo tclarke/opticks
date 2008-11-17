@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef MULTI_THREADED_ALGORITHM_H
-#define MULTI_THREADED_ALGORITHM_H
+#ifndef MULTITHREADEDALGORITHM_H
+#define MULTITHREADEDALGORITHM_H
 
 #include <string>
 #include <vector>
@@ -105,14 +105,14 @@ public:
     * @return Percent complete for the thread.
     */
    virtual int getProgress(int threadIndex) const = 0;
-   
+
    /**
     * Perform an action in the main thread.
     *
-    * @param thread
+    * @param command
     *        The action to run in the main thread.
     */
-   virtual void runInMainThread(ThreadCommand &thread) = 0;
+   virtual void runInMainThread(ThreadCommand& command) = 0;
 };
 
 /**
@@ -126,11 +126,11 @@ public:
     */
    enum ReportTypeEnum
    {
-      THREAD_NO_REPORT=0x0,
-      THREAD_PROGRESS=0x1,
-      THREAD_ERROR=0x2,
-      THREAD_COMPLETE=0x4,
-      THREAD_WORK=0x8
+      THREAD_NO_REPORT = 0x0,
+      THREAD_PROGRESS = 0x1,
+      THREAD_ERROR = 0x2,
+      THREAD_COMPLETE = 0x4,
+      THREAD_WORK = 0x8
    };
 
    /**
@@ -154,7 +154,8 @@ public:
     * @param signalB
     *        The second signal used to coordinate the threads.
     */
-   MultiThreadReporter(int threadCount, Result* pResult, BMutex &mutexA, BThreadSignal& signalA, BMutex &mutexB, BThreadSignal& signalB);
+   MultiThreadReporter(int threadCount, Result* pResult, BMutex& mutexA, BThreadSignal& signalA, BMutex& mutexB,
+      BThreadSignal& signalB);
 
    /**
     * Copy constructor.
@@ -162,7 +163,7 @@ public:
     * @param reporter
     *        The other
     */
-   MultiThreadReporter(MultiThreadReporter &reporter);
+   MultiThreadReporter(MultiThreadReporter& reporter);
 
    /**
     * @copydoc ThreadReporter::reportProgress()
@@ -199,7 +200,7 @@ public:
    /**
     * @copydoc ThreadReporter::runInMainThread()
     */
-   void runInMainThread(ThreadCommand &thread);
+   void runInMainThread(ThreadCommand& command);
 
    /**
     * Set the type of report.
@@ -207,32 +208,32 @@ public:
     * @param type
     *        The report type.
     */
-   void setReportType(ReportType type) { mReportType = type; }
+   void setReportType(ReportType type);
 
    /**
     * Access the report type.
     *
     * @return The report type.
     */
-   unsigned int getReportType() const { return mReportType; }
+   unsigned int getReportType() const;
    
    /**
     * Access the current thread command.
     *
     * @return The current thread command.
     */
-   ThreadCommand *getThreadCommand() { return mpThreadCommand; }
+   ThreadCommand* getThreadCommand();
 
 private:
    BMutex& mMutexA;
    BThreadSignal& mSignalA;
    BMutex& mMutexB;
    BThreadSignal& mSignalB;
-   Result *mpResult;
+   Result* mpResult;
    std::vector<int> mThreadProgress;
    std::string mErrorMessage;
    unsigned int mReportType;
-   ThreadCommand *mpThreadCommand;
+   ThreadCommand* mpThreadCommand;
    mutable DMutex mReporterMutex;
    mutable DMutex mSignalMutex;
 
@@ -257,7 +258,7 @@ public:
     * @param reporter
     *        Used to report status to the main thread.
     */
-   AlgorithmThread(int threadIndex, ThreadReporter &reporter) : 
+   AlgorithmThread(int threadIndex, ThreadReporter& reporter) : 
       mpAlgorithmMutex(NULL),
       mReporter(reporter), 
       mThreadHandle(static_cast<void*>(this),  reinterpret_cast<void*>(AlgorithmThread::threadFunction)), 
@@ -269,7 +270,7 @@ public:
     * @param thread
     *        The other
     */
-   AlgorithmThread(const AlgorithmThread &thread) : 
+   AlgorithmThread(const AlgorithmThread& thread) : 
       mpAlgorithmMutex(thread.mpAlgorithmMutex),
       mReporter(thread.mReporter), 
       mThreadHandle(static_cast<void*>(this),  reinterpret_cast<void*>(AlgorithmThread::threadFunction)),
@@ -281,19 +282,20 @@ public:
     * @param pThreadData
     *        The data for the thread being executed.
     */
-   static void threadFunction(AlgorithmThread *pThreadData);
+   static void threadFunction(AlgorithmThread* pThreadData);
+
    /**
     * Execute the thread.
     */
    virtual void run() = 0;
-   
+
    /**
     * Launch the thread.
     *
     * @return False if there was an error.
     */
    bool launch();
-   
+
    /**
     * Wait for thread compltion.
     *
@@ -307,7 +309,7 @@ public:
     * @param command
     *        The action to run in the main thread.
     */
-   void runInMainThread(ThreadCommand &command);
+   void runInMainThread(ThreadCommand& command);
 
    /**
     * Set the mutex which synchronizes the threads in an algorithm cluster.
@@ -317,7 +319,7 @@ public:
     * @param pMutex
     *        The mutex to synchronize.
     */
-   void setAlgorithmMutex(DMutex *pMutex);
+   void setAlgorithmMutex(DMutex* pMutex);
 
    /**
     * Wait to begin thread execution.
@@ -327,22 +329,21 @@ public:
     * @see setAlgorithmMutex()
     */
    void waitForAlgorithmLoop();
-   
+
    /**
     * Represents a range in integers.
     */
-   class Range 
-   { 
+   class Range
+   {
    public:
       /**
-       * The lower end of the range.
+       * Creates a Range.
        */
-      int mFirst;
-      
-      /**
-       * The upper end of the range.
-       */
-      int mLast;
+      Range() :
+         mFirst(0),
+         mLast(0)
+      {
+      }
 
       /**
        * Thread the range as a percentage.
@@ -351,8 +352,18 @@ public:
        */
       int computePercent(int index)
       {
-         return (100*(index-mFirst))/(mLast-mFirst+1);
+         return (100 * (index - mFirst)) / (mLast - mFirst + 1);
       }
+
+      /**
+       * The lower end of the range.
+       */
+      int mFirst;
+
+      /**
+       * The upper end of the range.
+       */
+      int mLast;
    };
 
 protected:
@@ -372,18 +383,18 @@ protected:
     *
     * @return The id of this thread.
     */
-   int getThreadIndex() const { return mThreadIndex; }
+   int getThreadIndex() const;
 
    /**
     * Get the object which this thread can use to report status.
     *
     * @return The object used to report status.
     */
-   ThreadReporter& getReporter() const { return mReporter; }
+   ThreadReporter& getReporter() const;
 
 private:
-   DMutex *mpAlgorithmMutex;
-   ThreadReporter &mReporter;
+   DMutex* mpAlgorithmMutex;
+   ThreadReporter& mReporter;
    BThread mThreadHandle;
    int mThreadIndex;
 };
@@ -394,13 +405,13 @@ private:
  * class MyAlgorithmThread : public AlgorithmThread
  * {
  * public:
- *    MyAlgorithmThread(const MyAlgInput &input, int threadCount, int threadIndex, ThreadReporter &reporter) : 
+ *    MyAlgorithmThread(const MyAlgInput& input, int threadCount, int threadIndex, ThreadReporter& reporter) : 
  *       AlgorithmThread(threadIndex, reporter) 
  *    { 
  *       // parse 'input' for 'threadIndex' into member data 
  *    }
  *    // required by STL functions used in MultiThreadedAlgorithm
- *    MyAlgorithmThread& operator=(const MyAlgorithmThread &thread)
+ *    MyAlgorithmThread& operator=(const MyAlgorithmThread& thread)
  *    {
  *       *this = thread;
  *       return *this;
@@ -433,7 +444,7 @@ public:
     * @param text
     *        The error message.
     */
-   virtual void reportError(const std::string &text) = 0;
+   virtual void reportError(const std::string& text) = 0;
 };
 
 /**
@@ -451,7 +462,10 @@ public:
     *        Progress object to report. If this is NULL, no Progress will receive reports.
     */
    ProgressObjectReporter(std::string baseMessage, Progress* pProgress) :
-      mMessage(baseMessage), mpProgress(pProgress) {}
+      mMessage(baseMessage),
+      mpProgress(pProgress)
+   {
+   }
 
    /**
     * @copydoc ProgressReporter::reportProgress()
@@ -461,11 +475,11 @@ public:
    /**
     * @copydoc ProgressReporter::reportError()
     */
-   void reportError(const std::string &text);
+   void reportError(const std::string& text);
 
 private:
    std::string mMessage;
-   Progress *mpProgress;
+   Progress* mpProgress;
 };
 
 /**
@@ -484,10 +498,10 @@ public:
     * @param key
     *        Message log key.
     */
-   StatusBarReporter(std::string baseMessage, const std::string &component, const std::string &key) :
-                        mMessage(baseMessage),
-                        mComponent(component),
-                        mKey(key)
+   StatusBarReporter(std::string baseMessage, const std::string& component, const std::string& key) :
+      mMessage(baseMessage),
+      mComponent(component),
+      mKey(key)
    {}
 
    /**
@@ -503,7 +517,7 @@ public:
    /**
     * @copydoc ProgressReporter::reportError()
     */
-   void reportError(const std::string &text) 
+   void reportError(const std::string& text)
    {
       Service<DesktopServices>()->setStatusBarMessage(text);
       MessageResource msg("Error", mComponent, mKey);
@@ -511,8 +525,8 @@ public:
    }
 private:
    std::string mMessage;
-   const std::string &mComponent;
-   const std::string &mKey;
+   const std::string& mComponent;
+   const std::string& mKey;
 };
 
 
@@ -530,8 +544,7 @@ public:
     * @param phaseWeights
     *        How much each phase contributes to the overall progress.
     */
-
-   MultiPhaseProgressReporter(ProgressReporter &base, const std::vector<int>& phaseWeights) :
+   MultiPhaseProgressReporter(ProgressReporter& base, const std::vector<int>& phaseWeights) :
       mReporter(base), mPhaseWeights(phaseWeights), mCurrentPhase(0) {}
 
    /**
@@ -542,7 +555,7 @@ public:
    /**
     * @copydoc ProgressReporter::reportError()
     */
-   void reportError(const std::string &text);
+   void reportError(const std::string& text);
 
    /**
     * Set the current algorithm phase.
@@ -550,14 +563,15 @@ public:
     * @param phase
     *        The phase the algorithm is executing.
     */
-   void setCurrentPhase(int phase) ;
+   void setCurrentPhase(int phase);
 
    /**
     * Access the current algorithm phase.
     *
     * @return The current phase.
     */
-   int getCurrentPhase() const { return mCurrentPhase; }
+   int getCurrentPhase() const;
+
 private:
    int convertPhaseProgressToTotalProgress(int phaseProgress);
 
@@ -585,7 +599,7 @@ public:
     * @param pProgress
     *        Used to report progress and errors.
     */
-   MultiThreadedAlgorithm(int threadCount, const AlgInput &input, AlgOutput &output, ProgressReporter *pProgress);
+   MultiThreadedAlgorithm(int threadCount, const AlgInput& input, AlgOutput& output, ProgressReporter* pProgress);
 
    /**
     * Destructor.
@@ -605,7 +619,10 @@ public:
     *
     * @return The last error message or an empty string if no error occured.
     */
-   std::string getErrorText() const { return mErrorText; }
+   std::string getErrorText() const
+   {
+      return mErrorText;
+   }
 
 private:
    Result createThreads(int threadCount);
@@ -616,11 +633,11 @@ private:
    Result compileResults();
 
    Result mCurrentStatus;
-   const AlgInput &mInput;
-   AlgOutput &mOutput;
+   const AlgInput& mInput;
+   AlgOutput& mOutput;
    std::vector<AlgThread*> mThreads;
    MultiThreadReporter mThreadReporter;
-   ProgressReporter *mpProgressReporter;
+   ProgressReporter* mpProgressReporter;
    DMutex mMutexA;
    DThreadSignal mSignalA;
    DMutex mMutexB;
@@ -629,11 +646,11 @@ private:
 };
 
 template<class AlgInput, class AlgOutput, class AlgThread>
-MultiThreadedAlgorithm<AlgInput, AlgOutput, AlgThread>::MultiThreadedAlgorithm
-                                              (int threadCount, 
-                                               const AlgInput&algInput, AlgOutput&algOutput, 
-                                               ProgressReporter *pReporter) : 
-   mCurrentStatus(SUCCESS), mInput(algInput), mOutput(algOutput), 
+MultiThreadedAlgorithm<AlgInput, AlgOutput, AlgThread>::MultiThreadedAlgorithm(int threadCount,
+   const AlgInput& algInput, AlgOutput& algOutput, ProgressReporter* pReporter) :
+   mCurrentStatus(SUCCESS),
+   mInput(algInput),
+   mOutput(algOutput),
    mThreadReporter(threadCount, &mCurrentStatus, mMutexA, mSignalA, mMutexB, mSignalB),
    mpProgressReporter(pReporter)
 {
@@ -646,8 +663,7 @@ MultiThreadedAlgorithm<AlgInput, AlgOutput, AlgThread>::~MultiThreadedAlgorithm(
    std::vector<AlgThread*>::iterator iter;
    for (iter = mThreads.begin(); iter != mThreads.end(); ++iter)
    {
-      AlgThread* pThread = NULL;
-      pThread = *iter;
+      AlgThread* pThread = *iter;
       if (pThread != NULL)
       {
          delete pThread;
@@ -702,7 +718,7 @@ Result MultiThreadedAlgorithm<AlgInput, AlgOutput, AlgThread>::waitForThreadsToC
 
       percentDone = processCurrentReports(percentDone);
       doneProcessing = (percentDone == 100 || mCurrentStatus != SUCCESS);
-      if(doneProcessing)
+      if (doneProcessing)
       {
          mMutexA.MutexUnlock();
 
@@ -744,7 +760,7 @@ int MultiThreadedAlgorithm<AlgInput, AlgOutput, AlgThread>::processCurrentReport
 template<class AlgInput, class AlgOutput, class AlgThread>
 int MultiThreadedAlgorithm<AlgInput, AlgOutput, AlgThread>::processReport(unsigned int currentType, int percentDone)
 {
-   switch(currentType)
+   switch (currentType)
    {
       case MultiThreadReporter::THREAD_NO_REPORT:
          break;
@@ -787,11 +803,16 @@ Result MultiThreadedAlgorithm<AlgInput, AlgOutput, AlgThread>::compileResults()
 template<class AlgInput, class AlgOutput, class AlgThread>
 Result MultiThreadedAlgorithm<AlgInput, AlgOutput, AlgThread>::run()
 {
-   Result result = SUCCESS;
+   Result result = startAllThreads();
+   if (result == SUCCESS)
+   {
+      result = waitForThreadsToComplete();
+   }
 
-   if (result == SUCCESS) { result = startAllThreads(); }
-   if (result == SUCCESS) { result = waitForThreadsToComplete(); }
-   if (result == SUCCESS) { result = compileResults(); }
+   if (result == SUCCESS)
+   {
+      result = compileResults();
+   }
 
    return result;
 }
@@ -802,21 +823,21 @@ Result MultiThreadedAlgorithm<AlgInput, AlgOutput, AlgThread>::run()
 class Cube
 {
 public:
-   Cube(void *pData, EncodingType type, int rowCount, int columnCount, int bandCount);
-   Cube(const Cube &cube);
+   Cube(void* pData, EncodingType type, int rowCount, int columnCount, int bandCount);
+   Cube(const Cube& cube);
 
-   const void *getData() const { return mpData; }
-   EncodingType getType() const { return mType; }
-   int getRowCount() const { return mRowCount; }
-   int getColumnCount() const { return mColumnCount; }
-   int getBandCount() const { return mBandCount; }
-   void *getPixel(int row, int col) const { return ((unsigned char*)mpData) + (mColumnCount * row + col)*mPixelSize; }
-   double getScaleFromStandard() const { return mScaleFromStandard; }
+   const void* getData() const;
+   EncodingType getType() const;
+   int getRowCount() const;
+   int getColumnCount() const;
+   int getBandCount() const;
+   void* getPixel(int row, int col) const;
+   double getScaleFromStandard() const;
 
 private:
    int computePixelSize(int bandCount, EncodingType type);
 
-   const void *mpData;
+   const void* mpData;
    EncodingType mType;
    int mRowCount;
    int mColumnCount;

@@ -41,8 +41,8 @@ BatchApplication::~BatchApplication()
 
 const string& BatchApplication::getObjectType() const
 {
-   static string type("BatchApplication");
-   return type;
+   static string sType("BatchApplication");
+   return sType;
 }
 
 bool BatchApplication::isKindOf(const string& className) const
@@ -144,7 +144,7 @@ int BatchApplication::run(int argc, char** argv)
       pManager->executeStartupPlugIns(pProgress);
    }
 
-   bool bSuccess =  executeStartupBatchWizards(pProgress);
+   bool bSuccess = executeStartupBatchWizards(pProgress);
 
    // Close the session to cleanup created objects
    SessionManagerImp::instance()->close();

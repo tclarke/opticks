@@ -11,6 +11,7 @@
 #define XMLRPCCALLBACK_H
 
 #include "XmlRpcParam.h"
+
 #include <QtCore/QBuffer>
 #include <QtCore/QObject>
 #include <QtCore/QString>
@@ -26,21 +27,22 @@ class XmlRpcCallback : public QObject
 {
    Q_OBJECT
 
-   QString mUrl;
-   QString mMethod;
-   mutable QHttp *mpHttpConnection;
-
 public:
    virtual ~XmlRpcCallback();
 
 protected:
-   XmlRpcCallback(const QString &url, const QString &method, const XmlRpcStructParam &params, QObject *pParent=NULL);
-   void call(const XmlRpcParams &params) const;
+   XmlRpcCallback(const QString& url, const QString& method, const XmlRpcStructParam& params, QObject* pParent = NULL);
+   void call(const XmlRpcParams& params) const;
    virtual void callComplete() {}
 
 protected slots:
    void processRequestFinished(int id, bool error);
-   void processResponseHeader(const QHttpResponseHeader &header);
+   void processResponseHeader(const QHttpResponseHeader& header);
+
+private:
+   QString mUrl;
+   QString mMethod;
+   mutable QHttp* mpHttpConnection;
 };
 
 #endif

@@ -24,7 +24,8 @@ AddFieldDlg::AddFieldDlg(QWidget* parent) :
    mpNameEdit = new QLineEdit(this);
 
    QRegExp regExp("[\\d\\w]{1,11}");
-   mpNameEdit->setValidator(new QRegExpValidator(regExp, this));
+   QRegExpValidator* pValidator = new QRegExpValidator(regExp, this);
+   mpNameEdit->setValidator(pValidator);
 
    // Type
    QLabel* pTypeLabel = new QLabel("Type:", this);

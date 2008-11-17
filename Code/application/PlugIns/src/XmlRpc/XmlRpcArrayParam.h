@@ -21,29 +21,42 @@ public:
    XmlRpcArrayParam(const XmlRpcArrayParam &other) : XmlRpcParam(other), mArray(other.mArray) {}
    ~XmlRpcArrayParam()
    {
-      for(QVector<const XmlRpcParam*>::const_iterator it = mArray.begin(); it != mArray.end(); ++it)
+      for (QVector<const XmlRpcParam*>::const_iterator it = mArray.begin(); it != mArray.end(); ++it)
       {
          delete *it;
       }
    }
-   XmlRpcArrayParam &operator<<(const XmlRpcParam *pValue)
+
+   XmlRpcArrayParam& operator<<(const XmlRpcParam* pValue)
    {
       mArray.push_back(pValue);
       return *this;
    }
-   const XmlRpcParam *operator[](QVector<const XmlRpcParam*>::size_type i) const { return mArray[i]; }
-   QVector<const XmlRpcParam*>::size_type size() const { return mArray.size(); }
 
-   virtual bool isValid() const { return !mArray.isEmpty(); }
+   const XmlRpcParam* operator[](QVector<const XmlRpcParam*>::size_type i) const
+   {
+      return mArray[i];
+   }
+
+   QVector<const XmlRpcParam*>::size_type size() const
+   {
+      return mArray.size();
+   }
+
+   virtual bool isValid() const
+   {
+      return !mArray.isEmpty();
+   }
+
    virtual bool toXml(XMLWriter &xml) const
    {
       xml.pushAddPoint(xml.addElement("array"));
       xml.pushAddPoint(xml.addElement("data"));
-      for(QVector<const XmlRpcParam*>::const_iterator it = mArray.begin(); it != mArray.end(); ++it)
+      for (QVector<const XmlRpcParam*>::const_iterator it = mArray.begin(); it != mArray.end(); ++it)
       {
          xml.pushAddPoint(xml.addElement("value"));
-         const XmlRpcParam *pParam = *it;
-         if((pParam == NULL) || !pParam->toXml(xml))
+         const XmlRpcParam* pParam = *it;
+         if ((pParam == NULL) || !pParam->toXml(xml))
          {
             return false;
          }

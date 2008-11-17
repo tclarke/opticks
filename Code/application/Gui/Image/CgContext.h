@@ -66,7 +66,7 @@ public:
     *
     *  @see     isCgFragmentProgram()
     */
-    bool isCgVertexProgram(const std::string& programName);
+   bool isCgVertexProgram(const std::string& programName);
 
    /**
     *  Compiles and loads a vertex program into the Cg context.
@@ -99,7 +99,7 @@ public:
     *
     *  @see     isCgVertexProgram()
     */
-    bool isCgFragmentProgram(const std::string& programName);
+   bool isCgFragmentProgram(const std::string& programName);
 
    /**
     *  Compiles and loads a fragment program into the Cg context.

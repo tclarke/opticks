@@ -54,7 +54,7 @@ public:
     *
     *  @return  \c true if the item was successfully saved and \c false otherwise.
     */
-   bool serialize(SessionItemSerializer &serializer) const;
+   bool serialize(SessionItemSerializer& serializer) const;
 };
 
 #endif

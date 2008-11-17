@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef LATLONUNDO_H
-#define LATLONUNDO_H
+#ifndef LATLONLAYERUNDO_H
+#define LATLONLAYERUNDO_H
 
 #include <QtGui/QColor>
 #include <QtGui/QFont>

@@ -31,10 +31,10 @@
 using namespace std;
 
 BackgroundTest::BackgroundTest() :
-      mInteractive(false),
-      mAbort(false),
-      mpProgress(NULL),
-      mpWorkerThread(NULL)
+   mInteractive(false),
+   mAbort(false),
+   mpProgress(NULL),
+   mpWorkerThread(NULL)
 {
    setCreator("Opticks Community");
    setVersion("Sample");
@@ -70,7 +70,7 @@ bool BackgroundTest::getInputSpecification(PlugInArgList*& pArgList)
    pArgList = mpPlugInManager->getPlugInArgList();
    VERIFY(pArgList != NULL);
 
-   PlugInArg *pArg = mpPlugInManager->getPlugInArg();
+   PlugInArg* pArg = mpPlugInManager->getPlugInArg();
    VERIFY(pArg != NULL);
    pArg->setName(ProgressArg());
    pArg->setType("Progress");
@@ -85,7 +85,7 @@ bool BackgroundTest::getOutputSpecification(PlugInArgList*& pArgList)
    pArgList = mpPlugInManager->getPlugInArgList();
    VERIFY(pArgList != NULL);
 
-   PlugInArg *pArg = mpPlugInManager->getPlugInArg();
+   PlugInArg* pArg = mpPlugInManager->getPlugInArg();
    VERIFY(pArg != NULL);
    pArg->setName(ProgressArg());
    pArg->setType("Progress");
@@ -95,27 +95,27 @@ bool BackgroundTest::getOutputSpecification(PlugInArgList*& pArgList)
    return true;
 }
 
-bool BackgroundTest::execute(PlugInArgList* pInputArgList, PlugInArgList* pOutArgList)
+bool BackgroundTest::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
    StepResource pStep("Run background test plug-in", "app", "B75359A2-7053-4d11-BA89-63CEC140E5C6");
-   VERIFY((pInputArgList != NULL) && (pOutArgList != NULL));
+   VERIFY((pInArgList != NULL) && (pOutArgList != NULL));
 
    // Get the input argument
    //
-   PlugInArg *pArg = NULL;
-   VERIFY(pInputArgList->getArg(ProgressArg(), pArg) && (pArg != NULL));
-   if(pArg->isActualSet())
+   PlugInArg* pArg = NULL;
+   VERIFY(pInArgList->getArg(ProgressArg(), pArg) && (pArg != NULL));
+   if (pArg->isActualSet())
    {
       mpProgress = static_cast<Progress*>(pArg->getActualValue());
    }
-   else if(pArg->isDefaultSet())
+   else if (pArg->isDefaultSet())
    {
       mpProgress = static_cast<Progress*>(pArg->getDefaultValue());
    }
    else
    {
       string msg = "No value set for Progress";
-      if(mpProgress != NULL)
+      if (mpProgress != NULL)
       {
          mpProgress->updateProgress(msg, 0, ERRORS);
       }
@@ -123,17 +123,16 @@ bool BackgroundTest::execute(PlugInArgList* pInputArgList, PlugInArgList* pOutAr
       mpProgress = NULL;
       return false;
    }
-   if(mpProgress != NULL)
+   if (mpProgress != NULL)
    {
       mpProgress->updateProgress("Run background test", 0, NORMAL);
    }
 
- 
    // Create a new thread safe progress object
    //
-   Progress *pNewProgress = mpUtility->getProgress(true);
+   Progress* pNewProgress = mpUtility->getProgress(true);
    VERIFY(pNewProgress != NULL);
-   Progress *pOldProgress = mpProgress;
+   Progress* pOldProgress = mpProgress;
    mpProgress = pNewProgress;
 
    // Set the output arg
@@ -150,7 +149,7 @@ bool BackgroundTest::execute(PlugInArgList* pInputArgList, PlugInArgList* pOutAr
 
    // Mark this as a success and return
    //
-   if(pOldProgress != NULL)
+   if (pOldProgress != NULL)
    {
       pOldProgress->updateProgress("Run background test", 100, NORMAL);
    }
@@ -176,24 +175,24 @@ bool BackgroundTest::isBackground() const
 
 void BackgroundTest::runWorkerThread(void *pArg)
 {
-   if(pArg == NULL)
+   if (pArg == NULL)
    {
       return;
    }
 
    // Execute the worker thread
    //
-   BackgroundTest *pSelf = reinterpret_cast<BackgroundTest*>(pArg);
+   BackgroundTest* pSelf = reinterpret_cast<BackgroundTest*>(pArg);
    bool returnValue = pSelf->workerThread();
 
    // Create a callback to exit the background thread
    //
-   PlugInCallback *pCallback = new BackgroundTest::Callback(pSelf,
+   PlugInCallback* pCallback = new BackgroundTest::Callback(pSelf,
                                                             pSelf->mpWorkerThread,
                                                             returnValue,
                                                             pSelf->mpProgress);
    Service<DesktopServices> pDesktop;
-   if(pCallback != NULL)
+   if (pCallback != NULL)
    {
       pDesktop->registerCallback(BACKGROUND_COMPLETE, pCallback);
    }
@@ -201,20 +200,20 @@ void BackgroundTest::runWorkerThread(void *pArg)
 
 bool BackgroundTest::workerThread()
 {
-   for(unsigned int tick = 0; tick < 50; tick++)
+   for (int tick = 0; tick < 50; ++tick)
    {
-      if(mAbort)
+      if (mAbort)
       {
-         if(mpProgress != NULL)
+         if (mpProgress != NULL)
          {
             mpProgress->updateProgress("Aborted", 0, ABORT);
          }
          return false;
       }
-      if(mpProgress != NULL)
+      if (mpProgress != NULL)
       {
-         double percent = 100 * tick / 20.0;
-         mpProgress->updateProgress("Working...", static_cast<int>(percent), NORMAL);
+         int percent = 100 * tick / 20;
+         mpProgress->updateProgress("Working...", percent, NORMAL);
       }
 #if defined(WIN_API)
       Sleep(500);     // 0.5 seconds
@@ -226,7 +225,6 @@ bool BackgroundTest::workerThread()
    }
 
    mpProgress->updateProgress("Finished", 100, NORMAL);
-
    return true;
 }
 

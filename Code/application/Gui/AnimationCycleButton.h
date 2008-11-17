@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef ANIMATION_CYCLE_H
-#define ANIMATION_CYCLE_H
+#ifndef ANIMATIONCYCLEBUTTON_H
+#define ANIMATIONCYCLEBUTTON_H
 
 #include "PixmapGrid.h"
 #include "PixmapGridButton.h"

@@ -28,10 +28,10 @@ public slots:
    void accept();
 
 protected:
-   void hideEvent(QHideEvent* e);
+   void hideEvent(QHideEvent* pEvent);
+
    virtual QString getExportFile() const;
-   QString updateExtension(const QString& strFilename,
-      bool preserveFullPath = false,
+   QString updateExtension(const QString& strFilename, bool preserveFullPath = false,
       bool alwaysReplaceExtension = true);
 
 protected slots:

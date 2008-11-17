@@ -24,8 +24,8 @@ SignatureLibraryAdapter::~SignatureLibraryAdapter()
 // TypeAwareObject
 const string& SignatureLibraryAdapter::getObjectType() const
 {
-   static string type("SignatureLibraryAdapter");
-   return type;
+   static string sType("SignatureLibraryAdapter");
+   return sType;
 }
 
 bool SignatureLibraryAdapter::isKindOf(const string& className) const

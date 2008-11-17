@@ -36,11 +36,9 @@ XERCES_CPP_NAMESPACE_USE
 
 // set the constants
 const static std::string UNAVAILABLE = "Lat/Long Coordinates Unavailable";
-
-const static int BASE_HANDLE  = 0;
-const static int TIP_HANDLE   = 1;
-
-const static float PCT        = 0.3f; // how much of the arrow we want in relation to 1/2 the text width
+const static int BASE_HANDLE = 0;
+const static int TIP_HANDLE = 1;
+const static float PCT = 0.3f;   // how much of the arrow we want in relation to 1/2 the text width
 
 LatLonInsertObjectImp::LatLonInsertObjectImp(const string& id, GraphicObjectType type, GraphicLayer* pLayer,
                                              LocationType pixelCoord) :
@@ -105,7 +103,7 @@ LatLonInsertObjectImp::LatLonInsertObjectImp(const string& id, GraphicObjectType
    updateHandles();
    updateLatLon();
 
-   GraphicLayerImp *pLayerImp = dynamic_cast<GraphicLayerImp*>(getLayer());
+   GraphicLayerImp* pLayerImp = dynamic_cast<GraphicLayerImp*>(getLayer());
    if (pLayerImp != NULL)
    {
       pLayerImp->completeInsertion();
@@ -119,8 +117,7 @@ LatLonInsertObjectImp::~LatLonInsertObjectImp()
    list<GraphicObject*>::const_iterator iter;
    for (iter = objects.begin(); iter != objects.end(); iter = objects.begin())
    {
-      GraphicObject* pObject = NULL;
-      pObject = (*iter);
+      GraphicObject* pObject = (*iter);
       if (pObject != NULL)
       {
          mpGroup->removeObject(pObject, true);
@@ -145,7 +142,7 @@ void LatLonInsertObjectImp::updateHandles()
 {
    GraphicObjectImp::updateHandles();
 
-   ArrowObjectImp *pArrow = getArrowObject();
+   ArrowObjectImp* pArrow = getArrowObject();
    if (pArrow != NULL)
    {
       LocationType llCorner = pArrow->getLlCorner();
@@ -156,7 +153,7 @@ void LatLonInsertObjectImp::updateHandles()
    }
 }
 
-bool LatLonInsertObjectImp::setProperty (const GraphicProperty* pProp)
+bool LatLonInsertObjectImp::setProperty(const GraphicProperty* pProp)
 {
    if (pProp == NULL)
    {
@@ -166,7 +163,7 @@ bool LatLonInsertObjectImp::setProperty (const GraphicProperty* pProp)
    ArrowObjectImp* pArrow = getArrowObject();
    TextObjectImp* pLatLonText = getTextObject();
 
-   const string &name = pProp->getName();
+   const string& name = pProp->getName();
    if (name == "Rotation")
    {
       return false;
@@ -220,7 +217,7 @@ GraphicProperty* LatLonInsertObjectImp::getProperty(const std::string &name) con
 {
    if (name == "TextString")
    {
-      TextObjectImp *pText = getTextObject();
+      TextObjectImp* pText = getTextObject();
       if (pText != NULL)
       {
          return pText->getProperty(name);
@@ -234,11 +231,11 @@ void LatLonInsertObjectImp::move(LocationType delta)
 {
    // just move the text and the arrow base
 
-   ArrowObjectImp *pArrow = getArrowObject();
+   ArrowObjectImp* pArrow = getArrowObject();
    LocationType arrowBase = pArrow->getLlCorner();
    pArrow->moveHandle(BOTTOM_LEFT, arrowBase+delta);
 
-   TextObjectImp *pText = getTextObject();
+   TextObjectImp* pText = getTextObject();
    pText->move(delta);
 
    setBoundingBox(mpGroup->getLlCorner(), mpGroup->getUrCorner());
@@ -247,8 +244,8 @@ void LatLonInsertObjectImp::move(LocationType delta)
 
 void LatLonInsertObjectImp::moveHandle(int handle, LocationType pixel, bool bMaintainAspect)
 {
-   ArrowObjectImp *pArrow = getArrowObject();
-   TextObjectImp *pLatLonText = getTextObject();
+   ArrowObjectImp* pArrow = getArrowObject();
+   TextObjectImp* pLatLonText = getTextObject();
 
    if (handle == BASE_HANDLE)
    {
@@ -295,7 +292,7 @@ bool LatLonInsertObjectImp::hit(LocationType pixelCoord) const
 
 bool LatLonInsertObjectImp::replicateObject(const GraphicObject* pObject)
 {
-   const LatLonInsertObjectImp *pLLIObject = dynamic_cast<const LatLonInsertObjectImp*>(pObject);
+   const LatLonInsertObjectImp* pLLIObject = dynamic_cast<const LatLonInsertObjectImp*>(pObject);
    if (pLLIObject == NULL)
    {
       return false;
@@ -303,7 +300,7 @@ bool LatLonInsertObjectImp::replicateObject(const GraphicObject* pObject)
 
    bool bSuccess = false;
 
-   const GraphicGroup &group = pLLIObject->getGroup();
+   const GraphicGroup& group = pLLIObject->getGroup();
    
    bSuccess = mpGroup->replicateObject(&group);
 
@@ -407,7 +404,7 @@ LocationType LatLonInsertObjectImp::getLatLonLoc() const
 {
    LocationType location;
 
-   ArrowObjectImp *pArrow = getArrowObject();
+   ArrowObjectImp* pArrow = getArrowObject();
    if (pArrow != NULL)
    {
       location = pArrow->getUrCorner();
@@ -419,19 +416,16 @@ LocationType LatLonInsertObjectImp::getLatLonLoc() const
 void LatLonInsertObjectImp::updateLatLon()
 {
    // Get the spatial data view and the scene coordinate at the arrow tip location
-   SpatialDataView* pSpatialDataView = NULL;
    LocationType sceneCoord;
 
    GraphicLayerImp* pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
    if (pLayer != NULL)
    {
-      View* pView = NULL;
-      pView = pLayer->getView();
+      View* pView = pLayer->getView();
       if (pView != NULL)
       {
-         if (pView->isKindOf("SpatialDataView") == true)
+         if (dynamic_cast<SpatialDataView*>(pView) != NULL)
          {
-            pSpatialDataView = (SpatialDataView*) pView;
             sceneCoord = getLatLonLoc();
          }
 
@@ -451,20 +445,14 @@ void LatLonInsertObjectImp::updateLatLon()
                pViewObject = pProductView->getActiveEditObject();
                if (pViewObject != NULL)
                {
-                  QPoint screenPoint((int) screenCoord.mX, (int) screenCoord.mY);
+                  QPoint screenPoint(static_cast<int>(screenCoord.mX), static_cast<int>(screenCoord.mY));
                   if (pLayer->hit(screenPoint) == pViewObject)
                   {
-                     View* pActiveView = NULL;
-                     pActiveView = pViewObject->getObjectView();
-                     if (pActiveView != NULL)
+                     SpatialDataView* pSpatialDataView = dynamic_cast<SpatialDataView*>(pViewObject->getObjectView());
+                     if (pSpatialDataView != NULL)
                      {
-                        if (pActiveView->isKindOf("SpatialDataView") == true)
-                        {
-                           pSpatialDataView = (SpatialDataView*) pActiveView;
-
-                           pSpatialDataView->translateScreenToWorld(screenCoord.mX,
-                              screenCoord.mY, sceneCoord.mX, sceneCoord.mY);
-                        }
+                        pSpatialDataView->translateScreenToWorld(screenCoord.mX, screenCoord.mY,
+                           sceneCoord.mX, sceneCoord.mY);
                      }
                   }
                }
@@ -478,7 +466,6 @@ void LatLonInsertObjectImp::updateLatLon()
    bool bSuccess = false;
    if (mpGeoreference.get() != NULL)
    {
-      Layer *pLayer = getLayer();
       if (pLayer != NULL)
       {
          LocationType dataCoord;
@@ -509,10 +496,10 @@ void LatLonInsertObjectImp::updateLatLonText()
       View* pView = pLayer->getView();
       if (pView != NULL)
       {
-         SpatialDataView *pSpatialView = dynamic_cast<SpatialDataView*>(pView);
+         SpatialDataView* pSpatialView = dynamic_cast<SpatialDataView*>(pView);
          if (pSpatialView == NULL)
          {
-            ProductView *pProductView = dynamic_cast<ProductView*>(pView);
+            ProductView* pProductView = dynamic_cast<ProductView*>(pView);
             pSpatialView = dynamic_cast<SpatialDataView*>(pProductView->getActiveEditView());
          }
 
@@ -546,7 +533,7 @@ void LatLonInsertObjectImp::updateLatLonText()
    }
 
    // Update the text object
-   TextObjectImp *pLatLonText = getTextObject();
+   TextObjectImp* pLatLonText = getTextObject();
    if (pLatLonText != NULL)
    {
       // Only update the text if it has changed
@@ -600,13 +587,16 @@ ArrowObjectImp *LatLonInsertObjectImp::getArrowObject() const
    return dynamic_cast<ArrowObjectImp*> (objects.front());
 }
 
-bool LatLonInsertObjectImp::processMousePress(LocationType screenCoord, 
-                                 Qt::MouseButton button,
-                                 Qt::MouseButtons buttons,
-                                 Qt::KeyboardModifiers modifiers)
+const GraphicGroup& LatLonInsertObjectImp::getGroup() const
+{
+   return *dynamic_cast<const GraphicGroup*>(mpGroup.get());
+}
+
+bool LatLonInsertObjectImp::processMousePress(LocationType screenCoord, Qt::MouseButton button,
+                                              Qt::MouseButtons buttons, Qt::KeyboardModifiers modifiers)
 {
    // all insertion is done in the constructor
-   GraphicLayerImp *pLayerImp = dynamic_cast<GraphicLayerImp*>(getLayer());
+   GraphicLayerImp* pLayerImp = dynamic_cast<GraphicLayerImp*>(getLayer());
    if (pLayerImp != NULL)
    {
       pLayerImp->completeInsertion();
@@ -615,30 +605,31 @@ bool LatLonInsertObjectImp::processMousePress(LocationType screenCoord,
    return false;
 }
 
-bool LatLonInsertObjectImp::processMouseMove(LocationType screenCoord, 
-                                 Qt::MouseButton button,
-                                 Qt::MouseButtons buttons,
-                                 Qt::KeyboardModifiers modifiers)
+bool LatLonInsertObjectImp::processMouseMove(LocationType screenCoord, Qt::MouseButton button,
+                                             Qt::MouseButtons buttons, Qt::KeyboardModifiers modifiers)
 {
    // should never get here
-   GraphicLayerImp *pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
+   GraphicLayerImp* pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
    VERIFY(pLayer != NULL);
    pLayer->completeInsertion(false);
 
    VERIFY(false);
 }
 
-bool LatLonInsertObjectImp::processMouseRelease(LocationType screenCoord, 
-                                 Qt::MouseButton button,
-                                 Qt::MouseButtons buttons,
-                                 Qt::KeyboardModifiers modifiers)
+bool LatLonInsertObjectImp::processMouseRelease(LocationType screenCoord, Qt::MouseButton button,
+                                                Qt::MouseButtons buttons, Qt::KeyboardModifiers modifiers)
 {
    // should never get here
-   GraphicLayerImp *pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
+   GraphicLayerImp* pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
    VERIFY(pLayer != NULL);
    pLayer->completeInsertion(false);
 
    VERIFY(false);
+}
+
+bool LatLonInsertObjectImp::hasCornerHandles() const
+{
+   return false;
 }
 
 void LatLonInsertObjectImp::updateGeo()
@@ -650,10 +641,10 @@ void LatLonInsertObjectImp::georeferenceModified(Subject &subject, const std::st
 {
    // keep the text in place, move the arrow to the appropriate point
 
-   ArrowObjectImp *pArrow = getArrowObject();
+   ArrowObjectImp* pArrow = getArrowObject();
    VERIFYNRV(pArrow != NULL);
 
-   BoundingBoxProperty *pProp = dynamic_cast<BoundingBoxProperty*>(pArrow->getProperty("BoundingBox"));
+   BoundingBoxProperty* pProp = dynamic_cast<BoundingBoxProperty*>(pArrow->getProperty("BoundingBox"));
    VERIFYNRV(pProp != NULL);
 
    updateGeoreferenceAttachment();
@@ -672,7 +663,7 @@ void LatLonInsertObjectImp::updateGeoreferenceAttachment()
 {
    if (mpGeoreference.get() == NULL)
    {
-      const RasterElement *pGeoreference = getGeoreferenceElement();
+      const RasterElement* pGeoreference = getGeoreferenceElement();
       if (pGeoreference != NULL)
       {
          mpGeoreference.reset(const_cast<RasterElement*>(pGeoreference));

@@ -25,8 +25,8 @@ AoiElementAdapter::~AoiElementAdapter()
 // TypeAwareObject
 const string& AoiElementAdapter::getObjectType() const
 {
-   static string type("AoiElementAdapter");
-   return type;
+   static string sType("AoiElementAdapter");
+   return sType;
 }
 
 bool AoiElementAdapter::isKindOf(const string& className) const

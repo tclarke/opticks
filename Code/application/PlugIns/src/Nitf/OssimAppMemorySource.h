@@ -20,7 +20,7 @@ class OssimAppMemorySource : public ossimImageSource
 public:
    OssimAppMemorySource(RasterElement& cube, const RasterFileDescriptor &exportDescriptor);
 
-   virtual ossimRefPtr<ossimImageData> getTile(const ossimIrect& rect, ossim_uint32 resLevel=0);
+   virtual ossimRefPtr<ossimImageData> getTile(const ossimIrect& rect, ossim_uint32 resLevel = 0);
    
    virtual ossimScalarType getOutputScalarType() const;
 
@@ -28,7 +28,7 @@ public:
 
    virtual ossim_uint32 getTileHeight() const;
 
-   virtual ossimIrect getBoundingRect(ossim_uint32 resLevel=0) const;
+   virtual ossimIrect getBoundingRect(ossim_uint32 resLevel = 0) const;
 
    ossim_uint32 getNumberOfInputBands() const;
 
@@ -43,7 +43,7 @@ public:
 // could use the general raster info class.
 private:
    RasterElement& mCube;
-   const RasterFileDescriptor &mExportDescriptor;
+   const RasterFileDescriptor& mExportDescriptor;
    unsigned int mColSkipFactor;
    unsigned int mRowSkipFactor;
 };

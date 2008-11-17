@@ -65,19 +65,23 @@ OptionsFileLocations::OptionsFileLocations() :
    pLayout->setSpacing(10);
    pLayout->addWidget(pFileSection, 10);
 
-   mFileLocations.push_back(pair<string,string>("Default Export Path", ConfigurationSettings::getSettingExportPathKey()));
-   mFileLocations.push_back(pair<string,string>("Default Import Path", ConfigurationSettings::getSettingImportPathKey()));
-   mFileLocations.push_back(pair<string,string>("Default Session Save/Open Path", ConfigurationSettings::getSettingSaveOpenSessionPathKey()));
+   mFileLocations.push_back(pair<string,string>("Default Export Path",
+      ConfigurationSettings::getSettingExportPathKey()));
+   mFileLocations.push_back(pair<string,string>("Default Import Path",
+      ConfigurationSettings::getSettingImportPathKey()));
+   mFileLocations.push_back(pair<string,string>("Default Session Save/Open Path",
+      ConfigurationSettings::getSettingSaveOpenSessionPathKey()));
    mFileLocations.push_back(pair<string,string>("Default Product Template", ProductView::getSettingTemplateFileKey()));
-   mFileLocations.push_back(pair<string,string>("Message Log Path", ConfigurationSettings::getSettingMessageLogPathKey()));
+   mFileLocations.push_back(pair<string,string>("Message Log Path",
+      ConfigurationSettings::getSettingMessageLogPathKey()));
    mFileLocations.push_back(pair<string,string>("Product Template Path", ProductView::getSettingTemplatePathKey()));
    mFileLocations.push_back(pair<string,string>("Temp Path", ConfigurationSettings::getSettingTempPathKey()));
-   mFileLocations.push_back(pair<string,string>("Support Files Path", ConfigurationSettings::getSettingSupportFilesPathKey()));
+   mFileLocations.push_back(pair<string,string>("Support Files Path",
+      ConfigurationSettings::getSettingSupportFilesPathKey()));
    mFileLocations.push_back(pair<string,string>("Wizard Path", ConfigurationSettings::getSettingWizardPathKey()));
 
    Service<ConfigurationSettings> pSettings;
-   for (vector<pair<string,string> >::iterator iter = mFileLocations.begin();
-        iter != mFileLocations.end(); ++iter)
+   for (vector<pair<string,string> >::iterator iter = mFileLocations.begin(); iter != mFileLocations.end(); ++iter)
    {
       const Filename* pFilename = dv_cast<Filename>(&pSettings->getSetting(iter->second));
       QString dir = "";
@@ -131,7 +135,8 @@ void OptionsFileLocations::applyChanges()
          string type = pItem->text(0).toStdString();
          string confSettingsKey = "";
          for (vector<pair<string,string> >::iterator iter2 = mFileLocations.begin();
-              iter2 != mFileLocations.end(); ++iter2)
+            iter2 != mFileLocations.end();
+            ++iter2)
          {
             if (iter2->first == type)
             {

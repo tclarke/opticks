@@ -16,8 +16,9 @@
 
 OptionsTiffImporter::OptionsTiffImporter(const QString &initialDirectory) : LabeledSectionGroup(NULL)
 {
-   QWidget *pFileBrowserWidget = new QWidget(this);
-   QLabel *pFileBrowserLabel = new QLabel("Select an ISD metadata file or leave blank for no ISD metadata:", pFileBrowserWidget);
+   QWidget* pFileBrowserWidget = new QWidget(this);
+   QLabel* pFileBrowserLabel = new QLabel("Select an ISD metadata file or leave blank for no ISD metadata:",
+      pFileBrowserWidget);
    mpFilename = new FileBrowser(pFileBrowserWidget);
    mpFilename->setWhatsThis("<p>An ISD metadata file is an XML file shipped with some imagery such as Quickbird. "
                             "It contains image metadata. If you have an ISD metadata file and would like to load "
@@ -34,14 +35,14 @@ OptionsTiffImporter::OptionsTiffImporter(const QString &initialDirectory) : Labe
    {
       mpFilename->setBrowseDirectory(initialDirectory);
    }
-   QGridLayout *pLayout = new QGridLayout(pFileBrowserWidget);
+   QGridLayout* pLayout = new QGridLayout(pFileBrowserWidget);
    pLayout->setMargin(0);
    pLayout->setSpacing(5);
    pLayout->addWidget(pFileBrowserLabel, 0, 0);
    pLayout->addWidget(mpFilename, 1, 0, 1, 2);
    pLayout->setColumnStretch(1, 5);
 
-   LabeledSection *pFileBrowserSection = new LabeledSection(pFileBrowserWidget, "ISD Metadata File", this);
+   LabeledSection* pFileBrowserSection = new LabeledSection(pFileBrowserWidget, "ISD Metadata File", this);
 
    // Initialization
    addSection(pFileBrowserSection);

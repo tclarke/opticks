@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #ifndef EIGENPLOTDLG_H
 #define EIGENPLOTDLG_H
 
@@ -20,11 +18,11 @@
 
 class EigenPlotDlg : public QDialog
 {
-    Q_OBJECT
+   Q_OBJECT
 
 public:
-    EigenPlotDlg(QWidget* parent = 0);
-    ~EigenPlotDlg();
+   EigenPlotDlg(QWidget* parent = 0);
+   ~EigenPlotDlg();
 
    int getNumComponents() const;
    bool setEigenValues(double* yVals, int numVals);

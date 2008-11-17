@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef PAGE_CACHE_H
-#define PAGE_CACHE_H
+#ifndef PAGECACHE_H
+#define PAGECACHE_H
 
 #include <list>
 
@@ -116,8 +114,10 @@ protected:
    UnitList mUnits;
    std::string mFilename;
    size_t mCacheSize;
-   int mBytesPerBand, mColumnCount, mBandCount;
-   
+   int mBytesPerBand;
+   int mColumnCount;
+   int mBandCount;
+
    void enforceCacheSize();
 };
 

@@ -49,7 +49,8 @@
 
 using namespace std;
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : TODO: The NULL pix value for OSSIM_PARTIAL is a bad value (leckels)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : TODO: The NULL pix value for OSSIM_PARTIAL " \
+   "is a bad value (leckels)")
 
 Nitf::NitfImporter::NitfImporter()
 {
@@ -123,7 +124,7 @@ vector<ImportDescriptor*> Nitf::NitfImporter::getImportDescriptors(const string 
       ImportDescriptorResource pImportDescriptor(filename + "-" + imageName, "RasterElement", NULL);
       VERIFYRV(pImportDescriptor.get() != NULL, retval);
 
-      RasterDataDescriptor *pDd = dynamic_cast<RasterDataDescriptor*>(pImportDescriptor->getDataDescriptor());
+      RasterDataDescriptor* pDd = dynamic_cast<RasterDataDescriptor*>(pImportDescriptor->getDataDescriptor());
       VERIFYRV(pDd != NULL, retval);
 
       vector<DimensionDescriptor> bands = 
@@ -142,7 +143,7 @@ vector<ImportDescriptor*> Nitf::NitfImporter::getImportDescriptors(const string 
       pDd->setDataType(appDataType);
       pDd->setProcessingLocation(IN_MEMORY);
 
-      RasterFileDescriptor *pFd = dynamic_cast<RasterFileDescriptor*>(
+      RasterFileDescriptor* pFd = dynamic_cast<RasterFileDescriptor*>(
          RasterUtilities::generateAndSetFileDescriptor(pDd, filename, imageName, LITTLE_ENDIAN));
 
       string errorMessage;
@@ -226,19 +227,19 @@ bool Nitf::NitfImporter::execute(PlugInArgList* pInArgs, PlugInArgList* pOutArgs
       return false;
    }
 
-   RasterElement *pRaster = getRasterElement();
+   RasterElement* pRaster = getRasterElement();
    VERIFY(pRaster != NULL);
 
-   DataDescriptor *pDd = pRaster->getDataDescriptor();
+   DataDescriptor* pDd = pRaster->getDataDescriptor();
    VERIFY(pDd != NULL);
 
-   FileDescriptor *pFd = pDd->getFileDescriptor();
+   FileDescriptor* pFd = pDd->getFileDescriptor();
    VERIFY(pFd != NULL);
 
    Classification* pClassification = pDd->getClassification();
    VERIFY(pClassification != NULL);
 
-   Progress *pProgress = getProgress();
+   Progress* pProgress = getProgress();
    if (pProgress != NULL)
    {
       map<string, string>::const_iterator msgIter = mParseMessages.find(pFd->getDatasetLocation());
@@ -295,7 +296,7 @@ SpatialDataView* Nitf::NitfImporter::createView() const
    SpatialDataView* pView = RasterElementImporterShell::createView();
    VERIFYRV(pView != NULL, pView);
 
-   RasterElement *pRaster = getRasterElement();
+   RasterElement* pRaster = getRasterElement();
    VERIFYRV(pRaster != NULL, pView);
 
    const DynamicObject* pMetadata = pRaster->getMetadata();
@@ -320,9 +321,9 @@ bool Nitf::NitfImporter::createRasterPager(RasterElement *pRaster) const
 {
    VERIFY(pRaster != NULL);
 
-   DataDescriptor *pDd = pRaster->getDataDescriptor();
+   DataDescriptor* pDd = pRaster->getDataDescriptor();
    VERIFY(pDd != NULL);
-   FileDescriptor *pFd = pDd->getFileDescriptor();
+   FileDescriptor* pFd = pDd->getFileDescriptor();
    VERIFY(pFd != NULL);
 
    stringstream imageNameStream(pFd->getDatasetLocation().substr(1));
@@ -339,7 +340,7 @@ bool Nitf::NitfImporter::createRasterPager(RasterElement *pRaster) const
 
    if (pPlugIn->execute() == true)
    {
-      RasterPager *pPager = dynamic_cast<RasterPager*>(pPlugIn->getPlugIn());
+      RasterPager* pPager = dynamic_cast<RasterPager*>(pPlugIn->getPlugIn());
       if (pPager != NULL)
       {
          pRaster->setPager(pPager);
@@ -411,7 +412,7 @@ bool Nitf::NitfImporter::validateDefaultOnDiskReadOnly(const DataDescriptor* pDe
 
 EncodingType Nitf::NitfImporter::ossimEncodingToEncodingType(ossimScalarType scalar)
 {
-   switch(scalar)
+   switch (scalar)
    {
    case OSSIM_UINT8:
       return INT1UBYTE;

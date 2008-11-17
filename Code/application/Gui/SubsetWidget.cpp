@@ -154,21 +154,20 @@ SubsetWidget::SubsetWidget(QWidget* pParent) :
    VERIFYNR(connect(mpStartColumnCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(notifyOfColumnsChange())));
    VERIFYNR(connect(mpEndColumnCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(notifyOfColumnsChange())));
    VERIFYNR(connect(mpColumnSkipSpin, SIGNAL(valueChanged(int)), this, SLOT(notifyOfColumnsChange())));
-   VERIFYNR(connect(mpBandList->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)), this, SLOT(notifyOfBandsChange())));
+   VERIFYNR(connect(mpBandList->selectionModel(),
+      SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(notifyOfBandsChange())));
    VERIFYNR(connect(pCustomBandSelect, SIGNAL(clicked()), this, SLOT(customBandSelection())));
 }
 
 SubsetWidget::~SubsetWidget()
-{
-}
+{}
 
 void SubsetWidget::setExportMode(bool enableExportMode)
 {
    mExportMode = enableExportMode;
 }
 
-void SubsetWidget::setRows(const vector<DimensionDescriptor>& rows,
-                           const vector<DimensionDescriptor>& selectedRows)
+void SubsetWidget::setRows(const vector<DimensionDescriptor>& rows, const vector<DimensionDescriptor>& selectedRows)
 {
    if (rows == mRows)
    {
@@ -208,11 +207,11 @@ void SubsetWidget::setRows(const vector<DimensionDescriptor>& rows,
          unsigned int originalNumber = rowDim.getOriginalNumber() + 1;
          name.append(QString::number(originalNumber));
       }
-      if (compareDimensionDescriptors(rowDim,startSelectRow))
+      if (compareDimensionDescriptors(rowDim, startSelectRow))
       {
          startRowIndex = i;
       }
-      if (compareDimensionDescriptors(rowDim,stopSelectRow))
+      if (compareDimensionDescriptors(rowDim, stopSelectRow))
       {
          stopRowIndex = i;
       }
@@ -271,10 +270,10 @@ vector<DimensionDescriptor> SubsetWidget::getSubsetRows() const
    unsigned int endRow = mpEndRowCombo->currentIndex();
    unsigned int rowSkip = mpRowSkipSpin->value();
 
-   DimensionDescriptor startRowDim, endRowDim;
-   startRowDim = mRows[startRow];
-   endRowDim = mRows[endRow];
-   vector<DimensionDescriptor> subsetRows = RasterUtilities::subsetDimensionVector(mRows, startRowDim, endRowDim, rowSkip);   
+   DimensionDescriptor startRowDim = mRows[startRow];
+   DimensionDescriptor endRowDim = mRows[endRow];
+   vector<DimensionDescriptor> subsetRows =
+      RasterUtilities::subsetDimensionVector(mRows, startRowDim, endRowDim, rowSkip);
    return subsetRows;
 }
 
@@ -388,10 +387,10 @@ vector<DimensionDescriptor> SubsetWidget::getSubsetColumns() const
    unsigned int endColumn = mpEndColumnCombo->currentIndex();
    unsigned int columnSkip = mpColumnSkipSpin->value();
 
-   DimensionDescriptor startColumnDim, endColumnDim;
-   startColumnDim = mColumns[startColumn];
-   endColumnDim = mColumns[endColumn];
-   vector<DimensionDescriptor> subsetColumns = RasterUtilities::subsetDimensionVector(mColumns, startColumnDim, endColumnDim, columnSkip);   
+   DimensionDescriptor startColumnDim = mColumns[startColumn];
+   DimensionDescriptor endColumnDim = mColumns[endColumn];
+   vector<DimensionDescriptor> subsetColumns =
+      RasterUtilities::subsetDimensionVector(mColumns, startColumnDim, endColumnDim, columnSkip);
    return subsetColumns;
 }
 
@@ -401,16 +400,16 @@ unsigned int SubsetWidget::getSubsetColumnCount() const
    return subsetColumns.size();
 }
 
-void SubsetWidget::setBands(const vector<DimensionDescriptor>& bands,
-      const vector<string>& bandNames,
-      const vector<DimensionDescriptor>& selectedBands)
+void SubsetWidget::setBands(const vector<DimensionDescriptor>& bands, const vector<string>& bandNames,
+                            const vector<DimensionDescriptor>& selectedBands)
 {
    if (bands == mBands)
    {
       return;
    }
 
-   disconnect(mpBandList->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)), this, SLOT(notifyOfBandsChange()));
+   disconnect(mpBandList->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
+      this, SLOT(notifyOfBandsChange()));
 
    mBands = bands;
 
@@ -444,8 +443,11 @@ void SubsetWidget::setBands(const vector<DimensionDescriptor>& bands,
    {
       QItemSelection totalSelection;
       bool inRange = false;
-      int rangeStart, rangeEnd;
-      for (unsigned int allBandIndex = 0, selectedBandIndex = 0; (allBandIndex < mBands.size()) && (selectedBandIndex < selectedBands.size()); ++allBandIndex)      
+      int rangeStart;
+      int rangeEnd;
+      for (unsigned int allBandIndex = 0, selectedBandIndex = 0;
+         (allBandIndex < mBands.size()) && (selectedBandIndex < selectedBands.size());
+         ++allBandIndex)
       {
          if (inRange)
          {
@@ -475,11 +477,12 @@ void SubsetWidget::setBands(const vector<DimensionDescriptor>& bands,
       {
          totalSelection.select(mpBandModel->index(rangeStart), mpBandModel->index(rangeEnd));
       }
-      mpBandList->selectionModel()->select(totalSelection, QItemSelectionModel::Select);
 
+      mpBandList->selectionModel()->select(totalSelection, QItemSelectionModel::Select);
    }
 
-   connect(mpBandList->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)), this, SLOT(notifyOfBandsChange()));
+   connect(mpBandList->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
+      this, SLOT(notifyOfBandsChange()));
 
    emit subsetBandsChanged(mBands);
    emit modified();
@@ -493,7 +496,7 @@ const vector<DimensionDescriptor>& SubsetWidget::getBands() const
 class QModelIndexCompare
 {
 public:
-   bool operator() (const QModelIndex& val1, const QModelIndex& val2)
+   bool operator()(const QModelIndex& val1, const QModelIndex& val2)
    {
       return val1.row() < val2.row();
    }
@@ -559,7 +562,8 @@ void SubsetWidget::customBandSelection()
       }
       int bandSkip = dialog.getSkipFactor();
 
-      disconnect(mpBandList->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)), this, SLOT(notifyOfBandsChange()));
+      disconnect(mpBandList->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
+         this, SLOT(notifyOfBandsChange()));
 
       mpBandList->selectionModel()->clear();
 
@@ -586,7 +590,8 @@ void SubsetWidget::customBandSelection()
       }
       mpBandList->selectionModel()->select(totalSelection, QItemSelectionModel::Select);
 
-      connect(mpBandList->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)), this, SLOT(notifyOfBandsChange()));
+      connect(mpBandList->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
+         this, SLOT(notifyOfBandsChange()));
       notifyOfBandsChange();
    }
    else
@@ -674,7 +679,7 @@ bool SubsetWidget::compareDimensionDescriptors(DimensionDescriptor left, Dimensi
          return false;
       }
 
-      return ((!left.isOriginalNumberValid() || (left.getOriginalNumber() == right.getOriginalNumber())) && 
+      return ((!left.isOriginalNumberValid() || (left.getOriginalNumber() == right.getOriginalNumber())) &&
          (!left.isActiveNumberValid() || (left.getActiveNumber() == right.getActiveNumber())));
    }
    else
@@ -683,10 +688,10 @@ bool SubsetWidget::compareDimensionDescriptors(DimensionDescriptor left, Dimensi
    }
 }
 
-
-BandCustomSelectionDialog::BandCustomSelectionDialog(QWidget* pParent,
-   QStringListModel* pBandList, QString badBandsDir) : 
-   QDialog(pParent), mpBandListModel(pBandList),
+BandCustomSelectionDialog::BandCustomSelectionDialog(QWidget* pParent, QStringListModel* pBandList,
+                                                     QString badBandsDir) :
+   QDialog(pParent),
+   mpBandListModel(pBandList),
    mBadBandDir(badBandsDir)
 {
    setModal(true);
@@ -820,4 +825,3 @@ int BandCustomSelectionDialog::getSkipFactor()
 {
    return mpBandSkipSpin->value();
 }
-

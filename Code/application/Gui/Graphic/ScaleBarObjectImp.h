@@ -33,7 +33,7 @@ public:
    void draw(double zoomFactor) const;
    bool setProperty(const GraphicProperty* pProp);
    GraphicProperty* getProperty(const std::string& name) const;
-   void moveHandle (int handle, LocationType pixel, bool bMaintainAspect = false);
+   void moveHandle(int handle, LocationType pixel, bool bMaintainAspect = false);
    bool hit(LocationType pixelCoord) const;
    const GraphicGroup &getGroup() const;
 
@@ -53,7 +53,8 @@ protected:
    void georeferenceModified(Subject &subject, const std::string &signal, const boost::any &v);
 
 private:
-   double mXgsd, mYgsd;   // variables for the georeference GSDs
+   double mXgsd;
+   double mYgsd;   // variables for the georeference GSDs
    bool mNeedsLayout;
    AttachmentPtr<PerspectiveView> mpView;
    AttachmentPtr<RasterElement> mpGeoreference;

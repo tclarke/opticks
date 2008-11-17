@@ -31,21 +31,21 @@ MessageLogWindow::MessageLogWindow(const string& id, QWidget* parent) :
    mpLogs(NULL),
    mpModel(NULL)
 {
-   QFrame *pTopFrame = new QFrame(this);
+   QFrame* pTopFrame = new QFrame(this);
    mpLogs = new QComboBox(pTopFrame);
    mpModel = new MessageLogWindowModel;
-   QTreeView *pTreeView = new QTreeView;
+   QTreeView* pTreeView = new QTreeView;
    pTreeView->setModel(mpModel);
    pTreeView->setSelectionMode(QAbstractItemView::NoSelection);
    pTreeView->setRootIsDecorated(true);
    QHeaderView* pHeader = pTreeView->header();
-   if(pHeader != NULL)
+   if (pHeader != NULL)
    {
       pHeader->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
       pHeader->setSortIndicatorShown(false);
    }
 
-   QVBoxLayout *pTopLayout = new QVBoxLayout(pTopFrame);
+   QVBoxLayout* pTopLayout = new QVBoxLayout(pTopFrame);
    pTopLayout->addWidget(pTreeView, 10);
    pTopLayout->addWidget(mpLogs, 0);
 
@@ -86,12 +86,12 @@ void MessageLogWindow::sessionClosed(Subject &subject, const string &signal, con
 void MessageLogWindow::setLogs(const vector<MessageLog*> &logs)
 {
    QString currentName;
-   if(mpLogs->count() > 0)
+   if (mpLogs->count() > 0)
    {
       currentName = mpLogs->currentText();
    }
    mpLogs->clear();
-   if(logs.empty())
+   if (logs.empty())
    {
       mpModel->setMessageLog(NULL);
       return;
@@ -99,17 +99,17 @@ void MessageLogWindow::setLogs(const vector<MessageLog*> &logs)
    Service<SessionManager> pSessionMgr;
    string sessionLogName = pSessionMgr->getName();
    bool setLog = true;
-   for(vector<MessageLog*>::const_iterator log = logs.begin(); log != logs.end(); ++log)
+   for (vector<MessageLog*>::const_iterator log = logs.begin(); log != logs.end(); ++log)
    {
-      MessageLog *pLog = *log;
-      if(pLog == NULL)
+      MessageLog* pLog = *log;
+      if (pLog == NULL)
       {
          continue;
       }
 
       // Get the log name
       string logName = pLog->getLogName();
-      if(logName.empty())
+      if (logName.empty())
       {
          continue;
       }
@@ -119,13 +119,13 @@ void MessageLogWindow::setLogs(const vector<MessageLog*> &logs)
          strName = "Session Log";
       }
       
-      if(strName == currentName)
+      if (strName == currentName)
       {
          setLog = false;
       }
       mpLogs->addItem(strName);
    }
-   if(setLog)
+   if (setLog)
    {
       mpModel->setMessageLog(logs.front());
       mpLogs->setCurrentIndex(0);
@@ -138,7 +138,7 @@ void MessageLogWindow::setLogs(const vector<MessageLog*> &logs)
 
 void MessageLogWindow::setLog(const QString &logName)
 {
-   if(mpLogs->count() == 0)
+   if (mpLogs->count() == 0)
    {
       mpModel->setMessageLog(NULL);
       return;
@@ -154,18 +154,18 @@ void MessageLogWindow::setLog(const QString &logName)
       realLogName = Service<SessionManager>()->getName();
    }
    vector<MessageLog*> logs = mpMsgLogMgr->getLogs();
-   for(vector<MessageLog*>::const_iterator lIter = logs.begin(); lIter != logs.end(); ++lIter)
+   for (vector<MessageLog*>::const_iterator lIter = logs.begin(); lIter != logs.end(); ++lIter)
    {
-      MessageLog *pLog = *lIter;
-      if((pLog != NULL) && (realLogName == pLog->getLogName()))
+      MessageLog* pLog = *lIter;
+      if ((pLog != NULL) && (realLogName == pLog->getLogName()))
       {
          int idx = mpLogs->findText(aliasedLogName);
-         if(idx == -1)
+         if (idx == -1)
          {
             setLogs(mpMsgLogMgr->getLogs());
             idx = mpLogs->findText(aliasedLogName);
          }
-         if(idx != -1)
+         if (idx != -1)
          {
             mpLogs->setCurrentIndex(idx);
             mpModel->setMessageLog(pLog);
@@ -189,42 +189,42 @@ MessageLogWindowModel::~MessageLogWindowModel()
 
 QModelIndex MessageLogWindowModel::index(int row, int column, const QModelIndex &parent) const
 {
-   if(mpLog == NULL)
+   if (mpLog == NULL)
    {
       return QModelIndex();
    }
 
-   const Message *pMessage = NULL;
-   if(parent.isValid())
+   const Message* pMessage = NULL;
+   if (parent.isValid())
    {
-      Subject *pSubject = reinterpret_cast<Subject*>(parent.internalPointer());
-      Message *pParent = dynamic_cast<Message*>(pSubject);
-      Step *pParentStep = dynamic_cast<Step*>(pParent);
+      Subject* pSubject = reinterpret_cast<Subject*>(parent.internalPointer());
+      Message* pParent = dynamic_cast<Message*>(pSubject);
+      Step* pParentStep = dynamic_cast<Step*>(pParent);
 
       // the parent is a step
-      if(pParentStep != NULL)
+      if (pParentStep != NULL)
       {
-         if(row < static_cast<int>(pParentStep->size()))
+         if (row < static_cast<int>(pParentStep->size()))
          {
             pMessage = (*pParentStep)[row];
          }
          else
          {
-            const DynamicObject *pProperties = pParent->getProperties();
+            const DynamicObject* pProperties = pParent->getProperties();
             mPropertyCache.insert(pProperties, pParent);
             return createIndex(row, column,
                            const_cast<Subject*>(static_cast<const Subject*>(pProperties)));
          }
       }
       // the parent is a message
-      else if(pParent != NULL)
+      else if (pParent != NULL)
       {
-         const DynamicObject *pProperties = pParent->getProperties();
+         const DynamicObject* pProperties = pParent->getProperties();
          mPropertyCache.insert(pProperties, pParent);
          return createIndex(row, column, const_cast<Subject*>(static_cast<const Subject*>(pProperties)));
       }
    }
-   else if(row < static_cast<int>(mpLog->size()))
+   else if (row < static_cast<int>(mpLog->size()))
    {
       pMessage = (*mpLog)[row];
    }
@@ -233,47 +233,47 @@ QModelIndex MessageLogWindowModel::index(int row, int column, const QModelIndex 
 
 QModelIndex MessageLogWindowModel::parent(const QModelIndex &index) const
 {
-   if(mpLog == NULL || !index.isValid())
+   if (mpLog == NULL || !index.isValid())
    {
       return QModelIndex();
    }
 
-   const Subject *pSubject = reinterpret_cast<Subject*>(index.internalPointer());
-   if(pSubject == NULL)
+   const Subject* pSubject = reinterpret_cast<Subject*>(index.internalPointer());
+   if (pSubject == NULL)
    {
       return QModelIndex();
    }
 
    // find the parent
-   const Message *pParent = NULL;
-   const DynamicObject *pProperties = dynamic_cast<const DynamicObject*>(pSubject);
-   if(pProperties != NULL)
+   const Message* pParent = NULL;
+   const DynamicObject* pProperties = dynamic_cast<const DynamicObject*>(pSubject);
+   if (pProperties != NULL)
    {
       // this is a property index
       pParent = mPropertyCache[pProperties];
    }
    else
    {
-      const MessageImp *pMessageImp = dynamic_cast<const MessageImp*>(pSubject);
-      if(pMessageImp != NULL)
+      const MessageImp* pMessageImp = dynamic_cast<const MessageImp*>(pSubject);
+      if (pMessageImp != NULL)
       {
          pParent = pMessageImp->getParent();
       }
    }
 
    // locate the row number
-   const MessageImp *pParentImp = dynamic_cast<const MessageImp*>(pParent);
-   if(pParentImp == NULL)
+   const MessageImp* pParentImp = dynamic_cast<const MessageImp*>(pParent);
+   if (pParentImp == NULL)
    {
       return QModelIndex();
    }
    int parentRow = 0;
-   const Step *pGrandParent = pParentImp->getParent();
-   if(pGrandParent != NULL)
+   const Step* pGrandParent = pParentImp->getParent();
+   if (pGrandParent != NULL)
    {
-      for(Step::const_iterator gpIter = pGrandParent->begin(); gpIter != pGrandParent->end(); ++gpIter)
+      for (Step::const_iterator gpIter = pGrandParent->begin(); gpIter != pGrandParent->end(); ++gpIter)
       {
-         if(*gpIter == pParent)
+         if (*gpIter == pParent)
          {
             break;
          }
@@ -282,9 +282,9 @@ QModelIndex MessageLogWindowModel::parent(const QModelIndex &index) const
    }
    else
    {
-      for(MessageLog::const_iterator lIter = mpLog->begin(); lIter != mpLog->end(); ++lIter)
+      for (MessageLog::const_iterator lIter = mpLog->begin(); lIter != mpLog->end(); ++lIter)
       {
-         if(*lIter == pParent)
+         if (*lIter == pParent)
          {
             break;
          }
@@ -296,27 +296,27 @@ QModelIndex MessageLogWindowModel::parent(const QModelIndex &index) const
 
 int MessageLogWindowModel::rowCount(const QModelIndex &parent) const
 {
-   if(mpLog == NULL)
+   if (mpLog == NULL)
    {
       return 0;
    }
 
    // if the parent is invalid, the request is for the number of top level items
-   if(!parent.isValid())
+   if (!parent.isValid())
    {
       return mpLog->size();
    }
 
-   const Subject *pSubject = reinterpret_cast<Subject*>(parent.internalPointer());
-   const Message *pParent = dynamic_cast<const Message*>(pSubject);
-   if(pParent == NULL)
+   const Subject* pSubject = reinterpret_cast<Subject*>(parent.internalPointer());
+   const Message* pParent = dynamic_cast<const Message*>(pSubject);
+   if (pParent == NULL)
    {
       return 0;
    }
-   const Step *pParentStep = dynamic_cast<const Step*>(pParent);
+   const Step* pParentStep = dynamic_cast<const Step*>(pParent);
 
    // if the parent is a Step, return the count of subitems
-   if(pParentStep != NULL)
+   if (pParentStep != NULL)
    {
       return pParentStep->size() + pParent->getProperties()->getNumAttributes();
    }
@@ -327,7 +327,7 @@ int MessageLogWindowModel::rowCount(const QModelIndex &parent) const
 
 int MessageLogWindowModel::columnCount(const QModelIndex &parent) const
 {
-   if(mpLog == NULL)
+   if (mpLog == NULL)
    {
       return 0;
    }
@@ -336,37 +336,37 @@ int MessageLogWindowModel::columnCount(const QModelIndex &parent) const
 
 QVariant MessageLogWindowModel::data(const QModelIndex &index, int role) const
 {
-   if(mpLog == NULL || !index.isValid())
+   if (mpLog == NULL || !index.isValid())
    {
       return QVariant();
    }
 
-   const Subject *pSubject = reinterpret_cast<Subject*>(index.internalPointer());
-   const DynamicObject *pProperties = dynamic_cast<const DynamicObject*>(pSubject);
-   if(pProperties != NULL)
+   const Subject* pSubject = reinterpret_cast<Subject*>(index.internalPointer());
+   const DynamicObject* pProperties = dynamic_cast<const DynamicObject*>(pSubject);
+   if (pProperties != NULL)
    {
-      if((role == Qt::DisplayRole) || (role == Qt::ToolTipRole))
+      if ((role == Qt::DisplayRole) || (role == Qt::ToolTipRole))
       {
-         const Message *pParent = mPropertyCache[pProperties];
-         const Step *pParentStep = dynamic_cast<const Step*>(pParent);
+         const Message* pParent = mPropertyCache[pProperties];
+         const Step* pParentStep = dynamic_cast<const Step*>(pParent);
          // this is a property index
          unsigned int propertyNumber = index.row();
-         if(pParentStep != NULL)
+         if (pParentStep != NULL)
          {
             propertyNumber -= pParentStep->size();
          }
-         if(propertyNumber < pProperties->getNumAttributes())
+         if (propertyNumber < pProperties->getNumAttributes())
          {
             vector<string> propertyNames;
             pProperties->getAttributeNames(propertyNames);
             string name = propertyNames[propertyNumber];
 
             QString header(headerData(index.column(), Qt::Horizontal).toString());
-            if(header == "ID")
+            if (header == "ID")
             {
                return QString::fromStdString(name);
             }
-            else if(header == "Type")
+            else if (header == "Type")
             {
                string type;
                const DataVariant& attrValue = pProperties->getAttribute(name);
@@ -376,7 +376,7 @@ QVariant MessageLogWindowModel::data(const QModelIndex &index, int role) const
                }
                return QString::fromStdString(type);
             }
-            else if(header == "Message")
+            else if (header == "Message")
             {
                string value = pProperties->getAttribute(name).toDisplayString();
                return QString::fromStdString(value);
@@ -387,24 +387,24 @@ QVariant MessageLogWindowModel::data(const QModelIndex &index, int role) const
    }
    else
    {
-      const MessageImp *pMessageImp = dynamic_cast<const MessageImp*>(pSubject);
-      if(pMessageImp == NULL)
+      const MessageImp* pMessageImp = dynamic_cast<const MessageImp*>(pSubject);
+      if (pMessageImp == NULL)
       {
          return QVariant();
       }
-      switch(role)
+      switch (role)
       {
          case Qt::DisplayRole:
          case Qt::ToolTipRole:
          {
             QString header(headerData(index.column(), Qt::Horizontal).toString());
-            if((header == "ID") && (role == Qt::DisplayRole))
+            if ((header == "ID") && (role == Qt::DisplayRole))
             {
                return QString::fromStdString(const_cast<MessageImp*>(pMessageImp)->getStringId());
             }
-            else if((header == "Type") && (role == Qt::DisplayRole))
+            else if ((header == "Type") && (role == Qt::DisplayRole))
             {
-               if(dynamic_cast<const Step*>(pMessageImp) != NULL)
+               if (dynamic_cast<const Step*>(pMessageImp) != NULL)
                {
                   return QString("Step");
                }
@@ -413,16 +413,16 @@ QVariant MessageLogWindowModel::data(const QModelIndex &index, int role) const
                   return QString("Message");
                }
             }
-            else if(header == "Message")
+            else if (header == "Message")
             {
                return QString::fromStdString(pMessageImp->getAction());
             }
-            else if((header == "Result") && (role == Qt::DisplayRole))
+            else if ((header == "Result") && (role == Qt::DisplayRole))
             {
-               const Step *pStep = dynamic_cast<const Step*>(pMessageImp);
-               if(pStep != NULL)
+               const Step* pStep = dynamic_cast<const Step*>(pMessageImp);
+               if (pStep != NULL)
                {
-                  switch(pStep->getResult())
+                  switch (pStep->getResult())
                   {
                      case Message::Success:
                         return QString("Success");
@@ -435,26 +435,27 @@ QVariant MessageLogWindowModel::data(const QModelIndex &index, int role) const
                   }
                }
             }
-            else if(header == "Reason")
+            else if (header == "Reason")
             {
-               const Step *pStep = dynamic_cast<const Step*>(pMessageImp);
-               if((pStep != NULL) && ((pStep->getResult() == Message::Abort) ||
+               const Step* pStep = dynamic_cast<const Step*>(pMessageImp);
+               if ((pStep != NULL) && ((pStep->getResult() == Message::Abort) ||
                                       (pStep->getResult() == Message::Failure)))
                {
                   return QString::fromStdString(pStep->getFailureMessage());
                }
             }
-            else if(header == "Time Stamp")
+            else if (header == "Time Stamp")
             {
-               string date, time;
+               string date;
+               string time;
                pMessageImp->serializeDate(date, time);
                return QString::fromStdString(date) + "  " + QString::fromStdString(time);
             }
-            else if((header == "Component") && (role == Qt::DisplayRole))
+            else if ((header == "Component") && (role == Qt::DisplayRole))
             {
                return QString::fromStdString(pMessageImp->getComponent());
             }
-            else if((header == "Key") && (role == Qt::DisplayRole))
+            else if ((header == "Key") && (role == Qt::DisplayRole))
             {
                return QString::fromStdString(pMessageImp->getKey());
             }
@@ -462,11 +463,11 @@ QVariant MessageLogWindowModel::data(const QModelIndex &index, int role) const
          }
          case Qt::BackgroundRole:
          {
-            if(pMessageImp->getComponent().empty() || pMessageImp->getKey().empty())
+            if (pMessageImp->getComponent().empty() || pMessageImp->getKey().empty())
             {
                return QVariant(Qt::yellow);
             }
-            if(pMessageImp->getResult() == Message::Failure)
+            if (pMessageImp->getResult() == Message::Failure)
             {
                return QVariant(Qt::red);
             }
@@ -498,11 +499,11 @@ bool MessageLogWindowModel::insertRows(int row, int count, const QModelIndex &pa
 
 QVariant MessageLogWindowModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-   if(role == Qt::DisplayRole)
+   if (role == Qt::DisplayRole)
    {
-      if(orientation == Qt::Horizontal)
+      if (orientation == Qt::Horizontal)
       {
-         if(section < mHeaderNames.size())
+         if (section < mHeaderNames.size())
          {
             return mHeaderNames[section];
          }
@@ -513,20 +514,24 @@ QVariant MessageLogWindowModel::headerData(int section, Qt::Orientation orientat
 
 void MessageLogWindowModel::setMessageLog(const MessageLog *pLog)
 {
-   if(pLog == mpLog)
+   if (pLog == mpLog)
    {
       return;
    }
-   if(mpLog != NULL)
+   if (mpLog != NULL)
    {
-      const_cast<MessageLog*>(mpLog)->detach(SIGNAL_NAME(MessageLog, MessageAdded), Slot(this, &MessageLogWindowModel::messageAdded));
-      const_cast<MessageLog*>(mpLog)->detach(SIGNAL_NAME(MessageLog, MessageHidden), Slot(this, &MessageLogWindowModel::messageFinalized));
+      const_cast<MessageLog*>(mpLog)->detach(SIGNAL_NAME(MessageLog, MessageAdded),
+         Slot(this, &MessageLogWindowModel::messageAdded));
+      const_cast<MessageLog*>(mpLog)->detach(SIGNAL_NAME(MessageLog, MessageHidden),
+         Slot(this, &MessageLogWindowModel::messageFinalized));
    }
    mpLog = pLog;
-   if(mpLog != NULL)
+   if (mpLog != NULL)
    {
-      const_cast<MessageLog*>(mpLog)->attach(SIGNAL_NAME(MessageLog, MessageAdded), Slot(this, &MessageLogWindowModel::messageAdded));
-      const_cast<MessageLog*>(mpLog)->attach(SIGNAL_NAME(MessageLog, MessageHidden), Slot(this, &MessageLogWindowModel::messageFinalized));
+      const_cast<MessageLog*>(mpLog)->attach(SIGNAL_NAME(MessageLog, MessageAdded),
+         Slot(this, &MessageLogWindowModel::messageAdded));
+      const_cast<MessageLog*>(mpLog)->attach(SIGNAL_NAME(MessageLog, MessageHidden),
+         Slot(this, &MessageLogWindowModel::messageFinalized));
    }
    reset();
 }
@@ -534,11 +539,11 @@ void MessageLogWindowModel::setMessageLog(const MessageLog *pLog)
 int MessageLogWindowModel::findIndex(const Step *pParent, const Message *pMessage) const
 {
    int row = -1;
-   if(pParent != NULL)
+   if (pParent != NULL)
    {
-      for(row = pParent->size() - 1; row >= 0; row--)
+      for (row = pParent->size() - 1; row >= 0; row--)
       {
-         if((*pParent)[row] == pMessage)
+         if ((*pParent)[row] == pMessage)
          {
             break;
          }
@@ -546,9 +551,9 @@ int MessageLogWindowModel::findIndex(const Step *pParent, const Message *pMessag
    }
    else
    {
-      for(row = mpLog->size() - 1; row >= 0; row--)
+      for (row = mpLog->size() - 1; row >= 0; row--)
       {
-         if((*mpLog)[row] == pMessage)
+         if ((*mpLog)[row] == pMessage)
          {
             break;
          }
@@ -559,17 +564,17 @@ int MessageLogWindowModel::findIndex(const Step *pParent, const Message *pMessag
 
 void MessageLogWindowModel::messageAdded(Subject &subject, const string &signal, const boost::any &data)
 {
-   MessageLog *pLog = dynamic_cast<MessageLog*>(&subject);
-   Message *pMessage = boost::any_cast<Message*>(data);
-   MessageImp *pMessageImp = dynamic_cast<MessageImp*>(pMessage);
+   MessageLog* pLog = dynamic_cast<MessageLog*>(&subject);
+   Message* pMessage = boost::any_cast<Message*>(data);
+   MessageImp* pMessageImp = dynamic_cast<MessageImp*>(pMessage);
    if (pMessageImp != NULL)
    {
-      const Step *pParent = pMessageImp->getParent();
+      const Step* pParent = pMessageImp->getParent();
       int msgRow = findIndex(pParent, pMessage);
-      if(pParent != NULL)
+      if (pParent != NULL)
       {
          // get the numeric index (row) of the parent step in the grand-parent
-         const MessageImp *pParentImp = dynamic_cast<const MessageImp*>(pParent);
+         const MessageImp* pParentImp = dynamic_cast<const MessageImp*>(pParent);
          VERIFYNRV(pParentImp != NULL);
          int parentRow = findIndex(pParentImp->getParent(), pParent);
 
@@ -578,7 +583,7 @@ void MessageLogWindowModel::messageAdded(Subject &subject, const string &signal,
       }
       // if the parent is a MessageLog and the messagae is ADDED
       // than a new top-level Message has been added to the log
-      else if(pLog != NULL)
+      else if (pLog != NULL)
       {
          // insert the new Message into the top-level
          insertRow(pLog->size() - 1);
@@ -588,14 +593,14 @@ void MessageLogWindowModel::messageAdded(Subject &subject, const string &signal,
 
 void MessageLogWindowModel::messageFinalized(Subject &subject, const string &signal, const boost::any &data)
 {
-   MessageLog *pLog = dynamic_cast<MessageLog*>(&subject);
-   Message *pMessage = boost::any_cast<Message*>(data);
-   MessageImp *pMessageImp = dynamic_cast<MessageImp*>(pMessage);
+   MessageLog* pLog = dynamic_cast<MessageLog*>(&subject);
+   Message* pMessage = boost::any_cast<Message*>(data);
+   MessageImp* pMessageImp = dynamic_cast<MessageImp*>(pMessage);
    if (pMessageImp != NULL)
    {
-      const Step *pParent = pMessageImp->getParent();
+      const Step* pParent = pMessageImp->getParent();
       int msgRow = findIndex(pParent, pMessage);
-      if(msgRow >= 0)
+      if (msgRow >= 0)
       {
          // Inform the GUI that we've modified the Message/Step item so
          // we see the finalization message

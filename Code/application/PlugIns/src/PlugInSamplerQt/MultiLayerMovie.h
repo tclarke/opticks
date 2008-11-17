@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef MULTI_LAYER_MOVIE_H
-#define MULTI_LAYER_MOVIE_H
+#ifndef MULTILAYERMOVIE_H
+#define MULTILAYERMOVIE_H
 
 #include "AlgorithmShell.h"
 
@@ -29,10 +29,10 @@ private:
    RasterElement* mpRaster1;
    RasterElement* mpRaster2;
    RasterElement* mpRaster3;
-   SpatialDataWindow *mpWindow;
-   RasterLayer *mpLayer1;
-   RasterLayer *mpLayer2;
-   RasterLayer *mpLayer3;
+   SpatialDataWindow* mpWindow;
+   RasterLayer* mpLayer1;
+   RasterLayer* mpLayer2;
+   RasterLayer* mpLayer3;
    static const int mNumRows = 256;
    static const int mNumCols = 256;
    static const int mNumBands = 256;
@@ -40,7 +40,7 @@ private:
    bool createRasterElements();
    bool populateRasterElements();
    bool createWindow();
-   bool createLayer(SpatialDataView* pView, RasterElement* pElement,RasterLayer*& pLayer,
+   bool createLayer(SpatialDataView* pView, RasterElement* pElement, RasterLayer*& pLayer,
       double xScale = 1.0, double xOffset = 0.0, double yScale = 1.0, double yOffset = 0.0);
    bool setupAnimations();
 };

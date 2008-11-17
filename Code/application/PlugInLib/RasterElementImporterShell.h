@@ -221,7 +221,7 @@ protected:
     *  @return  Returns <b>true</b> if the RasterPager can successfully import
     *           the given data descriptor on-disk read-only; otherwise returns <b>false</b>.
     */
-   virtual bool validateDefaultOnDiskReadOnly(const DataDescriptor *pDescriptor, std::string &errorMessage) const;
+   virtual bool validateDefaultOnDiskReadOnly(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
 
    /**
     *  This method validates the DataDescriptor for basic problems.
@@ -262,7 +262,7 @@ protected:
     *
     *  @see     DataDescriptor, FileDescriptor
     */
-   bool validateBasic(const DataDescriptor *pDescriptor, std::string &errorMessage) const;
+   bool validateBasic(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
 
    /**
     * Perform the a default import.
@@ -325,7 +325,7 @@ protected:
     *
     *  @return True if the pager was successfully created, false otherwise.
     */
-   virtual bool createRasterPager(RasterElement *pRaster) const;
+   virtual bool createRasterPager(RasterElement* pRaster) const;
 
    /**
     *  Copy data from the source element to the imported one.
@@ -336,7 +336,7 @@ protected:
     *
     *  @return True if the copy was successful, false otherwise.
     */
-   bool copyData(const RasterElement *pSrcElement) const;
+   bool copyData(const RasterElement* pSrcElement) const;
 
    Service<DesktopServices> mpDesktop;
    Service<ModelServices> mpModel;
@@ -344,7 +344,7 @@ protected:
    Service<UtilityServices> mpUtilities;
 
 private:
-   bool checkAbortOrError(std::string message, Step *pStep, bool checkForError=true) const;
+   bool checkAbortOrError(std::string message, Step* pStep, bool checkForError = true) const;
 
    mutable bool mUsingMemoryMappedPager;
    Progress* mpProgress;

@@ -32,23 +32,66 @@ using namespace std;
 namespace GeoTiffOnDisk
 {
 
-CacheUnit::CacheUnit(const vector<unsigned int> &blockNumbers, size_t blockSize)
-                       : mReferenceCount(0),
-                         mBlockNumbers(blockNumbers),
-                         mDataSize(blockSize),
-                         mpData(NULL),
-                         mIsEmpty(true)
+CacheUnit::CacheUnit(const vector<unsigned int>& blockNumbers, size_t blockSize) :
+   mReferenceCount(0),
+   mBlockNumbers(blockNumbers),
+   mDataSize(blockSize),
+   mpData(NULL),
+   mIsEmpty(true)
 {
    mpData = mpModelSvcs->getMemoryBlock(mDataSize);
 }
 
 CacheUnit::~CacheUnit()
 {
-   if(mpData != NULL)
+   if (mpData != NULL)
    {
       mpModelSvcs->deleteMemoryBlock(mpData);
       mpData = NULL;
    }
+}
+
+void CacheUnit::get()
+{
+   mReferenceCount++;
+}
+
+void CacheUnit::release()
+{
+   if (mReferenceCount > 0)
+   {
+      mReferenceCount--;
+   }
+}
+
+unsigned int CacheUnit::references() const
+{
+   return mReferenceCount;
+}
+
+const vector<unsigned int>& CacheUnit::blockNumbers() const
+{
+   return mBlockNumbers;
+}
+
+size_t CacheUnit::dataSize() const
+{
+   return mDataSize;
+}
+
+char* CacheUnit::data() const
+{
+   return mpData;
+}
+
+bool CacheUnit::isEmpty() const
+{
+   return mIsEmpty;
+}
+
+void CacheUnit::setIsEmpty(bool v)
+{
+   mIsEmpty = v;
 }
 
 Cache::Cache() : mCacheSize(8)
@@ -57,9 +100,9 @@ Cache::Cache() : mCacheSize(8)
 
 Cache::~Cache()
 {
-   for(cache_t::iterator it = mCache.begin(); it != mCache.end(); ++it)
+   for (cache_t::iterator it = mCache.begin(); it != mCache.end(); ++it)
    {
-      if(*it != NULL)
+      if (*it != NULL)
       {
          delete *it;
       }
@@ -81,9 +124,9 @@ CacheUnit *Cache::getCacheUnit(vector<unsigned int> &blocks, size_t blockSize)
    size_t dataSize(blocks.size() * blockSize);
 
    // find or create the needed cache blocks
-   CacheUnit *returnUnit(NULL);
+   CacheUnit* returnUnit(NULL);
    cache_t::iterator locate_it(find_if(mCache.begin(), mCache.end(), bind1st(ptr_fun(Cache::CacheLocator), blocks)));
-   if(locate_it != mCache.end())
+   if (locate_it != mCache.end())
    {
       // we found the CacheUnit
       returnUnit = *locate_it;
@@ -93,13 +136,13 @@ CacheUnit *Cache::getCacheUnit(vector<unsigned int> &blocks, size_t blockSize)
    {
       // we need to create a new CacheUnit
       // is the cache full?
-      if(mCache.size() >= mCacheSize)
+      if (mCache.size() >= mCacheSize)
       {
          // remove the first available unit
          cache_t::iterator clean_it(find_if(mCache.begin(), mCache.end(), Cache::CacheCleaner));
-         if(clean_it != mCache.end())
+         if (clean_it != mCache.end())
          {
-            if(*clean_it != NULL)
+            if (*clean_it != NULL)
             {
                delete *clean_it;
             }
@@ -108,9 +151,9 @@ CacheUnit *Cache::getCacheUnit(vector<unsigned int> &blocks, size_t blockSize)
       }
       returnUnit = new CacheUnit(blocks, dataSize);
    }
-   if(returnUnit != NULL)
+   if (returnUnit != NULL)
    {
-      if(returnUnit->data() == NULL)
+      if (returnUnit->data() == NULL)
       {
          delete returnUnit;
          returnUnit = NULL;
@@ -132,7 +175,7 @@ bool Cache::CacheLocator(vector<unsigned int> blockNumbers, CacheUnit *pUnit)
    //  does this CacheUnit contain fewer blocks than we need?
    //  does this CacheUnit contain none of the blocks we need?
    // for now, only the exact blocks will be used
-   if(blockNumbers.size() != pUnit->blockNumbers().size())
+   if (blockNumbers.size() != pUnit->blockNumbers().size())
    {
       return false;
    }
@@ -170,7 +213,7 @@ GeoTiffPager::~GeoTiffPager()
    mpMutex->MutexDestroy();
    delete mpMutex;
 
-   if(mpTiff != NULL)
+   if (mpTiff != NULL)
    {
       TIFFClose(mpTiff);
       mpTiff = NULL;
@@ -209,22 +252,22 @@ bool GeoTiffPager::getOutputSpecification(PlugInArgList *&pArgList)
 
 bool GeoTiffPager::execute(PlugInArgList *pInputArgList, PlugInArgList *)
 {
-   if((mpRaster != NULL) || (pInputArgList == NULL))
+   if ((mpRaster != NULL) || (pInputArgList == NULL))
    {
       return false;
    }
 
    //Get PlugIn Arguments
 
-   RasterElement *pRaster = pInputArgList->getPlugInArgValue<RasterElement>("Raster Element");
-   if(pRaster == NULL)
+   RasterElement* pRaster = pInputArgList->getPlugInArgValue<RasterElement>("Raster Element");
+   if (pRaster == NULL)
    {
       return false;
    }
 
    //Get Filename argument
-   Filename *pFilename = pInputArgList->getPlugInArgValue<Filename>("Filename");
-   if(pFilename == NULL)
+   Filename* pFilename = pInputArgList->getPlugInArgValue<Filename>("Filename");
+   if (pFilename == NULL)
    {
       return false;
    }
@@ -243,7 +286,7 @@ RasterPage* GeoTiffPager::getPage(DataRequest *pOriginalRequest,
       DimensionDescriptor startColumn, 
       DimensionDescriptor startBand)
 {
-   if(mpRaster == NULL || pOriginalRequest == NULL)
+   if (mpRaster == NULL || pOriginalRequest == NULL)
    {
       return NULL;
    }
@@ -253,7 +296,7 @@ RasterPage* GeoTiffPager::getPage(DataRequest *pOriginalRequest,
       return NULL;
    }
 
-   GeoTiffPage *pPage(NULL);
+   GeoTiffPage* pPage(NULL);
 
    // ensure only one thread enters this code at a time
    mpMutex->MutexLock();
@@ -262,7 +305,8 @@ RasterPage* GeoTiffPager::getPage(DataRequest *pOriginalRequest,
    // and ensure that the mutex gets unlocked on an error
    try
    {
-      const RasterDataDescriptor* pDescriptor = dynamic_cast<const RasterDataDescriptor*>(mpRaster->getDataDescriptor());
+      const RasterDataDescriptor* pDescriptor =
+         dynamic_cast<const RasterDataDescriptor*>(mpRaster->getDataDescriptor());
       if (pDescriptor == NULL)
       {
          throw string("Invalid Data Descriptor");
@@ -290,9 +334,9 @@ RasterPage* GeoTiffPager::getPage(DataRequest *pOriginalRequest,
       unsigned int bandNumber = startBand.getOnDiskNumber();
 
       // make sure the request is valid
-      if((rowNumber  >= numRows)    || ((rowNumber  + concurrentRows)    > numRows) ||
-         (colNumber  >= numColumns) || ((colNumber  + concurrentColumns) > numColumns) ||
-         (bandNumber >= numBands)   || ((bandNumber + concurrentBands)   > numBands))
+      if ((rowNumber >= numRows) || ((rowNumber + concurrentRows) > numRows) ||
+         (colNumber >= numColumns) || ((colNumber + concurrentColumns) > numColumns) ||
+         (bandNumber >= numBands) || ((bandNumber + concurrentBands) > numBands))
       {
          // Since it is acceptable to increment off the end of the data, do not report an error message
          throw string();
@@ -309,23 +353,23 @@ RasterPage* GeoTiffPager::getPage(DataRequest *pOriginalRequest,
        *     with tiles
        **/
 
-      if(TIFFIsTiled(mpTiff) == 0)
+      if (TIFFIsTiled(mpTiff) == 0)
       {
          // the data are stored as strips
          tsize_t stripSize(TIFFStripSize(mpTiff)); // columns * bands * rows in a strip (bands=1 for BSQ)
          int stripCount(TIFFNumberOfStrips(mpTiff));
 
-         if((stripSize == 0) || (stripCount == 0))
+         if ((stripSize == 0) || (stripCount == 0))
          {
             throw string("TIFF is not tiled. Strip size or strip count = 0");
          }
 
-         if(interleave == BIL)
+         if (interleave == BIL)
          {
             // we don't do this in memory, so we don't do it on disk either
             throw string("BIL interleave method not supported");
          }
-         else if((interleave == BSQ) && (concurrentBands != 1))
+         else if ((interleave == BSQ) && (concurrentBands != 1))
          {
             throw string("BSQ data can only be accessed one band at a time.");
          }
@@ -341,15 +385,16 @@ RasterPage* GeoTiffPager::getPage(DataRequest *pOriginalRequest,
          tstrip_t endStrip(TIFFComputeStrip(mpTiff, (rowNumber + concurrentRows) - 1, bandNumber));
 
          // if this data block is already in the cache, retrieve it...otherwise create a new block
-         GeoTiffOnDisk::CacheUnit *pCacheUnit(mBlockCache.getCacheUnit(startStrip, endStrip, stripSize));
-         if(pCacheUnit == NULL)
+         GeoTiffOnDisk::CacheUnit* pCacheUnit(mBlockCache.getCacheUnit(startStrip, endStrip, stripSize));
+         if (pCacheUnit == NULL)
          {
             throw string("Can't create a cache unit");
          }
-         if(interleave == BIP)
+         if (interleave == BIP)
          {
-            float rowsPerStrip(float(stripSize / numColumns) / float(numBands) / float(bytesPerElement));
-            if(rowsPerStrip < 1.0)
+            float rowsPerStrip(static_cast<float>(stripSize / numColumns) / static_cast<float>(numBands) /
+               static_cast<float>(bytesPerElement));
+            if (rowsPerStrip < 1.0)
             {
                pPage = new GeoTiffPage(pCacheUnit, 0 + (rowNumber * numBands * bytesPerElement) +
                                                            (bandNumber * bytesPerElement),
@@ -366,10 +411,10 @@ RasterPage* GeoTiffPager::getPage(DataRequest *pOriginalRequest,
                            numRowsAvailable, 0, 0);
             }
          }
-         else if(interleave == BSQ)
+         else if (interleave == BSQ)
          {
-            float rowsPerStrip(float(stripSize / numColumns) / float(bytesPerElement));
-            if(rowsPerStrip < 1.0)
+            float rowsPerStrip(static_cast<float>(stripSize / numColumns) / static_cast<float>(bytesPerElement));
+            if (rowsPerStrip < 1.0)
             {
                pPage = new GeoTiffPage(pCacheUnit, 0 + colNumber * bytesPerElement, 0, 0, 0);
             }
@@ -384,24 +429,24 @@ RasterPage* GeoTiffPager::getPage(DataRequest *pOriginalRequest,
             }
          }
 
-         if(pPage == NULL)
+         if (pPage == NULL)
          {
             throw string("Can't create a data block");
          }
-         if(pCacheUnit->isEmpty())
+         if (pCacheUnit->isEmpty())
          {
             // we need to load this block
-            char *pData(pCacheUnit->data());
-            if(pData == NULL)
+            char* pData(pCacheUnit->data());
+            if (pData == NULL)
             {
                throw string("Data block has no data");
             }
             // read in the strips
-            char *pBlockPos(pData);
-            for(tstrip_t curStrip = startStrip; curStrip <= endStrip; curStrip++)
+            char* pBlockPos(pData);
+            for (tstrip_t curStrip = startStrip; curStrip <= endStrip; curStrip++)
             {
                tsize_t bytesRead = TIFFReadEncodedStrip(mpTiff, curStrip, pBlockPos, -1);
-               if(bytesRead == -1)
+               if (bytesRead == -1)
                {
                   throw string("Error reading TIFF data");
                }
@@ -417,7 +462,7 @@ RasterPage* GeoTiffPager::getPage(DataRequest *pOriginalRequest,
          throw string("Tiled tiffs are not supported.");
       }
    }
-   catch(string &exc)
+   catch (string &exc)
    {
       pPage = NULL;
       if (exc.empty() == false)
@@ -435,7 +480,7 @@ RasterPage* GeoTiffPager::getPage(DataRequest *pOriginalRequest,
 
 void GeoTiffPager::releasePage(RasterPage *pPage)
 {
-   if(pPage == NULL)
+   if (pPage == NULL)
    {
       return;
    }

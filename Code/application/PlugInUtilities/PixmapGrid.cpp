@@ -38,7 +38,8 @@ void PixmapGrid::setNumColumns(int iColumns)
    updatePixmaps();
 }
 
-bool PixmapGrid::setPixmap(int iRow, int iColumn, const QPixmap& pix, const QString& identifier, const QString& strDescription)
+bool PixmapGrid::setPixmap(int iRow, int iColumn, const QPixmap& pix, const QString& identifier,
+                           const QString& strDescription)
 {
    // Check for an invalid input cell
    int iNumRows = getNumRows();
@@ -103,7 +104,8 @@ QPixmap PixmapGrid::getPixmap(int iRow, int iColumn) const
 
 QPixmap PixmapGrid::getPixmap(const QString& identifier) const
 {
-   int iRow, iColumn;
+   int iRow;
+   int iColumn;
    identifierToCell(identifier, iRow, iColumn);
    CellPixmap selectedPix = cellToPixmap(iRow, iColumn);
    return selectedPix.mPixmap;
@@ -129,7 +131,8 @@ QString PixmapGrid::getPixmapDescription(int iRow, int iColumn) const
 
 QString PixmapGrid::getPixmapDescription(const QString& identifier) const
 {
-   int iRow, iColumn;
+   int iRow;
+   int iColumn;
    identifierToCell(identifier, iRow, iColumn);
    CellPixmap selectedPix = cellToPixmap(iRow, iColumn);
    return selectedPix.mDescription;
@@ -358,7 +361,8 @@ void PixmapGrid::setSelectedPixmap(int iRow, int iColumn)
       map<int, CellPixmap>::const_iterator iter = mPixmaps.find(index);
       if (iter == mPixmaps.end())
       {
-         int orgRow = -1, orgCol = -1;        
+         int orgRow = -1;
+         int orgCol = -1;
          identifierToCell(mSelectedCell.mIdentifier, orgRow, orgCol);
          disconnect(this, SIGNAL(cellSelected(int, int)), this, SLOT(setSelectedPixmap(int, int)));
          setSelectedCell(orgRow, orgCol);

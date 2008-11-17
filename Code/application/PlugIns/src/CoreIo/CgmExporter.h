@@ -21,7 +21,7 @@ public:
 
    bool getInputSpecification(PlugInArgList*& pInArgList);
    bool getOutputSpecification(PlugInArgList*& pOutArgList);
-   bool execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList);
+   bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
 
 private:
    Service<PlugInManagerServices> mpPlugInManager;

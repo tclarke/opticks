@@ -6,10 +6,9 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
- 
 
-#ifndef DATUM_H
-#define DATUM_H
+#ifndef MGRSDATUM_H
+#define MGRSDATUM_H
 
 /***************************************************************************/
 /* RSC IDENTIFIER: Datum
@@ -965,8 +964,4 @@ typedef enum Datum_Types
  *    Height    : Calculated height value, in meters.         (output)
  */
 
-
-
-#endif /* DATUM_H */
-
- 
+#endif

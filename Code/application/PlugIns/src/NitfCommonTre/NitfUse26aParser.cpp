@@ -263,7 +263,7 @@ Nitf::TreState Nitf::Use26aParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID && totalFields != numFields)
    {
       reporter << "Total fields in the Dynamic Object(" <<
-         totalFields <<") did not match the number found(" << numFields << ") ";
+         totalFields << ") did not match the number found(" << numFields << ") ";
       status = INVALID;
    }
 
@@ -288,30 +288,30 @@ bool Nitf::Use26aParser::fromDynamicObject(const DynamicObject& input, ostream& 
 
    try
    {
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(USE26A::FIELD1)), 3, -1);
-      output <<   toString( dv_cast<double>(input.getAttribute(USE26A::FIELD2)), 5, 1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(USE26A::FIELD3)), 1, -1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(USE26A::FIELD4)), 5, -1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(USE26A::FIELD5)), 3, -1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(USE26A::FIELD6)),  1, -1);
-      output <<   toString( dv_cast<double>(input.getAttribute(USE26A::FIELD7)),  3, 1);
-      output <<   toString( dv_cast<double>(input.getAttribute(USE26A::FIELD8)), 5, 2);
-      output <<   toString( dv_cast<double>(input.getAttribute(USE26A::FIELD9)), 6, 2, ZERO_FILL, POS_SIGN_TRUE);
-      output << sizeString( dv_cast<string>(input.getAttribute (USE26A::FIELD10)), 12);
-      output << sizeString( dv_cast<string>(input.getAttribute (USE26A::FIELD11)), 15);
-      output <<   toString( dv_cast<double>(input.getAttribute(USE26A::FIELD12)), 4, 1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(USE26A::FIELD13)), 1, -1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(USE26A::FIELD14)), 3, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(USE26A::FIELD1)), 3, -1);
+      output << toString(dv_cast<double>(input.getAttribute(USE26A::FIELD2)), 5, 1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(USE26A::FIELD3)), 1, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(USE26A::FIELD4)), 5, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(USE26A::FIELD5)), 3, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(USE26A::FIELD6)), 1, -1);
+      output << toString(dv_cast<double>(input.getAttribute(USE26A::FIELD7)), 3, 1);
+      output << toString(dv_cast<double>(input.getAttribute(USE26A::FIELD8)), 5, 2);
+      output << toString(dv_cast<double>(input.getAttribute(USE26A::FIELD9)), 6, 2, ZERO_FILL, POS_SIGN_TRUE);
+      output << sizeString(dv_cast<string>(input.getAttribute(USE26A::FIELD10)), 12);
+      output << sizeString(dv_cast<string>(input.getAttribute(USE26A::FIELD11)), 15);
+      output << toString(dv_cast<double>(input.getAttribute(USE26A::FIELD12)), 4, 1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(USE26A::FIELD13)), 1, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(USE26A::FIELD14)), 3, -1);
 
       // one field of 2 or 2 fields of 1?
-      output << sizeString( dv_cast<string>(input.getAttribute (USE26A::FIELD15)), 2);
+      output << sizeString(dv_cast<string>(input.getAttribute(USE26A::FIELD15)), 2);
 
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(USE26A::FIELD16)), 2, -1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(USE26A::FIELD17)), 5, -1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(USE26A::FIELD18)), 3, -1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(USE26A::FIELD19)), 6, -1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(USE26A::FIELD20)), 6, -1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(USE26A::FIELD21)), 6, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(USE26A::FIELD16)), 2, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(USE26A::FIELD17)), 5, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(USE26A::FIELD18)), 3, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(USE26A::FIELD19)), 6, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(USE26A::FIELD20)), 6, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(USE26A::FIELD21)), 6, -1);
    }
    catch (const bad_cast&)
    {

@@ -35,8 +35,8 @@ ThreadSafeProgressImp::~ThreadSafeProgressImp()
 
 const string& ThreadSafeProgressImp::getObjectType() const
 {
-   static string type = "ThreadSafeProgressImp";
-   return type;
+   static string sType = "ThreadSafeProgressImp";
+   return sType;
 }
 
 bool ThreadSafeProgressImp::isKindOf(const string& className) const
@@ -59,7 +59,7 @@ bool ThreadSafeProgressImp::isKindOf(const string& className) const
 void ThreadSafeProgressImp::updateProgress(const string& text, int percent, ReportingLevel gran)
 {
    mpMutex->MutexLock();
-   ProgressImp::updateProgress(text,percent,gran);
+   ProgressImp::updateProgress(text, percent, gran);
    mpMutex->MutexUnlock();
 }
 
@@ -71,7 +71,7 @@ void ThreadSafeProgressImp::updateProgress(const string& text, int percent, Repo
 void ThreadSafeProgressImp::getProgress(string& text, int& percent, ReportingLevel& gran) const
 {
    mpMutex->MutexLock();
-   ProgressImp::getProgress(text,percent,gran);
+   ProgressImp::getProgress(text, percent, gran);
    mpMutex->MutexUnlock();
 }
 

@@ -34,7 +34,7 @@ public:
    ObjectFactory* getObjectFactory();
    SessionManager* getSessionManager();
 
-   virtual bool getJvm(JavaVM *&pJvm, JNIEnv *&pEnv);
+   virtual bool getJvm(JavaVM*& pJvm, JNIEnv*& pEnv);
 
 protected:
    ApplicationServicesImp();

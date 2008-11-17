@@ -1856,8 +1856,8 @@ CopyrightInformation::CopyrightInformation()
       ""
       "<P>"
       "That's all there is to it!");
-   addDependencyCopyright("splash screen", "The photo in the Opticks splash screen is copyright Andrew Davidhazy (http://www.rit.edu/~andpph) "
-                                           "and is used with permission.");
+   addDependencyCopyright("splash screen", "The photo in the Opticks splash screen is copyright Andrew Davidhazy "
+      "(http://www.rit.edu/~andpph) and is used with permission.");
    addDependencyCopyright("yaml-cpp", "<p>"
       "Copyright (c) 2008 Jesse Beder.</p>"
       "<p>Permission is hereby granted, free of charge, to any person obtaining a copy "

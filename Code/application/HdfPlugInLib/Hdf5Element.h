@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef HDF5_ELEMENT_H
-#define HDF5_ELEMENT_H
+#ifndef HDF5ELEMENT_H
+#define HDF5ELEMENT_H
 
 #include "Hdf5Node.h"
 

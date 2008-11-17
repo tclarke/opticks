@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef COLOR_MAP_H
-#define COLOR_MAP_H
+#ifndef COLORMAP_H
+#define COLORMAP_H
 
 #include "ColorType.h"
 
@@ -252,23 +252,23 @@ public:
     *
     * @return \c true if successful, \c false otherwise.
     */
-   bool loadFromBuffer (const std::string& buffer);
+   bool loadFromBuffer(const std::string& buffer);
 
 private:
    static const int VERSION_ONE_TABLE_SIZE = 256;
 
-   bool serialize (QIODevice &io) const;
-   bool deserialize (QIODevice &io);
+   bool serialize(QIODevice &io) const;
+   bool deserialize(QIODevice &io);
    bool setTable(const std::string& name, const std::vector<ColorType>& table);
    static bool tableIsValid(const std::vector<ColorType>& table);
-   std::vector<ColorType> tableFromGradient (const Gradient &gradient);
+   std::vector<ColorType> tableFromGradient(const Gradient &gradient);
    bool deserializeGradient(QIODevice &io, int version);
    bool serializeGradient(QIODevice &io) const;
 
    std::vector<ColorType> mTable;
    std::string mName;
    bool mIsDefault;
-   Gradient *mpGradient;
+   Gradient* mpGradient;
 };
 
 #endif

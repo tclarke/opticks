@@ -110,7 +110,7 @@ SessionManagerImp* SessionManagerImp::instance()
 {
    if (spInstance == NULL)
    {
-      if(mDestroyed)
+      if (mDestroyed)
       {
          throw logic_error("Attempting to use SessionManager after "
             "destroying it.");
@@ -123,7 +123,7 @@ SessionManagerImp* SessionManagerImp::instance()
 
 void SessionManagerImp::destroy()
 {
-   if(mDestroyed)
+   if (mDestroyed)
    {
       throw logic_error("Attempting to destroy SessionManager after "
          "destroying it.");
@@ -133,9 +133,11 @@ void SessionManagerImp::destroy()
    mDestroyed = true;
 }
 
-SessionManagerImp::SessionManagerImp() : mIsSaveLoad(false), mSaveLockCount(0)
+SessionManagerImp::SessionManagerImp() :
+   mName(SessionItemImp::generateUniqueId()),
+   mIsSaveLoad(false),
+   mSaveLockCount(0)
 {
-   mName = SessionItemImp::generateUniqueId();
 }
 
 SessionManagerImp::~SessionManagerImp()
@@ -144,8 +146,8 @@ SessionManagerImp::~SessionManagerImp()
 
 const string& SessionManagerImp::getObjectType() const
 {
-   static string type("SessionManagerImp");
-   return type;
+   static string sType("SessionManagerImp");
+   return sType;
 }
 
 bool SessionManagerImp::isKindOf(const string& className) const
@@ -239,23 +241,23 @@ SessionItem *SessionManagerImp::createDataElement(const string &type, const stri
 {
    QStringList typeComponents = QString::fromStdString(type).split("/");
    QString deType = typeComponents[0];
-   if(typeComponents.size() > 1)
+   if (typeComponents.size() > 1)
    {
       VERIFYRV(typeComponents.size() == 2 && typeComponents[0] == "DataElement", NULL);
       deType = typeComponents[1];
    }
-   if(deType.endsWith("Adapter"))
+   if (deType.endsWith("Adapter"))
    {
       deType.chop(7);
    }
-   if(deType.endsWith("Imp"))
+   if (deType.endsWith("Imp"))
    {
       deType.chop(3);
    }
    // create a DataDescriptor with name == id...the name will be set during DataElement deserialization
    DataDescriptorResource<DataDescriptor> pDescriptor(id, deType.toStdString(), NULL);
    VERIFYRV(pDescriptor.get() != NULL, NULL);
-   if(deType == "RasterElement")
+   if (deType == "RasterElement")
    {
       // need to fool ModelServices since it will be unable to create an in-memory pager right now
       static_cast<RasterDataDescriptor*>(pDescriptor.get())->setProcessingLocation(ON_DISK_READ_ONLY);
@@ -279,11 +281,11 @@ SessionItem *SessionManagerImp::createPlugInInstance(const string &type, const s
 
 SessionItem *SessionManagerImp::createModule(const string &type, const string &id, const std::string &name)
 {
-   const vector<ModuleDescriptor*> &modules = PlugInManagerServicesImp::instance()->getModuleDescriptors();
+   const vector<ModuleDescriptor*>& modules = PlugInManagerServicesImp::instance()->getModuleDescriptors();
    vector<ModuleDescriptor*>::const_iterator ppModule;
-   for (ppModule=modules.begin(); ppModule!=modules.end(); ++ppModule)
+   for (ppModule = modules.begin(); ppModule != modules.end(); ++ppModule)
    {
-      ModuleDescriptor *pModule = *ppModule;
+      ModuleDescriptor* pModule = *ppModule;
       LOG_IF(pModule == NULL, continue);
       if ("Module/" + pModule->getName() == type)
       {
@@ -477,8 +479,8 @@ void SessionManagerImp::destroyPlotSet(SessionItem *pItem)
 
 void SessionManagerImp::destroyAnimationController(SessionItem *pItem)
 {
-   AnimationController *pController = dynamic_cast<AnimationController*>(pItem);
-   if(pController != NULL)
+   AnimationController* pController = dynamic_cast<AnimationController*>(pItem);
+   if (pController != NULL)
    {
       Service<AnimationServices>()->destroyAnimationController(pController);
    }
@@ -486,14 +488,14 @@ void SessionManagerImp::destroyAnimationController(SessionItem *pItem)
 
 void SessionManagerImp::destroyAnimation(SessionItem *pItem)
 {
-   Animation *pAnimation = dynamic_cast<Animation*>(pItem);
-   if(pAnimation != NULL)
+   Animation* pAnimation = dynamic_cast<Animation*>(pItem);
+   if (pAnimation != NULL)
    {
       vector<AnimationController*> controllers = Service<AnimationServices>()->getAnimationControllers();
-      for(vector<AnimationController*>::iterator controller = controllers.begin();
+      for (vector<AnimationController*>::iterator controller = controllers.begin();
                controller != controllers.end(); ++controller)
       {
-         if((*controller)->getAnimation(pAnimation->getName()) == pAnimation)
+         if ((*controller)->getAnimation(pAnimation->getName()) == pAnimation)
          {
             (*controller)->destroyAnimation(pAnimation);
             return;
@@ -511,8 +513,8 @@ void SessionManagerImp::destroyAppWindow(SessionItem *pItem)
 
 void SessionManagerImp::destroyDataElement(SessionItem *pItem)
 {
-   DataElement *pElement = dynamic_cast<DataElement*>(pItem);
-   if(pElement != NULL)
+   DataElement* pElement = dynamic_cast<DataElement*>(pItem);
+   if (pElement != NULL)
    {
       Service<ModelServices>()->destroyElement(pElement);
    }
@@ -520,7 +522,7 @@ void SessionManagerImp::destroyDataElement(SessionItem *pItem)
 
 void SessionManagerImp::destroyPlugInInstance(SessionItem *pItem)
 {
-   PlugIn *pPlugIn = dynamic_cast<PlugIn*>(pItem);
+   PlugIn* pPlugIn = dynamic_cast<PlugIn*>(pItem);
    VERIFYNRV(pPlugIn != NULL);
    Service<PlugInManagerServices>()->destroyPlugIn(pPlugIn);
 }
@@ -574,7 +576,7 @@ string getBaseType(const string &type)
 
 void SessionManagerImp::createSessionItems(vector<IndexFileItem> &items, Progress *pProgress)
 {
-   map<string,CreatorProc> creators;
+   map<string, CreatorProc> creators;
    creators["PlotWidget"] = &SessionManagerImp::createPlotWidget;
    creators["PlotSet"] = &SessionManagerImp::createPlotSet;
    creators["View"] = &SessionManagerImp::createView;
@@ -591,10 +593,10 @@ void SessionManagerImp::createSessionItems(vector<IndexFileItem> &items, Progres
    vector<IndexFileItem>::iterator pItem;
    int count = items.size();
    int i = 0;
-   for (pItem=items.begin(), i=0; pItem!=items.end(); ++pItem, ++i)
+   for (pItem = items.begin(), i = 0; pItem != items.end(); ++pItem, ++i)
    {
       string baseType = getBaseType(pItem->mType);
-      map<string,CreatorProc>::iterator pNode = creators.find(baseType);
+      map<string, CreatorProc>::iterator pNode = creators.find(baseType);
       VERIFYNRV(pNode != creators.end());
       if (pProgress)
       {
@@ -623,11 +625,12 @@ void SessionManagerImp::deleteObsoleteFiles(const string &dir, const vector<Inde
    transform(itemsToKeep.begin(), itemsToKeep.end(), back_inserter(itemFilenames), ItemFilename());
    transform(files.begin(), files.end(), back_inserter(dirFilenames), boost::bind(&QString::toStdString, _1));
    sort(itemFilenames.begin(), itemFilenames.end());
-   
-   vector<string> obsoleteFiles;
-   set_difference(dirFilenames.begin(), dirFilenames.end(), itemFilenames.begin(), itemFilenames.end(), back_inserter(obsoleteFiles));
 
-   for (pFilename=obsoleteFiles.begin(); pFilename!=obsoleteFiles.end(); ++pFilename)
+   vector<string> obsoleteFiles;
+   set_difference(dirFilenames.begin(), dirFilenames.end(), itemFilenames.begin(), itemFilenames.end(),
+      back_inserter(obsoleteFiles));
+
+   for (pFilename = obsoleteFiles.begin(); pFilename != obsoleteFiles.end(); ++pFilename)
    {
       dirList.remove(QString::fromStdString(*pFilename));
    }
@@ -638,7 +641,7 @@ void SessionManagerImp::destroyFailedSessionItem(const string &type, SessionItem
    VERIFYNRV(pItem != NULL);
    mItems.erase(mItems.find(pItem->getId()));
 
-   map<string,DestroyerProc> destroyers;
+   map<string, DestroyerProc> destroyers;
    destroyers["PlotWidget"] = &SessionManagerImp::destroyPlotWidget;
    destroyers["PlotSet"] = &SessionManagerImp::destroyPlotSet;
    destroyers["View"] = &SessionManagerImp::destroyView;
@@ -653,7 +656,7 @@ void SessionManagerImp::destroyFailedSessionItem(const string &type, SessionItem
    destroyers["AnimationController"] = &SessionManagerImp::destroyAnimationController;
    destroyers["SessionInfo"] = &SessionManagerImp::destroySessionInfo;
    string baseType = getBaseType(type);
-   map<string,DestroyerProc>::iterator pNode = destroyers.find(baseType);
+   map<string, DestroyerProc>::iterator pNode = destroyers.find(baseType);
    VERIFYNRV(pNode != destroyers.end());
    DestroyerProc pProc = pNode->second;
    VERIFYNRV(pProc != NULL);
@@ -696,10 +699,20 @@ void SessionManagerImp::lockSessionSave()
 
 void SessionManagerImp::unlockSessionSave()
 {
-   if(mSaveLockCount > 0)
+   if (mSaveLockCount > 0)
    {
       mSaveLockCount--;
    }
+}
+
+bool SessionManagerImp::isSessionSaving() const
+{
+   return mIsSaveLoad;
+}
+
+bool SessionManagerImp::isSessionLoading() const
+{
+   return mIsSaveLoad;
 }
 
 bool SessionManagerImp::isSessionSaveLocked() const
@@ -726,7 +739,7 @@ struct IfiInitializer
       }
       return ifi;
    }
-   const string &mBaseType;
+   const string& mBaseType;
 };
 
 template<>
@@ -739,7 +752,7 @@ struct IfiInitializer<SessionItem*>
       ifi.mType = mBaseType;
       return ifi;
    }
-   const string &mBaseType;
+   const string& mBaseType;
 };
 
 template<>
@@ -756,7 +769,7 @@ struct IfiInitializer<TypeAwareObject*>
       }
       return ifi;
    }
-   const string &mBaseType;
+   const string& mBaseType;
 };
 
 template<class M>
@@ -772,21 +785,22 @@ void SessionManagerImp::getSessionItemsAnimation(vector<IndexFileItem> &items) c
       makeIfiI<SessionItem*>("AnimationController"));
 
    vector<AnimationController*>::const_iterator ppController;
-   for (ppController=animationControllers.begin(); ppController!=animationControllers.end(); ++ppController)
+   for (ppController = animationControllers.begin(); ppController != animationControllers.end(); ++ppController)
    {
       if (*ppController != NULL)
       {
-         const vector<Animation*> &currentAnimations = (*ppController)->getAnimations();
-         transform(currentAnimations.begin(), currentAnimations.end(), back_inserter(items), makeIfiI<SessionItem*>("Animation"));
+         const vector<Animation*>& currentAnimations = (*ppController)->getAnimations();
+         transform(currentAnimations.begin(), currentAnimations.end(), back_inserter(items),
+            makeIfiI<SessionItem*>("Animation"));
       }
    }
 }
 
 SessionItem *SessionManagerImp::getSessionItem(const string &id)
 {
-   if(mIsSaveLoad)
+   if (mIsSaveLoad)
    {
-      map<string,SessionItem*>::iterator pNode = mItems.find(id);
+      map<string, SessionItem*>::iterator pNode = mItems.find(id);
       if (pNode != mItems.end())
       {
          return pNode->second;
@@ -795,9 +809,9 @@ SessionItem *SessionManagerImp::getSessionItem(const string &id)
    else
    {
       vector<IndexFileItem> fileItems = getAllIndexFileItems();
-      for(vector<IndexFileItem>::const_iterator it = fileItems.begin(); it != fileItems.end(); ++it)
+      for (vector<IndexFileItem>::const_iterator it = fileItems.begin(); it != fileItems.end(); ++it)
       {
-         if(it->mId == id)
+         if (it->mId == id)
          {
             return it->getSessionItem();
          }
@@ -815,19 +829,19 @@ void SessionManagerImp::getSessionItemsDataElement(vector<IndexFileItem> &items)
 
 void SessionManagerImp::getSessionItemsPlugIn(vector<IndexFileItem> &items) const
 {
-   PlugInManagerServicesImp *pPims = PlugInManagerServicesImp::instance();
+   PlugInManagerServicesImp* pPims = PlugInManagerServicesImp::instance();
    vector<PlugIn*> plugIns = pPims->getPlugInInstances();
    transform(plugIns.begin(), plugIns.end(), back_inserter(items), 
       makeIfiI<PlugIn*>("PlugInInstance"));
 
-   const vector<ModuleDescriptor*> &modules = pPims->getModuleDescriptors();
+   const vector<ModuleDescriptor*>& modules = pPims->getModuleDescriptors();
    transform(modules.begin(), modules.end(), back_inserter(items), 
       makeIfiI<ModuleDescriptor*>("Module"));
 
    vector<ModuleDescriptor*>::const_iterator ppModule;
-   for (ppModule=modules.begin(); ppModule!=modules.end(); ++ppModule)
+   for (ppModule = modules.begin(); ppModule != modules.end(); ++ppModule)
    {
-      ModuleDescriptor *pModule = *ppModule;
+      ModuleDescriptor* pModule = *ppModule;
       LOG_IF(pModule == NULL, continue);
       vector<PlugInDescriptorImp*> plugInDescriptors = pModule->getPlugInSet();
       transform(plugInDescriptors.begin(), plugInDescriptors.end(), back_inserter(items), 
@@ -837,14 +851,14 @@ void SessionManagerImp::getSessionItemsPlugIn(vector<IndexFileItem> &items) cons
 
 void SessionManagerImp::getSessionItemsView(vector<IndexFileItem> &items, View &view) const
 {
-   SpatialDataViewImp *pSpatialDataView = dynamic_cast<SpatialDataViewImp*>(&view);
+   SpatialDataViewImp* pSpatialDataView = dynamic_cast<SpatialDataViewImp*>(&view);
    if (pSpatialDataView != NULL)
    {
       vector<Layer*> layers;
-      LayerList *pLayerList = pSpatialDataView->getLayerList();
+      LayerList* pLayerList = pSpatialDataView->getLayerList();
       pLayerList->getLayers(layers);
       transform(layers.begin(), layers.end(), back_inserter(items), makeIfiI<TypeAwareObject*>("Layer"));
-      Layer *pMeasurementLayer = pSpatialDataView->getMeasurementsLayer();
+      Layer* pMeasurementLayer = pSpatialDataView->getMeasurementsLayer();
       VERIFYNRV(pMeasurementLayer != NULL);
       DataElement* pElm = pMeasurementLayer->getDataElement();
       if (pElm != NULL)
@@ -855,21 +869,21 @@ void SessionManagerImp::getSessionItemsView(vector<IndexFileItem> &items, View &
    }
    else
    {
-      ProductView *pProductView = dynamic_cast<ProductView*>(&view);
+      ProductView* pProductView = dynamic_cast<ProductView*>(&view);
       if (pProductView != NULL)
       {
-         AnnotationLayer *pLayoutLayer = pProductView->getLayoutLayer();
+         AnnotationLayer* pLayoutLayer = pProductView->getLayoutLayer();
          list<GraphicObject*> objects;
          pLayoutLayer->getObjects(objects);
          list<GraphicObject*>::iterator ppObject;
-         for (ppObject=objects.begin(); ppObject!=objects.end(); ++ppObject)
+         for (ppObject = objects.begin(); ppObject != objects.end(); ++ppObject)
          {
-            GraphicObject *pObject = *ppObject;
+            GraphicObject* pObject = *ppObject;
             LOG_IF(pObject == NULL, continue);
-            ViewObjectImp *pViewObject = dynamic_cast<ViewObjectImp*>(pObject);
+            ViewObjectImp* pViewObject = dynamic_cast<ViewObjectImp*>(pObject);
             if (pViewObject != NULL)
             {
-               View *pLayerView = pViewObject->getView();
+               View* pLayerView = pViewObject->getView();
                if (pLayerView != NULL)
                {
                   getSessionItemsView(items, *pLayerView);
@@ -889,7 +903,7 @@ void SessionManagerImp::getSessionItemsWindow(vector<IndexFileItem> &items) cons
    // add each type of window
    int start(static_cast<int>(WORKSPACE_WINDOW));
    int stop(static_cast<int>(TOOLBAR));
-   for (int w=start; w<=stop; ++w)
+   for (int w = start; w <= stop; ++w)
    {
       WindowTypeEnum wt = static_cast<WindowTypeEnum>(w);
       pDesktop->getWindows(wt, windows);
@@ -903,12 +917,12 @@ void SessionManagerImp::getSessionItemsWindow(vector<IndexFileItem> &items) cons
    // get items associated with the windows
    pDesktop->getWindows(windows);
    vector<Window*>::iterator ppWindow;
-   for (ppWindow=windows.begin(); ppWindow!=windows.end(); ++ppWindow)
+   for (ppWindow = windows.begin(); ppWindow != windows.end(); ++ppWindow)
    {
       WorkspaceWindow* pWorkspaceWindow = dynamic_cast<WorkspaceWindow*>(*ppWindow);
       if (pWorkspaceWindow != NULL)
       {
-         View *pView = pWorkspaceWindow->getView();
+         View* pView = pWorkspaceWindow->getView();
          if (pView != NULL)
          {
             getSessionItemsView(items, *pView);
@@ -917,21 +931,21 @@ void SessionManagerImp::getSessionItemsWindow(vector<IndexFileItem> &items) cons
       }
       else
       {
-         PlotWindow *pPlotWindow = dynamic_cast<PlotWindow*>(*ppWindow);
+         PlotWindow* pPlotWindow = dynamic_cast<PlotWindow*>(*ppWindow);
          if (pPlotWindow != NULL)
          {
             vector<PlotSet*> plotSets;
             pPlotWindow->getPlotSets(plotSets);
             vector<PlotSet*>::iterator ppPlotSet;
-            for (ppPlotSet=plotSets.begin(); ppPlotSet!=plotSets.end(); ++ppPlotSet)
+            for (ppPlotSet = plotSets.begin(); ppPlotSet != plotSets.end(); ++ppPlotSet)
             {
-               PlotSet *pPlotSet = *ppPlotSet;
+               PlotSet* pPlotSet = *ppPlotSet;
                LOG_IF(pPlotSet == NULL, continue);
                vector<PlotWidget*> widgets;
                pPlotSet->getPlots(widgets);
 
                vector<PlotWidget*>::iterator ppPlotWidget;
-               for (ppPlotWidget=widgets.begin(); ppPlotWidget!=widgets.end(); ++ppPlotWidget)
+               for (ppPlotWidget = widgets.begin(); ppPlotWidget != widgets.end(); ++ppPlotWidget)
                {
                   PlotWidget* pPlotWidget = *ppPlotWidget;
                   LOG_IF(pPlotWidget == NULL, continue);
@@ -963,7 +977,8 @@ void SessionManagerImp::getSessionItemsWindow(vector<IndexFileItem> &items) cons
       (static_cast<ApplicationWindow*>(Service<DesktopServices>()->getMainWidget())));
 }
 
-SessionManagerImp::IndexFileItem::IndexFileItem(SessionItem *pItem) : mpItem(pItem)
+SessionManagerImp::IndexFileItem::IndexFileItem(SessionItem* pItem) :
+   mpItem(pItem)
 {
    if (pItem != NULL)
    {
@@ -972,8 +987,14 @@ SessionManagerImp::IndexFileItem::IndexFileItem(SessionItem *pItem) : mpItem(pIt
    }
 }
 
-SessionManagerImp::IndexFileItem::IndexFileItem() : mpItem(NULL)
+SessionManagerImp::IndexFileItem::IndexFileItem() :
+   mpItem(NULL)
 {
+}
+
+SessionItem* SessionManagerImp::IndexFileItem::getSessionItem() const
+{
+   return mpItem;
 }
 
 void SessionManagerImp::newSession()
@@ -981,7 +1002,7 @@ void SessionManagerImp::newSession()
    close();
    mName = SessionItemImp::generateUniqueId();
    MessageLogMgrImp::instance()->getLog(mName); //force the session log to be created.
-   ApplicationWindow *pAppWindow = static_cast<ApplicationWindow*>(Service<DesktopServices>()->getMainWidget());
+   ApplicationWindow* pAppWindow = static_cast<ApplicationWindow*>(Service<DesktopServices>()->getMainWidget());
    VERIFYNRV(pAppWindow != NULL);
    pAppWindow->registerPlugIns();
    pAppWindow->updateWizardCommands();
@@ -1022,8 +1043,8 @@ bool SessionManagerImp::open(const string &filename, Progress *pProgress)
          pProgress->updateProgress("Restoring base services...", 1, NORMAL);
       }
       notify(SIGNAL_NAME(SessionManager, AboutToRestore));
-      ApplicationWindow *pAppWindow = static_cast<ApplicationWindow*>(Service<DesktopServices>()->getMainWidget());
-      if(NN(pAppWindow))
+      ApplicationWindow* pAppWindow = static_cast<ApplicationWindow*>(Service<DesktopServices>()->getMainWidget());
+      if (NN(pAppWindow))
       {
          pAppWindow->registerPlugIns();
          pAppWindow->updateWizardCommands();
@@ -1044,7 +1065,7 @@ bool SessionManagerImp::open(const string &filename, Progress *pProgress)
          return false;
       }
    }
-   catch(SessionManagerImp::Failure &e)
+   catch (SessionManagerImp::Failure &e)
    {
       success = false;
       mIsSaveLoad = false;
@@ -1063,7 +1084,7 @@ bool SessionManagerImp::open(const string &filename, Progress *pProgress)
 void SessionManagerImp::populateItemMap(const vector<IndexFileItem> &items)
 {
    vector<IndexFileItem>::const_iterator pItem;
-   for (pItem=items.begin(); pItem!=items.end(); ++pItem)
+   for (pItem = items.begin(); pItem != items.end(); ++pItem)
    {
       if (pItem->mId.empty() == false && pItem->mpItem != NULL)
       {
@@ -1076,7 +1097,7 @@ vector<SessionManagerImp::IndexFileItem> SessionManagerImp::readIndexFile(const 
 {
    vector<IndexFileItem> items;
    Service<MessageLogMgr> pLogMgr;
-   MessageLog *pLog = pLogMgr->getLog();
+   MessageLog* pLog = pLogMgr->getLog();
    XmlReader xml(pLog, false);
 
    XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* pDocument = NULL;
@@ -1087,7 +1108,7 @@ vector<SessionManagerImp::IndexFileItem> SessionManagerImp::readIndexFile(const 
       pRootElement = pDocument->getDocumentElement();
       if (pRootElement != NULL)
       {
-         if(!XMLString::equals(pRootElement->getNodeName(), X("Session")))
+         if (!XMLString::equals(pRootElement->getNodeName(), X("Session")))
          {
             string msg = "Attempting to load a session from a non-session file.";
             throw Failure(msg);
@@ -1104,20 +1125,20 @@ vector<SessionManagerImp::IndexFileItem> SessionManagerImp::readIndexFile(const 
          {
             mName = SessionItemImp::generateUniqueId();
          }
-         FOR_EACH_DOMNODE(pRootElement, pChild)
+         FOR_EACH_DOMNODE (pRootElement, pChild)
          {
             if (XMLString::equals(pChild->getNodeName(), X("session_item")))
             {
                IndexFileItem item;
-               DOMElement *pElement = static_cast<DOMElement*>(pChild);
+               DOMElement* pElement = static_cast<DOMElement*>(pChild);
                item.mId = A(pElement->getAttribute(X("id")));
                item.mType = A(pElement->getAttribute(X("type")));
                item.mName = A(pElement->getAttribute(X("name")));
-               FOR_EACH_DOMNODE(pChild, pG1child)
+               FOR_EACH_DOMNODE (pChild, pG1child)
                {
                   if (XMLString::equals(pG1child->getNodeName(), X("block")))
                   {
-                     DOMElement *pBlockElement = dynamic_cast<DOMElement*>(pG1child);
+                     DOMElement* pBlockElement = dynamic_cast<DOMElement*>(pG1child);
                      if (pElement != NULL)
                      {
                         int size = atoi(A(pBlockElement->getAttribute(X("size"))));
@@ -1145,7 +1166,7 @@ void SessionManagerImp::restoreSessionItems(vector<IndexFileItem> &items, Progre
    int count = items.size();
    int i = 0;
    vector<IndexFileItem>::iterator pItem;
-   for (pItem=items.begin(), i=0; pItem!=items.end(); ++pItem, ++i)
+   for (pItem = items.begin(), i = 0; pItem != items.end(); ++pItem, ++i)
    {
       if (pProgress)
       {
@@ -1166,13 +1187,13 @@ void SessionManagerImp::restoreSessionItems(vector<IndexFileItem> &items, Progre
    }
    // remove session info item
    IndexFileItem infoItem = items.back();
-   SessionItem *pSessionItem = infoItem.mpItem;   
+   SessionItem* pSessionItem = infoItem.mpItem;   
    destroyFailedSessionItem(infoItem.mType, pSessionItem);
 }
 
 bool SessionManagerImp::restoreSessionItem(IndexFileItem &item)
 {
-   SessionItem *pSessionItem = item.mpItem;
+   SessionItem* pSessionItem = item.mpItem;
    VERIFY_MSG(pSessionItem!=NULL, 
       string("SessionItem '" + item.mType + "' not successfully created").c_str());
    ItemFilename filename;
@@ -1186,11 +1207,12 @@ bool SessionManagerImp::restoreSessionItem(IndexFileItem &item)
    return true;
 }
 
-pair<SessionManager::SerializationStatus,vector<pair<SessionItem*, string> > > SessionManagerImp::serialize(const string &filename, Progress *pProgress)
+pair<SessionManager::SerializationStatus, vector<pair<SessionItem*, string> > >
+SessionManagerImp::serialize(const string& filename, Progress* pProgress)
 {
-   if(isSessionSaveLocked())
+   if (isSessionSaveLocked())
    {
-      return make_pair(SerializationStatus(LOCKED), vector<pair<SessionItem*,string> >());
+      return make_pair(SerializationStatus(LOCKED), vector<pair<SessionItem*, string> >());
    }
    SerializationStatus status = SUCCESS;
    vector<IndexFileItem> items = getAllIndexFileItems();
@@ -1226,7 +1248,7 @@ pair<SessionManager::SerializationStatus,vector<pair<SessionItem*, string> > > S
          ppItem != items.end();
          ++ppItem, ++i)
       {
-         SessionItem *pItem = ppItem->getSessionItem();
+         SessionItem* pItem = ppItem->getSessionItem();
          LOG_IF(pItem == NULL, continue);
          string filePath = getPathForItem(sessionDirPath, *ppItem);
          if (pProgress)
@@ -1261,7 +1283,7 @@ pair<SessionManager::SerializationStatus,vector<pair<SessionItem*, string> > > S
       }
       if (pProgress)
       {
-         pProgress->updateProgress("Done.", 100, status==FAILURE?ERRORS:NORMAL);
+         pProgress->updateProgress("Done.", 100, status == FAILURE ? ERRORS : NORMAL);
       }
    }
 
@@ -1270,7 +1292,7 @@ pair<SessionManager::SerializationStatus,vector<pair<SessionItem*, string> > > S
 
 bool SessionManagerImp::writeIndexFile(const string &filename, const vector<IndexFileItem> &items)
 {
-   FILE *pFile = fopen(filename.c_str(), "w");
+   FILE* pFile = fopen(filename.c_str(), "w");
    if (pFile == NULL)
    {
       return false;
@@ -1280,22 +1302,22 @@ bool SessionManagerImp::writeIndexFile(const string &filename, const vector<Inde
    xml.addAttr("version", APP_VERSION_NUMBER);
    xml.addAttr("id", mName);
    vector<IndexFileItem>::const_iterator ppItem;
-   for (ppItem=items.begin(); ppItem!=items.end(); ++ppItem)
+   for (ppItem = items.begin(); ppItem != items.end(); ++ppItem)
    {
-      SessionItem *pItem = ppItem->getSessionItem();
+      SessionItem* pItem = ppItem->getSessionItem();
       if (pItem != NULL)
       {
-         XML_ADD_POINT(xml, session_item)
+         XML_ADD_POINT (xml, session_item)
          {
             xml.addAttr("id", ppItem->mId);
             xml.addAttr("type", ppItem->mType);
             xml.addAttr("name", ppItem->mName);
 
-            for(vector<int64_t>::const_iterator pSize=ppItem->mBlockSizes.begin(); 
-               pSize!=ppItem->mBlockSizes.end();
+            for (vector<int64_t>::const_iterator pSize = ppItem->mBlockSizes.begin();
+               pSize != ppItem->mBlockSizes.end();
                ++pSize)
             {
-               XML_ADD_POINT(xml, block)
+               XML_ADD_POINT (xml, block)
                {
                   xml.addAttr("size", *pSize);
                }

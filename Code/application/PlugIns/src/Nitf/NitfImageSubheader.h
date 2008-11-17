@@ -91,16 +91,16 @@ namespace Nitf
          const std::string& ossimName);
 
       static bool getGCPsFromUtmMgrs(const string& iGeolo, const LocationType gcpPixels[],
-         const unsigned int& numGcpPixels, list<GcpPoint>& gcps);
+         unsigned int numGcpPixels, list<GcpPoint>& gcps);
 
       static bool getGCPsFromUtm(const string& iCords, const string& iGeolo,
-         const LocationType gcpPixels[], const unsigned int& numGcpPixels, list<GcpPoint>& gcps);
+         const LocationType gcpPixels[], unsigned int numGcpPixels, list<GcpPoint>& gcps);
 
       static bool getGCPsFromGeographic(const string& iGeolo, const LocationType gcpPixels[],
-         const unsigned int& numGcpPixels, list<GcpPoint>& gcps);
+         unsigned int numGcpPixels, list<GcpPoint>& gcps);
 
       static bool getGCPsFromDecimalDegrees(const string& iGeolo, const LocationType gcpPixels[],
-         const unsigned int& numGcpPixels, list<GcpPoint>& gcps);
+         unsigned int numGcpPixels, list<GcpPoint>& gcps);
    };
 }
 

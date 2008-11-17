@@ -68,7 +68,7 @@ bool Tutorial4::getInputSpecification(PlugInArgList *&pInArgList)
    VERIFY(pInArgList = Service<PlugInManagerServices>()->getPlugInArgList());
    pInArgList->addArg<Progress>(Executable::ProgressArg(), NULL, "Progress reporter");
    pInArgList->addArg<RasterElement>(Executable::DataElementArg(), "Generate statistics for this raster element");
-   if(isBatch())
+   if (isBatch())
    {
       pInArgList->addArg<AoiElement>("AOI", NULL, "The AOI to calculate statistics over");
    }
@@ -88,56 +88,65 @@ bool Tutorial4::getOutputSpecification(PlugInArgList *&pOutArgList)
 bool Tutorial4::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
 {
    StepResource pStep("Tutorial 4", "app", "95034AC8-EC4C-4CB6-9089-4EF0DCBB41C3");
-   if(pInArgList == NULL || pOutArgList == NULL)
+   if (pInArgList == NULL || pOutArgList == NULL)
    {
       return false;
    }
-   Progress *pProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
-   RasterElement *pCube = pInArgList->getPlugInArgValue<RasterElement>(Executable::DataElementArg());
-   if(pCube == NULL)
+   Progress* pProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
+   RasterElement* pCube = pInArgList->getPlugInArgValue<RasterElement>(Executable::DataElementArg());
+   if (pCube == NULL)
    {
       std::string msg = "A raster cube must be specified.";
       pStep->finalize(Message::Failure, msg);
-      if(pProgress != NULL) pProgress->updateProgress(msg, 0, ERRORS);
+      if (pProgress != NULL)
+      {
+         pProgress->updateProgress(msg, 0, ERRORS);
+      }
+
       return false;
    }
-   RasterDataDescriptor *pDesc = static_cast<RasterDataDescriptor*>(pCube->getDataDescriptor());
+   RasterDataDescriptor* pDesc = static_cast<RasterDataDescriptor*>(pCube->getDataDescriptor());
    VERIFY(pDesc != NULL);
 
-   AoiElement *pAoi = NULL;
-   if(isBatch())
+   AoiElement* pAoi = NULL;
+   if (isBatch())
    {
       pAoi = pInArgList->getPlugInArgValue<AoiElement>("AOI");
    }
    else
    {
-      std::vector<DataElement*> pAois = Service<ModelServices>()->getElements(pCube, TypeConverter::toString<AoiElement>());
-      if(!pAois.empty())
+      Service<ModelServices> pModel;
+      std::vector<DataElement*> pAois = pModel->getElements(pCube, TypeConverter::toString<AoiElement>());
+      if (!pAois.empty())
       {
          QStringList aoiNames("<none>");
-         for(std::vector<DataElement*>::iterator it = pAois.begin(); it != pAois.end(); ++it)
+         for (std::vector<DataElement*>::iterator it = pAois.begin(); it != pAois.end(); ++it)
          {
             aoiNames << QString::fromStdString((*it)->getName());
          }
          QString aoi = QInputDialog::getItem(Service<DesktopServices>()->getMainWidget(),
             "Select an AOI", "Select an AOI for processing", aoiNames);
          // select AOI
-         if(aoi != "<none>")
+         if (aoi != "<none>")
          {
             std::string strAoi = aoi.toStdString();
-            for(std::vector<DataElement*>::iterator it = pAois.begin(); it != pAois.end(); ++it)
+            for (std::vector<DataElement*>::iterator it = pAois.begin(); it != pAois.end(); ++it)
             {
-               if((*it)->getName() == strAoi)
+               if ((*it)->getName() == strAoi)
                {
                   pAoi = static_cast<AoiElement*>(*it);
                   break;
                }
             }
-            if(pAoi == NULL)
+            if (pAoi == NULL)
             {
                std::string msg = "Invalid AOI.";
                pStep->finalize(Message::Failure, msg);
-               if(pProgress != NULL) pProgress->updateProgress(msg, 0, ERRORS);
+               if (pProgress != NULL)
+               {
+                  pProgress->updateProgress(msg, 0, ERRORS);
+               }
+
                return false;
             }
          }
@@ -148,11 +157,15 @@ bool Tutorial4::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
    unsigned int startColumn = 0;
    unsigned int endRow = pDesc->getRowCount() - 1;
    unsigned int endColumn = pDesc->getColumnCount() - 1;
-   const BitMask *pPoints = (pAoi == NULL) ? NULL : pAoi->getSelectedPoints();
-   if(pPoints != NULL && !pPoints->isOutsideSelected())
+   const BitMask* pPoints = (pAoi == NULL) ? NULL : pAoi->getSelectedPoints();
+   if (pPoints != NULL && !pPoints->isOutsideSelected())
    {
-      int x1,x2,y1,y2;
+      int x1;
+      int x2;
+      int y1;
+      int y2;
       pPoints->getMinimalBoundingBox(x1, y1, x2, y2);
+
       startRow = y1;
       endRow = y2;
       startColumn = x1;
@@ -168,26 +181,39 @@ bool Tutorial4::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
    double max = -min;
    double total = 0.0;
    unsigned int count = 0;
-   for(unsigned int row = startRow; row <= endRow; row++)
+   for (unsigned int row = startRow; row <= endRow; row++)
    {
-      if(isAborted())
+      if (isAborted())
       {
          std::string msg = getName() + " has been aborted.";
          pStep->finalize(Message::Abort, msg);
-         if(pProgress != NULL) pProgress->updateProgress(msg, 0, ABORT);
+         if (pProgress != NULL)
+         {
+            pProgress->updateProgress(msg, 0, ABORT);
+         }
+
          return false;
       }
-      if(!pAcc.isValid())
+      if (!pAcc.isValid())
       {
          std::string msg = "Unable to access the cube data.";
          pStep->finalize(Message::Failure, msg);
-         if(pProgress != NULL) pProgress->updateProgress(msg, 0, ERRORS);
+         if (pProgress != NULL)
+         {
+            pProgress->updateProgress(msg, 0, ERRORS);
+         }
+
          return false;
       }
-      if(pProgress != NULL) pProgress->updateProgress("Calculating statistics", row * 100 / pDesc->getRowCount(), NORMAL);
-      for(unsigned int col = startColumn; col <= endColumn; col++)
+
+      if (pProgress != NULL)
       {
-         if(pPoints == NULL || pPoints->getPixel(col, row))
+         pProgress->updateProgress("Calculating statistics", row * 100 / pDesc->getRowCount(), NORMAL);
+      }
+
+      for (unsigned int col = startColumn; col <= endColumn; col++)
+      {
+         if (pPoints == NULL || pPoints->getPixel(col, row))
          {
             switchOnEncoding(pDesc->getDataType(), updateStatistics, pAcc->getColumn(), min, max, total);
             ++count;
@@ -198,7 +224,7 @@ bool Tutorial4::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
    }
    double mean = total / count;
 
-   if(pProgress != NULL)
+   if (pProgress != NULL)
    {
       std::string msg = "Minimum value: " + StringUtilities::toDisplayString(min) + "\n"
                       + "Maximum value: " + StringUtilities::toDisplayString(max) + "\n"

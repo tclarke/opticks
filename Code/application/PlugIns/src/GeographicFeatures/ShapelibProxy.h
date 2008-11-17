@@ -41,7 +41,7 @@ public:
       ArcProxyLib::FeatureClassProperties &properties, std::string &errorMessage);
    bool query(const std::string &handle, std::string &errorMessage,
       const std::string &whereClause = "", const std::string &labelFormat = "",
-      LocationType minClip=LocationType(), LocationType maxClip=LocationType());
+      LocationType minClip = LocationType(), LocationType maxClip = LocationType());
 
    class ShapelibHandle
    {
@@ -50,16 +50,16 @@ public:
       {
       }
 
-      ShapelibHandle(const std::string &filename)
+      ShapelibHandle(const std::string& filename)
       {
          mShpHandle = SHPOpen(filename.c_str(), "rb");
          mDbfHandle = DBFOpen(filename.c_str(), "rb");
       }
 
-      ShapelibHandle(const ShapelibHandle &rhs)
+      ShapelibHandle(const ShapelibHandle& rhs) :
+         mShpHandle(rhs.mShpHandle),
+         mDbfHandle(rhs.mDbfHandle)
       {
-         mShpHandle = rhs.mShpHandle;
-         mDbfHandle = rhs.mDbfHandle;
       }
 
       void close()
