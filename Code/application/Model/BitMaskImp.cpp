@@ -1539,12 +1539,12 @@ bool BitMaskImp::fromXml(DOMNode* document, unsigned int version)
    {
       if (XMLString::equals(pChld->getNodeName(), X("rectangle")))
       {
-         DOMNode* gchld(pChld->getFirstChild());
+         DOMNode* pGchld(pChld->getFirstChild());
          double a;
          double b;
          double c;
          double d;
-         XmlReader::StrToQuadCoord(pChld->getNodeValue(), a, b, c, d);
+         XmlReader::StrToQuadCoord(pGchld->getNodeValue(), a, b, c, d);
          mx1 = static_cast<int>(a);
          my1 = static_cast<int>(b);
          mx2 = static_cast<int>(c);
@@ -1552,12 +1552,12 @@ bool BitMaskImp::fromXml(DOMNode* document, unsigned int version)
       }
       else if (XMLString::equals(pChld->getNodeName(), X("boundingBox")))
       {
-         DOMNode* gchld(pChld->getFirstChild());
+         DOMNode* pGchld(pChld->getFirstChild());
          double a;
          double b;
          double c;
          double d;
-         XmlReader::StrToQuadCoord(gchld->getNodeValue(), a, b, c, d);
+         XmlReader::StrToQuadCoord(pGchld->getNodeValue(), a, b, c, d);
          mbbx1 = static_cast<int>(a);
          mbby1 = static_cast<int>(b);
          mbbx2 = static_cast<int>(c);
@@ -1568,12 +1568,12 @@ bool BitMaskImp::fromXml(DOMNode* document, unsigned int version)
          // we only need to read 3 coords by StrToQuadCoord still works well
          // as it handles cases where there are fewer than four coords (defaults them to 0.0)
          // so we just pass in a dummy that never actually gets read
-         DOMNode* gchld(pChld->getFirstChild());
+         DOMNode* pGchld(pChld->getFirstChild());
          double a;
          double b;
          double c;
          double dummy;
-         XmlReader::StrToQuadCoord(gchld->getNodeValue(), a, b, c, dummy);
+         XmlReader::StrToQuadCoord(pGchld->getNodeValue(), a, b, c, dummy);
          mxSize = static_cast<int>(a);
          mySize = static_cast<int>(b);
          mCount = static_cast<int>(c);
@@ -1582,8 +1582,8 @@ bool BitMaskImp::fromXml(DOMNode* document, unsigned int version)
       else if (XMLString::equals(pChld->getNodeName(), X("mask")))
       {
          unsigned int dlen;
-         DOMNode* gchld(pChld->getFirstChild());
-         const XMLCh* b64(gchld->getNodeValue());
+         DOMNode* pGchld(pChld->getFirstChild());
+         const XMLCh* b64(pGchld->getNodeValue());
          XMLByte* bytes(Base64::decode((const XMLByte*)A(b64), &dlen));
 
          mpMask = new (nothrow) unsigned int*[mySize];
