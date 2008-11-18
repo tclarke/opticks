@@ -20,7 +20,7 @@ EnviField* parseEnviField(vector<string>::iterator& lineIterator)
    EnviField* pField = new EnviField();
 
    string::size_type position = line.find("{");
-   if (position < 0)
+   if (position == string::npos)
    {
       position = line.find("=");
       if (position == string::npos)
