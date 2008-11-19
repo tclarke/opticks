@@ -45,7 +45,7 @@ MemoryMappedMatrixView::MemoryMappedMatrixView(HANDLE_TYPE handle, unsigned int 
    mBandNum(bandNum),
    mInterLineBytes(interLineBytes),
    mInterBandBytes(interBandBytes),
-   mSegmentSize(static_cast<unsigned int>(ensureGranularity(segmentSize))),
+   mSegmentSize(0),
    mRequestedSegmentSize(segmentSize),
    mGranularity(granularity),
    mpBlock(NULL),
@@ -87,6 +87,8 @@ MemoryMappedMatrixView::MemoryMappedMatrixView(HANDLE_TYPE handle, unsigned int 
       mAccessPermissions = PROT_READ;
    }
 #endif
+
+   mSegmentSize = static_cast<unsigned int>(ensureGranularity(mRequestedSegmentSize));
 }
 
 MemoryMappedMatrixView::~MemoryMappedMatrixView()
