@@ -3415,7 +3415,10 @@ void ApplicationWindow::showZapDlg()
 void ApplicationWindow::registerPlugIns()
 {
    // Get the plug-in directory from the options
-   string plugInDir = Service<ConfigurationSettings>()->getPlugInPath();
+   ConfigurationSettingsExt2* pSettings =
+      dynamic_cast<ConfigurationSettingsExt2*>(Service<ConfigurationSettings>().get());
+   VERIFYNRV(pSettings != NULL);
+   string plugInDir = pSettings->getPlugInPath();
    if (plugInDir.empty())
    {
       plugInDir = QDir::currentPath().toStdString();
