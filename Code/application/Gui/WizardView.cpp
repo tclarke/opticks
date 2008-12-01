@@ -1232,6 +1232,8 @@ void WizardView::viewportMouseReleaseEvent(QMouseEvent* e)
             // Get the wizard items
             WizardItemImp* pInputItem = NULL;
             WizardItemImp* pOutputItem = NULL;
+            WizardNodeImp* pInputNode = NULL;
+            WizardNodeImp* pOutputNode = NULL;
 
             WizardItemImp* pItem = static_cast<WizardItemImp*>(pStartItem->getWizardItem());
             if (pItem != NULL)
@@ -1239,10 +1241,12 @@ void WizardView::viewportMouseReleaseEvent(QMouseEvent* e)
                if (pItem->isInputNode(pStartNode) == true)
                {
                   pInputItem = pItem;
+                  pInputNode = pStartNode;
                }
                else if (pItem->isOutputNode(pStartNode) == true)
                {
                   pOutputItem = pItem;
+                  pOutputNode = pStartNode;
                }
             }
 
@@ -1252,32 +1256,47 @@ void WizardView::viewportMouseReleaseEvent(QMouseEvent* e)
                if (pItem->isInputNode(pEndNode) == true)
                {
                   pInputItem = pItem;
+                  pInputNode = pEndNode;
                }
                else if (pItem->isOutputNode(pEndNode) == true)
                {
                   pOutputItem = pItem;
+                  pOutputNode = pEndNode;
                }
             }
 
-            // Check for circular connections between the two items
+            // Check for possible connection errors
             if ((pInputItem != NULL) && (pOutputItem != NULL))
             {
-               bool bConnected = pOutputItem->isItemConnected(pInputItem, true);
-               if (bConnected == false)
-               {
-                  // Check if the nodes are already connected
-                  bConnected = pStartNode->isNodeConnected(pEndNode);
-                  if (bConnected == false)
-                  {
-                     // Connect the nodes
-                     pStartNode->addConnectedNode(pEndNode);
-                     pEndNode->addConnectedNode(pStartNode);
-                  }
-               }
-               else
+               bool connectNodes = true;
+
+               // Check for circular connections between the two items
+               if (pOutputItem->isItemConnected(pInputItem, true) == true)
                {
                   QMessageBox::critical(this, "Wizard Builder", "These nodes cannot be connected "
                      "since a circular connection between the two items would be created!");
+                  connectNodes = false;
+               }
+
+               // Check if the nodes are already connected
+               if ((connectNodes == true) && (pStartNode->isNodeConnected(pEndNode) == true))
+               {
+                  connectNodes = false;
+               }
+
+               // Check for multiple output nodes connected to the same input node
+               if ((connectNodes == true) && (pInputNode != NULL) && (pInputNode->getNumConnectedNodes() > 0))
+               {
+                  QMessageBox::warning(this, "Wizard Builder", "The input node already has a valid input.  "
+                     "The connection will not be made.");
+                  connectNodes = false;
+               }
+
+               // Connect the nodes
+               if (connectNodes == true)
+               {
+                  pStartNode->addConnectedNode(pEndNode);
+                  pEndNode->addConnectedNode(pStartNode);
                }
             }
          }
