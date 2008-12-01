@@ -2022,6 +2022,14 @@ void WizardBuilder::connectItems()
       return;
    }
 
+   // Check for multiple output nodes connected to the same input node
+   if (pInputNode->getNumConnectedNodes() > 0)
+   {
+      QMessageBox::warning(this, "Wizard Builder", "The input node already has a valid input.  "
+         "The connection will not be made.");
+      return;
+   }
+
    // Connect the nodes
    pOutputNode->addConnectedNode(pInputNode);
    pInputNode->addConnectedNode(pOutputNode);
