@@ -481,7 +481,10 @@ FeatureProxyConnector *FeatureManager::getProxy()
    if (mpProxy == NULL)
    {
       // Start up ArcProxy
-      string plugInPath = Service<ConfigurationSettings>()->getPlugInPath();
+      ConfigurationSettingsExt2* pSettings =
+         dynamic_cast<ConfigurationSettingsExt2*>(Service<ConfigurationSettings>().get());
+      VERIFYRV(pSettings != NULL, NULL);
+      string plugInPath = pSettings->getPlugInPath();
 #if defined(WIN_API)
       QString proxyPath = QString::fromStdString(
          plugInPath + SLASH + "ArcProxy" + SLASH + "ArcProxy" + EXE_EXTENSION);
@@ -493,7 +496,7 @@ FeatureProxyConnector *FeatureManager::getProxy()
 #endif
 
       mpProxy = new FeatureProxyConnector(proxyPath);
-      VERIFY(mpProxy != NULL);
+      VERIFYRV(mpProxy != NULL, NULL);
       connect(mpProxy, SIGNAL(initialized()), this, SLOT(proxyInitialized()));
 
       mpProxy->initialize();
