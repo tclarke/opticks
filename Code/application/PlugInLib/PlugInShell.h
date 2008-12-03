@@ -39,7 +39,10 @@ class SettableSessionItem;
 #define FAIL_IF(cond, errorMessage, action) \
    if (cond) \
    { \
-      if (pProgress != NULL) pProgress->updateProgress(errorMessage, 0, ERRORS); \
+      if (pProgress != NULL) \
+      { \
+         pProgress->updateProgress(errorMessage, 0, ERRORS); \
+      } \
       pStep.get()->finalize(Message::Failure, errorMessage); \
       action; \
    }
@@ -214,7 +217,7 @@ protected:
     *         The verbatim copyright message for the dependency.
     *         The copyright message may be formatted with HTML markup.
     */
-   void addDependencyCopyright(const std::string &dependencyName, const std::string &copyright);
+   void addDependencyCopyright(const std::string& dependencyName, const std::string& copyright);
 
    /**
     *  Sets a text description for the plug-in.

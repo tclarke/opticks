@@ -36,14 +36,6 @@ public:
    PlugInArgListImp();
 
    /**
-    *  Copy constructor for the Plug-In Argument List.
-    *
-    */
-   PlugInArgListImp(const PlugInArgListImp& rhs);
-
-   PlugInArgListImp(const PlugInArgList& rhs);
-
-   /**
     *  Destructor for the Plug-In Argument List.
     *
     *  This destructor removes all dynamic references.
@@ -72,7 +64,7 @@ public:
     *  @return  The method returns true if the Plug-In Argument was 
     *           successfully added to the list, otherwise returns false.
     */
-   virtual bool addArg( const PlugInArg& );
+   virtual bool addArg(const PlugInArg&);
 
    /**
     *  Get a Plug-In Argument from the list.
@@ -91,7 +83,7 @@ public:
     *  @return  The method returns true if the Plug-In Argument was 
     *           successfully found in the list, otherwise returns false.
     */
-   virtual bool getArg( const std::string& name, PlugInArg*& piArg ) const;
+   virtual bool getArg(const std::string& name, PlugInArg*& piArg) const;
 
    /**
     *  Get a Plug-In Argument from the list.
@@ -116,7 +108,7 @@ public:
     *  @return  The method returns true if the index was a valid index in 
     *           the list, otherwise returns false.
     */
-   virtual bool getArg( int argNumber, PlugInArg*& piArg ) const;
+   virtual bool getArg(int argNumber, PlugInArg*& piArg) const;
 
    /**
     *  Get the number of Arguments in the Plug-In Argument List.
@@ -134,16 +126,19 @@ public:
     *  The catenateLists() method adds each Argument in the given Plug-In 
     *  Argument List to the current list using addArg().
     *
-    *  @param   argList
+    *  @param   plugInArg
     *           Plug-In Argument List whose elements are to be added to 
     *           the end of this List.
     *
     *  @return  The method returns true if all items in argList were 
     *           successfully added to this list, otherwise returns false.
     */
-   virtual bool catenateLists( const PlugInArgList& plugInArg );
+   virtual bool catenateLists(const PlugInArgList& plugInArg);
 
 private:
+   PlugInArgListImp(const PlugInArgList& rhs) {}
+   PlugInArgListImp(const PlugInArgListImp& rhs) {}
+
    std::vector<PlugInArgImp*> mArgList;
 };
 

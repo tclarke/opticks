@@ -22,7 +22,6 @@
 #include "SessionResource.h"
 #include "SpatialDataView.h"
 #include "Testable.h"
-#include "UtilityServices.h"
 #include "WorkspaceWindow.h"
 
 #include <string>
@@ -36,7 +35,9 @@ ExecutableAgentImp::ExecutableAgentImp() :
    mpInArgList(NULL),
    mpOutArgList(NULL),
    mpProgress(NULL),
-   mProgressDialog(false)
+   mPlugInProgress(false),
+   mProgressDialog(false),
+   mAutoInArg(true)
 {
 }
 
@@ -47,7 +48,11 @@ ExecutableAgentImp::~ExecutableAgentImp()
 
 void ExecutableAgentImp::instantiate(Progress* pProgress, bool batch)
 {
-   if (mInstantiated) throw logic_error("ExecutableAgent can not be instantiated twice!");
+   if (mInstantiated)
+   {
+      throw logic_error("ExecutableAgent can not be instantiated twice!");
+   }
+
    mInstantiated = true;
 
    mPlugIn = PlugInResource();
@@ -62,7 +67,11 @@ void ExecutableAgentImp::instantiate(Progress* pProgress, bool batch)
 void ExecutableAgentImp::instantiate(const string& plugInName, const string& menuCommand,
    Progress* pProgress, bool batch)
 {
-   if (mInstantiated) throw logic_error("ExecutableAgent can not be instantiated twice!");
+   if (mInstantiated)
+   {
+      throw logic_error("ExecutableAgent can not be instantiated twice!");
+   }
+
    mInstantiated = true;
 
    mPlugIn = PlugInResource(plugInName);
@@ -79,6 +88,7 @@ void ExecutableAgentImp::instantiate(const string& plugInName, const string& men
       if (pPlugInManager.get() != NULL)
       {
          mpProgress = pPlugInManager->getProgress(getPlugIn());
+         mPlugInProgress = true;
       }
    }
 }
@@ -86,7 +96,11 @@ void ExecutableAgentImp::instantiate(const string& plugInName, const string& men
 void ExecutableAgentImp::instantiate(PlugIn* pPlugIn, const string& menuCommand,
    Progress* pProgress, bool batch)
 {
-   if (mInstantiated) throw logic_error("ExecutableAgent can not be instantiated twice!");
+   if (mInstantiated)
+   {
+      throw logic_error("ExecutableAgent can not be instantiated twice!");
+   }
+
    mInstantiated = true;
 
    mPlugIn = PlugInResource(pPlugIn);
@@ -103,6 +117,7 @@ void ExecutableAgentImp::instantiate(PlugIn* pPlugIn, const string& menuCommand,
       if (pPlugInManager.get() != NULL)
       {
          mpProgress = pPlugInManager->getProgress(getPlugIn());
+         mPlugInProgress = true;
       }
    }
 }
@@ -111,12 +126,6 @@ void ExecutableAgentImp::setPlugIn(const string& plugInName)
 {
    checkInstantiate();
    clearArgLists();
-   if (mpProgress != NULL)
-   {
-      Service<UtilityServices> pServices;
-      pServices->destroyProgress(mpProgress);
-      mpProgress = NULL; 
-   }
 
    // Free the existing plug-in
    mPlugIn = PlugInResource();
@@ -126,10 +135,11 @@ void ExecutableAgentImp::setPlugIn(const string& plugInName)
       PlugInResource plugIn(plugInName);
       mPlugIn = plugIn;
 
-      Service<PlugInManagerServices> pPlugInManager;
-      if (pPlugInManager.get() != NULL)
+      if ((mpProgress == NULL) || (mPlugInProgress == true))
       {
+         Service<PlugInManagerServices> pPlugInManager;
          mpProgress = pPlugInManager->getProgress(getPlugIn());
+         mPlugInProgress = true;
       }
    }
 }
@@ -138,12 +148,6 @@ void ExecutableAgentImp::setPlugIn(PlugIn* pPlugIn)
 {
    checkInstantiate();
    clearArgLists();
-   if (mpProgress != NULL)
-   {
-      Service<UtilityServices> pServices;
-      pServices->destroyProgress(mpProgress);
-      mpProgress = NULL; 
-   }
 
    // Free the existing plug-in
    mPlugIn = PlugInResource();
@@ -153,10 +157,11 @@ void ExecutableAgentImp::setPlugIn(PlugIn* pPlugIn)
       PlugInResource plugIn(pPlugIn);
       mPlugIn = plugIn;
 
-      Service<PlugInManagerServices> pPlugInManager;
-      if (pPlugInManager.get() != NULL)
+      if ((mpProgress == NULL) || (mPlugInProgress == true))
       {
+         Service<PlugInManagerServices> pPlugInManager;
          mpProgress = pPlugInManager->getProgress(getPlugIn());
+         mPlugInProgress = true;
       }
    }
 }
@@ -221,9 +226,8 @@ bool ExecutableAgentImp::executePlugIn()
 
    bool bSuccess = false;
    clearArgLists(false, true);
-
-   PlugInArgList &inArgList = getPopulatedInArgList();
-   PlugInArgList &outArgList = getOutArgList();
+   PlugInArgList& inArgList = (mAutoInArg ? getPopulatedInArgList() : getInArgList());
+   PlugInArgList& outArgList = getOutArgList();
    { // scope the lifetime of the lock
       SessionSaveLock lock;
       if (mSupportsRequestedBatchSetting)
@@ -246,6 +250,20 @@ bool ExecutableAgentImp::executePlugIn()
       else
       {
          //plug-in doesn't support the batch or interactive mode requested
+         string errorMessage;
+         if (mBatch == true)
+         {
+            errorMessage = "The " + pPlugIn->getName() + " plug-in does not support batch mode!";
+         }
+         else
+         {
+            errorMessage = "The " + pPlugIn->getName() + " plug-in does not support interactive mode!";
+         }
+
+         if (mpProgress != NULL) 
+         { 
+            mpProgress->updateProgress(errorMessage, 0, ERRORS);
+         }
          bSuccess = false;
       }
    }
@@ -436,10 +454,10 @@ void ExecutableAgentImp::populateArgValues(PlugInArgList *pArgList)
    if (pArgList != NULL)
    {
       // Window
-      PlugInArg *pWindowArg = NULL;
+      PlugInArg* pWindowArg = NULL;
       pArgList->getArg(Executable::WindowArg(), pWindowArg);
 
-      WorkspaceWindow *pWindow = NULL;
+      WorkspaceWindow* pWindow = NULL;
       string windowType = TypeConverter::toString<Window>();
       if (pWindowArg != NULL)
       {
@@ -464,10 +482,10 @@ void ExecutableAgentImp::populateArgValues(PlugInArgList *pArgList)
       }
 
       // View
-      PlugInArg *pViewArg = NULL;
+      PlugInArg* pViewArg = NULL;
       pArgList->getArg(Executable::ViewArg(), pViewArg);
 
-      View *pView = NULL;
+      View* pView = NULL;
       string viewType = TypeConverter::toString<View>();
       if (pViewArg != NULL)
       {
@@ -499,10 +517,10 @@ void ExecutableAgentImp::populateArgValues(PlugInArgList *pArgList)
       }
 
       // Layer
-      PlugInArg *pLayerArg = NULL;
+      PlugInArg* pLayerArg = NULL;
       pArgList->getArg(Executable::LayerArg(), pLayerArg);
 
-      Layer *pLayer = NULL;
+      Layer* pLayer = NULL;
       string layerType = TypeConverter::toString<Layer>();
       if (pLayerArg != NULL)
       {
@@ -537,10 +555,10 @@ void ExecutableAgentImp::populateArgValues(PlugInArgList *pArgList)
       }
 
       // Data Element
-      PlugInArg *pElementArg = NULL;
+      PlugInArg* pElementArg = NULL;
       pArgList->getArg(Executable::DataElementArg(), pElementArg);
 
-      DataElement *pElement = NULL;
+      DataElement* pElement = NULL;
       string elementType = TypeConverter::toString<DataElement>();
       if (pElementArg != NULL)
       {
@@ -553,9 +571,10 @@ void ExecutableAgentImp::populateArgValues(PlugInArgList *pArgList)
 
       if (pElement == NULL)
       {
-         RasterElement *pPrimaryRaster = NULL;
+         RasterElement* pPrimaryRaster = NULL;
+
          // Prefer the primary RasterElement of the view
-         SpatialDataView *pSpatialDataView = dynamic_cast<SpatialDataView*>(pView);
+         SpatialDataView* pSpatialDataView = dynamic_cast<SpatialDataView*>(pView);
          if (pSpatialDataView != NULL)
          {
             LayerList* pLayerList = pSpatialDataView->getLayerList();
@@ -575,7 +594,7 @@ void ExecutableAgentImp::populateArgValues(PlugInArgList *pArgList)
          // Try the element of the current layer
          if (pElement == NULL && pLayer != NULL)
          {
-            DataElement *pLayerElement = pLayer->getDataElement();
+            DataElement* pLayerElement = pLayer->getDataElement();
             if (pLayerElement != NULL && pLayerElement->isKindOf(elementType))
             {
                pElement = pLayerElement;
@@ -629,4 +648,14 @@ void ExecutableAgentImp::populateArgValues(PlugInArgList *pArgList)
 bool ExecutableAgentImp::isBatch() const
 {
    return mBatch;
+}
+
+void ExecutableAgentImp::setAutoArg(bool bAutoArg)
+{
+   mAutoInArg = bAutoArg;
+}
+
+bool ExecutableAgentImp::getAutoArg() const
+{
+   return mAutoInArg;
 }

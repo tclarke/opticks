@@ -17,17 +17,15 @@ using namespace std;
 SignaturePlotImp::SignaturePlotImp(const string& id, const string& viewName, QGLContext* pDrawContext,
                                    QWidget* pParent) :
    CartesianPlotImp(id, viewName, pDrawContext, pParent)
-{
-}
+{}
 
 SignaturePlotImp::~SignaturePlotImp()
-{
-}
+{}
 
 const string& SignaturePlotImp::getObjectType() const
 {
-   static string type("SignaturePlotImp");
-   return type;
+   static string sType("SignaturePlotImp");
+   return sType;
 }
 
 bool SignaturePlotImp::isKindOf(const string& className) const
@@ -56,7 +54,7 @@ void SignaturePlotImp::getViewTypes(vector<string>& classList)
    CartesianPlotImp::getViewTypes(classList);
 }
 
-SignaturePlotImp& SignaturePlotImp::operator= (const SignaturePlotImp& signaturePlot)
+SignaturePlotImp& SignaturePlotImp::operator=(const SignaturePlotImp& signaturePlot)
 {
    if (this != &signaturePlot)
    {
@@ -82,9 +80,9 @@ View* SignaturePlotImp::copy(QGLContext* pDrawContext, QWidget* pParent) const
    return pView;
 }
 
-bool SignaturePlotImp::copy(View *pView) const
+bool SignaturePlotImp::copy(View* pView) const
 {
-   SignaturePlotImp *pViewImp = dynamic_cast<SignaturePlotImp*>(pView);
+   SignaturePlotImp* pViewImp = dynamic_cast<SignaturePlotImp*>(pView);
    if (pViewImp != NULL)
    {
       UndoLock lock(pView);

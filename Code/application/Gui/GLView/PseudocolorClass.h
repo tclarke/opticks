@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #ifndef PSEUDOCOLORCLASS_H
 #define PSEUDOCOLORCLASS_H
 

@@ -69,7 +69,7 @@ public:
    UnitsImp* getUnits();
    const UnitsImp* getUnits() const;
 
-   void setDisplayBand(RasterChannelType eColor, DimensionDescriptor pBand);
+   void setDisplayBand(RasterChannelType eColor, DimensionDescriptor band);
    DimensionDescriptor getDisplayBand(RasterChannelType eColor) const;
    void setDisplayMode(DisplayMode displayMode);
    DisplayMode getDisplayMode() const;

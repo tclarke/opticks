@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef TIE_POINT_TESTER_INPUTS_H
-#define TIE_POINT_TESTER_INPUTS_H
+#ifndef TIEPOINTTESTERINPUTS_H
+#define TIEPOINTTESTERINPUTS_H
 
 /**
  *  Implements the data transfer structure between the GUI and the algorithm.

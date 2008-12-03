@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef DATA_PLOTTER_DLG_H
-#define DATA_PLOTTER_DLG_H
+#ifndef DATAPLOTTERDLG_H
+#define DATAPLOTTERDLG_H
 
 #include <QtGui/QComboBox>
 #include <QtGui/QDialog>
@@ -34,14 +34,14 @@ private slots:
    void addToPlot();
 
 private:
-   QComboBox *mpXbox;
-   QComboBox *mpYbox;
-   QPushButton *mpAddButton;
+   QComboBox* mpXbox;
+   QComboBox* mpYbox;
+   QPushButton* mpAddButton;
 
-   Signature &mSig;
-   PlotWidget *mpPlot;
-   PlotSet *mpPlotSet;
-   PlotWindow *mpPlotWindow;
+   Signature& mSig;
+   PlotWidget* mpPlot;
+   PlotSet* mpPlotSet;
+   PlotWindow* mpPlotWindow;
 };
 
 #endif

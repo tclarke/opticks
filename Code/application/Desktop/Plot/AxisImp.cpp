@@ -486,7 +486,7 @@ bool AxisImp::toXml(XMLWriter* pXml) const
 {
    pXml->addAttr("title", mTitle.toStdString());
    pXml->pushAddPoint(pXml->addElement("titleFont"));
-   if(!mTitleFont.toXml(pXml))
+   if (!mTitleFont.toXml(pXml))
    {
       return false;
    }
@@ -526,5 +526,9 @@ bool AxisImp::fromXml(DOMNode* pDocument, unsigned int version)
    mMaxMajorTicks = StringUtilities::fromXmlString<int>(A(pElmnt->getAttribute(X("maxMajorTicks"))));
    mMaxMinorTicks = StringUtilities::fromXmlString<int>(A(pElmnt->getAttribute(X("maxMinorTicks"))));
    mScaleDraw.setLabelFormat(A(pElmnt->getAttribute(X("scaleDrawLabelFormat"))));
+
+   updateScale();
+   updateSize();
+
    return true;
 }

@@ -107,14 +107,14 @@ void PlugInBranding::setHelpWebpage(const Filename* pWebpage)
 
 const vector<PlugInBranding>& PlugInBranding::getBrandings()
 {
-   static vector<PlugInBranding> brandings;
-   static bool parsedBranding = false;
-   if (!parsedBranding)
+   static vector<PlugInBranding> sBrandings;
+   static bool sParsedBranding = false;
+   if (!sParsedBranding)
    {
-      parsedBranding = true; /* Since the parsed brandings are used during start-up to show
-                                the splash screen, we should only attempt to parse them once
-                                even if there is an error during the parse, so that the About
-                                dialog will be consistent with the splash screen display. */
+      sParsedBranding = true; /* Since the parsed brandings are used during start-up to show
+                                 the splash screen, we should only attempt to parse them once
+                                 even if there is an error during the parse, so that the About
+                                 dialog will be consistent with the splash screen display. */
       const Filename* pSupportFilesPath = ConfigurationSettings::getSettingSupportFilesPath();
       if (pSupportFilesPath != NULL)
       {
@@ -228,11 +228,13 @@ const vector<PlugInBranding>& PlugInBranding::getBrandings()
                         }
                      }
                   }
-                  brandings.push_back(branding);
+
+                  sBrandings.push_back(branding);
                }
             }
          }
       }
    }
-   return brandings;
+
+   return sBrandings;
 }

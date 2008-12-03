@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef SESSION_MANAGER_IMP
-#define SESSION_MANAGER_IMP
+#ifndef SESSIONMANAGERIMP_H
+#define SESSIONMANAGERIMP_H
 
 #include "SessionItem.h"
 #include "SessionManager.h"
@@ -29,16 +29,6 @@ public:
     */
    SIGNAL_METHOD(SessionManagerImp, NameChanged)
 
-   /**
-    *  Emitted with a null boost::any when the session has finished restoring itself.
-    */
-   SIGNAL_METHOD(SessionManagerImp, SessionRestored)
-
-   /**
-    *  Emitted with a null boost::any just prior to restoring a session.
-    */
-   SIGNAL_METHOD(SessionManagerImp, AboutToRestore)
-
    static SessionManagerImp* instance();
    static void destroy();
 
@@ -51,8 +41,8 @@ public:
    std::vector<SessionItem*> getAllSessionItems();
    std::string getName() const;
 
-   bool isSessionSaving() const { return mIsSaveLoad; }
-   bool isSessionLoading() const { return mIsSaveLoad; }
+   bool isSessionSaving() const;
+   bool isSessionLoading() const;
    bool isSessionSaveLocked() const;
 
    /**
@@ -82,7 +72,8 @@ public:
     *            otherwise.
     */
    bool open(const std::string &filename, Progress *pProgress);
-   std::pair<SerializationStatus,std::vector<std::pair<SessionItem*, std::string> > > serialize(const std::string &filename, Progress *pProgress);
+   std::pair<SerializationStatus, std::vector<std::pair<SessionItem*, std::string> > >
+      serialize(const std::string& filename, Progress* pProgress);
    SessionItem *getSessionItem(const std::string &id);
 
    struct IndexFileItem
@@ -90,7 +81,7 @@ public:
       IndexFileItem(SessionItem* pItem);
       IndexFileItem();
 
-      SessionItem* getSessionItem() const { return mpItem; }
+      SessionItem* getSessionItem() const;
       SessionItem* mpItem;
       std::string mId;
       std::string mType;
@@ -163,7 +154,7 @@ private:
    static bool mDestroyed;
    std::string mName;
    std::string mRestoreSessionPath;
-   std::map<std::string,SessionItem*> mItems;
+   std::map<std::string, SessionItem*> mItems;
    bool mIsSaveLoad;
    unsigned int mSaveLockCount;
 };

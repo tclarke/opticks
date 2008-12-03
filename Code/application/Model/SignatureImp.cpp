@@ -52,25 +52,26 @@ DataElement* SignatureImp::copy(const string& name, DataElement* pParent) const
 
 bool SignatureImp::toXml(XMLWriter* pXml) const
 {
-   if(!DataElementImp::toXml(pXml))
+   if (!DataElementImp::toXml(pXml))
    {
       return false;
    }
-   for(map<string, DataVariant>::const_iterator datum = mData.begin(); datum != mData.end(); ++datum)
+   for (map<string, DataVariant>::const_iterator datum = mData.begin(); datum != mData.end(); ++datum)
    {
       pXml->pushAddPoint(pXml->addElement("data"));
       pXml->addAttr("name", datum->first);
       pXml->pushAddPoint(pXml->addElement("value"));
-      if(!datum->second.toXml(pXml))
+      pXml->addAttr("type", datum->second.getTypeName());
+      if (!datum->second.toXml(pXml))
       {
          return false;
       }
       pXml->popAddPoint();
       map<string, boost::shared_ptr<UnitsImp> >::const_iterator units = mUnits.find(datum->first);
-      if(units != mUnits.end())
+      if (units != mUnits.end())
       {
          pXml->pushAddPoint(pXml->addElement("units"));
-         if(!units->second->toXml(pXml))
+         if (!units->second->toXml(pXml))
          {
             return false;
          }
@@ -83,18 +84,65 @@ bool SignatureImp::toXml(XMLWriter* pXml) const
 
 bool SignatureImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   return false;
+   if ((pDocument == NULL) || (DataElementImp::fromXml(pDocument, version) == false))
+   {
+      return false;
+   }
+
+   mData.clear();
+   mUnits.clear();
+
+   DOMElement* pElement = static_cast<DOMElement*>(pDocument);
+   for (DOMNode* pChild = pElement->getFirstChild(); pChild != NULL; pChild = pChild->getNextSibling())
+   {
+      if (XMLString::equals(pChild->getNodeName(), X("data")))
+      {
+         DOMElement* pDataElement = static_cast<DOMElement*>(pChild);
+
+         string name = A(pDataElement->getAttribute(X("name")));
+         if (name.empty() == true)
+         {
+            return false;
+         }
+
+         for (DOMNode* pGChild = pChild->getFirstChild(); pGChild != NULL; pGChild = pGChild->getNextSibling())
+         {
+            if (XMLString::equals(pGChild->getNodeName(), X("value")))
+            {
+               DataVariant value;
+               if (value.fromXml(pGChild, version) == false)
+               {
+                  return false;
+               }
+
+               mData[name] = value;
+            }
+            else if (XMLString::equals(pGChild->getNodeName(), X("units")))
+            {
+               boost::shared_ptr<UnitsImp> pNewUnits(new UnitsImp);
+               if (pNewUnits->fromXml(pGChild, version) == false)
+               {
+                  return false;
+               }
+
+               mUnits[name] = pNewUnits;
+            }
+         }
+      }
+   }
+
+   return true;
 }
 
 const string& SignatureImp::getObjectType() const
 {
-   static string type("SignatureImp");
-   return type;
+   static string sType("SignatureImp");
+   return sType;
 }
 
 bool SignatureImp::isKindOf(const string& className) const
 {
-   if ((className == getObjectType())  || (className == "Signature"))
+   if ((className == getObjectType()) || (className == "Signature"))
    {
       return true;
    }
@@ -120,7 +168,7 @@ void SignatureImp::getElementTypes(vector<string>& classList)
 
 const DataVariant &SignatureImp::getData(string name) const
 {
-   map<string,DataVariant>::const_iterator ppData = mData.find(name);
+   map<string, DataVariant>::const_iterator ppData = mData.find(name);
    if (ppData == mData.end())
    {
       return mNullData;
@@ -135,12 +183,12 @@ void SignatureImp::setData(std::string name, const DataVariant &data)
 {
    mData[name] = data;
    notify(SIGNAL_NAME(Signature, DataChanged), boost::any(
-      std::pair<string,DataVariant>(name, data)));
+      std::pair<string, DataVariant>(name, data)));
 }
 
 const Units *SignatureImp::getUnits(string name) const
 {
-   map<string,boost::shared_ptr<UnitsImp> >::const_iterator ppUnits = mUnits.find(name);
+   map<string, boost::shared_ptr<UnitsImp> >::const_iterator ppUnits = mUnits.find(name);
    if (ppUnits == mUnits.end())
    {
       boost::shared_ptr<UnitsImp> pUnits(new UnitsImp);
@@ -155,7 +203,7 @@ const Units *SignatureImp::getUnits(string name) const
 
 void SignatureImp::setUnits(string name, const Units *pUnits)
 {
-   map<string,boost::shared_ptr<UnitsImp> >::const_iterator ppUnits = mUnits.find(name);
+   map<string, boost::shared_ptr<UnitsImp> >::const_iterator ppUnits = mUnits.find(name);
    if (ppUnits == mUnits.end())
    {
       boost::shared_ptr<UnitsImp> pNewUnits(new UnitsImp);
@@ -167,13 +215,13 @@ void SignatureImp::setUnits(string name, const Units *pUnits)
       *(ppUnits->second) = *static_cast<const UnitsImp*>(pUnits);
    }
    notify(SIGNAL_NAME(Signature, UnitsChanged), boost::any(
-      std::pair<string,const Units*>(name,pUnits)));
+      std::pair<string, const Units*>(name, pUnits)));
 }
 
 set<string> SignatureImp::getDataNames() const
 {
    set<string> keys;
-   for(map<string,DataVariant>::const_iterator datum = mData.begin(); datum != mData.end(); ++datum)
+   for (map<string, DataVariant>::const_iterator datum = mData.begin(); datum != mData.end(); ++datum)
    {
       keys.insert(datum->first);
    }
@@ -183,7 +231,7 @@ set<string> SignatureImp::getDataNames() const
 set<string> SignatureImp::getUnitNames() const
 {
    set<string> keys;
-   for(map<string,boost::shared_ptr<UnitsImp> >::const_iterator unit = mUnits.begin(); unit != mUnits.end(); ++unit)
+   for (map<string, boost::shared_ptr<UnitsImp> >::const_iterator unit = mUnits.begin(); unit != mUnits.end(); ++unit)
    {
       keys.insert(unit->first);
    }

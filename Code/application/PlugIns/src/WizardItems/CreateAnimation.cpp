@@ -40,7 +40,7 @@ bool CreateAnimation::getInputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
 
-   if(mbInteractive)
+   if (mbInteractive)
    {
       VERIFY(DesktopItems::getInputSpecification(pArgList) && (pArgList != NULL));
 
@@ -54,7 +54,7 @@ bool CreateAnimation::getOutputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
 
-   if(mbInteractive)
+   if (mbInteractive)
    {
       Service<PlugInManagerServices> pPlugInManager;
       VERIFY(pPlugInManager.get() != NULL);
@@ -86,13 +86,13 @@ bool CreateAnimation::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
    pStep->addProperty("Item", getName());
    mpStep = pStep.get();
 
-   if(!extractInputArgs(pInArgList))
+   if (!extractInputArgs(pInArgList))
    {
       reportError("Unable to extract input arguments.", "5E158F48-6089-4A88-ABD0-55C717BD13E2");
       return false;
    }
-   SpatialDataView *pView = pInArgList->getPlugInArgValue<SpatialDataView>(ViewArg());
-   if(pView == NULL)
+   SpatialDataView* pView = pInArgList->getPlugInArgValue<SpatialDataView>(ViewArg());
+   if (pView == NULL)
    {
       reportError("No view provided.", "852F585B-D239-4C0A-B993-70EE68EC8DEE");
       return false;

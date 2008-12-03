@@ -29,8 +29,8 @@ DataDescriptorAdapter::~DataDescriptorAdapter()
 // TypeAwareObject
 const string& DataDescriptorAdapter::getObjectType() const
 {
-   static string type("DataDescriptorAdapter");
-   return type;
+   static string sType("DataDescriptorAdapter");
+   return sType;
 }
 
 bool DataDescriptorAdapter::isKindOf(const string& className) const

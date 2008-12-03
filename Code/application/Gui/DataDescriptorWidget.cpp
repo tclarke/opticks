@@ -19,6 +19,7 @@
 #include "DataDescriptorWidget.h"
 #include "DataElement.h"
 #include "DimensionDescriptor.h"
+#include "ObjectResource.h"
 #include "RasterDataDescriptor.h"
 #include "RasterUtilities.h"
 #include "Service.h"
@@ -32,7 +33,7 @@ using namespace std;
 
 DataDescriptorWidget::DataDescriptorWidget(QWidget* parent) :
    QWidget(parent),
-   mReadOnly(true),
+   mEditAll(false),
    mModified(false),
    mpDescriptor(NULL),
    mpClassificationLabel(NULL),
@@ -96,22 +97,12 @@ DataDescriptorWidget::~DataDescriptorWidget()
 {
 }
 
-void DataDescriptorWidget::setDataDescriptor(DataDescriptor* pDescriptor)
+void DataDescriptorWidget::setDataDescriptor(DataDescriptor* pDescriptor, bool editAll)
 {
    mpTreeWidget->closeActiveCellWidget(false);
 
-   mReadOnly = false;
+   mEditAll = editAll;
    mpDescriptor = pDescriptor;
-   initialize();
-   mModified = false;
-}
-
-void DataDescriptorWidget::setDataDescriptor(const DataDescriptor* pDescriptor)
-{
-   mpTreeWidget->closeActiveCellWidget(false);
-
-   mReadOnly = true;
-   mpDescriptor = const_cast<DataDescriptor*>(pDescriptor);
    initialize();
    mModified = false;
 }
@@ -160,7 +151,7 @@ void DataDescriptorWidget::initialize()
 {
    mpTreeWidget->clear();
    mpTrueColorButton->setEnabled(false);
-   mpTrueColorButton->setVisible(!mReadOnly);
+   mpTrueColorButton->setVisible(mEditAll);
 
    if (mpDescriptor == NULL)
    {
@@ -267,7 +258,7 @@ void DataDescriptorWidget::initialize()
       pProcessingLocationItem->setText(1, QString::fromStdString(processingLocationText));
 
       // Set a combo box as the edit widget
-      if (mReadOnly == false)
+      if (mEditAll)
       {
          mpTreeWidget->setCellWidgetType(pProcessingLocationItem, 1, CustomTreeWidget::COMBO_BOX);
          mpTreeWidget->setComboBox(pProcessingLocationItem, 1, mpProcessingLocationCombo);
@@ -316,7 +307,7 @@ void DataDescriptorWidget::initialize()
       pDataTypeItem->setText(1, QString::fromStdString(dataTypeText));
       mpTreeWidget->insertTopLevelItem(5, pDataTypeItem);
 
-      if (mReadOnly == false)
+      if (mEditAll)
       {
          QComboBox* pDataTypeCombo = new QComboBox(mpTreeWidget);
          pDataTypeCombo->setEditable(false);
@@ -347,7 +338,7 @@ void DataDescriptorWidget::initialize()
       pBadValues->setText(0, "Bad Values");
       pBadValues->setText(1, QString::fromStdString(badValuesText));
 
-      if (mReadOnly == false)
+      if (mEditAll)
       {
          mpTreeWidget->setCellWidgetType(pBadValues, 1, CustomTreeWidget::LINE_EDIT);
       }
@@ -362,7 +353,7 @@ void DataDescriptorWidget::initialize()
       pXPixelSizeItem->setText(0, "X Pixel Size");
       pXPixelSizeItem->setText(1, QString::number(pixelSize));
 
-      if (mReadOnly == false)
+      if (mEditAll)
       {
          mpTreeWidget->setCellWidgetType(pXPixelSizeItem, 1, CustomTreeWidget::LINE_EDIT);
       }
@@ -376,7 +367,7 @@ void DataDescriptorWidget::initialize()
       pYPixelSizeItem->setText(0, "Y Pixel Size");
       pYPixelSizeItem->setText(1, QString::number(pixelSize));
 
-      if (mReadOnly == false)
+      if (mEditAll)
       {
          mpTreeWidget->setCellWidgetType(pYPixelSizeItem, 1, CustomTreeWidget::LINE_EDIT);
       }
@@ -401,10 +392,7 @@ void DataDescriptorWidget::initialize()
             pUnitNameItem->setText(0, "Unit Name");
             pUnitNameItem->setText(1, QString::fromStdString(unitsName));
 
-            if (mReadOnly == false)
-            {
-               mpTreeWidget->setCellWidgetType(pUnitNameItem, 1, CustomTreeWidget::LINE_EDIT);
-            }
+            mpTreeWidget->setCellWidgetType(pUnitNameItem, 1, CustomTreeWidget::LINE_EDIT);
          }
 
          // Type
@@ -417,25 +405,22 @@ void DataDescriptorWidget::initialize()
             pUnitTypeItem->setText(0, "Unit Type");
             pUnitTypeItem->setText(1, QString::fromStdString(unitTypeText));
 
-            if (mReadOnly == false)
-            {
-               QComboBox* pUnitTypeCombo = new QComboBox(mpTreeWidget);
-               pUnitTypeCombo->setEditable(false);
-               pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(ABSORBANCE)));
-               pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(ABSORPTANCE)));
-               pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(DIGITAL_NO)));
-               pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(DISTANCE)));
-               pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(EMISSIVITY)));
-               pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(RADIANCE)));
-               pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(REFLECTANCE)));
-               pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(REFLECTANCE_FACTOR)));
-               pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(TRANSMITTANCE)));
-               pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(CUSTOM_UNIT)));
-               pUnitTypeCombo->hide();
+            QComboBox* pUnitTypeCombo = new QComboBox(mpTreeWidget);
+            pUnitTypeCombo->setEditable(false);
+            pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(ABSORBANCE)));
+            pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(ABSORPTANCE)));
+            pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(DIGITAL_NO)));
+            pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(DISTANCE)));
+            pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(EMISSIVITY)));
+            pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(RADIANCE)));
+            pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(REFLECTANCE)));
+            pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(REFLECTANCE_FACTOR)));
+            pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(TRANSMITTANCE)));
+            pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(CUSTOM_UNIT)));
+            pUnitTypeCombo->hide();
 
-               mpTreeWidget->setCellWidgetType(pUnitTypeItem, 1, CustomTreeWidget::COMBO_BOX);
-               mpTreeWidget->setComboBox(pUnitTypeItem, 1, pUnitTypeCombo);
-            }
+            mpTreeWidget->setCellWidgetType(pUnitTypeItem, 1, CustomTreeWidget::COMBO_BOX);
+            mpTreeWidget->setComboBox(pUnitTypeItem, 1, pUnitTypeCombo);
          }
 
          // Scale
@@ -447,10 +432,7 @@ void DataDescriptorWidget::initialize()
             pScaleItem->setText(0, "Scale");
             pScaleItem->setText(1, QString::number(dScale));
 
-            if (mReadOnly == false)
-            {
-               mpTreeWidget->setCellWidgetType(pScaleItem, 1, CustomTreeWidget::LINE_EDIT);
-            }
+            mpTreeWidget->setCellWidgetType(pScaleItem, 1, CustomTreeWidget::LINE_EDIT);
          }
 
          // Range minimum
@@ -462,10 +444,7 @@ void DataDescriptorWidget::initialize()
             pMinimumItem->setText(0, "Range Minimum");
             pMinimumItem->setText(1, QString::number(dMinimum));
 
-            if (mReadOnly == false)
-            {
-               mpTreeWidget->setCellWidgetType(pMinimumItem, 1, CustomTreeWidget::LINE_EDIT);
-            }
+            mpTreeWidget->setCellWidgetType(pMinimumItem, 1, CustomTreeWidget::LINE_EDIT);
          }
 
          // Range maximum
@@ -477,10 +456,7 @@ void DataDescriptorWidget::initialize()
             pMaximumItem->setText(0, "Range Maximum");
             pMaximumItem->setText(1, QString::number(dMaximum));
 
-            if (mReadOnly == false)
-            {
-               mpTreeWidget->setCellWidgetType(pMaximumItem, 1, CustomTreeWidget::LINE_EDIT);
-            }
+            mpTreeWidget->setCellWidgetType(pMaximumItem, 1, CustomTreeWidget::LINE_EDIT);
          }
       }
    }
@@ -505,7 +481,7 @@ void DataDescriptorWidget::initialize()
       pInterleaveItem->setText(1, QString::fromStdString(interleaveText));
 
       mpTreeWidget->insertTopLevelItem(8, pInterleaveItem);
-      if (mReadOnly == false)
+      if (mEditAll)
       {
          QComboBox* pInterleaveCombo = new QComboBox(mpTreeWidget);
          pInterleaveCombo->setEditable(false);
@@ -534,7 +510,7 @@ void DataDescriptorWidget::initialize()
       pGrayBandItem->setText(0, "Gray Band");
       pGrayBandItem->setText(1, strBand);
 
-      if (mReadOnly == false)
+      if (mEditAll)
       {
          mpTreeWidget->setCellWidgetType(pGrayBandItem, 1, CustomTreeWidget::LINE_EDIT);
       }
@@ -555,7 +531,7 @@ void DataDescriptorWidget::initialize()
       pRedBandItem->setText(0, "Red Band");
       pRedBandItem->setText(1, strBand);
 
-      if (mReadOnly == false)
+      if (mEditAll)
       {
          mpTreeWidget->setCellWidgetType(pRedBandItem, 1, CustomTreeWidget::LINE_EDIT);
       }
@@ -576,7 +552,7 @@ void DataDescriptorWidget::initialize()
       pGreenBandItem->setText(0, "Green Band");
       pGreenBandItem->setText(1, strBand);
 
-      if (mReadOnly == false)
+      if (mEditAll)
       {
          mpTreeWidget->setCellWidgetType(pGreenBandItem, 1, CustomTreeWidget::LINE_EDIT);
       }
@@ -597,7 +573,7 @@ void DataDescriptorWidget::initialize()
       pBlueBandItem->setText(0, "Blue Band");
       pBlueBandItem->setText(1, strBand);
 
-      if (mReadOnly == false)
+      if (mEditAll)
       {
          mpTreeWidget->setCellWidgetType(pBlueBandItem, 1, CustomTreeWidget::LINE_EDIT);
       }
@@ -613,7 +589,7 @@ void DataDescriptorWidget::initialize()
       pDisplayModeItem->setText(0, "Display Mode");
       pDisplayModeItem->setText(1, QString::fromStdString(displayModeText));
 
-      if (mReadOnly == false)
+      if (mEditAll)
       {
          QComboBox* pDisplayModeCombo = new QComboBox(mpTreeWidget);
          pDisplayModeCombo->setEditable(false);
@@ -639,11 +615,6 @@ bool DataDescriptorWidget::applyChanges()
 
 bool DataDescriptorWidget::applyToDataDescriptor(DataDescriptor* pDescriptor)
 {
-   if (mReadOnly == true)
-   {
-      return true;
-   }
-
    if (mModified == false)
    {
       return true;
@@ -674,47 +645,9 @@ bool DataDescriptorWidget::applyToDataDescriptor(DataDescriptor* pDescriptor)
       return true;
    }
 
-   // Data type
-   QString strDataType = getDescriptorValue("Data Type");
-   if (strDataType.isEmpty() == false)
-   {
-      bool bError = true;
-      EncodingType dataType = StringUtilities::fromDisplayString<EncodingType>(strDataType.toStdString(), &bError);
-      if (bError == false)
-      {
-         pRasterDescriptor->setDataType(dataType);
-      }
-   }
-
-   // Bad values
-   QString strBadValues = getDescriptorValue("Bad Values");
-   if (strBadValues.isEmpty() == false)
-   {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Use a QListView to allow editing of bad values, since the fromDisplayString parser is brittle? (kstreith)")
-      bool bError = true;
-      vector<int> badValues = StringUtilities::fromDisplayString<vector<int> >(strBadValues.toStdString(), &bError);
-      if (bError == false)
-      {
-         pRasterDescriptor->setBadValues(badValues);
-      }
-   }
-
-   // Pixel size
-   QString strPixelSize = getDescriptorValue("X Pixel Size");
-   if (strPixelSize.isEmpty() == false)
-   {
-      pRasterDescriptor->setXPixelSize(strPixelSize.toDouble());
-   }
-
-   strPixelSize = getDescriptorValue("Y Pixel Size");
-   if (strPixelSize.isEmpty() == false)
-   {
-      pRasterDescriptor->setYPixelSize(strPixelSize.toDouble());
-   }
-
    // Units
-   Units* pUnits = pRasterDescriptor->getUnits();
-   if (pUnits != NULL)
+   FactoryResource<Units> pUnits;
+   if (pUnits.get() != NULL)
    {
       // Name
       QString strUnitsName = getDescriptorValue("Unit Name");
@@ -757,6 +690,52 @@ bool DataDescriptorWidget::applyToDataDescriptor(DataDescriptor* pDescriptor)
       {
          double dMaximum = strMaximum.toDouble();
          pUnits->setRangeMax(dMaximum);
+      }
+
+      pRasterDescriptor->setUnits(pUnits.get());
+   }
+
+   if (mEditAll == false) // nothing else could have been changed so return
+   {
+      return true;
+   }
+
+   // Pixel size
+   QString strPixelSize = getDescriptorValue("X Pixel Size");
+   if (strPixelSize.isEmpty() == false)
+   {
+      pRasterDescriptor->setXPixelSize(strPixelSize.toDouble());
+   }
+
+   strPixelSize = getDescriptorValue("Y Pixel Size");
+   if (strPixelSize.isEmpty() == false)
+   {
+      pRasterDescriptor->setYPixelSize(strPixelSize.toDouble());
+   }
+
+   // Data type
+   QString strDataType = getDescriptorValue("Data Type");
+   if (strDataType.isEmpty() == false)
+   {
+      bool bError = true;
+      EncodingType dataType = StringUtilities::fromDisplayString<EncodingType>(strDataType.toStdString(), &bError);
+      if (bError == false)
+      {
+         pRasterDescriptor->setDataType(dataType);
+      }
+   }
+
+   // Bad values
+   QString strBadValues = getDescriptorValue("Bad Values");
+   if (strBadValues.isEmpty() == false)
+   {
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Use a QListView to allow editing of bad values, " \
+   "since the fromDisplayString parser is brittle? (kstreith)")
+      bool bError = true;
+      vector<int> badValues = StringUtilities::fromDisplayString<vector<int> >(strBadValues.toStdString(), &bError);
+      if (bError == false)
+      {
+         pRasterDescriptor->setBadValues(badValues);
       }
    }
 
@@ -963,7 +942,9 @@ void DataDescriptorWidget::setDisplayBandsToTrueColor()
 
    if (success)
    {
-      QString strRedBand, strGreenBand, strBlueBand;
+      QString strRedBand;
+      QString strGreenBand;
+      QString strBlueBand;
       DimensionDescriptor bandDim = pRaster->getDisplayBand(RED);
       if (bandDim.isValid())
       {

@@ -14,8 +14,9 @@
 
 using namespace std;
 
-Hdf5Node::Hdf5Node(Hdf5Node* pParent, const string& name)
-: mpParent(pParent), mName(name)
+Hdf5Node::Hdf5Node(Hdf5Node* pParent, const string& name) :
+   mpParent(pParent),
+   mName(name)
 {
    if (mpParent != NULL)
    {

@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef NITF_CONSTANTS_H
-#define NITF_CONSTANTS_H
+#ifndef NITFCONSTANTS_H
+#define NITFCONSTANTS_H
 
 #include <iomanip>
 #include <sstream>
@@ -383,7 +383,7 @@ namespace Nitf
          const static std::string LRFC_LOC = "LRFC_LOC";
          const static std::string FRFC_LOC = "FRFC_LOC";
          const static std::string RESERVED2 = "RESERVED2";
-        }
+      }
 
 
       namespace CMETAA

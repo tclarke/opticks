@@ -26,14 +26,15 @@
 #include "SecondMomentGui.h"
 #include "TypeConverter.h"
 
-SecondMomentGui::SecondMomentGui(RasterElement *pElement, int rowFactor, int columnFactor,
-                                 bool forceRecalculate, bool elementExists, QWidget *pParent) :
+SecondMomentGui::SecondMomentGui(RasterElement* pElement, int rowFactor, int columnFactor,
+                                 bool forceRecalculate, bool elementExists, QWidget* pParent) :
    QDialog(pParent), mForceRecalculate(forceRecalculate), mElementExists(elementExists)
 {
    setModal(true);
    setWindowTitle("Second Moment Matrix");
 
-   QDialogButtonBox *pButtons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, this);
+   QDialogButtonBox* pButtons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, 
+      Qt::Horizontal, this);
 
    mpCalculationMethodGroup = new QGroupBox("Calculation Method", this);
    mpUseMatrix = new QRadioButton("Use existing second moment matrix", mpCalculationMethodGroup);
@@ -55,7 +56,7 @@ SecondMomentGui::SecondMomentGui(RasterElement *pElement, int rowFactor, int col
 
    mpMessage = new QLabel(this);
 
-   QGridLayout *pGroupLayout = new QGridLayout(mpCalculationMethodGroup);
+   QGridLayout* pGroupLayout = new QGridLayout(mpCalculationMethodGroup);
    pGroupLayout->setMargin(10);
    pGroupLayout->setSpacing(5);
    pGroupLayout->addWidget(mpUseMatrix, 0, 0, 1, 3);
@@ -69,7 +70,7 @@ SecondMomentGui::SecondMomentGui(RasterElement *pElement, int rowFactor, int col
    pGroupLayout->addWidget(mpAoi, 6, 1, 1, 2);
    pGroupLayout->setColumnMinimumWidth(0, 25);
 
-   QVBoxLayout *pTopLevel = new QVBoxLayout(this);
+   QVBoxLayout* pTopLevel = new QVBoxLayout(this);
    pTopLevel->setMargin(10);
    pTopLevel->setSpacing(5);
    pTopLevel->addWidget(mpCalculationMethodGroup, 10);
@@ -90,22 +91,23 @@ SecondMomentGui::SecondMomentGui(RasterElement *pElement, int rowFactor, int col
    // initialize values
    mpRowSkip->setValue(rowFactor);
    mpColumnSkip->setValue(columnFactor);
-   std::vector<DataElement*> aois = Service<ModelServices>()->getElements(pElement, TypeConverter::toString<AoiElement>());
-   for(std::vector<DataElement*>::const_iterator iter = aois.begin(); iter != aois.end(); ++iter)
+   std::vector<DataElement*> aois = Service<ModelServices>()->getElements(pElement, 
+      TypeConverter::toString<AoiElement>());
+   for (std::vector<DataElement*>::const_iterator iter = aois.begin(); iter != aois.end(); ++iter)
    {
       mpAoi->addItem(QString::fromStdString((*iter)->getName()), QVariant::fromValue(reinterpret_cast<void*>(*iter)));
    }
-   FileDescriptor *pFd = NULL;
-   DataDescriptor *pDd = NULL;
-   if(pElement != NULL)
+   FileDescriptor* pFd = NULL;
+   DataDescriptor* pDd = NULL;
+   if (pElement != NULL)
    {
       pDd = pElement->getDataDescriptor();
    }
-   if(pDd != NULL)
+   if (pDd != NULL)
    {
       pFd = pDd->getFileDescriptor();
    }
-   if(pFd != NULL)
+   if (pFd != NULL)
    {
       mpFile->setFilename(QString::fromStdString(pFd->getFilename().getFullPathAndName() + ".smm"));
    }
@@ -113,15 +115,15 @@ SecondMomentGui::SecondMomentGui(RasterElement *pElement, int rowFactor, int col
    updateFilename(mpFile->getFilename());
    mpUseAoi->setEnabled(mpAoi->count() > 0);
 
-   if(mForceRecalculate)
+   if (mForceRecalculate)
    {
       mpUseSkipFactors->setChecked(true);
    }
-   else if(mElementExists)
+   else if (mElementExists)
    {
       mpUseMatrix->setChecked(true);
    }
-   else if(mSmmFile.isFile())
+   else if (mSmmFile.isFile())
    {
       mpUseFile->setChecked(true);
    }
@@ -138,7 +140,7 @@ SecondMomentGui::SecondMomentGui(RasterElement *pElement, int rowFactor, int col
 
 int SecondMomentGui::getRowFactor() const
 {
-   if(mpRowSkip->isEnabled())
+   if (mpRowSkip->isEnabled())
    {
       return mpRowSkip->value();
    }
@@ -147,16 +149,16 @@ int SecondMomentGui::getRowFactor() const
 
 int SecondMomentGui::getColumnFactor() const
 {
-   if(mpColumnSkip->isEnabled())
+   if (mpColumnSkip->isEnabled())
    {
       return mpColumnSkip->value();
    }
    return 1;
 }
 
-AoiElement *SecondMomentGui::getAoi() const
+AoiElement* SecondMomentGui::getAoi() const
 {
-   if(mpAoi->isEnabled())
+   if (mpAoi->isEnabled())
    {
       return reinterpret_cast<AoiElement*>(mpAoi->itemData(mpAoi->currentIndex()).value<void*>());
    }
@@ -181,14 +183,14 @@ bool SecondMomentGui::getUseFile() const
 void SecondMomentGui::updateFilename(const QString &filename)
 {
    mSmmFile.setFile(filename);
-   if(mForceRecalculate)
+   if (mForceRecalculate)
    {
       mpUseFile->setEnabled(false);
       mpMessage->setText("<b>The second moment matrix must be recalculated.</b>");
    }
-   else if(!mSmmFile.isFile())
+   else if (!mSmmFile.isFile())
    {
-      if(mpUseFile->isChecked())
+      if (mpUseFile->isChecked())
       {
          mpUseSkipFactors->setChecked(true);
       }

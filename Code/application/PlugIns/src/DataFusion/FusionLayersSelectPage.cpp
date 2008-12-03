@@ -105,6 +105,7 @@ struct LayerSetBuilder : unary_function<Layer*, bool>
    explicit LayerSetBuilder(set<Layer*>& emptySet) : mSet(emptySet)
    {
    }
+
    bool operator()(Layer* pLayer)
    {
       if (pLayer != NULL)
@@ -114,7 +115,11 @@ struct LayerSetBuilder : unary_function<Layer*, bool>
       return true;
    }
 
-   const set<Layer*>& getSet() const { return mSet; }
+   const set<Layer*>& getSet() const
+   {
+      return mSet;
+   }
+
 private:
    set<Layer*>& mSet;
 };
@@ -147,6 +152,11 @@ vector<Layer*> FusionLayersSelectPage::getSelectedLayers() const
    return layers;
 }
 
+bool FusionLayersSelectPage::isValid() const
+{
+   return true;
+}
+
 void FusionLayersSelectPage::hideEvent(QHideEvent* pEvt)
 {
    mSelectedLayers = getSelectedLayers();
@@ -172,12 +182,12 @@ void FusionLayersSelectPage::addLayerToGui(Layer* pLayer)
    }
 }
 
-void FusionLayersSelectPage::attached(Subject &subject, const string &signal, const Slot &slot)
+void FusionLayersSelectPage::attached(Subject& subject, const string& signal, const Slot& slot)
 {
    layerListAttached(subject, signal, boost::any());
 }
 
-void FusionLayersSelectPage::detached(Subject &subject, const string &signal, const Slot &slot)
+void FusionLayersSelectPage::detached(Subject& subject, const string& signal, const Slot& slot)
 {
    if (slot == Slot(this, &FusionLayersSelectPage::layerListDeleted))
    {
@@ -189,7 +199,7 @@ void FusionLayersSelectPage::detached(Subject &subject, const string &signal, co
    }
 }
 
-void FusionLayersSelectPage::layerListAttached(Subject &subject, const string &signal, const boost::any &v)
+void FusionLayersSelectPage::layerListAttached(Subject& subject, const string& signal, const boost::any& v)
 {
    LayerList* pLayerList = dynamic_cast<LayerList*>(&subject);
    if (pLayerList != NULL)
@@ -208,7 +218,7 @@ void FusionLayersSelectPage::layerListAttached(Subject &subject, const string &s
    }
 }
 
-void FusionLayersSelectPage::layerListModified(Subject &subject, const string &signal, const boost::any &v)
+void FusionLayersSelectPage::layerListModified(Subject& subject, const string& signal, const boost::any& v)
 {
    LayerList* pLayerList = dynamic_cast<LayerList*>(&subject);
    if (pLayerList != NULL)
@@ -227,15 +237,14 @@ void FusionLayersSelectPage::layerListModified(Subject &subject, const string &s
    }
 }
 
-void FusionLayersSelectPage::layerListDeleted(Subject &subject, const string &signal, const boost::any &v)
+void FusionLayersSelectPage::layerListDeleted(Subject& subject, const string& signal, const boost::any& v)
 {
    LayerList* pLayerList = dynamic_cast<LayerList*>(&subject);
    if (pLayerList != NULL)
    {
       vector<Layer*> pLayers;
       pLayerList->getLayers(pLayers);
-      vector<Layer*>::iterator it;
-      for (it=pLayers.begin(); it!=pLayers.end(); ++it)
+      for (vector<Layer*>::iterator it = pLayers.begin(); it != pLayers.end(); ++it)
       {
          Layer* pLayer = *it;
          if (pLayer != NULL)
@@ -247,7 +256,7 @@ void FusionLayersSelectPage::layerListDeleted(Subject &subject, const string &si
    }
 }
 
-void FusionLayersSelectPage::layerModified(Subject &subject, const string &signal, const boost::any &v)
+void FusionLayersSelectPage::layerModified(Subject& subject, const string& signal, const boost::any& v)
 {
    Layer* pLayer = dynamic_cast<Layer*>(&subject);
    if (pLayer != NULL)
@@ -261,7 +270,7 @@ void FusionLayersSelectPage::layerModified(Subject &subject, const string &signa
    }
 }
 
-void FusionLayersSelectPage::layerDeleted(Subject &subject, const string &signal, const boost::any &v)
+void FusionLayersSelectPage::layerDeleted(Subject& subject, const string& signal, const boost::any& v)
 {
    Layer* pLayer = dynamic_cast<Layer*>(&subject);
    if (pLayer != NULL)

@@ -95,8 +95,14 @@ void SessionItemSerializerImp::endBlock()
    {
       mFile.close();
    }
-   mBytesReserved = mBytesWritten = 0;
+   mBytesReserved = 0;
+   mBytesWritten = 0;
    stringstream buf;
    buf << mBaseFilename << "." << mTotalBlocks++;
    mFilename = buf.str();
+}
+
+unsigned int SessionItemSerializerImp::getBlockCount() const
+{
+   return mTotalBlocks;
 }

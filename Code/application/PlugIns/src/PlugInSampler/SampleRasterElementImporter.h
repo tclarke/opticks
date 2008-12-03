@@ -7,12 +7,13 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef SAMPLERASTERELEMENTIMPORTER_H__
-#define SAMPLERASTERELEMENTIMPORTER_H__
+#ifndef SAMPLERASTERELEMENTIMPORTER_H
+#define SAMPLERASTERELEMENTIMPORTER_H
 
 #include "RasterElementImporterShell.h"
 #include "RasterPage.h"
 #include "RasterPager.h"
+
 #include <vector>
 
 class SampleRasterPage : public RasterPage
@@ -20,7 +21,8 @@ class SampleRasterPage : public RasterPage
 public:
    SampleRasterPage(int row, int col);
    virtual ~SampleRasterPage();
-   virtual void *getRawData();
+
+   virtual void* getRawData();
    virtual unsigned int getNumRows();
    virtual unsigned int getNumColumns();
    virtual unsigned int getNumBands();
@@ -38,9 +40,9 @@ public:
    SampleRasterPager();
    virtual ~SampleRasterPager();
 
-   virtual RasterPage *getPage(DataRequest *pOriginalRequest, DimensionDescriptor startRow,
-                               DimensionDescriptor startColumn, DimensionDescriptor startBand);
-   virtual void releasePage(RasterPage *pPage);
+   virtual RasterPage* getPage(DataRequest* pOriginalRequest, DimensionDescriptor startRow,
+      DimensionDescriptor startColumn, DimensionDescriptor startBand);
+   virtual void releasePage(RasterPage* pPage);
    virtual int getSupportedRequestVersion() const;
 };
 
@@ -50,10 +52,10 @@ public:
    SampleRasterElementImporter();
    virtual ~SampleRasterElementImporter();
 
-   virtual unsigned char getFileAffinity(const std::string &filename);
+   virtual unsigned char getFileAffinity(const std::string& filename);
    virtual bool isProcessingLocationSupported(ProcessingLocation location) const;
-   virtual std::vector<ImportDescriptor*> getImportDescriptors(const std::string &filename);
-   virtual bool createRasterPager(RasterElement *pRaster) const;
+   virtual std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename);
+   virtual bool createRasterPager(RasterElement* pRaster) const;
 };
 
 #endif

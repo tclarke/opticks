@@ -36,7 +36,7 @@ ZoomPanWidget::ZoomPanWidget(SpatialDataViewImp* pView, QWidget* parent) :
       mpView->setFocusProxy(this);
       mpView->installEventFilter(this);
 
-      const LayerList *pLayerList = mpView->getLayerList();
+      const LayerList* pLayerList = mpView->getLayerList();
       if (pLayerList != NULL)
       {
          mpLayer = pLayerList->getLayer(RASTER, pLayerList->getPrimaryRasterElement());

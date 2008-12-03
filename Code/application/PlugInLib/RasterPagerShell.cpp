@@ -30,7 +30,7 @@ bool RasterPagerShell::getOutputSpecification(PlugInArgList*& pArgList)
    return true;
 }
 
-bool RasterPagerShell::serialize(SessionItemSerializer &serializer) const
+bool RasterPagerShell::serialize(SessionItemSerializer& serializer) const
 {
    return true;
 }

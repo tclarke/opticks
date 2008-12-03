@@ -80,19 +80,19 @@ void PolygonObjectImp::drawVector(double zoomFactor) const
       gluTessNormal(pTess, 0.0, 0.0, 1.0);
       gluTessBeginPolygon(pTess, NULL);
 
-      const vector<LocationType> &vertices = getVertices();
+      const vector<LocationType>& vertices = getVertices();
       unsigned int max = vertices.size();
       unsigned int min = 0;
       int maxPaths = mPaths.size()-1;
       // gluTess* doesn't like identical vertices
       LocationType lastVertex(numeric_limits<double>::max(), numeric_limits<double>::max());
-      for (int i = maxPaths; i >=0 ; --i)
+      for (int i = maxPaths; i >= 0; --i)
       {
          min = mPaths[i];
          gluTessBeginContour(pTess);
          for (unsigned int j = min; j < max-1; ++j) // do not use final point
          {
-            const LocationType &currentVertex = vertices[j];
+            const LocationType& currentVertex = vertices[j];
             if (currentVertex == lastVertex)
             {
                continue;
@@ -131,7 +131,7 @@ void PolygonObjectImp::drawPixels(double zoomFactor) const
    ColorType fillColor = getFillColor();
    glColor3ub(fillColor.mRed, fillColor.mGreen, fillColor.mBlue);
   
-   const std::vector<LocationType> &vertices = getVertices();
+   const std::vector<LocationType>& vertices = getVertices();
 
    LocationType llCorner = getLlCorner();
    LocationType urCorner = getUrCorner();
@@ -148,7 +148,7 @@ void PolygonObjectImp::drawPixels(double zoomFactor) const
 
 void PolygonObjectImp::moveHandle(int handle, LocationType pixel, bool bMaintainAspect)
 {
-   const vector<LocationType> &vertices = getVertices();
+   const vector<LocationType>& vertices = getVertices();
    int movedVertex = handle - 8;
 
    if (movedVertex >= 0)
@@ -210,7 +210,7 @@ bool PolygonObjectImp::hit(LocationType pixelCoord) const
          return false;
       }
 
-      const vector<LocationType> &vertices = getVertices();
+      const vector<LocationType>& vertices = getVertices();
       bHit = DrawUtil::isWithin(pixelCoord, &vertices[0], uiSegments+1, &mPaths[0], mPaths.size());
    }
 
@@ -279,7 +279,7 @@ const BitMask* PolygonObjectImp::getPixels(int iStartColumn, int iStartRow, int 
 
 bool PolygonObjectImp::newPath()
 {
-   const vector<LocationType> &vertices = getVertices();
+   const vector<LocationType>& vertices = getVertices();
    if (mPaths.empty() == false && vertices.empty() == false)
    {
       unsigned int firstVertex = mPaths.back();
@@ -326,7 +326,7 @@ bool PolygonObjectImp::processMouseDoubleClick(LocationType screenCoord, Qt::Mou
       removeVertex(getVertices().size() - 2);
 
       // Complete the insertion
-      GraphicLayerImp *pLayerImp = dynamic_cast<GraphicLayerImp*>(getLayer());
+      GraphicLayerImp* pLayerImp = dynamic_cast<GraphicLayerImp*>(getLayer());
       if (pLayerImp != NULL)
       {
          pLayerImp->completeInsertion();
@@ -357,7 +357,7 @@ bool PolygonObjectImp::isKindOf(const string& className) const
 bool PolygonObjectImp::addVertex(LocationType endPoint)
 {
    LocationType loopStart = endPoint;
-   const std::vector<LocationType> &vertices = getVertices();
+   const std::vector<LocationType>& vertices = getVertices();
    if (!mPaths.empty() && mPaths.back() < vertices.size())
    {
       loopStart = vertices[mPaths.back()];

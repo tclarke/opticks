@@ -127,13 +127,13 @@ public:
    bool toXml(XMLWriter* pXml) const;
    bool fromXml(DOMNode* pDocument, unsigned int version);
 
-signals:
-   void graphicObjectTypeChanged(GraphicObjectType type);
-   void modeChanged(ModeType mode);
-
 public slots:
    bool setAoiLayer(Layer* pLayer);
    void setAddMode(AoiAddMode mode);
+
+signals:
+   void graphicObjectTypeChanged(GraphicObjectType type);
+   void modeChanged(ModeType mode);
 
 protected:
    void aoiLayerDeleted(Subject& subject, const std::string& signal, const boost::any& value);

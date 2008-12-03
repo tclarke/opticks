@@ -21,6 +21,8 @@ RasterDataDescriptorImp::RasterDataDescriptorImp(const string& name, const strin
    DataDescriptorImp(name, type, pParent),
    mDataType(INT1UBYTE),
    mInterleave(BIP),
+   mRowSkipFactor(0),
+   mColumnSkipFactor(0),
    mXPixelSize(1.0),
    mYPixelSize(1.0),
    mDisplayMode(GRAYSCALE_MODE)
@@ -31,6 +33,8 @@ RasterDataDescriptorImp::RasterDataDescriptorImp(const string& name, const strin
    DataDescriptorImp(name, type, parent),
    mDataType(INT1UBYTE),
    mInterleave(BIP),
+   mRowSkipFactor(0),
+   mColumnSkipFactor(0),
    mXPixelSize(1.0),
    mYPixelSize(1.0),
    mDisplayMode(GRAYSCALE_MODE)
@@ -165,7 +169,7 @@ DimensionDescriptor RasterDataDescriptorImp::getOriginalRow(unsigned int origina
 
 DimensionDescriptor RasterDataDescriptorImp::getOnDiskRow(unsigned int onDiskNumber) const
 {
-   const RasterFileDescriptorImp *pFd = static_cast<const RasterFileDescriptorImp*>(getFileDescriptor());
+   const RasterFileDescriptorImp* pFd = static_cast<const RasterFileDescriptorImp*>(getFileDescriptor());
    if (pFd != NULL)
    {
       DimensionDescriptor descriptor = pFd->getOnDiskRow(onDiskNumber);
@@ -226,7 +230,7 @@ void RasterDataDescriptorImp::setColumns(const vector<DimensionDescriptor>& colu
             if (count > 0)
             {
                //determine skip factor on second iteration
-               int curSkipFactor = columns[count].getOnDiskNumber() - columns[count-1].getOnDiskNumber();
+               int curSkipFactor = columns[count].getOnDiskNumber() - columns[count - 1].getOnDiskNumber();
                VERIFYNRV(curSkipFactor >= 1);
                if (count > 1)
                {
@@ -277,7 +281,7 @@ DimensionDescriptor RasterDataDescriptorImp::getOriginalColumn(unsigned int orig
 
 DimensionDescriptor RasterDataDescriptorImp::getOnDiskColumn(unsigned int onDiskNumber) const
 {
-   const RasterFileDescriptorImp *pFd = static_cast<const RasterFileDescriptorImp*>(getFileDescriptor());
+   const RasterFileDescriptorImp* pFd = static_cast<const RasterFileDescriptorImp*>(getFileDescriptor());
    if (pFd != NULL)
    {
       DimensionDescriptor descriptor = pFd->getOnDiskColumn(onDiskNumber);
@@ -336,7 +340,7 @@ void RasterDataDescriptorImp::setBands(const vector<DimensionDescriptor>& bands)
             anyOnDiskNumberSet = true;
             if (count > 0)
             {
-               int numberDiff = bands[count].getOnDiskNumber() - bands[count-1].getOnDiskNumber();
+               int numberDiff = bands[count].getOnDiskNumber() - bands[count - 1].getOnDiskNumber();
                VERIFYNRV(numberDiff >= 1);
             }
          }
@@ -375,7 +379,7 @@ DimensionDescriptor RasterDataDescriptorImp::getOriginalBand(unsigned int origin
 
 DimensionDescriptor RasterDataDescriptorImp::getOnDiskBand(unsigned int onDiskNumber) const
 {
-   const RasterFileDescriptorImp *pFd = static_cast<const RasterFileDescriptorImp*>(getFileDescriptor());
+   const RasterFileDescriptorImp* pFd = static_cast<const RasterFileDescriptorImp*>(getFileDescriptor());
    if (pFd != NULL)
    {
       DimensionDescriptor descriptor = pFd->getOnDiskBand(onDiskNumber);
@@ -548,8 +552,7 @@ DisplayMode RasterDataDescriptorImp::getDisplayMode() const
 
 DataDescriptor* RasterDataDescriptorImp::copy(const string& name, DataElement* pParent) const
 {
-   RasterDataDescriptor* pDescriptor =
-      dynamic_cast<RasterDataDescriptor*>(DataDescriptorImp::copy(name, pParent));
+   RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(DataDescriptorImp::copy(name, pParent));
    if (pDescriptor != NULL)
    {
       pDescriptor->setDataType(mDataType);
@@ -688,7 +691,7 @@ bool RasterDataDescriptorImp::toXml(XMLWriter* pXml) const
       // Pixel size
       stringstream buf;
       buf << mXPixelSize << " " << mYPixelSize;
-      pXml->addText(buf.str().c_str(),pXml->addElement("pixelSize"));
+      pXml->addText(buf.str().c_str(), pXml->addElement("pixelSize"));
 
       // Units
       pXml->pushAddPoint(pXml->addElement("units"));
@@ -699,7 +702,7 @@ bool RasterDataDescriptorImp::toXml(XMLWriter* pXml) const
 
       // Bands
       pXml->pushAddPoint(pXml->addElement("bands"));
-      for(vector<DimensionDescriptor>::const_iterator iter = mBands.begin();
+      for (vector<DimensionDescriptor>::const_iterator iter = mBands.begin();
          bSuccess && iter != mBands.end();
          ++iter)
       {
@@ -757,7 +760,7 @@ bool RasterDataDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version)
    VERIFY(pDocument != NULL);
 
    bool success = DataDescriptorImp::fromXml(pDocument, version);
-   if(!success)
+   if (!success)
    {
       return false;
    }
@@ -781,36 +784,35 @@ bool RasterDataDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version)
    mDisplayMode = StringUtilities::fromXmlString<DisplayMode>(
       A(pElement->getAttribute(X("displayMode"))));
 
-   for(DOMNode* pChild = pDocument->getFirstChild(); success && pChild != NULL; pChild = pChild->getNextSibling())
+   for (DOMNode* pChild = pDocument->getFirstChild(); success && pChild != NULL; pChild = pChild->getNextSibling())
    {
-      if(XMLString::equals(pChild->getNodeName(), X("pixelSize")))
+      if (XMLString::equals(pChild->getNodeName(), X("pixelSize")))
       {
-         DOMNode *pGchld(pChild->getFirstChild());
+         DOMNode* pGchld(pChild->getFirstChild());
          LocationType pixelSize(1.0, 1.0);
          XmlReader::StrToLocation(pGchld->getNodeValue(), pixelSize);
          mXPixelSize = pixelSize.mX;
          mYPixelSize = pixelSize.mY;
       }
-      else if(XMLString::equals(pChild->getNodeName(), X("BadValues")))
+      else if (XMLString::equals(pChild->getNodeName(), X("BadValues")))
       {
-         for(DOMNode* pGrandchild = pChild->getFirstChild(); pGrandchild != NULL;
+         for (DOMNode* pGrandchild = pChild->getFirstChild(); pGrandchild != NULL;
             pGrandchild = pGrandchild->getNextSibling())
          {
-            if(XMLString::equals(pGrandchild->getNodeName(), X("value")))
+            if (XMLString::equals(pGrandchild->getNodeName(), X("value")))
             {
                DOMNode* pValue = pGrandchild->getFirstChild();
-               if(pValue != NULL)
+               if (pValue != NULL)
                {
-                  int value = StringUtilities::fromXmlString<int>(
-                     A(pValue->getNodeValue()));
+                  int value = StringUtilities::fromXmlString<int>(A(pValue->getNodeValue()));
                   mBadValues.push_back(value);
                }
             }
          }
       }
-      else if(XMLString::equals(pChild->getNodeName(), X("rows")))
+      else if (XMLString::equals(pChild->getNodeName(), X("rows")))
       {
-         for(DOMNode* pGrandchild = pChild->getFirstChild();
+         for (DOMNode* pGrandchild = pChild->getFirstChild();
             success && pGrandchild != NULL;
             pGrandchild = pGrandchild->getNextSibling())
          {
@@ -823,13 +825,13 @@ bool RasterDataDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version)
             }
          }
       }
-      else if(XMLString::equals(pChild->getNodeName(), X("columns")))
+      else if (XMLString::equals(pChild->getNodeName(), X("columns")))
       {
-         for(DOMNode* pGrandchild = pChild->getFirstChild();
+         for (DOMNode* pGrandchild = pChild->getFirstChild();
             success && pGrandchild != NULL;
             pGrandchild = pGrandchild->getNextSibling())
          {
-            if(XMLString::equals(pGrandchild->getNodeName(), X("column")))
+            if (XMLString::equals(pGrandchild->getNodeName(), X("column")))
             {
                // Create the column descriptor
                DimensionDescriptor descriptor;
@@ -851,7 +853,7 @@ bool RasterDataDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version)
             }
          }
       }
-      else if(XMLString::equals(pChild->getNodeName(), X("units")))
+      else if (XMLString::equals(pChild->getNodeName(), X("units")))
       {
          success = mUnits.fromXml(pChild, version);
       }
@@ -879,8 +881,8 @@ bool RasterDataDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version)
 
 const string& RasterDataDescriptorImp::getObjectType() const
 {
-   static string type("RasterDataDescriptorImp");
-   return type;
+   static string sType("RasterDataDescriptorImp");
+   return sType;
 }
 
 bool RasterDataDescriptorImp::isKindOf(const string& className) const

@@ -24,67 +24,122 @@ AspamImp::~AspamImp()
 {
 }
 
-void AspamImp::setParagraphA(const Aspam::ParagraphA &val)
+const Aspam::ParagraphA& AspamImp::getParagraphA() const
+{
+   return mParagraphA;
+}
+
+const Aspam::ParagraphB& AspamImp::getParagraphB() const
+{
+   return mParagraphB;
+}
+
+const Aspam::ParagraphC& AspamImp::getParagraphC() const
+{
+   return mParagraphC;
+}
+
+const Aspam::ParagraphD& AspamImp::getParagraphD() const
+{
+   return mParagraphD;
+}
+
+const Aspam::ParagraphE& AspamImp::getParagraphE() const
+{
+   return mParagraphE;
+}
+
+const Aspam::ParagraphF& AspamImp::getParagraphF() const
+{
+   return mParagraphF;
+}
+
+const Aspam::ParagraphG& AspamImp::getParagraphG() const
+{
+   return mParagraphG;
+}
+
+const Aspam::ParagraphH& AspamImp::getParagraphH() const
+{
+   return mParagraphH;
+}
+
+const Aspam::ParagraphI& AspamImp::getParagraphI() const
+{
+   return mParagraphI;
+}
+
+const Aspam::ParagraphJ& AspamImp::getParagraphJ() const
+{
+   return mParagraphJ;
+}
+
+const Aspam::ParagraphK& AspamImp::getParagraphK() const
+{
+   return mParagraphK;
+}
+
+void AspamImp::setParagraphA(const Aspam::ParagraphA& val)
 {
    mParagraphA = val;
    notify(SIGNAL_NAME(Aspam, ParagraphAModified), boost::any(mParagraphA));
 }
 
-void AspamImp::setParagraphB(const Aspam::ParagraphB &val)
+void AspamImp::setParagraphB(const Aspam::ParagraphB& val)
 {
    mParagraphB = val;
    notify(SIGNAL_NAME(Aspam, ParagraphBModified), boost::any(mParagraphB));
 }
 
-void AspamImp::setParagraphC(const Aspam::ParagraphC &val)
+void AspamImp::setParagraphC(const Aspam::ParagraphC& val)
 {
    mParagraphC = val;
    notify(SIGNAL_NAME(Aspam, ParagraphCModified), boost::any(mParagraphC));
 }
 
-void AspamImp::setParagraphD(const Aspam::ParagraphD &val)
+void AspamImp::setParagraphD(const Aspam::ParagraphD& val)
 {
    mParagraphD = val;
    notify(SIGNAL_NAME(Aspam, ParagraphDModified), boost::any(mParagraphD));
 }
 
-void AspamImp::setParagraphE(const Aspam::ParagraphE &val)
+void AspamImp::setParagraphE(const Aspam::ParagraphE& val)
 {
    mParagraphE = val;
    notify(SIGNAL_NAME(Aspam, ParagraphEModified), boost::any(mParagraphE));
 }
 
-void AspamImp::setParagraphF(const Aspam::ParagraphF &val)
+void AspamImp::setParagraphF(const Aspam::ParagraphF& val)
 {
    mParagraphF = val;
    notify(SIGNAL_NAME(Aspam, ParagraphFModified), boost::any(mParagraphF));
 }
 
-void AspamImp::setParagraphG(const Aspam::ParagraphG &val)
+void AspamImp::setParagraphG(const Aspam::ParagraphG& val)
 {
    mParagraphG = val;
    notify(SIGNAL_NAME(Aspam, ParagraphGModified), boost::any(mParagraphG));
 }
 
-void AspamImp::setParagraphH(const Aspam::ParagraphH &val)
+void AspamImp::setParagraphH(const Aspam::ParagraphH& val)
 {
    mParagraphH = val;
    notify(SIGNAL_NAME(Aspam, ParagraphHModified), boost::any(mParagraphH));
 }
 
-void AspamImp::setParagraphI(const Aspam::ParagraphI &val)
+void AspamImp::setParagraphI(const Aspam::ParagraphI& val)
 {
    mParagraphI = val;
    notify(SIGNAL_NAME(Aspam, ParagraphIModified), boost::any(mParagraphI));
 }
 
-void AspamImp::setParagraphJ(const Aspam::ParagraphJ &val)
+void AspamImp::setParagraphJ(const Aspam::ParagraphJ& val)
 {
    mParagraphJ = val;
    notify(SIGNAL_NAME(Aspam, ParagraphJModified), boost::any(mParagraphJ));
 }
 
-void AspamImp::setParagraphK(const Aspam::ParagraphK &val)
+void AspamImp::setParagraphK(const Aspam::ParagraphK& val)
 {
    mParagraphK = val;
    notify(SIGNAL_NAME(Aspam, ParagraphKModified), boost::any(mParagraphK));
@@ -92,8 +147,8 @@ void AspamImp::setParagraphK(const Aspam::ParagraphK &val)
 
 AnyData* AspamImp::copy() const
 {
-   Aspam *pAspam = dynamic_cast<Aspam*>(new AspamAdapter);
-   if(pAspam != NULL)
+   Aspam* pAspam = dynamic_cast<Aspam*>(new AspamAdapter);
+   if (pAspam != NULL)
    {
       pAspam->setParagraphA(mParagraphA);
       pAspam->setParagraphB(mParagraphB);
@@ -109,13 +164,13 @@ AnyData* AspamImp::copy() const
 
 const string& AspamImp::getObjectType() const
 {
-   static string type("AspamImp");
-   return type;
+   static string sType("AspamImp");
+   return sType;
 }
 
 bool AspamImp::isKindOf(const string& className) const
 {
-   if((className == getObjectType()) || (className == "Aspam"))
+   if ((className == getObjectType()) || (className == "Aspam"))
    {
       return true;
    }

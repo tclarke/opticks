@@ -165,7 +165,7 @@ bool Nitf::FileHeader::importMetadata(const ossimPropertyInterface *pHeader, Ras
 {
    VERIFY(pDescriptor != NULL && pHeader != NULL);
 
-   ossimNitfFileHeader *pFileHeader = PTR_CAST(ossimNitfFileHeader, pHeader);
+   ossimNitfFileHeader* pFileHeader = PTR_CAST(ossimNitfFileHeader, pHeader);
    VERIFY(pFileHeader != NULL && pFileHeader->getVersion() == mFileVersion);
 
    FactoryResource<DynamicObject> pFileHeaderMetadata;
@@ -201,7 +201,7 @@ bool Nitf::FileHeader::importMetadata(const ossimPropertyInterface *pHeader, Ras
       pFileHeaderMetadata->setAttribute(NUM_LABELS, numLabels);
    }
 
-   DynamicObject *pMetadata = pDescriptor->getMetadata();
+   DynamicObject* pMetadata = pDescriptor->getMetadata();
    VERIFY(pMetadata != NULL);
    VERIFY(pMetadata->setAttributeByPath(getMetadataPath(), *pFileHeaderMetadata.get()));
    return true;
@@ -213,7 +213,7 @@ bool Nitf::FileHeader::importClassificationString(const ossimPropertyInterface *
    const string& ossimName)
 {
    VERIFY(pDescriptor != NULL);
-   Classification *pClass = pDescriptor->getClassification();
+   Classification* pClass = pDescriptor->getClassification();
    VERIFY(pClass != NULL);
 
    if (!importMetadataValue<string>(pPropertyInterface, pDescriptor, 
@@ -224,7 +224,7 @@ bool Nitf::FileHeader::importClassificationString(const ossimPropertyInterface *
 
    const DataVariant& attrValue = pDynObj->getAttribute(appName);
    string type = attrValue.getTypeName();
-   const string *pValue = attrValue.getPointerToValue<string>();
+   const string* pValue = attrValue.getPointerToValue<string>();
 
    if (pValue == NULL)
    {
@@ -313,7 +313,7 @@ bool Nitf::FileHeader::exportClassificationString(const RasterDataDescriptor *pD
    const string& ossimName)
 {
    VERIFY(pDescriptor != NULL);
-   const Classification *pClass = pDescriptor->getClassification();
+   const Classification* pClass = pDescriptor->getClassification();
    VERIFY(pClass != NULL);
 
    string value;
@@ -393,7 +393,7 @@ bool Nitf::FileHeader::importClassificationDate(const ossimPropertyInterface *pP
    const string& ossimName)
 {
    VERIFY(pDescriptor != NULL);
-   Classification *pClass = pDescriptor->getClassification();
+   Classification* pClass = pDescriptor->getClassification();
    VERIFY(pClass != NULL);
 
    // All FileHeader classification dates are stored in CCYYMMDD format.
@@ -405,7 +405,7 @@ bool Nitf::FileHeader::importClassificationDate(const ossimPropertyInterface *pP
 
    const DataVariant& attrValue = pDynObj->getAttribute(appName);
    string type = attrValue.getTypeName();
-   const DateTime *pValue = attrValue.getPointerToValue<DateTime>();
+   const DateTime* pValue = attrValue.getPointerToValue<DateTime>();
    if (pValue == NULL)
    {
       // ok, empty string
@@ -441,10 +441,10 @@ bool Nitf::FileHeader::exportClassificationDate(const RasterDataDescriptor *pDes
    const string& ossimName)
 {
    VERIFY(pDescriptor != NULL);
-   const Classification *pClass = pDescriptor->getClassification();
+   const Classification* pClass = pDescriptor->getClassification();
    VERIFY(pClass != NULL);
 
-   const DateTime *pValue = NULL;
+   const DateTime* pValue = NULL;
    
    if (appName == SECURITY_DECLASS_DATE)
    {

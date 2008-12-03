@@ -37,7 +37,7 @@ bool TemplateUtilities::getInputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
 
-   if(mbInteractive)
+   if (mbInteractive)
    {
       VERIFY(DesktopItems::getInputSpecification(pArgList) && (pArgList != NULL));
 
@@ -75,7 +75,7 @@ bool TemplateUtilities::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
    pStep->addProperty("Item", getName());
    mpStep = pStep.get();
 
-   if(!extractInputArgs(pInArgList))
+   if (!extractInputArgs(pInArgList))
    {
       reportError("Unable to extract input arguments.", "DD2764C8-17B2-4dd6-A67D-6B2B5C41A281");
       return false;
@@ -111,16 +111,16 @@ bool TemplateUtilities::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
    vector<Window*> windows;
    mpDesktop->getWindows(PRODUCT_WINDOW, windows);
 
-   for(vector<Window*>::iterator iter = windows.begin(); iter != windows.end(); ++iter)
+   for (vector<Window*>::iterator iter = windows.begin(); iter != windows.end(); ++iter)
    {
       ProductWindow* pWindow = static_cast<ProductWindow*>(*iter);
-      if(pWindow != NULL)
+      if (pWindow != NULL)
       {
          ProductView* pCurrentView = pWindow->getProductView();
-         if(pCurrentView != NULL)
+         if (pCurrentView != NULL)
          {
             string viewName = pCurrentView->getName();
-            if(viewName == mProductName)
+            if (viewName == mProductName)
             {
                pView = pCurrentView;
                break;
@@ -129,14 +129,14 @@ bool TemplateUtilities::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
       }
    }
 
-   if(pView == NULL)
+   if (pView == NULL)
    {
       reportError("Could not get the view!", "F44F65D0-DBCD-400a-8862-F560E889335D");
       return false;
    }
 
    // Perform the action
-   if(!executeUtility(pView, filename))
+   if (!executeUtility(pView, filename))
    {
       return false;
    }
@@ -147,7 +147,7 @@ bool TemplateUtilities::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
 
 bool TemplateUtilities::extractInputArgs(PlugInArgList* pInArgList)
 {
-   if(!DesktopItems::extractInputArgs(pInArgList))
+   if (!DesktopItems::extractInputArgs(pInArgList))
    {
       return false;
    }
@@ -207,10 +207,10 @@ bool LoadTemplate::executeUtility(ProductView* pView, const string& templateFile
 
    reportProgress("Loading the template from the file...", 0, "74EC20B4-6B98-4314-B9F0-FE0C4302E619");
 
-   if(!pView->loadTemplate(templateFile))
+   if (!pView->loadTemplate(templateFile))
    {
       reportError("Could not load the template from the '" + templateFile + "' file!",
-                           "88CCA25F-F675-478e-BFB4-2DED36100809");
+         "88CCA25F-F675-478e-BFB4-2DED36100809");
       return false;
    }
 
@@ -243,10 +243,10 @@ bool SaveTemplate::executeUtility(ProductView* pView, const string& templateFile
 
    reportProgress("Saving the template to the file...", 0, "E795F35F-82DD-476b-B8D5-D44C8D1630DF");
 
-   if(!pView->saveTemplate(templateFile))
+   if (!pView->saveTemplate(templateFile))
    {
       reportError("Could not save the template to the '" + templateFile + "' file!",
-                           "08AD8B83-6139-467e-9F99-6411388AA941");
+         "08AD8B83-6139-467e-9F99-6411388AA941");
       return false;
    }
 

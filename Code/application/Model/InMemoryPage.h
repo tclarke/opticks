@@ -15,17 +15,17 @@
 class InMemoryPage : public RasterPage
 {
 public:
-   InMemoryPage(void *pData, unsigned int numRows);
+   InMemoryPage(void* pData, unsigned int numRows);
    ~InMemoryPage();
 
-   void *getRawData();
+   void* getRawData();
    unsigned int getNumRows();
    unsigned int getNumColumns();
    unsigned int getNumBands();
    unsigned int getInterlineBytes();
 
 private:
-   void *mpData;
+   void* mpData;
    unsigned int mNumRows;
 };
 

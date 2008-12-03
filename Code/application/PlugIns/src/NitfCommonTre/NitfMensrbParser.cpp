@@ -298,7 +298,7 @@ Nitf::TreState Nitf::MensrbParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID && totalFields != numFields)
    {
       reporter << "Total fields in the Dynamic Object(" <<
-         totalFields <<") did not match the number found(" << numFields << ") ";
+         totalFields << ") did not match the number found(" << numFields << ") ";
       status = INVALID;
    }
 
@@ -322,30 +322,30 @@ bool Nitf::MensrbParser::fromDynamicObject(const DynamicObject& input, ostream& 
 
    try
    {
-      output << sizeString( dv_cast<string>(input.getAttribute(MENSRB::ACFT_LOC)), 25);
-      output <<   toString( dv_cast<double>(input.getAttribute(MENSRB::ACFT_LOC_ACCY)), 6, 2);
-      output <<   toString( dv_cast<int>(input.getAttribute(MENSRB::ACFT_ALT)), 6);
-      output << sizeString( dv_cast<string>(input.getAttribute(MENSRB::RP_LOC)), 25);
-      output <<   toString( dv_cast<double>(input.getAttribute(MENSRB::RP_LOC_ACCY)), 6, 2);
-      output <<   toString( dv_cast<int>(input.getAttribute(MENSRB::RP_ELEV)), 6, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute(MENSRB::OF_PC_R)), 7, 1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute(MENSRB::OF_PC_A)), 7, 1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute(MENSRB::COSGRZ)), 7);
-      output <<   toString( dv_cast<int>(input.getAttribute(MENSRB::RGCRP)), 7);
-      output << sizeString( dv_cast<string>(input.getAttribute(MENSRB::RLMAP)), 1);
-      output <<   toString( dv_cast<int>(input.getAttribute(MENSRB::RP_ROW)), 5);
-      output <<   toString( dv_cast<int>(input.getAttribute(MENSRB::RP_COL)), 5);
-      output <<   toString( dv_cast<double>(input.getAttribute(MENSRB::C_R_NC)), 10, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute(MENSRB::C_R_EC)), 10, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute(MENSRB::C_R_DC)), 10, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute(MENSRB::C_AZ_NC)), 9, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute(MENSRB::C_AZ_EC)), 9, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute(MENSRB::C_AZ_DC)), 9, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute(MENSRB::C_AL_NC)), 9, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute(MENSRB::C_AL_EC)), 9, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute(MENSRB::C_AL_DC)), 9, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<int>(input.getAttribute(MENSRB::TOTAL_TILES_COLS)), 3);
-      output <<   toString( dv_cast<int>(input.getAttribute(MENSRB::TOTAL_TILES_ROWS)), 5);
+      output << sizeString(dv_cast<string>(input.getAttribute(MENSRB::ACFT_LOC)), 25);
+      output << toString(dv_cast<double>(input.getAttribute(MENSRB::ACFT_LOC_ACCY)), 6, 2);
+      output << toString(dv_cast<int>(input.getAttribute(MENSRB::ACFT_ALT)), 6);
+      output << sizeString(dv_cast<string>(input.getAttribute(MENSRB::RP_LOC)), 25);
+      output << toString(dv_cast<double>(input.getAttribute(MENSRB::RP_LOC_ACCY)), 6, 2);
+      output << toString(dv_cast<int>(input.getAttribute(MENSRB::RP_ELEV)), 6, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(MENSRB::OF_PC_R)), 7, 1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(MENSRB::OF_PC_A)), 7, 1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(MENSRB::COSGRZ)), 7);
+      output << toString(dv_cast<int>(input.getAttribute(MENSRB::RGCRP)), 7);
+      output << sizeString(dv_cast<string>(input.getAttribute(MENSRB::RLMAP)), 1);
+      output << toString(dv_cast<int>(input.getAttribute(MENSRB::RP_ROW)), 5);
+      output << toString(dv_cast<int>(input.getAttribute(MENSRB::RP_COL)), 5);
+      output << toString(dv_cast<double>(input.getAttribute(MENSRB::C_R_NC)), 10, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(MENSRB::C_R_EC)), 10, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(MENSRB::C_R_DC)), 10, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(MENSRB::C_AZ_NC)), 9, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(MENSRB::C_AZ_EC)), 9, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(MENSRB::C_AZ_DC)), 9, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(MENSRB::C_AL_NC)), 9, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(MENSRB::C_AL_EC)), 9, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(MENSRB::C_AL_DC)), 9, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<int>(input.getAttribute(MENSRB::TOTAL_TILES_COLS)), 3);
+      output << toString(dv_cast<int>(input.getAttribute(MENSRB::TOTAL_TILES_ROWS)), 5);
    }
    catch (const bad_cast&)
    {

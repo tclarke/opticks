@@ -9,7 +9,9 @@ Import('env build_dir libInstallTargets')
 ####
 srcs = map(lambda x,bd=build_dir: '%s/%s' % (bd,x), filter(lambda x: x != "ModuleShell.cpp", glob.glob("*.cpp")))
 objs = env.Object(srcs)
-module_shell = env.SharedObject("%s/ModuleShell.cpp" % build_dir)
+ms_env = env.Clone() # compile to ModuleShell.os instead of so_ModuleShell.o
+ms_env.Replace(SHOBJPREFIX = '', SHOBJSUFFIX = '.os')
+module_shell = ms_env.SharedObject("%s/ModuleShell.cpp" % build_dir)
 
 ####
 # build the library and set up an alias to ease building it later

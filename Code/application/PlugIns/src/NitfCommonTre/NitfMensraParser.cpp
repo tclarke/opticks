@@ -275,7 +275,7 @@ Nitf::TreState Nitf::MensraParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID && totalFields != numFields)
    {
       reporter << "Total fields in the Dynamic Object(" <<
-         totalFields <<") did not match the number found(" << numFields << ") ";
+         totalFields << ") did not match the number found(" << numFields << ") ";
       status = INVALID;
    }
 
@@ -301,26 +301,26 @@ bool Nitf::MensraParser::fromDynamicObject(const DynamicObject& input, ostream& 
 
    try
    {
-      output << sizeString( dv_cast<string>(input.getAttribute (MENSRA::CCRP_LOC)), 21);
-      output <<   toString( dv_cast<int>(input.getAttribute    (MENSRA::CCRP_ALT)), 6, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (MENSRA::OF_PC_R)), 7, 1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (MENSRA::OF_PC_A)), 7, 1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (MENSRA::COSGRZ)), 7, 5);
-      output <<   toString( dv_cast<int>(input.getAttribute    (MENSRA::RGCCRP)), 7);
-      output << sizeString( dv_cast<string>(input.getAttribute (MENSRA::RLMAP)), 1);
-      output <<   toString( dv_cast<int>(input.getAttribute    (MENSRA::CCRP_ROW)), 5);
-      output <<   toString( dv_cast<int>(input.getAttribute    (MENSRA::CCRP_COL)), 5);
-      output << sizeString( dv_cast<string>(input.getAttribute (MENSRA::ACFT_LOC)), 21);
-      output <<   toString( dv_cast<int>(input.getAttribute    (MENSRA::ACFT_ALT)), 5);
-      output <<   toString( dv_cast<double>(input.getAttribute (MENSRA::C_R_NC)), 7, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (MENSRA::C_R_EC)), 7, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (MENSRA::C_R_DC)), 7, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (MENSRA::C_AZ_NC)), 7, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (MENSRA::C_AZ_EC)), 7, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (MENSRA::C_AZ_DC)), 7, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (MENSRA::C_AL_NC)), 7, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (MENSRA::C_AL_EC)), 7, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (MENSRA::C_AL_DC)), 7, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << sizeString(dv_cast<string>(input.getAttribute(MENSRA::CCRP_LOC)), 21);
+      output << toString(dv_cast<int>(input.getAttribute(MENSRA::CCRP_ALT)), 6, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(MENSRA::OF_PC_R)), 7, 1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(MENSRA::OF_PC_A)), 7, 1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(MENSRA::COSGRZ)), 7, 5);
+      output << toString(dv_cast<int>(input.getAttribute(MENSRA::RGCCRP)), 7);
+      output << sizeString(dv_cast<string>(input.getAttribute(MENSRA::RLMAP)), 1);
+      output << toString(dv_cast<int>(input.getAttribute(MENSRA::CCRP_ROW)), 5);
+      output << toString(dv_cast<int>(input.getAttribute(MENSRA::CCRP_COL)), 5);
+      output << sizeString(dv_cast<string>(input.getAttribute(MENSRA::ACFT_LOC)), 21);
+      output << toString(dv_cast<int>(input.getAttribute(MENSRA::ACFT_ALT)), 5);
+      output << toString(dv_cast<double>(input.getAttribute(MENSRA::C_R_NC)), 7, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(MENSRA::C_R_EC)), 7, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(MENSRA::C_R_DC)), 7, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(MENSRA::C_AZ_NC)), 7, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(MENSRA::C_AZ_EC)), 7, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(MENSRA::C_AZ_DC)), 7, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(MENSRA::C_AL_NC)), 7, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(MENSRA::C_AL_EC)), 7, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(MENSRA::C_AL_DC)), 7, -1, ZERO_FILL, POS_SIGN_TRUE);
    }
    catch (const bad_cast&)
    {

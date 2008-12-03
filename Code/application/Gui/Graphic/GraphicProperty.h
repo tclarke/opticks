@@ -47,7 +47,7 @@ public:
    AlphaProperty(double alpha);
 
    double getAlpha() const;
-   bool set(const GraphicProperty *pProp) { *this = *(AlphaProperty*)pProp; return true; }
+   bool set(const GraphicProperty* pProp);
    bool compare(const GraphicProperty* pProp) const;
    GraphicProperty* copy() const;
 
@@ -65,7 +65,7 @@ public:
    ApexProperty(double apex);
 
    double getApex() const;
-   bool set(const GraphicProperty *pProp) { *this = *(ApexProperty*)pProp; return true; }
+   bool set(const GraphicProperty* pProp);
    bool compare(const GraphicProperty* pProp) const;
    GraphicProperty* copy() const;
 
@@ -83,7 +83,7 @@ public:
    ArcRegionProperty(ArcRegion eRegion);
 
    ArcRegion getRegion() const;
-   bool set(const GraphicProperty *pProp) { *this = *(ArcRegionProperty*)pProp; return true; }
+   bool set(const GraphicProperty* pProp);
    bool compare(const GraphicProperty* pProp) const;
    GraphicProperty* copy() const;
 
@@ -109,7 +109,7 @@ public:
    LocationType getUrCorner() const;
    LocationType getLlLatLong() const;
    LocationType getUrLatLong() const;
-   bool set(const GraphicProperty* pProp) { *this = *(BoundingBoxProperty*)pProp; return true; }
+   bool set(const GraphicProperty* pProp);
    bool compare(const GraphicProperty* pProp) const;
    GraphicProperty* copy() const;
 
@@ -133,7 +133,7 @@ public:
    FillColorProperty(ColorType color);
 
    ColorType getColor() const;
-   bool set(const GraphicProperty *pProp) { *this = *(FillColorProperty*)pProp; return true; }
+   bool set(const GraphicProperty* pProp);
    bool compare(const GraphicProperty* pProp) const;
    GraphicProperty* copy() const;
 
@@ -151,7 +151,7 @@ public:
    FillStyleProperty(FillStyle eStyle);
 
    FillStyle getFillStyle() const;
-   bool set(const GraphicProperty *pProp) { *this = *(FillStyleProperty*)pProp; return true; }
+   bool set(const GraphicProperty* pProp);
    bool compare(const GraphicProperty* pProp) const;
    GraphicProperty* copy() const;
 
@@ -169,7 +169,7 @@ public:
    FontProperty(const FontImp& font);
 
    const FontImp& getFont() const;
-   bool set(const GraphicProperty *pProp) { *this = *(FontProperty*)pProp; return true; }
+   bool set(const GraphicProperty* pProp);
    bool compare(const GraphicProperty* pProp) const;
    GraphicProperty* copy() const;
 
@@ -187,7 +187,7 @@ public:
    HatchStyleProperty(SymbolType eHatch);
 
    SymbolType getHatchStyle() const;
-   bool set(const GraphicProperty *pProp) { *this = *(HatchStyleProperty*)pProp; return true; }
+   bool set(const GraphicProperty* pProp);
    bool compare(const GraphicProperty* pProp) const;
    GraphicProperty* copy() const;
 
@@ -202,9 +202,9 @@ private:
 class LatLonProperty : public GraphicProperty
 {
 public:
-   LatLonProperty(LatLonPoint latLonPoint) : GraphicProperty("LatLon"), mLatLon(latLonPoint) { }
+   LatLonProperty(LatLonPoint latLonPoint);
 
-   LatLonPoint getLatLon() const { return mLatLon; }
+   LatLonPoint getLatLon() const;
    bool set(const GraphicProperty *pProp);
    bool compare(const GraphicProperty* pProp) const;
    GraphicProperty* copy() const;
@@ -223,7 +223,7 @@ public:
    LineColorProperty(ColorType color);
 
    ColorType getColor() const;
-   bool set(const GraphicProperty *pProp) { *this = *(LineColorProperty*)pProp; return true; }
+   bool set(const GraphicProperty* pProp);
    bool compare(const GraphicProperty* pProp) const;
    GraphicProperty* copy() const;
 
@@ -241,7 +241,7 @@ public:
    LineOnProperty(bool state);
 
    bool getState() const;
-   bool set(const GraphicProperty *pProp) { *this = *(LineOnProperty*)pProp; return true; }
+   bool set(const GraphicProperty* pProp);
    bool compare(const GraphicProperty* pProp) const;
    GraphicProperty* copy() const;
 
@@ -252,13 +252,14 @@ private:
    bool mState;
 };
 
+
 class LineScaledProperty : public GraphicProperty
 {
 public:
    LineScaledProperty(bool scaled);
 
    bool getScaled() const;
-   bool set(const GraphicProperty *pProp);
+   bool set(const GraphicProperty* pProp);
    bool compare(const GraphicProperty* pProp) const;
    GraphicProperty* copy() const;
 
@@ -269,13 +270,14 @@ private:
    bool mScaled;
 };
 
+
 class LineStyleProperty : public GraphicProperty
 {
 public:
    LineStyleProperty(LineStyle eStyle);
 
    LineStyle getStyle() const;
-   bool set(const GraphicProperty *pProp) { *this = *(LineStyleProperty*)pProp; return true; }
+   bool set(const GraphicProperty* pProp);
    bool compare(const GraphicProperty* pProp) const;
    GraphicProperty* copy() const;
 
@@ -293,7 +295,7 @@ public:
    LineWidthProperty(double width);
 
    double getWidth() const;
-   bool set(const GraphicProperty *pProp) { *this = *(LineWidthProperty*)pProp; return true; }
+   bool set(const GraphicProperty* pProp);
    bool compare(const GraphicProperty* pProp) const;
    GraphicProperty* copy() const;
 
@@ -311,7 +313,7 @@ public:
    RotationProperty(double rotate);
 
    double getRotation() const;
-   bool set(const GraphicProperty *pProp) { *this = *(RotationProperty*)pProp; return true; }
+   bool set(const GraphicProperty* pProp);
    bool compare(const GraphicProperty* pProp) const;
    GraphicProperty* copy() const;
 
@@ -329,7 +331,7 @@ public:
    ScaleProperty(double scale);
 
    double getScale() const;
-   bool set(const GraphicProperty *pProp) { *this = *(ScaleProperty*)pProp; return true; }
+   bool set(const GraphicProperty* pProp);
    bool compare(const GraphicProperty* pProp) const;
    GraphicProperty* copy() const;
 
@@ -365,7 +367,7 @@ public:
    TextColorProperty(ColorType color);
 
    ColorType getColor() const;
-   bool set(const GraphicProperty *pProp) { *this = *(TextColorProperty*)pProp; return true; }
+   bool set(const GraphicProperty* pProp);
    bool compare(const GraphicProperty* pProp) const;
    GraphicProperty* copy() const;
 
@@ -383,7 +385,7 @@ public:
    TextStringProperty(const std::string& text);
 
    const std::string& getString() const;
-   bool set(const GraphicProperty *pProp) { *this = *(TextStringProperty*)pProp; return true; }
+   bool set(const GraphicProperty* pProp);
    bool compare(const GraphicProperty* pProp) const;
    GraphicProperty* copy() const;
 
@@ -402,7 +404,7 @@ public:
 
    double getStartAngle() const;
    double getStopAngle() const;
-   bool set(const GraphicProperty* pProperty) { *this = *(WedgeProperty*)pProperty; return true; }
+   bool set(const GraphicProperty* pProperty);
    bool compare(const GraphicProperty* pProp) const;
    GraphicProperty* copy() const;
 
@@ -421,10 +423,10 @@ private:
 class PaperSizeProperty : public GraphicProperty
 {
 public:
-   PaperSizeProperty(LocationType paperSize);
+   PaperSizeProperty(LocationType size);
 
    LocationType getSize() const;
-   bool set(const GraphicProperty* pProperty) { *this = *(PaperSizeProperty*)pProperty; return true; }
+   bool set(const GraphicProperty* pProperty);
    bool compare(const GraphicProperty* pProp) const;
    GraphicProperty* copy() const;
 
@@ -441,8 +443,8 @@ class FileNameProperty : public GraphicProperty
 public:
    FileNameProperty(const std::string& filename);
 
-   const std::string & getFileName() const { return mFileName; }
-   bool set(const GraphicProperty *pProp);
+   const std::string& getFileName() const;
+   bool set(const GraphicProperty* pProp);
    bool compare(const GraphicProperty* pProp) const;
    GraphicProperty* copy() const;
 
@@ -453,13 +455,14 @@ private:
    std::string mFileName;
 };
 
+
 class PixelSymbolProperty : public GraphicProperty
 {
 public:
    PixelSymbolProperty(SymbolType symbol);
 
-   SymbolType getPixelSymbol() const { return mSymbol; }
-   bool set(const GraphicProperty *pProp);
+   SymbolType getPixelSymbol() const;
+   bool set(const GraphicProperty* pProp);
    bool compare(const GraphicProperty* pProp) const;
    GraphicProperty* copy() const;
 
@@ -470,13 +473,14 @@ private:
    SymbolType mSymbol;
 };
 
+
 class DrawModeProperty : public GraphicProperty
 {
 public:
    DrawModeProperty(ModeType mode);
 
-   ModeType getDrawMode() const { return mMode; }
-   bool set(const GraphicProperty *pProp);
+   ModeType getDrawMode() const;
+   bool set(const GraphicProperty* pProp);
    bool compare(const GraphicProperty* pProp) const;
    GraphicProperty* copy() const;
 
@@ -487,13 +491,14 @@ private:
    ModeType mMode;
 };
 
+
 class GraphicSymbolProperty : public GraphicProperty
 {
 public:
-   GraphicSymbolProperty(const std::string &symbolName);
+   GraphicSymbolProperty(const std::string& symbolName);
 
-   const std::string &getSymbolName() const { return mSymbolName; }
-   bool set(const GraphicProperty *pProp);
+   const std::string& getSymbolName() const;
+   bool set(const GraphicProperty* pProp);
    bool compare(const GraphicProperty* pProp) const;
    GraphicProperty* copy() const;
 
@@ -504,13 +509,14 @@ private:
    std::string mSymbolName;
 };
 
+
 class GraphicSymbolSizeProperty : public GraphicProperty
 {
 public:
    GraphicSymbolSizeProperty(unsigned int symbolSize);
 
-   const unsigned int getSymbolSize() const { return mSymbolSize; }
-   bool set(const GraphicProperty *pProp);
+   const unsigned int getSymbolSize() const;
+   bool set(const GraphicProperty* pProp);
    bool compare(const GraphicProperty* pProp) const;
    GraphicProperty* copy() const;
 

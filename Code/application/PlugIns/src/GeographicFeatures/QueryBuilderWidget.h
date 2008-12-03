@@ -54,11 +54,11 @@ private:
     */
    typedef EnumWrapper<CombinationTypeEnum> CombinationType;
 
-   QLabel *mpAllShapesLabel;
-   QStringListModel *mpFieldModel;
-   QComboBox *mpCombineCombo;
-   QWidget *mpRulesWidget;
-   QVBoxLayout *mpRulesLayout;
+   QLabel* mpAllShapesLabel;
+   QStringListModel* mpFieldModel;
+   QComboBox* mpCombineCombo;
+   QWidget* mpRulesWidget;
+   QVBoxLayout* mpRulesLayout;
 
 };
 
@@ -79,9 +79,9 @@ signals:
    void removeButtonPressed();
 
 private:
-   QComboBox *mpFieldCombo;
-   QComboBox *mpCompareCombo;
-   QLineEdit *mpValueEdit;
+   QComboBox* mpFieldCombo;
+   QComboBox* mpCompareCombo;
+   QLineEdit* mpValueEdit;
 };
 
 #endif

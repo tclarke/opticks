@@ -23,12 +23,13 @@ class PostScriptExporter : public ExporterShell
 public:
    PostScriptExporter();
    ~PostScriptExporter();
-   bool getInputSpecification(PlugInArgList *&pInArgList);
-   bool execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList);
+
+   bool getInputSpecification(PlugInArgList*& pArgList);
+   bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
 
 protected:
-   void writePostScriptHeader(const std::string &fname, const QPoint &offset, const QSize &size);
-   void writeImageSegment(const QImage &image, const QPoint &offset, double scale = 1.0);
+   void writePostScriptHeader(const std::string& fname, const QPoint& offset, const QSize& size);
+   void writeImageSegment(const QImage& image, const QPoint& offset, double scale = 1.0);
    void writePostScriptFooter();
 
 private:
@@ -37,7 +38,7 @@ private:
    void cleanup85();
    void encode(unsigned long tuple, int count);
 
-   FILE *mpOutFile;
+   FILE* mpOutFile;
    unsigned long mWidth;
    int mPos;
    int mTuple;

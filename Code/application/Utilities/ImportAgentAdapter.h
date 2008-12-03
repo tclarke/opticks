@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef IMPORT_AGENT_ADAPTER_H
-#define IMPORT_AGENT_ADAPTER_H
+#ifndef IMPORTAGENTADAPTER_H
+#define IMPORTAGENTADAPTER_H
 
 #include "ImportAgent.h"
 #include "ImportAgentImp.h"

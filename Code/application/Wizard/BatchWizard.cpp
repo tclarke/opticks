@@ -15,10 +15,10 @@
 
 using namespace std;
 
-BatchWizard::BatchWizard()
+BatchWizard::BatchWizard() :
+   mbClean(false),
+   mpRepeatFileset(NULL)
 {
-   mbClean = false;
-   mpRepeatFileset = NULL;
 }
 
 BatchWizard::~BatchWizard()
@@ -85,8 +85,7 @@ BatchFileset* BatchWizard::getFileset(const string& filesetName) const
    vector<BatchFileset*>::const_iterator iter;
    for (iter = mFilesets.begin(); iter != mFilesets.end(); iter++)
    {
-      BatchFileset* pFileset = NULL;
-      pFileset = *iter;
+      BatchFileset* pFileset = *iter;
       if (pFileset != NULL)
       {
          string name = pFileset->getName();
@@ -107,9 +106,7 @@ const vector<BatchFileset*>& BatchWizard::getFilesets() const
 
 int BatchWizard::getNumFilesets() const
 {
-   int iCount = 0;
-   iCount = mFilesets.size();
-
+   int iCount = static_cast<int>(mFilesets.size());
    return iCount;
 }
 
@@ -120,11 +117,9 @@ bool BatchWizard::containsFileset(BatchFileset* pFileset) const
       return false;
    }
 
-   vector<BatchFileset*>::const_iterator iter;
-   for (iter = mFilesets.begin(); iter != mFilesets.end(); iter++)
+   for (vector<BatchFileset*>::const_iterator iter = mFilesets.begin(); iter != mFilesets.end(); ++iter)
    {
-      BatchFileset* pCurrentFileset = NULL;
-      pCurrentFileset = *iter;
+      BatchFileset* pCurrentFileset = *iter;
       if (pCurrentFileset != NULL)
       {
          if (pCurrentFileset == pFileset)
@@ -139,11 +134,9 @@ bool BatchWizard::containsFileset(BatchFileset* pFileset) const
 
 bool BatchWizard::removeFileset(BatchFileset* pFileset)
 {
-   vector<BatchFileset*>::iterator iter;
-   for (iter = mFilesets.begin(); iter != mFilesets.end(); iter++)
+   for (vector<BatchFileset*>::iterator iter = mFilesets.begin(); iter != mFilesets.end(); ++iter)
    {
-      BatchFileset* pCurrentFileset = NULL;
-      pCurrentFileset = *iter;
+      BatchFileset* pCurrentFileset = *iter;
       if (pCurrentFileset != NULL)
       {
          if (pCurrentFileset == pFileset)
@@ -268,7 +261,7 @@ bool BatchWizard::toXml(XMLWriter* pXml) const
       return false;
    }
    XMLWriter& writer = *pXml;
-   writer.pushAddPoint(writer.addElement("wizard"));   
+   writer.pushAddPoint(writer.addElement("wizard"));
    writer.addAttr("filename", mWizardFilename);
 
    string repeatFileset = "";

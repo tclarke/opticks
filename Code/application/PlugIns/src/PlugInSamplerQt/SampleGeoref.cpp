@@ -16,7 +16,6 @@
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "RasterLayer.h"
-#include "AppVersion.h"
 #include "SampleGeoref.h"
 #include "SessionItemDeserializer.h"
 #include "SessionItemSerializer.h"
@@ -42,8 +41,9 @@ SampleGeoref::SampleGeoref() :
    mpGui(NULL)
 {
    setName("SampleGeoref");
-   setCreator("Ball Aerospace & Technologies, Corp.");
-   setCopyright(APP_COPYRIGHT);
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setDescription("Simple Georeference plugin");
    setProductionStatus(false);
    setDescriptorId("{57B86486-3B3B-465a-B74F-53A17290D982}");
@@ -80,7 +80,7 @@ bool SampleGeoref::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
    // In this case, get our X and Y factors.
 
    StepResource pStep("Run Sample Georef", "app", "CFCB8AA9-D504-42e9-86F0-547DF9B4798A");
-   Progress *pProgress = pInArgList->getPlugInArgValue<Progress>(ProgressArg());
+   Progress* pProgress = pInArgList->getPlugInArgValue<Progress>(ProgressArg());
 
    FAIL_IF(!isBatch(), "Interactive mode is not supported.", return false);
 
@@ -94,7 +94,7 @@ bool SampleGeoref::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
    pInArgList->getPlugInArgValue("Animated", animated);
    pInArgList->getPlugInArgValue("Rotate", mRotate);
 
-   View *pView = pInArgList->getPlugInArgValue<View>(ViewArg());
+   View* pView = pInArgList->getPlugInArgValue<View>(ViewArg());
    mpRaster = pInArgList->getPlugInArgValue<RasterElement>(DataElementArg());
    FAIL_IF(mpRaster == NULL, "Could not find raster element", return false);
 
@@ -109,19 +109,19 @@ bool SampleGeoref::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
 
    if (animated)
    {
-      SpatialDataView *pSpatialView = dynamic_cast<SpatialDataView*>(pView);
+      SpatialDataView* pSpatialView = dynamic_cast<SpatialDataView*>(pView);
       FAIL_IF(pSpatialView == NULL, "Could not find spatial data view.", return false);
 
-      LayerList *pLayerList = pSpatialView->getLayerList();
+      LayerList* pLayerList = pSpatialView->getLayerList();
       FAIL_IF(pLayerList == NULL, "Could not find layer list.", return false);
       
-      RasterLayer *pLayer = dynamic_cast<RasterLayer*>(pLayerList->getLayer(RASTER, mpRaster));
+      RasterLayer* pLayer = dynamic_cast<RasterLayer*>(pLayerList->getLayer(RASTER, mpRaster));
       FAIL_IF(pLayer == NULL, "Could not find raster layer", return false);
 
-      Animation *pAnim = pLayer->getAnimation();
+      Animation* pAnim = pLayer->getAnimation();
       FAIL_IF(pAnim == NULL, "Could not find animation", return false);
 
-      const std::vector<AnimationFrame> &frames = pAnim->getFrames();
+      const std::vector<AnimationFrame>& frames = pAnim->getFrames();
       FAIL_IF(frames.empty(), "No frames in animation.", return false);
 
       mpAnimation.reset(pAnim);
@@ -129,7 +129,7 @@ bool SampleGeoref::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
       mCurrentFrame = 0;
    }
 
-   RasterDataDescriptor *pDescriptor = dynamic_cast<RasterDataDescriptor*>(mpRaster->getDataDescriptor());
+   RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(mpRaster->getDataDescriptor());
    FAIL_IF(pDescriptor == NULL, "Could not get data descriptor.", return false);
 
    unsigned int rows = pDescriptor->getRowCount();
@@ -202,7 +202,7 @@ bool SampleGeoref::validateGuiInput() const
 
 void SampleGeoref::animationFrameChanged(Subject &subject, const std::string &signal, const boost::any &data)
 {
-   const AnimationFrame *pFrame = boost::any_cast<AnimationFrame*>(data);
+   const AnimationFrame* pFrame = boost::any_cast<AnimationFrame*>(data);
    if (pFrame != NULL)
    {
       mCurrentFrame = pFrame->mFrameNumber;
@@ -240,7 +240,7 @@ bool SampleGeoref::serialize(SessionItemSerializer &serializer) const
    writer.addAttr("extrapolate", mExtrapolate);
    writer.addAttr("currentFrame", mCurrentFrame);
    writer.addAttr("rotate", mRotate);
-   const Animation *pAnim = mpAnimation.get();
+   const Animation* pAnim = mpAnimation.get();
    if (pAnim)
    {
       writer.addAttr("animationId", pAnim->getId());
@@ -251,7 +251,7 @@ bool SampleGeoref::serialize(SessionItemSerializer &serializer) const
 bool SampleGeoref::deserialize(SessionItemDeserializer &deserializer)
 {
    XmlReader reader(NULL, false);
-   DOMElement *pRootElement = deserializer.deserialize(reader, "SampleGeoref");
+   DOMElement* pRootElement = deserializer.deserialize(reader, "SampleGeoref");
    if (pRootElement)
    {
       std::string windowId = A(pRootElement->getAttribute(X("rasterId")));
@@ -269,7 +269,7 @@ bool SampleGeoref::deserialize(SessionItemDeserializer &deserializer)
          std::string animId = A(pRootElement->getAttribute(X("animationId")));
          if (animId.empty() == false)
          {
-            Animation *pAnim = dynamic_cast<Animation*>(Service<SessionManager>()->getSessionItem(animId));
+            Animation* pAnim = dynamic_cast<Animation*>(Service<SessionManager>()->getSessionItem(animId));
             if (pAnim)
             {
                mpAnimation.reset(pAnim);

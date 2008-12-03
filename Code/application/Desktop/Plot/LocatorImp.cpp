@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "LocatorImp.h"
 #include "glCommon.h"
+#include "LocatorImp.h"
 #include "PlotViewImp.h"
 
 #include <sstream>
@@ -28,6 +28,10 @@ LocatorImp::LocatorImp(PlotViewImp* pPlot, bool bPrimary) :
    mLineWidth(1),
    mLineStyle(SOLID_LINE)
 {
+   // Initialization
+   updateExtents();
+
+   // Connections
    if (pPlot != NULL)
    {
       connect(pPlot, SIGNAL(displayAreaChanged()), this, SLOT(updateExtents()));
@@ -207,8 +211,8 @@ void LocatorImp::setText(const QString& strTextX, const QString& strTextY)
       mTextY = strTextY;
 
       emit textChanged(mTextX, mTextY);
-      notify(SIGNAL_NAME(Locator, TextChanged), boost::any(
-         std::pair<std::string,std::string>(mTextX.toStdString(), mTextY.toStdString())));
+      notify(SIGNAL_NAME(Locator, TextChanged),
+         boost::any(pair<string, string>(mTextX.toStdString(), mTextY.toStdString())));
    }
 }
 
@@ -322,28 +326,22 @@ bool LocatorImp::fromXml(DOMNode* pDocument, unsigned int version)
    {
       return false;
    }
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
-   ColorType color = StringUtilities::fromXmlString<ColorType>(
-      A(pElem->getAttribute(X("color"))));
+
+   DOMElement* pElem = static_cast<DOMElement*>(pDocument);
+   ColorType color = StringUtilities::fromXmlString<ColorType>(A(pElem->getAttribute(X("color"))));
    mColor = COLORTYPE_TO_QCOLOR(color);
-   mLineWidth = StringUtilities::fromXmlString<int>(
-      A(pElem->getAttribute(X("lineWidth"))));
-   mLineStyle = StringUtilities::fromXmlString<LineStyle>(
-      A(pElem->getAttribute(X("lineStyle"))));
-   LocationType ll = StringUtilities::fromXmlString<LocationType>(
-      A(pElem->getAttribute(X("lowerLeft"))));
+   mLineWidth = StringUtilities::fromXmlString<int>(A(pElem->getAttribute(X("lineWidth"))));
+   mLineStyle = StringUtilities::fromXmlString<LineStyle>(A(pElem->getAttribute(X("lineStyle"))));
+   LocationType ll = StringUtilities::fromXmlString<LocationType>(A(pElem->getAttribute(X("lowerLeft"))));
    mMinX = ll.mX;
    mMinY = ll.mY;
-   LocationType ur = StringUtilities::fromXmlString<LocationType>(
-      A(pElem->getAttribute(X("upperRight"))));
+   LocationType ur = StringUtilities::fromXmlString<LocationType>(A(pElem->getAttribute(X("upperRight"))));
    mMaxX = ur.mX;
    mMaxY = ur.mY;
-   mStyle = StringUtilities::fromXmlString<Locator::LocatorStyle>(
-      A(pElem->getAttribute(X("locatorStyle"))));
+   mStyle = StringUtilities::fromXmlString<Locator::LocatorStyle>(A(pElem->getAttribute(X("locatorStyle"))));
    mTextX = A(pElem->getAttribute(X("textX")));
    mTextY = A(pElem->getAttribute(X("textY")));
-   mLocation = StringUtilities::fromXmlString<LocationType>(
-      A(pElem->getAttribute(X("location"))));
+   mLocation = StringUtilities::fromXmlString<LocationType>(A(pElem->getAttribute(X("location"))));
 
    return true;
 }

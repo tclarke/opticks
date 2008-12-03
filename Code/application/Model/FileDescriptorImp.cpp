@@ -147,7 +147,7 @@ bool FileDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version)
    }
    mFilename = *(pFilename.get());
    // Dataset location
-   if(!error)
+   if (!error)
    {
       mDatasetLocation = A(pElement->getAttribute(X("datasetLocation")));
       mEndian = StringUtilities::fromXmlString<EndianType>(A(pElement->getAttribute(X("endian"))), &error);
@@ -159,8 +159,8 @@ bool FileDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version)
 
 const string& FileDescriptorImp::getObjectType() const
 {
-   static string type("FileDescriptorImp");
-   return type;
+   static string sType("FileDescriptorImp");
+   return sType;
 }
 
 bool FileDescriptorImp::isKindOf(const string& className) const

@@ -36,6 +36,7 @@ public:
    bool accept(SessionItem* pItem) const;
 
 protected:
+   bool eventFilter(QObject* pObject, QEvent* pEvent);
    void updateContextMenu(Subject& subject, const std::string& signal, const boost::any& value);
    void updatePropertiesDialog(Subject& subject, const std::string& signal, const boost::any& value);
    void dropSessionItem(Subject& subject, const std::string& signal, const boost::any& value);
@@ -46,6 +47,7 @@ protected slots:
    void addBrowseButton(bool bAdd);
    void addPrintButton(bool bAdd);
    void enableMouseMode();
+   void setCustomMouseMode();
    void setClassificationText();
    void setPlotMargin();
    void setTextColor(const QColor& textColor);
@@ -62,6 +64,7 @@ private:
    AttachmentPtr<PlotWidget> mpPlotWidget;
    QLineEdit* mpClassificationEdit;
    QComboBox* mpMouseModeCombo;
+   QAction* mpMouseModeAction;
    QLineEdit* mpMarginEdit;
    QCheckBox* mpContextMenuCheck;
 

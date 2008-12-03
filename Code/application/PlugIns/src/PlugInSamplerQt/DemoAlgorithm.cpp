@@ -85,21 +85,40 @@ bool DemoAlgorithm::postprocess()
  */
 void DemoAlgorithm::applyColormap(RasterElement &cube, std::vector<ColorType>& colormap) const
 {
-   Service<DesktopServices> desktop;
-   
-   SpatialDataWindow *pSpatialWindow = 
-      (SpatialDataWindow*)desktop->getWindow(cube.getName().c_str(), SPATIAL_DATA_WINDOW);
-   if (pSpatialWindow == NULL) return;
+   Service<DesktopServices> pDesktop;
+
+   SpatialDataWindow* pSpatialWindow =
+      dynamic_cast<SpatialDataWindow*>(pDesktop->getWindow(cube.getName(), SPATIAL_DATA_WINDOW));
+   if (pSpatialWindow == NULL)
+   {
+      return;
+   }
+
    SpatialDataView* pView = pSpatialWindow->getSpatialDataView();
-   if (pView == NULL) return;
+   if (pView == NULL)
+   {
+      return;
+   }
+
    LayerList* pLayers = pView->getLayerList();
-   if (pLayers == NULL) return;
-   std::vector<Layer*> lRasterLayers;
-   pLayers->getLayers(RASTER, lRasterLayers);
-   if (lRasterLayers.empty()) return;
-   
-   ((RasterLayer*)(lRasterLayers.at(0)))->setDisplayMode(GRAYSCALE_MODE);
-   ((RasterLayer*)(lRasterLayers.at(0)))->setColorMap("Dynamic Colormap", colormap);
+   if (pLayers == NULL)
+   {
+      return;
+   }
+
+   std::vector<Layer*> rasterLayers;
+   pLayers->getLayers(RASTER, rasterLayers);
+   if (rasterLayers.empty())
+   {
+      return;
+   }
+
+   RasterLayer* pRasterLayer = static_cast<RasterLayer*>(rasterLayers.front());
+   if (pRasterLayer != NULL)
+   {
+      pRasterLayer->setDisplayMode(GRAYSCALE_MODE);
+      pRasterLayer->setColorMap("Dynamic Colormap", colormap);
+   }
 }
 
 /**
@@ -121,9 +140,9 @@ void DemoAlgorithm::populateColormapFromNodes(std::vector<ColorType>& colormap) 
    colormap.clear();
 
    unsigned int j = 0;
-   for (int i=0; i<mInputs.mNumberOfCells; ++i)
+   for (int i = 0; i < mInputs.mNumberOfCells; ++i)
    {
-      double cellPosition = double(i)/double(mInputs.mNumberOfCells-1);
+      double cellPosition = static_cast<double>(i) / static_cast<double>(mInputs.mNumberOfCells-1);
 
       // find next node after cell
       while (j < mInputs.mNodes.size() && mInputs.mNodes[j].first < cellPosition)
@@ -153,9 +172,9 @@ void DemoAlgorithm::populateColormapFromNodes(std::vector<ColorType>& colormap) 
 
          // insert the computed color into the colormap
          ColorType color;
-         color.mRed = int(red);
-         color.mGreen = int(green);
-         color.mBlue = int(blue);
+         color.mRed = static_cast<int>(red);
+         color.mGreen = static_cast<int>(green);
+         color.mBlue = static_cast<int>(blue);
          colormap.push_back(color);
       }
    }
@@ -186,16 +205,16 @@ DemoAlgorithm::DemoAlgorithm(RasterElement &rasterElement, Progress *pProgress, 
  *       Initialization data to run the algorithm on
  *  @return true if the data were valid, false otherwise
  */
-bool DemoAlgorithm::initialize(void *pAlgorithmData)
+bool DemoAlgorithm::initialize(void* pAlgorithmData)
 {
    bool success = true;
    REQUIRE(pAlgorithmData != NULL);
 
-   mInputs = *(DemoInputs*)pAlgorithmData;
+   mInputs = *(reinterpret_cast<DemoInputs*>(pAlgorithmData));
 
    PlugInSamplerQt::Node prevNode;
-   for (std::vector<PlugInSamplerQt::Node>::iterator it=mInputs.mNodes.begin();
-      it!=mInputs.mNodes.end(); ++it)
+   for (std::vector<PlugInSamplerQt::Node>::iterator it = mInputs.mNodes.begin();
+      it != mInputs.mNodes.end(); ++it)
    {
       if (it != mInputs.mNodes.begin() && (*it).first <= prevNode.first)
       {

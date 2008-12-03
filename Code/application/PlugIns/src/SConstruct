@@ -124,8 +124,6 @@ extra_obj = [extra_obj_file]
 libs = []
 Export('env','MODE','extra_obj','TOOLPATH','PLATFORM')
 
-subprocess.Popen(["../../../update-build-revision.py"]).wait()
-
 for plugin in plugins:
    if plugin in ignore:
       continue

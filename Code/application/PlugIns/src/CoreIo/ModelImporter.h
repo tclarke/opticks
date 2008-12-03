@@ -22,7 +22,6 @@ class DataDescriptor;
 class DesktopServices;
 class ModelServices;
 class PlugInManagerServices;
-class UtilityServices;
 class QCheckBox;
 class QWidget;
 
@@ -37,13 +36,13 @@ public:
    ModelImporter();
    ~ModelImporter();
 
-   bool getInputSpecification(PlugInArgList *&pInArgList);
-   bool getOutputSpecification(PlugInArgList *&pOutArgList);
+   bool getInputSpecification(PlugInArgList*& pInArgList);
+   bool getOutputSpecification(PlugInArgList*& pOutArgList);
    std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename);
    unsigned char getFileAffinity(const std::string& filename);
-   bool execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList);
+   bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
 
-   QWidget *getImportOptionsWidget(DataDescriptor *pDescriptor);
+   QWidget* getImportOptionsWidget(DataDescriptor* pDescriptor);
 
    static ImportDescriptor* populateImportDescriptor(XERCES_CPP_NAMESPACE_QUALIFIER DOMElement* pElement,
       const std::string& filename);
@@ -52,11 +51,11 @@ protected:
    std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename, bool reportErrors);
 
 private:
-   static std::map<std::string,std::string> sTypeMap;
+   static std::map<std::string, std::string> sTypeMap;
    static std::string getTypeSubstitution(std::string type);
 
    QWidget* mpOptionsWidget;
-   QCheckBox *mpCheckBox;
+   QCheckBox* mpCheckBox;
 
    Service<DesktopServices> mpDesktop;
    Service<ModelServices> mpModel;

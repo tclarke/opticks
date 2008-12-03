@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef HDF4_ELEMENT_H
-#define HDF4_ELEMENT_H
+#ifndef HDF4ELEMENT_H
+#define HDF4ELEMENT_H
 
 #include <map>
 #include <string>

@@ -82,8 +82,9 @@ public:
    QWidget* getWidget() const;
    std::list<ContextMenuAction> getContextMenuActions() const;
 
-   bool toXml(XMLWriter* pXml) const;
-   bool fromXml(DOMNode* pDocument, unsigned int version);
+   void saveState() const;
+   void restoreState();
+   bool isShown() const;
 
 public slots:
    void dock();
@@ -112,7 +113,8 @@ private:
 };
 
 #define DOCKWINDOWADAPTEREXTENSION_CLASSES \
-   VIEWWINDOWADAPTEREXTENSION_CLASSES
+   VIEWWINDOWADAPTEREXTENSION_CLASSES \
+   , public DockWindowExt1
 
 #define DOCKWINDOWADAPTER_METHODS(impClass) \
    VIEWWINDOWADAPTER_METHODS(impClass) \
@@ -135,6 +137,10 @@ private:
    void hide() \
    { \
       impClass::hide(); \
+   } \
+   bool isShown() const \
+   { \
+      return impClass::isShown(); \
    }
 
 #endif

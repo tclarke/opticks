@@ -312,7 +312,7 @@ Nitf::TreState Nitf::SensraParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID && totalFields != numFields)
    {
       reporter << "Total fields in the Dynamic Object(" <<
-         totalFields <<") did not match the number found(" << numFields << ") ";
+         totalFields << ") did not match the number found(" << numFields << ") ";
       status = INVALID;
    }
 
@@ -337,30 +337,30 @@ bool Nitf::SensraParser::fromDynamicObject(const DynamicObject& input, ostream& 
 
    try
    {
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(SENSRA::REF_ROW)), 8, -1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(SENSRA::REF_COL)), 8, -1);
-      output << sizeString( dv_cast<string>(input.getAttribute (SENSRA::SENSOR_MODEL)), 6);
-      output <<   toString( dv_cast<int>(input.getAttribute(SENSRA::SENSOR_MOUNT)), 3, -1);
-      output << sizeString( dv_cast<string>(input.getAttribute (SENSRA::SENSOR_LOC)), 21);
-      output << sizeString( dv_cast<string>(input.getAttribute (SENSRA::SENSOR_ALT_SOURCE)), 1);
-      output <<   toString( dv_cast<int>(input.getAttribute(SENSRA::SENSOR_ALT)), 6, -1);
-      output << sizeString( dv_cast<string>(input.getAttribute (SENSRA::SENSOR_ALT_UNIT)), 1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(SENSRA::SENSOR_AGL)), 5, -1);
-      output <<   toString( dv_cast<double>(input.getAttribute(SENSRA::SENSOR_PITCH)), 7, 3, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute(SENSRA::SENSOR_ROLL)), 8, 3, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute(SENSRA::SENSOR_YAW)), 8, 3, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute(SENSRA::PLATFORM_PITCH)), 7, 3, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute(SENSRA::PLATFORM_ROLL)), 8, 3, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute(SENSRA::PLATFORM_HDG)), 5, 1);
-      output << sizeString( dv_cast<string>(input.getAttribute (SENSRA::GROUND_SPD_SOURCE)), 1);
-      output <<   toString( dv_cast<double>(input.getAttribute(SENSRA::GROUND_SPD)), 6, 1);
-      output << sizeString( dv_cast<string>(input.getAttribute (SENSRA::GRND_SPD_UNIT)), 1);
-      output <<   toString( dv_cast<double>(input.getAttribute(SENSRA::GROUND_TRACK)), 5, 1);
-      output <<   toString( dv_cast<int>(input.getAttribute(SENSRA::VERT_VEL)), 5, -1);
-      output << sizeString( dv_cast<string>(input.getAttribute (SENSRA::VERT_VEL_UNIT)), 1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(SENSRA::SWATH_FRAMES)), 4, -1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(SENSRA::NUM_SWATHS)), 4, -1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(SENSRA::SPOT_NUM)), 3, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(SENSRA::REF_ROW)), 8, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(SENSRA::REF_COL)), 8, -1);
+      output << sizeString(dv_cast<string>(input.getAttribute(SENSRA::SENSOR_MODEL)), 6);
+      output << toString(dv_cast<int>(input.getAttribute(SENSRA::SENSOR_MOUNT)), 3, -1);
+      output << sizeString(dv_cast<string>(input.getAttribute(SENSRA::SENSOR_LOC)), 21);
+      output << sizeString(dv_cast<string>(input.getAttribute(SENSRA::SENSOR_ALT_SOURCE)), 1);
+      output << toString(dv_cast<int>(input.getAttribute(SENSRA::SENSOR_ALT)), 6, -1);
+      output << sizeString(dv_cast<string>(input.getAttribute(SENSRA::SENSOR_ALT_UNIT)), 1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(SENSRA::SENSOR_AGL)), 5, -1);
+      output << toString(dv_cast<double>(input.getAttribute(SENSRA::SENSOR_PITCH)), 7, 3, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(SENSRA::SENSOR_ROLL)), 8, 3, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(SENSRA::SENSOR_YAW)), 8, 3, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(SENSRA::PLATFORM_PITCH)), 7, 3, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(SENSRA::PLATFORM_ROLL)), 8, 3, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(SENSRA::PLATFORM_HDG)), 5, 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(SENSRA::GROUND_SPD_SOURCE)), 1);
+      output << toString(dv_cast<double>(input.getAttribute(SENSRA::GROUND_SPD)), 6, 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(SENSRA::GRND_SPD_UNIT)), 1);
+      output << toString(dv_cast<double>(input.getAttribute(SENSRA::GROUND_TRACK)), 5, 1);
+      output << toString(dv_cast<int>(input.getAttribute(SENSRA::VERT_VEL)), 5, -1);
+      output << sizeString(dv_cast<string>(input.getAttribute(SENSRA::VERT_VEL_UNIT)), 1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(SENSRA::SWATH_FRAMES)), 4, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(SENSRA::NUM_SWATHS)), 4, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(SENSRA::SPOT_NUM)), 3, -1);
    }
    catch (const bad_cast&)
    {

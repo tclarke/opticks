@@ -7,13 +7,13 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef EXECUTABLE_AGENT_ADAPTER_H
-#define EXECUTABLE_AGENT_ADAPTER_H
+#ifndef EXECUTABLEAGENTADAPTER_H
+#define EXECUTABLEAGENTADAPTER_H
 
 #include "ExecutableAgent.h"
 #include "ExecutableAgentImp.h"
 
-class ExecutableAgentAdapter : public ExecutableAgentCommon, public ExecutableAgentImp
+class ExecutableAgentAdapter : public ExecutableAgentCommon1, public ExecutableAgentImp
 {
 public:
    virtual ~ExecutableAgentAdapter()

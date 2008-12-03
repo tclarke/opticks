@@ -59,7 +59,7 @@ DatasetPage::DatasetPage(QWidget* pParent) :
    pAgreementLayout->addWidget(mpSaveCheckBox);
 
    QString tip = "Only check this box if you think that the georeferencing provided\n"
-                 "by both datasets is sufficiently accurate to bypass the Tie Point Step.";
+      "by both datasets is sufficiently accurate to bypass the Tie Point Step.";
    mpGroupBox->setToolTip(tip);
 
    // Layout
@@ -179,12 +179,12 @@ bool DatasetPage::isValid() const
    return pPrimary != NULL && pSecondary != NULL && pPrimary != pSecondary;
 }
 
-void DatasetPage::attached(Subject &subject, const string &signal, const Slot &slot)
+void DatasetPage::attached(Subject& subject, const string& signal, const Slot& slot)
 {
    windowAttached(subject, signal, boost::any());
 }
 
-void DatasetPage::detached(Subject &subject, const string &signal, const Slot &slot)
+void DatasetPage::detached(Subject& subject, const string& signal, const Slot& slot)
 {
    windowDeleted(subject, signal, boost::any());
 }
@@ -202,10 +202,10 @@ void DatasetPage::windowAdded(Subject& subject, const string& signal, const boos
    }
 }
 
-void DatasetPage::windowAttached(Subject &subject, const string &signal, const boost::any &v)
+void DatasetPage::windowAttached(Subject& subject, const string& signal, const boost::any& v)
 {
-   SpatialDataWindow* pWindow = NULL;
-   if ((pWindow = dynamic_cast<SpatialDataWindow*>(&subject)) != NULL)
+   SpatialDataWindow* pWindow = dynamic_cast<SpatialDataWindow*>(&subject);
+   if (pWindow != NULL)
    {
       string windowName = pWindow->getName();
       VERIFYNRV(!windowName.empty());
@@ -248,10 +248,10 @@ void DatasetPage::windowAttached(Subject &subject, const string &signal, const b
    }
 }
 
-void DatasetPage::windowDeleted(Subject &subject, const string &signal, const boost::any &v)
+void DatasetPage::windowDeleted(Subject& subject, const string& signal, const boost::any& v)
 {
-   SpatialDataWindow* pWindow = NULL;
-   if ((pWindow = dynamic_cast<SpatialDataWindow*>(&subject)) != NULL)
+   SpatialDataWindow* pWindow = dynamic_cast<SpatialDataWindow*>(&subject);
+   if (pWindow != NULL)
    {
       string windowName = pWindow->getName();
       VERIFYNRV(!windowName.empty());
@@ -287,10 +287,10 @@ void DatasetPage::windowDeleted(Subject &subject, const string &signal, const bo
    }
 }
 
-void DatasetPage::windowModified(Subject &subject, const string &signal, const boost::any &v)
+void DatasetPage::windowModified(Subject& subject, const string& signal, const boost::any& v)
 {
-   SpatialDataWindow* pWindow = NULL;
-   if ((pWindow = dynamic_cast<SpatialDataWindow*>(&subject)) != NULL)
+   SpatialDataWindow* pWindow = dynamic_cast<SpatialDataWindow*>(&subject);
+   if (pWindow != NULL)
    {
       string windowName = pWindow->getName();
       VERIFYNRV(!windowName.empty());
@@ -367,8 +367,8 @@ SpatialDataView* DatasetPage::getView(QListWidget* pBox) const
          QString windowName = pItem->text();
          if (!windowName.isEmpty())
          {
-            SpatialDataWindow* pWindow = dynamic_cast<SpatialDataWindow*>
-                                         (mpDesktop->getWindow(windowName.toStdString(), SPATIAL_DATA_WINDOW));
+            SpatialDataWindow* pWindow =
+               dynamic_cast<SpatialDataWindow*>(mpDesktop->getWindow(windowName.toStdString(), SPATIAL_DATA_WINDOW));
             if (pWindow != NULL)
             {
                pView = pWindow->getSpatialDataView();

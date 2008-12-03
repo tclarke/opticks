@@ -7,13 +7,14 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef ANIMATION_TOOLBAR_ADAPTER_H
-#define ANIMATION_TOOLBAR_ADAPTER_H
+#ifndef ANIMATIONTOOLBARADAPTER_H
+#define ANIMATIONTOOLBARADAPTER_H
 
 #include "AnimationToolBar.h"
 #include "AnimationToolBarImp.h"
 
-class AnimationToolBarAdapter : public AnimationToolBar, public AnimationToolBarImp ANIMATIONTOOLBARADAPTEREXTENSION_CLASSES
+class AnimationToolBarAdapter : public AnimationToolBar, public AnimationToolBarImp
+   ANIMATIONTOOLBARADAPTEREXTENSION_CLASSES
 {
 public:
    AnimationToolBarAdapter(const std::string& id, QWidget* parent = 0);

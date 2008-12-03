@@ -31,7 +31,7 @@ PixelAspectRatioGui::PixelAspectRatioGui( QWidget* pParent, const char* pName, b
    }
    setModal( FALSE );
 
-   QGridLayout *pLayout = new QGridLayout( this );
+   QGridLayout* pLayout = new QGridLayout( this );
 
    mpApplyButton = new QPushButton( "Apply Scaling", this );
    mpGenerateViewButton = new QPushButton( "Generate Test View", this );
@@ -70,7 +70,7 @@ PixelAspectRatioGui::~PixelAspectRatioGui()
 {
    Service<DesktopServices> pDesktop;
    StepResource pStep( "Pixel Aspect Ratio Closed.", "app", "1E200C4D-003D-4684-B9B0-712D7E17051A" );
-   if( mbScalingApplied ) //successful state
+   if ( mbScalingApplied ) //successful state
    {
       pStep->finalize( Message::Success );
    }
@@ -81,7 +81,7 @@ PixelAspectRatioGui::~PixelAspectRatioGui()
 
    SpatialDataWindow* pScaledWindow = dynamic_cast<SpatialDataWindow*>( pDesktop->getWindow(
       "scaledCubeWindow", SPATIAL_DATA_WINDOW ) );
-   if( pScaledWindow != NULL )
+   if ( pScaledWindow != NULL )
    {
       pDesktop->deleteWindow( pScaledWindow );
       pScaledWindow = NULL;
@@ -91,20 +91,20 @@ PixelAspectRatioGui::~PixelAspectRatioGui()
 void PixelAspectRatioGui::init()
 {
    Service<ModelServices> pModel;
-   mCubeNames = pModel->getElementNames( "RasterElement" );
+   mCubeNames = pModel->getElementNames("RasterElement");
 
-   for( unsigned int i = 0; i < mCubeNames.size(); i++ )
+   for (unsigned int i = 0; i < mCubeNames.size(); i++)
    {
-      mpCubeListCombo->insertItem( i, QString::fromStdString(mCubeNames[i]) );
+      mpCubeListCombo->insertItem(i, QString::fromStdString(mCubeNames[i]));
    }
 
-   mpXScaleFactor->setMinimum( 1 );
-   mpYScaleFactor->setMinimum( 1 );
+   mpXScaleFactor->setMinimum(1);
+   mpYScaleFactor->setMinimum(1);
    mpScaledLayer = NULL;
 
-   mpXScaleFactor->setEnabled( false );
-   mpYScaleFactor->setEnabled( false );
-   mpApplyButton->setEnabled( false );
+   mpXScaleFactor->setEnabled(false);
+   mpYScaleFactor->setEnabled(false);
+   mpApplyButton->setEnabled(false);
    mbScalingApplied = false;
 }
 
@@ -112,13 +112,14 @@ void PixelAspectRatioGui::applyScale()
 {
    Service<DesktopServices> pDesktop;
 
-   SpatialDataWindow* pScaledWindow = dynamic_cast<SpatialDataWindow*>( pDesktop->getWindow( "scaledCubeWindow", SPATIAL_DATA_WINDOW ) );
-   if( pScaledWindow != NULL )
+   SpatialDataWindow* pScaledWindow =
+      dynamic_cast<SpatialDataWindow*>(pDesktop->getWindow("scaledCubeWindow", SPATIAL_DATA_WINDOW));
+   if (pScaledWindow != NULL)
    {
-      if( mpScaledLayer != NULL )
+      if (mpScaledLayer != NULL)
       {
-         mpScaledLayer->setXScaleFactor( mpXScaleFactor->value() );
-         mpScaledLayer->setYScaleFactor( mpYScaleFactor->value() );
+         mpScaledLayer->setXScaleFactor(mpXScaleFactor->value());
+         mpScaledLayer->setYScaleFactor(mpYScaleFactor->value());
          mbScalingApplied = true;
       }
    }
@@ -128,33 +129,36 @@ void PixelAspectRatioGui::generateNewView()
 {
    Service<DesktopServices> pDesktop;
 
-   SpatialDataWindow *pWindow = dynamic_cast<SpatialDataWindow*>( pDesktop->getWindow( mCubeNames.at( mpCubeListCombo->currentIndex() ), SPATIAL_DATA_WINDOW ) );
-   if( pWindow != NULL )
+   SpatialDataWindow* pWindow = dynamic_cast<SpatialDataWindow*>(pDesktop->getWindow(mCubeNames.at(
+      mpCubeListCombo->currentIndex()), SPATIAL_DATA_WINDOW));
+   if (pWindow != NULL)
    {
-      SpatialDataView *pView = dynamic_cast<SpatialDataView*>( pWindow->getView() );
-      if( pView != NULL )
+      SpatialDataView* pView = dynamic_cast<SpatialDataView*>(pWindow->getView());
+      if (pView != NULL)
       {
-         Layer *pLayer = pView->getTopMostLayer( RASTER );
-         if( pLayer != NULL )
+         Layer* pLayer = pView->getTopMostLayer(RASTER);
+         if (pLayer != NULL)
          {
-            SpatialDataWindow* pScaledWindow = dynamic_cast<SpatialDataWindow*>( pDesktop->createWindow( "scaledCubeWindow", SPATIAL_DATA_WINDOW ) );
-            if( pScaledWindow != NULL )
+            SpatialDataWindow* pScaledWindow =
+               dynamic_cast<SpatialDataWindow*>(pDesktop->createWindow("scaledCubeWindow", SPATIAL_DATA_WINDOW));
+            if (pScaledWindow != NULL)
             {
-               SpatialDataView *pScaledView = dynamic_cast<SpatialDataView*>( pScaledWindow->getView() );
-               if( pScaledView != NULL )
+               SpatialDataView* pScaledView = dynamic_cast<SpatialDataView*>(pScaledWindow->getView());
+               if (pScaledView != NULL)
                {
-                  mpScaledLayer = pLayer->copy( std::string(), true, pLayer->getDataElement() );
-                  pScaledView->addLayer( mpScaledLayer );
+                  mpScaledLayer = pLayer->copy(std::string(), true, pLayer->getDataElement());
+                  pScaledView->addLayer(mpScaledLayer);
                   pScaledView->refresh();
                   pScaledView->zoomExtents();
 
-                  mpXScaleFactor->setEnabled( true );
-                  mpYScaleFactor->setEnabled( true );
-                  mpApplyButton->setEnabled( true );
+                  mpXScaleFactor->setEnabled(true);
+                  mpYScaleFactor->setEnabled(true);
+                  mpApplyButton->setEnabled(true);
                }
             }
          }
       }
    }
 }
+
 

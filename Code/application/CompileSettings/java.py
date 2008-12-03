@@ -11,7 +11,7 @@ def generate(env):
     if not path:
        SCons.Warnings.warn(JavaNotFound,"Could not detect Java")
     else:
-       env.AppendUnique(CXXFLAGS="-I%s/include -I%s/include/solaris" % (path,path),
+       env.AppendUnique(CXXFLAGS=["-I%s/include" % (path), "-I%s/include/solaris" % (path)],
                         LIBPATH=['%s/jre/lib/sparcv9' % (path), '%s/jre/lib/sparcv9/server' % (path)],
                         LIBS=["java", "jvm"])
 

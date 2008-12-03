@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef ICE_READER_H
-#define ICE_READER_H
+#ifndef ICEREADER_H
+#define ICEREADER_H
 
 #include "IceUtilities.h"
 
@@ -41,7 +41,7 @@ public:
    };
    typedef EnumWrapper<ValidityTypeEnum> ValidityType;
 
-   ValidityType isValidIceFile();
+   ValidityType getIceFileValidity();
    IceUtilities::FileType getFileType();
 
    std::vector<ImportDescriptor*> getImportDescriptors();
@@ -50,7 +50,8 @@ public:
    const std::vector<std::string>& getErrors();
 
    bool loadCubeStatistics(RasterElement* pElement);
-   bool createLayer(const std::string& hdfPath, SpatialDataView* pView, DataElement* pParent, std::string& warningMessage);
+   bool createLayer(const std::string& hdfPath, SpatialDataView* pView, DataElement* pParent,
+      std::string& warningMessage);
 
 private:
    void readFormatDescriptor();

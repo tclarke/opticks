@@ -42,7 +42,7 @@ protected slots:
    void editCurrentValue();
    void deleteKey();
    void clearKeys();
-   void currentChanged(const QModelIndex& selected, const QModelIndex& deselected);
+   void currentChanged(const QModelIndex& selectedItem, const QModelIndex& deselectedItem);
    void editSelectedValue(const QModelIndex& selectedItem);
 
 private:

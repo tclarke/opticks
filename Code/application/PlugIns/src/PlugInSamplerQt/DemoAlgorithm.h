@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef DEMO_ALGORITHM_H
-#define DEMO_ALGORITHM_H
+#ifndef DEMOALGORITHM_H
+#define DEMOALGORITHM_H
 
 #include <math.h>
 
@@ -28,6 +28,10 @@ class Step;
  */
 class DemoAlgorithm : public AlgorithmPattern
 {
+public:
+   DemoAlgorithm(RasterElement &rasterElement, Progress *pProgress, bool interactive);
+
+private:
    // obligations from base class
    bool initialize(void *pAlgorithmData);
    bool preprocess();
@@ -46,10 +50,7 @@ class DemoAlgorithm : public AlgorithmPattern
    DemoInputs mInputs;
 
    // The message log step
-   Step *mpStep;
-
-public:
-   DemoAlgorithm(RasterElement &rasterElement, Progress *pProgress, bool interactive);
+   Step* mpStep;
 };
 
 #endif

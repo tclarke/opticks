@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef MULTI_LINE_TEXT_DIALOG_H
-#define MULTI_LINE_TEXT_DIALOG_H
+#ifndef MULTILINETEXTDIALOG_H
+#define MULTILINETEXTDIALOG_H
 
 #include <QtGui/QDialog>
 
@@ -35,7 +33,7 @@ public slots:
    void accept();
 
 private:
-   QTextEdit *mpEdit;
+   QTextEdit* mpEdit;
 };
 
 #endif

@@ -65,7 +65,8 @@ class PlugInShell;
       impClass::setPropertiesPages(plugInNames); \
    }
 
-class SettableSessionItemAdapter : public SettableSessionItem, public SessionItemImp SETTABLESESSIONITEMADAPTEREXTENSION_CLASSES
+class SettableSessionItemAdapter : public SettableSessionItem, public SessionItemImp
+   SETTABLESESSIONITEMADAPTEREXTENSION_CLASSES
 {
 public:
    SettableSessionItemAdapter(const std::string& id);

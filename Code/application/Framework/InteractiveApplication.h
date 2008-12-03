@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef INTERACTIVEAPPLICATION_H__
-#define INTERACTIVEAPPLICATION_H__
+#ifndef INTERACTIVEAPPLICATION_H
+#define INTERACTIVEAPPLICATION_H
 
 #include "Application.h"
 
@@ -22,7 +22,6 @@ public:
 
    int run(int argc, char** argv);
 
-protected:
    void reportWarning(const std::string& warningMessage) const;
    void reportError(const std::string& errorMessage) const;
 };

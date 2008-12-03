@@ -31,11 +31,11 @@ public:
    bool getExtrapolate() const;
 
 private:
-   QSpinBox *mpXSpin;
-   QSpinBox *mpYSpin;
-   QCheckBox *mpExtrapolateCheck;
-   QCheckBox *mpAnimatedCheck;
-   QRadioButton *mpRotateButton;
+   QSpinBox* mpXSpin;
+   QSpinBox* mpYSpin;
+   QCheckBox* mpExtrapolateCheck;
+   QCheckBox* mpAnimatedCheck;
+   QRadioButton* mpRotateButton;
 };
 
-#endif // SAMPLEGEOREFGUI_H
+#endif

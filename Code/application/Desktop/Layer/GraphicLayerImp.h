@@ -42,26 +42,6 @@ class GraphicLayerImp : public LayerImp
 {
    Q_OBJECT
 
-   // a list of the currently selected objects
-   std::list<GraphicObject*> mSelectedObjects;
-   std::vector<LocationType> mObjectAnchors;
-   LocationType mStartAnchor;
-
-   // currently 3
-   double mHandleSize;
-
-   // draws a single selection handle
-   void drawHandle (LocationType point, bool bSelectionHandle);
-
-   void drawSelectionRectangle(LocationType ll, LocationType ur) const;
-
-   /**
-    *  Determines if the object type is a physical object that is seen on the layer
-    */
-   bool isVisibleObjectType (GraphicObjectType eType) const;
-
-   void initializeFromGroup();
-
 public:
    GraphicLayerImp(const std::string& id, const std::string& layerName, DataElement* pElement);
    ~GraphicLayerImp();
@@ -71,7 +51,7 @@ public:
 
    GraphicLayerImp& operator= (const GraphicLayerImp& graphicLayer);
 
-   virtual bool getExtents (double& x1, double& y1, double& x4, double& y4);
+   virtual bool getExtents(double& x1, double& y1, double& x4, double& y4);
    virtual LayerType getLayerType() const;
    using LayerImp::setName;
 
@@ -268,11 +248,31 @@ private:
    std::set<GraphicObjectType> mAcceptableTypes;
    mutable bool mGroupHasLayerSet;
 
-   GraphicObjectImp *mpInsertingObject;
+   GraphicObjectImp* mpInsertingObject;
 
    GraphicObjectType mCurrentType;
 
    UndoLock* mpUndoLock;
+
+   // a list of the currently selected objects
+   std::list<GraphicObject*> mSelectedObjects;
+   std::vector<LocationType> mObjectAnchors;
+   LocationType mStartAnchor;
+
+   // currently 3
+   double mHandleSize;
+
+   // draws a single selection handle
+   void drawHandle(LocationType point, bool bSelectionHandle);
+
+   void drawSelectionRectangle(LocationType ll, LocationType ur) const;
+
+   /**
+    *  Determines if the object type is a physical object that is seen on the layer
+    */
+   bool isVisibleObjectType(GraphicObjectType eType) const;
+
+   void initializeFromGroup();
 };
 
 #define GRAPHICLAYERADAPTEREXTENSION_CLASSES \

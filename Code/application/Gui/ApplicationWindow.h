@@ -20,6 +20,7 @@
 #include "ConfigurationSettings.h"
 #include "DynamicObject.h"
 #include "GraphicGroupAdapter.h"
+#include "ImportAgent.h"
 #include "MruFile.h"
 #include "SettableSessionItemAdapter.h"
 #include "SubjectAdapter.h"
@@ -292,6 +293,7 @@ private:
    QMenu* m_pSession;
    QMenu* m_pEdit;
    QMenu* m_pView;
+   QMenu* mpToolbarsMenu;
    QMenu* m_pLayout;
    QMenu* m_pTools;
    QMenu* m_pWindow;
@@ -440,6 +442,10 @@ private:
    // Undo
    QUndoGroup* mpUndoGroup;
 
+   // Drag and Drop File Import
+   std::vector<std::string> mDroppedFilesList;
+   ImportAgentExt1::EditType mDroppedFilesEditType;
+
 private:
    bool isDefaultWindow(Window* pWindow) const;
    void checkColorDepth(QWidget* pSplash);
@@ -457,6 +463,8 @@ private slots:
    void constructWindowMenu();
    void windowMenuActivated(QAction* pAction);
    void updateUndoActions(const std::string& oldId, const std::string& newId);
+   void importDroppedFiles();
+   void showToolbarsMenu();
 };
 
 #endif

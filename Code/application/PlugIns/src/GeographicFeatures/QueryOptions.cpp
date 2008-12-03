@@ -46,7 +46,7 @@ namespace
       }
 
    private:
-      DynamicObject &mDynObj;
+      DynamicObject& mDynObj;
    };
 }
 
@@ -67,24 +67,19 @@ const std::string QueryOptions::HATCH_STYLE = "Hatch style";
 const ColorType QueryOptions::mDefaultColor = ColorType(255, 255, 0);
 const std::string QueryOptions::mDefaultName = "New Query";
 
-QueryOptions::QueryOptions()
+QueryOptions::QueryOptions() :
+   mQueryName(mDefaultName),
+   mSymbolName(GraphicLayer::getSettingSymbolName()),
+   mSymbolSize(GraphicLayer::getSettingSymbolSize()),
+   mLineState(GraphicLayer::getSettingFill()),
+   mLineStyle(GraphicLayer::getSettingLineStyle()),
+   mLineWidth(GraphicLayer::getSettingLineWidth()),
+   mLineColor(mDefaultColor),
+   mLineScaled(GraphicLayer::getSettingLineScaled()),
+   mFillColor(mDefaultColor),
+   mFillStyle(EMPTY_FILL),
+   mHatchStyle(GraphicLayer::getSettingHatchStyle())
 {
-   mSymbolName = GraphicLayer::getSettingSymbolName();   
-   mSymbolSize = GraphicLayer::getSettingSymbolSize();
-   mLineState = GraphicLayer::getSettingFill();
-   mLineStyle = GraphicLayer::getSettingLineStyle();
-   mLineWidth = GraphicLayer::getSettingLineWidth();
-
-   mLineColor = mDefaultColor;
-
-   mLineScaled = GraphicLayer::getSettingLineScaled();
-   
-   mFillColor = mDefaultColor;
-
-   mFillStyle = EMPTY_FILL;
-   mHatchStyle = GraphicLayer::getSettingHatchStyle();
-
-   mQueryName = mDefaultName;
 }
 
 QueryOptions::~QueryOptions()

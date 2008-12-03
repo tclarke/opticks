@@ -45,8 +45,8 @@ OverviewWindow::OverviewWindow(SpatialDataViewImp* pView, QWidget* parent) :
    mpView(pView),
    mpOverview(NULL),
    mpSelectionWidget(NULL),
-   mpTrail(NULL),
    mpTrailLayer(NULL),
+   mpTrail(NULL),
    mZoomThreshold(100)
 {
    // get trail defaults from ConfigurationSettings
@@ -292,9 +292,9 @@ void OverviewWindow::updateView(const vector<LocationType>& selectionArea)
       return;
    }
 
-   LayerList *pLayerList = mpView->getLayerList();
+   LayerList* pLayerList = mpView->getLayerList();
    VERIFYNRV(pLayerList != NULL);
-   Layer *pLayer = pLayerList->getLayer(RASTER, pLayerList->getPrimaryRasterElement());
+   Layer* pLayer = pLayerList->getLayer(RASTER, pLayerList->getPrimaryRasterElement());
    VERIFYNRV(pLayer != NULL);
    LocationType worldLl;
    LocationType worldUr;
@@ -324,9 +324,9 @@ void OverviewWindow::updateSelectionBox()
    disconnect(mpSelectionWidget, SIGNAL(selectionChanged(const std::vector<LocationType>&)), this,
       SLOT(updateView(const std::vector<LocationType>&)));
 
-   LayerList *pLayerList = mpView->getLayerList();
+   LayerList* pLayerList = mpView->getLayerList();
    VERIFYNRV(pLayerList != NULL);
-   Layer *pLayer = pLayerList->getLayer(RASTER, pLayerList->getPrimaryRasterElement());
+   Layer* pLayer = pLayerList->getLayer(RASTER, pLayerList->getPrimaryRasterElement());
    VERIFYNRV(pLayer != NULL);
 
    // Set the selection area
@@ -375,13 +375,15 @@ TrailObjectImp* OverviewWindow::createSnailTrail(SpatialDataViewImp* pOverview)
    TrailObjectImp* pTrailImp(NULL);
    if (mpTrailLayer != NULL)
    {
-      TrailObject* pTrail = dynamic_cast<TrailObject*>(
-                            mpTrailLayer->addObject(TRAIL_OBJECT));
+      TrailObject* pTrail = dynamic_cast<TrailObject*>(mpTrailLayer->addObject(TRAIL_OBJECT));
       VERIFYRV(pTrail != NULL, NULL);
-      double minX,minY,maxX,maxY;
-      pOverview->getExtents(minX,minY,maxX,maxY);
+      double minX;
+      double minY;
+      double maxX;
+      double maxY;
+      pOverview->getExtents(minX, minY, maxX, maxY);
       pTrail->setAlpha(0.3);
-      pTrail->setBoundingBox(LocationType(minX,minY),LocationType(maxX,maxY));
+      pTrail->setBoundingBox(LocationType(minX, minY), LocationType(maxX, maxY));
       pTrail->setFillStyle(SOLID_FILL);
       pTrail->setHatchStyle(SOLID);
       pTrail->setFillState(true);
@@ -391,13 +393,13 @@ TrailObjectImp* OverviewWindow::createSnailTrail(SpatialDataViewImp* pOverview)
       pTrailImp = dynamic_cast<TrailObjectImp*>(pTrail);
    }
 
-  return pTrailImp;
+   return pTrailImp;
 }
 
 void OverviewWindow::changeTrailColor()
 {
    QColor oldColor = COLORTYPE_TO_QCOLOR(mTrailColor);
-   QColor newColor = QColorDialog::getColor(oldColor,this);
+   QColor newColor = QColorDialog::getColor(oldColor, this);
    if (newColor.isValid())
    {
       mTrailColor.mRed = newColor.red();
@@ -419,16 +421,23 @@ void OverviewWindow::clearTrail()
 
 void OverviewWindow::changeTrailOpacity()
 {
-   int oldAlpha = int(mTrailColor.mAlpha / 2.550f + 0.5);
+   int oldAlpha = static_cast<int>(mTrailColor.mAlpha / 2.550f + 0.5);
    bool bOk;
-   int newAlpha = QInputDialog::getInteger(this,"Set Overview Trail Opacity",
-      "Set from 0% (transparent) to 100% (opaque)", 
-      oldAlpha,0,100,1,&bOk);
+   int newAlpha = QInputDialog::getInteger(this, "Set Overview Trail Opacity",
+      "Set from 0% (transparent) to 100% (opaque)", oldAlpha, 0, 100, 1, &bOk);
    if (bOk)
    {
-      newAlpha = int(newAlpha * 2.550f + 0.5);
-      if (newAlpha > 255) newAlpha = 255;
-      if (newAlpha < 0) newAlpha = 0;
+      newAlpha = static_cast<int>(newAlpha * 2.550f + 0.5);
+      if (newAlpha > 255)
+      {
+         newAlpha = 255;
+      }
+
+      if (newAlpha < 0)
+      {
+         newAlpha = 0;
+      }
+
       mTrailColor.mAlpha = newAlpha;
       mpTrail->setFillColor(mTrailColor);
       updateSelectionBox();
@@ -438,9 +447,9 @@ void OverviewWindow::changeTrailOpacity()
 void OverviewWindow::changeTrailThreshold()
 {
    bool bOk;
-   int newZoom = QInputDialog::getInteger(this,"Set Trail Zoom Threshold",
+   int newZoom = QInputDialog::getInteger(this, "Set Trail Zoom Threshold",
       "Set lowest zoom percentage for marking Trail.\nThis action will reset the Overview Trail.", 
-      mZoomThreshold,1,1000,10,&bOk);
+      mZoomThreshold, 1, 1000, 10, &bOk);
    if (bOk)
    {
       mZoomThreshold = newZoom;
@@ -450,14 +459,14 @@ void OverviewWindow::changeTrailThreshold()
 
 void OverviewWindow::takeSnapshot()
 {
-   View *pView = dynamic_cast<View*>(mpOverview);
+   View* pView = dynamic_cast<View*>(mpOverview);
    if (pView != NULL)
    {
       QImage image;
       pView->getCurrentImage(image);
       if (image.isNull() == false)
       {
-         QClipboard *pClipboard = QApplication::clipboard();
+         QClipboard* pClipboard = QApplication::clipboard();
          pClipboard->setImage(image);
       }
    }

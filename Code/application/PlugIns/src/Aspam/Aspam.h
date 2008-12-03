@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef ASPAM_H__
-#define ASPAM_H__
+#ifndef ASPAM_H
+#define ASPAM_H
 
 #include "AnyData.h"
 #include "DateTime.h"
@@ -44,16 +44,25 @@ public: // Structures
     */
    struct CloudLayer
    {
+      CloudLayer() :
+         mCoverage(0),
+         mBaseAltitude(0),
+         mTopAltitude(0)
+      {
+      }
+
+      CloudLayer(const CloudLayer& b) :
+         mCoverage(b.mCoverage),
+         mType(b.mType),
+         mBaseAltitude(b.mBaseAltitude),
+         mTopAltitude(b.mTopAltitude)
+      {
+      }
+
       unsigned int mCoverage;
       std::string mType;
       unsigned int mBaseAltitude;
       unsigned int mTopAltitude;
-      CloudLayer() : mCoverage(0), mBaseAltitude(0), mTopAltitude(0) {}
-      CloudLayer(const CloudLayer &b) : mCoverage(b.mCoverage),
-                                        mType(b.mType),
-                                        mBaseAltitude(b.mBaseAltitude),
-                                        mTopAltitude(b.mTopAltitude)
-      {}
    };
 
    /**
@@ -61,6 +70,30 @@ public: // Structures
     */
    struct Analytic
    {
+      Analytic() :
+         mUnits(' '),
+         mHeight(0),
+         mWindDirection(0),
+         mWindSpeed(0),
+         mTemperature(0),
+         mHumidity(0.0),
+         mDensity(0.0),
+         mPressure(0.0)
+      {
+      }
+
+      Analytic(const Analytic& b) :
+         mUnits(b.mUnits),
+         mHeight(b.mHeight),
+         mWindDirection(b.mWindDirection),
+         mWindSpeed(b.mWindSpeed),
+         mTemperature(b.mTemperature),
+         mHumidity(b.mHumidity),
+         mDensity(b.mDensity),
+         mPressure(b.mPressure)
+      {
+      }
+
       char mUnits;
       float mHeight;
       float mWindDirection;
@@ -69,17 +102,6 @@ public: // Structures
       float mHumidity;
       float mDensity;
       float mPressure;
-      Analytic() : mUnits(' '), mHeight(0), mWindDirection(0), mWindSpeed(0),
-                   mTemperature(0), mHumidity(0.0), mDensity(0.0), mPressure(0.0) {}
-      Analytic(const Analytic &b) : mUnits(b.mUnits),
-                                    mHeight(b.mHeight),
-                                    mWindDirection(b.mWindDirection),
-                                    mWindSpeed(b.mWindSpeed),
-                                    mTemperature(b.mTemperature),
-                                    mHumidity(b.mHumidity),
-                                    mDensity(b.mDensity),
-                                    mPressure(b.mPressure)
-      {}
    };
 
    /**
@@ -87,6 +109,32 @@ public: // Structures
     */
    struct Aerosol
    {
+      Aerosol() :
+         mHeight(0),
+         mPressure(0),
+         mTemperature(0),
+         mWaterVaporDensity(0),
+         mAlternateTemperature(0),
+         mAlternateWaterVaporDensity(0),
+         mLatitude(0),
+         mLongtitude(0),
+         mOzoneRatio(0.0)
+      {
+      }
+
+      Aerosol(const Aerosol& b) :
+         mHeight(b.mHeight),
+         mPressure(b.mPressure),
+         mTemperature(b.mTemperature),
+         mWaterVaporDensity(b.mWaterVaporDensity),
+         mAlternateTemperature(b.mAlternateTemperature),
+         mAlternateWaterVaporDensity(b.mAlternateWaterVaporDensity),
+         mLatitude(b.mLatitude),
+         mLongtitude(b.mLongtitude),
+         mOzoneRatio(b.mOzoneRatio)
+      {
+      }
+
       int mHeight;
       unsigned int mPressure;
       int mTemperature;
@@ -96,27 +144,6 @@ public: // Structures
       int mLatitude;
       unsigned int mLongtitude;
       float mOzoneRatio;
-
-      Aerosol() : mHeight(0),
-                  mPressure(0),
-                  mTemperature(0),
-                  mWaterVaporDensity(0),
-                  mAlternateTemperature(0),
-                  mAlternateWaterVaporDensity(0),
-                  mLatitude(0),
-                  mLongtitude(0),
-                  mOzoneRatio(0.0)
-      {}
-      Aerosol(const Aerosol &b) : mHeight(b.mHeight),
-                                  mPressure(b.mPressure),
-                                  mTemperature(b.mTemperature),
-                                  mWaterVaporDensity(b.mWaterVaporDensity),
-                                  mAlternateTemperature(b.mAlternateTemperature),
-                                  mAlternateWaterVaporDensity(b.mAlternateWaterVaporDensity),
-                                  mLatitude(b.mLatitude),
-                                  mLongtitude(b.mLongtitude),
-                                  mOzoneRatio(b.mOzoneRatio)
-      {}
    };
 
    /**
@@ -175,7 +202,7 @@ public: // Structures
                            mWindDirection(0),
                            mAlternateWindSpeed(0)
       {}
-      SurfaceWeather(const SurfaceWeather &b) :
+      SurfaceWeather(const SurfaceWeather& b) :
                            mYear(b.mYear),
                            mJulianDay(b.mJulianDay),
                            mHour(b.mHour),
@@ -215,8 +242,8 @@ public: // Structures
       LocationType mSiteId;
       bool mLoaded;
 
-      ParagraphA() : mSiteId(0.0,0.0), mLoaded(false) {}
-      ParagraphA(const ParagraphA &b) : mSiteId(b.mSiteId), mLoaded(b.mLoaded) {}
+      ParagraphA() : mSiteId(0.0, 0.0), mLoaded(false) {}
+      ParagraphA(const ParagraphA& b) : mSiteId(b.mSiteId), mLoaded(b.mLoaded) {}
    };
 
    /**
@@ -229,7 +256,7 @@ public: // Structures
       FactoryResource<DateTime> mpDateTime;
       bool mLoaded;
       ParagraphB() : mLoaded(false) {}
-      ParagraphB(const ParagraphB &other)
+      ParagraphB(const ParagraphB& other)
       {
          mpDateTime->setStructured(other.mpDateTime->getStructured());
       }
@@ -256,6 +283,30 @@ public: // Structures
     */
    struct ParagraphD
    {
+      ParagraphD() :
+         mSurfaceVisibility(0.0),
+         mUnits(""),
+         mTotalCoverage(0),
+         mWindDirection(0),
+         mWindSpeed(0),
+         mGustSpeed(0),
+         mLoaded(false)
+      {
+      }
+
+      ParagraphD(const ParagraphD& b) :
+         mSurfaceVisibility(b.mSurfaceVisibility),
+         mUnits(b.mUnits),
+         mCloudLayers(b.mCloudLayers),
+         mTotalCoverage(b.mTotalCoverage),
+         mWindDirection(b.mWindDirection),
+         mWindSpeed(b.mWindSpeed),
+         mGustSpeed(b.mGustSpeed),
+         mRemark(b.mRemark),
+         mLoaded(b.mLoaded)
+      {
+      }
+
       double mSurfaceVisibility;
       std::string mUnits;
       std::vector<CloudLayer> mCloudLayers;
@@ -266,25 +317,6 @@ public: // Structures
       unsigned int mGustSpeed;
       std::string mRemark;
       bool mLoaded;
-
-      ParagraphD() : mSurfaceVisibility(0.0),
-                     mUnits(""),
-                     mTotalCoverage(0),
-                     mWindDirection(0),
-                     mWindSpeed(0),
-                     mGustSpeed(0),
-                     mLoaded(false)
-      {}
-      ParagraphD(const ParagraphD &b) : mSurfaceVisibility(b.mSurfaceVisibility),
-                                        mUnits(b.mUnits),
-                                        mCloudLayers(b.mCloudLayers),
-                                        mTotalCoverage(b.mTotalCoverage),
-                                        mWindDirection(b.mWindDirection),
-                                        mWindSpeed(b.mWindSpeed),
-                                        mGustSpeed(b.mGustSpeed),
-                                        mRemark(b.mRemark),
-                                        mLoaded(b.mLoaded)
-      {}
    };
 
 
@@ -297,7 +329,7 @@ public: // Structures
     */
    struct ParagraphE
    {
-     // empty
+      // empty
       bool mLoaded;
       ParagraphE() : mLoaded(false) {}
    };
@@ -309,14 +341,21 @@ public: // Structures
     */
    struct ParagraphF
    {
+      ParagraphF() :
+         mLoaded(false)
+      {
+      }
+
+      ParagraphF(const ParagraphF& b) :
+         mLevel(b.mLevel),
+         mAnalytic(b.mAnalytic),
+         mLoaded(b.mLoaded)
+      {
+      }
+
       std::string mLevel;
       std::vector<Analytic> mAnalytic;
       bool mLoaded;
-
-      ParagraphF() : mLoaded(false) {}
-      ParagraphF(const ParagraphF &b) : mLevel(b.mLevel), 
-                                        mAnalytic(b.mAnalytic), 
-                                        mLoaded(b.mLoaded) {}
    };
 
    /**
@@ -330,7 +369,7 @@ public: // Structures
       bool mLoaded;
 
       ParagraphG() : mLoaded(false) {}
-      ParagraphG(const ParagraphG &b) : mRemarks(b.mRemarks), mLoaded(b.mLoaded) {}
+      ParagraphG(const ParagraphG& b) : mRemarks(b.mRemarks), mLoaded(b.mLoaded) {}
    };
 
    /**
@@ -340,6 +379,38 @@ public: // Structures
     */
    struct ParagraphH
    {
+      ParagraphH() :
+         mLevels(0),
+         mPrimaryBoundaryLayerAerosolParameter(0),
+         mAirParcelType(0),
+         mSeasonalDependence(0),
+         mStratosphericAerosol(0),
+         mSurfaceVisibility(0),
+         mOzoneProfile(0),
+         mBoundaryLayerParameterQualityIndex(0),
+         mAlternateSurfaceVisibility(0),
+         mAlternateBoundaryLayerAerosolParameter(0),
+         mAlternateAirParcelType(0),
+         mLoaded(false)
+      {
+      }
+
+      ParagraphH(const ParagraphH& b) :
+         mLevels(b.mLevels),
+         mPrimaryBoundaryLayerAerosolParameter(b.mPrimaryBoundaryLayerAerosolParameter),
+         mAirParcelType(b.mAirParcelType),
+         mSeasonalDependence(b.mSeasonalDependence),
+         mStratosphericAerosol(b.mStratosphericAerosol),
+         mSurfaceVisibility(b.mSurfaceVisibility),
+         mOzoneProfile(b.mOzoneProfile),
+         mBoundaryLayerParameterQualityIndex(b.mBoundaryLayerParameterQualityIndex),
+         mAlternateSurfaceVisibility(b.mAlternateSurfaceVisibility),
+         mAlternateBoundaryLayerAerosolParameter(b.mAlternateBoundaryLayerAerosolParameter),
+         mAlternateAirParcelType(b.mAlternateAirParcelType),
+         mLoaded(b.mLoaded)
+      {
+      }
+
       unsigned int mLevels;
       unsigned int mPrimaryBoundaryLayerAerosolParameter;
       unsigned int mAirParcelType;
@@ -353,34 +424,6 @@ public: // Structures
       unsigned int mAlternateAirParcelType;
       std::vector<Aerosol> mAerosol;
       bool mLoaded;
-
-      ParagraphH() : mLevels(0),
-                     mPrimaryBoundaryLayerAerosolParameter(0),
-                     mAirParcelType(0),
-                     mSeasonalDependence(0),
-                     mStratosphericAerosol(0),
-                     mSurfaceVisibility(0),
-                     mOzoneProfile(0),
-                     mBoundaryLayerParameterQualityIndex(0),
-                     mAlternateSurfaceVisibility(0),
-                     mAlternateBoundaryLayerAerosolParameter(0),
-                     mAlternateAirParcelType(0),
-                     mLoaded(false)
-      {}
-      ParagraphH(const ParagraphH &b) :
-                     mLevels(b.mLevels),
-                     mPrimaryBoundaryLayerAerosolParameter(b.mPrimaryBoundaryLayerAerosolParameter),
-                     mAirParcelType(b.mAirParcelType),
-                     mSeasonalDependence(b.mSeasonalDependence),
-                     mStratosphericAerosol(b.mStratosphericAerosol),
-                     mSurfaceVisibility(b.mSurfaceVisibility),
-                     mOzoneProfile(b.mOzoneProfile),
-                     mBoundaryLayerParameterQualityIndex(b.mBoundaryLayerParameterQualityIndex),
-                     mAlternateSurfaceVisibility(b.mAlternateSurfaceVisibility),
-                     mAlternateBoundaryLayerAerosolParameter(b.mAlternateBoundaryLayerAerosolParameter),
-                     mAlternateAirParcelType(b.mAlternateAirParcelType),
-                     mLoaded(b.mLoaded)
-      {}
    };
 
    /**
@@ -399,22 +442,27 @@ public: // Structures
     */
    struct ParagraphJ
    {
+      ParagraphJ() :
+         mMaxTemperature(0.0),
+         mMinTemperature(0.0),
+         mSnowDepth(0.0),
+         mLoaded(false)
+      {
+      }
+
+      ParagraphJ(const ParagraphJ& b) :
+         mMaxTemperature(b.mMaxTemperature),
+         mMinTemperature(b.mMinTemperature),
+         mSnowDepth(b.mSnowDepth),
+         mLoaded(b.mLoaded)
+      {
+      }
+
       std::vector<SurfaceWeather> mSurfaceWeather;
       float mMaxTemperature;
       float mMinTemperature;
       float mSnowDepth;
       bool mLoaded;
-
-      ParagraphJ() : mMaxTemperature(0.0),
-                     mMinTemperature(0.0),
-                     mSnowDepth(0.0),
-                     mLoaded(false)
-      {}
-      ParagraphJ(const ParagraphJ &b) : mMaxTemperature(b.mMaxTemperature),
-                                        mMinTemperature(b.mMinTemperature),
-                                        mSnowDepth(b.mSnowDepth),
-                                        mLoaded(b.mLoaded)
-      {}
    };
 
    /**
@@ -493,14 +541,14 @@ public: // Accessors
     *
     *  @return  A read-only reference to the paragraph A data
     */
-   virtual const ParagraphA &getParagraphA() const = 0;
+   virtual const ParagraphA& getParagraphA() const = 0;
 
    /**
     *  Gets the data for paragraph B.
     *
     *  @return  A read-only reference to the paragraph B data
     */
-   virtual const ParagraphB &getParagraphB() const = 0;
+   virtual const ParagraphB& getParagraphB() const = 0;
 
    /**
     *  Gets the data for paragraph C.
@@ -508,14 +556,14 @@ public: // Accessors
     *
     *  @return  A read-only reference to the paragraph C data
     */
-   virtual const ParagraphC &getParagraphC() const = 0;
+   virtual const ParagraphC& getParagraphC() const = 0;
 
    /**
     *  Gets the data for paragraph D.
     *
     *  @return  A read-only reference to the paragraph D data
     */
-   virtual const ParagraphD &getParagraphD() const = 0;
+   virtual const ParagraphD& getParagraphD() const = 0;
 
    /**
     *  Gets the data for paragraph E.
@@ -523,28 +571,28 @@ public: // Accessors
     *
     *  @return  A read-only reference to the paragraph E data
     */
-   virtual const ParagraphE &getParagraphE() const = 0;
+   virtual const ParagraphE& getParagraphE() const = 0;
 
    /**
     *  Gets the data for paragraph F.
     *
     *  @return  A read-only reference to the paragraph F data
     */
-   virtual const ParagraphF &getParagraphF() const = 0;
+   virtual const ParagraphF& getParagraphF() const = 0;
 
    /**
     *  Gets the data for paragraph G.
     *
     *  @return  A read-only reference to the paragraph G data
     */
-   virtual const ParagraphG &getParagraphG() const = 0;
+   virtual const ParagraphG& getParagraphG() const = 0;
 
    /**
     *  Gets the data for paragraph H.
     *
     *  @return  A read-only reference to the paragraph H data
     */
-   virtual const ParagraphH &getParagraphH() const = 0;
+   virtual const ParagraphH& getParagraphH() const = 0;
 
    /**
     *  Gets the data for paragraph I.
@@ -552,14 +600,14 @@ public: // Accessors
     *
     *  @return  A read-only reference to the paragraph I data
     */
-   virtual const ParagraphI &getParagraphI() const = 0;
+   virtual const ParagraphI& getParagraphI() const = 0;
 
    /**
     *  Gets the data for paragraph J.
     *
     *  @return  A read-only reference to the paragraph J data
     */
-   virtual const ParagraphJ &getParagraphJ() const = 0;
+   virtual const ParagraphJ& getParagraphJ() const = 0;
 
    /**
     *  Gets the data for paragraph K.
@@ -567,9 +615,8 @@ public: // Accessors
     *
     *  @return  A read-only reference to the paragraph K data
     */
-   virtual const ParagraphK &getParagraphK() const = 0;
+   virtual const ParagraphK& getParagraphK() const = 0;
 
-   
    /**
     *  Sets the data for paragraph A.
     *
@@ -580,7 +627,7 @@ public: // Accessors
     *          the paragraph value is set. The optional argument
     *          is boost::any<ParagraphA>.
     */
-   virtual void setParagraphA(const Aspam::ParagraphA &val) = 0;
+   virtual void setParagraphA(const Aspam::ParagraphA& val) = 0;
    
    /**
     *  Sets the data for paragraph B.
@@ -592,7 +639,7 @@ public: // Accessors
     *          the paragraph value is set. The optional argument
     *          is boost::any<ParagraphB>
     */
-   virtual void setParagraphB(const Aspam::ParagraphB &val) = 0;
+   virtual void setParagraphB(const Aspam::ParagraphB& val) = 0;
    
    /**
     *  Sets the data for paragraph C.
@@ -605,7 +652,7 @@ public: // Accessors
     *          the paragraph value is set. The optional argument
     *          is boost::any<ParagraphC>
     */
-   virtual void setParagraphC(const Aspam::ParagraphC &val) = 0;
+   virtual void setParagraphC(const Aspam::ParagraphC& val) = 0;
    
    /**
     *  Sets the data for paragraph D.
@@ -617,7 +664,7 @@ public: // Accessors
     *          the paragraph value is set. The optional argument
     *          is boost::any<ParagraphD>
     */
-   virtual void setParagraphD(const Aspam::ParagraphD &val) = 0;
+   virtual void setParagraphD(const Aspam::ParagraphD& val) = 0;
    
    /**
     *  Sets the data for paragraph E.
@@ -630,7 +677,7 @@ public: // Accessors
     *          the paragraph value is set. The optional argument
     *          is boost::any<ParagraphE>
     */
-   virtual void setParagraphE(const Aspam::ParagraphE &val) = 0;
+   virtual void setParagraphE(const Aspam::ParagraphE& val) = 0;
    
    /**
     *  Sets the data for paragraph F.
@@ -642,7 +689,7 @@ public: // Accessors
     *          the paragraph value is set. The optional argument
     *          is boost::any<ParagraphF>
     */
-   virtual void setParagraphF(const Aspam::ParagraphF &val) = 0;
+   virtual void setParagraphF(const Aspam::ParagraphF& val) = 0;
    
    /**
     *  Sets the data for paragraph G.
@@ -654,7 +701,7 @@ public: // Accessors
     *          the paragraph value is set. The optional argument
     *          is boost::any<ParagraphG>
     */
-   virtual void setParagraphG(const Aspam::ParagraphG &val) = 0;
+   virtual void setParagraphG(const Aspam::ParagraphG& val) = 0;
    
    /**
     *  Sets the data for paragraph H.
@@ -666,7 +713,7 @@ public: // Accessors
     *          the paragraph value is set. The optional argument
     *          is boost::any<ParagraphH>
     */
-   virtual void setParagraphH(const Aspam::ParagraphH &val) = 0;
+   virtual void setParagraphH(const Aspam::ParagraphH& val) = 0;
    
    /**
     *  Sets the data for paragraph I.
@@ -679,7 +726,7 @@ public: // Accessors
     *          the paragraph value is set. The optional argument
     *          is boost::any<ParagraphI>
     */
-   virtual void setParagraphI(const Aspam::ParagraphI &val) = 0;
+   virtual void setParagraphI(const Aspam::ParagraphI& val) = 0;
    
    /**
     *  Sets the data for paragraph J.
@@ -691,7 +738,7 @@ public: // Accessors
     *          the paragraph value is set. The optional argument
     *          is boost::any<ParagraphJ>
     */
-   virtual void setParagraphJ(const Aspam::ParagraphJ &val) = 0;
+   virtual void setParagraphJ(const Aspam::ParagraphJ& val) = 0;
    
    /**
     *  Sets the data for paragraph K.
@@ -704,7 +751,7 @@ public: // Accessors
     *          the paragraph value is set. The optional argument
     *          is boost::any<ParagraphK>
     */
-   virtual void setParagraphK(const Aspam::ParagraphK &val) = 0;
+   virtual void setParagraphK(const Aspam::ParagraphK& val) = 0;
 
 protected:
    /**

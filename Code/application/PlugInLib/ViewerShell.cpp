@@ -44,10 +44,10 @@ bool ViewerShell::getOutputSpecification(PlugInArgList*& pArgList)
 class ViewerCallback : public PlugInCallback
 {
 public:
-   ViewerCallback(PlugIn* pPlugIn, QWidget* pViewer)
+   ViewerCallback(PlugIn* pPlugIn, QWidget* pViewer) :
+      mpPlugIn(pPlugIn),
+      mpViewer(pViewer)
    {
-      mpPlugIn = pPlugIn;
-      mpViewer = pViewer;
    }
 
    ~ViewerCallback()
@@ -87,20 +87,20 @@ bool ViewerShell::abort()
 {
    bool bSuccess = false;
 
-   Service<DesktopServices> pDesktop;
    ViewerCallback* pCallback = new ViewerCallback(this, getWidget());
    if (pCallback != NULL)
    {
+      Service<DesktopServices> pDesktop;
       bSuccess = pDesktop->registerCallback(BACKGROUND_COMPLETE, pCallback);
    }
 
    return bSuccess;
 }
 
-void ViewerShell::cleanupWidget(Subject &subject, const std::string &signal, const boost::any &data)
+void ViewerShell::cleanupWidget(Subject& subject, const std::string& signal, const boost::any& data)
 {
-   QWidget *pWidget = getWidget();
-   if(pWidget != NULL)
+   QWidget* pWidget = getWidget();
+   if (pWidget != NULL)
    {
       pWidget->hide();
       delete pWidget;

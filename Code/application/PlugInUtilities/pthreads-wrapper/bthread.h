@@ -6,11 +6,9 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
- 
 
-
-#ifndef _BTHREAD_DOT_H
-#define _BTHREAD_DOT_H
+#ifndef BTHREAD_H
+#define BTHREAD_H
 
 #include "thread.h"
 #include "pthread.h"

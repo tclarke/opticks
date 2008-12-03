@@ -78,7 +78,7 @@ bool ModelImporter::getInputSpecification(PlugInArgList *&pInArgList)
    pInArgList = mpPlugInManager->getPlugInArgList();
    VERIFY(pInArgList != NULL);
 
-   PlugInArg *pArg;
+   PlugInArg* pArg = NULL;
    VERIFY((pArg = mpPlugInManager->getPlugInArg()) != NULL);
    pArg->setName(ProgressArg());
    pArg->setType("Progress");
@@ -125,7 +125,7 @@ vector<ImportDescriptor*> ModelImporter::getImportDescriptors(const string& file
 
       XmlReader xml(pLog);
       XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *pDoc = xml.parse(filename, "metadata");
-      DOMElement *pRootElement = NULL;
+      DOMElement* pRootElement = NULL;
       if (pDoc != NULL)
       {
          pRootElement = pDoc->getDocumentElement();
@@ -143,7 +143,7 @@ vector<ImportDescriptor*> ModelImporter::getImportDescriptors(const string& file
    return descriptors;
 }
 
-unsigned char ModelImporter::getFileAffinity(const std::string& filename)
+unsigned char ModelImporter::getFileAffinity(const string& filename)
 {
    if (getImportDescriptors(filename, false).empty())
    {
@@ -177,7 +177,7 @@ ImportDescriptor* ModelImporter::populateImportDescriptor(DOMElement* pElement, 
    }
    unsigned int version = atoi(A(pElement->getAttribute(X("version"))));
 
-   DOMElement *pClassificationElement = static_cast<DOMElement*>(
+   DOMElement* pClassificationElement = static_cast<DOMElement*>(
          pElement->getElementsByTagName(X("classification"))->item(0));
    FactoryResource<Classification> pClassification;
    bool classificationValid = false;
@@ -188,7 +188,7 @@ ImportDescriptor* ModelImporter::populateImportDescriptor(DOMElement* pElement, 
    }
 
    FactoryResource<DynamicObject> pMetaData;
-   DOMElement *pMetadataElement = static_cast<DOMElement*>(
+   DOMElement* pMetadataElement = static_cast<DOMElement*>(
       pElement->getElementsByTagName(X("metadata"))->item(0));
    bool metaDataValid = false;
    if (pMetadataElement != NULL)
@@ -230,8 +230,8 @@ ImportDescriptor* ModelImporter::populateImportDescriptor(DOMElement* pElement, 
 
 bool ModelImporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
 {
-   Progress *pProgress = NULL;
-   DataElement *pElement = NULL;
+   Progress* pProgress = NULL;
+   DataElement* pElement = NULL;
    bool createLayer = true;
    StepResource pStep("Import model element", "app", "52672A08-89C5-4238-815D-83B573206562");
 
@@ -285,7 +285,7 @@ bool ModelImporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
    }
    else
    {
-      DOMElement *pRootElement = pDomDocument->getDocumentElement();
+      DOMElement* pRootElement = pDomDocument->getDocumentElement();
       VERIFY(pRootElement != NULL);
 
       if (pProgress != NULL)
@@ -313,9 +313,9 @@ bool ModelImporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
             pProgress->updateProgress("Build the layer", 60, NORMAL);
          }
 
-         Layer *pLayer = NULL;
-         SpatialDataView *pView = NULL;
-         SpatialDataWindow *pWindow = dynamic_cast<SpatialDataWindow*>(mpDesktop->getCurrentWorkspaceWindow());
+         Layer* pLayer = NULL;
+         SpatialDataView* pView = NULL;
+         SpatialDataWindow* pWindow = dynamic_cast<SpatialDataWindow*>(mpDesktop->getCurrentWorkspaceWindow());
          if (pWindow != NULL)
          {
             pView = pWindow->getSpatialDataView();
@@ -383,7 +383,7 @@ bool ModelImporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
             return false;
          }
       }
-      catch(XmlReader::DomParseException &)
+      catch (XmlReader::DomParseException&)
       {
          return false;
       }
@@ -405,7 +405,7 @@ QWidget *ModelImporter::getImportOptionsWidget(DataDescriptor *pDescriptor)
       mpOptionsWidget = new QWidget();
       VERIFYRV(mpOptionsWidget != NULL, NULL);
 
-      QHBoxLayout *pTopLevel = new QHBoxLayout(mpOptionsWidget);
+      QHBoxLayout* pTopLevel = new QHBoxLayout(mpOptionsWidget);
       mpCheckBox = new QCheckBox("Create a layer from this element?", mpOptionsWidget);
       mpCheckBox->setChecked(true);
       pTopLevel->addWidget(mpCheckBox);
@@ -416,7 +416,7 @@ QWidget *ModelImporter::getImportOptionsWidget(DataDescriptor *pDescriptor)
 
 string ModelImporter::getTypeSubstitution(string type)
 {
-   map<string,string>::const_iterator newType = sTypeMap.find(type);
+   map<string, string>::const_iterator newType = sTypeMap.find(type);
    if (newType != sTypeMap.end())
    {
       return newType->second;

@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef PLUG_IN_SELECTOR_DLG_H
-#define PLUG_IN_SELECTOR_DLG_H
+#ifndef PLUGINSELECTORDLG_H
+#define PLUGINSELECTORDLG_H
 
 #include <QtGui/QDialog>
 

@@ -6,11 +6,9 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
- 
 
-
-#ifndef _BMUTEX_DOT_H
-#define _BMUTEX_DOT_H
+#ifndef BMUTEX_H
+#define BMUTEX_H
 
 #include "mutex.h"
 #include "pthread.h"

@@ -38,14 +38,14 @@ public:
 
    bool setBatch();
    bool setInteractive();
-   bool getInputSpecification(PlugInArgList*& pInArgList);
+   bool getInputSpecification(PlugInArgList*& pArgList);
    bool getOutputSpecification(PlugInArgList*& pArgList);
    bool hasAbort();
    bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
    bool abort();
 
 protected:
-   bool extractPlugInArgs(PlugInArgList* pArgList);
+   bool extractPlugInArgs(const PlugInArgList* pArgList);
    bool checkExtension(const PlugInDescriptor* pDescriptor, const std::string& filename) const;
    PlugIn* findImporter(const DataDescriptor* pDescriptor);
    PlugIn* findImporter(const std::string& filename);

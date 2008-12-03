@@ -219,8 +219,7 @@ bool AoiToolBar::setAoiLayer(Layer* pLayer)
       {
          disconnect(this, SIGNAL(graphicObjectTypeChanged(GraphicObjectType)), 
             pAoiLayerImp, SLOT(setCurrentGraphicObjectType(GraphicObjectType)));
-         disconnect(this, SIGNAL(modeChanged(ModeType)), 
-            pAoiLayerImp, SLOT(setMode(ModeType)));
+         disconnect(this, SIGNAL(modeChanged(ModeType)), pAoiLayerImp, SLOT(setMode(ModeType)));
          disconnect(pAoiLayerImp, SIGNAL(currentTypeChanged(GraphicObjectType)), this,
             SLOT(setSelectionTool(GraphicObjectType)));
          disconnect(pAoiLayerImp, SIGNAL(modeChanged(ModeType)), this, SLOT(setSelectionMode(ModeType)));
@@ -238,8 +237,7 @@ bool AoiToolBar::setAoiLayer(Layer* pLayer)
       {
          connect(this, SIGNAL(graphicObjectTypeChanged(GraphicObjectType)),
             pAoiLayerImp, SLOT(setCurrentGraphicObjectType(GraphicObjectType)));
-         connect(this, SIGNAL(modeChanged(ModeType)), 
-            pAoiLayerImp, SLOT(setMode(ModeType)));
+         connect(this, SIGNAL(modeChanged(ModeType)), pAoiLayerImp, SLOT(setMode(ModeType)));
          connect(pAoiLayerImp, SIGNAL(currentTypeChanged(GraphicObjectType)), this,
             SLOT(setSelectionTool(GraphicObjectType)));
          connect(pAoiLayerImp, SIGNAL(modeChanged(ModeType)), this, SLOT(setSelectionMode(ModeType)));
@@ -338,6 +336,7 @@ void AoiToolBar::aoiLayerDeleted(Subject& subject, const string& signal, const b
    if (dynamic_cast<AoiLayer*>(&subject) == mpAoiLayer)
    {
       setAoiLayer(NULL);
+      setEnabled(false);
    }
 }
 
@@ -426,17 +425,17 @@ void AoiToolBar::mergeAoi()
          {
             if (bCombine)
             {
-               GraphicGroup *pGroup = pAoi->getGroup();
+               GraphicGroup* pGroup = pAoi->getGroup();
                VERIFYNRV(pGroup != NULL);
-               const std::list<GraphicObject*> &objects = pGroup->getObjects();
+               const std::list<GraphicObject*>& objects = pGroup->getObjects();
                for (std::list<GraphicObject*>::const_iterator iter = objects.begin();
                   iter != objects.end(); ++iter)
                {
-                  GraphicObject *pObj = *iter;
+                  GraphicObject* pObj = *iter;
                   VERIFYNRV(pObj != NULL);
-                  GraphicGroup *pTargetGroup = pTargetAoi->getGroup();
+                  GraphicGroup* pTargetGroup = pTargetAoi->getGroup();
                   VERIFYNRV(pTargetGroup != NULL);
-                  GraphicObjectImp *pTargetObj = dynamic_cast<GraphicObjectImp*>(
+                  GraphicObjectImp* pTargetObj = dynamic_cast<GraphicObjectImp*>(
                      pTargetGroup->addObject(pObj->getGraphicObjectType()));
                   VERIFYNRV(pTargetObj != NULL);
                   pTargetObj->replicateObject(pObj);
@@ -444,7 +443,7 @@ void AoiToolBar::mergeAoi()
             }
             else
             {
-               const BitMask *pMask = pAoi->getSelectedPoints();
+               const BitMask* pMask = pAoi->getSelectedPoints();
                VERIFYNRV(pMask != NULL);
                if (i == 0)
                {
@@ -685,7 +684,7 @@ bool AoiToolBar::toXml(XMLWriter* pXml) const
    pXml->addAttr("showPointLabels", mpAoiShowPointLabels->isChecked());
    pXml->addAttr("addMode", mpAddMode->getCurrentValue());
    pXml->addAttr("selectionTool", mpTool->getCurrentValue());
-  return true;
+   return true;
 }
 
 bool AoiToolBar::fromXml(DOMNode* pDocument, unsigned int version)
@@ -695,15 +694,12 @@ bool AoiToolBar::fromXml(DOMNode* pDocument, unsigned int version)
       return false;
    }
 
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
-   bool bEnabled = StringUtilities::fromXmlString<bool>(
-      A(pElem->getAttribute(X("showLabels"))));
+   DOMElement* pElem = static_cast<DOMElement*>(pDocument);
+   bool bEnabled = StringUtilities::fromXmlString<bool>(A(pElem->getAttribute(X("showLabels"))));
    mpAoiShowLabels->setChecked(bEnabled);
-   bEnabled = StringUtilities::fromXmlString<bool>(
-      A(pElem->getAttribute(X("showPointLabels"))));
+   bEnabled = StringUtilities::fromXmlString<bool>(A(pElem->getAttribute(X("showPointLabels"))));
    mpAoiShowPointLabels->setChecked(bEnabled);
-   AoiAddMode aMode = StringUtilities::fromXmlString<AoiAddMode>(
-      A(pElem->getAttribute(X("addMode"))));
+   AoiAddMode aMode = StringUtilities::fromXmlString<AoiAddMode>(A(pElem->getAttribute(X("addMode"))));
    mpAddMode->setCurrentValue(aMode);
    GraphicObjectType oType = StringUtilities::fromXmlString<GraphicObjectType>(
       A(pElem->getAttribute(X("selectionTool"))));

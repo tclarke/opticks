@@ -34,44 +34,44 @@ public:
 
    static const std::string& getName()
    {
-      static std::string var = "GeoTIFF Exporter Options";
-      return var;
+      static std::string sName = "GeoTIFF Exporter Options";
+      return sName;
    }
 
    static const std::string& getOptionName()
    {
-      static std::string var = "Export/GeoTIFF";
-      return var;
+      static std::string sOptionName = "Export/GeoTIFF";
+      return sOptionName;
    }
 
    static const std::string& getDescription()
    {
-      static std::string var = "Widget to display GeoTIFF exporter related options";
-      return var;
+      static std::string sDescription = "Widget to display GeoTIFF exporter related options";
+      return sDescription;
    }
 
    static const std::string& getShortDescription()
    {
-      static std::string var = "Widget to display GeoTIFF exporter related options";
-      return var;
+      static std::string sShortDescription = "Widget to display GeoTIFF exporter related options";
+      return sShortDescription;
    }
 
    static const std::string& getCreator()
    {
-      static std::string var = "Ball Aerospace & Technologies Corp.";
-      return var;
+      static std::string sCreator = "Ball Aerospace & Technologies Corp.";
+      return sCreator;
    }
 
    static const std::string& getCopyright()
    {
-      static std::string var = APP_COPYRIGHT_MSG;
-      return var;
+      static std::string sCopyright = APP_COPYRIGHT_MSG;
+      return sCopyright;
    }
 
    static const std::string& getVersion()
    {
-      static std::string var = APP_VERSION_NUMBER;
-      return var;
+      static std::string sVersion = APP_VERSION_NUMBER;
+      return sVersion;
    }
 
    static bool isProduction()
@@ -81,8 +81,8 @@ public:
 
    static const std::string& getDescriptorId()
    {
-      static std::string var = "{26845CD5-CFEE-4d9b-A227-BD8B296B48D3}";
-      return var;
+      static std::string sId = "{26845CD5-CFEE-4d9b-A227-BD8B296B48D3}";
+      return sId;
    }
 
 private:

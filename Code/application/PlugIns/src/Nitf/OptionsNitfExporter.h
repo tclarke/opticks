@@ -66,7 +66,7 @@ private:
       QWidget* mpOther;
 
       OptionsNitfExporterElement(const QString& name, const std::string& originalValue,
-         const unsigned int& maxLength, const QString& defaultValue, QWidget* pSelf, QWidget* pOther = NULL);
+         unsigned int maxLength, const QString& defaultValue, QWidget* pSelf, QWidget* pOther = NULL);
 
       void setValue(const std::string& newValue);
    };
@@ -77,14 +77,14 @@ private:
    const Classification* const mpClassification;
 
    bool createLineEditElement(const QString& name, const QString& toolTip, const std::string& originalValue,
-      const unsigned int& maxLength = 0, const QString& defaultValue = QString(),
+      unsigned int maxLength = 0, const QString& defaultValue = QString(),
       const QString& inputMask = QString());
 
    bool createComboBoxElement(const QString& name, const QString& toolTip, const std::string& originalValue,
-      const QStringList& availableValues, const unsigned int& maxLength = 0);
+      const QStringList& availableValues, unsigned int maxLength = 0);
 
-   bool createDateEditElement(const QString& name, const QString& toolTip, const DateTime* originalValue,
-      const unsigned int& maxLength = 0);
+   bool createDateEditElement(const QString& name, const QString& toolTip, const DateTime* pOriginalValue,
+      unsigned int maxLength = 0);
 
    bool createElements();
 };

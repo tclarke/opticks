@@ -12,16 +12,18 @@
 
 const int Tile::INIT_TILE_SIZE = 512;
 
-Tile::Tile() : mXcoords(4), mYcoords(4)
+Tile::Tile() :
+   mTexFormat(GL_RGB),
+   mTexSizeX(INIT_TILE_SIZE),
+   mTexSizeY(INIT_TILE_SIZE),
+   mGeomSizeX(INIT_TILE_SIZE),
+   mGeomSizeY(INIT_TILE_SIZE),
+   mPosX(0),
+   mPosY(0),
+   mXcoords(4),
+   mYcoords(4),
+   mAlpha(255)
 {
-   mTexFormat = GL_RGB;
-   mTexSizeX = INIT_TILE_SIZE;
-   mTexSizeY = INIT_TILE_SIZE;
-   mGeomSizeX = INIT_TILE_SIZE;
-   mGeomSizeY = INIT_TILE_SIZE;
-   mPosX = 0;
-   mPosY = 0;
-
    mXcoords[0] = 0;
    mYcoords[0] = 0;
    mXcoords[1] = 0;
@@ -30,8 +32,6 @@ Tile::Tile() : mXcoords(4), mYcoords(4)
    mYcoords[2] = 0;
    mXcoords[3] = 0;
    mYcoords[3] = 0;
-
-   mAlpha = 255;
 }
 
 Tile::~Tile()
@@ -44,18 +44,24 @@ unsigned int Tile::getTextureIndex() const
    double targetSize = 0.5;
    unsigned int index = 0;
 
-   if(pixelSize == 0.0)
+   if (pixelSize == 0.0)
    {
       // return the full sized tile if we
       // ever get in here with a 0 area tile
       return 0;
    }
+
    while (pixelSize < targetSize)
    {
       index++;
       pixelSize *= 2.0;
    }
-   if (index > 3) index = 3;
+
+   if (index > 3)
+   {
+      index = 3;
+   }
+
    return index;
 }
 
@@ -67,6 +73,11 @@ bool Tile::isTextureReady(unsigned int index) const
    }
 
    return mTextures[index].isAllocated();
+}
+
+bool Tile::isTextureReady() const
+{
+   return isTextureReady(getTextureIndex());
 }
 
 void Tile::draw(GLint textureMode)
@@ -82,7 +93,7 @@ void Tile::draw(GLint textureMode)
    glPushMatrix();
 
    // move the tile into it's correct position in the image
-   glTranslatef((GLfloat) mPosX, (GLfloat) mPosY, 0.0);
+   glTranslatef(static_cast<GLfloat>(mPosX), static_cast<GLfloat>(mPosY), 0.0);
 
    mTextures[index].bind();
 
@@ -90,10 +101,10 @@ void Tile::draw(GLint textureMode)
    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, textureMode);
    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-   float fsizeX = (GLfloat) mTexSizeX;
-   float fsizeY = (GLfloat) mTexSizeY;
-   float ratioX = (GLfloat) mGeomSizeX / (GLfloat) mTexSizeX;
-   float ratioY = (GLfloat) mGeomSizeY / (GLfloat) mTexSizeY;
+   float fsizeX = static_cast<GLfloat>(mTexSizeX);
+   float fsizeY = static_cast<GLfloat>(mTexSizeY);
+   float ratioX = static_cast<GLfloat>(mGeomSizeX) / static_cast<GLfloat>(mTexSizeX);
+   float ratioY = static_cast<GLfloat>(mGeomSizeY) / static_cast<GLfloat>(mTexSizeY);
 
    glBegin(GL_QUADS);
    glColor4ub(255, 255, 255, mAlpha);
@@ -117,7 +128,7 @@ void Tile::draw(GLint textureMode)
    glPopMatrix();
 }
 
-void Tile::allocateTexture(unsigned int index, int channels, unsigned char *pTextureData)
+void Tile::allocateTexture(unsigned int index, int channels, unsigned char* pTextureData)
 {
    int factor = computeReductionFactor(index);
 
@@ -140,7 +151,10 @@ void Tile::setupTexture(unsigned int index, unsigned char* pTextureData)
       mTextures.push_back(Texture());
    }
 
-   if (mTextures[index].isAllocated()) return;
+   if (mTextures[index].isAllocated())
+   {
+      return;
+   }
 
    mXcoords[0] = -(mTexSizeX / 2);
    mYcoords[0] = -(mTexSizeY / 2);
@@ -170,7 +184,7 @@ void Tile::setupTexture(unsigned int index, unsigned char* pTextureData)
 
    glEnable(GL_TEXTURE_2D);
 
-   unsigned char *pResTextureData = pTextureData;
+   unsigned char* pResTextureData = pTextureData;
 //   std::vector<unsigned char> dataSpace;
 //   if (index != 0)
 //   {
@@ -210,24 +224,34 @@ Texture *Tile::getTextureToDeAllocate()
    return &mTextures[indexOfOldest];
 }
 
-bool Tile::computeTexture(unsigned int index, unsigned char *pTextureData)
+void Tile::setAlpha(unsigned int alpha)
 {
-   for (int i=index-1; i>=0; --i)
+   mAlpha = alpha;
+}
+
+unsigned int Tile::getAlpha() const
+{
+   return mAlpha;
+}
+
+bool Tile::computeTexture(unsigned int index, unsigned char* pTextureData)
+{
+   for (int i = index - 1; i >= 0; --i)
    {
-      if (static_cast<unsigned int>(i)<mTextures.size() && mTextures[i].isAllocated())
+      if (static_cast<unsigned int>(i) < mTextures.size() && mTextures[i].isAllocated())
       {
          glEnable(GL_TEXTURE_2D);
          mTextures[i].bind();
-         GLint width=0;
-         GLint height=0;
-         GLint components=0;
+         GLint width = 0;
+         GLint height = 0;
+         GLint components = 0;
          glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
          glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
          glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_COMPONENTS, &components);
-         std::vector<unsigned char> pHighResTexture(components*width*height);
+         std::vector<unsigned char> pHighResTexture(components * width * height);
          glGetTexImage(GL_TEXTURE_2D, 0, mTexFormat, GL_UNSIGNED_BYTE, &pHighResTexture[0]);
-         int reductionFactor=1;
-         for (unsigned int j=i; j<index; ++j)
+         int reductionFactor = 1;
+         for (unsigned int j = i; j < index; ++j)
          {
             reductionFactor *= 2;
          }
@@ -240,31 +264,30 @@ bool Tile::computeTexture(unsigned int index, unsigned char *pTextureData)
    return false;
 }
 
-void Tile::createLowResTexData(unsigned char* pSourceData, unsigned char* pDestDataPtr, int texSizeX,
+void Tile::createLowResTexData(unsigned char* pSourceData, unsigned char* pDestData, int texSizeX,
                                int texSizeY, int channels, int reductionFactor)
 {
    const int MAX_CHANNELS = 4;
-   int j, k, l;
-   int texFactorChannel = reductionFactor*channels;
+   int texFactorChannel = reductionFactor * channels;
    int texSizeXFactorChannel = texFactorChannel * texSizeX;
 
-   unsigned char *pDestChannelPtr = NULL;
+   unsigned char* pDestChannel = NULL;
    unsigned char* pBase = NULL;
    unsigned char* pSourceBase = NULL;
 
-   pDestChannelPtr = pDestDataPtr;
+   pDestChannel = pDestData;
 
-   for (j = 0; j < texSizeY; j += reductionFactor)
+   for (int j = 0; j < texSizeY; j += reductionFactor)
    {
       pSourceBase = pSourceData;
-      for (l = 0; l < texSizeX; l += reductionFactor)
+      for (int l = 0; l < texSizeX; l += reductionFactor)
       {
          pBase = pSourceBase;
 
-         for (k = 0; k < channels; ++k)
+         for (int k = 0; k < channels; ++k)
          {
-            *pDestChannelPtr = *pBase;
-            ++pDestChannelPtr;
+            *pDestChannel = *pBase;
+            ++pDestChannel;
             ++pBase;
          }
 

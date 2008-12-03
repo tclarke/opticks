@@ -41,8 +41,17 @@ class GraphicElement;
 class GraphicLayer;
 class RasterElement;
 
-//                0            1              2             3             4          5           6         7
-enum HandleTypeEnum { BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT, MIDDLE_RIGHT, TOP_RIGHT, TOP_CENTER, TOP_LEFT, MIDDLE_LEFT };
+enum HandleTypeEnum
+{
+   BOTTOM_LEFT,
+   BOTTOM_CENTER,
+   BOTTOM_RIGHT,
+   MIDDLE_RIGHT,
+   TOP_RIGHT,
+   TOP_CENTER,
+   TOP_LEFT,
+   MIDDLE_LEFT
+};
 
 /**
  * @EnumWrapper ::HandleTypeEnum.
@@ -59,7 +68,7 @@ public:
    GraphicObjectImp(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer, LocationType pixelCoord);
    virtual ~GraphicObjectImp();
 
-   virtual void draw (double zoomFactor) const = 0;
+   virtual void draw(double zoomFactor) const = 0;
    virtual void drawLabel() const;
    virtual bool replicateObject(const GraphicObject* pObject);
    virtual CgmObject* convertToCgm();
@@ -72,16 +81,16 @@ public:
    virtual bool setProperty(const GraphicProperty* pProp);
    virtual GraphicProperty* getProperty(const std::string &name) const;
    void setProperties(const std::vector<GraphicProperty*>& properties);
-   virtual const std::vector<GraphicProperty*>& getProperties() const { return mProperties; }
+   virtual const std::vector<GraphicProperty*>& getProperties() const;
    virtual void updateGeo();
    virtual void enableGeo();
 
    // Handles
-   void setHandles(const std::vector<LocationType>& handles) { mHandles = handles; }
+   void setHandles(const std::vector<LocationType>& handles);
    virtual const std::vector<LocationType>& getHandles() const;
    virtual LocationType getHandle(int iHandle) const;
-   virtual void moveHandle(int handle, LocationType pixel, bool bMaintainAspect = false);
-   virtual void rotateHandle(int handle, LocationType pixel);
+   virtual void moveHandle(int handle, LocationType point, bool bMaintainAspect = false);
+   virtual void rotateHandle(int handle, LocationType delta);
    virtual void updateHandles();
 
    // Position
@@ -150,8 +159,9 @@ public:
    // Image
    bool setImageFile(const char *pFilename);
    const char* getImageFile() const;
-   virtual bool setObjectImage(const unsigned int *pData, int width, int height, ColorType transparent = ColorType(-1,-1,-1)) { return false; }
-   virtual const unsigned int* getObjectImage(int &width, int &height, ColorType &transparent) const { return NULL; }
+   virtual bool setObjectImage(const unsigned int* pData, int width, int height,
+      ColorType transparent = ColorType(-1, -1, -1));
+   virtual const unsigned int* getObjectImage(int& width, int& height, ColorType& transparent) const;
    double getAlpha() const;
    bool setAlpha(double alpha);
 

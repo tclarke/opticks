@@ -401,7 +401,7 @@ public:
     *           The position for which to get the axis.
     *
     *  @return  Returns a pointer to the axis widget in the given position.
-    *           This method always returns false if a PolarPlot is displayed.
+    *           This method always returns \c NULL if a PolarPlot is displayed.
     */
    virtual Axis* getAxis(AxisPosition axis) const = 0;
 

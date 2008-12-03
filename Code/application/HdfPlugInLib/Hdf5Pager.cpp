@@ -52,9 +52,10 @@ bool Hdf5Pager::openFile(const std::string& filename)
       size_t rawDataElementCount = 0;
       size_t rawDataBytes = 0;
       double weight = 1.0;
-      
+
       // get the current chunk cache properties
-      herr_t status = H5Pget_cache(mFileAccessProperties, &metaDataElementCount, &rawDataElementCount, &rawDataBytes, &weight);
+      herr_t status = H5Pget_cache(mFileAccessProperties, &metaDataElementCount, &rawDataElementCount,
+         &rawDataBytes, &weight);
       if (status >= 0)
       {
          // get the hdf5 chunk cache configuration setting
@@ -206,7 +207,7 @@ CachedPage::UnitPtr Hdf5Pager::fetchUnit(DataRequest *pOriginalRequest)
    
    bool success = false;
 
-   switch(fileInterleave)
+   switch (fileInterleave)
    {
    case BIP:
       {
@@ -316,6 +317,8 @@ CachedPage::UnitPtr Hdf5Pager::fetchUnit(DataRequest *pOriginalRequest)
       return pUnit;
    }
 
-   pUnit.reset(new CachedPage::CacheUnit(pData.release(), startRow, concurrentRows, pageSize, startBand));
+   CachedPage::CacheUnit* pCacheUnit = new CachedPage::CacheUnit(pData.release(), startRow, concurrentRows,
+      pageSize, startBand);
+   pUnit.reset(pCacheUnit);
    return pUnit;
 }

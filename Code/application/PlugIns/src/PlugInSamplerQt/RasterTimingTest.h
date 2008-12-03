@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef RASTER_TIMING_TEST_H
-#define RASTER_TIMING_TEST_H
+#ifndef RASTERTIMINGTEST_H
+#define RASTERTIMINGTEST_H
 
 #include "AlgorithmShell.h"
 

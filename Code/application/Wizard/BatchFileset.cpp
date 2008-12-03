@@ -13,19 +13,17 @@
 
 using namespace std;
 
-BatchFileset::BatchFileset()
+BatchFileset::BatchFileset() :
+   mpCurrentFile(NULL)
 {
-   mName = "";
-   mDirectory = "";
-   mpCurrentFile = NULL;
 }
 
-BatchFileset::BatchFileset(const string& name, const string& directory, const vector<BatchFile*>& fileset)
+BatchFileset::BatchFileset(const string& name, const string& directory, const vector<BatchFile*>& fileset) :
+   mName(name),
+   mDirectory(directory),
+   mFiles(fileset),
+   mpCurrentFile(NULL)
 {
-   mName = name;
-   mDirectory = directory;
-   mFiles = fileset;
-   mpCurrentFile = NULL;
 }
 
 BatchFileset::~BatchFileset()
@@ -70,12 +68,9 @@ void BatchFileset::addFile(BatchFile* pBatchFile)
    }
 
    bool bContains = false;
-
-   vector<BatchFile*>::iterator iter;
-   for (iter = mFiles.begin(); iter != mFiles.end(); iter++)
+   for (vector<BatchFile*>::iterator iter = mFiles.begin(); iter != mFiles.end(); ++iter)
    {
-      BatchFile* pCurrentFile = NULL;
-      pCurrentFile = *iter;
+      BatchFile* pCurrentFile = *iter;
       if (pCurrentFile == pBatchFile)
       {
          bContains = true;
@@ -113,8 +108,7 @@ void BatchFileset::addFile(const string& filename)
    }
 }
 
-void BatchFileset::addFilesetRequirement(BatchFileset::FilesetRequirementType eType,
-   const string& requirement)
+void BatchFileset::addFilesetRequirement(BatchFileset::FilesetRequirementType eType, const string& requirement)
 {
    switch (eType)
    {
@@ -143,7 +137,7 @@ const multimap<string, string>& BatchFileset::getFilesetRequirements() const
 
 bool BatchFileset::doesFileExist(const string& filename) const
 {
-   if ((filename.empty() == true) || (mFiles.size() == 0))
+   if ((filename.empty() == true) || (mFiles.empty() == true))
    {
       return false;
    }
@@ -184,12 +178,11 @@ void BatchFileset::updateFileset(ObjectFactory* pObjFact)
       // Check if the requirement is a specific file or contains a wild card
       bool bFile = false;
 
-      int iPos = -1;
-      iPos = pattern.find("*");
-      if (iPos == -1)
+      string::size_type pos = pattern.find("*");
+      if (pos == string::npos)
       {
-         iPos = pattern.find("?");
-         if (iPos == -1)
+         pos = pattern.find("?");
+         if (pos == string::npos)
          {
             bFile = true;
          }
@@ -249,7 +242,7 @@ void BatchFileset::updateFileset(ObjectFactory* pObjFact)
 
 string BatchFileset::getFirstFile() 
 {
-   if (mFiles.size() == 0)
+   if (mFiles.empty() == true)
    {
       mpCurrentFile = NULL;
    }
@@ -272,7 +265,7 @@ string BatchFileset::getCurrentFile()
    return currentFile;
 }
 
-string BatchFileset::getNextFile() 
+string BatchFileset::getNextFile()
 {
    if (mpCurrentFile != NULL)
    {

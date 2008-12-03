@@ -11,7 +11,7 @@
 
 unsigned int ImageUtilities::sizeOf(GLenum dataType)
 {
-   switch(dataType)
+   switch (dataType)
    {
    case(GL_UNSIGNED_BYTE):
    case(GL_BYTE):
@@ -34,7 +34,7 @@ unsigned int ImageUtilities::sizeOf(GLenum dataType)
 
 unsigned int ImageUtilities::getNumColorChannels(GLenum textureFormat)
 {
-   switch(textureFormat)
+   switch (textureFormat)
    {
    case GL_RED:
    case GL_GREEN:
@@ -51,6 +51,8 @@ unsigned int ImageUtilities::getNumColorChannels(GLenum textureFormat)
    case GL_RGBA:
       return 4;
       break;
+   default:
+      break;
    }
 
    return 1;
@@ -58,7 +60,7 @@ unsigned int ImageUtilities::getNumColorChannels(GLenum textureFormat)
 
 GLenum ImageUtilities::convertEncodingType(EncodingType encodingType)
 {
-   switch(encodingType)
+   switch (encodingType)
    {
    case INT1SBYTE:
       return GL_BYTE;
@@ -199,7 +201,7 @@ GLint ImageUtilities::getInternalFormat(GLenum dataType, GLenum textureFormat)
 
 GLenum ImageUtilities::getTextureProxy(GLenum textureTarget)
 {
-   switch(textureTarget)
+   switch (textureTarget)
    {
    case GL_TEXTURE_RECTANGLE_ARB:
       return GL_PROXY_TEXTURE_RECTANGLE_ARB;

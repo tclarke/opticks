@@ -41,10 +41,11 @@ bool PropertiesDataDescriptor::initialize(SessionItem* pSessionItem)
    DataElement* pElement = dynamic_cast<DataElement*>(pSessionItem);
    if (pElement != NULL)
    {
-      const DataDescriptor* pDescriptor = pElement->getDataDescriptor();
+      DataDescriptor* pDescriptor = pElement->getDataDescriptor();
       if (pDescriptor != NULL)
       {
-         pDescriptorPage->setDataDescriptor(pDescriptor);
+         // turn off full editing of fields
+         pDescriptorPage->setDataDescriptor(pDescriptor, false);
          return true;
       }
    }

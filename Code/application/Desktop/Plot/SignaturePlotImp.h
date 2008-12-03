@@ -32,9 +32,9 @@ public:
    static bool isKindOfView(const std::string& className);
    static void getViewTypes(std::vector<std::string>& classList);
 
-   SignaturePlotImp& operator= (const SignaturePlotImp& cartesianPlot);
+   SignaturePlotImp& operator=(const SignaturePlotImp& signaturePlot);
    View* copy(QGLContext* pDrawContext = 0, QWidget* pParent = 0) const;
-   bool copy(View *pView) const;
+   bool copy(View* pView) const;
    using ViewImp::setName;
 
    PlotType getPlotType() const;

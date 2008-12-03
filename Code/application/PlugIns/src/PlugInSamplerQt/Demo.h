@@ -15,7 +15,6 @@
 #include "AlgorithmPattern.h"
 #include "AlgorithmShell.h"
 #include "DemoInputs.h"
-
 #include "Node.h"
 
 #include <string>
@@ -31,6 +30,14 @@ class DemoGuiImp;
  */
 class Demo : public AlgorithmPlugIn
 {
+public:
+   Demo();
+   ~Demo();
+
+   // obligations from base class
+   bool hasAbort();
+   bool needToRunAlgorithm();
+
 private:
    // obligations from base class
    bool canRunBatch() const;
@@ -46,17 +53,9 @@ private:
 
    // data members
    Progress* mpProgress;
-   DemoAlgorithm *mpDemoAlg;
+   DemoAlgorithm* mpDemoAlg;
    DemoInputs mInputs;
-   DemoGuiImp *mpDemoGui;
-
-public:
-   Demo();
-   ~Demo();
-
-   // obligations from base class
-   bool hasAbort();
-   bool needToRunAlgorithm();
+   DemoGuiImp* mpDemoGui;
 };
 
 #endif

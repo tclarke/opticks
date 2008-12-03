@@ -68,7 +68,7 @@ protected slots:
 
 private:
    SpatialDataViewImp* mpView;
-   SpatialDataViewImp *mpOverview;
+   SpatialDataViewImp* mpOverview;
    ZoomPanWidget* mpSelectionWidget;
    AnnotationLayerAdapter* mpTrailLayer;
    TrailObjectImp* mpTrail;

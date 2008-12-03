@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef FUSION_DLG_H
-#define FUSION_DLG_H
+#ifndef DATAFUSIONDLG_H
+#define DATAFUSIONDLG_H
 
 #include "DesktopServices.h"
 #include "Vector.h"
@@ -41,14 +41,14 @@ class DataFusionDlg : public QDialog
 {
    Q_OBJECT
 
- public:
-   DataFusionDlg(PlugIn* pPlugIn, ProgressTracker &progressTracker, QWidget* pParent = NULL);
+public:
+   DataFusionDlg(PlugIn* pPlugIn, ProgressTracker& progressTracker, QWidget* pParent = NULL);
    ~DataFusionDlg();
 
    RasterElement* getPrimaryChip() const;
    RasterElement* getSecondaryChip() const;
 
-   void windowDeleted(Subject &subject, const std::string &signal, const boost::any &v);
+   void windowDeleted(Subject& subject, const std::string& signal, const boost::any& v);
 
 protected:
    void showPage(QWidget* pPage);
@@ -126,13 +126,16 @@ private:
 
    // modified map
    QMap<FusionPage*, bool> mModified;
-   
+
    // These mouse modes are the mouse modes after the views are selected on the first page.
    // They are restored when the dialog goes away. I am storing strings instead of pointers
    // since they are safer.
-   std::string mPrimaryMouseMode, mSecondaryMouseMode;
+   std::string mPrimaryMouseMode;
+   std::string mSecondaryMouseMode;
 
-   static const std::string PRIMARY_CHIP_WIDGET_NAME, SECONDARY_CHIP_WIDGET_NAME, ANNOTATION_LAYER_NAME;
+   static const std::string PRIMARY_CHIP_WIDGET_NAME;
+   static const std::string SECONDARY_CHIP_WIDGET_NAME;
+   static const std::string ANNOTATION_LAYER_NAME;
 };
 
 #endif

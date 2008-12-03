@@ -26,10 +26,10 @@ Tutorial2::Tutorial2()
 {
    setDescriptorId("{1F6316EB-8A03-4034-8B3D-31FADB7AF727}");
    setName("Tutorial 2");
-   setVersion("1.0");
    setDescription("Using resources and services.");
-   setCreator("The Opticks Team");
-   setCopyright("Copyright 2008");
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setProductionStatus(false);
    setType("Sample");
    setMenuLocation("[Tutorial]/Tutorial 2");
@@ -59,31 +59,40 @@ bool Tutorial2::getOutputSpecification(PlugInArgList *&pOutArgList)
 bool Tutorial2::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
 {
    StepResource pStep("Tutorial 2", "app", "A8FEFCB3-5D08-4670-B47E-CC533A932737");
-   if(pInArgList == NULL)
+   if (pInArgList == NULL)
    {
       return false;
    }
-   Progress *pProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
-   int count, depth;
+   Progress* pProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
+   int count;
+   int depth;
    pInArgList->getPlugInArgValue("Count", count);
    pInArgList->getPlugInArgValue("Depth", depth);
-   if(count < 1 || count >= 10 || depth < 1 || depth >= 10)
+   if (count < 1 || count >= 10 || depth < 1 || depth >= 10)
    {
       std::string msg = "Count and depth must be between 1 and 9 inclusive.";
       pStep->finalize(Message::Failure, msg);
-      if(pProgress != NULL) pProgress->updateProgress(msg, 0, ERRORS);
+      if (pProgress != NULL)
+      {
+         pProgress->updateProgress(msg, 0, ERRORS);
+      }
+
       return false;
    }
-   if(depth > count)
+   if (depth > count)
    {
       std::string msg = "Depth must be <= count";
       pStep->finalize(Message::Failure, msg);
-      if(pProgress != NULL) pProgress->updateProgress(msg, 0, ERRORS);
+      if (pProgress != NULL)
+      {
+         pProgress->updateProgress(msg, 0, ERRORS);
+      }
+
       return false;
    }
    pStep->addProperty("Depth", depth);
 
-   if(pProgress != NULL)
+   if (pProgress != NULL)
    {
       pProgress->updateProgress("Tutorial 2: Count " + StringUtilities::toDisplayString(count)
          + " Depth " + StringUtilities::toDisplayString(depth), depth * 100 / count, NORMAL);
@@ -95,13 +104,13 @@ bool Tutorial2::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
    sleep(1);
 #endif
 
-   if(depth < count)
+   if (depth < count)
    {
       ExecutableResource pSubCall("Tutorial 2", std::string(), pProgress, false);
       VERIFY(pSubCall->getPlugIn() != NULL);
       pSubCall->getInArgList().setPlugInArgValue("Count", &count);
       pSubCall->getInArgList().setPlugInArgValue("Depth", &++depth);
-      if(!pSubCall->execute())
+      if (!pSubCall->execute())
       {
          // sub-call has already posted an error message
          return false;

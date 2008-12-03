@@ -44,7 +44,7 @@ public:
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
 
-   const GraphicGroup& getGroup() const { return *(dynamic_cast<const GraphicGroup*>(mpGroup.get())); }
+   const GraphicGroup& getGroup() const;
 
    /**
     * Desired insertion behavior:
@@ -52,18 +52,12 @@ public:
     *  * User is warned if orientation is unavailable.
     *  * No further interaction
     */
-   virtual bool processMousePress(LocationType screenCoord, 
-                                  Qt::MouseButton button,
-                                  Qt::MouseButtons buttons,
-                                  Qt::KeyboardModifiers modifiers);
-   virtual bool processMouseMove(LocationType screenCoord, 
-                                  Qt::MouseButton button,
-                                  Qt::MouseButtons buttons,
-                                  Qt::KeyboardModifiers modifiers);
-   virtual bool processMouseRelease(LocationType screenCoord, 
-                                  Qt::MouseButton button,
-                                  Qt::MouseButtons buttons,
-                                  Qt::KeyboardModifiers modifiers);
+   virtual bool processMousePress(LocationType screenCoord, Qt::MouseButton button, Qt::MouseButtons buttons,
+      Qt::KeyboardModifiers modifiers);
+   virtual bool processMouseMove(LocationType screenCoord, Qt::MouseButton button, Qt::MouseButtons buttons,
+      Qt::KeyboardModifiers modifiers);
+   virtual bool processMouseRelease(LocationType screenCoord, Qt::MouseButton button, Qt::MouseButtons buttons,
+      Qt::KeyboardModifiers modifiers);
 
    void updateGeo();
 

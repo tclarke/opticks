@@ -93,17 +93,17 @@ private:
    /**
     * The source view.
     */
-   const SpatialDataViewImp *mpSrcView;
+   const SpatialDataViewImp* mpSrcView;
 
    /**
     * The source layer.
     */
-   const Layer *mpSrcLayer;
+   const Layer* mpSrcLayer;
 
    /**
     * The source georeferenced RasterElement.
     */
-   const RasterElement *mpSrcGeo;
+   const RasterElement* mpSrcGeo;
 
    /**
     * The tightness of this instance.  Divide by the result of findResolution() of

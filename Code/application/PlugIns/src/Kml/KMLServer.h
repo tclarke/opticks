@@ -40,7 +40,8 @@ public:
    bool execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList);
 
 protected:
-   MuHttpServer::Response getRequest(const QString &uri, const QString &contentType, const QString &body, const FormValueMap &form);
+   MuHttpServer::Response getRequest(const QString &uri, const QString &contentType, const QString &body,
+      const FormValueMap &form);
 };
 
 #endif

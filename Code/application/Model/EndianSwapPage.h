@@ -38,8 +38,8 @@ public:
     *        Pointer to the end of the memory segment containing pSrcData. Do not attempt to access past this point.
     *        This is ignored if NULL.
     */
-   EndianSwapPage(void *pSrcData, EncodingType encoding,  unsigned int rows, unsigned int columns,
-                  unsigned int bytesPerRow, unsigned int interlineBytes, unsigned char *pEndOfSegment);
+   EndianSwapPage(void* pSrcData, EncodingType encoding, unsigned int rows, unsigned int columns,
+      unsigned int bytesPerRow, unsigned int interlineBytes, unsigned char* pEndOfSegment);
 
    ~EndianSwapPage();
 

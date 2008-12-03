@@ -25,7 +25,7 @@ class PixelObjectImp : public GraphicObjectImp
 {
 public:
 
-   void draw(double scaleFactor) const;
+   void draw(double zoomFactor) const;
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;

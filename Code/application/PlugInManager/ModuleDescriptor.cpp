@@ -47,7 +47,7 @@ ModuleDescriptor::ModuleDescriptor(const string& id) :
    addPropertiesPage(PropertiesModuleDescriptor::getName());
 }
 
-ModuleDescriptor::ModuleDescriptor(const string& id, const string& file, map<string, string> &plugInIds) :
+ModuleDescriptor::ModuleDescriptor(const string& id, const string& file, map<string, string>& plugInIds) :
    SessionItemImp(id),
    mVersion(""),
    mDescription(""),
@@ -59,26 +59,22 @@ ModuleDescriptor::ModuleDescriptor(const string& id, const string& file, map<str
    mpModule(0)
 {
    bool initValid = false;
-   char *pModuleName = NULL;
-   char *pModuleVersion = NULL;
-   char *pModuleDescription = NULL;
+   char* pModuleName = NULL;
+   char* pModuleVersion = NULL;
+   char* pModuleDescription = NULL;
    unsigned int totalPlugIns = 0;
-   char *pModuleValidationKey = NULL;
-   char *pModuleId = NULL;
-   FileFinderImp* find;
-
-    //if (!isValidModule(file)) return;  // TODO Throw exception
+   char* pModuleValidationKey = NULL;
+   char* pModuleId = NULL;
 
    FilenameImp fileObj(file);
    mFileName = fileObj.getFullPathAndName();
 
-   find = new FileFinderImp();
-   find->findFile(fileObj.getPath(), fileObj.getFileName());
-   find->findNextFile();
-   mFileSize = find->getLength();
+   FileFinderImp find;
+   find.findFile(fileObj.getPath(), fileObj.getFileName());
+   find.findNextFile();
+   mFileSize = find.getLength();
 
-   find->getLastModificationTime(mFileDate);
-   delete find;
+   find.getLastModificationTime(mFileDate);
 
    if (!load())
    {
@@ -86,14 +82,14 @@ ModuleDescriptor::ModuleDescriptor(const string& id, const string& file, map<str
    }
 
    // Get the name, description, version, number of plugins
-   bool(*moduleNameProcedure)(char **, char **, char **, unsigned int *, char **, char **) =
-      reinterpret_cast<bool(*)(char **, char **, char **, unsigned int *, char**, char **)>(
-                              mpModule->getProcedureAddress( "get_name" ) );
+   bool(*moduleNameProcedure)(char**, char**, char**, unsigned int*, char**, char**) =
+      reinterpret_cast<bool(*)(char**, char**, char**, unsigned int*, char**, char**)>(
+                              mpModule->getProcedureAddress("get_name"));
 
    if (moduleNameProcedure)
    {
-      initValid = moduleNameProcedure( &pModuleName, &pModuleVersion, &pModuleDescription,
-         &totalPlugIns, &pModuleValidationKey, &pModuleId );
+      initValid = moduleNameProcedure(&pModuleName, &pModuleVersion, &pModuleDescription,
+         &totalPlugIns, &pModuleValidationKey, &pModuleId);
    }
 
    Icons* pIcons = Icons::instance();
@@ -149,11 +145,11 @@ ModuleDescriptor::~ModuleDescriptor()
    }
 }
 
-string ModuleDescriptor::getModuleId(const std::string &filename)
+string ModuleDescriptor::getModuleId(const string& filename)
 {
    string id;
 
-   DynamicModule *pModule = Service<PlugInManagerServices>()->getDynamicModule(filename);
+   DynamicModule* pModule = Service<PlugInManagerServices>()->getDynamicModule(filename);
    if (pModule == NULL)
    {
       return string();
@@ -171,20 +167,20 @@ string ModuleDescriptor::getModuleId(const std::string &filename)
       }
    }
 
-   bool(*pNameProcedure)(char **, char **, char **, unsigned int *, char **, char **) =
-      reinterpret_cast<bool(*)(char **, char **, char **, unsigned int *, char**, char **)>(
-                               pModule->getProcedureAddress( "get_name" ) );
+   bool(*pNameProcedure)(char**, char**, char**, unsigned int*, char**, char**) =
+      reinterpret_cast<bool(*)(char**, char**, char**, unsigned int*, char**, char**)>(
+                               pModule->getProcedureAddress("get_name"));
 
    if (pNameProcedure)
    {
-      char *pModuleName = NULL;
-      char *pModuleVersion = NULL;
-      char *pModuleDescription = NULL;
+      char* pModuleName = NULL;
+      char* pModuleVersion = NULL;
+      char* pModuleDescription = NULL;
       unsigned int totalPlugIns = 0;
-      char *pModuleId = NULL;
-      char *pValidationKey;
-      if (!pNameProcedure( &pModuleName, &pModuleVersion, &pModuleDescription,
-         &totalPlugIns, &pValidationKey, &pModuleId ) || pModuleId == NULL)
+      char* pModuleId = NULL;
+      char* pValidationKey = NULL;
+      if (!pNameProcedure(&pModuleName, &pModuleVersion, &pModuleDescription,
+         &totalPlugIns, &pValidationKey, &pModuleId) || pModuleId == NULL)
       {
          Service<PlugInManagerServices>()->destroyDynamicModule(pModule);
          return string();
@@ -234,7 +230,7 @@ void ModuleDescriptor::unload()
    }
 }
 
-bool ModuleDescriptor::initializePlugInInformation(map<string, string> &plugInIds)
+bool ModuleDescriptor::initializePlugInInformation(map<string, string>& plugInIds)
 {
    bool previouslyLoaded = false;
    if (mpModule == NULL)
@@ -280,7 +276,7 @@ bool ModuleDescriptor::initializePlugInInformation(map<string, string> &plugInId
             delete pPlugIn;
             continue;
          }
-         plugInIds.insert(pair<string,string>(descriptorId, pPlugIn->getName()));
+         plugInIds.insert(pair<string, string>(descriptorId, pPlugIn->getName()));
          PlugInDescriptorImp* pDescriptor = new PlugInDescriptorImp(descriptorId, pPlugIn);
          pDescriptor->setModuleFileName(getFileName());
          pDescriptor->setModuleName(getName());
@@ -379,12 +375,12 @@ const bool ModuleDescriptor::isValidatedModule() const
    return (mValidationKey == "YES");
 }
 
-bool ModuleDescriptor::serialize(SessionItemSerializer &serializer) const
+bool ModuleDescriptor::serialize(SessionItemSerializer& serializer) const
 {
    return serializer.serialize(NULL, 0);
 }
 
-bool ModuleDescriptor::deserialize(SessionItemDeserializer &deserializer)
+bool ModuleDescriptor::deserialize(SessionItemDeserializer& deserializer)
 {
    return true;
 }

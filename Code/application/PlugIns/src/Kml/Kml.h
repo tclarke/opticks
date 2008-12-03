@@ -24,27 +24,27 @@ class SpatialDataWindow;
 class Kml
 {
 public:
-   Kml(bool exportImages=false);
+   Kml(bool exportImages = false);
    ~Kml();
 
    QString toString();
-   bool toFile(const std::string &filename);
+   bool toFile(const std::string& filename);
 
    bool addSession();
-   bool addWindow(SpatialDataWindow *pWindow);
-   bool addView(SpatialDataView *pView);
-   bool addLayer(Layer *pLayer, RasterElement *pGeoElement, SpatialDataView *pView, int totalLayers);
+   bool addWindow(const SpatialDataWindow* pWindow);
+   bool addView(const SpatialDataView* pView);
+   bool addLayer(Layer* pLayer, const Layer* pGeoLayer, const SpatialDataView* pView, int totalLayers);
 
-   void generateBoundingBox(RasterElement *pGeoElement);
-   void generatePolygonalLayer(GraphicLayer *pGraphicLayer, bool visible, int order, RasterElement *pGeoElement);
-   void generateGroundOverlayLayer(Layer *pLayer, bool visible, int order, RasterElement *pGeoElement, int frame=-1);
+   void generateBoundingBox(const Layer* pGeoLayer, int bbox[4]);
+   void generatePolygonalLayer(const GraphicLayer* pGraphicLayer, bool visible, int order, const Layer* pGeoLayer);
+   void generateGroundOverlayLayer(Layer* pLayer, bool visible, int order, const Layer* pGeoLayer, int frame = -1);
 
-   const QMap<QString,QByteArray> getImages() const;
+   const QMap<QString, QByteArray> getImages() const;
 
 private:
    XMLWriter mXml;
    bool mExportImages;
-   QMap<QString,QByteArray> mImages;
+   QMap<QString, QByteArray> mImages;
 };
 
 #endif

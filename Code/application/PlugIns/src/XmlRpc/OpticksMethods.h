@@ -46,8 +46,15 @@ namespace Annotation
       virtual XmlRpcArrayParam *getSignature();
 
    protected:
-      virtual QString getNamespace() const { return "Annotation"; }
-      virtual LayerType getLayerType() const { return ANNOTATION; }
+      virtual QString getNamespace() const
+      {
+         return "Annotation";
+      }
+
+      virtual LayerType getLayerType() const
+      {
+         return ANNOTATION;
+      }
    };
 
    class Delete : public XmlRpcMethodCallImp
@@ -61,8 +68,15 @@ namespace Annotation
       virtual XmlRpcArrayParam *getSignature();
 
    protected:
-      virtual QString getNamespace() const { return "Annotation"; }
-      virtual LayerType getLayerType() const { return ANNOTATION; }
+      virtual QString getNamespace() const
+      {
+         return "Annotation";
+      }
+
+      virtual LayerType getLayerType() const
+      {
+         return ANNOTATION;
+      }
    };
 };
 
@@ -76,8 +90,15 @@ namespace Aoi
       virtual ~Create() {}
 
    protected:
-      QString getNamespace() const { return "AOI"; }
-      LayerType getLayerType() const { return AOI_LAYER; }
+      QString getNamespace() const
+      {
+         return "AOI";
+      }
+
+      LayerType getLayerType() const
+      {
+         return AOI_LAYER;
+      }
    };
 
    class Delete : public Annotation::Delete
@@ -88,8 +109,15 @@ namespace Aoi
       virtual ~Delete() {}
 
    protected:
-      QString getNamespace() const { return "AOI"; }
-      LayerType getLayerType() const { return AOI_LAYER; }
+      QString getNamespace() const
+      {
+         return "AOI";
+      }
+
+      LayerType getLayerType() const
+      {
+         return AOI_LAYER;
+      }
    };
 
    class DeleteLayer : public XmlRpcMethodCallImp
@@ -216,9 +244,6 @@ public:
 
 class RegisterCallback : public XmlRpcMethodCallImp
 {
-   XmlRpcServer &mServer;
-   std::list<XmlRpcCallback*> mCallbacks;
-
 public:
    RegisterCallback(XmlRpcServer &server) : mServer(server) {}
    RegisterCallback(const RegisterCallback &other) : mServer(other.mServer) {}
@@ -227,6 +252,10 @@ public:
    virtual XmlRpcParam *operator()(const XmlRpcParams &params);
    virtual QString getHelp();
    virtual XmlRpcArrayParam *getSignature();
+
+private:
+   XmlRpcServer& mServer;
+   std::list<XmlRpcCallback*> mCallbacks;
 };
 
 class RotateBy : public XmlRpcMethodCallImp

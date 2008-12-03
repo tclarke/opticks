@@ -97,8 +97,8 @@ public:
       mValid(false),
       mFile(-1),
       mDataset(-1),
-      mDataSpace(-1),
-      mType(-1)
+      mType(-1),
+      mDataSpace(-1)
    {
       Hdf5File* pFile = pDataset->getFile();
       DO_IF(pFile == NULL, return);
@@ -189,9 +189,7 @@ Hdf5Data::DataReader* Hdf5Dataset::createReader() const
    {
       return pReader;
    }
-   else
-   {
-      delete pReader;
-      return NULL;
-   }
+
+   delete pReader;
+   return NULL;
 }

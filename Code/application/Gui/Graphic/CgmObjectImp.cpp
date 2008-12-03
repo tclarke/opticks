@@ -36,18 +36,16 @@ XERCES_CPP_NAMESPACE_USE
 using namespace std;
 
 CgmObjectImp::CgmObjectImp(const string& id, GraphicObjectType type, GraphicLayer* pLayer, LocationType pixelCoord) :
-   GraphicGroupImp(id, type, pLayer, pixelCoord)
+   GraphicGroupImp(id, type, pLayer, pixelCoord),
+   msVersion(1),
+   msColorSelectionMode(1),
+   msEdgeWidthMode(0),
+   msLineWidthMode(0),
+   mpCgm(NULL)
 {
-   msVersion = 1;
-   msColorSelectionMode = 1;
-   msEdgeWidthMode = 0;
-   msLineWidthMode = 0;
-
    mElementList.push_back(1);
    mElementList.push_back(-1);
    mElementList.push_back(1);
-
-   mpCgm = NULL;
 }
 
 CgmObjectImp::~CgmObjectImp()
@@ -131,8 +129,7 @@ bool CgmObjectImp::replicateObject(const GraphicObject* pObject)
       return false;
    }
 
-   bool bSuccess = false;
-   bSuccess = GraphicGroupImp::replicateObject(pObject);
+   bool bSuccess = GraphicGroupImp::replicateObject(pObject);
    if (bSuccess == false)
    {
       return false;
@@ -150,12 +147,10 @@ bool CgmObjectImp::replicateObject(const GraphicObject* pObject)
    msEdgeWidthMode = pCgm->msEdgeWidthMode;
    msLineWidthMode = pCgm->msLineWidthMode;
 
-   unsigned int uiSize = 0;
-   uiSize = pCgm->mFontList.size();
-   for (unsigned int i = 0; i < uiSize; i++)
+   unsigned int uiSize = pCgm->mFontList.size();
+   for (unsigned int i = 0; i < uiSize; ++i)
    {
-      string fontName = "";
-      fontName = pCgm->mFontList.at(i);
+      string fontName = pCgm->mFontList.at(i);
       if (fontName.empty() == false)
       {
          mFontList.push_back(fontName);
@@ -227,7 +222,7 @@ int CgmObjectImp::fromCgm(short* pData)
    }
 
    mElementList.clear();
-   for (int i = 0; i < 3; i++)
+   for (int i = 0; i < 3; ++i)
    {
       short sListItem = readElement(pData, lIndex);
       mElementList.push_back(sListItem);
@@ -260,12 +255,11 @@ int CgmObjectImp::fromCgm(short* pData)
 
       mFontList.clear();
 
-      char* pCharData = (char*) &(pData[lIndex]);
+      char* pCharData = reinterpret_cast<char*>(&(pData[lIndex]));
       short sBytes = sFontBytes;
       while (sBytes > 0)
       {
-         unsigned char ucLength = 0;
-         ucLength = pCharData[0];
+         unsigned char ucLength = pCharData[0];
          pCharData++;
 
          sBytes -= sizeof(unsigned char);
@@ -274,8 +268,7 @@ int CgmObjectImp::fromCgm(short* pData)
             break;
          }
 
-         char* pFontName = NULL;
-         pFontName = new char[ucLength + 1];
+         char* pFontName = new char[ucLength + 1];
          if (pFontName != NULL)
          {
             strncpy(pFontName, pCharData, ucLength);
@@ -372,8 +365,8 @@ int CgmObjectImp::fromCgm(short* pData)
    short sUrObjectCornerX = readElement(pData, lIndex);
    short sUrObjectCornerY = readElement(pData, lIndex);
 
-   LocationType llCorner((double) sLlObjectCornerX, (double) sLlObjectCornerY);
-   LocationType urCorner((double) sUrObjectCornerX, (double) sUrObjectCornerY);
+   LocationType llCorner(sLlObjectCornerX, sLlObjectCornerY);
+   LocationType urCorner(sUrObjectCornerX, sUrObjectCornerY);
 
    int iVdcXOrientation = 1;
    int iVdcYOrientation = -1;
@@ -457,7 +450,7 @@ int CgmObjectImp::fromCgm(short* pData)
                short sXCoord = readElement(pData, lIndex);
                short sYCoord = readElement(pData, lIndex);
 
-               LocationType origPoint((double) sXCoord, (double) sYCoord);
+               LocationType origPoint(sXCoord, sYCoord);
                LocationType startPoint = origPoint;
 
                segments.push_back(startPoint);
@@ -474,14 +467,14 @@ int CgmObjectImp::fromCgm(short* pData)
                   return -1;
                }
 
-               PolylineObjectImp *pPolyline = dynamic_cast<PolylineObjectImp*>(pCurrentObject);
+               PolylineObjectImp* pPolyline = dynamic_cast<PolylineObjectImp*>(pCurrentObject);
                VERIFYRV(pPolyline != NULL, -1);
-               for (short s = 1; s < sLength; s++)
+               for (short s = 1; s < sLength; ++s)
                {
                   sXCoord = readElement(pData, lIndex);
                   sYCoord = readElement(pData, lIndex);
 
-                  LocationType endPoint((double) sXCoord, (double) sYCoord);
+                  LocationType endPoint(sXCoord, sYCoord);
                   if (startPoint != endPoint)
                   {
                      segments.push_back(endPoint);
@@ -523,8 +516,7 @@ int CgmObjectImp::fromCgm(short* pData)
                LocationType point(sXCoord, sYCoord);
 
                pCurrentObject = addObject(TEXT_OBJECT, point);
-               TextObjectImp *pCurrentText = dynamic_cast<TextObjectImp*>(
-                  pCurrentObject);
+               TextObjectImp* pCurrentText = dynamic_cast<TextObjectImp*>(pCurrentObject);
                VERIFYRV(pCurrentText != NULL, -1);
 
                lIndex++;
@@ -614,13 +606,13 @@ int CgmObjectImp::fromCgm(short* pData)
                short sYCoord = -1;
                short sEdgeFlag = -1;
 
-               for (short s = 0; s < sLength; s++)
+               for (short s = 0; s < sLength; ++s)
                {
                   sXCoord = readElement(pData, lIndex);
                   sYCoord = readElement(pData, lIndex);
                   sEdgeFlag = readElement(pData, lIndex);
 
-                  LocationType endPoint((double) sXCoord, (double) sYCoord);
+                  LocationType endPoint(sXCoord, sYCoord);
 
                   if (pCurrentObject == NULL)
                   {
@@ -634,7 +626,7 @@ int CgmObjectImp::fromCgm(short* pData)
                   }
                   else
                   {
-                     PolygonObjectImp *pPolygon = dynamic_cast<PolygonObjectImp*>(pCurrentObject);
+                     PolygonObjectImp* pPolygon = dynamic_cast<PolygonObjectImp*>(pCurrentObject);
                      VERIFYRV(pPolygon != NULL, -1);
                      if (startPoint != endPoint)
                      {
@@ -646,7 +638,7 @@ int CgmObjectImp::fromCgm(short* pData)
 
                   if ((sEdgeFlag == 2) || (sEdgeFlag == 3))
                   {
-                     PolygonObjectImp *pPolygon = dynamic_cast<PolygonObjectImp*>(pCurrentObject);
+                     PolygonObjectImp* pPolygon = dynamic_cast<PolygonObjectImp*>(pCurrentObject);
                      VERIFYRV(pPolygon != NULL, -1);
                      if (origPoint != startPoint)
                      {
@@ -695,8 +687,8 @@ int CgmObjectImp::fromCgm(short* pData)
                short sUrCornerX = readElement(pData, lIndex);
                short sUrCornerY = readElement(pData, lIndex);
 
-               LocationType rectLlCorner((double) sLlCornerX, (double) sLlCornerY);
-               LocationType rectUrCorner((double) sUrCornerX, (double) sUrCornerY);
+               LocationType rectLlCorner(sLlCornerX, sLlCornerY);
+               LocationType rectUrCorner(sUrCornerX, sUrCornerY);
 
                pCurrentObject->setBoundingBox(rectLlCorner, rectUrCorner);
                break;
@@ -715,12 +707,12 @@ int CgmObjectImp::fromCgm(short* pData)
                short sRadius = readElement(pData, lIndex);
 
                LocationType circleLlCorner;
-               circleLlCorner.mX = (double) sCenterX - (double) sRadius;
-               circleLlCorner.mY = (double) sCenterY - (double) sRadius;
+               circleLlCorner.mX = static_cast<double>(sCenterX) - static_cast<double>(sRadius);
+               circleLlCorner.mY = static_cast<double>(sCenterY) - static_cast<double>(sRadius);
 
                LocationType circleUrCorner;
-               circleUrCorner.mX = (double) sCenterX + (double) sRadius;
-               circleUrCorner.mY = (double) sCenterY + (double) sRadius;
+               circleUrCorner.mX = static_cast<double>(sCenterX) + static_cast<double>(sRadius);
+               circleUrCorner.mY = static_cast<double>(sCenterY) + static_cast<double>(sRadius);
 
                pCurrentObject->setBoundingBox(circleLlCorner, circleUrCorner);
                break;
@@ -749,22 +741,22 @@ int CgmObjectImp::fromCgm(short* pData)
 
                // Set the ellipse location
                LocationType ellipseLlCorner;
-               ellipseLlCorner.mX = (double) (sCenterX - sRadius);
-               ellipseLlCorner.mY = (double) (sCenterY - sRadius);
+               ellipseLlCorner.mX = static_cast<double>(sCenterX - sRadius);
+               ellipseLlCorner.mY = static_cast<double>(sCenterY - sRadius);
 
                LocationType ellipseUrCorner;
-               ellipseUrCorner.mX = (double) (sCenterX + sRadius);
-               ellipseUrCorner.mY = (double) (sCenterY + sRadius);
+               ellipseUrCorner.mX = static_cast<double>(sCenterX + sRadius);
+               ellipseUrCorner.mY = static_cast<double>(sCenterY + sRadius);
 
-               ArcObjectImp *pCurrentArc = dynamic_cast<ArcObjectImp*>(pCurrentObject);
+               ArcObjectImp* pCurrentArc = dynamic_cast<ArcObjectImp*>(pCurrentObject);
                VERIFYRV(pCurrentArc != NULL, -1);
                pCurrentArc->setEllipseCorners(ellipseLlCorner, ellipseUrCorner);
 
                // Set the start and stop angles
                double dStart = 0.0;
                double dStop = 0.0;
-               dStart = atan2((double) sStartY, (double) sStartX) * 180.0 / PI;
-               dStop = atan2((double) sStopY, (double) sStopX) * 180.0 / PI;
+               dStart = atan2(static_cast<double>(sStartY), static_cast<double>(sStartX)) * 180.0 / PI;
+               dStop = atan2(static_cast<double>(sStopY), static_cast<double>(sStopX)) * 180.0 / PI;
 
                pCurrentArc->setAngles(dStart, dStop);
 
@@ -816,10 +808,10 @@ int CgmObjectImp::fromCgm(short* pData)
                short sEndY2 = readElement(pData, lIndex);
 
                // Calculate the ellipse width and height
-               double x1 = (double) (sEndX1 - sCenterX);
-               double y1 = (double) (sEndY1 - sCenterY);
-               double x2 = (double) (sEndX2 - sCenterX);
-               double y2 = (double) (sEndY2 - sCenterY);
+               double x1 = static_cast<double>(sEndX1 - sCenterX);
+               double y1 = static_cast<double>(sEndY1 - sCenterY);
+               double x2 = static_cast<double>(sEndX2 - sCenterX);
+               double y2 = static_cast<double>(sEndY2 - sCenterY);
 
                double dC = 0.0;
                double dB = 0.0;
@@ -858,17 +850,19 @@ int CgmObjectImp::fromCgm(short* pData)
                   dRotation = 0.5 * ((2 * atan(1.0)) - atan((dA - dC) / dB));   // Radians
                }
 
-               double dWidth = sqrt(1 / ((dA * pow(cos(dRotation), 2)) + (dB * cos(dRotation) * sin(dRotation)) + (dC * pow(sin(dRotation), 2))));
-               double dHeight = sqrt(1 / ((dA * pow(sin(dRotation), 2)) - (dB * cos(dRotation) * sin(dRotation)) + (dC * pow(cos(dRotation), 2))));
+               double dWidth = sqrt(1 / ((dA * pow(cos(dRotation), 2)) + (dB * cos(dRotation) * sin(dRotation)) +
+                  (dC * pow(sin(dRotation), 2))));
+               double dHeight = sqrt(1 / ((dA * pow(sin(dRotation), 2)) - (dB * cos(dRotation) * sin(dRotation)) +
+                  (dC * pow(cos(dRotation), 2))));
 
                // Set the ellipse location
                LocationType ellipseLlCorner;
-               ellipseLlCorner.mX = ((double) sCenterX) - dWidth;
-               ellipseLlCorner.mY = ((double) sCenterY) - dHeight;
+               ellipseLlCorner.mX = static_cast<double>(sCenterX) - dWidth;
+               ellipseLlCorner.mY = static_cast<double>(sCenterY) - dHeight;
 
                LocationType ellipseUrCorner;
-               ellipseUrCorner.mX = ((double) sCenterX) + dWidth;
-               ellipseUrCorner.mY = ((double) sCenterY) + dHeight;
+               ellipseUrCorner.mX = static_cast<double>(sCenterX) + dWidth;
+               ellipseUrCorner.mY = static_cast<double>(sCenterY) + dHeight;
 
                pCurrentObject->setBoundingBox(ellipseLlCorner, ellipseUrCorner);
 
@@ -896,10 +890,10 @@ int CgmObjectImp::fromCgm(short* pData)
                short sEndY2 = readElement(pData, lIndex);
 
                // Calculate the ellipse width and height
-               double x1 = (double) (sEndX1 - sCenterX);
-               double y1 = (double) (sEndY1 - sCenterY);
-               double x2 = (double) (sEndX2 - sCenterX);
-               double y2 = (double) (sEndY2 - sCenterY);
+               double x1 = static_cast<double>(sEndX1 - sCenterX);
+               double y1 = static_cast<double>(sEndY1 - sCenterY);
+               double x2 = static_cast<double>(sEndX2 - sCenterX);
+               double y2 = static_cast<double>(sEndY2 - sCenterY);
 
                double dC = 0.0;
                double dB = 0.0;
@@ -938,19 +932,21 @@ int CgmObjectImp::fromCgm(short* pData)
                   dRotation = 0.5 * ((2 * atan(1.0)) - atan((dA - dC) / dB));   // Radians
                }
 
-               double dWidth = sqrt(1 / ((dA * pow(cos(dRotation), 2)) + (dB * cos(dRotation) * sin(dRotation)) + (dC * pow(sin(dRotation), 2))));
-               double dHeight = sqrt(1 / ((dA * pow(sin(dRotation), 2)) - (dB * cos(dRotation) * sin(dRotation)) + (dC * pow(cos(dRotation), 2))));
+               double dWidth = sqrt(1 / ((dA * pow(cos(dRotation), 2)) + (dB * cos(dRotation) * sin(dRotation)) +
+                  (dC * pow(sin(dRotation), 2))));
+               double dHeight = sqrt(1 / ((dA * pow(sin(dRotation), 2)) - (dB * cos(dRotation) * sin(dRotation)) +
+                  (dC * pow(cos(dRotation), 2))));
 
                // Set the ellipse location
                LocationType ellipseLlCorner;
-               ellipseLlCorner.mX = ((double) sCenterX) - dWidth;
-               ellipseLlCorner.mY = ((double) sCenterY) - dHeight;
+               ellipseLlCorner.mX = static_cast<double>(sCenterX) - dWidth;
+               ellipseLlCorner.mY = static_cast<double>(sCenterY) - dHeight;
 
                LocationType ellipseUrCorner;
-               ellipseUrCorner.mX = ((double) sCenterX) + dWidth;
-               ellipseUrCorner.mY = ((double) sCenterY) + dHeight;
+               ellipseUrCorner.mX = static_cast<double>(sCenterX) + dWidth;
+               ellipseUrCorner.mY = static_cast<double>(sCenterY) + dHeight;
 
-               ArcObjectImp *pCurrentArc = dynamic_cast<ArcObjectImp*>(pCurrentObject);
+               ArcObjectImp* pCurrentArc = dynamic_cast<ArcObjectImp*>(pCurrentObject);
                VERIFYRV(pCurrentArc != NULL, -1);
                pCurrentArc->setEllipseCorners(ellipseLlCorner, ellipseUrCorner);
 
@@ -971,22 +967,24 @@ int CgmObjectImp::fromCgm(short* pData)
 
                double dStartAngle = 0.0;
                double dStopAngle = 0.0;
-               double dStartDisplacement = sqrt(pow((double)sStartX, 2) + pow((double)sStartY, 2));
-               double dStopDisplacement = sqrt(pow((double)sStopX, 2) + pow((double)sStopY, 2));
+               double dStartDisplacement = sqrt(pow(static_cast<double>(sStartX), 2) +
+                  pow(static_cast<double>(sStartY), 2));
+               double dStopDisplacement = sqrt(pow(static_cast<double>(sStopX), 2) +
+                  pow(static_cast<double>(sStopY), 2));
 
-               dStartAngle = atan2((double) sStartY, (double) sStartX) * 180.0 / PI;
-               dStopAngle = atan2((double) sStopY, (double) sStopX) * 180.0 / PI;
+               dStartAngle = atan2(static_cast<double>(sStartY), static_cast<double>(sStartX)) * 180.0 / PI;
+               dStopAngle = atan2(static_cast<double>(sStopY), static_cast<double>(sStopX)) * 180.0 / PI;
 
                dStartAngle -= dRotation;
                dStopAngle -= dRotation;
 
                LocationType startPoint;
-               startPoint.mX = ((double) sCenterX) + (dStartDisplacement * cos(dStartAngle * PI / 180.0));
-               startPoint.mY = ((double) sCenterY) + (dStartDisplacement * sin(dStartAngle * PI / 180.0));
+               startPoint.mX = static_cast<double>(sCenterX) + (dStartDisplacement * cos(dStartAngle * PI / 180.0));
+               startPoint.mY = static_cast<double>(sCenterY) + (dStartDisplacement * sin(dStartAngle * PI / 180.0));
 
                LocationType stopPoint;
-               stopPoint.mX = ((double) sCenterX) + (dStopDisplacement * cos(dStopAngle * PI / 180.0));
-               stopPoint.mY = ((double) sCenterY) + (dStopDisplacement * sin(dStopAngle * PI / 180.0));
+               stopPoint.mX = static_cast<double>(sCenterX) + (dStopDisplacement * cos(dStopAngle * PI / 180.0));
+               stopPoint.mY = static_cast<double>(sCenterY) + (dStopDisplacement * sin(dStopAngle * PI / 180.0));
 
                double dStart = pCurrentArc->getAngle(startPoint);
                double dStop = pCurrentArc->getAngle(stopPoint);
@@ -1029,12 +1027,14 @@ int CgmObjectImp::fromCgm(short* pData)
                arcCenter.mX = (arcLlCorner.mX + arcUrCorner.mX) / 2;
                arcCenter.mY = (arcLlCorner.mY + arcUrCorner.mY) / 2;
 
-               double dRadius = sqrt(pow(arcCenter.mX - (double) sCenterX, 2) + pow(arcCenter.mY - (double) sCenterY, 2));
-               double dTheta = dRotation + atan2(arcCenter.mY - (double) sCenterY, arcCenter.mX - (double) sCenterX) * 180.0 / PI;
-               
+               double dRadius = sqrt(pow(arcCenter.mX - static_cast<double>(sCenterX), 2) +
+                  pow(arcCenter.mY - static_cast<double>(sCenterY), 2));
+               double dTheta = dRotation + atan2(arcCenter.mY - static_cast<double>(sCenterY),
+                  arcCenter.mX - static_cast<double>(sCenterX)) * 180.0 / PI;
+
                LocationType newArcCenter;
-               newArcCenter.mX = ((double) sCenterX) + (dRadius * cos(dTheta * PI / 180.0));
-               newArcCenter.mY = ((double) sCenterY) + (dRadius * sin(dTheta * PI / 180.0));
+               newArcCenter.mX = static_cast<double>(sCenterX) + (dRadius * cos(dTheta * PI / 180.0));
+               newArcCenter.mY = static_cast<double>(sCenterY) + (dRadius * sin(dTheta * PI / 180.0));
 
                LocationType translation;
                translation.mX = newArcCenter.mX - arcCenter.mX;
@@ -1072,6 +1072,9 @@ int CgmObjectImp::fromCgm(short* pData)
 
                break;
             }
+
+            default:
+               break;
          }
 
          if (pCurrentObject != NULL)
@@ -1126,8 +1129,7 @@ int CgmObjectImp::fromCgm(short* pData)
                unsigned char ucGreen = 0;
                unsigned char ucBlue = 0;
 
-               unsigned char* pTextData = NULL;
-               pTextData = (unsigned char*) &(pData[lIndex]);
+               unsigned char* pTextData = reinterpret_cast<unsigned char*>(&(pData[lIndex]));
                if (pTextData != NULL)
                {
                   ucRed = pTextData[0];
@@ -1137,16 +1139,16 @@ int CgmObjectImp::fromCgm(short* pData)
 
                lIndex += 2;
 
-               textColor.mRed = (unsigned int) ucRed;
-               textColor.mGreen = (unsigned int) ucGreen;
-               textColor.mBlue = (unsigned int) ucBlue;
+               textColor.mRed = static_cast<int>(ucRed);
+               textColor.mGreen = static_cast<int>(ucGreen);
+               textColor.mBlue = static_cast<int>(ucBlue);
                break;
             }
 
             case CHARACTER_HEIGHT:
             {
                short sFontSize = readElement(pData, lIndex);
-               textFont.setPointSize((int) sFontSize);
+               textFont.setPointSize(sFontSize);
                break;
             }
 
@@ -1225,13 +1227,12 @@ int CgmObjectImp::fromCgm(short* pData)
 
                string fontName = "";
 
-               int iFonts = 0;
-               iFonts = mFontList.size();
+               int iFonts = mFontList.size();
                if (sFontIndex <= iFonts)
                {
                   fontName = mFontList.at(sFontIndex - 1);
 
-                  for (int i=0; i<fontCount; ++i)
+                  for (int i = 0; i < fontCount; ++i)
                   {
                      if (fontName == pCgmFonts[i])
                      {
@@ -1266,8 +1267,8 @@ int CgmObjectImp::fromCgm(short* pData)
                short sXValue = readElement(pData, lIndex);
                lIndex++;
 
-               iTextXOrientation = (int) sXValue;
-               iTextYOrientation = (int) sYValue;
+               iTextXOrientation = sXValue;
+               iTextYOrientation = sYValue;
                break;
             }
 
@@ -1277,8 +1278,7 @@ int CgmObjectImp::fromCgm(short* pData)
                unsigned char ucGreen = 0;
                unsigned char ucBlue = 0;
 
-               unsigned char* pFillData = NULL;
-               pFillData = (unsigned char*) &(pData[lIndex]);
+               unsigned char* pFillData = reinterpret_cast<unsigned char*>(&(pData[lIndex]));
                if (pFillData != NULL)
                {
                   ucRed = pFillData[0];
@@ -1288,9 +1288,9 @@ int CgmObjectImp::fromCgm(short* pData)
 
                lIndex += 2;
 
-               fillColor.mRed = (unsigned int) ucRed;
-               fillColor.mGreen = (unsigned int) ucGreen;
-               fillColor.mBlue = (unsigned int) ucBlue;
+               fillColor.mRed = static_cast<int>(ucRed);
+               fillColor.mGreen = static_cast<int>(ucGreen);
+               fillColor.mBlue = static_cast<int>(ucBlue);
                break;
             }
 
@@ -1372,7 +1372,7 @@ int CgmObjectImp::fromCgm(short* pData)
             case EDGE_WIDTH:
             {
                short sWidth = readElement(pData, lIndex);
-               dEdgeWidth = (double) sWidth;
+               dEdgeWidth = sWidth;
                break;
             }
 
@@ -1415,8 +1415,7 @@ int CgmObjectImp::fromCgm(short* pData)
                unsigned char ucGreen = 0;
                unsigned char ucBlue = 0;
 
-               unsigned char* pEdgeData = NULL;
-               pEdgeData = (unsigned char*) &(pData[lIndex]);
+               unsigned char* pEdgeData = reinterpret_cast<unsigned char*>(&(pData[lIndex]));
                if (pEdgeData != NULL)
                {
                   ucRed = pEdgeData[0];
@@ -1426,16 +1425,16 @@ int CgmObjectImp::fromCgm(short* pData)
 
                lIndex += 2;
 
-               edgeColor.mRed = (unsigned int) ucRed;
-               edgeColor.mGreen = (unsigned int) ucGreen;
-               edgeColor.mBlue = (unsigned int) ucBlue;
+               edgeColor.mRed = static_cast<int>(ucRed);
+               edgeColor.mGreen = static_cast<int>(ucGreen);
+               edgeColor.mBlue = static_cast<int>(ucBlue);
                break;
             }
 
             case LINE_WIDTH:
             {
                short sWidth = readElement(pData, lIndex);
-               dLineWidth = (double) sWidth;
+               dLineWidth = sWidth;
                break;
             }
 
@@ -1478,8 +1477,7 @@ int CgmObjectImp::fromCgm(short* pData)
                unsigned char ucGreen = 0;
                unsigned char ucBlue = 0;
 
-               unsigned char* pLineData = NULL;
-               pLineData = (unsigned char*) &(pData[lIndex]);
+               unsigned char* pLineData = reinterpret_cast<unsigned char*>(&(pData[lIndex]));
                if (pLineData != NULL)
                {
                   ucRed = pLineData[0];
@@ -1489,11 +1487,14 @@ int CgmObjectImp::fromCgm(short* pData)
 
                lIndex += 2;
 
-               lineColor.mRed = (unsigned int) ucRed;
-               lineColor.mGreen = (unsigned int) ucGreen;
-               lineColor.mBlue = (unsigned int) ucBlue;
+               lineColor.mRed = static_cast<int>(ucRed);
+               lineColor.mGreen = static_cast<int>(ucGreen);
+               lineColor.mBlue = static_cast<int>(ucBlue);
                break;
             }
+
+            default:
+               break;
          }
       }
       else
@@ -1526,15 +1527,12 @@ int CgmObjectImp::fromCgm(short* pData)
       llCorner.mX *= -1;
       urCorner.mX *= -1;
 
-      list<GraphicObject*>::iterator iter;
-      for (iter = mObjects.begin(); iter != mObjects.end(); iter++)
+      for (list<GraphicObject*>::iterator iter = mObjects.begin(); iter != mObjects.end(); ++iter)
       {
-         GraphicObject* pObject = NULL;
-         pObject = *iter;
+         GraphicObject* pObject = *iter;
          if (pObject != NULL)
          {
-            double dRotation = 0.0;
-            dRotation = pObject->getRotation();
+            double dRotation = pObject->getRotation();
             dRotation *= -1.0;
 
             pObject->setRotation(dRotation);
@@ -1547,15 +1545,12 @@ int CgmObjectImp::fromCgm(short* pData)
       llCorner.mY *= -1;
       urCorner.mY *= -1;
 
-      list<GraphicObject*>::iterator iter;
-      for (iter = mObjects.begin(); iter != mObjects.end(); iter++)
+      for (list<GraphicObject*>::iterator iter = mObjects.begin(); iter != mObjects.end(); ++iter)
       {
-         GraphicObject* pObject = NULL;
-         pObject = *iter;
+         GraphicObject* pObject = *iter;
          if (pObject != NULL)
          {
-            double dRotation = 0.0;
-            dRotation = pObject->getRotation();
+            double dRotation = pObject->getRotation();
             dRotation *= -1.0;
 
             pObject->setRotation(dRotation);
@@ -1609,8 +1604,7 @@ bool CgmObjectImp::toXml(XMLWriter* pXml) const
    buf << msLineWidthMode;
    pXml->addAttr("lineWidthMode", buf.str());
 
-   vector<short>::const_iterator elementIt;
-   for(elementIt = mElementList.begin(); elementIt != mElementList.end(); elementIt++)
+   for (vector<short>::const_iterator elementIt = mElementList.begin(); elementIt != mElementList.end(); ++elementIt)
    {
       pXml->pushAddPoint(pXml->addElement("element"));
       buf.str("");
@@ -1619,8 +1613,7 @@ bool CgmObjectImp::toXml(XMLWriter* pXml) const
       pXml->popAddPoint();
    }
 
-   vector<string>::const_iterator fontIt;
-   for(fontIt = mFontList.begin(); fontIt != mFontList.end(); fontIt++)
+   for (vector<string>::const_iterator fontIt = mFontList.begin(); fontIt != mFontList.end(); ++fontIt)
    {
       pXml->pushAddPoint(pXml->addElement("font"));
       pXml->addText(*fontIt);
@@ -1633,18 +1626,18 @@ bool CgmObjectImp::toXml(XMLWriter* pXml) const
    return true;
 }
 
-bool CgmObjectImp::fromXml(DOMNode* document, unsigned int version)
+bool CgmObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   if(!GraphicGroupImp::fromXml(document, version))
-      return false;
-
-   for(DOMNode *chld = document->getFirstChild();
-                chld != NULL;
-                chld = chld->getNextSibling())
+   if (!GraphicGroupImp::fromXml(pDocument, version))
    {
-      if(XMLString::equals(chld->getNodeName(), X("Cgm")))
+      return false;
+   }
+
+   for (DOMNode* pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
+   {
+      if (XMLString::equals(pChld->getNodeName(), X("Cgm")))
       {
-         DOMElement *elmnt(static_cast<DOMElement*>(chld));
+         DOMElement* elmnt(static_cast<DOMElement*>(pChld));
          mMetafileName = A(elmnt->getAttribute(X("metafile")));
          mPictureName = A(elmnt->getAttribute(X("picture")));
          mDescription = A(elmnt->getAttribute(X("description")));
@@ -1655,14 +1648,16 @@ bool CgmObjectImp::fromXml(DOMNode* document, unsigned int version)
 
          mElementList.clear();
          mFontList.clear();
-         for(DOMNode *gchld = chld->getFirstChild();
-                      gchld != NULL;
-                      gchld = gchld->getNextSibling())
+         for (DOMNode* pGchld = pChld->getFirstChild(); pGchld != NULL; pGchld = pGchld->getNextSibling())
          {
-            if(XMLString::equals(gchld->getNodeName(), X("element")))
-               mElementList.push_back(atoi(A(gchld->getTextContent())));
-            else if(XMLString::equals(gchld->getNodeName(), X("font")))
-               mFontList.push_back(string(A(gchld->getTextContent())));
+            if (XMLString::equals(pGchld->getNodeName(), X("element")))
+            {
+               mElementList.push_back(atoi(A(pGchld->getTextContent())));
+            }
+            else if (XMLString::equals(pGchld->getNodeName(), X("font")))
+            {
+               mFontList.push_back(string(A(pGchld->getTextContent())));
+            }
          }
       }
    }
@@ -1800,10 +1795,9 @@ short* CgmObjectImp::makeCgm(int& lBytes, bool bCountOnly)
    // Begin metafile
    writeElement(BEGIN_METAFILE, mpCgm, lIndex, bCountOnly);
 
-   unsigned char ucLength = 0;
-   ucLength = (unsigned char) (mMetafileName.length());
+   unsigned char ucLength = static_cast<unsigned char>(mMetafileName.length());
 
-   writeElement((short) (ucLength + 1), mpCgm, lIndex, bCountOnly);
+   writeElement(static_cast<short>(ucLength + 1), mpCgm, lIndex, bCountOnly);
    writeStringElement(mMetafileName.data(), mpCgm, lIndex, bCountOnly);
 
    // Metafile version
@@ -1813,33 +1807,28 @@ short* CgmObjectImp::makeCgm(int& lBytes, bool bCountOnly)
    // Metafile element list
    writeElement(METAFILE_ELEMENT_LIST, mpCgm, lIndex, bCountOnly);
 
-   int iListCount = 0;
-   iListCount = mElementList.size();
-   for (int i = 0; i < iListCount; i++)
+   int iListCount = mElementList.size();
+   for (int i = 0; i < iListCount; ++i)
    {
-      short sListItem = 0;
-      sListItem = mElementList.at(i);
-
+      short sListItem = mElementList.at(i);
       writeElement(sListItem, mpCgm, lIndex, bCountOnly);
    }
 
    // Metafile description
    writeElement(METAFILE_DESCRIPTION, mpCgm, lIndex, bCountOnly);
 
-   ucLength = 0;
-   ucLength = (unsigned char) (mDescription.length());
+   ucLength = static_cast<unsigned char>(mDescription.length());
 
-   writeElement((short) (ucLength + 1), mpCgm, lIndex, bCountOnly);
+   writeElement(static_cast<short>(ucLength + 1), mpCgm, lIndex, bCountOnly);
    writeStringElement(mDescription.data(), mpCgm, lIndex, bCountOnly);
 
    // Font list
    bool bText = false;
 
    list<GraphicObject*>::iterator iter;
-   for (iter = mObjects.begin(); iter != mObjects.end(); iter++)
+   for (iter = mObjects.begin(); iter != mObjects.end(); ++iter)
    {
-      GraphicObjectImp* pGroupObject = NULL;
-      pGroupObject = dynamic_cast<GraphicObjectImp*>(*iter);
+      GraphicObjectImp* pGroupObject = dynamic_cast<GraphicObjectImp*>(*iter);
       if (pGroupObject != NULL)
       {
          bText = pGroupObject->hasProperty("TextString");
@@ -1862,16 +1851,13 @@ short* CgmObjectImp::makeCgm(int& lBytes, bool bCountOnly)
 
       short s = 0;
       short sListLength = 0;
-      for (s = 0; s < sFontCount; s++)
+      for (s = 0; s < sFontCount; ++s)
       {
-         string fontName = "";
-         fontName = mFontList.at(s);
+         string fontName = mFontList.at(s);
          if (fontName.empty() == false)
          {
-            int iSize = 0;
-            iSize = fontName.size();
-
-            sListLength += (short) iSize + 1;
+            int iSize = fontName.size();
+            sListLength += static_cast<short>(iSize) + 1;
          }
       }
 
@@ -1879,15 +1865,13 @@ short* CgmObjectImp::makeCgm(int& lBytes, bool bCountOnly)
 
       if ((bCountOnly == false) && (mpCgm != NULL))
       {
-         char* pCharData = (char*) &(mpCgm[lIndex]);
-         for (s = 0; s < sFontCount; s++)
+         char* pCharData = reinterpret_cast<char*>(&(mpCgm[lIndex]));
+         for (s = 0; s < sFontCount; ++s)
          {
-            string fontName = "";
-            fontName = mFontList.at(s);
+            string fontName = mFontList.at(s);
             if (fontName.empty() == false)
             {
-               unsigned char ucLength = 0;
-               ucLength = (unsigned char) (fontName.length());
+               ucLength = static_cast<unsigned char>(fontName.length());
 
                pCharData[0] = ucLength;
                pCharData++;
@@ -1919,10 +1903,9 @@ short* CgmObjectImp::makeCgm(int& lBytes, bool bCountOnly)
    // Begin picture
    writeElement(BEGIN_PICTURE, mpCgm, lIndex, bCountOnly);
 
-   ucLength = 0;
-   ucLength = (unsigned char) (mPictureName.length());
+   ucLength = static_cast<unsigned char>(mPictureName.length());
 
-   writeElement((short) (ucLength + 1), mpCgm, lIndex, bCountOnly);
+   writeElement(static_cast<short>(ucLength + 1), mpCgm, lIndex, bCountOnly);
    writeStringElement(mPictureName.data(), mpCgm, lIndex, bCountOnly);
 
    // Color selection mode
@@ -1964,10 +1947,10 @@ short* CgmObjectImp::makeCgm(int& lBytes, bool bCountOnly)
    }
 
    // Swap the y-values since CGM expects object origin in upper left
-   short sLlCornerX = (short) llCorner.mX;
-   short sLlCornerY = (short) urCorner.mY;
-   short sUrCornerX = (short) urCorner.mX;
-   short sUrCornerY = (short) llCorner.mY;
+   short sLlCornerX = static_cast<short>(llCorner.mX);
+   short sLlCornerY = static_cast<short>(urCorner.mY);
+   short sUrCornerX = static_cast<short>(urCorner.mX);
+   short sUrCornerY = static_cast<short>(llCorner.mY);
 
    writeElement(sLlCornerX, mpCgm, lIndex, bCountOnly);
    writeElement(sLlCornerY, mpCgm, lIndex, bCountOnly);
@@ -1978,7 +1961,7 @@ short* CgmObjectImp::makeCgm(int& lBytes, bool bCountOnly)
    writeElement(BEGIN_PICTURE_BODY, mpCgm, lIndex, bCountOnly);
 
    // Objects
-   for (iter = mObjects.begin(); iter != mObjects.end(); iter++)
+   for (iter = mObjects.begin(); iter != mObjects.end(); ++iter)
    {
       GraphicObject* pObject = NULL;
       pObject = *iter;
@@ -2022,7 +2005,7 @@ short CgmObjectImp::readElement(short* pData, int& lByteIndex)
    if (Endian::getSystemEndian() == LITTLE_ENDIAN)
    {
       // Swap the bytes
-      unsigned char* buffer = (unsigned char*) &sElement;
+      unsigned char* buffer = reinterpret_cast<unsigned char*>(&sElement);
       unsigned char byte1 = buffer[0];
       buffer[0] = buffer[1];
       buffer[1] = byte1;
@@ -2039,10 +2022,9 @@ string CgmObjectImp::readStringElement(short* pData, int& lByteIndex)
       return NULL;
    }
 
-   char* pStringData = (char*) &(pData[lByteIndex]);
+   char* pStringData = reinterpret_cast<char*>(&(pData[lByteIndex]));
 
-   unsigned char ucLength = 0;
-   ucLength = pStringData[0];
+   unsigned char ucLength = pStringData[0];
    pStringData++;
 
    string text(pStringData, ucLength);
@@ -2063,7 +2045,7 @@ bool CgmObjectImp::writeElement(short sElement, short* pData, int& lByteIndex, b
       if (Endian::getSystemEndian() == LITTLE_ENDIAN)
       {
          // Swap the bytes
-         unsigned char* buffer = (unsigned char*) &sElement;
+         unsigned char* buffer = reinterpret_cast<unsigned char*>(&sElement);
          unsigned char byte1 = buffer[0];
          buffer[0] = buffer[1];
          buffer[1] = byte1;
@@ -2083,12 +2065,11 @@ bool CgmObjectImp::writeStringElement(const char* pText, short* pData, int& lByt
       return false;
    }
 
-   unsigned char ucLength = 0;
-   ucLength = strlen(pText);
+   unsigned char ucLength = strlen(pText);
 
    if ((bCountOnly == false) && (pData != NULL))
    {
-      char* pStringData = (char*) &(pData[lByteIndex]);
+      char* pStringData = reinterpret_cast<char*>(&(pData[lByteIndex]));
 
       pStringData[0] = ucLength;
       pStringData++;
@@ -2147,20 +2128,18 @@ bool CgmObjectImp::serializeCgmProperties(const GraphicObject* pObject, short* p
    
    short fontSize = 21; // standard default CGM font size
    vector<GraphicProperty*>::iterator iter;
-   for (iter = properties.begin(); iter != properties.end(); iter++)
+   for (iter = properties.begin(); iter != properties.end(); ++iter)
    {
-      GraphicProperty* pProperty = NULL;
-      pProperty = *iter;
+      GraphicProperty* pProperty = *iter;
       if (pProperty != NULL)
       {
-         string propertyName = "";
-         propertyName = pProperty->getName();
+         string propertyName = pProperty->getName();
          if (propertyName == "BoundingBox")
          {
-            BoundingBoxProperty *pBoxProperty = (BoundingBoxProperty*)pProperty;
+            BoundingBoxProperty* pBoxProperty = static_cast<BoundingBoxProperty*>(pProperty);
             LocationType llCorner = pBoxProperty->getLlCorner();
             LocationType urCorner = pBoxProperty->getUrCorner();
-            fontSize = (short)std::abs(llCorner.mY - urCorner.mY);
+            fontSize = static_cast<short>(std::abs(llCorner.mY - urCorner.mY));
          }
          else if (propertyName == "LineColor")
          {
@@ -2178,17 +2157,16 @@ bool CgmObjectImp::serializeCgmProperties(const GraphicObject* pObject, short* p
                writeElement(EDGE_COLOR, pData, lByteIndex, bCountOnly);
             }
 
-            LineColorProperty* pLineProperty = (LineColorProperty*) pProperty;
+            LineColorProperty* pLineProperty = static_cast<LineColorProperty*>(pProperty);
             ColorType lineColor = pLineProperty->getColor();
 
-            unsigned char ucRed = (unsigned char) (lineColor.mRed);
-            unsigned char ucGreen = (unsigned char) (lineColor.mGreen);
-            unsigned char ucBlue = (unsigned char) (lineColor.mBlue);
+            unsigned char ucRed = static_cast<unsigned char>(lineColor.mRed);
+            unsigned char ucGreen = static_cast<unsigned char>(lineColor.mGreen);
+            unsigned char ucBlue = static_cast<unsigned char>(lineColor.mBlue);
 
             if (pData != NULL)
             {
-               unsigned char* pLineData = NULL;
-               pLineData = (unsigned char*) &(pData[lByteIndex]);
+               unsigned char* pLineData = reinterpret_cast<unsigned char*>(&(pData[lByteIndex]));
                if (pLineData != NULL)
                {
                   pLineData[0] = ucRed;
@@ -2216,9 +2194,9 @@ bool CgmObjectImp::serializeCgmProperties(const GraphicObject* pObject, short* p
                writeElement(EDGE_WIDTH, pData, lByteIndex, bCountOnly);
             }
 
-            LineWidthProperty* pLineProperty = (LineWidthProperty*) pProperty;
+            LineWidthProperty* pLineProperty = static_cast<LineWidthProperty*>(pProperty);
             double dWidth = pLineProperty->getWidth();
-            short sWidth = (short) dWidth;
+            short sWidth = static_cast<short>(dWidth);
 
             writeElement(sWidth, pData, lByteIndex, bCountOnly);
          }
@@ -2226,17 +2204,16 @@ bool CgmObjectImp::serializeCgmProperties(const GraphicObject* pObject, short* p
          {
             writeElement(FILL_COLOR, pData, lByteIndex, bCountOnly);
 
-            FillColorProperty* pFillProperty = (FillColorProperty*) pProperty;
+            FillColorProperty* pFillProperty = static_cast<FillColorProperty*>(pProperty);
             ColorType fillColor = pFillProperty->getColor();
 
-            unsigned char ucRed = (unsigned char) (fillColor.mRed);
-            unsigned char ucGreen = (unsigned char) (fillColor.mGreen);
-            unsigned char ucBlue = (unsigned char) (fillColor.mBlue);
+            unsigned char ucRed = static_cast<unsigned char>(fillColor.mRed);
+            unsigned char ucGreen = static_cast<unsigned char>(fillColor.mGreen);
+            unsigned char ucBlue = static_cast<unsigned char>(fillColor.mBlue);
 
             if (pData != NULL)
             {
-               unsigned char* pFillData = NULL;
-               pFillData = (unsigned char*) &(pData[lByteIndex]);
+               unsigned char* pFillData = reinterpret_cast<unsigned char*>(&(pData[lByteIndex]));
                if (pFillData != NULL)
                {
                   pFillData[0] = ucRed;
@@ -2252,17 +2229,16 @@ bool CgmObjectImp::serializeCgmProperties(const GraphicObject* pObject, short* p
          {
             writeElement(TEXT_COLOR, pData, lByteIndex, bCountOnly);
 
-            TextColorProperty* pTextProperty = (TextColorProperty*) pProperty;
+            TextColorProperty* pTextProperty = static_cast<TextColorProperty*>(pProperty);
             ColorType textColor = pTextProperty->getColor();
 
-            unsigned char ucRed = (unsigned char) (textColor.mRed);
-            unsigned char ucGreen = (unsigned char) (textColor.mGreen);
-            unsigned char ucBlue = (unsigned char) (textColor.mBlue);
+            unsigned char ucRed = static_cast<unsigned char>(textColor.mRed);
+            unsigned char ucGreen = static_cast<unsigned char>(textColor.mGreen);
+            unsigned char ucBlue = static_cast<unsigned char>(textColor.mBlue);
 
             if (pData != NULL)
             {
-               unsigned char* pTextData = NULL;
-               pTextData = (unsigned char*) &(pData[lByteIndex]);
+               unsigned char* pTextData = reinterpret_cast<unsigned char*>(&(pData[lByteIndex]));
                if (pTextData != NULL)
                {
                   pTextData[0] = ucRed;
@@ -2289,7 +2265,7 @@ bool CgmObjectImp::serializeCgmProperties(const GraphicObject* pObject, short* p
 
             if (bLineObject == false)
             {
-               LineOnProperty* pLineProperty = (LineOnProperty*) pProperty;
+               LineOnProperty* pLineProperty = static_cast<LineOnProperty*>(pProperty);
                bool bState = pLineProperty->getState();
 
                short sState = 0;
@@ -2304,12 +2280,11 @@ bool CgmObjectImp::serializeCgmProperties(const GraphicObject* pObject, short* p
          }
          else if (propertyName == "Font")
          {
-            FontProperty* pFontProperty = (FontProperty*) pProperty;
+            FontProperty* pFontProperty = static_cast<FontProperty*>(pProperty);
             QFont textFont = pFontProperty->getFont().toQFont();
 
             // Character height
-            short sHeight = 0;
-            sHeight = fontSize;
+            short sHeight = fontSize;
 
             writeElement(CHARACTER_HEIGHT, pData, lByteIndex, bCountOnly);
             writeElement(sHeight, pData, lByteIndex, bCountOnly);
@@ -2326,15 +2301,13 @@ bool CgmObjectImp::serializeCgmProperties(const GraphicObject* pObject, short* p
             writeElement(TEXT_FONT_INDEX, pData, lByteIndex, bCountOnly);
 
             int i = 0;
-            int iFonts = 0;
-            iFonts = mFontList.size();
-            for (i = 0; i < iFonts; i++)
+            int iFonts = mFontList.size();
+            for (i = 0; i < iFonts; ++i)
             {
-               string currentFont;
-               currentFont = mFontList.at(i);
+               string currentFont = mFontList.at(i);
                if (currentFont == fontName)
                {
-                  short sIndex = (short) (i + 1);
+                  short sIndex = static_cast<short>(i + 1);
                   writeElement(sIndex, pData, lByteIndex, bCountOnly);
                   break;
                }
@@ -2385,7 +2358,7 @@ bool CgmObjectImp::serializeCgmProperties(const GraphicObject* pObject, short* p
                writeElement(EDGE_TYPE, pData, lByteIndex, bCountOnly);
             }
 
-            LineStyleProperty* pLineProperty = (LineStyleProperty*) pProperty;
+            LineStyleProperty* pLineProperty = static_cast<LineStyleProperty*>(pProperty);
             LineStyle eStyle = pLineProperty->getStyle();
 
             short sStyle = 1;
@@ -2410,7 +2383,7 @@ bool CgmObjectImp::serializeCgmProperties(const GraphicObject* pObject, short* p
          }
          else if (propertyName == "FillStyle")
          {
-            FillStyleProperty* pFillProperty = (FillStyleProperty*) pProperty;
+            FillStyleProperty* pFillProperty = static_cast<FillStyleProperty*>(pProperty);
             FillStyle eFill = pFillProperty->getFillStyle();
 
             // Fill style
@@ -2430,7 +2403,7 @@ bool CgmObjectImp::serializeCgmProperties(const GraphicObject* pObject, short* p
          }
          else if (propertyName == "HatchStyle")
          {
-            HatchStyleProperty* pHatchProperty = (HatchStyleProperty*) pProperty;
+            HatchStyleProperty* pHatchProperty = static_cast<HatchStyleProperty*>(pProperty);
             SymbolType eHatch = pHatchProperty->getHatchStyle();
 
             // Hatch style
@@ -2504,7 +2477,7 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
          }
 
          // Center
-         const ArcObjectImp *pArcObject = dynamic_cast<const ArcObjectImp*>(pObject);
+         const ArcObjectImp* pArcObject = dynamic_cast<const ArcObjectImp*>(pObject);
          VERIFY(pObject != NULL);
          LocationType ellipseCenter = pArcObject->getCenter();
 
@@ -2515,8 +2488,8 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
          newEllipseCenter.mX = center.mX + (dCenterDisplacement * cos(dTheta * PI / 180.0));
          newEllipseCenter.mY = center.mY + (dCenterDisplacement * sin(dTheta * PI / 180.0));
 
-         writeElement((short) newEllipseCenter.mX, pData, lByteIndex, bCountOnly);
-         writeElement((short) newEllipseCenter.mY, pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newEllipseCenter.mX), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newEllipseCenter.mY), pData, lByteIndex, bCountOnly);
 
          // Endpoints
          LocationType endPoint1 = pArcObject->getLocation(0.0);
@@ -2535,10 +2508,10 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
          newEndPoint2.mX = center.mX + (dSecondDisplacement * cos(dSecondTheta * PI / 180.0));
          newEndPoint2.mY = center.mY + (dSecondDisplacement * sin(dSecondTheta * PI / 180.0));
 
-         writeElement((short) newEndPoint1.mX, pData, lByteIndex, bCountOnly);
-         writeElement((short) newEndPoint1.mY, pData, lByteIndex, bCountOnly);
-         writeElement((short) newEndPoint2.mX, pData, lByteIndex, bCountOnly);
-         writeElement((short) newEndPoint2.mY, pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newEndPoint1.mX), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newEndPoint1.mY), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newEndPoint2.mX), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newEndPoint2.mY), pData, lByteIndex, bCountOnly);
 
          // Start and stop points
          double dStart = pObject->getStartAngle();
@@ -2560,10 +2533,10 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
          newStopPoint.mX = center.mX + (dStopDisplacement * cos(dStopTheta * PI / 180.0));
          newStopPoint.mY = center.mY + (dStopDisplacement * sin(dStopTheta * PI / 180.0));
 
-         writeElement((short) (newStartPoint.mX - newEllipseCenter.mX), pData, lByteIndex, bCountOnly);
-         writeElement((short) (newStartPoint.mY - newEllipseCenter.mY), pData, lByteIndex, bCountOnly);
-         writeElement((short) (newStopPoint.mX - newEllipseCenter.mX), pData, lByteIndex, bCountOnly);
-         writeElement((short) (newStopPoint.mY - newEllipseCenter.mY), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newStartPoint.mX - newEllipseCenter.mX), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newStartPoint.mY - newEllipseCenter.mY), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newStopPoint.mX - newEllipseCenter.mX), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newStopPoint.mY - newEllipseCenter.mY), pData, lByteIndex, bCountOnly);
 
          if (eRegion != ARC_OPEN)
          {
@@ -2597,10 +2570,10 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
 
          writeElement(POLYLINE, pData, lByteIndex, bCountOnly);
          writeElement(8, pData, lByteIndex, bCountOnly);      // Two nodes * four
-         writeElement((short) newLlCorner.mX, pData, lByteIndex, bCountOnly);
-         writeElement((short) newLlCorner.mY, pData, lByteIndex, bCountOnly);
-         writeElement((short) newUrCorner.mX, pData, lByteIndex, bCountOnly);
-         writeElement((short) newUrCorner.mY, pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newLlCorner.mX), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newLlCorner.mY), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newUrCorner.mX), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newUrCorner.mY), pData, lByteIndex, bCountOnly);
 
          // Arrow tips
          double arrowHeadSize = 6;
@@ -2635,31 +2608,27 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
 
          writeElement(POLYLINE, pData, lByteIndex, bCountOnly);
          writeElement(12, pData, lByteIndex, bCountOnly);   // Three nodes * four
-         writeElement((short) newEndPoint1.mX, pData, lByteIndex, bCountOnly);
-         writeElement((short) newEndPoint1.mY, pData, lByteIndex, bCountOnly);
-         writeElement((short) newUrCorner.mX, pData, lByteIndex, bCountOnly);
-         writeElement((short) newUrCorner.mY, pData, lByteIndex, bCountOnly);
-         writeElement((short) newEndPoint2.mX, pData, lByteIndex, bCountOnly);
-         writeElement((short) newEndPoint2.mY, pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newEndPoint1.mX), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newEndPoint1.mY), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newUrCorner.mX), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newUrCorner.mY), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newEndPoint2.mX), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newEndPoint2.mY), pData, lByteIndex, bCountOnly);
 
          break;
       }
 
-      case CGM_OBJECT: case GROUP_OBJECT:
+      case CGM_OBJECT:
+      case GROUP_OBJECT:
       {
-         list<GraphicObject*> groupObjects = static_cast<const GraphicGroup*>(
-            pObject)->getObjects();
-
-         list<GraphicObject*>::iterator iter;
-         for (iter = groupObjects.begin(); iter != groupObjects.end(); iter++)
+         list<GraphicObject*> groupObjects = static_cast<const GraphicGroup*>(pObject)->getObjects();
+         for (list<GraphicObject*>::iterator iter = groupObjects.begin(); iter != groupObjects.end(); ++iter)
          {
-            GraphicObject* pGroupObject = NULL;
-            pGroupObject = *iter;
+            GraphicObject* pGroupObject = *iter;
             if (pGroupObject != NULL)
             {
-               bool bSuccess = false;
-               bSuccess = serializeCgmProperties(pGroupObject, pData, lByteIndex, bCountOnly);
-               if (bSuccess = false)
+               bool bSuccess = serializeCgmProperties(pGroupObject, pData, lByteIndex, bCountOnly);
+               if (bSuccess == false)
                {
                   return false;
                }
@@ -2681,8 +2650,8 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
          writeElement(ELLIPSE, pData, lByteIndex, bCountOnly);
 
          // Center
-         writeElement((short) center.mX, pData, lByteIndex, bCountOnly);
-         writeElement((short) center.mY, pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(center.mX), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(center.mY), pData, lByteIndex, bCountOnly);
 
          // Endpoints
          double dWidth = urCorner.mX - center.mX;
@@ -2693,10 +2662,10 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
          double dEndX2 = center.mX + (dHeight * cos((dRotation + 90.0) * PI / 180.0));
          double dEndY2 = center.mY + (dHeight * sin((dRotation + 90.0) * PI / 180.0));
 
-         writeElement((short) dEndX1, pData, lByteIndex, bCountOnly);
-         writeElement((short) dEndY1, pData, lByteIndex, bCountOnly);
-         writeElement((short) dEndX2, pData, lByteIndex, bCountOnly);
-         writeElement((short) dEndY2, pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(dEndX1), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(dEndY1), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(dEndX2), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(dEndY2), pData, lByteIndex, bCountOnly);
 
          break;
       }
@@ -2723,10 +2692,10 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
          newUrCorner.mX = center.mX + (dUrDisplacement * cos(dUrTheta * PI / 180.0));
          newUrCorner.mY = center.mY + (dUrDisplacement * sin(dUrTheta * PI / 180.0));
 
-         writeElement((short) newLlCorner.mX, pData, lByteIndex, bCountOnly);
-         writeElement((short) newLlCorner.mY, pData, lByteIndex, bCountOnly);
-         writeElement((short) newUrCorner.mX, pData, lByteIndex, bCountOnly);
-         writeElement((short) newUrCorner.mY, pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newLlCorner.mX), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newLlCorner.mY), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newUrCorner.mX), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newUrCorner.mY), pData, lByteIndex, bCountOnly);
 
          break;
       }
@@ -2738,10 +2707,10 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
 
          // Parameters
          unsigned int uiSegments = 0;
-         const PolygonObjectImp *pPolygonObject = dynamic_cast<const PolygonObjectImp*>(pObject);
+         const PolygonObjectImp* pPolygonObject = dynamic_cast<const PolygonObjectImp*>(pObject);
          VERIFY(pPolygonObject != NULL);
          uiSegments = (pPolygonObject->getNumSegments() + 1) * 4;
-         writeElement((short) uiSegments, pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(uiSegments), pData, lByteIndex, bCountOnly);
 
          // Start point
          std::vector<LocationType> vertices = pPolygonObject->getVertices();
@@ -2759,8 +2728,8 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
          newStartPoint.mX = center.mX - (dStartDisplacement * cos(dStartTheta * PI / 180.0));
          newStartPoint.mY = center.mY - (dStartDisplacement * sin(dStartTheta * PI / 180.0));
 
-         writeElement((short) newStartPoint.mX, pData, lByteIndex, bCountOnly);
-         writeElement((short) newStartPoint.mY, pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newStartPoint.mX), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newStartPoint.mY), pData, lByteIndex, bCountOnly);
 
          // Vertices
          vector<LocationType>::iterator iter = vertices.begin();
@@ -2776,8 +2745,8 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
             newEndPoint.mX = center.mX + (dEndDisplacement * cos(dEndTheta * PI / 180.0));
             newEndPoint.mY = center.mY + (dEndDisplacement * sin(dEndTheta * PI / 180.0));
 
-            writeElement((short) newEndPoint.mX, pData, lByteIndex, bCountOnly);
-            writeElement((short) newEndPoint.mY, pData, lByteIndex, bCountOnly);
+            writeElement(static_cast<short>(newEndPoint.mX), pData, lByteIndex, bCountOnly);
+            writeElement(static_cast<short>(newEndPoint.mY), pData, lByteIndex, bCountOnly);
          }
 
          break;
@@ -2789,11 +2758,10 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
          writeElement(POLYLINE, pData, lByteIndex, bCountOnly);
 
          // Parameters
-         unsigned int uiSegments = 0;
-         const PolylineObjectImp *pPolylineObject = dynamic_cast<const PolylineObjectImp*>(pObject);
+         const PolylineObjectImp* pPolylineObject = dynamic_cast<const PolylineObjectImp*>(pObject);
          VERIFY(pPolylineObject != NULL);
-         uiSegments = (pPolylineObject->getNumSegments() + 1) * 4;
-         writeElement((short) uiSegments, pData, lByteIndex, bCountOnly);
+         unsigned int uiSegments = (pPolylineObject->getNumSegments() + 1) * 4;
+         writeElement(static_cast<short>(uiSegments), pData, lByteIndex, bCountOnly);
 
          // Start point
          vector<LocationType> vertices = pPolylineObject->getVertices();
@@ -2811,8 +2779,8 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
          newStartPoint.mX = center.mX - (dStartDisplacement * cos(dStartTheta * PI / 180.0));
          newStartPoint.mY = center.mY - (dStartDisplacement * sin(dStartTheta * PI / 180.0));
 
-         writeElement((short) newStartPoint.mX, pData, lByteIndex, bCountOnly);
-         writeElement((short) newStartPoint.mY, pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newStartPoint.mX), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newStartPoint.mY), pData, lByteIndex, bCountOnly);
 
          // Vertices
          vector<LocationType>::iterator iter = vertices.begin();
@@ -2828,8 +2796,8 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
             newEndPoint.mX = center.mX + (dEndDisplacement * cos(dEndTheta * PI / 180.0));
             newEndPoint.mY = center.mY + (dEndDisplacement * sin(dEndTheta * PI / 180.0));
 
-            writeElement((short) newEndPoint.mX, pData, lByteIndex, bCountOnly);
-            writeElement((short) newEndPoint.mY, pData, lByteIndex, bCountOnly);
+            writeElement(static_cast<short>(newEndPoint.mX), pData, lByteIndex, bCountOnly);
+            writeElement(static_cast<short>(newEndPoint.mY), pData, lByteIndex, bCountOnly);
          }
 
          break;
@@ -2843,10 +2811,10 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
             writeElement(RECTANGLE, pData, lByteIndex, bCountOnly);
 
             // Location
-            writeElement((short) llCorner.mX, pData, lByteIndex, bCountOnly);
-            writeElement((short) llCorner.mY, pData, lByteIndex, bCountOnly);
-            writeElement((short) urCorner.mX, pData, lByteIndex, bCountOnly);
-            writeElement((short) urCorner.mY, pData, lByteIndex, bCountOnly);
+            writeElement(static_cast<short>(llCorner.mX), pData, lByteIndex, bCountOnly);
+            writeElement(static_cast<short>(llCorner.mY), pData, lByteIndex, bCountOnly);
+            writeElement(static_cast<short>(urCorner.mX), pData, lByteIndex, bCountOnly);
+            writeElement(static_cast<short>(urCorner.mY), pData, lByteIndex, bCountOnly);
          }
          else
          {
@@ -2864,8 +2832,8 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
             newLlPoint.mX = center.mX - (dLlDisplacement * cos(dLlTheta * PI / 180.0));
             newLlPoint.mY = center.mY - (dLlDisplacement * sin(dLlTheta * PI / 180.0));
 
-            writeElement((short) newLlPoint.mX, pData, lByteIndex, bCountOnly);
-            writeElement((short) newLlPoint.mY, pData, lByteIndex, bCountOnly);
+            writeElement(static_cast<short>(newLlPoint.mX), pData, lByteIndex, bCountOnly);
+            writeElement(static_cast<short>(newLlPoint.mY), pData, lByteIndex, bCountOnly);
 
             // Lower right
             double dLrDisplacement = sqrt(pow(urCorner.mX - center.mX, 2) + pow(llCorner.mY - center.mY, 2));
@@ -2875,8 +2843,8 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
             newLrPoint.mX = center.mX + (dLrDisplacement * cos(dLrTheta * PI / 180.0));
             newLrPoint.mY = center.mY + (dLrDisplacement * sin(dLrTheta * PI / 180.0));
 
-            writeElement((short) newLrPoint.mX, pData, lByteIndex, bCountOnly);
-            writeElement((short) newLrPoint.mY, pData, lByteIndex, bCountOnly);
+            writeElement(static_cast<short>(newLrPoint.mX), pData, lByteIndex, bCountOnly);
+            writeElement(static_cast<short>(newLrPoint.mY), pData, lByteIndex, bCountOnly);
 
             // Upper right
             double dUrDisplacement = sqrt(pow(urCorner.mX - center.mX, 2) + pow(urCorner.mY - center.mY, 2));
@@ -2886,8 +2854,8 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
             newUrPoint.mX = center.mX + (dUrDisplacement * cos(dUrTheta * PI / 180.0));
             newUrPoint.mY = center.mY + (dUrDisplacement * sin(dUrTheta * PI / 180.0));
 
-            writeElement((short) newUrPoint.mX, pData, lByteIndex, bCountOnly);
-            writeElement((short) newUrPoint.mY, pData, lByteIndex, bCountOnly);
+            writeElement(static_cast<short>(newUrPoint.mX), pData, lByteIndex, bCountOnly);
+            writeElement(static_cast<short>(newUrPoint.mY), pData, lByteIndex, bCountOnly);
 
             // Upper left
             double dUlDisplacement = sqrt(pow(llCorner.mX - center.mX, 2) + pow(urCorner.mY - center.mY, 2));
@@ -2897,12 +2865,12 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
             newUlPoint.mX = center.mX + (dUlDisplacement * cos(dUlTheta * PI / 180.0));
             newUlPoint.mY = center.mY + (dUlDisplacement * sin(dUlTheta * PI / 180.0));
 
-            writeElement((short) newUlPoint.mX, pData, lByteIndex, bCountOnly);
-            writeElement((short) newUlPoint.mY, pData, lByteIndex, bCountOnly);
+            writeElement(static_cast<short>(newUlPoint.mX), pData, lByteIndex, bCountOnly);
+            writeElement(static_cast<short>(newUlPoint.mY), pData, lByteIndex, bCountOnly);
 
             // Lower left again to close the polygon
-            writeElement((short) newLlPoint.mX, pData, lByteIndex, bCountOnly);
-            writeElement((short) newLlPoint.mY, pData, lByteIndex, bCountOnly);
+            writeElement(static_cast<short>(newLlPoint.mX), pData, lByteIndex, bCountOnly);
+            writeElement(static_cast<short>(newLlPoint.mY), pData, lByteIndex, bCountOnly);
          }
 
          break;
@@ -2955,8 +2923,8 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
          newPoint.mX = center.mX + (dDisplacement * cos(dTheta * PI / 180.0));
          newPoint.mY = center.mY + (dDisplacement * sin(dTheta * PI / 180.0));
 
-         writeElement((short) newPoint.mX, pData, lByteIndex, bCountOnly);
-         writeElement((short) newPoint.mY, pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newPoint.mX), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newPoint.mY), pData, lByteIndex, bCountOnly);
 
          dX = urCorner.mX - dRadius;
          dY = llCorner.mY;
@@ -2966,11 +2934,11 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
          newPoint.mX = center.mX + (dDisplacement * cos(dTheta * PI / 180.0));
          newPoint.mY = center.mY + (dDisplacement * sin(dTheta * PI / 180.0));
 
-         writeElement((short) newPoint.mX, pData, lByteIndex, bCountOnly);
-         writeElement((short) newPoint.mY, pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newPoint.mX), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newPoint.mY), pData, lByteIndex, bCountOnly);
 
          int i = 0;
-         for (i = 3*DrawUtil::VERTEX_COUNT/4; i < DrawUtil::VERTEX_COUNT; i += 2)
+         for (i = 3 * DrawUtil::VERTEX_COUNT / 4; i < DrawUtil::VERTEX_COUNT; i += 2)
          {
             dX = urCorner.mX - dRadius + DrawUtil::sCirclePoints[i].mX * dRadius;
             dY = llCorner.mY + dRadius + DrawUtil::sCirclePoints[i].mY * dRadius;
@@ -2980,8 +2948,8 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
             newPoint.mX = center.mX + (dDisplacement * cos(dTheta * PI / 180.0));
             newPoint.mY = center.mY + (dDisplacement * sin(dTheta * PI / 180.0));
 
-            writeElement((short) newPoint.mX, pData, lByteIndex, bCountOnly);
-            writeElement((short) newPoint.mY, pData, lByteIndex, bCountOnly);
+            writeElement(static_cast<short>(newPoint.mX), pData, lByteIndex, bCountOnly);
+            writeElement(static_cast<short>(newPoint.mY), pData, lByteIndex, bCountOnly);
          }
 
          dX = urCorner.mX;
@@ -2992,10 +2960,10 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
          newPoint.mX = center.mX + (dDisplacement * cos(dTheta * PI / 180.0));
          newPoint.mY = center.mY + (dDisplacement * sin(dTheta * PI / 180.0));
 
-         writeElement((short) newPoint.mX, pData, lByteIndex, bCountOnly);
-         writeElement((short) newPoint.mY, pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newPoint.mX), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newPoint.mY), pData, lByteIndex, bCountOnly);
 
-         for (i = 0; i < DrawUtil::VERTEX_COUNT/4; i += 2)
+         for (i = 0; i < DrawUtil::VERTEX_COUNT / 4; i += 2)
          {
             dX = urCorner.mX - dRadius + DrawUtil::sCirclePoints[i].mX * dRadius;
             dY = urCorner.mY - dRadius + DrawUtil::sCirclePoints[i].mY * dRadius;
@@ -3005,8 +2973,8 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
             newPoint.mX = center.mX + (dDisplacement * cos(dTheta * PI / 180.0));
             newPoint.mY = center.mY + (dDisplacement * sin(dTheta * PI / 180.0));
 
-            writeElement((short) newPoint.mX, pData, lByteIndex, bCountOnly);
-            writeElement((short) newPoint.mY, pData, lByteIndex, bCountOnly);
+            writeElement(static_cast<short>(newPoint.mX), pData, lByteIndex, bCountOnly);
+            writeElement(static_cast<short>(newPoint.mY), pData, lByteIndex, bCountOnly);
          }
 
          dX = llCorner.mX + dRadius;
@@ -3017,10 +2985,10 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
          newPoint.mX = center.mX + (dDisplacement * cos(dTheta * PI / 180.0));
          newPoint.mY = center.mY + (dDisplacement * sin(dTheta * PI / 180.0));
 
-         writeElement((short) newPoint.mX, pData, lByteIndex, bCountOnly);
-         writeElement((short) newPoint.mY, pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newPoint.mX), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newPoint.mY), pData, lByteIndex, bCountOnly);
 
-         for (i = DrawUtil::VERTEX_COUNT/4; i < DrawUtil::VERTEX_COUNT/2; i += 2)
+         for (i = DrawUtil::VERTEX_COUNT / 4; i < DrawUtil::VERTEX_COUNT / 2; i += 2)
          {
             dX = llCorner.mX + dRadius + DrawUtil::sCirclePoints[i].mX * dRadius;
             dY = urCorner.mY - dRadius + DrawUtil::sCirclePoints[i].mY * dRadius;
@@ -3030,8 +2998,8 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
             newPoint.mX = center.mX + (dDisplacement * cos(dTheta * PI / 180.0));
             newPoint.mY = center.mY + (dDisplacement * sin(dTheta * PI / 180.0));
 
-            writeElement((short) newPoint.mX, pData, lByteIndex, bCountOnly);
-            writeElement((short) newPoint.mY, pData, lByteIndex, bCountOnly);
+            writeElement(static_cast<short>(newPoint.mX), pData, lByteIndex, bCountOnly);
+            writeElement(static_cast<short>(newPoint.mY), pData, lByteIndex, bCountOnly);
          }
 
          dX = llCorner.mX;
@@ -3042,10 +3010,10 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
          newPoint.mX = center.mX + (dDisplacement * cos(dTheta * PI / 180.0));
          newPoint.mY = center.mY + (dDisplacement * sin(dTheta * PI / 180.0));
 
-         writeElement((short) newPoint.mX, pData, lByteIndex, bCountOnly);
-         writeElement((short) newPoint.mY, pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newPoint.mX), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newPoint.mY), pData, lByteIndex, bCountOnly);
 
-         for (i = DrawUtil::VERTEX_COUNT/2; i < 3*DrawUtil::VERTEX_COUNT/4; i += 2)
+         for (i = DrawUtil::VERTEX_COUNT / 2; i < 3 * DrawUtil::VERTEX_COUNT / 4; i += 2)
          {
             dX = llCorner.mX + dRadius + DrawUtil::sCirclePoints[i].mX * dRadius;
             dY = llCorner.mY + dRadius + DrawUtil::sCirclePoints[i].mY * dRadius;
@@ -3055,8 +3023,8 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
             newPoint.mX = center.mX + (dDisplacement * cos(dTheta * PI / 180.0));
             newPoint.mY = center.mY + (dDisplacement * sin(dTheta * PI / 180.0));
 
-            writeElement((short) newPoint.mX, pData, lByteIndex, bCountOnly);
-            writeElement((short) newPoint.mY, pData, lByteIndex, bCountOnly);
+            writeElement(static_cast<short>(newPoint.mX), pData, lByteIndex, bCountOnly);
+            writeElement(static_cast<short>(newPoint.mY), pData, lByteIndex, bCountOnly);
          }
 
          break;
@@ -3064,13 +3032,12 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
 
       case SCALEBAR_OBJECT:
       {
-         const ScaleBarObjectImp *pScaleBarObject = dynamic_cast<const ScaleBarObjectImp*>(pObject);
+         const ScaleBarObjectImp* pScaleBarObject = dynamic_cast<const ScaleBarObjectImp*>(pObject);
          VERIFY(pScaleBarObject != NULL);
-         const GraphicGroup *pGroup =  &pScaleBarObject->getGroup();
+         const GraphicGroup* pGroup = &pScaleBarObject->getGroup();
          if (pGroup != NULL)
          {
-            bool bSuccess = false;
-            bSuccess = serializeCgmObject(pGroup, pData, lByteIndex, bCountOnly);
+            bool bSuccess = serializeCgmObject(pGroup, pData, lByteIndex, bCountOnly);
             if (bSuccess == false)
             {
                return false;
@@ -3082,9 +3049,8 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
 
       case LATLONINSERT_OBJECT:
       {
-         const LatLonInsertObjectImp *pLatLonObject = 
-            dynamic_cast<const LatLonInsertObjectImp*>(pObject);
-         const GraphicGroup *pGroup = &pLatLonObject->getGroup();
+         const LatLonInsertObjectImp* pLatLonObject = dynamic_cast<const LatLonInsertObjectImp*>(pObject);
+         const GraphicGroup* pGroup = &pLatLonObject->getGroup();
          if (pGroup != NULL)
          {
             bool bSuccess = false;
@@ -3102,14 +3068,12 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
          // fall through
       case EASTARROW_OBJECT:
          {
-            const DirectionalArrowObjectImp *pDirArrowObj = 
-               dynamic_cast<const DirectionalArrowObjectImp*>(pObject);
+            const DirectionalArrowObjectImp* pDirArrowObj = dynamic_cast<const DirectionalArrowObjectImp*>(pObject);
             VERIFY(pDirArrowObj != NULL);
             const GraphicGroup* pGroup = &pDirArrowObj->getGroup();
             if (pGroup != NULL)
             {
-               bool bSuccess = false;
-               bSuccess = serializeCgmObject(pGroup, pData, lByteIndex, bCountOnly);
+               bool bSuccess = serializeCgmObject(pGroup, pData, lByteIndex, bCountOnly);
                if (bSuccess == false)
                {
                   return false;
@@ -3127,10 +3091,9 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
          // Parameters
          string text = pObject->getText();
 
-         unsigned char ucLength = 0;
-         ucLength = (unsigned char) (text.length());
+         unsigned char ucLength = static_cast<unsigned char>(text.length());
 
-         writeElement((short) (ucLength + 7), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(ucLength + 7), pData, lByteIndex, bCountOnly);
 
          // Location
          double dDisplacement = sqrt(pow(center.mX - llCorner.mX, 2) + pow(center.mY - llCorner.mY, 2));
@@ -3140,9 +3103,9 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
          newPoint.mX = center.mX - (dDisplacement * cos(dTheta * PI / 180.0));
          newPoint.mY = center.mY - (dDisplacement * sin(dTheta * PI / 180.0));
 
-         writeElement((short) newPoint.mX, pData, lByteIndex, bCountOnly);
-         writeElement((short) newPoint.mY, pData, lByteIndex, bCountOnly);
-         writeElement((short) 1, pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newPoint.mX), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newPoint.mY), pData, lByteIndex, bCountOnly);
+         writeElement(1, pData, lByteIndex, bCountOnly);
 
          // Length
          writeStringElement(text.data(), pData, lByteIndex, bCountOnly);
@@ -3169,8 +3132,8 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
          newLlPoint.mX = center.mX - (dDisplacement * cos(dTheta * PI / 180.0));
          newLlPoint.mY = center.mY - (dDisplacement * sin(dTheta * PI / 180.0));
 
-         writeElement((short) newLlPoint.mX, pData, lByteIndex, bCountOnly);
-         writeElement((short) newLlPoint.mY, pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newLlPoint.mX), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newLlPoint.mY), pData, lByteIndex, bCountOnly);
 
          // Lower right
          dDisplacement = sqrt(pow(urCorner.mX - center.mX, 2) + pow(llCorner.mY - center.mY, 2));
@@ -3180,8 +3143,8 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
          newPoint.mX = center.mX + (dDisplacement * cos(dTheta * PI / 180.0));
          newPoint.mY = center.mY + (dDisplacement * sin(dTheta * PI / 180.0));
 
-         writeElement((short) newPoint.mX, pData, lByteIndex, bCountOnly);
-         writeElement((short) newPoint.mY, pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newPoint.mX), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newPoint.mY), pData, lByteIndex, bCountOnly);
 
          // Apex
          dDisplacement = sqrt(pow((llCorner.mX + (dApex * dWidth)) - center.mX, 2) + pow(urCorner.mY - center.mY, 2));
@@ -3190,12 +3153,12 @@ bool CgmObjectImp::serializeCgmObject(const GraphicObject* pObject, short* pData
          newPoint.mX = center.mX + (dDisplacement * cos(dTheta * PI / 180.0));
          newPoint.mY = center.mY + (dDisplacement * sin(dTheta * PI / 180.0));
 
-         writeElement((short) newPoint.mX, pData, lByteIndex, bCountOnly);
-         writeElement((short) newPoint.mY, pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newPoint.mX), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newPoint.mY), pData, lByteIndex, bCountOnly);
 
          // Lower left again to close the polygon
-         writeElement((short) newLlPoint.mX, pData, lByteIndex, bCountOnly);
-         writeElement((short) newLlPoint.mY, pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newLlPoint.mX), pData, lByteIndex, bCountOnly);
+         writeElement(static_cast<short>(newLlPoint.mY), pData, lByteIndex, bCountOnly);
 
          break;
       }

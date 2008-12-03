@@ -19,10 +19,10 @@
 
 #include <limits>
 
-SampleGeorefGui::SampleGeorefGui(void)
+SampleGeorefGui::SampleGeorefGui()
 {
-   QLabel *pXLabel = new QLabel("X Size:", this);
-   QLabel *pYLabel = new QLabel("Y Size:", this);
+   QLabel* pXLabel = new QLabel("X Size:", this);
+   QLabel* pYLabel = new QLabel("Y Size:", this);
 
    mpXSpin = new QSpinBox(this);
    mpXSpin->setMinimum(0);
@@ -36,8 +36,8 @@ SampleGeorefGui::SampleGeorefGui(void)
    mpExtrapolateCheck = new QCheckBox("Extrapolate", this);
 
    mpAnimatedCheck = new QCheckBox("Animated", this);
-   
-   QRadioButton *pTranslateButton = new QRadioButton("Translate", this);
+
+   QRadioButton* pTranslateButton = new QRadioButton("Translate", this);
    mpRotateButton = new QRadioButton("Rotate", this);
    pTranslateButton->setChecked(true);
    pTranslateButton->setEnabled(false);
@@ -62,7 +62,7 @@ SampleGeorefGui::SampleGeorefGui(void)
    VERIFYNR(connect(mpAnimatedCheck, SIGNAL(toggled(bool)), mpRotateButton, SLOT(setEnabled(bool))));
 }
 
-SampleGeorefGui::~SampleGeorefGui(void)
+SampleGeorefGui::~SampleGeorefGui()
 {
 }
 

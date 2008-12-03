@@ -16,12 +16,12 @@
 
 #include "DockWindowWidget.h"
 #include "AddPlotDlg.h"
-#include "AppVersion.h"
+#include "AppAssert.h"
 #include "Axis.h"
 #include "CartesianGridlines.h"
 #include "CartesianPlot.h"
-#include "AppAssert.h"
 #include "DesktopServices.h"
+#include "PlotManager.h"
 #include "PlotPropertiesDlg.h"
 #include "PlotSet.h"
 #include "PlotView.h"
@@ -438,7 +438,7 @@ void DockWindowWidget::deletePlotWindow()
    PlotWindow* pWindow = getSelectedPlotWindow();
    if (pWindow == NULL)
    {
-      QMessageBox::critical(this, APP_NAME, "Please select a plot window to delete!");
+      QMessageBox::critical(this, PLOT_MANAGER_NAME, "Please select a plot window to delete!");
       return;
    }
 
@@ -450,7 +450,7 @@ void DockWindowWidget::deletePlotWindow()
    }
    else
    {
-      QMessageBox::critical(this, APP_NAME, "Could not delete the plot window!");
+      QMessageBox::critical(this, PLOT_MANAGER_NAME, "Could not delete the plot window!");
    }
 }
 
@@ -504,7 +504,7 @@ void DockWindowWidget::addPlot()
    PlotWindow* pWindow = getSelectedPlotWindow();
    if (pWindow == NULL)
    {
-      QMessageBox::critical(this, APP_NAME, "Please select a plot window for which to add a plot!");
+      QMessageBox::critical(this, PLOT_MANAGER_NAME, "Please select a plot window for which to add a plot!");
       return;
    }
 
@@ -642,7 +642,8 @@ void DockWindowWidget::deletePlot()
    PlotWindow* pWindow = getSelectedPlotWindow();
    if (pWindow == NULL)
    {
-      QMessageBox::critical(this, APP_NAME, "Please select a plot window for which to delete a plot set or plot!");
+      QMessageBox::critical(this, PLOT_MANAGER_NAME,
+         "Please select a plot window for which to delete a plot set or plot!");
       return;
    }
 
@@ -656,7 +657,7 @@ void DockWindowWidget::deletePlot()
 
    if (pItem == NULL)
    {
-      QMessageBox::critical(this, APP_NAME, "Please select a plot set or plot to delete!");
+      QMessageBox::critical(this, PLOT_MANAGER_NAME, "Please select a plot set or plot to delete!");
       return;
    }
 
@@ -766,7 +767,8 @@ void DockWindowWidget::activatePlot()
    PlotWindow* pWindow = getSelectedPlotWindow();
    if (pWindow == NULL)
    {
-      QMessageBox::critical(this, APP_NAME, "Please select a plot window for which to activate a plot set or plot!");
+      QMessageBox::critical(this, PLOT_MANAGER_NAME,
+         "Please select a plot window for which to activate a plot set or plot!");
       return;
    }
 
@@ -780,7 +782,7 @@ void DockWindowWidget::activatePlot()
 
    if (pItem == NULL)
    {
-      QMessageBox::critical(this, APP_NAME, "Please select a plot set or plot to activate!");
+      QMessageBox::critical(this, PLOT_MANAGER_NAME, "Please select a plot set or plot to activate!");
       return;
    }
 
@@ -813,7 +815,8 @@ void DockWindowWidget::renamePlot()
    PlotWindow* pWindow = getSelectedPlotWindow();
    if (pWindow == NULL)
    {
-      QMessageBox::critical(this, APP_NAME, "Please select a plot window for which to rename a plot set or plot!");
+      QMessageBox::critical(this, PLOT_MANAGER_NAME,
+         "Please select a plot window for which to rename a plot set or plot!");
       return;
    }
 
@@ -827,7 +830,7 @@ void DockWindowWidget::renamePlot()
 
    if (pItem == NULL)
    {
-      QMessageBox::critical(this, APP_NAME, "Please select a plot set or plot to rename!");
+      QMessageBox::critical(this, PLOT_MANAGER_NAME, "Please select a plot set or plot to rename!");
       return;
    }
 
@@ -860,7 +863,7 @@ void DockWindowWidget::renamePlot()
                bool bSuccess = pPlotSet->renamePlot(pPlot, newPlotName);
                if (bSuccess == false)
                {
-                  QMessageBox::critical(this, APP_NAME, "Could not rename the plot because a plot with the " +
+                  QMessageBox::critical(this, PLOT_MANAGER_NAME, "Could not rename the plot because a plot with the " +
                      strPlotName + " name already exists!");
                }
                else
@@ -893,8 +896,8 @@ void DockWindowWidget::renamePlot()
             bool bSuccess = pWindow->renamePlotSet(pPlotSet, newPlotSetName);
             if (bSuccess == false)
             {
-               QMessageBox::critical(this, APP_NAME, "Could not rename the plot set because a plot set with the " +
-                  strPlotSet + " name already exists!");
+               QMessageBox::critical(this, PLOT_MANAGER_NAME,
+                  "Could not rename the plot set because a plot set with the " + strPlotSet + " name already exists!");
             }
             else
             {
@@ -910,14 +913,15 @@ void DockWindowWidget::editPlotProperties()
    PlotWindow* pWindow = getSelectedPlotWindow();
    if (pWindow == NULL)
    {
-      QMessageBox::critical(this, APP_NAME, "Please select a plot window for which to edit a plot's properties!");
+      QMessageBox::critical(this, PLOT_MANAGER_NAME,
+         "Please select a plot window for which to edit a plot's properties!");
       return;
    }
 
    PlotWidget* pPlot = getSelectedPlot();
    if (pPlot == NULL)
    {
-      QMessageBox::critical(this, APP_NAME, "Please select a plot for which to edit its properties!");
+      QMessageBox::critical(this, PLOT_MANAGER_NAME, "Please select a plot for which to edit its properties!");
       return;
    }
 
@@ -928,7 +932,7 @@ void DockWindowWidget::editPlotProperties()
    }
    catch (AssertException except)
    {
-      QMessageBox::critical(this, APP_NAME, except.getText().c_str());
+      QMessageBox::critical(this, PLOT_MANAGER_NAME, except.getText().c_str());
       return;
    }
 }

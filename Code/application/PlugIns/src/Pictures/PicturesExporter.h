@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef PICTURESPEXPORTER_H
-#define PICTURESPEXPORTER_H
+#ifndef PICTURESEXPORTER_H
+#define PICTURESEXPORTER_H
 
 #include <QtGui/QImage>
 
@@ -31,7 +31,10 @@ public:
    virtual std::string description() = 0;
    virtual std::string extensions() = 0;
    virtual bool savePict(QString strFilename, QImage img, const SessionItem *pItem) = 0;
-   virtual QWidget* getExportOptionsWidget(const PlugInArgList *pInArgList) { return NULL; }
+   virtual QWidget* getExportOptionsWidget(const PlugInArgList *pInArgList)
+   {
+      return NULL;
+   }
    virtual bool isProduction() const = 0;
 };
 
@@ -52,7 +55,7 @@ protected:
    virtual bool generateImage(QImage &image) = 0;
 
    Progress* mpProgress;
-   SessionItem *mpItem;
+   SessionItem* mpItem;
 
 private:
    Service<PlugInManagerServices> mpPlugInManager;

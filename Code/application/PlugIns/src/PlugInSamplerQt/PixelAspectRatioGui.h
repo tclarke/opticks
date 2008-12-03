@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef PIXELASPECTRATIOGUI_H__
-#define PIXELASPECTRATIOGUI_H__
+#ifndef PIXELASPECTRATIOGUI_H
+#define PIXELASPECTRATIOGUI_H
 
 #include <QtGui/QDialog>
 #include "PlotWidget.h"
@@ -44,7 +44,7 @@ private:
 
     void init();
     std::vector<std::string> mCubeNames;
-    Layer *mpScaledLayer;
+    Layer* mpScaledLayer;
     bool mbScalingApplied;
 
 };

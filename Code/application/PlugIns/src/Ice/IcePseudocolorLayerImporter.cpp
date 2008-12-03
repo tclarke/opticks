@@ -59,7 +59,9 @@ bool IcePseudocolorLayerImporter::parseInputArgList(PlugInArgList* pInArgList)
    mpView = pInArgList->getPlugInArgValue<SpatialDataView>(Executable::ViewArg());
    if (mpView == NULL)
    {
-      SpatialDataWindow* pWindow = dynamic_cast<SpatialDataWindow*>(Service<DesktopServices>()->getCurrentWorkspaceWindow());
+      Service<DesktopServices> pDesktop;
+
+      SpatialDataWindow* pWindow = dynamic_cast<SpatialDataWindow*>(pDesktop->getCurrentWorkspaceWindow());
       if (pWindow != NULL)
       {
          mpView = pWindow->getSpatialDataView();

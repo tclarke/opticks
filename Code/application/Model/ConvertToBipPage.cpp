@@ -10,19 +10,18 @@
 #include "ConvertToBipPage.h"
 #include <string.h>
 
-ConvertToBipPage::ConvertToBipPage(unsigned int rows, unsigned int columns, 
-   unsigned int bands, unsigned int bytesPerElement) :
-   mCache(rows*columns*bands*bytesPerElement), mRows(rows),
-   mColumns(columns), mBands(bands), mBytesPerElement(bytesPerElement),
-   mPixelOffset(bands*bytesPerElement)
+ConvertToBipPage::ConvertToBipPage(unsigned int rows, unsigned int columns, unsigned int bands,
+                                   unsigned int bytesPerElement) :
+   mCache(rows * columns * bands * bytesPerElement),
+   mRows(rows),
+   mColumns(columns),
+   mBands(bands),
+   mBytesPerElement(bytesPerElement),
+   mPixelOffset(bands * bytesPerElement)
 {
 }
 
-ConvertToBipPage::ConvertToBipPage()
-{
-}
-
-ConvertToBipPage::~ConvertToBipPage(void)
+ConvertToBipPage::~ConvertToBipPage()
 {
 }
 
@@ -46,14 +45,13 @@ unsigned int ConvertToBipPage::getInterlineBytes()
    return 0;
 }
 
-void *ConvertToBipPage::getRawData()
+void* ConvertToBipPage::getRawData()
 {
    return &mCache.front();
 }
 
-bool ConvertToBipPage::feed(unsigned int row, unsigned int band, void *pData)
+bool ConvertToBipPage::feed(unsigned int row, unsigned int band, void* pData)
 {
-
    if (band > mBands || row > mRows)
    {
       return false;
@@ -63,8 +61,7 @@ bool ConvertToBipPage::feed(unsigned int row, unsigned int band, void *pData)
       sourcePos < mColumns * mBytesPerElement;
       cachePos += mPixelOffset, sourcePos += mBytesPerElement)
    {
-      memcpy(&mCache[cachePos], 
-         reinterpret_cast<unsigned char*>(pData) + sourcePos, mBytesPerElement);
+      memcpy(&mCache[cachePos], reinterpret_cast<unsigned char*>(pData) + sourcePos, mBytesPerElement);
    }
 
    return true;

@@ -425,48 +425,15 @@ void SessionExplorerImp::updateData(SessionItem* pItem)
 
 bool SessionExplorerImp::event(QEvent* pEvent)
 {
-   bool bSuccess = DockWindowImp::event(pEvent);
-   if (pEvent != NULL)
+   bool success = DockWindowImp::event(pEvent);
+   if ((pEvent != NULL) && (pEvent->type() == QEvent::Polish))
    {
-      if (pEvent->type() == QEvent::Polish)
-      {
-         // Window model
-         WindowModel* pWindowModel = new WindowModel(this);
-         mpWindowTree->setModel(pWindowModel);
-
-         // Animation model
-         AnimationModel* pAnimationModel = new AnimationModel(this);
-
-         QSortFilterProxyModel* pAnimationProxyModel = new QSortFilterProxyModel(this);
-         pAnimationProxyModel->setSourceModel(pAnimationModel);
-         pAnimationProxyModel->setDynamicSortFilter(true);
-
-         mpAnimationTree->setModel(pAnimationProxyModel);
-
-         // Element model
-         ElementModel* pElementModel = new ElementModel(this);
-
-         QSortFilterProxyModel* pElementProxyModel = new QSortFilterProxyModel(this);
-         pElementProxyModel->setSourceModel(pElementModel);
-         pElementProxyModel->setDynamicSortFilter(true);
-
-         mpElementTree->setModel(pElementProxyModel);
-
-         // Plug-in model
-         PlugInModel* pPlugInModel = new PlugInModel(this);
-
-         QSortFilterProxyModel* pPlugInProxyModel = new QSortFilterProxyModel(this);
-         pPlugInProxyModel->setSourceModel(pPlugInModel);
-         pPlugInProxyModel->setDynamicSortFilter(true);
-
-         mpPlugInTree->setModel(pPlugInProxyModel);
-
-         // Attach to the dock window
-         attach(SIGNAL_NAME(DockWindow, AboutToShowContextMenu), Slot(this, &SessionExplorerImp::updateContextMenu));
-      }
+      // To ensure that objects add and remove actions from the correct menu (SessionExplorer or selected
+      // SessionItem(s)), attach to the dock window just before the window is shown to make it the last slot connected
+      attach(SIGNAL_NAME(DockWindow, AboutToShowContextMenu), Slot(this, &SessionExplorerImp::updateContextMenu));
    }
 
-   return bSuccess;
+   return success;
 }
 
 bool SessionExplorerImp::eventFilter(QObject* pObject, QEvent* pEvent)
@@ -718,7 +685,7 @@ void SessionExplorerImp::treeViewChanged()
 
 void SessionExplorerImp::renameItem()
 {
-   QTreeView *pView = getCurrentTreeView();
+   QTreeView* pView = getCurrentTreeView();
    if (pView == NULL)
    {
       return;
@@ -741,5 +708,51 @@ void SessionExplorerImp::renameItem()
       {
          QMessageBox::critical(pView, windowTitle(), "The selected session item cannot be renamed.");
       }
+   }
+}
+
+void SessionExplorerImp::initialize()
+{
+   // Window model
+   if (mpWindowTree->model() == NULL)
+   {
+      WindowModel* pWindowModel = new WindowModel(this);
+      mpWindowTree->setModel(pWindowModel);
+   }
+
+   // Animation model
+   if (mpAnimationTree->model() == NULL)
+   {
+      AnimationModel* pAnimationModel = new AnimationModel(this);
+
+      QSortFilterProxyModel* pAnimationProxyModel = new QSortFilterProxyModel(this);
+      pAnimationProxyModel->setSourceModel(pAnimationModel);
+      pAnimationProxyModel->setDynamicSortFilter(true);
+
+      mpAnimationTree->setModel(pAnimationProxyModel);
+   }
+
+   // Element model
+   if (mpElementTree->model() == NULL)
+   {
+      ElementModel* pElementModel = new ElementModel(this);
+
+      QSortFilterProxyModel* pElementProxyModel = new QSortFilterProxyModel(this);
+      pElementProxyModel->setSourceModel(pElementModel);
+      pElementProxyModel->setDynamicSortFilter(true);
+
+      mpElementTree->setModel(pElementProxyModel);
+   }
+
+   // Plug-in model
+   if (mpPlugInTree->model() == NULL)
+   {
+      PlugInModel* pPlugInModel = new PlugInModel(this);
+
+      QSortFilterProxyModel* pPlugInProxyModel = new QSortFilterProxyModel(this);
+      pPlugInProxyModel->setSourceModel(pPlugInModel);
+      pPlugInProxyModel->setDynamicSortFilter(true);
+
+      mpPlugInTree->setModel(pPlugInProxyModel);
    }
 }

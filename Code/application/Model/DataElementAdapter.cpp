@@ -25,8 +25,8 @@ DataElementAdapter::~DataElementAdapter()
 // TypeAwareObject
 const string& DataElementAdapter::getObjectType() const
 {
-   static string type("DataElementAdapter");
-   return type;
+   static string sType("DataElementAdapter");
+   return sType;
 }
 
 bool DataElementAdapter::isKindOf(const string& className) const

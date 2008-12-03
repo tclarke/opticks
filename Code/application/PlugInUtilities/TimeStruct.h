@@ -7,23 +7,18 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
  
-#ifndef TIME_STRUCT
-#define TIME_STRUCT
+#ifndef TIMESTRUCT_H
+#define TIMESTRUCT_H
 
 #include <time.h>
 
 namespace TimeStruct
 {
+   const long TimeScaleOffset = 946771200; // seconds between 1/1/1940 and 1/1/1970.
 
-const long TimeScaleOffset = 946771200; // seconds between 1/1/1940 and 1/1/1970.
-
-
-unsigned int ToSam(struct tm *pTimeStruct);
-struct tm *FromSam(unsigned int sam);
-bool IsLeapYear (int year);
-
+   unsigned int ToSam(struct tm* pTimeStruct);
+   struct tm* FromSam(unsigned int sam);
+   bool IsLeapYear(int year);
 }
 
 #endif
-
- 

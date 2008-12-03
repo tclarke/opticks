@@ -23,7 +23,7 @@ class PropertiesDlg : public QDialog
    Q_OBJECT
 
 public:
-   PropertiesDlg(SessionItem* pItem, const std::vector<std::string>& displayedPages, QWidget* pParent = NULL);
+   PropertiesDlg(SessionItem* pSessionItem, const std::vector<std::string>& displayedPages, QWidget* pParent = NULL);
    ~PropertiesDlg();
 
 protected:

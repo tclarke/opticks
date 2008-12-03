@@ -10,11 +10,12 @@
 #ifndef CONNECTIONMANAGER_H
 #define CONNECTIONMANAGER_H
 
-#include <string>
 #include "External.h"
 
+#include <string>
+
 /**
- * Connection Manager 
+ * Connection Manager
  *
  * This class is responsible for providing all external connections
  * with access to the Model, Desktop, and Plug-In Services.
@@ -23,25 +24,6 @@
  */
 class ConnectionManager : public External
 {
-protected:
-   /**
-    *  Constructor which can NOT be called outside this class.
-    *
-    *  The default constructor is protected.  The allows the instance()
-    *  method to control the number of instances of this class.  To
-    *  instantiate this class the ConnectionManager::instance() 
-    *  method must be called.
-    */
-   ConnectionManager() {};
-
-   /**
-    * Destructor which can not be invoked outside this class.
-    *
-    * This destructor deletes all dynamic memory associated with the
-    * class.
-    */
-   ~ConnectionManager() {};
-
 public:
    /**
     *  Returns the instance of this singleton class.
@@ -75,8 +57,8 @@ public:
     *
     *  @return TRUE is the interface is supported
     */
-   bool queryInterface( const char *interfaceName,
-                         void** interfaceAddress );
+   bool queryInterface(const char* interfaceName, void** interfaceAddress);
+
    /**
     *  Maps the connection manager instance.
     *
@@ -86,7 +68,26 @@ public:
     *  @param  manager  The connection manager instance created from the
     *                   main applicaiton.
     */
-   static void mapConnection( ConnectionManager* pManager );
+   static void mapConnection(ConnectionManager* pManager);
+
+protected:
+   /**
+    *  Constructor which can NOT be called outside this class.
+    *
+    *  The default constructor is protected.  The allows the instance()
+    *  method to control the number of instances of this class.  To
+    *  instantiate this class the ConnectionManager::instance() 
+    *  method must be called.
+    */
+   ConnectionManager() {};
+
+   /**
+    * Destructor which can not be invoked outside this class.
+    *
+    * This destructor deletes all dynamic memory associated with the
+    * class.
+    */
+   ~ConnectionManager() {};
 
 private:
    static ConnectionManager* spInstance;

@@ -15,11 +15,12 @@
 #include <QtCore/QStringList>
 #include <QtCore/QTimer>
 
-MuHttpServer::MuHttpServer(int port, QObject *pParent) : QObject(pParent),
-                                                         mpTimer(NULL),
-                                                         mServerIsRunning(false),
-                                                         mAllowNonLocal(false),
-                                                         mSession(SIGNAL_NAME(SessionManager, Closed), Slot(this, &MuHttpServer::stop))
+MuHttpServer::MuHttpServer(int port, QObject *pParent) :
+   QObject(pParent),
+   mpTimer(NULL),
+   mServerIsRunning(false),
+   mAllowNonLocal(false),
+   mSession(SIGNAL_NAME(SessionManager, Closed), Slot(this, &MuHttpServer::stop))
 {
    if (port > 0)
    {
@@ -35,7 +36,7 @@ MuHttpServer::MuHttpServer(int port, QObject *pParent) : QObject(pParent),
 
 MuHttpServer::~MuHttpServer()
 {
-   if(mServerIsRunning)
+   if (mServerIsRunning)
    {
       StopServer();
    }
@@ -43,21 +44,21 @@ MuHttpServer::~MuHttpServer()
 
 bool MuHttpServer::start()
 {
-   if(mParams.empty())
+   if (mParams.empty())
    {
       warning("Invalid parameters.");
       return false;
    }
-   if(mServerIsRunning)
+   if (mServerIsRunning)
    {
       return true;
    }
-   switch(StartServer(mParams))
+   switch (StartServer(mParams))
    {
    case STARTSERVER_SUCCESS:
       mpTimer->start(); // fall through
    case STARTSERVER_ALREADYRUNNING:
-      for(QMap<QString, EHS*>::iterator it = mRegistrations.begin(); it != mRegistrations.end(); ++it)
+      for (QMap<QString, EHS*>::iterator it = mRegistrations.begin(); it != mRegistrations.end(); ++it)
       {
          RegisterEHS(it.value(), it.key().toAscii());
       }
@@ -95,7 +96,7 @@ void MuHttpServer::stop(Subject &subject, const std::string &signal, const boost
 
 void MuHttpServer::registerPath(const QString &path, EHS *pObj)
 {
-   if(mServerIsRunning)
+   if (mServerIsRunning)
    {
       RegisterEHS(pObj, path.toAscii());
    }
@@ -114,7 +115,7 @@ ResponseCode MuHttpServer::HandleRequest(HttpRequest *pHttpRequest, HttpResponse
 {
    debug(pHttpRequest);
 
-   if(!mAllowNonLocal && pHttpRequest->GetAddress() != "127.0.0.1")
+   if (!mAllowNonLocal && pHttpRequest->GetAddress() != "127.0.0.1")
    {
       QString errorString = QString("<html><body><h1>Forbidden</h1>"
          "Connection from %1 has been blocked. Only localhost connections are allowed.</body></html>")
@@ -125,15 +126,16 @@ ResponseCode MuHttpServer::HandleRequest(HttpRequest *pHttpRequest, HttpResponse
    }
 
    QString uri = QString::fromStdString(pHttpRequest->sUri).split("?")[0];
-   if(pHttpRequest->nRequestMethod == REQUESTMETHOD_GET || pHttpRequest->nRequestMethod == REQUESTMETHOD_POST)
+   if (pHttpRequest->nRequestMethod == REQUESTMETHOD_GET || pHttpRequest->nRequestMethod == REQUESTMETHOD_POST)
    {
       QString contentType = pHttpRequest->oRequestHeaders["content-type"].c_str();
       QString body = pHttpRequest->sBody.c_str();
-      Response rsp = (pHttpRequest->nRequestMethod == REQUESTMETHOD_GET) ? getRequest(uri, contentType, body, pHttpRequest->oFormValueMap)
-                                                                         : postRequest(uri, contentType, body, pHttpRequest->oFormValueMap);
-      if(rsp.mCode != HTTPRESPONSECODE_INVALID)
+      Response rsp = (pHttpRequest->nRequestMethod == REQUESTMETHOD_GET) ?
+         getRequest(uri, contentType, body, pHttpRequest->oFormValueMap) :
+         postRequest(uri, contentType, body, pHttpRequest->oFormValueMap);
+      if (rsp.mCode != HTTPRESPONSECODE_INVALID)
       {
-         switch(rsp.mEncoding)
+         switch (rsp.mEncoding)
          {
          case Response::ASCII:
             pHttpResponse->SetBody(rsp.mBody.toAscii(), rsp.mBody.toAscii().length());
@@ -146,7 +148,7 @@ ResponseCode MuHttpServer::HandleRequest(HttpRequest *pHttpRequest, HttpResponse
             break;
          }
          QMapIterator<QString,QString> headerIt(rsp.mHeaders);
-         while(headerIt.hasNext())
+         while (headerIt.hasNext())
          {
             headerIt.next();
             pHttpResponse->oResponseHeaders[headerIt.key().toStdString()] = headerIt.value().toStdString();
@@ -161,7 +163,8 @@ ResponseCode MuHttpServer::HandleRequest(HttpRequest *pHttpRequest, HttpResponse
    return HTTPRESPONSECODE_500_INTERNALSERVERERROR;
 }
 
-MuHttpServer::Response MuHttpServer::postRequest(const QString &uri, const QString &contentType, const QString &body, const FormValueMap &form)
+MuHttpServer::Response MuHttpServer::postRequest(const QString& uri, const QString& contentType,
+                                                 const QString& body, const FormValueMap& form)
 {
    Response r;
    r.mCode = HTTPRESPONSECODE_403_FORBIDDEN;
@@ -170,10 +173,10 @@ MuHttpServer::Response MuHttpServer::postRequest(const QString &uri, const QStri
    return r;
 }
 
-void MuHttpServer::debug(HttpRequest *pHttpRequest)
+void MuHttpServer::debug(HttpRequest* pHttpRequest)
 {
 }
 
-void MuHttpServer::warning(const QString &msg)
+void MuHttpServer::warning(const QString& msg)
 {
 }

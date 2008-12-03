@@ -20,9 +20,9 @@
 
 using namespace std;
 
-FileFinderImp::FileFinderImp()
+FileFinderImp::FileFinderImp() :
+   mCurrentEntry(mEntryList.end())
 {
-   mCurrentEntry = mEntryList.end();
 }
 
 FileFinderImp::~FileFinderImp()
@@ -35,7 +35,7 @@ bool FileFinderImp::findFile(const string& path, const string& criteria, bool in
    mDir.setFilter(includeDirectories ? QDir::AllEntries : QDir::Files);
    mDir.setNameFilters(QStringList() << QString::fromStdString(criteria));
    mDir.setSorting(QDir::Name);
-   if(!mDir.exists())
+   if (!mDir.exists())
    {
       mDir = QDir();
       mEntryList.clear();
@@ -50,11 +50,11 @@ bool FileFinderImp::findFile(const string& path, const string& criteria, bool in
 
 bool FileFinderImp::findNextFile()
 {
-   if(mEntryList.isEmpty())
+   if (mEntryList.isEmpty())
    {
       return false;
    }
-   if(mCurrentEntry == mEntryList.end())
+   if (mCurrentEntry == mEntryList.end())
    {
       mCurrentEntry = mEntryList.begin();
    }
@@ -62,7 +62,7 @@ bool FileFinderImp::findNextFile()
    {
       ++mCurrentEntry;
    }
-   if(mCurrentEntry == mEntryList.end())
+   if (mCurrentEntry == mEntryList.end())
    {
       mEntryList.clear();
       mCurrentEntry = mEntryList.end();
@@ -79,7 +79,7 @@ double FileFinderImp::getLength() const
 string FileFinderImp::getFileName() const
 {
    string name;
-   if(mCurrentEntry != mEntryList.end())
+   if (mCurrentEntry != mEntryList.end())
    {
       name = mCurrentEntry->fileName().toStdString();
    }
@@ -89,10 +89,10 @@ string FileFinderImp::getFileName() const
 string FileFinderImp::getFilePath() const
 {
    string path;
-   if(mCurrentEntry != mEntryList.end())
+   if (mCurrentEntry != mEntryList.end())
    {
       path = mCurrentEntry->absolutePath().toStdString();
-      if(!path.empty() && path[path.size()-1] != '/')
+      if (!path.empty() && path[path.size()-1] != '/')
       {
          path += "/";
       }
@@ -102,7 +102,7 @@ string FileFinderImp::getFilePath() const
 
 bool FileFinderImp::getFileTitle(string& fileTitle) const
 {
-   if(mCurrentEntry != mEntryList.end())
+   if (mCurrentEntry != mEntryList.end())
    {
       fileTitle = mCurrentEntry->baseName().toStdString();
       return true;
@@ -112,7 +112,7 @@ bool FileFinderImp::getFileTitle(string& fileTitle) const
 
 bool FileFinderImp::getFullPath(string& fullFilePath) const
 {
-   if(mCurrentEntry != mEntryList.end())
+   if (mCurrentEntry != mEntryList.end())
    {
       fullFilePath = mCurrentEntry->absoluteFilePath().toStdString();
       return true;
@@ -122,12 +122,13 @@ bool FileFinderImp::getFullPath(string& fullFilePath) const
 
 void FileFinderImp::getLastAccessTime(DateTime& dt) const
 {
-   if(mCurrentEntry != mEntryList.end())
+   if (mCurrentEntry != mEntryList.end())
    {
 #if defined(WIN_API)
 #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Workaround for Qt 4.3.1 issue #186743 (dadkins)")
       WIN32_FILE_ATTRIBUTE_DATA fileData;
-      if (GetFileAttributesEx(mCurrentEntry->absoluteFilePath().toStdString().c_str(), GetFileExInfoStandard, &fileData))
+      if (GetFileAttributesEx(mCurrentEntry->absoluteFilePath().toStdString().c_str(),
+         GetFileExInfoStandard, &fileData))
       {
          SYSTEMTIME systemTime;
          if (FileTimeToSystemTime(&fileData.ftLastAccessTime, &systemTime))
@@ -138,9 +139,10 @@ void FileFinderImp::getLastAccessTime(DateTime& dt) const
       }
 #else
       QDateTime qdt = mCurrentEntry->lastRead().toUTC();
-      if(qdt.isValid())
+      if (qdt.isValid())
       {
-         dt.set(qdt.date().year(), qdt.date().month(), qdt.date().day(), qdt.time().hour(), qdt.time().minute(), qdt.time().second());
+         dt.set(qdt.date().year(), qdt.date().month(), qdt.date().day(), qdt.time().hour(),
+            qdt.time().minute(), qdt.time().second());
       }
 #endif
    }
@@ -148,12 +150,13 @@ void FileFinderImp::getLastAccessTime(DateTime& dt) const
 
 void FileFinderImp::getLastModificationTime(DateTime& dt) const
 {
-   if(mCurrentEntry != mEntryList.end())
+   if (mCurrentEntry != mEntryList.end())
    {
 #if defined(WIN_API)
 #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Workaround for Qt 4.3.1 issue #186743 (dadkins)")
       WIN32_FILE_ATTRIBUTE_DATA fileData;
-      if (GetFileAttributesEx(mCurrentEntry->absoluteFilePath().toStdString().c_str(), GetFileExInfoStandard, &fileData))
+      if (GetFileAttributesEx(mCurrentEntry->absoluteFilePath().toStdString().c_str(),
+         GetFileExInfoStandard, &fileData))
       {
          SYSTEMTIME systemTime;
          if (FileTimeToSystemTime(&fileData.ftLastWriteTime, &systemTime))
@@ -164,9 +167,10 @@ void FileFinderImp::getLastModificationTime(DateTime& dt) const
       }
 #else
       QDateTime qdt = mCurrentEntry->lastModified().toUTC();
-      if(qdt.isValid())
+      if (qdt.isValid())
       {
-         dt.set(qdt.date().year(), qdt.date().month(), qdt.date().day(), qdt.time().hour(), qdt.time().minute(), qdt.time().second());
+         dt.set(qdt.date().year(), qdt.date().month(), qdt.date().day(), qdt.time().hour(),
+            qdt.time().minute(), qdt.time().second());
       }
 #endif
    }
@@ -174,7 +178,8 @@ void FileFinderImp::getLastModificationTime(DateTime& dt) const
 
 bool FileFinderImp::isDots() const
 {
-   return (mCurrentEntry != mEntryList.end()) && (mCurrentEntry->fileName() == "." || mCurrentEntry->fileName() == "..");
+   return (mCurrentEntry != mEntryList.end()) &&
+      (mCurrentEntry->fileName() == "." || mCurrentEntry->fileName() == "..");
 }
 
 bool FileFinderImp::isDirectory() const

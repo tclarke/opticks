@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #include <QtCore/QRegExp>
 #include <QtCore/QStringList>
 
@@ -33,17 +31,16 @@ QValidator::State BandBadValuesValidator::validate(QString& input, int& pos) con
    {
       return QValidator::Intermediate;
    }
-   else
-   {
-      return QValidator::Invalid;
-   }
+
+   return QValidator::Invalid;
 }
 
 QString BandBadValuesValidator::convertVectorToString(const vector<int>& vec)
 {
    QStringList lstOfNumberStrings;
    QString numberString;
-   vector<int>::const_iterator iter = vec.begin(), end = vec.end();
+   vector<int>::const_iterator iter = vec.begin();
+   vector<int>::const_iterator end = vec.end();
    while (iter != end)
    {
       numberString = QString::number(*iter);
@@ -59,7 +56,8 @@ const std::vector<int> BandBadValuesValidator::convertStringToVector(QString& in
 {
    QStringList lstOfUnparsedStrings;
    lstOfUnparsedStrings = input.split(QString(","), QString::SkipEmptyParts);
-   QStringList::iterator iter = lstOfUnparsedStrings.begin(), end = lstOfUnparsedStrings.end();
+   QStringList::iterator iter = lstOfUnparsedStrings.begin();
+   QStringList::iterator end = lstOfUnparsedStrings.end();
    bool convertedAll = true;
 
    vector<int> lstOfInts;

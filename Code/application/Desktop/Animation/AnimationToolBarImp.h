@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef ANIMATION_TOOLBAR_IMP_H
-#define ANIMATION_TOOLBAR_IMP_H
+#ifndef ANIMATIONTOOLBARIMP_H
+#define ANIMATIONTOOLBARIMP_H
 
 #include <QtGui/QComboBox>
 #include <QtGui/QLabel>
@@ -46,10 +46,13 @@ public:
    void setHideTimestamp(bool hideTimestamp);
    bool getHideTimestamp() const;
 
+   void cleanUpItems();
+
 protected slots:
    // animation control buttons
-   void backward();
-   void forward();
+   void speedUp();
+   void slowDown();
+   void changeDirection();
    void stop();
    void playPause();
    void stepForward();
@@ -79,6 +82,7 @@ protected:
 
 private:
    void setPlayButtonState(AnimationState state);
+   void setChangeDirectionButtonState(AnimationState state);
 
    /**
     * WheelEventSlider is a subclass of QSlider to avoid
@@ -97,16 +101,14 @@ private:
       void wheelEvent(QWheelEvent *e);
    };
 
+   QAction* mpChangeDirectionAction;   // button changes the direction in which the movie is playing
    QAction* mpStopAction;              // button to stop playing movie and return to beginning of movie
    QAction* mpPlayPauseAction;         // pause/play button
-   QAction* mpBackwardAction;          // button changes the direction in which the movie is playing to backward
-                                       // button also changes the speed if movie already playing backwards
-   QAction* mpForwardAction;           // button changes the direction in which the movie is playing to forward
-                                       // button also changes the speed if movie already playing backwards
-
+   QAction* mpSlowDownAction;          // button changes the speed to the previous value in the list
+   QAction* mpSpeedUpAction;           // button changes the speed to the next value in the list
    QComboBox* mpFrameSpeedCombo;       // button changes the speed at which the movie is playing
-   QAction* mpStepBackwardAction;      // button steps the movie one frame backward
    QAction* mpStepForwardAction;       // button steps the movie one frame forward
+   QAction* mpStepBackwardAction;      // button steps the movie one frame backward
    QSlider* mpFrameSlider;             // slider is used to change the frame the movie is displaying
    QAction* mpDropFramesAction;        // button to determine show if frames can be dropped or not
    AnimationCycleButton* mpCycle;
@@ -116,36 +118,6 @@ private:
 
    AnimationState mPrevAnimationState; // stores the previous animation state to be used after the slider is released
    bool mHideTimestamp;
-};
-
-class AnimationCycleGrid : public PixmapGrid
-{
-   Q_OBJECT
-
-public:
-   AnimationCycleGrid(QWidget* pParent);
-   void setCurrentValue(AnimationCycle value);
-   AnimationCycle getCurrentValue() const;
-
-signals: 
-   void valueChanged(AnimationCycle value);
-
-private slots:
-   void translateChange(const QString&);
-};
-
-class AnimationCycleButton : public PixmapGridButton
-{
-   Q_OBJECT
-
-public:
-   AnimationCycleButton(QWidget* pParent);
-
-   void setCurrentValue(AnimationCycle value);
-   AnimationCycle getCurrentValue() const;
-
-signals:
-   void valueChanged(AnimationCycle value);
 };
 
 #define ANIMATIONTOOLBARADAPTEREXTENSION_CLASSES \

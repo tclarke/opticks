@@ -41,8 +41,8 @@ BatchApplication::~BatchApplication()
 
 const string& BatchApplication::getObjectType() const
 {
-   static string type("BatchApplication");
-   return type;
+   static string sType("BatchApplication");
+   return sType;
 }
 
 bool BatchApplication::isKindOf(const string& className) const
@@ -144,7 +144,7 @@ int BatchApplication::run(int argc, char** argv)
       pManager->executeStartupPlugIns(pProgress);
    }
 
-   bool bSuccess =  executeStartupBatchWizards(pProgress);
+   bool bSuccess = executeStartupBatchWizards(pProgress);
 
    // Close the session to cleanup created objects
    SessionManagerImp::instance()->close();
@@ -171,8 +171,7 @@ void BatchApplication::reportWarning(const string& warningMessage) const
 {
    if (warningMessage.empty() == false)
    {
-      cerr << endl;
-      cerr << APP_NAME << " WARNING: " << warningMessage << endl;
+      cerr << endl << APP_NAME << " WARNING: " << warningMessage << endl;
    }
 }
 
@@ -184,6 +183,5 @@ void BatchApplication::reportError(const string& errorMessage) const
       message = "Unknown error";
    }
 
-   cerr << endl;
-   cerr << APP_NAME << " ERROR: " << message << endl;
+   cerr << endl << APP_NAME << " ERROR: " << message << endl;
 }

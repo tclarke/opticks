@@ -34,7 +34,8 @@ Nitf::StdidbParser::StdidbParser()
 
 bool Nitf::StdidbParser::runAllTests(Progress* pProgress, ostream& failure)
 {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : TODO: The fields sizes and types from the stdidb.tbl file do not match the information in the JITC's MrBIIF DFF file. (lbeck)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : TODO: The fields sizes and types " \
+   "from the stdidb.tbl file do not match the information in the JITC's MrBIIF DFF file. (lbeck)")
 
    static const string data(
       "11SEP01"                 // FIELD1
@@ -171,7 +172,9 @@ bool Nitf::StdidbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
    dtg.resize(8);
    memcpy(&dtg[0], &buf[0], 8);
 
-   unsigned short year(0), month(0), day(0);
+   unsigned short year(0);
+   unsigned short month(0);
+   unsigned short day(0);
 
    if (success)
    {
@@ -219,7 +222,9 @@ bool Nitf::StdidbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
    string str;
    str.resize(6);
    memcpy(&str[0], &buf[0], 6);
-   unsigned short hour(0), min(0), sec(0);
+   unsigned short hour(0);
+   unsigned short min(0);
+   unsigned short sec(0);
    if (success)
    {
       success = DtgParseHHMM(str, hour, min);
@@ -364,7 +369,7 @@ Nitf::TreState Nitf::StdidbParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID && totalFields != numFields)
    {
       reporter << "Total fields in the Dynamic Object(" <<
-         totalFields <<") did not match the number found(" << numFields << ") ";
+         totalFields << ") did not match the number found(" << numFields << ") ";
       status = INVALID;
    }
 
@@ -388,7 +393,7 @@ bool Nitf::StdidbParser::fromDynamicObject(const DynamicObject& input, ostream& 
 
    try
    {
-      const DateTime *pMissionDTG = dv_cast<DateTime>(&input.getAttribute(STDIDB::FIELD1));
+      const DateTime* pMissionDTG = dv_cast<DateTime>(&input.getAttribute(STDIDB::FIELD1));
       if (pMissionDTG == NULL)
       {
          return false;
@@ -399,26 +404,25 @@ bool Nitf::StdidbParser::fromDynamicObject(const DynamicObject& input, ostream& 
       boost::to_upper(ddmmmyy);
       output << sizeString(ddmmmyy, 7);
 
-      output << sizeString( dv_cast<string>(input.getAttribute (STDIDB::FIELD2)), 4);
-      output << sizeString( dv_cast<string>(input.getAttribute (STDIDB::FIELD3)), 2);
-      output <<   toString( dv_cast<int>(input.getAttribute    (STDIDB::FIELD4)), 3);
-      output << sizeString( dv_cast<string>(input.getAttribute (STDIDB::FIELD5)), 2);
-      output <<   toString( dv_cast<int>(input.getAttribute    (STDIDB::FIELD6)), 2);
-      output << sizeString( dv_cast<string>(input.getAttribute (STDIDB::FIELD7)), 3);
-      output << sizeString( dv_cast<string>(input.getAttribute (STDIDB::FIELD8)), 1);
-      output <<   toString( dv_cast<int>(input.getAttribute    (STDIDB::FIELD9)), 2);
-      output <<   toString( dv_cast<int>(input.getAttribute    (STDIDB::FIELD10)), 5);
-      output << sizeString( dv_cast<string>(input.getAttribute (STDIDB::FIELD11)), 2);
-      output <<   toString( dv_cast<int>(input.getAttribute    (STDIDB::FIELD12)), 2);
-      output <<   toString( dv_cast<int>(input.getAttribute    (STDIDB::FIELD13)), 5);
-      output << sizeString( dv_cast<string>(input.getAttribute (STDIDB::FIELD14)), 2);
-      output <<   toString( dv_cast<int>(input.getAttribute    (STDIDB::FIELD15)), 4);
-
-      output << sizeString( dv_cast<string>(input.getAttribute (STDIDB::FIELD16)), 11);
+      output << sizeString(dv_cast<string>(input.getAttribute(STDIDB::FIELD2)), 4);
+      output << sizeString(dv_cast<string>(input.getAttribute(STDIDB::FIELD3)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(STDIDB::FIELD4)), 3);
+      output << sizeString(dv_cast<string>(input.getAttribute(STDIDB::FIELD5)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(STDIDB::FIELD6)), 2);
+      output << sizeString(dv_cast<string>(input.getAttribute(STDIDB::FIELD7)), 3);
+      output << sizeString(dv_cast<string>(input.getAttribute(STDIDB::FIELD8)), 1);
+      output << toString(dv_cast<int>(input.getAttribute(STDIDB::FIELD9)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(STDIDB::FIELD10)), 5);
+      output << sizeString(dv_cast<string>(input.getAttribute(STDIDB::FIELD11)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(STDIDB::FIELD12)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(STDIDB::FIELD13)), 5);
+      output << sizeString(dv_cast<string>(input.getAttribute(STDIDB::FIELD14)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(STDIDB::FIELD15)), 4);
+      output << sizeString(dv_cast<string>(input.getAttribute(STDIDB::FIELD16)), 11);
 
       // NOTE: the create DATE and FIELD17 fields are combined into one.
 
-      const DateTime *pCreateDTG = dv_cast<DateTime>(&input.getAttribute(STDIDB::FIELD17));
+      const DateTime* pCreateDTG = dv_cast<DateTime>(&input.getAttribute(STDIDB::FIELD17));
       if (pCreateDTG == NULL)
       {
          return false;

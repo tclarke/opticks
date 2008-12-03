@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef __DYNMCOBJADAPTER_H
-#define __DYNMCOBJADAPTER_H
+#ifndef DYNAMICOBJECTADAPTER_H
+#define DYNAMICOBJECTADAPTER_H
 
 #include "DynamicObject.h"
 #include "DynamicObjectImp.h"
@@ -30,8 +30,8 @@ public:
 
    virtual const std::string& getObjectType() const
    {
-      static std::string type("DynamicObjectAdapter");
-      return type;
+      static std::string sType("DynamicObjectAdapter");
+      return sType;
    }
 
    virtual bool isKindOf(const std::string& className) const
@@ -47,4 +47,4 @@ public:
    DYNAMICOBJECTADAPTER_METHODS(DynamicObjectImp)
 };
 
-#endif   // __DYNMCOBJADAPTER_H
+#endif

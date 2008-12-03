@@ -67,18 +67,18 @@ OptionsOverviewWindow::OptionsOverviewWindow() :
    
    // Initialize From Settings
    ColorType trailColor = SpatialDataWindow::getSettingOverviewTrailColor();
-   int opacity = int(trailColor.mAlpha / 2.550f + 0.5f); 
+   int opacity = static_cast<int>(trailColor.mAlpha / 2.550f + 0.5f); 
    trailColor.mAlpha = 255;
    mpTrailColor->setColor(trailColor);
 
    mpTrailOpacity->setValue(opacity);
    mpTrailThreshold->setValue(SpatialDataWindow::getSettingOverviewTrailThreshold());
 }
-   
+
 void OptionsOverviewWindow::applyChanges()
-{  
+{
    ColorType trailColor = mpTrailColor->getColorType();
-   int alpha = int(mpTrailOpacity->value() * 2.55f + 0.5f);
+   int alpha = static_cast<int>(mpTrailOpacity->value() * 2.55f + 0.5f);
    if (alpha < 0)
    {
       alpha = 0;

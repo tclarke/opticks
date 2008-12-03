@@ -60,7 +60,7 @@ public:
     *  @param   file
     *           Full filename path of the Module.
     */
-   ModuleDescriptor(const std::string& id, const std::string& file, std::map<std::string, std::string> &plugInIds);
+   ModuleDescriptor(const std::string& id, const std::string& file, std::map<std::string, std::string>& plugInIds);
 
    /**
     *  Default desctructor for a Module
@@ -96,7 +96,7 @@ public:
     *  @return  This method returns true if the Module initialization
     *           is sucessful.
     */
-   bool initializePlugInInformation(std::map<std::string, std::string> &plugInIds);
+   bool initializePlugInInformation(std::map<std::string, std::string>& plugInIds);
 
    /**
     *  Instantiates one of the Module's Plug-Ins
@@ -118,12 +118,12 @@ public:
     *  The createInterface() method is used to instantiate one of a 
     *  Module's Plug-Ins.  
     *
-    *  @param   plugIn
+    *  @param   pDescriptor
     *           Reference to the Plug-In you want to create.
     *
     *  @return  A pointer to the created interface.
     */
-   virtual PlugIn* createInterface(PlugInDescriptorImp* plugIn);
+   virtual PlugIn* createInterface(PlugInDescriptorImp* pDescriptor);
 
    /**
     *  Test whether a given file is a Module
@@ -137,14 +137,14 @@ public:
     *  call procedure that is part of the Module interface,
     *  defined in the Module.h header file.
     *
-    *  @param    fileName
+    *  @param    file
     *            The given file to test whether it is a valid
     *            Module.
     *
     *  @return   This method returns true if the given filename
     *            is a valid Module.
     */
-   static bool isModule(const std::string& fileName);
+   static bool isModule(const std::string& file);
 
    virtual const bool isValidatedModule() const;
 
@@ -272,17 +272,19 @@ public:
     *
     *  @return The unique id specified by the module.
     */
-   static std::string getModuleId(const std::string &filename);
+   static std::string getModuleId(const std::string& filename);
+
    SESSIONITEMACCESSOR_METHODS(SessionItemImp)
+
    /**
     * @copydoc SessionItem::serialize()
     */
-   virtual bool serialize(SessionItemSerializer &serializer) const;
+   virtual bool serialize(SessionItemSerializer& serializer) const;
 
    /**
     * @copydoc SessionItem::deserialize()
     */
-   virtual bool deserialize(SessionItemDeserializer &deserializer);
+   virtual bool deserialize(SessionItemDeserializer& deserializer);
 
 protected:
    std::string  mVersion;

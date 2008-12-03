@@ -135,7 +135,8 @@ OptionsSpatialDataView::OptionsSpatialDataView() :
    pPanZoomLayout->addWidget(pMaxZoomLabel, 2, 0);
    pPanZoomLayout->addWidget(mpMaxZoom, 2, 1, Qt::AlignLeft);
    pPanZoomLayout->setColumnStretch(1, 10);
-   LabeledSection* pPanZoomLimitSection = new LabeledSection(pPanZoomWidget, "Default Panning And Zooming Limits", this);
+   LabeledSection* pPanZoomLimitSection = new LabeledSection(pPanZoomWidget,
+      "Default Panning And Zooming Limits", this);
    
    // Dialog layout
    QVBoxLayout* pLayout = new QVBoxLayout(this);

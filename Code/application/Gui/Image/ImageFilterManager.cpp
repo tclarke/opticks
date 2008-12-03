@@ -219,7 +219,7 @@ vector<ImageFilterDescriptorImp*> ImageFilterManager::deserialize(const string& 
 #endif
 
    XmlReader xmlReader(NULL, false);
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *pDomDoc(NULL);
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* pDomDoc(NULL);
    if (filename.empty() == false)
    {
       if (QFile::exists(QString::fromStdString(filename)))
@@ -237,34 +237,39 @@ vector<ImageFilterDescriptorImp*> ImageFilterManager::deserialize(const string& 
 
    try 
    {
-      DOMElement *pRoot(NULL);
+      DOMElement* pRoot(NULL);
       if (pDomDoc != NULL)
       {
          pRoot = pDomDoc->getDocumentElement();
-         for(DOMNode *pNode = pRoot->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())
+
+         if (pRoot == NULL)
          {
-            if (XMLString::equals(pNode->getNodeName(),X("filter")))
+            return filterDescriptors;
+         }
+
+         for (DOMNode* pNode = pRoot->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())
+         {
+            if (XMLString::equals(pNode->getNodeName(), X("filter")))
             {
                // Parse the Filter XML Element
-               DOMElement *pElement(static_cast<DOMElement *>(pNode));
+               DOMElement* pElement(static_cast<DOMElement*>(pNode));
 
                ImageFilterDescriptorAdapter* pFilterDescriptor = new ImageFilterDescriptorAdapter();
                pFilterDescriptor->setName(A(pElement->getAttribute(X("name"))));
                pFilterDescriptor->setDescription(A(pElement->getAttribute(X("description"))));
                pFilterDescriptor->setType(ImageFilterDescriptor::IMAGE_FILTER);
 
-               if(XMLString::equals(pElement->getAttribute(X("type")),X("FeedbackFilter")))
+               if (XMLString::equals(pElement->getAttribute(X("type")), X("FeedbackFilter")))
                {
                   pFilterDescriptor->setType(ImageFilterDescriptor::FEEDBACK_FILTER);
                }
 
                // Parse all the Programs
-               for(DOMNode *pProgram = pNode->getFirstChild(); pProgram != NULL;
-                  pProgram = pProgram->getNextSibling())
+               for (DOMNode* pProgram = pNode->getFirstChild(); pProgram != NULL; pProgram = pProgram->getNextSibling())
                {
-                  if(XMLString::equals(pProgram->getNodeName(),X("parameter")))
+                  if (XMLString::equals(pProgram->getNodeName(), X("parameter")))
                   {
-                     DOMElement *pParamElement(static_cast<DOMElement *>(pProgram));
+                     DOMElement* pParamElement(static_cast<DOMElement*>(pProgram));
                      if (pParamElement != NULL)
                      {
                         string parameterName(A(pParamElement->getAttribute(X("name"))));
@@ -275,16 +280,16 @@ vector<ImageFilterDescriptorImp*> ImageFilterManager::deserialize(const string& 
                         pFilterDescriptor->setParameter(parameterName, parameterVariant);
                      }
                   }
-                  if(XMLString::equals(pProgram->getNodeName(),X("program")))
+                  if (XMLString::equals(pProgram->getNodeName(), X("program")))
                   {
-                     DOMElement *pElement(static_cast<DOMElement *>(pProgram));
-                     if (pElement != NULL)
+                     DOMElement* pProgramElement(static_cast<DOMElement*>(pProgram));
+                     if (pProgramElement != NULL)
                      {
-                        string gpuProgramName(A(pElement->getAttribute(X("name"))));
-                        string gpuProgramType(A(pElement->getAttribute(X("type"))));
+                        string gpuProgramName(A(pProgramElement->getAttribute(X("name"))));
+                        string gpuProgramType(A(pProgramElement->getAttribute(X("type"))));
                         GpuProgramDescriptor::GpuProgramType programType = GpuProgramDescriptor::VERTEX_PROGRAM;
 
-                        GpuProgramDescriptorAdapter *pGpuDescriptor = new GpuProgramDescriptorAdapter();
+                        GpuProgramDescriptorAdapter* pGpuDescriptor = new GpuProgramDescriptorAdapter();
                         VERIFYRV(pGpuDescriptor != NULL, vector<ImageFilterDescriptorImp*>());
                         if (gpuProgramName.empty() == false)
                         {
@@ -296,12 +301,13 @@ vector<ImageFilterDescriptorImp*> ImageFilterManager::deserialize(const string& 
                            pGpuDescriptor->setType(programType);
 
                            // get input parameters specific to Gpu program
-                           for(DOMNode *pParameter = pProgram->getFirstChild(); pParameter != NULL;
+                           for (DOMNode* pParameter = pProgram->getFirstChild();
+                              pParameter != NULL;
                               pParameter = pParameter->getNextSibling())
                            {
-                              if(XMLString::equals(pParameter->getNodeName(),X("parameter")))
+                              if (XMLString::equals(pParameter->getNodeName(), X("parameter")))
                               {
-                                 DOMElement *pParamElement(static_cast<DOMElement *>(pParameter));
+                                 DOMElement* pParamElement(static_cast<DOMElement*>(pParameter));
                                  if (pParamElement != NULL)
                                  {
                                     string parameterName(A(pParamElement->getAttribute(X("name"))));
@@ -316,20 +322,22 @@ vector<ImageFilterDescriptorImp*> ImageFilterManager::deserialize(const string& 
                            bool compiled = true;
 #if defined(CG_SUPPORTED)
                            compiled = CgContext::instance()->isCgVertexProgram(pGpuDescriptor->getName()) ||
-                                      CgContext::instance()->isCgFragmentProgram(pGpuDescriptor->getName());
+                              CgContext::instance()->isCgFragmentProgram(pGpuDescriptor->getName());
 #endif
-                           if(compiled)
+                           if (compiled)
                            {
                               pFilterDescriptor->addGpuProgram(pGpuDescriptor);
                            }
                            else
                            {
-                              MessageResource msg("Unable to load GPU filter", "app", "7FA00287-DF55-46A9-AA82-D3CBFA34842F");
+                              MessageResource msg("Unable to load GPU filter", "app",
+                                 "7FA00287-DF55-46A9-AA82-D3CBFA34842F");
                               msg->addProperty("filter name", pGpuDescriptor->getName());
 #if defined(CG_SUPPORTED)
                               msg->addProperty("error message", CgContext::instance()->getLastCgErrorMessage());
 #endif
-                              pFilterDescriptor->setName(""); // make sure this filter descriptor does not go in the list
+                              // make sure this filter descriptor does not go in the list
+                              pFilterDescriptor->setName("");
                               delete pGpuDescriptor;
                               pGpuDescriptor = NULL;
                            }
@@ -346,7 +354,7 @@ vector<ImageFilterDescriptorImp*> ImageFilterManager::deserialize(const string& 
          }
       }
    }
-   catch (XmlReader::DomParseException &parseException)
+   catch (XmlReader::DomParseException& parseException)
    {
       VERIFYNR_MSG(false == true, parseException.str().c_str());
    }

@@ -36,17 +36,17 @@ public:
    FeatureClass();
    ~FeatureClass();
 
-   AnyData *copy() const;
+   AnyData* copy() const;
 
-   bool setParentElement(GraphicElement *pParentElement);
+   bool setParentElement(GraphicElement* pParentElement);
 
-   bool open(std::string &errorMessage);
-   bool close(std::string &errorMessage);
+   bool open(std::string& errorMessage);
+   bool close(std::string& errorMessage);
 
    bool hasLabels() const;
 
-   bool setConnectionParameters(const ArcProxyLib::ConnectionParameters &param);
-   const ArcProxyLib::ConnectionParameters &getConnectionParameters() const;
+   bool setConnectionParameters(const ArcProxyLib::ConnectionParameters& connection);
+   const ArcProxyLib::ConnectionParameters& getConnectionParameters() const;
 
    bool clearQueries();
    bool addQuery(const QueryOptions &query);
@@ -97,7 +97,7 @@ private:
 
    // Don't need to listen for deletion of or clean up this pointer, 
    // since this AnyData will be deleted before the parent element
-   GraphicElement *mpParentElement;
+   GraphicElement* mpParentElement;
 
    std::string mFeatureClassId;
 
@@ -110,9 +110,9 @@ private:
    std::string mLayerName;
 
    // only valid during load
-   GraphicGroup *mpLoadGroup;
-   Progress *mpLoadProgress;
-   const QueryOptions *mpLoadQueryOptions;
+   GraphicGroup* mpLoadGroup;
+   Progress* mpLoadProgress;
+   const QueryOptions* mpLoadQueryOptions;
    unsigned int mProgress;
    unsigned int mProgressBase;
    unsigned int mProgressSize;

@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef HDF4_FILE_H
-#define HDF4_FILE_H
+#ifndef HDF4FILE_H
+#define HDF4FILE_H
 
 #include <string>
 #include <vector>
@@ -30,11 +28,11 @@ public:
    /**
     * Creates an Hdf4File with a given filename.
     *
-    * @param  filename
+    * @param  name
     *         The name of the HDF file on disk.
     */
-   explicit Hdf4File(const std::string& filename);
-   
+   explicit Hdf4File(const std::string& name);
+
    /**
     * Destroys the Hdf4File object.
     */
@@ -52,4 +50,4 @@ private:
    Hdf4Group* mpRootGroup;
 };
 
-#endif   // HDF4FILE_H
+#endif

@@ -13,7 +13,6 @@
 #include "ExporterShell.h"
 
 class PlugInManagerServices;
-class UtilityServices;
 
 /**
  *  Model Exporter
@@ -23,15 +22,12 @@ class UtilityServices;
 class ModelExporter : public ExporterShell
 {
 public:
-   ModelExporter(const std::string &dataElementSubclass);
+   ModelExporter(const std::string& dataElementSubclass);
    ~ModelExporter();
-
-   bool setBatch() { return true; }
-   bool setInteractive() { return true; }
 
    bool getInputSpecification(PlugInArgList*& pInArgList);
    bool getOutputSpecification(PlugInArgList*& pOutArgList);
-   bool execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList);
+   bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
 
 protected:
    Service<PlugInManagerServices> mpPlugInManager;

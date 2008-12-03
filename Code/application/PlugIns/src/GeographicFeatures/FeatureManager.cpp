@@ -91,19 +91,19 @@ FeatureManager::~FeatureManager()
       delete mpProxy;
    }
    vector<DataElement*> featureClasses = Service<ModelServices>()->getElements("FeatureClass");
-   for(vector<DataElement*>::iterator element = featureClasses.begin(); element != featureClasses.end(); ++element)
+   for (vector<DataElement*>::iterator element = featureClasses.begin(); element != featureClasses.end(); ++element)
    {
-      Any *pAnyElement = dynamic_cast<Any*>(*element);
-      if(model_cast<FeatureClass*>(*element) != NULL)
+      Any* pAnyElement = dynamic_cast<Any*>(*element);
+      if (model_cast<FeatureClass*>(*element) != NULL)
       {
          pAnyElement->setData(NULL);
       }
    }
    ToolBar* pToolBar = static_cast<ToolBar*>(Service<DesktopServices>()->getWindow(MENU_NAME, TOOLBAR));
-   if(pToolBar != NULL)
+   if (pToolBar != NULL)
    {
-      MenuBar *pMenuBar = pToolBar->getMenuBar();
-      if(pMenuBar != NULL)
+      MenuBar* pMenuBar = pToolBar->getMenuBar();
+      if (pMenuBar != NULL)
       {
          for_each(mImportActions.begin(), mImportActions.end(),
             boost::bind(&MenuBar::removeMenuItem, pMenuBar, _1));
@@ -136,7 +136,7 @@ bool FeatureManager::execute(PlugInArgList *pInputArgList, PlugInArgList *pOutpu
       Service<DesktopServices> pDesktop;
       ToolBar* pToolBar = static_cast<ToolBar*>(pDesktop->createWindow(MENU_NAME, TOOLBAR));
       VERIFY(pToolBar != NULL);
-      MenuBar *pMenuBar = pToolBar->getMenuBar();
+      MenuBar* pMenuBar = pToolBar->getMenuBar();
       VERIFY(pMenuBar != NULL);
 
       if (addMenuItems(*pMenuBar) == false)
@@ -156,13 +156,13 @@ bool FeatureManager::execute(PlugInArgList *pInputArgList, PlugInArgList *pOutpu
 
 bool FeatureManager::addMenuItems(MenuBar &menuBar)
 {
-   QAction *pEditAction = menuBar.addCommand(MENU_NAME + "\\" + EDIT, PLUGIN_NAME + "/" + EDIT);
-   QAction *pImportGeodatabaseAction = menuBar.addCommand(MENU_NAME + "\\" + IMPORT, PLUGIN_NAME + "/" + IMPORT);
+   QAction* pEditAction = menuBar.addCommand(MENU_NAME + "\\" + EDIT, PLUGIN_NAME + "/" + EDIT);
+   QAction* pImportGeodatabaseAction = menuBar.addCommand(MENU_NAME + "\\" + IMPORT, PLUGIN_NAME + "/" + IMPORT);
    VERIFY(pEditAction != NULL && pImportGeodatabaseAction != NULL);
    pEditAction->setAutoRepeat(false);
    pImportGeodatabaseAction->setAutoRepeat(false);
 
-   QMenu *pMenu = menuBar.getMenu(menuBar.getMenuItem(MENU_NAME));
+   QMenu* pMenu = menuBar.getMenu(menuBar.getMenuItem(MENU_NAME));
    VERIFY(pMenu != NULL);
 
    mpSeparator = pMenu->insertSeparator(pEditAction);
@@ -181,7 +181,7 @@ bool FeatureManager::refresh()
 
    ToolBar* pToolBar = static_cast<ToolBar*>(pDesktop->getWindow(MENU_NAME, TOOLBAR));
    VERIFY(pToolBar != NULL);
-   MenuBar *pMenuBar = pToolBar->getMenuBar();
+   MenuBar* pMenuBar = pToolBar->getMenuBar();
    VERIFY(pMenuBar != NULL);
 
    return refresh(*pMenuBar);
@@ -189,14 +189,12 @@ bool FeatureManager::refresh()
 
 bool FeatureManager::refresh(MenuBar &menuBar)
 {
-   for_each(mImportActions.begin(), mImportActions.end(),
-      boost::bind(&MenuBar::removeMenuItem, &menuBar, _1));
-
+   for_each(mImportActions.begin(), mImportActions.end(), boost::bind(&MenuBar::removeMenuItem, &menuBar, _1));
    mImportActions.clear();
 
    // generate new actions
 
-   const DynamicObject *pOptionsSet = FeatureManager::getSettingOptions();
+   const DynamicObject* pOptionsSet = FeatureManager::getSettingOptions();
    if (pOptionsSet == NULL)
    {
       return true; // No options is a valid state
@@ -209,7 +207,7 @@ bool FeatureManager::refresh(MenuBar &menuBar)
       iter != names.end(); ++iter)
    {
       string menuLocation = MENU_NAME + "\\" + *iter;
-      QAction *pAction = menuBar.addCommand(menuLocation, mpSeparator);
+      QAction* pAction = menuBar.addCommand(menuLocation, mpSeparator);
       VERIFY(pAction != NULL);
       pAction->setAutoRepeat(false);
       pDesktop->initializeAction(pAction, PLUGIN_NAME + "/" + *iter);
@@ -221,7 +219,7 @@ bool FeatureManager::refresh(MenuBar &menuBar)
 
 void FeatureManager::menuItemTriggered(QAction *pAction)
 {
-   size_t i;
+   vector<QAction*>::size_type i;
    for (i = 0; i < mImportActions.size(); ++i)
    {
       if (mImportActions[i] == pAction)
@@ -234,7 +232,7 @@ void FeatureManager::menuItemTriggered(QAction *pAction)
       return; // not found
    }
 
-   const DynamicObject *pOptionsSet = FeatureManager::getSettingOptions();
+   const DynamicObject* pOptionsSet = FeatureManager::getSettingOptions();
 
    if (pOptionsSet == NULL)
    {
@@ -245,7 +243,7 @@ void FeatureManager::menuItemTriggered(QAction *pAction)
 
    QString name = pAction->text();
    DataVariant var = pOptionsSet->getAttribute(name.toStdString());
-   DynamicObject *pOptions = var.getPointerToValue<DynamicObject>();
+   DynamicObject* pOptions = var.getPointerToValue<DynamicObject>();
    if (pOptions == NULL)
    {
       return;
@@ -283,7 +281,7 @@ void FeatureManager::updateContextMenu(Subject &subject, const string &signal, c
       return;
    }
 
-   QAction *pRefreshAction = new QAction("Refresh", pMenu->getActionParent());
+   QAction* pRefreshAction = new QAction("Refresh", pMenu->getActionParent());
    pRefreshAction->setAutoRepeat(false);
    VERIFYNR(connect(pRefreshAction, SIGNAL(triggered()), this, SLOT(refreshFeatureClass())));
    pMenu->addActionBefore(pRefreshAction, APP_FEATUREMANAGER_REFRESH_ACTION, APP_APPLICATIONWINDOW_EXPORT_ACTION);
@@ -300,7 +298,7 @@ void FeatureManager::updateContextMenu(Subject &subject, const string &signal, c
       exportPix.setMask(exportPix.createHeuristicMask());
       QIcon exportIcon(exportPix);
 
-      QAction *pExportAction = new QAction(exportIcon, "Export", pMenu->getActionParent());
+      QAction* pExportAction = new QAction(exportIcon, "Export", pMenu->getActionParent());
       pExportAction->setAutoRepeat(false);
       VERIFYNR(connect(pExportAction, SIGNAL(triggered()), this, SLOT(exportFeatureClass())));
       pMenu->addActionAfter(pExportAction, APP_FEATUREMANAGER_EXPORT_ACTION, APP_FEATUREMANAGER_SEPARATOR_ACTION);
@@ -368,7 +366,7 @@ void FeatureManager::exportFeatureClass()
       return;
    }
 
-   FeatureClass *pFeatureClass = featureClasses.front();
+   FeatureClass* pFeatureClass = featureClasses.front();
 
    QString filename = QFileDialog::getSaveFileName(Service<DesktopServices>()->getMainWidget(), 
       "Export to", QString(), "Geographic feature layer (*.geolayer)");
@@ -414,7 +412,7 @@ void FeatureManager::displayFeatureClassProperties()
 void FeatureManager::importGeodatabase()
 {
    ProgressResource pProgressRes("Geodatabase import");
-   Progress *pProgress = pProgressRes.get();
+   Progress* pProgress = pProgressRes.get();
    StepResource pStep("Run Algorithm", "app", "F218A414-6C65-457a-B012-AF676FC44C26");
 
    ImporterResource pImporter(FeatureLayerImporter::PLUGIN_NAME, 
@@ -426,10 +424,10 @@ void FeatureManager::importGeodatabase()
    DataDescriptor* pDescriptor = descriptors.front()->getDataDescriptor();
    FAIL_IF(pDescriptor == NULL, "Could not get the data descriptor", return);
 
-   Importer *pImporterPlugIn = dynamic_cast<Importer*>(pImporter->getPlugIn());
+   Importer* pImporterPlugIn = dynamic_cast<Importer*>(pImporter->getPlugIn());
    FAIL_IF(pImporterPlugIn == NULL, "Could not find the importer", return);
 
-   FeatureClassWidget *pProperties = dynamic_cast<FeatureClassWidget*>(
+   FeatureClassWidget* pProperties = dynamic_cast<FeatureClassWidget*>(
       pImporterPlugIn->getImportOptionsWidget(pDescriptor));
 
    FAIL_IF(pProperties == NULL, "Could not get properties widget", return);
@@ -437,21 +435,23 @@ void FeatureManager::importGeodatabase()
    Service<DesktopServices> pDesktop;
    auto_ptr<QDialog> pDialog(new QDialog(pDesktop->getMainWidget()));
   
-   QDialogButtonBox *pButtons = new QDialogButtonBox(
+   QDialogButtonBox* pButtons = new QDialogButtonBox(
       QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, pDialog.get());
 
    QFrame* pHLine = new QFrame(pDialog.get());
    pHLine->setFrameStyle(QFrame::HLine | QFrame::Sunken);
 
-   QVBoxLayout *pLayout = new QVBoxLayout(pDialog.get());
+   QVBoxLayout* pLayout = new QVBoxLayout(pDialog.get());
    pProperties->layout()->setMargin(0);
    pLayout->addWidget(pProperties);
    pLayout->addWidget(pHLine);
    pLayout->addWidget(pButtons);
 
-   FAIL_IF(!QObject::connect(pButtons, SIGNAL(accepted()), pDialog.get(), SLOT(accept())), "Could not connect buttons", return);
-   FAIL_IF(!QObject::connect(pButtons, SIGNAL(rejected()), pDialog.get(), SLOT(reject())), "Could not connect buttons", return);
-   
+   FAIL_IF(!QObject::connect(pButtons, SIGNAL(accepted()), pDialog.get(),
+      SLOT(accept())), "Could not connect buttons", return);
+   FAIL_IF(!QObject::connect(pButtons, SIGNAL(rejected()), pDialog.get(),
+      SLOT(reject())), "Could not connect buttons", return);
+
    int result = pDialog->exec();
 
    pProperties->setParent(NULL);
@@ -481,12 +481,10 @@ FeatureProxyConnector *FeatureManager::getProxy()
    if (mpProxy == NULL)
    {
       // Start up ArcProxy
-      const Filename* pPlugInPath = ConfigurationSettings::getSettingPlugInPath();
-      string plugInPath;
-      if (pPlugInPath != NULL)
-      {
-         plugInPath = pPlugInPath->getFullPathAndName();
-      }
+      ConfigurationSettingsExt2* pSettings =
+         dynamic_cast<ConfigurationSettingsExt2*>(Service<ConfigurationSettings>().get());
+      VERIFYRV(pSettings != NULL, NULL);
+      string plugInPath = pSettings->getPlugInPath();
 #if defined(WIN_API)
       QString proxyPath = QString::fromStdString(
          plugInPath + SLASH + "ArcProxy" + SLASH + "ArcProxy" + EXE_EXTENSION);
@@ -498,7 +496,7 @@ FeatureProxyConnector *FeatureManager::getProxy()
 #endif
 
       mpProxy = new FeatureProxyConnector(proxyPath);
-      VERIFY(mpProxy != NULL);
+      VERIFYRV(mpProxy != NULL, NULL);
       connect(mpProxy, SIGNAL(initialized()), this, SLOT(proxyInitialized()));
 
       mpProxy->initialize();
@@ -524,13 +522,13 @@ vector<FeatureClass*> FeatureManager::getFeatureClasses(const vector<SessionItem
    for (vector<SessionItem*>::const_iterator iter = sessionItems.begin();
       iter != sessionItems.end(); ++iter)
    {
-      SessionItem *pItem = *iter;
+      SessionItem* pItem = *iter;
       if (pItem == NULL)
       {
          continue;
       }
 
-      FeatureClass *pFeatureClass = model_cast<FeatureClass*>(pItem);
+      FeatureClass* pFeatureClass = model_cast<FeatureClass*>(pItem);
       if (pFeatureClass != NULL)
       {
          featureClasses.push_back(pFeatureClass);
@@ -541,9 +539,9 @@ vector<FeatureClass*> FeatureManager::getFeatureClasses(const vector<SessionItem
          continue;
       }
 
-      AnnotationElement *pElement = NULL;
+      AnnotationElement* pElement = NULL;
       
-      AnnotationLayer *pLayer = dynamic_cast<AnnotationLayer*>(pItem);
+      AnnotationLayer* pLayer = dynamic_cast<AnnotationLayer*>(pItem);
       if (pLayer != NULL)
       {
          pElement = dynamic_cast<AnnotationElement*>(pLayer->getDataElement());
@@ -557,10 +555,10 @@ vector<FeatureClass*> FeatureManager::getFeatureClasses(const vector<SessionItem
       {
          Service<ModelServices> pModel;
          vector<DataElement*> elements = pModel->getElements(pElement, "FeatureClass");
-         for (vector<DataElement*>::const_iterator iter = elements.begin(); 
-            iter != elements.end(); ++iter)
+         for (vector<DataElement*>::const_iterator elementIter = elements.begin(); 
+            elementIter != elements.end(); ++elementIter)
          {
-            FeatureClass *pFeatureClass = model_cast<FeatureClass*>(*iter);
+            pFeatureClass = model_cast<FeatureClass*>(*elementIter);
             if (pFeatureClass != NULL)
             {
                featureClasses.push_back(pFeatureClass);
@@ -593,16 +591,16 @@ bool FeatureManager::serialize(SessionItemSerializer &serializer) const
       success = writer.addAttr("toolbarId", pToolBar->getId());
    }
    vector<DataElement*> elements = Service<ModelServices>()->getElements("FeatureClass");
-   for(vector<DataElement*>::iterator element = elements.begin(); element != elements.end(); ++element)
+   for (vector<DataElement*>::iterator element = elements.begin(); element != elements.end(); ++element)
    {
-      FeatureClass *pFeatureClass = model_cast<FeatureClass*>(*element);
-      if(pFeatureClass != NULL)
+      FeatureClass* pFeatureClass = model_cast<FeatureClass*>(*element);
+      if (pFeatureClass != NULL)
       {
          writer.pushAddPoint(writer.addElement("FeatureClass"));
          writer.addAttr("dataElementId", (*element)->getId());
          writer.addAttr("parentElementId", (*element)->getParent()->getId());
          FactoryResource<DynamicObject> dynobj(pFeatureClass->toDynamicObject());
-         if(dynobj.get() == NULL)
+         if (dynobj.get() == NULL)
          {
             return false;
          }
@@ -617,40 +615,40 @@ bool FeatureManager::serialize(SessionItemSerializer &serializer) const
 bool FeatureManager::deserialize(SessionItemDeserializer &deserializer)
 {
    XmlReader reader(NULL, false);
-   DOMElement *pRootElement = deserializer.deserialize(reader, "FeatureManager");
+   DOMElement* pRootElement = deserializer.deserialize(reader, "FeatureManager");
    if (pRootElement == NULL)
    {
       return false;
    }
    string id = A(pRootElement->getAttribute(X("toolbarId")));
-   ToolBar *pToolBar = dynamic_cast<ToolBar*>(Service<SessionManager>()->getSessionItem(id));
+   ToolBar* pToolBar = dynamic_cast<ToolBar*>(Service<SessionManager>()->getSessionItem(id));
    if (pToolBar != NULL)
    {
-      MenuBar *pMenuBar = pToolBar->getMenuBar();
+      MenuBar* pMenuBar = pToolBar->getMenuBar();
       if (pMenuBar != NULL)
       {
          addMenuItems(*pMenuBar);
-         if(!refresh(*pMenuBar))
+         if (!refresh(*pMenuBar))
          {
             return false;
          }
       }
    }
-   for(DOMNode *pChld = pRootElement->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
+   for (DOMNode *pChld = pRootElement->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
    {
-      if(XMLString::equals(pChld->getNodeName(), X("FeatureClass")))
+      if (XMLString::equals(pChld->getNodeName(), X("FeatureClass")))
       {
-         DOMElement *pElmnt = static_cast<DOMElement*>(pChld);
+         DOMElement* pElmnt = static_cast<DOMElement*>(pChld);
          string elementId = A(pElmnt->getAttribute(X("dataElementId")));
-         Any *pElement = dynamic_cast<Any*>(Service<SessionManager>()->getSessionItem(elementId));
-         if(pElement == NULL)
+         Any* pElement = dynamic_cast<Any*>(Service<SessionManager>()->getSessionItem(elementId));
+         if (pElement == NULL)
          {
             return false;
          }
-         FeatureClass *pFeatureClass = new FeatureClass();
+         FeatureClass* pFeatureClass = new FeatureClass();
          FactoryResource<DynamicObject> dynobj;
          VERIFY(pFeatureClass != NULL && dynobj.get() != NULL);
-         if(!dynobj->fromXml(pChld, XmlBase::VERSION) || !pFeatureClass->fromDynamicObject(dynobj.get()))
+         if (!dynobj->fromXml(pChld, XmlBase::VERSION) || !pFeatureClass->fromDynamicObject(dynobj.get()))
          {
             return false;
          }

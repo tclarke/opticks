@@ -7,6 +7,9 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#ifndef GCPPOINTREADERWRITER_H
+#define GCPPOINTREADERWRITER_H
+
 #include "GcpList.h"
 #include "Hdf5CustomReader.h"
 #include "Hdf5CustomWriter.h"
@@ -43,3 +46,5 @@ private:
    hid_t mDataType;
    std::vector<hsize_t> mDataSpace;
 };
+
+#endif

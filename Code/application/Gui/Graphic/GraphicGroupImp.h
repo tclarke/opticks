@@ -52,7 +52,7 @@ public:
    bool moveObjectToFront(GraphicObject* pObject);
    int getObjectStackingIndex(GraphicObject* pObject) const;
    void setObjectStackingIndex(GraphicObject* pObject, int index);
-   virtual bool removeObject(GraphicObject* pObj, bool bDelete);
+   virtual bool removeObject(GraphicObject* pObject, bool bDelete);
    virtual void removeAllObjects(bool bDelete);
 
    bool replicateObject(const GraphicObject* pObject);

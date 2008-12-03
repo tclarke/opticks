@@ -258,7 +258,7 @@ Nitf::TreState Nitf::ExoptaParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID && totalFields != numFields)
    {
       reporter << "Total fields in the Dynamic Object(" <<
-         totalFields <<") did not match the number found(" << numFields << ") ";
+         totalFields << ") did not match the number found(" << numFields << ") ";
       status = INVALID;
    }
 
@@ -283,32 +283,32 @@ bool Nitf::ExoptaParser::fromDynamicObject(const DynamicObject& input, ostream& 
 
    try
    {
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(EXOPTA::ANGLE_TO_NORTH)), 3, -1);
-      output <<   toString( dv_cast<double>(input.getAttribute(EXOPTA::MEAN_GSD)), 5, 1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(EXOPTA::ANGLE_TO_NORTH)), 3, -1);
+      output << toString(dv_cast<double>(input.getAttribute(EXOPTA::MEAN_GSD)), 5, 1);
 
       // RESERVED has a fixed value of "1" so hard code it for now
       // output << sizeString( dv_cast<string>(input.getAttribute (EXOPTA::RESERVED)), 1);
       output << "1";
 
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(EXOPTA::DYNAMIC_RANGE)), 5, -1);
-      output << sizeString( dv_cast<string>(input.getAttribute (EXOPTA::RESERVED2)), 7);
-      output <<   toString( dv_cast<double>(input.getAttribute(EXOPTA::OBL_ANG)), 5, 2);
-      output <<   toString( dv_cast<double>(input.getAttribute(EXOPTA::ROLL_ANG)), 6, 2, ZERO_FILL, POS_SIGN_TRUE);
-      output << sizeString( dv_cast<string>(input.getAttribute (EXOPTA::PRIME_ID)), 12);
-      output << sizeString( dv_cast<string>(input.getAttribute (EXOPTA::PRIME_BE)), 15);
-      output << sizeString( dv_cast<string>(input.getAttribute (EXOPTA::RESERVED3)), 5);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(EXOPTA::N_SEC)), 3, -1);
-      output << sizeString( dv_cast<string>(input.getAttribute (EXOPTA::RESERVED4)), 2);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(EXOPTA::DYNAMIC_RANGE)), 5, -1);
+      output << sizeString(dv_cast<string>(input.getAttribute(EXOPTA::RESERVED2)), 7);
+      output << toString(dv_cast<double>(input.getAttribute(EXOPTA::OBL_ANG)), 5, 2);
+      output << toString(dv_cast<double>(input.getAttribute(EXOPTA::ROLL_ANG)), 6, 2, ZERO_FILL, POS_SIGN_TRUE);
+      output << sizeString(dv_cast<string>(input.getAttribute(EXOPTA::PRIME_ID)), 12);
+      output << sizeString(dv_cast<string>(input.getAttribute(EXOPTA::PRIME_BE)), 15);
+      output << sizeString(dv_cast<string>(input.getAttribute(EXOPTA::RESERVED3)), 5);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(EXOPTA::N_SEC)), 3, -1);
+      output << sizeString(dv_cast<string>(input.getAttribute(EXOPTA::RESERVED4)), 2);
 
       // RESERVED5 has a fixed value of "0000001" so hard code it for now
       // output << sizeString( dv_cast<string>(input.getAttribute (EXOPTA::RESERVED5)), 7);
       output << "0000001";    // RESERVED5 has a fixed value of "0000001"
 
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(EXOPTA::N_SEG)), 3, -1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(EXOPTA::MAX_LP_SEG)), 6, -1);
-      output << sizeString( dv_cast<string>(input.getAttribute (EXOPTA::RESERVED6)), 12);
-      output <<   toString( dv_cast<double>(input.getAttribute(EXOPTA::SUN_EL)), 5, 1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute(EXOPTA::SUN_AZ)), 5, 1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(EXOPTA::N_SEG)), 3, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(EXOPTA::MAX_LP_SEG)), 6, -1);
+      output << sizeString(dv_cast<string>(input.getAttribute(EXOPTA::RESERVED6)), 12);
+      output << toString(dv_cast<double>(input.getAttribute(EXOPTA::SUN_EL)), 5, 1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(EXOPTA::SUN_AZ)), 5, 1);
    }
    catch (const bad_cast&)
    {

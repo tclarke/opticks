@@ -30,11 +30,23 @@ class XmlRpcMethodCallImp
 {
 public:
    XmlRpcMethodCallImp() {}
-   XmlRpcMethodCallImp(const XmlRpcMethodCallImp &other) {}
+   XmlRpcMethodCallImp(const XmlRpcMethodCallImp& other) {}
    virtual ~XmlRpcMethodCallImp() {}
-   virtual XmlRpcParam *operator()(const XmlRpcParams &params) { return new XmlRpcParam; }
-   virtual QString getHelp() { return ""; }
-   virtual XmlRpcArrayParam *getSignature() { return NULL; }
+
+   virtual XmlRpcParam* operator()(const XmlRpcParams& params)
+   {
+      return new XmlRpcParam;
+   }
+
+   virtual QString getHelp()
+   {
+      return "";
+   }
+
+   virtual XmlRpcArrayParam* getSignature()
+   {
+      return NULL;
+   }
 };
 
 /**
@@ -49,11 +61,23 @@ public:
 class XmlRpcMethodCall
 {
 public:
-   XmlRpcMethodCall(const QString &methodName, const XmlRpcParams &params) : mMethodName(methodName), mParams(params) {}
-   explicit XmlRpcMethodCall(XERCES_CPP_NAMESPACE_QUALIFIER DOMElement *pRoot);
+   XmlRpcMethodCall(const QString &methodName, const XmlRpcParams &params) :
+      mMethodName(methodName),
+      mParams(params)
+   {
+   }
 
-   QString getMethodName() const { return mMethodName; }
-   const XmlRpcParams &getParams() const { return mParams; }
+   explicit XmlRpcMethodCall(XERCES_CPP_NAMESPACE_QUALIFIER DOMElement* pRoot);
+
+   QString getMethodName() const
+   {
+      return mMethodName;
+   }
+
+   const XmlRpcParams& getParams() const
+   {
+      return mParams;
+   }
 
    QString toXml() const;
 
@@ -65,21 +89,21 @@ private:
 class XmlRpcMethodResponse
 {
 public:
-   explicit XmlRpcMethodResponse(XERCES_CPP_NAMESPACE_QUALIFIER DOMElement *pRoot);
-   explicit XmlRpcMethodResponse(const XmlRpcParam *pReturnValue);
-   ~XmlRpcMethodResponse() { delete mpReturnValue; }
+   explicit XmlRpcMethodResponse(XERCES_CPP_NAMESPACE_QUALIFIER DOMElement* pRoot);
+   explicit XmlRpcMethodResponse(const XmlRpcParam* pReturnValue);
+   ~XmlRpcMethodResponse();
 
    QString toXml() const;
-   const XmlRpcParam *returnValue() { return mpReturnValue; }
+   const XmlRpcParam* returnValue();
 
 private:
-   const XmlRpcParam *mpReturnValue;
+   const XmlRpcParam* mpReturnValue;
 };
 
 class XmlRpcMethodFault
 {
 public:
-   XmlRpcMethodFault(unsigned int faultCode, const QString &otherInformation = QString());
+   XmlRpcMethodFault(unsigned int faultCode, const QString& otherInformation = QString());
 
    QString toXml() const;
 

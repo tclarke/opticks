@@ -7,21 +7,19 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-#include <algorithm>
-#include <sstream>
-
-#include <boost/bind.hpp>
-
 #include "AppVerify.h"
 #include "DataRequest.h"
 #include "PageCache.h"
 #include "TypesFile.h"
 
+#include <algorithm>
+#include <boost/bind.hpp>
+#include <sstream>
 using namespace std;
 
 PageCache::PageCache(const int maxCacheSize) :
-   mCacheSize(0), MAX_CACHE_SIZE(maxCacheSize)
+   MAX_CACHE_SIZE(maxCacheSize),
+   mCacheSize(0)
 {
    initialize(0, 0, 0);
 }
@@ -102,7 +100,7 @@ CachedPage *PageCache::createPage(CachedPage::UnitPtr pUnit, InterleaveFormatTyp
 
 void PageCache::enforceCacheSize()
 {
-   while(mCacheSize > MAX_CACHE_SIZE && !mUnits.empty())
+   while (mCacheSize > MAX_CACHE_SIZE && !mUnits.empty())
    {
       mCacheSize -= mUnits.front()->getSize();
       mUnits.pop_front();

@@ -7,7 +7,7 @@ class ArcProxyNotFound(SCons.Warnings.Warning):
 SCons.Warnings.enableWarningClass(ArcProxyNotFound)
 
 def generate(env):
-    env.AppendUnique(CXXFLAGS="-I../../ArcProxyLib -IArcProxyLib")
+    env.AppendUnique(CXXFLAGS=["-I../../ArcProxyLib", "-IArcProxyLib"])
 
 def exists(env):
     return env.Detect('ArcProxy')

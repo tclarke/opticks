@@ -10,7 +10,6 @@
 #include "Animation.h"
 #include "AnimationController.h"
 #include "AnimationServices.h"
-#include "AppVersion.h"
 #include "DataAccessor.h"
 #include "DataAccessorImpl.h"
 #include "DesktopServices.h"
@@ -34,9 +33,9 @@ MultiMovie::MultiMovie() :
    mpWindow1(NULL), mpWindow2(NULL), mpWindow3(NULL),
    mpLayer1(NULL), mpLayer2(NULL), mpLayer3(NULL)
 {
-   setCreator("Ball Aerospace & Technologies Corp.");
-   setCopyright("Copyright (c) 2007 BATC");
-   setVersion(APP_VERSION_NUMBER);
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setProductionStatus(false);
    setMenuLocation("[Demo]\\Multi-Movie");
    setName("Multi Movie");
@@ -150,14 +149,14 @@ bool MultiMovie::populateRasterElements()
       return false;
    }
 
-   for (int row=0; row<mNumRows; ++row)
+   for (int row = 0; row < mNumRows; ++row)
    {
-      unsigned short *pData1 = static_cast<unsigned short*>(da1->getRow());
-      unsigned short *pData2 = static_cast<unsigned short*>(da2->getRow());
-      unsigned short *pData3 = static_cast<unsigned short*>(da3->getRow());
-      for (int col=0; col<mNumCols; ++col)
+      unsigned short* pData1 = static_cast<unsigned short*>(da1->getRow());
+      unsigned short* pData2 = static_cast<unsigned short*>(da2->getRow());
+      unsigned short* pData3 = static_cast<unsigned short*>(da3->getRow());
+      for (int col = 0; col < mNumCols; ++col)
       {
-         for (int band=0; band<mNumBands; ++band)
+         for (int band = 0; band < mNumBands; ++band)
          {
             *pData1++ = band;
             *pData2++ = mNumBands + band;
@@ -185,14 +184,14 @@ bool MultiMovie::createWindow(RasterElement *pElement, SpatialDataWindow *&pWind
 
    VERIFY(pWindow != NULL);
    
-   SpatialDataView *pView = pWindow->getSpatialDataView();
+   SpatialDataView* pView = pWindow->getSpatialDataView();
    VERIFY(pView != NULL);
 
    UndoLock lock(pView);
    pView->setPrimaryRasterElement(pElement);
 
    pLayer = dynamic_cast<RasterLayer*>(pView->createLayer(RASTER, pElement));
-   if(pLayer != NULL)
+   if (pLayer != NULL)
    {
       pLayer->enableGpuImage(true);
       pLayer->setStretchUnits(GRAYSCALE_MODE, RAW_VALUE);
@@ -207,7 +206,9 @@ bool MultiMovie::createWindow(RasterElement *pElement, SpatialDataWindow *&pWind
 bool MultiMovie::setupAnimations()
 {
    // Create the controller
-   AnimationController *pController = Service<AnimationServices>()->createAnimationController("MultiMovie", FRAME_TIME);
+   Service<AnimationServices> pServices;
+
+   AnimationController* pController = pServices->createAnimationController("MultiMovie", FRAME_TIME);
    if (pController == NULL)
    {
       return false;
@@ -215,12 +216,12 @@ bool MultiMovie::setupAnimations()
    pController->setCanDropFrames(false);
 
    // Set the controller into each of the views
-   SpatialDataView *pView1 = dynamic_cast<SpatialDataView*>(mpWindow1->getView());
-   SpatialDataView *pView2 = dynamic_cast<SpatialDataView*>(mpWindow2->getView());
-   SpatialDataView *pView3 = dynamic_cast<SpatialDataView*>(mpWindow3->getView());
+   SpatialDataView* pView1 = dynamic_cast<SpatialDataView*>(mpWindow1->getView());
+   SpatialDataView* pView2 = dynamic_cast<SpatialDataView*>(mpWindow2->getView());
+   SpatialDataView* pView3 = dynamic_cast<SpatialDataView*>(mpWindow3->getView());
    if (pView1 == NULL || pView2 == NULL || pView3 == NULL)
    {
-      Service<AnimationServices>()->destroyAnimationController(pController);
+      pServices->destroyAnimationController(pController);
       return false;
    }
 
@@ -229,12 +230,12 @@ bool MultiMovie::setupAnimations()
    pView3->setAnimationController(pController);
 
    // Create the animations for each layer
-   Animation *pAnimation1 = pController->createAnimation("MultiMovie1");
-   Animation *pAnimation2 = pController->createAnimation("MultiMovie2");
-   Animation *pAnimation3 = pController->createAnimation("MultiMovie3");
+   Animation* pAnimation1 = pController->createAnimation("MultiMovie1");
+   Animation* pAnimation2 = pController->createAnimation("MultiMovie2");
+   Animation* pAnimation3 = pController->createAnimation("MultiMovie3");
    if (pAnimation1 == NULL || pAnimation2 == NULL || pAnimation3 == NULL)
    {
-      Service<AnimationServices>()->destroyAnimationController(pController);
+      pServices->destroyAnimationController(pController);
       return false;
    }
 
@@ -243,7 +244,7 @@ bool MultiMovie::setupAnimations()
    vector<AnimationFrame> frames1;
    vector<AnimationFrame> frames2;
    vector<AnimationFrame> frames3;
-   for (int i=0; i<mNumBands; ++i)
+   for (int i = 0; i < mNumBands; ++i)
    {
       AnimationFrame frame1("frame", i, static_cast<double>(i)/mNumBands);
       AnimationFrame frame2("frame", i, static_cast<double>(i+timeOffset)/(mNumBands+timeOffset));

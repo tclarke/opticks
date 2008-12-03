@@ -11,7 +11,6 @@
 
 #include <QtGui/QCursor>
 #include <QtGui/QInputDialog>
-#include <QtGui/QMenu>
 #include <QtGui/QMouseEvent>
 
 #include "glCommon.h"
@@ -28,7 +27,7 @@
 #include "CurveAdapter.h"
 #include "CurveCollectionAdapter.h"
 #include "DataDescriptorAdapter.h"
-#include "DesktopServicesImp.h"
+#include "DesktopServices.h"
 #include "GraphicGroupImp.h"
 #include "HistogramAdapter.h"
 #include "Icons.h"
@@ -79,47 +78,47 @@ PlotViewImp::PlotViewImp(const string& id, const string& viewName, QGLContext* d
    list<ContextMenuAction> menuActions;
 
    // Mouse mode menu
-   QMenu* pMouseModeMenu = new QMenu("&Mouse Mode", this);
-   if (pMouseModeMenu != NULL)
+   mpMouseModeMenu = new QMenu("&Mouse Mode", this);
+   if (mpMouseModeMenu != NULL)
    {
       string mouseModeContext = shortcutContext + string("/Mouse Mode");
 
-      QActionGroup* pMouseModeGroup = new QActionGroup(pMouseModeMenu);
-      pMouseModeGroup->setExclusive(true);
+      mpMouseModeGroup = new QActionGroup(mpMouseModeMenu);
+      mpMouseModeGroup->setExclusive(true);
 
-      mpObjectSelectAction = pMouseModeGroup->addAction(pIcons->mEdit, "&Object Selection");
+      mpObjectSelectAction = mpMouseModeGroup->addAction(pIcons->mEdit, "&Object Selection");
       mpObjectSelectAction->setAutoRepeat(false);
       mpObjectSelectAction->setCheckable(true);
       mpObjectSelectAction->setStatusTip("Enables selection of objects within the plot area");
       pDesktop->initializeAction(mpObjectSelectAction, mouseModeContext);
 
-      mpPanAction = pMouseModeGroup->addAction(pIcons->mPan, "&Pan");
+      mpPanAction = mpMouseModeGroup->addAction(pIcons->mPan, "&Pan");
       mpPanAction->setAutoRepeat(false);
       mpPanAction->setCheckable(true);
       mpPanAction->setStatusTip("Enables panning within the plot area");
       pDesktop->initializeAction(mpPanAction, mouseModeContext);
 
-      mpZoomAction = pMouseModeGroup->addAction(pIcons->mZoomRect, "&Zoom");
+      mpZoomAction = mpMouseModeGroup->addAction(pIcons->mZoomRect, "&Zoom");
       mpZoomAction->setAutoRepeat(false);
       mpZoomAction->setCheckable(true);
       mpZoomAction->setStatusTip("Enables zooming within the plot area");
       pDesktop->initializeAction(mpZoomAction, mouseModeContext);
 
-      mpLocateAction = pMouseModeGroup->addAction(pIcons->mDrawPixel, "&Locate Point");
+      mpLocateAction = mpMouseModeGroup->addAction(pIcons->mDrawPixel, "&Locate Point");
       mpLocateAction->setAutoRepeat(false);
       mpLocateAction->setCheckable(true);
       mpLocateAction->setStatusTip("Enables display of plot values at a given point");
       pDesktop->initializeAction(mpLocateAction, mouseModeContext);
 
-      mpAnnotateAction = pMouseModeGroup->addAction(pIcons->mAnnotation, "&Annotation");
+      mpAnnotateAction = mpMouseModeGroup->addAction(pIcons->mAnnotation, "&Annotation");
       mpAnnotateAction->setAutoRepeat(false);
       mpAnnotateAction->setCheckable(true);
       mpAnnotateAction->setStatusTip("Adds an annotation object (arrow with text) to the plot at a given point");
       pDesktop->initializeAction(mpAnnotateAction, mouseModeContext);
 
-      pMouseModeMenu->addActions(pMouseModeGroup->actions());
-      VERIFYNR(connect(pMouseModeGroup, SIGNAL(triggered(QAction*)), this, SLOT(setMouseMode(QAction*))));
-      menuActions.push_back(ContextMenuAction(pMouseModeMenu->menuAction(), APP_PLOTVIEW_MOUSE_MODE_MENU_ACTION));
+      mpMouseModeMenu->addActions(mpMouseModeGroup->actions());
+      VERIFYNR(connect(mpMouseModeGroup, SIGNAL(triggered(QAction*)), this, SLOT(setMouseMode(QAction*))));
+      menuActions.push_back(ContextMenuAction(mpMouseModeMenu->menuAction(), APP_PLOTVIEW_MOUSE_MODE_MENU_ACTION));
 
       // Separator
       QAction* pSeparatorAction = new QAction(this);
@@ -173,6 +172,10 @@ PlotViewImp::PlotViewImp(const string& id, const string& viewName, QGLContext* d
    mSelectionArea.setVisible(false);
 
    // Connections
+   VERIFYNR(connect(this, SIGNAL(mouseModeAdded(const MouseMode*)), this,
+      SLOT(addMouseModeAction(const MouseMode*))));
+   VERIFYNR(connect(this, SIGNAL(mouseModeRemoved(const MouseMode*)), this,
+      SLOT(removeMouseModeAction(const MouseMode*))));
    VERIFYNR(connect(this, SIGNAL(mouseModeEnabled(const MouseMode*, bool)), this,
       SLOT(enableMouseModeAction(const MouseMode*, bool))));
    VERIFYNR(connect(this, SIGNAL(mouseModeChanged(const MouseMode*)), this,
@@ -445,7 +448,7 @@ bool PlotViewImp::insertObject(PlotObject* pObject)
 
    if (pObject->isPrimary())
    {
-      PlotObjectImp *pObjectImp = dynamic_cast<PlotObjectImp*>(pObject);
+      PlotObjectImp* pObjectImp = dynamic_cast<PlotObjectImp*>(pObject);
       VERIFY(pObjectImp != NULL);
 
       VERIFYNR(connect(pObjectImp, SIGNAL(extentsChanged()), this, SLOT(updateExtents())));
@@ -717,8 +720,7 @@ void PlotViewImp::selectObjects(const QPoint& point, const PointSet* pPointSet,
 
    vector<Point*> points = pPointSet->getPoints();
 
-   for (vector<Point*>::iterator pointIter = points.begin(); 
-      pointIter != points.end(); pointIter++)
+   for (vector<Point*>::iterator pointIter = points.begin(); pointIter != points.end(); ++pointIter)
    {
       Point* pPoint = *pointIter;
       if (pPoint != NULL)
@@ -756,8 +758,7 @@ list<PlotObject*> PlotViewImp::getSelectedObjects(bool filterVisible) const
 
             //----- Get the pointsets points
             vector<Point*> pPoints = pPointSet->getPoints();
-            for (vector<Point*>::iterator pointIter = pPoints.begin();
-               pointIter != pPoints.end(); pointIter++) 
+            for (vector<Point*>::iterator pointIter = pPoints.begin(); pointIter != pPoints.end(); ++pointIter)
             {
                Point* pPoint = *pointIter;
                if (pPoint->isSelected() && (!filterVisible || pPoint->isVisible()))
@@ -839,8 +840,8 @@ void PlotViewImp::deleteSelectedObjects(bool filterVisible)
    {
       bool deleteObject = false;
 
-      PlotObject *pObj = *iter;
-      PlotObjectImp *pObjImp = dynamic_cast<PlotObjectImp*>(pObj);
+      PlotObject* pObj = *iter;
+      PlotObjectImp* pObjImp = dynamic_cast<PlotObjectImp*>(pObj);
       VERIFYNRV(pObjImp != NULL);
       if (pObjImp->isSelected() && (!filterVisible || pObjImp->isVisible()))
       {
@@ -850,7 +851,7 @@ void PlotViewImp::deleteSelectedObjects(bool filterVisible)
       {
          if (mSelectionMode == DEEP_SELECTION)
          {
-            PointSetImp *pSet = dynamic_cast<PointSetImp*>(pObjImp);
+            PointSetImp* pSet = dynamic_cast<PointSetImp*>(pObjImp);
             if (pSet != NULL)
             {
                pSet->deleteSelectedPoints(filterVisible);
@@ -984,6 +985,10 @@ void PlotViewImp::mousePressEvent(QMouseEvent* e)
          setCursor(Qt::BlankCursor);
          updateGL();
       }
+      else if (strMouseMode == "PanMode")
+      {
+         setCursor(Qt::ClosedHandCursor);
+      }
       else if (strMouseMode == "SelectionMode")
       {
          if ((e->modifiers() != Qt::ShiftModifier) && (e->modifiers() != Qt::ControlModifier))
@@ -1102,14 +1107,11 @@ void PlotViewImp::mouseMoveEvent(QMouseEvent* e)
       }
       else if (strMouseMode == "PanMode")
       {
-         DesktopServicesImp* pDesktop = DesktopServicesImp::instance();
-         if (pDesktop != NULL)
+         Service<DesktopServices> pDesktop;
+         if (pDesktop->getPanMode() == PAN_INSTANT)
          {
-            if (pDesktop->getPanMode() == PAN_INSTANT)
-            {
-               ViewImp::pan(ptMouse, mMouseCurrent);
-               updateGL();
-            }
+            ViewImp::pan(ptMouse, mMouseCurrent);
+            updateGL();
          }
       }
       else if (strMouseMode == "SelectionMode")
@@ -1211,14 +1213,20 @@ void PlotViewImp::mouseReleaseEvent(QMouseEvent* e)
       }
       else if (strMouseMode == "PanMode")
       {
-         DesktopServicesImp* pDesktop = DesktopServicesImp::instance();
-         if (pDesktop != NULL)
+         Service<DesktopServices> pDesktop;
+         if (pDesktop->getPanMode() == PAN_DELAY)
          {
-            if (pDesktop->getPanMode() == PAN_DELAY)
-            {
-               ViewImp::pan(ptMouse, mMouseStart);
-            }
+            ViewImp::pan(ptMouse, mMouseStart);
          }
+
+         // Restore the cursor
+         QCursor mouseCursor(Qt::OpenHandCursor);
+         if (pMouseMode != NULL)
+         {
+            mouseCursor = pMouseMode->getCursor();
+         }
+
+         setCursor(mouseCursor);
       }
       else if (strMouseMode == "SelectionMode")
       {
@@ -1339,7 +1347,7 @@ void PlotViewImp::draw()
 
 void PlotViewImp::temporaryGlContextChange()
 {
-   if(mpAnnotationLayer != NULL)
+   if (mpAnnotationLayer != NULL)
    {
       mpAnnotationLayer->temporaryGlContextChange();
    }
@@ -1401,9 +1409,62 @@ void PlotViewImp::setMouseMode(QAction* pAction)
    {
       setMouseMode("AnnotationMode");
    }
-   else
+   else if (pAction == NULL)
    {
       setMouseMode(reinterpret_cast<const MouseMode*>(NULL));
+   }
+   else
+   {
+      vector<const MouseMode*> mouseModes = getMouseModes();
+      for (vector<const MouseMode*>::iterator iter = mouseModes.begin(); iter != mouseModes.end(); ++iter)
+      {
+         const MouseMode* pMouseMode = *iter;
+         if (pMouseMode != NULL)
+         {
+            QAction* pCurrentAction = pMouseMode->getAction();
+            if (pCurrentAction == pAction)
+            {
+               string modeName;
+               pMouseMode->getName(modeName);
+               if (modeName.empty() == false)
+               {
+                  setMouseMode(QString::fromStdString(modeName));
+                  break;
+               }
+            }
+         }
+      }
+   }
+}
+
+void PlotViewImp::addMouseModeAction(const MouseMode* pMouseMode)
+{
+   if (pMouseMode == NULL)
+   {
+      return;
+   }
+
+   QAction* pAction = pMouseMode->getAction();
+   if (pAction != NULL)
+   {
+      mpMouseModeMenu->addAction(pAction);
+      mpMouseModeGroup->addAction(pAction);
+      pAction->setCheckable(true);
+   }
+}
+
+void PlotViewImp::removeMouseModeAction(const MouseMode* pMouseMode)
+{
+   if (pMouseMode == NULL)
+   {
+      return;
+   }
+
+   QAction* pAction = pMouseMode->getAction();
+   if (pAction != NULL)
+   {
+      mpMouseModeMenu->removeAction(pAction);
+      mpMouseModeGroup->removeAction(pAction);
    }
 }
 
@@ -2158,12 +2219,22 @@ bool PlotViewImp::toXml(XMLWriter* pXml) const
    {
       pXml->pushAddPoint(pXml->addElement("PlotObjects"));
       list<PlotObject*>::const_iterator it;
-      for (it=mObjects.begin(); it!= mObjects.end(); ++it)
+      for (it = mObjects.begin(); it != mObjects.end(); ++it)
       {
          const PlotObjectImp* pObject = dynamic_cast<PlotObjectImp*>(*it);
          if (pObject != NULL)
          {
-            pObject->toXml(pXml);
+            pXml->pushAddPoint(pXml->addElement("PlotObject"));
+            bool success = pObject->toXml(pXml);
+            DOMNode* pNode = pXml->popAddPoint();
+
+            if (success == false)
+            {
+               if (pNode != NULL)
+               {
+                  pXml->removeChild(pNode);
+               }
+            }
          }
       }
       pXml->popAddPoint();
@@ -2184,7 +2255,7 @@ bool PlotViewImp::fromXml(DOMNode* pDocument, unsigned int version)
       return false;
    }
 
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
+   DOMElement* pElem = static_cast<DOMElement*>(pDocument);
    if (pElem == NULL)
    {
       return false;
@@ -2224,9 +2295,8 @@ bool PlotViewImp::fromXml(DOMNode* pDocument, unsigned int version)
             pGChld != NULL;
             pGChld = pGChld->getNextSibling())
          {
-            if (pGChld->getNodeType() == DOMNode::ELEMENT_NODE)
+            if (XMLString::equals(pGChld->getNodeName(), X("PlotObject")))
             {
-               string name = A(pGChld->getNodeName());
                pElem = static_cast<DOMElement*>(pGChld);
                string typeStr = A(pElem->getAttribute(X("type")));
                PlotObjectType eType = StringUtilities::fromXmlString<PlotObjectType>(typeStr);

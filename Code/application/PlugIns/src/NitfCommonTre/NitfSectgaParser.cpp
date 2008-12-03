@@ -160,7 +160,7 @@ Nitf::TreState Nitf::SectgaParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID && totalFields != numFields)
    {
       reporter << "Total fields in the Dynamic Object(" <<
-         totalFields <<") did not match the number found(" << numFields << ") ";
+         totalFields << ") did not match the number found(" << numFields << ") ";
       status = INVALID;
    }
 
@@ -185,9 +185,9 @@ bool Nitf::SectgaParser::fromDynamicObject(const DynamicObject& input, ostream& 
 
    try
    {
-      output << sizeString( dv_cast<string>(input.getAttribute (SECTGA::SEC_ID)), 12);
-      output << sizeString( dv_cast<string>(input.getAttribute (SECTGA::SEC_BE)), 15);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(SECTGA::RESERVED001)), 1, -1);
+      output << sizeString(dv_cast<string>(input.getAttribute(SECTGA::SEC_ID)), 12);
+      output << sizeString(dv_cast<string>(input.getAttribute(SECTGA::SEC_BE)), 15);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(SECTGA::RESERVED001)), 1, -1);
    }
    catch (const bad_cast&)
    {

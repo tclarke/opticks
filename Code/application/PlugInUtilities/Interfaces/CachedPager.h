@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef CACHED_PAGER_H
-#define CACHED_PAGER_H
+#ifndef CACHEDPAGER_H
+#define CACHEDPAGER_H
 
 #include <string>
 
@@ -47,7 +45,10 @@ public:
     * that this object will page.  Arguments 
     * with this name should be of the type RasterElement.
     */
-   static std::string PagedElementArg() { return "Paged Element"; }
+   static std::string PagedElementArg()
+   {
+      return "Paged Element";
+   }
 
    /**
     * The name to use for the filename argument.
@@ -56,7 +57,10 @@ public:
     * this object will page.  Arguments with this name should 
     * be of the type Filename.
     */
-   static std::string PagedFilenameArg() { return "Paged Filename"; }
+   static std::string PagedFilenameArg()
+   {
+      return "Paged Filename";
+   }
 
    /**
     * Creates a CachedPager PlugIn.
@@ -67,6 +71,19 @@ public:
     * open the file and get a block from that file.
     */
    CachedPager();
+
+   /**
+    * Creates a CachedPager PlugIn.
+    *
+    * Sets cache size to cacheSize bytes. Sets writable flag to false.
+    *
+    * Subclasses need to override private pure virtual methods to
+    * open the file and get a block from that file.
+    *
+    * @param cacheSize
+    *        Number of bytes in the page cache.
+    */
+   CachedPager(const size_t cacheSize);
 
    /**
     * Destructor
@@ -251,28 +268,28 @@ protected:
     *          For a 200 row x 100 column x 10 band x INT2UBYTES dataset, this
     *          function would return 2.
     */
-   const int getBytesPerBand() const { return mBytesPerBand; }
+   const int getBytesPerBand() const;
 
    /**
     *  Accessor function for subclasses to gain access to private member variables.
     *
     *  @return The number of columns in the dataset.
     */
-   const int getColumnCount() const { return mColumnCount; }
+   const int getColumnCount() const;
 
    /**
     *  Accessor function for subclasses to gain access to private member variables.
     *
     *  @return The number of bands in the dataset.
     */
-   const int getBandCount() const { return mBandCount; }
+   const int getBandCount() const;
 
    /**
     *  Accessor function for subclasses to gain access to private member variables.
     *
     *  @return A pointer to the RasterElement.
     */
-   const RasterElement* getRasterElement() const { return mpRaster; }
+   const RasterElement* getRasterElement() const;
 
    /**
     *  Returns a reasonable chunk size.
@@ -284,14 +301,14 @@ protected:
     *
     *  @return  A reasonable chunk size, in bytes. Default implementation returns 1048576 bytes (1 MB).
     */
-   virtual double getChunkSize() const { return 1 * 1024 * 1024; }
+   virtual double getChunkSize() const;
 
 private:
    PageCache mCache;
    std::auto_ptr<mta::DMutex> mpMutex;
    std::string mFilename;
-   RasterDataDescriptor *mpDescriptor;
-   RasterElement *mpRaster;
+   RasterDataDescriptor* mpDescriptor;
+   RasterElement* mpRaster;
    int mBytesPerBand;
    int mColumnCount;
    int mBandCount;

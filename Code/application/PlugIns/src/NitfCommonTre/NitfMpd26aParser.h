@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef NITF_MPD26A_PARSER_H
-#define NITF_MPD26A_PARSER_H
+#ifndef NITFMPD26APARSER_H
+#define NITFMPD26APARSER_H
 
 #include "NitfTreParserShell.h"
 

@@ -46,8 +46,8 @@ protected:
    std::auto_ptr<FeatureClass> mpFeatureClass;
    mutable std::string mMessageText;
 
-   Progress *mpProgress;
-   Step *mpStep;
+   Progress* mpProgress;
+   Step* mpStep;
 
 private:
    FeatureClassWidget* mpOptionsWidget;

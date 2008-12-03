@@ -19,7 +19,7 @@ def generate(env):
        if not qtpath:
           SCons.Warnings.warn(QwtNotFound,"Could not detect Qt")
        else:
-          env.AppendUnique(CXXFLAGS="-I%s/include -I%s/include/%s/QtCore -I%s/include/%s/QtGui" % (path,qtpath,env["PLATFORM"],qtpath,env["PLATFORM"]),
+          env.AppendUnique(CXXFLAGS=["-I%s/include" % (path), "-I%s/include/%s/QtCore" % (qtpath,env["PLATFORM"]), "-I%s/include/%s/QtGui" % (qtpath,env["PLATFORM"])],
                            LIBPATH=['%s/lib/%s' % (path,env["PLATFORM"])],
                            LIBS=['qwt'])
 

@@ -20,23 +20,18 @@ public:
    InMemoryPager();
    ~InMemoryPager();
 
-   bool getInputSpecification(PlugInArgList *&pArgList);
+   bool getInputSpecification(PlugInArgList*& pArgList);
+   bool execute(PlugInArgList* pInput, PlugInArgList* pOutput);
 
-   bool execute(PlugInArgList *pInput, PlugInArgList *pOutput);
-
-   RasterPage *getPage(DataRequest *pOriginalRequest, 
-      DimensionDescriptor startRow,
-      DimensionDescriptor startColumn,
+   RasterPage* getPage(DataRequest* pOriginalRequest, DimensionDescriptor startRow, DimensionDescriptor startColumn,
       DimensionDescriptor startBand);
-
-   void releasePage(RasterPage *pPage);
+   void releasePage(RasterPage* pPage);
 
    int getSupportedRequestVersion() const;
 
 private:
-   RasterElement *mpRaster;
-   void *mpData;
-
+   RasterElement* mpRaster;
+   void* mpData;
 };
 
 #endif

@@ -132,7 +132,7 @@ void BackgroundPluginItem::finish()
    Executable* pExecutable = dynamic_cast<Executable*>(mpPlugIn);
    if (pExecutable != NULL)
    {
-      if(!pExecutable->hasAbort() || pExecutable->abort())
+      if (!pExecutable->hasAbort() || pExecutable->abort())
       {
          mFinished = true;
       }
@@ -155,7 +155,7 @@ void BackgroundPluginItem::setStatus(QString statusStr)
 
 // Custom event types - these values must be bewteen 1000 and 65535 as stated in the QEvent documentation
 const int BackgroundPluginWindow::BPW_PMODIFIED = 60000;
-const int BackgroundPluginWindow::BPW_CALLBACK  = 60001;
+const int BackgroundPluginWindow::BPW_CALLBACK = 60001;
 
 BackgroundPluginWindow::BackgroundPluginWindow(const string& id, QWidget* parent) :
    DockWindowAdapter(id, "Background Plug-In Window", parent),
@@ -172,7 +172,7 @@ BackgroundPluginWindow::BackgroundPluginWindow(const string& id, QWidget* parent
    mpStatusList->setUniformItemSizes(false);
 
    // Dismiss button
-   mpDismissButton  = new QPushButton("Dismiss", pWindowWidget);
+   mpDismissButton = new QPushButton("Dismiss", pWindowWidget);
    mpDismissButton->setToolTip("Remove selected status items if the plugin has completed or has been aborted.");
 
    // Abort button
@@ -227,7 +227,7 @@ BackgroundPluginItem* BackgroundPluginWindow::addItem(PlugIn* pPlugIn, Progress*
    // is the hexadecimal memory location of the plug-in pointer
    if (name.isEmpty() == true)
    {
-      name = "PlugIn " + QString::number(reinterpret_cast<size_t>(pPlugIn),16);
+      name = "PlugIn " + QString::number(reinterpret_cast<size_t>(pPlugIn), 16);
    }
 
    pProgress->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &BackgroundPluginWindow::progressChanged));
@@ -257,7 +257,7 @@ BackgroundPluginItem* BackgroundPluginWindow::getItem(Progress* pProgress)
 
 void BackgroundPluginWindow::progressChanged(Subject &subject, const string &signal, const boost::any &v)
 {
-   Progress *pProgress = dynamic_cast<Progress*>(&subject);
+   Progress* pProgress = dynamic_cast<Progress*>(&subject);
    if (NN(pProgress))
    {
       QApplication::postEvent(this, new ModifiedEvent(pProgress));
@@ -266,7 +266,7 @@ void BackgroundPluginWindow::progressChanged(Subject &subject, const string &sig
 
 bool BackgroundPluginWindow::addCallback(PlugInCallback *callback)
 {
-   if(callback != NULL)
+   if (callback != NULL)
    {
       QApplication::postEvent(this, new CallbackEvent(callback));
       return true;
@@ -303,11 +303,11 @@ void BackgroundPluginWindow::customEvent(QEvent* pEvent)
                (*pCallback)();
             }
 
-            PlugIn *pPlugIn(NULL);
+            PlugIn* pPlugIn(NULL);
             bool bDestroy(true);
 
-            BackgroundPluginItem *pItem(getItem(pCallback->progress()));
-            if(pItem != NULL)
+            BackgroundPluginItem* pItem(getItem(pCallback->progress()));
+            if (pItem != NULL)
             {
                pPlugIn = pItem->getPlugIn();
 
@@ -315,10 +315,11 @@ void BackgroundPluginWindow::customEvent(QEvent* pEvent)
                pItem->finish();
 
                // detach so we don't get anymore updates
-               Progress *pProgress(pItem->getProgress());
-               if(pProgress != NULL)
+               Progress* pProgress(pItem->getProgress());
+               if (pProgress != NULL)
                {
-                  pProgress->detach(SIGNAL_NAME(Subject, Modified), Slot(this, &BackgroundPluginWindow::progressChanged));
+                  pProgress->detach(SIGNAL_NAME(Subject, Modified),
+                     Slot(this, &BackgroundPluginWindow::progressChanged));
                }
 
                Executable* pExecutable = dynamic_cast<Executable*>(pPlugIn);
@@ -336,11 +337,10 @@ void BackgroundPluginWindow::customEvent(QEvent* pEvent)
 
             delete pCallback;
 
-            if(pPlugIn != NULL && bDestroy)
+            if (pPlugIn != NULL && bDestroy)
             {
-               PlugInManagerServicesImp *pManager(
-                           PlugInManagerServicesImp::instance());
-               if(pManager != NULL)
+               PlugInManagerServicesImp* pManager(PlugInManagerServicesImp::instance());
+               if (pManager != NULL)
                {
                   pManager->destroyPlugIn(pPlugIn);
                }
@@ -349,6 +349,9 @@ void BackgroundPluginWindow::customEvent(QEvent* pEvent)
 
          break;
       }
+
+      default:
+         break;
    }
 }
 

@@ -33,7 +33,8 @@ namespace
    struct Hdf5OpData
    {
       explicit Hdf5OpData(Hdf5Group* pGroup, ObjectIdMap& objMap) :
-         mpGroup(pGroup), mMap(objMap)
+         mMap(objMap),
+         mpGroup(pGroup)
       {
       }
 
@@ -227,8 +228,8 @@ namespace
 
 Hdf5File::Hdf5File(const string& filename, hid_t fileHandle) :
    Hdf5Node(NULL, ""),
-   mFilename(filename),
-   mFileHandle(fileHandle)
+   mFileHandle(fileHandle),
+   mFilename(filename)
 {
    mpRootGroup = new Hdf5Group(this, "");
    mFullPathAndName = "";
@@ -282,7 +283,7 @@ bool Hdf5File::readFileData(const string& groupPath)
    Hdf5GroupResource groupId;
    {  //Turn off error handling while we check for the group, since it may not exist
       Hdf5ErrorHandlerResource errHandler(NULL, NULL);
-      groupId =  Hdf5GroupResource(H5Gopen(fileHandle, groupPath.c_str()));
+      groupId = Hdf5GroupResource(H5Gopen(fileHandle, groupPath.c_str()));
    }
    DO_IF(*groupId < 0, return false);
 

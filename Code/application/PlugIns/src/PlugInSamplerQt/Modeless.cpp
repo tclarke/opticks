@@ -12,7 +12,6 @@
 #include <QtGui/QVBoxLayout>
 
 #include "ApplicationServices.h"
-#include "AppVersion.h"
 #include "ConfigurationSettings.h"
 #include "DataVariant.h"
 #include "DesktopServices.h"
@@ -22,7 +21,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 // ModelessPlugIn
-static const char *spConfigKey = "ModelessDialog/Runs";
+static const char* spConfigKey = "ModelessDialog/Runs";
 
 ModelessPlugIn::ModelessPlugIn() :
    mpDialog(NULL),
@@ -30,8 +29,9 @@ ModelessPlugIn::ModelessPlugIn() :
    mSessionClosed(true)    // Reset this when execute() runs
 {
    setName("Modeless Dialog");
-   setCreator("Ball Aerospace & Technologies Corp.");
-   setCopyright(APP_COPYRIGHT);
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setDescription("Demonstrates creation and cleanup of a modeless dialog in a viewer plug-in.");
    setDescriptorId("{616CAF5A-300D-4c65-9BB1-455CAF5571A1}");
    setShortDescription("Modeless dialog in a plug-in");
@@ -42,7 +42,11 @@ ModelessPlugIn::ModelessPlugIn() :
 ModelessPlugIn::~ModelessPlugIn()
 {
    Service<ApplicationServices> pApp;
+   pApp->detach(SIGNAL_NAME(ApplicationServices, ApplicationClosed), Slot(this, &ModelessPlugIn::aboutToClose));
    pApp->detach(SIGNAL_NAME(ApplicationServices, SessionClosed), Slot(this, &ModelessPlugIn::sessionClosed));
+
+   Service<ConfigurationSettings> pConfig;
+   pConfig->detach(SIGNAL_NAME(ConfigurationSettings, AboutToSave), Slot(this, &ModelessPlugIn::updateConfigSettings));
 
    VERIFYNR(mSessionClosed);
 }
@@ -65,7 +69,7 @@ void ModelessPlugIn::sessionClosed(Subject& subject, const std::string& signal, 
    mSessionClosed = true;
 }
 
-bool ModelessPlugIn::execute(PlugInArgList *pInputArgList, PlugInArgList *pOutArgList)
+bool ModelessPlugIn::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
    if (mpDialog == NULL)
    {
@@ -79,7 +83,8 @@ bool ModelessPlugIn::execute(PlugInArgList *pInputArgList, PlugInArgList *pOutAr
       mSessionClosed = false;
 
       Service<ConfigurationSettings> pConfig;
-      pConfig->attach(SIGNAL_NAME(ConfigurationSettings, AboutToSave), Slot(this, &ModelessPlugIn::updateConfigSettings));
+      pConfig->attach(SIGNAL_NAME(ConfigurationSettings, AboutToSave),
+         Slot(this, &ModelessPlugIn::updateConfigSettings));
 
       DataVariant var = pConfig->getSetting(spConfigKey);
       mRuns = dv_cast<int>(var, 1);

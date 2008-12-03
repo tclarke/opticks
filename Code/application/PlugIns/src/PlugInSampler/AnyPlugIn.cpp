@@ -10,7 +10,6 @@
 #include "Any.h"
 #include "AnyPlugIn.h"
 #include "AppVerify.h"
-#include "AppVersion.h"
 #include "CustomElementData.h"
 #include "DataVariant.h"
 #include "DataVariantAnyData.h"
@@ -28,8 +27,9 @@ AnyPlugIn::AnyPlugIn() :
    mInteractive(false)
 {
    setName("Any Plug-In");
-   setCreator("Ball Aerospace & Technologies Corp.");
-   setCopyright(APP_COPYRIGHT);
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setDescription("Demonstrates creation and storage of the Any data element containing default and custom data.");
    setShortDescription("Demonstrates usage of the Any data element.");
    setMenuLocation("[Demo]/Any Plug-In");

@@ -107,8 +107,8 @@ MetadataWidget::MetadataWidget(QWidget* parent) :
    // Connections
    if (mEditWarning == false)
    {
-      connect(mpMetadataTree->selectionModel(), SIGNAL(currentChanged(const QModelIndex&,const QModelIndex&)), this,
-         SLOT(currentChanged(const QModelIndex&,const QModelIndex&)));
+      connect(mpMetadataTree->selectionModel(), SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)), this,
+         SLOT(currentChanged(const QModelIndex&, const QModelIndex&)));
       connect(mpMetadataTree, SIGNAL(doubleClicked(const QModelIndex&)), this,
          SLOT(editSelectedValue(const QModelIndex&)));
    }
@@ -116,7 +116,7 @@ MetadataWidget::MetadataWidget(QWidget* parent) :
    connect(mpModifyButton, SIGNAL(clicked()), this, SLOT(modifyValues()));
    connect(mpAddChildButton, SIGNAL(clicked()), this, SLOT(addKey()));
    connect(mpAddSiblingButton, SIGNAL(clicked()), this, SLOT(addKey()));
-   connect(mpEditButton,   SIGNAL(clicked()), this, SLOT(editCurrentValue()));
+   connect(mpEditButton, SIGNAL(clicked()), this, SLOT(editCurrentValue()));
    connect(mpDeleteButton, SIGNAL(clicked()), this, SLOT(deleteKey()));
    connect(mpClearButton, SIGNAL(clicked()), this, SLOT(clearKeys()));
 }
@@ -200,8 +200,8 @@ void MetadataWidget::modifyValues()
    mpDeleteButton->setEnabled(false);
    mpClearButton->setEnabled(mpMetadata != NULL);
 
-   connect(mpMetadataTree->selectionModel(), SIGNAL(currentChanged(const QModelIndex&,const QModelIndex&)), this,
-      SLOT(currentChanged(const QModelIndex&,const QModelIndex&)));
+   connect(mpMetadataTree->selectionModel(), SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)), this,
+      SLOT(currentChanged(const QModelIndex&, const QModelIndex&)));
    connect(mpMetadataTree, SIGNAL(doubleClicked(const QModelIndex&)), this,
       SLOT(editSelectedValue(const QModelIndex&)));
 }

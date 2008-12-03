@@ -49,7 +49,7 @@ string CgContext::getCgProgramPath() const
 {
    string programPath;
    const Filename* pSupportFilesPath = ConfigurationSettings::getSettingSupportFilesPath();
-   if(pSupportFilesPath != NULL)
+   if (pSupportFilesPath != NULL)
    {
       programPath = pSupportFilesPath->getFullPathAndName() + SLASH + "Cg" + SLASH;
    }

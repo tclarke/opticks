@@ -67,7 +67,7 @@ const string DataFusionDlg::PRIMARY_CHIP_WIDGET_NAME = "primary";
 const string DataFusionDlg::SECONDARY_CHIP_WIDGET_NAME = "secondary";
 const string DataFusionDlg::ANNOTATION_LAYER_NAME = "Fused Layers";
 
-DataFusionDlg::DataFusionDlg(PlugIn* pPlugIn, ProgressTracker &progressTracker, QWidget* pParent) :
+DataFusionDlg::DataFusionDlg(PlugIn* pPlugIn, ProgressTracker& progressTracker, QWidget* pParent) :
    QDialog(pParent),
    mpDescriptionLabel(NULL),
    mpFlicker(NULL),
@@ -239,7 +239,7 @@ RasterElement* DataFusionDlg::getSecondaryChip() const
    return pRaster;
 }
 
-void DataFusionDlg::windowDeleted(Subject &subject, const string &signal, const boost::any &v)
+void DataFusionDlg::windowDeleted(Subject& subject, const string& signal, const boost::any& v)
 {
    SpatialDataWindow* pSdw = dynamic_cast<SpatialDataWindow*>(&subject);
    WorkspaceWindow* pWW = dynamic_cast<WorkspaceWindow*>(&subject);
@@ -282,7 +282,6 @@ void DataFusionDlg::showPage(QWidget* pPage)
 
       if (NN(mpDatasetPage))
       {
-         const SpatialDataView* pPrimaryView = mpDatasetPage->getPrimaryView();
          if (NN(pPrimaryView))
          {
             string viewName = pPrimaryView->getName();
@@ -579,7 +578,7 @@ void DataFusionDlg::fuse()
       VERIFYNRV(pLayerList != NULL);
       RasterElement* pPrimaryRaster = dynamic_cast<RasterElement*>(pLayerList->getPrimaryRasterElement());
       VERIFYNRV(pPrimaryRaster != NULL);
-      SpatialDataWindow *pPrimaryWindow = 
+      SpatialDataWindow* pPrimaryWindow = 
          dynamic_cast<SpatialDataWindow*>(pDesktop->getWindow(pPrimaryRaster->getName(), SPATIAL_DATA_WINDOW));
       VERIFYNRV(pPrimaryWindow != NULL);
       VERIFYNRV(pDesktop->setCurrentWorkspaceWindow(pPrimaryWindow));
@@ -595,7 +594,7 @@ void DataFusionDlg::fuse()
             return;
          }
       }
-      SpatialDataView *pSecondaryView = mpDatasetPage->getSecondaryView();
+      SpatialDataView* pSecondaryView = mpDatasetPage->getSecondaryView();
       if (pSecondaryView == NULL)
       {
          string msg = "Error DataFusionDlg: Secondary data set does not exist. "
@@ -607,7 +606,7 @@ void DataFusionDlg::fuse()
       VERIFYNRV(pLayerList != NULL);
       RasterElement* pSecondaryRaster = pLayerList->getPrimaryRasterElement();
       VERIFYNRV(pSecondaryRaster != NULL);
-      SpatialDataWindow *pSecondaryWindow = 
+      SpatialDataWindow* pSecondaryWindow = 
          dynamic_cast<SpatialDataWindow*>(pDesktop->getWindow(pSecondaryRaster->getName(), SPATIAL_DATA_WINDOW));
       VERIFYNRV(pSecondaryWindow != NULL);
       VERIFYNRV(pDesktop->setCurrentWorkspaceWindow(pSecondaryWindow));
@@ -647,7 +646,10 @@ void DataFusionDlg::fuse()
          zoomFactor = 10;
       }
 
-      int x1, y1, x2, y2;
+      int x1;
+      int y1;
+      int x2;
+      int y2;
       if (mpInputsPage->getRoiBoundingBox(x1, y1, x2, y2) == false)
       {
          string msg = "ERROR DataFusionDlg: No AOI Layer or AOI was found for the primary image."
@@ -674,7 +676,8 @@ void DataFusionDlg::fuse()
       LocationType primaryUrc = pPrimaryRaster->convertPixelToGeocoord(LocationType(x2, y2));
       LocationType primaryLrc = pPrimaryRaster->convertPixelToGeocoord(LocationType(x2, y1));
 
-      double latOffset = 0, lonOffset = 0;
+      double latOffset = 0;
+      double lonOffset = 0;
 
       // if the tie points are bypassed, we can use the default offset of 0,0 to avoid many changes
       if (mpDatasetPage->canBypassTiePointStep() == false)
@@ -724,14 +727,15 @@ void DataFusionDlg::fuse()
       yS[2] = pSecondaryRaster->convertGeocoordToPixel(primaryUrc - offset).mY;
       yS[3] = pSecondaryRaster->convertGeocoordToPixel(primaryLrc - offset).mY;
 
-      Vector<double> P, Q; // warp matrices
+      Vector<double> p;
+      Vector<double> q; // warp matrices
 
-      const DataDescriptor *pDescriptor = pPrimaryRaster->getDataDescriptor();
       try
       {
-         polywarp(xS, yS, xP, yP, P, Q, zoomFactor, mProgressTracker);
+         polywarp(xS, yS, xP, yP, p, q, zoomFactor, mProgressTracker);
          mProgressTracker.nextStage();
 
+         const DataDescriptor* pDescriptor = pPrimaryRaster->getDataDescriptor();
          if (pDescriptor == NULL)
          {
             throw FusionException("ERROR DataFusionDlg: Unable to get Data descriptor! Bailing out!",
@@ -763,13 +767,13 @@ void DataFusionDlg::fuse()
             throw FusionException("ERROR DataFusionDlg: Unable to create the primary image chip!", __LINE__, __FILE__);
          }
 
-         RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(pChip->getDataDescriptor());
+         RasterDataDescriptor* pRasterDescriptor = dynamic_cast<RasterDataDescriptor*>(pChip->getDataDescriptor());
 
          // Set the number of columns and rows in the secondary image.
          // This should be the actual number of columns and rows in the primary image multiplied by zoomFactor.
-         unsigned int newx = zoomFactor * pDescriptor->getColumnCount();
-         unsigned int newy = zoomFactor * pDescriptor->getRowCount();
-         RasterElement* pSPrime = createSecondaryImageChip(pSecondaryRaster, P, Q, newx, newy, x1, y1, zoomFactor,
+         unsigned int newx = zoomFactor * pRasterDescriptor->getColumnCount();
+         unsigned int newy = zoomFactor * pRasterDescriptor->getRowCount();
+         RasterElement* pSPrime = createSecondaryImageChip(pSecondaryRaster, p, q, newx, newy, x1, y1, zoomFactor,
                                                          mpInputsPage->inMemory());
          bool bAborted = DataFusionTools::getAbortFlag();
          if (pSPrime == NULL || bAborted)
@@ -819,8 +823,7 @@ void DataFusionDlg::fuse()
 
                if (georefRes->execute() == true)
                {
-                  LatLonLayer* pLayer =
-                     static_cast<LatLonLayer*>(pFlickerView->createLayer(LAT_LONG, pChip));
+                  LatLonLayer* pLayer = static_cast<LatLonLayer*>(pFlickerView->createLayer(LAT_LONG, pChip));
                   pLayer->setStyle(LATLONSTYLE_CROSS);
                }
                georefRes.release(); // the RasterElement manages the PlugIn now.
@@ -876,10 +879,11 @@ void DataFusionDlg::fuse()
             mpSbs = static_cast<WorkspaceWindow*>(pDesktop->createWindow(windowName, WORKSPACE_WINDOW));
             if (mpSbs != NULL)
             {
-               QSplitter *pWidget = new QSplitter(Qt::Horizontal, NULL);
+               QSplitter* pWidget = new QSplitter(Qt::Horizontal, NULL);
 
                SpatialDataView* pPPrimeView =
-                  static_cast<SpatialDataView*>(pDesktop->createView(PRIMARY_CHIP_WIDGET_NAME, SPATIAL_DATA_VIEW, pWidget));
+                  static_cast<SpatialDataView*>(pDesktop->createView(PRIMARY_CHIP_WIDGET_NAME,
+                  SPATIAL_DATA_VIEW, pWidget));
                if (pPPrimeView != NULL)
                {
                   UndoLock lock(pPPrimeView);
@@ -889,7 +893,8 @@ void DataFusionDlg::fuse()
                }
 
                SpatialDataView* pSPrimeView =
-                  static_cast<SpatialDataView*>(pDesktop->createView(SECONDARY_CHIP_WIDGET_NAME, SPATIAL_DATA_VIEW, pWidget));
+                  static_cast<SpatialDataView*>(pDesktop->createView(SECONDARY_CHIP_WIDGET_NAME,
+                  SPATIAL_DATA_VIEW, pWidget));
                if (pSPrimeView != NULL)
                {
                   UndoLock lock(pSPrimeView);
@@ -941,12 +946,12 @@ void DataFusionDlg::fuse()
          }
          mModified[mpInputsPage] = false;
       }
-      catch(AssertException& exc)
+      catch (AssertException& exc)
       {
          // AssertException is a bug. Report line numbers to user.
          mProgressTracker.report(exc.getText(), 0, ERRORS, true);
       }
-      catch(FusionException& exc)
+      catch (FusionException& exc)
       {
          // don't report line numbers to the user
          mProgressTracker.report(exc.toString(false), 0, ERRORS, true);
@@ -966,7 +971,8 @@ void DataFusionDlg::copyColorMap(RasterLayer& destination, const RasterLayer& so
    destination.setAlpha(source.getAlpha());
    destination.setComplexComponent(source.getComplexComponent());
 
-   double lower, upper;
+   double lower;
+   double upper;
    source.getStretchValues(RED, lower, upper); // get values
    // convert values
    lower = source.convertStretchValue(RED, lower, RAW_VALUE);
@@ -1023,10 +1029,8 @@ string DataFusionDlg::getNewFilename(const string& filename, const char* pAppend
    return newName;
 }
 
-RasterElement* DataFusionDlg::createChip(RasterElement* pRaster,
-                                              unsigned int x1, unsigned int x2, unsigned int y1, unsigned int y2,
-                                              const std::string& appendage,
-                                              int alphaValue, int zoomFactor) // default to opaque
+RasterElement* DataFusionDlg::createChip(RasterElement* pRaster, unsigned int x1, unsigned int x2, unsigned int y1,
+                                         unsigned int y2, const string& appendage, int alphaValue, int zoomFactor)
 {
    Service<ModelServices> pModel;
 
@@ -1037,8 +1041,10 @@ RasterElement* DataFusionDlg::createChip(RasterElement* pRaster,
 
    if (NN(pDescriptor))
    {
-      vector<DimensionDescriptor> bands, chipRows, chipCols;
-   
+      vector<DimensionDescriptor> bands;
+      vector<DimensionDescriptor> chipRows;
+      vector<DimensionDescriptor> chipCols;
+
       for (unsigned int i = y1; i <= y2; ++i)
       {
          chipRows.push_back(pDescriptor->getActiveRow(i));
@@ -1064,10 +1070,10 @@ RasterElement* DataFusionDlg::createChip(RasterElement* pRaster,
    return NULL;
 }
 
-RasterElement* DataFusionDlg::createSecondaryImageChip(RasterElement* pSecondaryRaster,
-                                                     const Vector<double>& P, const Vector<double>& Q,
-                                                     unsigned int newCols, unsigned int newRows,
-                                                     int llX, int llY, int zoomFactor, bool inMemory)
+RasterElement* DataFusionDlg::createSecondaryImageChip(RasterElement* pSecondaryRaster, const Vector<double>& P,
+                                                       const Vector<double>& Q, unsigned int newCols,
+                                                       unsigned int newRows, int llX, int llY, int zoomFactor,
+                                                       bool inMemory)
 {
    if (pSecondaryRaster == NULL)
    {
@@ -1083,10 +1089,8 @@ RasterElement* DataFusionDlg::createSecondaryImageChip(RasterElement* pSecondary
    RasterElement* pRaster = NULL;
    EncodingType dataEncoding = pDescriptor->getDataType();
 
-   switchOnEncoding(dataEncoding, pRaster = poly_2D,
-                      NULL, // NULL for the data type
-                      pSecondaryRaster, P, Q, newCols, newRows, llX, llY, zoomFactor, mProgressTracker,
-                      inMemory);
+   switchOnEncoding(dataEncoding, pRaster = poly_2D, NULL, pSecondaryRaster, P, Q, newCols, newRows, llX, llY,
+      zoomFactor, mProgressTracker, inMemory);
    mProgressTracker.nextStage();
 
    RasterDataDescriptor* pNewDescriptor = dynamic_cast<RasterDataDescriptor*>(pRaster->getDataDescriptor());
@@ -1106,11 +1110,10 @@ bool DataFusionDlg::copyLayersToView(SpatialDataView& view, int scaleFactor) con
    vector<Layer*> layersToCopy = mpLayersPage->getSelectedLayers();
 
    const QString question = "Some of the layers selected no longer exist.\n"
-                            "Do you want to continue the fusion process anyway and fuse only the available layers?";
+      "Do you want to continue the fusion process anyway and fuse only the available layers?";
 
-   QMessageBox qBox(windowTitle(), question,
-                    QMessageBox::Warning, QMessageBox::Yes | QMessageBox::Default,
-                    QMessageBox::No | QMessageBox::Escape, QMessageBox::Cancel, NULL);
+   QMessageBox qBox(windowTitle(), question, QMessageBox::Warning, QMessageBox::Yes | QMessageBox::Default,
+      QMessageBox::No | QMessageBox::Escape, QMessageBox::Cancel, NULL);
 
    if (mpLayersPage->areAllSelectedLayersAvailable() == false)
    {
@@ -1125,7 +1128,10 @@ bool DataFusionDlg::copyLayersToView(SpatialDataView& view, int scaleFactor) con
    REQUIRE(pLayerList != NULL);
 
    // this method returns bool but was already called to create the image chips.
-   int x1, y1, x2, y2;
+   int x1;
+   int y1;
+   int x2;
+   int y2;
    mpInputsPage->getRoiBoundingBox(x1, y1, x2, y2);
 
    LocationType delta(x1, y1);
@@ -1185,10 +1191,12 @@ bool DataFusionDlg::copyLayersToView(SpatialDataView& view, int scaleFactor) con
             REQUIRE(rmEnd.mY >= 0);
 
             string newName(pRaster->getName() + "_resampled");
-            const vector<DimensionDescriptor> &srcRows = pDescriptor->getRows();
-            vector<DimensionDescriptor> rows = RasterUtilities::subsetDimensionVector(srcRows, srcRows[rmStart.mY], srcRows[rmEnd.mY]);
-            const vector<DimensionDescriptor> &srcCols = pDescriptor->getColumns();
-            vector<DimensionDescriptor> cols = RasterUtilities::subsetDimensionVector(srcCols, srcCols[rmStart.mX], srcCols[rmEnd.mX]);
+            const vector<DimensionDescriptor>& srcRows = pDescriptor->getRows();
+            vector<DimensionDescriptor> rows =
+               RasterUtilities::subsetDimensionVector(srcRows, srcRows[rmStart.mY], srcRows[rmEnd.mY]);
+            const vector<DimensionDescriptor>& srcCols = pDescriptor->getColumns();
+            vector<DimensionDescriptor> cols =
+               RasterUtilities::subsetDimensionVector(srcCols, srcCols[rmStart.mX], srcCols[rmEnd.mX]);
 
             RasterElement* pResampled = pRaster->createChip(NULL, "_resampled", rows, cols);
 
@@ -1206,12 +1214,12 @@ bool DataFusionDlg::copyLayersToView(SpatialDataView& view, int scaleFactor) con
             // TODO: Upgrade to not just allow RasterLayer
             if (eLayerType == RASTER)
             {
-               RasterLayer* pRaster = dynamic_cast<RasterLayer*>(pCopiedLayer);
-               REQUIRE(pCopiedLayer != NULL);
+               RasterLayer* pRaster2 = dynamic_cast<RasterLayer*>(pCopiedLayer);
+               REQUIRE(pRaster2 != NULL);
                RasterLayer* pSourceLayer = dynamic_cast<RasterLayer*>(pLayer);
                REQUIRE(pSourceLayer != NULL);
 
-               copyColorMap(*pRaster, *pSourceLayer);
+               copyColorMap(*pRaster2, *pSourceLayer);
             }
          }
          else if (pGraphic != NULL)
@@ -1220,17 +1228,17 @@ bool DataFusionDlg::copyLayersToView(SpatialDataView& view, int scaleFactor) con
             REQUIRE(pCopy != NULL);
 
             GraphicLayer* pGraphicCopy = static_cast<GraphicLayer*>(pCopy);
-            typedef list<GraphicObject*> GraphicList;
 
-            GraphicList graphics;
+            list<GraphicObject*> graphics;
             pGraphicCopy->getObjects(graphics);
-            for (GraphicList::iterator it = graphics.begin(); it != graphics.end(); ++it)
+            for (list<GraphicObject*>::iterator it = graphics.begin(); it != graphics.end(); ++it)
             {
                // normalize GraphicObject to match origin of the chip
-               GraphicObject *pObj = *it;
+               GraphicObject* pObj = *it;
                if (pObj != NULL)
                {
-                  LocationType ll = pObj->getLlCorner(), ur = pObj->getUrCorner();
+                  LocationType ll = pObj->getLlCorner();
+                  LocationType ur = pObj->getUrCorner();
                   ll -= delta;
                   ur -= delta;
 

@@ -7,7 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "AppVersion.h"
 #include "TiePointTester.h"
 #include "TiePointTesterAlgorithm.h"
 #include "PlugInArgList.h"
@@ -101,11 +100,15 @@ bool TiePointTester::parseInputArgList(PlugInArgList *pArgList)
    VERIFY(pArgList != NULL);
    mpProgress = pArgList->getPlugInArgValue<Progress>(ProgressArg());
 
-   RasterElement *pRasterElement = pArgList->getPlugInArgValue<RasterElement>(DataElementArg());
+   RasterElement* pRasterElement = pArgList->getPlugInArgValue<RasterElement>(DataElementArg());
    if (pRasterElement == NULL)
    {
-      std::string msg = "Error Tester001: The raster element input value is invalid!";
-      if (mpProgress != NULL) mpProgress->updateProgress(msg, 0, ERRORS);
+      string msg = "Error Tester001: The raster element input value is invalid!";
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(msg, 0, ERRORS);
+      }
+
       return false;
    }
 
@@ -178,9 +181,9 @@ TiePointTester::TiePointTester() :
    mpProgress(NULL),
    mpTesterAlg(NULL)
 {
-   setCreator("Ball Aerospace & Technologies Corp.");
-   setCopyright(APP_COPYRIGHT);
-   setVersion(APP_VERSION_NUMBER);
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setProductionStatus(false);
    setName("Tie Point Tester");
    setShortDescription("Tie Point Tester");

@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef NITF_UTILITIES_H
-#define NITF_UTILITIES_H
+#ifndef NITFUTILITIES_H
+#define NITFUTILITIES_H
 
 class Classification;
 class DateTime;
@@ -29,7 +29,7 @@ class DateTime;
 #include <boost/lexical_cast.hpp>
 
 namespace Nitf
-{   
+{
    /**
     * Determine the least trusted state of the provided TreStates.
     *
@@ -122,7 +122,7 @@ namespace Nitf
     * @return SUSPECT if outside the range, VALID otherwise.
     */
    template<typename T>
-   TreState testTagValueRange(std::ostream& reporter, const T &testValue, const T &minValue, const T &maxValue)
+   TreState testTagValueRange(std::ostream& reporter, const T& testValue, const T& minValue, const T& maxValue)
    {
       if (testValue < minValue || testValue > maxValue)
       {
@@ -155,7 +155,7 @@ namespace Nitf
     */
    template<typename T>
    TreState testTagValueRange(const DynamicObject& tre, std::ostream& reporter, 
-      unsigned int* pNumFields, const std::string& name, const T &minValue, const T &maxValue)
+      unsigned int* pNumFields, const std::string& name, const T& minValue, const T& maxValue)
    {
       try
       {
@@ -195,11 +195,11 @@ namespace Nitf
     * @return INVALID if the tag is not found, SUSPECT if not equal, VALID otherwise.
     */
    template<typename T>
-   TreState testTagValueEq(const DynamicObject& tre, std::ostream& reporter, const std::string& name, const T &eqValue)
+   TreState testTagValueEq(const DynamicObject& tre, std::ostream& reporter, const std::string& name, const T& eqValue)
    {
       try
       {
-         const T &testValue = dv_cast<T>(tre.getAttribute(name));
+         const T& testValue = dv_cast<T>(tre.getAttribute(name));
          if (testValue == eqValue)
          {
             return VALID;
@@ -232,11 +232,11 @@ namespace Nitf
     */
    template<typename T>
    inline TreState testTagValueNotEq(const DynamicObject& tre, std::ostream& reporter,
-      const std::string& name, const T &notEqValue)
+      const std::string& name, const T& notEqValue)
    {
       try
       {
-         const T &testValue = dv_cast<T>(tre.getAttribute(name));
+         const T& testValue = dv_cast<T>(tre.getAttribute(name));
          if (testValue != notEqValue)
          {
             return VALID;
@@ -265,7 +265,7 @@ namespace Nitf
     * @return The contents of the buffer, appropriately typed and swapped.
     */
    template<typename T>
-   T convertBinary(const void *pBuffer, EndianType sourceEndian)
+   T convertBinary(const void* pBuffer, EndianType sourceEndian)
    {
       T data;
       Endian endian(sourceEndian);
@@ -298,9 +298,7 @@ namespace Nitf
     *
     * @return True if the parse succeeded, false otherwise.
     */
-   bool DtgParseHHMM(const std::string &fDTG,
-      unsigned short &hour,
-      unsigned short &min);
+   bool DtgParseHHMM(const std::string& fDTG, unsigned short& hour, unsigned short& min);
 
    /**
     * Parse a date-time string of the form CCYYMMDDhhmm.
@@ -320,12 +318,8 @@ namespace Nitf
     *
     * @return True if the parse succeeded, false otherwise.
     */
-   bool DtgParseCCYYMMDDhhmm(const std::string &fDTG, 
-      unsigned short &year, 
-      unsigned short &month, 
-      unsigned short &day, 
-      unsigned short &hour, 
-      unsigned short &min);
+   bool DtgParseCCYYMMDDhhmm(const std::string& fDTG, unsigned short& year, unsigned short& month,
+      unsigned short& day, unsigned short& hour, unsigned short& min);
 
    /**
     * Parse a date-time string of the form CCYYMMDDhhmm.
@@ -337,8 +331,7 @@ namespace Nitf
     *
     * @return True if the parse succeeded, false otherwise.
     */
-   bool DtgParseCCYYMMDDhhmm(const std::string &fDTG, 
-      DateTime *pDateTime);
+   bool DtgParseCCYYMMDDhhmm(const std::string& fDTG, DateTime* pDateTime);
 
    /**
     * Parse a date-time string of the form CCYYMMDDhhmmss.
@@ -368,15 +361,9 @@ namespace Nitf
     *         that even if this returns false, pDateValid and pTimeValid will
     *         be set appropriately.
     */
-   bool DtgParseCCYYMMDDhhmmss(const std::string &fDTG, 
-      unsigned short &year, 
-      unsigned short &month, 
-      unsigned short &day, 
-      unsigned short &hour, 
-      unsigned short &min,
-      unsigned short &sec,
-      bool *pDateValid = NULL,
-      bool *pTimeValid = NULL);
+   bool DtgParseCCYYMMDDhhmmss(const std::string& fDTG, unsigned short& year, unsigned short& month,
+      unsigned short& day, unsigned short& hour, unsigned short& min, unsigned short& sec, bool* pDateValid = NULL,
+      bool* pTimeValid = NULL);
 
    /**
     * Parse a date-time string of the form CCYYMMDDhhmmss.
@@ -389,8 +376,7 @@ namespace Nitf
     * @return True if the parse succeeded, false otherwise.
     *         Note that even if this returns false, pDateTime may contain partially valid data.
     */
-   bool DtgParseCCYYMMDDhhmmss(const std::string &fDTG, 
-      DateTime *pDateTime);
+   bool DtgParseCCYYMMDDhhmmss(const std::string& fDTG, DateTime* pDateTime);
 
    /**
     * Parse a date-time string of the form CCYYMMDD.
@@ -406,10 +392,7 @@ namespace Nitf
     *
     * @return True if the parse succeeded, false otherwise.
     */
-   bool DtgParseCCYYMMDD(const std::string &fDTG, 
-      unsigned short &year, 
-      unsigned short &month, 
-      unsigned short &day);
+   bool DtgParseCCYYMMDD(const std::string& fDTG, unsigned short& year, unsigned short& month, unsigned short& day);
 
    /**
     * Parse a date-time string of the form CCYYMMDD.
@@ -421,8 +404,7 @@ namespace Nitf
     *
     * @return True if the parse succeeded, false otherwise.
     */
-   bool DtgParseCCYYMMDD(const std::string &fDTG, 
-      DateTime *pDateTime);
+   bool DtgParseCCYYMMDD(const std::string& fDTG, DateTime* pDateTime);
 
    /**
     * Parse a date-time string of the form DDMMMYY, where MMM is a three-letter
@@ -441,10 +423,7 @@ namespace Nitf
     *
     * @return True if the parse succeeded, false otherwise.
     */
-   bool DtgParseDDMMMYY(const std::string &fDTG, 
-      unsigned short &year, 
-      unsigned short &month, 
-      unsigned short &day);
+   bool DtgParseDDMMMYY(const std::string& fDTG, unsigned short& year, unsigned short& month, unsigned short& day);
 
    /**
     * Parse a date-time string of the form DDMMMYY, where MMM is a three-letter
@@ -459,8 +438,7 @@ namespace Nitf
     *
     * @return True if the parse succeeded, false otherwise.
     */
-   bool DtgParseDDMMMYY(const std::string &fDTG, 
-      DateTime *pDateTime);
+   bool DtgParseDDMMMYY(const std::string& fDTG, DateTime* pDateTime);
 
    /**
     * Parse a date-time string of the form CCYYMMDDhhmmss.
@@ -482,13 +460,8 @@ namespace Nitf
     *
     * @return True if the parse succeeded, false otherwise.
     */
-   bool DtgParseCCYYMMMDDhhmmss(const std::string &fDTG, 
-      unsigned short &year, 
-      unsigned short &month, 
-      unsigned short &day,
-      unsigned short &hour,
-      unsigned short &min,
-      unsigned short &sec);
+   bool DtgParseCCYYMMMDDhhmmss(const std::string& fDTG, unsigned short& year, unsigned short& month,
+      unsigned short& day, unsigned short& hour, unsigned short& min, unsigned short& sec);
 
    /**
     * Parse a date-time string of the form CCYYMMDDhhmmss.
@@ -500,8 +473,7 @@ namespace Nitf
     *
     * @return True if the parse succeeded, false otherwise.
     */
-   bool DtgParseCCYYMMMDDhhmmss(const std::string &fDTG, 
-      DateTime *pDateTime);
+   bool DtgParseCCYYMMMDDhhmmss(const std::string& fDTG, DateTime* pDateTime);
 
    /**
     * Parse a date-time string of the form DDHHMMSSZMONYY, where MMM is a three-letter
@@ -526,13 +498,8 @@ namespace Nitf
     *
     * @return True if the parse succeeded, false otherwise.
     */
-   bool DtgParseDDHHMMSSZMONYY(const std::string &fDTG, 
-      unsigned short &year, 
-      unsigned short &month, 
-      unsigned short &day,
-      unsigned short &hour,
-      unsigned short &min,
-      unsigned short &sec);
+   bool DtgParseDDHHMMSSZMONYY(const std::string& fDTG, unsigned short& year, unsigned short& month,
+      unsigned short& day, unsigned short& hour, unsigned short& min, unsigned short& sec);
 
    /**
     * Parse a date-time string of the form CCYYMMDDhhmmss, where MMM is a three-letter
@@ -547,8 +514,7 @@ namespace Nitf
     *
     * @return True if the parse succeeded, false otherwise.
     */
-   bool DtgParseDDHHMMSSZMONYY(const std::string &fDTG, 
-      DateTime *pDateTime);
+   bool DtgParseDDHHMMSSZMONYY(const std::string& fDTG, DateTime* pDateTime);
 
    /**
     * Parse a date-time string of the form YYMMDD.
@@ -566,10 +532,7 @@ namespace Nitf
     *
     * @return True if the parse succeeded, false otherwise.
     */
-   bool DtgParseYYMMDD(const std::string &fDTG, 
-      unsigned short &year, 
-      unsigned short &month, 
-      unsigned short &day);
+   bool DtgParseYYMMDD(const std::string& fDTG, unsigned short& year, unsigned short& month, unsigned short& day);
 
    /**
     * Parse a date-time string of the form YYMMDD.
@@ -583,8 +546,7 @@ namespace Nitf
     *
     * @return True if the parse succeeded, false otherwise.
     */
-    bool DtgParseYYMMDD(const std::string &fDTG,
-      DateTime *pDateTime);
+    bool DtgParseYYMMDD(const std::string& fDTG, DateTime* pDateTime);
 
    /**
     * Test a tag to ensure valid BCS-A strings from within a set.
@@ -611,14 +573,8 @@ namespace Nitf
     *           -# If testValue contains characters outside of BCS-A,
     *                 emits a message and returns TreState::INVALID.
     */
-   TreState testTagValidBcsASet( const std::string &testValue, 
-                                 std::ostream& reporter,
-                                 std::set<std::string> testSet, 
-                                 bool allBlankOk = false,
-                                 bool notInSetOk = true,
-                                 bool emitMsgNotInSet = false );
-   
-
+   TreState testTagValidBcsASet(const std::string& testValue, std::ostream& reporter, std::set<std::string> testSet,
+      bool allBlankOk = false, bool notInSetOk = true, bool emitMsgNotInSet = false);
 
    /**
     * Test a tag to ensure valid BCS-A strings from within a set.
@@ -650,15 +606,9 @@ namespace Nitf
     *           -# If testValue contains characters outside of BCS-A,
     *                 emits a message and returns TreState::INVALID.
     */
-   TreState testTagValidBcsASet( const DynamicObject& tre, 
-                                 std::ostream& reporter,
-                                 unsigned int* pNumFields,
-                                 const std::string& name,
-                                 const std::set<std::string> &testSet, 
-                                 bool allBlankOk = false,
-                                 bool notInSetOk = true,
-                                 bool emitMsgNotInSet = false );
-
+   TreState testTagValidBcsASet(const DynamicObject& tre, std::ostream& reporter, unsigned int* pNumFields,
+      const std::string& name, const std::set<std::string>& testSet, bool allBlankOk = false,
+      bool notInSetOk = true, bool emitMsgNotInSet = false);
 
    /**
     * Reads a number of characters from a stream and places it in a vector of chars.
@@ -676,7 +626,6 @@ namespace Nitf
     */
    bool readFromStream(std::istream& strm, std::vector<char>& buf, std::streamsize count, bool bStr = true);
 
-
    /**
     * Cleans up a string for NITF export.  It guarantees the string is characters long.
     * Left or right justified, as specified, if the string needs to be lengthened.
@@ -691,7 +640,7 @@ namespace Nitf
     *         If true then the string is right justified, left justified otherwise.
     * @return The output string. Guaranteed to be size characters long.
     */
-   std::string sizeString(const std::string &str, unsigned int size, char fillChar=' ', bool rightJustify=false);
+   std::string sizeString(const std::string& str, unsigned int size, char fillChar = ' ', bool rightJustify = false);
 
    /**
     * Converts a numeric to a string.  It only works with numeric intrinsics
@@ -717,8 +666,8 @@ namespace Nitf
     *         long with a leading '-' if negative or a leading '+' if positive and posSign == true
     */
    template<typename T>
-   std::string toString(T num, unsigned int size, int precision=-1,
-      char fillChar='0', bool posSign=false, bool sciNotation=false, int expSize=3)
+   std::string toString(T num, unsigned int size, int precision = -1,
+      char fillChar = '0', bool posSign = false, bool sciNotation = false, int expSize = 3)
    {
       std::stringstream   outp;
       std::string         outStr;
@@ -852,7 +801,7 @@ namespace Nitf
 
    // General template for dealing with most types
    template<typename T>
-   inline T fromBuffer(std::vector<char> &buf, bool &ok, bool allBlankOk)
+   inline T fromBuffer(std::vector<char>& buf, bool& ok, bool allBlankOk)
    {
       if (!numeric_limits<T>::is_signed)
       {
@@ -888,7 +837,7 @@ namespace Nitf
 
    // Specialization for the unusual ones
    template <>
-   inline std::string fromBuffer<std::string>(std::vector<char> &buf, bool &ok, bool allBlankOk)
+   inline std::string fromBuffer<std::string>(std::vector<char>& buf, bool& ok, bool allBlankOk)
    {
       std::string trimmedString = StringUtilities::stripWhitespace(std::string(&buf.front()));
       if (trimmedString.empty() == true)
@@ -900,7 +849,7 @@ namespace Nitf
    }
 
    // create the error message
-   inline bool readFieldErrMsg(std::string &msg, const std::string &name, const std::vector<char> &buf, int len)
+   inline bool readFieldErrMsg(std::string& msg, const std::string& name, const std::vector<char>& buf, int len)
    {
       std::string value;
       value.resize(len);
@@ -911,9 +860,10 @@ namespace Nitf
    }
 
    //
-   inline bool numReadErrMsg(int numRead, int numBytes, std::string &errorMessage)
+   inline bool numReadErrMsg(int numRead, int numBytes, std::string& errorMessage)
    {
-      std::string numB, numR;
+      std::string numB;
+      std::string numR;
 
       try
       {
@@ -924,10 +874,12 @@ namespace Nitf
       {
       }
 
-      if (numRead < 0) {
+      if (numRead < 0)
+      {
          errorMessage += "Read past end of data. Should have read " + numB + " bytes.\n";
       }
-      else {
+      else
+      {
          errorMessage += "Read " + numR + " bytes. Should have read " + numB + " bytes.\n";
       }
 
@@ -935,8 +887,8 @@ namespace Nitf
    }
 
    template<typename T>
-   inline bool readField(std::istream &input, DynamicObject &output, bool &success,
-      const std::string &name, int len, std::string &msg, std::vector<char> &buf, bool allBlankOk = false)
+   inline bool readField(std::istream& input, DynamicObject& output, bool& success,
+      const std::string& name, int len, std::string& msg, std::vector<char>& buf, bool allBlankOk = false)
    {
       bool ok(true);
       if (input.good() == false)

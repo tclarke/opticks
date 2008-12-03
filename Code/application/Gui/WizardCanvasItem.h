@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #ifndef WIZARDCANVASITEM_H
 #define WIZARDCANVASITEM_H
 
@@ -295,4 +293,4 @@ private:
    int mSelectionNodeSize;
 };
 
-#endif   // WIZARDCANVASITEM_H
+#endif

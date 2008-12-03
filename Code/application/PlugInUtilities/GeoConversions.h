@@ -7,6 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#ifndef GEOCONVERSIONS_H
+#define GEOCONVERSIONS_H
 
 #include <cmath>
 #include "AppConfig.h"
@@ -170,3 +172,5 @@ namespace GeoConversions
       return aRad * 3437.7467707849392526;
    }
 };
+
+#endif

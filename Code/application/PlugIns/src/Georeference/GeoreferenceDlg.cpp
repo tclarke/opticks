@@ -32,7 +32,7 @@ GeoreferenceDlg::GeoreferenceDlg(const QString& title,
    mpStack = new QStackedWidget(this);
 
    // Other labels
-   QLabel *pNoUILabel = new QLabel("The selected plug-in has no options");
+   QLabel* pNoUILabel = new QLabel("The selected plug-in has no options");
    pNoUILabel->setAlignment(Qt::AlignCenter);
 
    // Horizontal line

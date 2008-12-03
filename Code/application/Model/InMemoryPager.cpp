@@ -18,7 +18,9 @@
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 
-InMemoryPager::InMemoryPager() : mpData(NULL), mpRaster(NULL)
+InMemoryPager::InMemoryPager() :
+   mpRaster(NULL),
+   mpData(NULL)
 {
    setName("In Memory Pager");
    setCopyright("Copyright (2006) by Ball Aerospace & Technologies Corp.");
@@ -52,7 +54,7 @@ bool InMemoryPager::getInputSpecification(PlugInArgList *&pArgList)
    return true;
 }
 
-bool InMemoryPager::execute(PlugInArgList *pInput, PlugInArgList *pOutput)
+bool InMemoryPager::execute(PlugInArgList* pInput, PlugInArgList* pOutput)
 {
    VERIFY(mpRaster == NULL && mpData == NULL);
    VERIFY(pInput != NULL);
@@ -63,17 +65,15 @@ bool InMemoryPager::execute(PlugInArgList *pInput, PlugInArgList *pOutput)
    return true;
 }
 
-RasterPage *InMemoryPager::getPage(DataRequest *pOriginalRequest, 
-      DimensionDescriptor startRow,
-      DimensionDescriptor startColumn,
-      DimensionDescriptor startBand)
+RasterPage* InMemoryPager::getPage(DataRequest* pOriginalRequest, DimensionDescriptor startRow,
+                                   DimensionDescriptor startColumn, DimensionDescriptor startBand)
 {
    VERIFYRV(mpData != NULL, NULL);
    VERIFYRV(mpRaster != NULL, NULL);
    VERIFYRV(pOriginalRequest != NULL, NULL);
 
    InterleaveFormatType requestedType = pOriginalRequest->getInterleaveFormat();
-   RasterDataDescriptor *pDescriptor = dynamic_cast<RasterDataDescriptor*>(mpRaster->getDataDescriptor());
+   RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(mpRaster->getDataDescriptor());
    VERIFYRV(pDescriptor != NULL, NULL);
    if (pDescriptor->getInterleaveFormat() != requestedType)
    {
@@ -94,8 +94,8 @@ RasterPage *InMemoryPager::getPage(DataRequest *pOriginalRequest,
       return NULL;
    }
 
-   char *pData = reinterpret_cast<char*>(mpData);
-   char *pStart = NULL;
+   char* pData = reinterpret_cast<char*>(mpData);
+   char* pStart = NULL;
    switch (requestedType)
    {
    case BIP:
@@ -133,7 +133,7 @@ RasterPage *InMemoryPager::getPage(DataRequest *pOriginalRequest,
 
 void InMemoryPager::releasePage(RasterPage *pPage)
 {
-   InMemoryPage *pMemPage = dynamic_cast<InMemoryPage*>(pPage);
+   InMemoryPage* pMemPage = dynamic_cast<InMemoryPage*>(pPage);
    if (pMemPage != NULL)
    {
       delete pMemPage;

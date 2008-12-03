@@ -128,7 +128,7 @@ QDialog(parent)
          pDesktop->getWindows(windows);
          std::vector<Window*>::const_iterator it;
          WindowType winType;
-         for (it=windows.begin(); it!=windows.end(); ++it)
+         for (it = windows.begin(); it != windows.end(); ++it)
          {
             Window* pWin = *it;
             if (pWin != NULL)
@@ -139,10 +139,10 @@ QDialog(parent)
                   string name = pWin->getName();
                   if (name.empty() == false)
                   {
-                     QString label(winType==SPATIAL_DATA_WINDOW ? "SDW>" : "PW>");
+                     QString label(winType == SPATIAL_DATA_WINDOW ? "SDW>" : "PW>");
                      label += name.c_str();
                      QListWidgetItem* pItem = new QListWidgetItem(label, mpTileList);
-                     pItem->setData(Qt::UserRole, QVariant::fromValue((void*)pWin));
+                     pItem->setData(Qt::UserRole, QVariant::fromValue(reinterpret_cast<void*>(pWin)));
                   }
                }
             }
@@ -160,13 +160,12 @@ std::vector<WorkspaceWindow*> WindowSelectionDlg::getSelectedWindows() const
 {
    std::vector<WorkspaceWindow*> selectedWindows;
    int numWins = mpSelectedList->count();
-   for (int i=0; i<numWins; ++i)
+   for (int i = 0; i < numWins; ++i)
    {
       QListWidgetItem* pItem = mpSelectedList->item(i);
       if (pItem != NULL)
       {
          QVariant var = pItem->data(Qt::UserRole);
-         WorkspaceWindow* pWin = NULL;
          void* pVoid = var.value<void*>();
          if (pVoid != NULL)
          {
@@ -221,7 +220,7 @@ void WindowSelectionDlg::clearSelections()
 void WindowSelectionDlg::addSelection()
 {
    QList<QListWidgetItem*> selectedItems = mpTileList->selectedItems();
-   for (int i=0; i<selectedItems.count(); ++i)
+   for (int i = 0; i < selectedItems.count(); ++i)
    {
       QListWidgetItem* pItem = selectedItems.at(i);
       QList<QListWidgetItem*> matches = mpSelectedList->findItems(pItem->text(),
@@ -240,7 +239,7 @@ void WindowSelectionDlg::addSelection()
 void WindowSelectionDlg::removeSelection()
 {
    QList<QListWidgetItem*> selectedItems = mpSelectedList->selectedItems();
-   for (int i=0; i<selectedItems.count(); ++i)
+   for (int i = 0; i < selectedItems.count(); ++i)
    {
       QListWidgetItem* pItem = selectedItems.at(i);
       int row = mpSelectedList->row(pItem);

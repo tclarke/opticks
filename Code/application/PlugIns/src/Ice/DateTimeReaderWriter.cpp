@@ -25,7 +25,18 @@ using namespace std;
 class TempDateTimeTransferStruct
 {
 public:
-   TempDateTimeTransferStruct() {}
+   TempDateTimeTransferStruct() :
+      mDateValid(0),
+      mMonth(0),
+      mDay(0),
+      mYear(0),
+      mTimeValid(0),
+      mHour(0),
+      mMinute(0),
+      mSecond(0)
+   {
+   }
+
    unsigned char mDateValid;
    unsigned char mMonth;
    unsigned char mDay;
@@ -36,13 +47,19 @@ public:
    unsigned char mSecond;
 };
 
-DateTimeReaderWriter::DateTimeReaderWriter()
-: mpReadBuffer(NULL), mpWriteBuffer(NULL), mDataType(-1), mpValue(NULL)
+DateTimeReaderWriter::DateTimeReaderWriter() :
+   mpValue(NULL),
+   mpWriteBuffer(NULL),
+   mpReadBuffer(NULL),
+   mDataType(-1)
 {
 }
 
-DateTimeReaderWriter::DateTimeReaderWriter(hid_t dataType)
-: mpValue(NULL), mpReadBuffer(NULL), mpWriteBuffer(NULL), mDataType(dataType)
+DateTimeReaderWriter::DateTimeReaderWriter(hid_t dataType) :
+   mpValue(NULL),
+   mpWriteBuffer(NULL),
+   mpReadBuffer(NULL),
+   mDataType(dataType)
 {
    //if data cannot be read, return from constructor before mpValue is set to non-NULL.
    //so that isValid() will return false.
@@ -131,7 +148,11 @@ void* DateTimeReaderWriter::getReadBuffer() const
 
 bool DateTimeReaderWriter::setDataToWrite(void* pObject)
 {
-   if (pObject == NULL) return false;
+   if (pObject == NULL)
+   {
+      return false;
+   }
+
    mpValue = reinterpret_cast<DateTime*>(pObject);
    delete mpWriteBuffer;
    mpWriteBuffer = NULL;
@@ -149,7 +170,9 @@ const void* DateTimeReaderWriter::getWriteBuffer() const
          string formatString = mpValue->getFormattedUtc("%d %m %Y");
          istringstream formatParser;
          formatParser.str(formatString);
-         unsigned int day, year, month;
+         unsigned int day;
+         unsigned int year;
+         unsigned int month;
          formatParser >> day;
          formatParser >> month;
          formatParser >> year;
@@ -169,7 +192,9 @@ const void* DateTimeReaderWriter::getWriteBuffer() const
          string formatString = mpValue->getFormattedUtc("%H %M %S");
          istringstream formatParser;
          formatParser.str(formatString);
-         unsigned int hour, minute, second;
+         unsigned int hour;
+         unsigned int minute;
+         unsigned int second;
          formatParser >> hour;
          formatParser >> minute;
          formatParser >> second;

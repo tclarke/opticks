@@ -123,8 +123,8 @@ namespace
          mHandles.push_back(mSwitcher.location(main+0.5, mMidSec));
       }
    private:
-      const DimensionObjectImp::DimensionSwitcher &mSwitcher;
-      std::vector<LocationType> &mHandles;
+      const DimensionObjectImp::DimensionSwitcher& mSwitcher;
+      std::vector<LocationType>& mHandles;
       double mMidSec;
    };
 
@@ -148,7 +148,7 @@ namespace
          glVertex2i(mSwitcher.x(main, mMaxSec), mSwitcher.y(main, mMaxSec));
       }
    private:
-      const DimensionObjectImp::DimensionSwitcher &mSwitcher;
+      const DimensionObjectImp::DimensionSwitcher& mSwitcher;
       int mMinSec;
       int mMaxSec;
    };
@@ -169,7 +169,7 @@ namespace
       }
 
    private:
-      const DimensionObjectImp::DimensionSwitcher &mSwitcher;
+      const DimensionObjectImp::DimensionSwitcher& mSwitcher;
       DrawUtil::PixelDrawer mDrawer;
       int mMinSec;
       int mMaxSec;
@@ -179,15 +179,15 @@ namespace
 DimensionObjectImp::DimensionObjectImp(const string& id, GraphicObjectType type, GraphicLayer* pLayer, 
                                        LocationType pixelCoord) :
    PixelObjectImp(id, type, pLayer, pixelCoord),
-   mSwitcher(type),
    mInsertingDim(0),
-   mInserting(false)
+   mInserting(false),
+   mSwitcher(type)
 {
    addProperty("LineColor");
    addProperty("PixelSymbol");
 }
 
-DimensionObjectImp::~DimensionObjectImp(void)
+DimensionObjectImp::~DimensionObjectImp()
 {
 }
 
@@ -196,7 +196,8 @@ void DimensionObjectImp::drawVector(double zoomFactor) const
    ColorType color = getLineColor();
    glColor3ub(color.mRed, color.mGreen, color.mBlue);
 
-   int minSec, maxSec;
+   int minSec;
+   int maxSec;
    getSecExtents(minSec, maxSec);
    ::DrawDimVector drawer(mSwitcher, minSec, maxSec); 
    for_each(mSelectedDims.begin(), mSelectedDims.end(), drawer);
@@ -213,7 +214,8 @@ void DimensionObjectImp::drawPixels(double zoomFactor) const
    ColorType color = getLineColor();
    glColor3ub(color.mRed, color.mGreen, color.mBlue);
 
-   int minSec, maxSec;
+   int minSec;
+   int maxSec;
    getSecExtents(minSec, maxSec);
 
    ::DrawDimPixels drawer(mSwitcher, getPixelSymbol(), minSec, maxSec);
@@ -226,8 +228,8 @@ void DimensionObjectImp::drawPixels(double zoomFactor) const
 
 void DimensionObjectImp::getSecExtents(int &minSec, int &maxSec) const
 {
-   GraphicLayer *pLayer = getLayer();
-   if(pLayer == NULL)
+   GraphicLayer* pLayer = getLayer();
+   if (pLayer == NULL)
    {
       // if there is no layer associated with this object, the handles
       // will be incorrect. this is ok as there is no layer to draw the
@@ -235,9 +237,14 @@ void DimensionObjectImp::getSecExtents(int &minSec, int &maxSec) const
       // element, the handles should be updated
       return;
    }
-   View *pView = pLayer->getView();
+
+   View* pView = pLayer->getView();
    VERIFYNRV(pView != NULL);
-   double dMinX, dMinY, dMaxX, dMaxY;
+
+   double dMinX;
+   double dMinY;
+   double dMaxX;
+   double dMaxY;
    pView->getExtents(dMinX, dMinY, dMaxX, dMaxY);
 
    minSec = mSwitcher.secondDimension(dMinX, dMinY);
@@ -246,11 +253,16 @@ void DimensionObjectImp::getSecExtents(int &minSec, int &maxSec) const
 
 void DimensionObjectImp::getMainExtents(int &minMain, int &maxMain) const
 {
-   GraphicLayer *pLayer = getLayer();
+   GraphicLayer* pLayer = getLayer();
    VERIFYNRV(pLayer != NULL);
-   View *pView = pLayer->getView();
+
+   View* pView = pLayer->getView();
    VERIFYNRV(pView != NULL);
-   double dMinX, dMinY, dMaxX, dMaxY;
+
+   double dMinX;
+   double dMinY;
+   double dMaxX;
+   double dMaxY;
    pView->getExtents(dMinX, dMinY, dMaxX, dMaxY);
 
    minMain = mSwitcher.mainDimension(dMinX, dMinY);
@@ -303,7 +315,8 @@ bool DimensionObjectImp::processMouseRelease(LocationType sceneCoord,
       processMouseMove(sceneCoord, button, buttons, modifiers);
       if (find(mSelectedDims.begin(), mSelectedDims.end(), mInsertingDim) == mSelectedDims.end())
       {
-         int minMain, maxMain;
+         int minMain;
+         int maxMain;
          getMainExtents(minMain, maxMain);
          if (mInsertingDim >= minMain && mInsertingDim < maxMain)
          {
@@ -326,9 +339,10 @@ void DimensionObjectImp::updateHandles()
    {
       return;
    }
-   int minSec=0, maxSec=0;
+   int minSec = 0;
+   int maxSec = 0;
    getSecExtents(minSec, maxSec);
-   if(minSec == maxSec)
+   if (minSec == maxSec)
    {
       return;
    }
@@ -353,7 +367,8 @@ void DimensionObjectImp::moveHandle(int handle, LocationType pixel, bool bMainta
    VERIFYNRV(static_cast<size_t>(handle) < mHandles.size());
  
    int dim = mSwitcher.mainDimension(pixel);
-   int minMain, maxMain;
+   int minMain;
+   int maxMain;
    getMainExtents(minMain, maxMain);
    if (dim < minMain || dim > maxMain)
    {
@@ -459,7 +474,7 @@ bool DimensionObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
                std::string name(A(path->getNodeName()));
                if (XMLString::equals(path->getNodeName(), X("pixel")))
                {
-                  DOMNode *pValue = path->getFirstChild();
+                  DOMNode* pValue = path->getFirstChild();
                   unsigned int pixel = atoi(A(pValue->getNodeValue()));
                   mSelectedDims.push_back(pixel);
                }

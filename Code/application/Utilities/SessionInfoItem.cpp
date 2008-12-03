@@ -43,8 +43,8 @@ SessionInfoItem::~SessionInfoItem()
 
 const string& SessionInfoItem::getObjectType() const
 {
-   static string type("SessionInfoItem");
-   return type;
+   static string sType("SessionInfoItem");
+   return sType;
 }
 
 bool SessionInfoItem::serialize(SessionItemSerializer &serializer) const
@@ -124,7 +124,7 @@ bool SessionInfoItem::fromXml(DOMNode* pDocument, unsigned int version)
       return false;
    }
 
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
+   DOMElement* pElem = static_cast<DOMElement*>(pDocument);
 
    if (pElem->hasAttribute(X("currentWorkspaceWindowId")))
    {
@@ -158,7 +158,7 @@ bool SessionInfoItem::fromXml(DOMNode* pDocument, unsigned int version)
             A(pElem->getAttribute(X("activeLayerType"))));
          Layer* pLayer(NULL);
          ViewType vType = pView->getViewType();
-         switch(vType)
+         switch (vType)
          {
             case SPATIAL_DATA_VIEW:
             {
@@ -170,7 +170,7 @@ bool SessionInfoItem::fromXml(DOMNode* pDocument, unsigned int version)
                   vector<Layer*> layers;
                   vector<Layer*>::iterator it;
                   pLayerList->getLayers(eType, layers);
-                  for (it=layers.begin(); it!=layers.end(); ++it)
+                  for (it = layers.begin(); it != layers.end(); ++it)
                   {
                      string name = (*it)->getName();
                      if (name == layerName)

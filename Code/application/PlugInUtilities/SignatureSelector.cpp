@@ -82,7 +82,7 @@ SignatureSelector::SignatureSelector(Progress* pProgress, QWidget* parent,
    mpImportButton = new QPushButton("&Import >>", this);
 
    mpApplyButton = NULL;
-   if(addApply)
+   if (addApply)
    {
       mpApplyButton = new QPushButton("&Apply", this);
       connect(mpApplyButton, SIGNAL(clicked()), this, SLOT(apply()));
@@ -263,14 +263,14 @@ vector<Signature*> SignatureSelector::getSignatures() const
    return signatures;
 }
 
-static void extractFromSigSets(const vector<Signature*> &sourceSigs, vector<Signature*> &destSigs)
+static void extractFromSigSets(const vector<Signature*>& sourceSigs, vector<Signature*>& destSigs)
 {
    vector<Signature*>::const_iterator ppSig;
-   for (ppSig=sourceSigs.begin(); ppSig!=sourceSigs.end(); ++ppSig)
+   for (ppSig = sourceSigs.begin(); ppSig != sourceSigs.end(); ++ppSig)
    {
       if ((*ppSig)->isKindOf("SignatureSet"))
       {
-         const vector<Signature*> &subSigs = ((SignatureSet*)(*ppSig))->getSignatures();
+         const vector<Signature*>& subSigs = ((SignatureSet*)(*ppSig))->getSignatures();
          extractFromSigSets(subSigs, destSigs);
       }
       else
@@ -298,7 +298,7 @@ void SignatureSelector::abortSearch()
 
 void SignatureSelector::addCustomType(const QString &type)
 {
-   if(!type.isEmpty() && mpFormatCombo->findText(type) == -1)
+   if (!type.isEmpty() && mpFormatCombo->findText(type) == -1)
    {
       mpFormatCombo->addItem(type);
    }
@@ -453,18 +453,15 @@ QTreeWidgetItem* SignatureSelector::addSignatureItem(Signature* pSignature, QTre
 
       mLoadedSignatures[pItem] = pSignature;
 
-      if (pSignature->isKindOf("SignatureSet") == true)
+      SignatureSet* pSignatureSet = dynamic_cast<SignatureSet*>(pSignature);
+      if (pSignatureSet != NULL)
       {
-         SignatureSet* pSignatureSet = (SignatureSet*) pSignature;
-
          vector<Signature*> signatures = pSignatureSet->getSignatures();
 
-         int iCount = 0;
-         iCount = signatures.size();
+         int iCount = signatures.size();
          for (int i = 0; i < iCount; i++)
          {
-            Signature* pCurrentSignature = NULL;
-            pCurrentSignature = signatures.at(i);
+            Signature* pCurrentSignature = signatures.at(i);
             if (pCurrentSignature != NULL)
             {
                addSignatureItem(pCurrentSignature, pItem);
@@ -658,7 +655,7 @@ void SignatureSelector::displaySignatureProperties()
 void SignatureSelector::exportSignatures()
 {
    ModelResource<SignatureSet> pExportSet("SignatureSelectorExportSet");
-   if(pExportSet.get() == NULL)
+   if (pExportSet.get() == NULL)
    {
       return;
    }
@@ -682,19 +679,19 @@ void SignatureSelector::exportSignatures()
    {
       map<QTreeWidgetItem*, Signature*>::iterator iter;
       for (iter = mLoadedSignatures.begin(); iter != mLoadedSignatures.end(); ++iter)
-   {
-      QTreeWidgetItem* pItem = iter->first;
-         if (pItem != NULL)
       {
-            if (mpSignatureList->isItemSelected(pItem))
+         QTreeWidgetItem* pItem = iter->first;
+         if (pItem != NULL)
          {
+            if (mpSignatureList->isItemSelected(pItem))
+            {
                SignatureSet* pSet = dynamic_cast<SignatureSet*>(iter->second);
                if (pSet != NULL)
-            {
+               {
                   pExportSet->insertSignatures(pSet->getSignatures());
-            }
-            else
-            {
+               }
+               else
+               {
                   pExportSet->insertSignature(iter->second);
                }
             }
@@ -864,7 +861,7 @@ void SignatureSelector::browseFiles()
    }
    else
    {
-      pWorkingDir = ConfigurationSettings::getSettingImportExportPath();
+      pWorkingDir = ConfigurationSettings::getSettingImportPath();
    }
    if (pWorkingDir != NULL)
    {
@@ -886,7 +883,8 @@ void SignatureSelector::browseFiles()
                FactoryResource<Filename> pNewWorkingDir;
                pNewWorkingDir->setFullPathAndName(strDirectory.toStdString());
                Service<ConfigurationSettings> pSettings;
-               pSettings->setSessionSetting(ConfigurationSettings::getSettingPluginWorkingDirectoryKey("Signature"), *pNewWorkingDir.get());
+               pSettings->setSessionSetting(ConfigurationSettings::getSettingPluginWorkingDirectoryKey("Signature"),
+                  *pNewWorkingDir.get());
             }
          }
       }
@@ -912,7 +910,7 @@ void SignatureSelector::searchDirectories()
    }
    else
    {
-      pWorkingDir = ConfigurationSettings::getSettingImportExportPath();
+      pWorkingDir = ConfigurationSettings::getSettingImportPath();
    }
    if (pWorkingDir != NULL)
    {

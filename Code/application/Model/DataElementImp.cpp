@@ -168,7 +168,7 @@ DataElement* DataElementImp::getParent() const
 vector<string> DataElementImp::getParentDesignator() const
 {
    vector<string> parentDesignator;
-   if(mpDataDescriptor != NULL)
+   if (mpDataDescriptor != NULL)
    {
       parentDesignator = mpDataDescriptor->getParentDesignator();
    }
@@ -255,11 +255,11 @@ DataElement* DataElementImp::copy(const string& name, DataElement* pParent) cons
 bool DataElementImp::serialize(SessionItemSerializer& serializer) const
 {
    XMLWriter xml(getObjectType().c_str());
-   if(!SessionItemImp::toXml(&xml))
+   if (!SessionItemImp::toXml(&xml))
    {
       return false;
    }
-   DataElement *pParent = getParent();
+   DataElement* pParent = getParent();
    if (pParent != NULL)
    {
       xml.addAttr("parentId", pParent->getId());
@@ -270,16 +270,17 @@ bool DataElementImp::serialize(SessionItemSerializer& serializer) const
 bool DataElementImp::deserialize(SessionItemDeserializer &deserializer)
 {
    XmlReader reader(NULL, false);
-   DOMDocument *pDoc = deserializer.deserialize(reader);
-   if(pDoc == NULL)
+   DOMDocument* pDoc = deserializer.deserialize(reader);
+   if (pDoc == NULL)
    {
       return false;
    }
-   DOMElement *pRoot = pDoc->getDocumentElement();
+   DOMElement* pRoot = pDoc->getDocumentElement();
    VERIFY(pRoot != NULL);
-   if(pRoot->hasAttribute(X("parentId")))
+   if (pRoot->hasAttribute(X("parentId")))
    {
-      DataElement *pParent = dynamic_cast<DataElement*>(Service<SessionManager>()->getSessionItem(A(pRoot->getAttribute(X("parentId")))));
+      DataElement* pParent =
+         dynamic_cast<DataElement*>(Service<SessionManager>()->getSessionItem(A(pRoot->getAttribute(X("parentId")))));
       if (pParent == NULL)
       {
          return false;
@@ -357,8 +358,8 @@ bool DataElementImp::fromXml(DOMNode* pDocument, unsigned int version)
 
 const string& DataElementImp::getObjectType() const
 {
-   static string type("DataElementImp");
-   return type;
+   static string sType("DataElementImp");
+   return sType;
 }
 
 bool DataElementImp::isKindOf(const string& className) const

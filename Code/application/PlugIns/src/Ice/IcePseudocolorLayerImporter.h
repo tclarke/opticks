@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef ICE_PSEUDOCOLOR_LAYER_IMPORTER_H
-#define ICE_PSEUDOCOLOR_LAYER_IMPORTER_H
+#ifndef ICEPSEUDOCOLORLAYERIMPORTER_H
+#define ICEPSEUDOCOLORLAYERIMPORTER_H
 
 #include "IceImporterShell.h"
 

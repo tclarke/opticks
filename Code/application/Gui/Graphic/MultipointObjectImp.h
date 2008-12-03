@@ -74,12 +74,11 @@ private:
    void getVertices(const DOMNode* pVertex, const std::string& nodeName, std::vector<LocationType>& vertices);
    std::vector<LocationType> mVertices;
    std::vector<LocationType> mGeoVertices;
-   
+
    bool mFlipX;
    bool mFlipY;
    // bounding box is a derived value, is it current?
    bool mBoxMatchesVertices;
-   bool mUseHitTolerance;
    bool mUpdating;
 };
 
@@ -93,4 +92,4 @@ private:
       return impClass::getVertices(); \
    }
 
-#endif // MULTIPOINTOBJECT_H
+#endif

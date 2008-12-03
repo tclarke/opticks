@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef XMLBASE_H__
-#define XMLBASE_H__
+#ifndef XMLBASE_H
+#define XMLBASE_H
 
 #include <stdio.h>
 
@@ -35,64 +33,70 @@
  */
 class OpticksXStr
 {
-   XMLCh *fUnicodeForm;
-   char *fAsciiForm;
-   int releaseWhich;
 public:
    /**
     * Create an %OpticksXStr object containing an ASCII string.
-    * @param toTranscode
+    * @param pToTranscode
     *        The ASCII string
     */
-   OpticksXStr(const char *toTranscode)
-      {
-         fAsciiForm=const_cast<char *>(toTranscode);
-         fUnicodeForm=XERCES_CPP_NAMESPACE_QUALIFIER XMLString::transcode(toTranscode);
-         releaseWhich=1;
-      }
+   OpticksXStr(const char* pToTranscode)
+   {
+      mpAsciiForm = const_cast<char*>(pToTranscode);
+      mpUnicodeForm = XERCES_CPP_NAMESPACE_QUALIFIER XMLString::transcode(pToTranscode);
+      mReleaseWhich = 1;
+   }
 
    /**
     * Create an %OpticksXStr object containing a Unicode string.
-    * @param unicode
+    * @param pUnicode
     *        The Unicode string
     */
-   OpticksXStr(const XMLCh *unicode)
-      {
-         fUnicodeForm = const_cast<XMLCh *>(unicode);
-         fAsciiForm=XERCES_CPP_NAMESPACE_QUALIFIER XMLString::transcode(unicode);
-         releaseWhich=2;
-      }
+   OpticksXStr(const XMLCh* pUnicode)
+   {
+      mpUnicodeForm = const_cast<XMLCh*>(pUnicode);
+      mpAsciiForm = XERCES_CPP_NAMESPACE_QUALIFIER XMLString::transcode(pUnicode);
+      mReleaseWhich = 2;
+   }
 
    /**
     * Destroy the %OpticksXStr, cleaning up Xerces allocated memory as needed.
     */
    ~OpticksXStr()
+   {
+      if (mReleaseWhich == 1)
       {
-         if(releaseWhich == 1)
-            XERCES_CPP_NAMESPACE_QUALIFIER XMLString::release(&fUnicodeForm);
-         else if(releaseWhich = 2)
-            XERCES_CPP_NAMESPACE_QUALIFIER XMLString::release(&fAsciiForm);
+         XERCES_CPP_NAMESPACE_QUALIFIER XMLString::release(&mpUnicodeForm);
       }
+      else if (mReleaseWhich == 2)
+      {
+         XERCES_CPP_NAMESPACE_QUALIFIER XMLString::release(&mpAsciiForm);
+      }
+   }
 
    /**
     * Obtain the Unicode version of this %OpticksXStr
     *
     * @return the Unicode form
     */
-   const XMLCh *unicodeForm() const
-      {
-         return fUnicodeForm;
-      }
+   const XMLCh* unicodeForm() const
+   {
+      return mpUnicodeForm;
+   }
 
    /**
     * Obtain the ASCII version of this %OpticksXStr
     *
     * @return the ASCII form
     */
-   const char *asciiForm() const
-      {
-         return fAsciiForm;
-      }
+   const char* asciiForm() const
+   {
+      return mpAsciiForm;
+   }
+
+private:
+   XMLCh* mpUnicodeForm;
+   char* mpAsciiForm;
+   int mReleaseWhich;
 };
 
 /**
@@ -124,7 +128,7 @@ public: // static helpers
     * however, you will not be able to refer to paths such
     * as \b /c:/ on UNIX.
     *
-    * @param url
+    * @param pUrl
     *        The URL to convert to a path. This is passed
     *        in as a Unicode string as the most often used
     *        pattern is to read an attribute or element value
@@ -132,7 +136,7 @@ public: // static helpers
     *
     * @return A string representation of the path
     */
-   static std::string URLtoPath(const XMLCh *url);
+   static std::string URLtoPath(const XMLCh* pUrl);
 
    /**
     * This function will convert a path to a \b file:// URL.
@@ -148,14 +152,13 @@ public: // static helpers
     */
    static std::string PathToURL(std::string path);
 
-public:
    /**
     * Construct a new XML processor.
     *
     * Constructing an %XmlBase is not particularly useful as most
     * functionality will be in derived classes.
     *
-    * @param log
+    * @param pLog
     *        If this optional MessageLog is passed in, any errors
     *        encountered during processing will be logged.
     *
@@ -164,7 +167,7 @@ public:
     *
     * @see XmlReader, XMLWriter
     */
-   XmlBase(MessageLog* log = NULL);
+   XmlBase(MessageLog* pLog = NULL);
 
    /**
     * Destroy and cleanup the XML processor.
@@ -174,7 +177,7 @@ public:
    /**
     * Encode data in base 64 representation.
     *
-    * @param data
+    * @param pData
     *        This is the 2-byte data which will be encoded.
     *
     * @param size
@@ -190,13 +193,13 @@ public:
     *
     * @return The Unicode form of the base 64 encoded data.
     */
-   static XMLByte *encodeBase64(unsigned int *data, unsigned int size, std::string encoding,
-      unsigned int *pOutLen = NULL);
-   
+   static XMLByte* encodeBase64(unsigned int* pData, unsigned int size, std::string encoding,
+      unsigned int* pOutLen = NULL);
+
    /**
     * Decode data in base 64 representation.
     *
-    * @param data
+    * @param pData
     *        This is the Unicode representation of the base 64 encoded data.
     *
     * @param size
@@ -209,16 +212,13 @@ public:
     *
     * @return The 2-byte array of decoded data.
     */
-   static unsigned int *decodeBase64(const XMLByte *data, unsigned int size, std::string encoding);
+   static unsigned int* decodeBase64(const XMLByte* pData, unsigned int size, std::string encoding);
 
-public: // internal class
    /**
     * This class represents an exception thrown by the XML classes.
     */
    class XmlException
    {
-      std::string message;
-
    public:
       /**
        * Create a new exception with no error message.
@@ -236,14 +236,21 @@ public: // internal class
        * @param msg
        *        The error message string.
        */
-      XmlException(std::string msg) : message(msg) {}
+      XmlException(std::string msg) :
+         mMessage(msg) {}
 
       /**
        * Accessor for the error message.
        *
        * @return The error message string.
        */
-      virtual std::string str() const { return message; }
+      virtual std::string str() const
+      {
+         return mMessage;
+      }
+
+   private:
+      std::string mMessage;
    };
 
    /**
@@ -251,46 +258,43 @@ public: // internal class
     */
    static const unsigned int VERSION;
 
-protected:
-   /**
-    * Log an XML exception to the message log, if one is available.
-    *
-    * @param exc
-    *        The exception to log.
-    */
-   void logException(const XERCES_CPP_NAMESPACE_QUALIFIER XMLException *exc);
-
-   /**
-    * Log a Xerces DOM exception to the message log, if one is available.
-    *
-    * @param exc
-    *        The exception to log.
-    */
-   void logException(const XERCES_CPP_NAMESPACE_QUALIFIER DOMException *exc);
-
-   /**
-    * Log a Xerces SAX exception to the message log, if one is available.
-    *
-    * @param exc
-    *        The exception to log.
-    *
-    * @param severity
-    *        A severity which is also logged. SAX exceptions may not be fatal
-    *        and this is a way to inform the uses of the exception severity.
-    */
-   void logException(const XERCES_CPP_NAMESPACE_QUALIFIER SAXParseException *exc,
-                           std::string severity);
-
-public:
    /**
     * Log a Xerces DOM error to the message log, if one is available.
     * 
     * @param exc
     *        The exception to log.
     */
-   void logError(const XERCES_CPP_NAMESPACE_QUALIFIER DOMError &exc);
+   void logError(const XERCES_CPP_NAMESPACE_QUALIFIER DOMError& exc);
 
 protected:
+   /**
+    * Log an XML exception to the message log, if one is available.
+    *
+    * @param pExc
+    *        The exception to log.
+    */
+   void logException(const XERCES_CPP_NAMESPACE_QUALIFIER XMLException* pExc);
+
+   /**
+    * Log a Xerces DOM exception to the message log, if one is available.
+    *
+    * @param pExc
+    *        The exception to log.
+    */
+   void logException(const XERCES_CPP_NAMESPACE_QUALIFIER DOMException* pExc);
+
+   /**
+    * Log a Xerces SAX exception to the message log, if one is available.
+    *
+    * @param pExc
+    *        The exception to log.
+    *
+    * @param severity
+    *        A severity which is also logged. SAX exceptions may not be fatal
+    *        and this is a way to inform the uses of the exception severity.
+    */
+   void logException(const XERCES_CPP_NAMESPACE_QUALIFIER SAXParseException* pExc, std::string severity);
+
    /**
     * Log a string message to the message log, if one is available.
     *
@@ -302,10 +306,10 @@ protected:
    /**
     * This is the ASCII namespace which XML data exists in.
     */
-   static const char *namespaceId;
+   static const char* sNamespaceId;
 
 private:
-   MessageLog *mpLog;
+   MessageLog* mpLog;
 };
 
 #endif

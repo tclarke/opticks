@@ -33,11 +33,15 @@ public:
    enum TypeEnum { INTEGRAL, DOUBLE, BOOL, DATE_TIME, ENUMERATION, VECTOR, DYNAMIC_OBJECT, TEXT };
    typedef EnumWrapper<TypeEnum> Type;
 
-   DataVariantEditorDelegate()
+   DataVariantEditorDelegate() :
+      mNeedBrowseButton(false)
    {
    }
-   DataVariantEditorDelegate(std::string typeName, Type theType, bool needBrowseButton = false)
-    : mTypeName(typeName), mType(theType), mNeedBrowseButton(needBrowseButton)
+
+   DataVariantEditorDelegate(std::string typeName, Type theType, bool needBrowseButton = false) :
+      mType(theType),
+      mTypeName(typeName),
+      mNeedBrowseButton(needBrowseButton)
    {
    }
 
@@ -95,7 +99,7 @@ public:
    DataVariantEditor(QWidget* parent = 0);
    ~DataVariantEditor();
 
-   void setValue(const DataVariant &value, bool useVariantCurrentValue = true);
+   void setValue(const DataVariant& value, bool useVariantCurrentValue = true);
    const DataVariant &getValue();
 
    std::vector<DataVariantEditorDelegate> getDelegates();

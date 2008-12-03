@@ -18,7 +18,6 @@
 #include <stdio.h>
 #include <limits>
 
-
 #if defined(WIN_API)
 #include <windows.h>
 #include <direct.h>
@@ -32,24 +31,21 @@
 
 using namespace std;
 
-MemoryMappedMatrix::MemoryMappedMatrix(const string &fileName, unsigned int headerOffset,
-                        InterleaveFormatType interleave, unsigned int bytesPerElement,
-                        unsigned int rowNum, unsigned int columnNum, unsigned int bandNum,
-                        unsigned int interLineBytes, unsigned int interBandBytes, bool readOnly)
+MemoryMappedMatrix::MemoryMappedMatrix(const string& fileName, unsigned int headerOffset,
+                                       InterleaveFormatType interleave, unsigned int bytesPerElement,
+                                       unsigned int rowNum, unsigned int columnNum, unsigned int bandNum,
+                                       unsigned int interLineBytes, unsigned int interBandBytes, bool readOnly) :
+   mFileName(fileName),
+   mInterleave(interleave),
+   mBytesPerElement(bytesPerElement),
+   mRowNum(rowNum),
+   mColumnNum(columnNum),
+   mBandNum(bandNum),
+   mInterLineBytes(interLineBytes),
+   mInterBandBytes(interBandBytes),
+   mHeaderOffset(headerOffset),
+   mReadOnly(readOnly)
 {
-   mInterleave = interleave;
-   mBytesPerElement = bytesPerElement;
-   mRowNum = rowNum;
-   mColumnNum = columnNum;
-   mBandNum = bandNum;
-   mReadOnly = readOnly;
-   mInterLineBytes = interLineBytes;
-   mInterBandBytes = interBandBytes;
-
-   mAddressOffset = 0;
-   mFileName = fileName;
-   mHeaderOffset = headerOffset;
-
 #if defined(WIN_API)
    // All addresses must align on a page boundary.
    SYSTEM_INFO info;
@@ -59,22 +55,16 @@ MemoryMappedMatrix::MemoryMappedMatrix(const string &fileName, unsigned int head
    unsigned int openPermissions = GENERIC_READ | GENERIC_WRITE;
    unsigned int mapPermissions = PAGE_READWRITE;
 
-   if(readOnly)
+   if (readOnly)
    {
       openPermissions = GENERIC_READ;
       mapPermissions = PAGE_READONLY;
    }
 
-   mFileHandle = CreateFile(mFileName.c_str(),
-      openPermissions,
-      FILE_SHARE_READ,
-      NULL,
-      OPEN_ALWAYS, //OPEN_EXISTING,CREATE_ALWAYS
-      0,
-      NULL);
+   mFileHandle = CreateFile(mFileName.c_str(), openPermissions, FILE_SHARE_READ, NULL, OPEN_ALWAYS, 0, NULL);
 
-   mFileSizeLow = GetFileSize(mFileHandle, & mFileSizeHigh);
-   if((mFileSizeLow == 0xFFFFFFFF) && (GetLastError() != NO_ERROR))
+   mFileSizeLow = GetFileSize(mFileHandle, &mFileSizeHigh);
+   if ((mFileSizeLow == 0xFFFFFFFF) && (GetLastError() != NO_ERROR))
    {
       mFileSizeLow = 0;
       mFileSizeHigh = 0;
@@ -84,28 +74,22 @@ MemoryMappedMatrix::MemoryMappedMatrix(const string &fileName, unsigned int head
    mFileSize *= static_cast<LONG64>(UINT_MAX) + 1;
    mFileSize += mFileSizeLow;
 
-   mHandle = CreateFileMapping(mFileHandle,
-      NULL,
-      mapPermissions,
-      0,
-      0,
-      NULL); 
-       
-    if(mHandle == 0) // bad file handle :(
-    {
-    	throw std::out_of_range("Unable to map file (in MemoryMappedMatrix.cpp)");
-    }
-       
+   mHandle = CreateFileMapping(mFileHandle, NULL, mapPermissions, 0, 0, NULL);
+   if (mHandle == 0)
+   {
+      throw std::out_of_range("Unable to map file (in MemoryMappedMatrix.cpp)");
+   }
+
 #else
    unsigned int openPermissions = O_RDWR;
 
-   if(readOnly)
+   if (readOnly)
    {
       openPermissions = O_RDONLY;
    }
 
    mHandle = open(mFileName.c_str(), openPermissions); //|O_CREAT, 0777);
-   if(mHandle == -1)
+   if (mHandle == -1)
    {
       throw std::out_of_range("Unable to map file (in MemoryMappedMatrix.cpp)");
    }
@@ -113,8 +97,8 @@ MemoryMappedMatrix::MemoryMappedMatrix(const string &fileName, unsigned int head
    struct stat fileStats;
    fstat(mHandle, &fileStats);
    mFileSize = fileStats.st_size;
-   mFileSizeLow = mFileSize / numeric_limits<unsigned int>::max();;
-   mFileSizeHigh = mFileSize % numeric_limits<unsigned int>::max();;
+   mFileSizeLow = mFileSize / numeric_limits<unsigned int>::max();
+   mFileSizeHigh = mFileSize % numeric_limits<unsigned int>::max();
    mGranularity = sysconf(_SC_PAGESIZE);
    if (fileStats.st_blksize > mGranularity && fileStats.st_blksize % mGranularity == 0)
    {
@@ -135,16 +119,15 @@ MemoryMappedMatrix::~MemoryMappedMatrix()
 
 MemoryMappedMatrixView* MemoryMappedMatrix::getView(size_t defaultSegmentSize)
 {
-   MemoryMappedMatrixView* pView = new MemoryMappedMatrixView(mHandle, mHeaderOffset, 
-                                      defaultSegmentSize, mInterleave,
-                                      mBytesPerElement, mRowNum, mColumnNum, mBandNum,
-                                      mInterLineBytes, mInterBandBytes, mReadOnly, mGranularity, mFileSize);
+   MemoryMappedMatrixView* pView = new MemoryMappedMatrixView(mHandle, mHeaderOffset, defaultSegmentSize,
+      mInterleave, mBytesPerElement, mRowNum, mColumnNum, mBandNum, mInterLineBytes, mInterBandBytes, mReadOnly,
+      mGranularity, mFileSize);
 
-   views.insert(pView);
+   mViews.insert(pView);
    return pView;
 }
 
 void MemoryMappedMatrix::release(MemoryMappedMatrixView* pView)
 {
-   views.erase(pView);
+   mViews.erase(pView);
 }

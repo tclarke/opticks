@@ -7,15 +7,22 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef FUSION_TOOLS_H
-#define FUSION_TOOLS_H
+#ifndef DATAFUSIONTOOLS_H
+#define DATAFUSIONTOOLS_H
 
 class DataFusionTools
 {
 public:
    // used by Poly2D/PolyWarp to access plug-in objects
-   static inline void setAbortFlag(bool bFlag) { smbAbortFlag = bFlag; }
-   static inline bool getAbortFlag() { return smbAbortFlag; }
+   static inline void setAbortFlag(bool bFlag)
+   {
+      smbAbortFlag = bFlag;
+   }
+
+   static inline bool getAbortFlag()
+   {
+      return smbAbortFlag;
+   }
 
 private:
    static bool smbAbortFlag;

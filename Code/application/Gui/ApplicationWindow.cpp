@@ -23,8 +23,8 @@
 #include <QtGui/QMessageBox>
 #include <QtGui/QSplashScreen>
 #include <QtGui/QToolTip>
-#include <QtGui/QWhatsThis>
 #include <QtGui/QVBoxLayout>
+#include <QtGui/QWhatsThis>
 
 #include "AboutDlg.h"
 #include "AnimationController.h"
@@ -36,10 +36,10 @@
 #include "AoiToolBar.h"
 #include "AppAssert.h"
 #include "AppConfig.h"
+#include "ApplicationServices.h"
 #include "ApplicationWindow.h"
 #include "AppVerify.h"
 #include "AppVersion.h"
-#include "ApplicationServices.h"
 #include "BackgroundPluginWindow.h"
 #include "BatchEditorDlg.h"
 #include "BatchExportDlg.h"
@@ -78,7 +78,6 @@
 #include "LatLonLayer.h"
 #include "Layer.h"
 #include "LayerList.h"
-#include "LayerListImp.h"
 #include "LinkDlg.h"
 #include "MeasurementToolBar.h"
 #include "MenuBarImp.h"
@@ -162,9 +161,9 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    SettableSessionItemAdapter("{D21A6DE0-174B-4fd2-9886-963D8BB1FC48}"),
    mAutoTimerRetryOnLock(false),
    mClipboard(SessionItemImp::generateUniqueId(), GROUP_OBJECT, NULL, LocationType()),
+   mpWorkspace(NULL),
    mpCurrentWnd(NULL),
    mpCurrentEditView(NULL),
-   mpWorkspace(NULL),
    mpGcpEditor(NULL),
    mpUndoGroup(new QUndoGroup(this))
 {
@@ -389,12 +388,14 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
 
    m_pFlip_Horiz_Action = new QAction(pIcons->mFlipHoriz, "Flip &Horizontally", this);
    m_pFlip_Horiz_Action->setAutoRepeat(false);
+   m_pFlip_Horiz_Action->setShortcut(QKeySequence(Qt::Key_H));
    m_pFlip_Horiz_Action->setToolTip("Flip Horizontally");
    m_pFlip_Horiz_Action->setStatusTip("Flips the data set from left to right");
    VERIFYNR(connect(m_pFlip_Horiz_Action, SIGNAL(triggered()), this, SLOT(flipHoriz())));
 
    m_pFlip_Vert_Action = new QAction(pIcons->mFlipVert, "Flip &Vertically", this);
    m_pFlip_Vert_Action->setAutoRepeat(false);
+   m_pFlip_Vert_Action->setShortcut(QKeySequence(Qt::Key_V));
    m_pFlip_Vert_Action->setToolTip("Flip Vertically");
    m_pFlip_Vert_Action->setStatusTip("Flips the data set from top to bottom");
    VERIFYNR(connect(m_pFlip_Vert_Action, SIGNAL(triggered()), this, SLOT(flipVert())));
@@ -413,17 +414,20 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
 
    m_pReset_Action = new QAction(pIcons->mReset, "R&eset", this);
    m_pReset_Action->setAutoRepeat(false);
+   m_pReset_Action->setShortcut(QKeySequence(Qt::Key_W));
    m_pReset_Action->setToolTip("Reset");
    m_pReset_Action->setStatusTip("Returns the data set to its original orientation");
    VERIFYNR(connect(m_pReset_Action, SIGNAL(triggered()), this, SLOT(reset())));
 
    // Zoom
    m_pZoom_In_Action = new QAction(pIcons->mZoomIn, "&In", this);
+   m_pZoom_In_Action->setShortcut(QKeySequence(Qt::Key_Z));
    m_pZoom_In_Action->setToolTip("Zoom In");
    m_pZoom_In_Action->setStatusTip("Increases the zoom level in the active view about the window center");
    VERIFYNR(connect(m_pZoom_In_Action, SIGNAL(triggered()), this, SLOT(zoomIn())));
 
    m_pZoom_Out_Action = new QAction(pIcons->mZoomOut, "&Out", this);
+   m_pZoom_Out_Action->setShortcut(QKeySequence("Shift+Z"));
    m_pZoom_Out_Action->setToolTip("Zoom Out");
    m_pZoom_Out_Action->setStatusTip("Decreases the zoom level in the active view about the window center");
    VERIFYNR(connect(m_pZoom_Out_Action, SIGNAL(triggered()), this, SLOT(zoomOut())));
@@ -496,6 +500,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
 
    m_pZoom_To_Fit_Action = new QAction(pIcons->mZoomToFit, "To &Fit", this);
    m_pZoom_To_Fit_Action->setAutoRepeat(false);
+   m_pZoom_To_Fit_Action->setShortcut(QKeySequence(Qt::Key_E));
    m_pZoom_To_Fit_Action->setToolTip("Zoom to Fit");
    m_pZoom_To_Fit_Action->setStatusTip("Zooms the active view to the maximum extent of the data");
    VERIFYNR(connect(m_pZoom_To_Fit_Action, SIGNAL(triggered()), this, SLOT(zoomToFit())));
@@ -742,7 +747,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    mpSessionExplorer->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &ApplicationWindow::windowRemoved));
    mpSessionExplorer->attach(SIGNAL_NAME(SessionExplorer, AboutToShowSessionItemContextMenu), 
       Slot(this, &ApplicationWindow::updateContextMenu));
-   SessionManagerImp::instance()->attach(SIGNAL_NAME(SessionManagerImp, SessionRestored),
+   SessionManagerImp::instance()->attach(SIGNAL_NAME(SessionManager, SessionRestored),
       Slot(this, &ApplicationWindow::sessionLoaded));
 
    // Histogram window
@@ -898,6 +903,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
       addWindow(mpAnnotationToolBar);
       mpAnnotationToolBar->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &ApplicationWindow::windowRemoved));
       mpAnnotationToolBar->hide();
+      mpAnnotationToolBar->installEventFilter(this);
    }
 
    // Brightness toolbar
@@ -938,7 +944,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    ///////////
 
    // Create the submenus
-   QMenu* pToolbarsMenu = createPopupMenu();
+   mpToolbarsMenu = new QMenu ("Toolbars", m_pView);
    QMenu* pPanMenu = new QMenu("Pan &Mode", m_pView);
    QMenu* pRotateMenu = new QMenu("Rot&ate", m_pView);
    QMenu* pZoomMenu = new QMenu("&Zoom", m_pView);
@@ -986,7 +992,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
 
    // View menu
    mpMenuBar->insertCommand(pStatus_Bar_Action, m_pView, viewContext);
-   mpMenuBar->insertMenu(pToolbarsMenu, m_pView);
+   mpMenuBar->insertMenu(mpToolbarsMenu, m_pView);
    m_pView->addSeparator();
    mpMenuBar->insertCommand(m_pPan_Action, m_pView, mouseModeContext);
    mpMenuBar->insertMenu(pPanMenu, m_pView);
@@ -1001,25 +1007,6 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    mpMenuBar->insertCommand(mpClearMarkingsAction, m_pView, viewContext);
    mpMenuBar->insertCommand(mpTakeSnapshotAction, m_pView, viewContext);
    mpMenuBar->insertCommand(pPropertiesAction, m_pView, viewContext);
-
-   // Toolbars popup menu
-   pToolbarsMenu->setTitle("Toolbars");
-
-   QList<QAction*> menuActions = pToolbarsMenu->actions();
-   for (int i = 0; i < menuActions.count(); ++i)
-   {
-      QAction* pAction = menuActions[i];
-      if (pAction != NULL)
-      {
-         QString strName = pAction->text();
-         if ((pAction->isSeparator() == true) || (strName == mpSessionExplorer->windowTitle()) ||
-            (strName == m_pHistogram->windowTitle()) || (strName == m_pMessage_Log->windowTitle()) ||
-            (strName == m_pBackground_Plugins->windowTitle()) || (strName == m_pScripting->windowTitle()))
-         {
-            pToolbarsMenu->removeAction(pAction);
-         }
-      }
-   }
 
    // Pan Mode popup menu
    string panContext = viewContext + string("/") + pPanMenu->menuAction()->toolTip().toStdString();;
@@ -1176,6 +1163,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
 
    m_pNo_View_Mode_Action->setChecked(true);
 
+   mpSessionExplorer->initialize();
    qApp->installEventFilter(this);
 
    /////////////////
@@ -1207,6 +1195,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    VERIFYNR(connect(m_pScripting_Wnd_Action, SIGNAL(triggered(bool)), m_pScripting, SLOT(setVisible(bool))));
    VERIFYNR(connect(m_pScripting, SIGNAL(visibilityChanged(bool)), m_pScripting_Wnd_Action, SLOT(setChecked(bool))));
    VERIFYNR(connect(mpWorkspace, SIGNAL(windowActivated(QWidget*)), this, SLOT(updateActiveWindow(QWidget*))));
+   VERIFYNR(connect(mpToolbarsMenu, SIGNAL(aboutToShow()), this, SLOT(showToolbarsMenu())));
 
    Service<DesktopServices> pDesktop;
    attach(SIGNAL_NAME(ApplicationWindow, WindowAdded),
@@ -1404,26 +1393,6 @@ bool ApplicationWindow::addWindow(Window* pWindow)
       setMouseMode(pMouseModeAction);
    }
 
-   SpatialDataWindow* pSpatialDataWindow = dynamic_cast<SpatialDataWindow*>(pWindow);
-   if (pSpatialDataWindow != NULL)
-   {
-      SpatialDataViewImp* pView = dynamic_cast<SpatialDataViewImp*>(pSpatialDataWindow->getSpatialDataView());
-      if ((pView != NULL) && (m_pHistogram != NULL))
-      {
-         VERIFYNR(connect(pView, SIGNAL(layerActivated(Layer*)), static_cast<HistogramWindowImp*>(m_pHistogram),
-            SLOT(setCurrentPlot(Layer*))));
-
-         LayerListImp* pLayerList = dynamic_cast<LayerListImp*>(pView->getLayerList());
-         if (pLayerList != NULL)
-         {
-            VERIFYNR(connect(pLayerList, SIGNAL(layerAdded(Layer*)), static_cast<HistogramWindowImp*>(m_pHistogram),
-               SLOT(createPlot(Layer*))));
-            VERIFYNR(connect(pLayerList, SIGNAL(layerDeleted(Layer*)), static_cast<HistogramWindowImp*>(m_pHistogram),
-               SLOT(deletePlot(Layer*))));
-         }
-      }
-   }
-
    ViewWindow* pViewWindow = dynamic_cast<ViewWindow*>(pWindow);
    if (pViewWindow != NULL)
    {
@@ -1445,6 +1414,7 @@ bool ApplicationWindow::addWindow(Window* pWindow)
    {
       pDockWindow->setObjectName(QString::fromStdString(pDockWindow->getName()));
       addDockWidget(Qt::BottomDockWidgetArea, pDockWindow);
+      pDockWindow->restoreState();
    }
 
    ToolBarImp* pToolBar = dynamic_cast<ToolBarImp*>(pWindow);
@@ -1673,6 +1643,13 @@ bool ApplicationWindow::deleteWindow(Window* pWindow)
    if (isDefaultWindow(pWindow) == true)
    {
       return false;
+   }
+
+   // if dock window, save geometry
+   DockWindowImp* pDockWindow = dynamic_cast<DockWindowImp*>(pWindow);
+   if (pDockWindow != NULL)
+   {
+      pDockWindow->saveState();
    }
 
    // Close the widget before removing the window to cancel out if the user does not confirm the close
@@ -2406,7 +2383,7 @@ void ApplicationWindow::openSession(const QString& filename)
       else
       {
          SessionSaveType eSave = SessionManager::getSettingQueryForSave();
-         int buttonVal = static_cast<int>(eSave);
+         int buttonVal = (eSave == SESSION_AUTO_SAVE ? QMessageBox::Yes : QMessageBox::No);
          if (eSave == SESSION_QUERY_SAVE)
          {
             buttonVal = QMessageBox::question(this, "Save Session", 
@@ -2440,7 +2417,7 @@ void ApplicationWindow::openSession(const QString& filename)
 bool ApplicationWindow::newSession()
 {
    SessionSaveType eSave = SessionManager::getSettingQueryForSave();
-   int buttonVal = static_cast<int>(eSave);
+   int buttonVal = (eSave == SESSION_AUTO_SAVE ? QMessageBox::Yes : QMessageBox::No);
    if (eSave == SESSION_QUERY_SAVE)
    {
          buttonVal = QMessageBox::question(this, "Close Session", 
@@ -2550,6 +2527,16 @@ bool ApplicationWindow::saveSession()
          remove(mSessionFilename.c_str());
          progress.updateProgress("Session saving is temporarily locked.", 0, ERRORS);
          return false;
+      }
+      Service<MessageLogMgr> pLogMgr;
+      MessageLog *pLog = pLogMgr->getLog();
+      if (pLog != NULL && status.first == SessionManager::SUCCESS)
+      {
+         pLog->createMessage("Session saved: " + mSessionFilename,"app","7AD6D0B4-08E4-4556-A20D-2595B797B4F3");
+      }
+      else if(pLog != NULL && status.first == SessionManager::PARTIAL_SUCCESS)
+      {
+         pLog->createMessage("Session saved. Not all session items were successfully loaded: " + mSessionFilename,"app","C85E14F3-69B0-4495-AD91-F3E1B7013A8E");
       }
       return true;
    }
@@ -3085,26 +3072,38 @@ void ApplicationWindow::reset()
 
 void ApplicationWindow::zoomIn()
 {
-   PerspectiveView* pView = dynamic_cast<PerspectiveView*>(getCurrentWorkspaceWindowView());
+   PerspectiveViewImp* pView = dynamic_cast<PerspectiveViewImp*>(getCurrentWorkspaceWindowView());
    if (pView != NULL)
    {
-      double dZoom = pView->getZoomPercentage();
-      dZoom *= 1.25;
+      if (pView->isInsetEnabled() == true)
+      {
+         pView->zoomInset(true);
+      }
+      else
+      {
+         double dZoom = pView->getZoomPercentage() * 1.25;
+         pView->zoomTo(dZoom);
+      }
 
-      pView->zoomTo(dZoom);
       pView->refresh();
    }
 }
 
 void ApplicationWindow::zoomOut()
 {
-   PerspectiveView* pView = dynamic_cast<PerspectiveView*>(getCurrentWorkspaceWindowView());
+   PerspectiveViewImp* pView = dynamic_cast<PerspectiveViewImp*>(getCurrentWorkspaceWindowView());
    if (pView != NULL)
    {
-      double dZoom = pView->getZoomPercentage();
-      dZoom /= 1.25;
+      if (pView->isInsetEnabled() == true)
+      {
+         pView->zoomInset(false);
+      }
+      else
+      {
+         double dZoom = pView->getZoomPercentage() / 1.25;
+         pView->zoomTo(dZoom);
+      }
 
-      pView->zoomTo(dZoom);
       pView->refresh();
    }
 }
@@ -3416,12 +3415,10 @@ void ApplicationWindow::showZapDlg()
 void ApplicationWindow::registerPlugIns()
 {
    // Get the plug-in directory from the options
-   const Filename* pPlugInPath = ConfigurationSettings::getSettingPlugInPath();
-   string plugInDir;
-   if (pPlugInPath != NULL)
-   {
-      plugInDir = pPlugInPath->getFullPathAndName();
-   }
+   ConfigurationSettingsExt2* pSettings =
+      dynamic_cast<ConfigurationSettingsExt2*>(Service<ConfigurationSettings>().get());
+   VERIFYNRV(pSettings != NULL);
+   string plugInDir = pSettings->getPlugInPath();
    if (plugInDir.empty())
    {
       plugInDir = QDir::currentPath().toStdString();
@@ -3637,35 +3634,47 @@ void ApplicationWindow::updateWizardCommands()
    removeMenuCommands(mWizardCommands);
    mWizardCommands.clear();
 
-   // Get the wizard directory from the options
-   QString strWizardDir;
+   // Get the wizard directories
+   QStringList wizardDirs;
+
+   const Filename* pSupportFilesPath = ConfigurationSettings::getSettingSupportFilesPath();
+   if (pSupportFilesPath != NULL)
+   {
+      QString wizardDir = QString::fromStdString(pSupportFilesPath->getFullPathAndName() + "/Wizards");
+      wizardDirs.append(wizardDir);
+   }
+
    const Filename* pWizardPath = ConfigurationSettings::getSettingWizardPath();
    if (pWizardPath != NULL)
    {
-      strWizardDir = QString::fromStdString(pWizardPath->getFullPathAndName());
+      QString wizardDir = QString::fromStdString(pWizardPath->getFullPathAndName());
+      wizardDirs.append(wizardDir);
    }
-   if (strWizardDir.isEmpty())
+
+   if (wizardDirs.isEmpty())
    {
-      strWizardDir = QDir::currentPath();
+      wizardDirs.append(QDir::currentPath());
    }
 
    // Get the wizard filenames
-   QDir dirWizards = QDir(strWizardDir, "*.wiz");
    QStringList strlWizardFiles;
-   int i = 0;
-
-   int iCount = 0;
-   iCount = dirWizards.count();
-   for (i = 0; i < iCount; i++)
+   for (int i = 0; i < wizardDirs.count(); ++i)
    {
-      QString strFilename = strWizardDir + "/";
-      strFilename += dirWizards[i];
-      strlWizardFiles.append(strFilename);
+      QString wizardDir = wizardDirs[i];
+      if (wizardDir.isEmpty() == false)
+      {
+         QDir dirWizards = QDir(wizardDir, "*.wiz");
+         for (unsigned int j = 0; j < dirWizards.count(); ++j)
+         {
+            QString strFilename = wizardDir + "/";
+            strFilename += dirWizards[j];
+            strlWizardFiles.append(strFilename);
+         }
+      }
    }
 
    // Add the commands to the menus
-   iCount = strlWizardFiles.count();
-   for (i = 0; i < iCount; i++)
+   for (int i = 0; i < strlWizardFiles.count(); ++i)
    {
       QString strFilename = strlWizardFiles[i];
 
@@ -4662,7 +4671,6 @@ void ApplicationWindow::enableToolBars(bool bEnable)
    bool bEnableGcp = false;
    bool bEnableTiePoint = false;
    bool bEnableMeasurement = false;
-   bool bEnableClipboard = false;
 
    WorkspaceWindow* pWindow = getCurrentWorkspaceWindow();
    if (pWindow != NULL)
@@ -4703,7 +4711,6 @@ void ApplicationWindow::enableToolBars(bool bEnable)
             bEnableAoi = (dynamic_cast<AoiLayer*>(pActiveLayer) != NULL);
             bEnableGcp = (dynamic_cast<GcpLayer*>(pActiveLayer) != NULL);
             bEnableTiePoint = (dynamic_cast<TiePointLayer*>(pActiveLayer) != NULL);
-            bEnableClipboard = bEnableAnnotation;
          }
          else if (bMeasurementMode == true)
          {
@@ -4718,18 +4725,9 @@ void ApplicationWindow::enableToolBars(bool bEnable)
          if ((bLayerMode == true) && (pActiveLayer != NULL))
          {
             bEnableAnnotation = true;
-
-            if (pActiveLayer == pProductView->getLayoutLayer())
-            {
-               bEnableClipboard = true;
-            }
          }
       }
    }
-
-   m_pCut_Action->setEnabled(bEnable && bEnableClipboard);
-   m_pCopy_Action->setEnabled(bEnable && bEnableClipboard);
-   m_pPaste_Action->setEnabled(bEnable && bEnableClipboard);
 
    mpDisplayToolBar->setEnabled(bEnable && bView);
    mpBrightnessToolbar->setEnabled(bEnable && bSpatialDataView);
@@ -4742,6 +4740,10 @@ void ApplicationWindow::enableToolBars(bool bEnable)
 
 void ApplicationWindow::saveConfiguration() const
 {
+   // save dock window states
+   vector<Window*> dockWindows = getWindows(DOCK_WINDOW); 
+   vector<Window*>::iterator it; 
+
    ConfigurationSettings* pConfig = ConfigurationSettingsImp::instance();
    if (pConfig == NULL)
    {
@@ -4749,6 +4751,15 @@ void ApplicationWindow::saveConfiguration() const
    }
 
    // Dock window and toolbar configuration
+   for (it=dockWindows.begin(); it!=dockWindows.end(); ++it) 
+   { 
+      DockWindowImp* pDock = dynamic_cast<DockWindowImp*>(*it); 
+      if (pDock != NULL) 
+      { 
+         pDock->saveState(); 
+      } 
+   } 
+
    QByteArray windowConfiguration = saveState().toBase64();
 
    QString strConfiguration(windowConfiguration);
@@ -4842,7 +4853,7 @@ void ApplicationWindow::closeEvent(QCloseEvent* e)
 
    // Close the session
    SessionSaveType eSave = SessionManager::getSettingQueryForSave();
-   int button = (eSave==SESSION_AUTO_SAVE?0:1);
+   int button = (eSave == SESSION_AUTO_SAVE ? QMessageBox::Yes : QMessageBox::No);
    if (eSave == SESSION_QUERY_SAVE)
    {
          button = QMessageBox::question(this, "Close Session", 
@@ -4904,6 +4915,14 @@ bool ApplicationWindow::eventFilter(QObject* pObj, QEvent* pEvent)
             }
          }
       }
+   }
+
+   if (pObj == mpAnnotationToolBar && pEvent->type() == QEvent::EnabledChange)
+   {
+      bool enable(mpAnnotationToolBar->isEnabled());
+      m_pCopy_Action->setEnabled(enable);
+      m_pCut_Action->setEnabled(enable);
+      m_pPaste_Action->setEnabled(enable);
    }
 
    return QMainWindow::eventFilter(pObj, pEvent);
@@ -5149,7 +5168,8 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
       return;
    }
 
-   vector<string> files;
+   mDroppedFilesList.clear();
+
    if (pEvent->mimeData()->hasUrls())
    {
       const QList<QUrl> urls = pEvent->mimeData()->urls();
@@ -5159,7 +5179,7 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
          string filename = url.toLocalFile().toStdString();
          if (filename.empty() == false)
          {
-            files.push_back(filename);
+            mDroppedFilesList.push_back(filename);
          }
       }
    }
@@ -5181,7 +5201,7 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
                break;
             }
          }
-         files.push_back(charArray.data());
+         mDroppedFilesList.push_back(charArray.data());
       }
    }
 
@@ -5193,9 +5213,9 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
    Qt::MouseButton contextMenuButton = Qt::MidButton;
 #endif
 
-   if (files.size() == 1)
+   if (mDroppedFilesList.size() == 1)
    {
-      QString filename = QString::fromStdString(files.front());
+      QString filename = QString::fromStdString(mDroppedFilesList.front());
 
       QFileInfo info(filename);
       if ((info.suffix() == "wiz") || (info.suffix() == "batchwiz"))
@@ -5231,7 +5251,7 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
          else if (info.suffix() == "batchwiz")
          {
             vector<string> batchFile;
-            batchFile.push_back(files.front());
+            batchFile.push_back(mDroppedFilesList.front());
             WizardUtilities::runBatchFiles(batchFile, NULL);
          }
 
@@ -5258,9 +5278,7 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
       }
    }
 
-   ImportAgentExt1::EditType editType = ImportAgentExt1::NEVER_EDIT;
-   bool errorContinue = true;
-   bool displayContinueMessage = true;
+   mDroppedFilesEditType = ImportAgentExt1::NEVER_EDIT;
 
    if (pEvent->mouseButtons() == contextMenuButton)
    {
@@ -5276,15 +5294,15 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
       QAction* pSelectedAction = contextMenu.exec(mapToGlobal(pEvent->pos()));
       if (pSelectedAction == pAlwaysAction)
       {
-         editType = ImportAgentExt1::ALWAYS_EDIT;
+         mDroppedFilesEditType = ImportAgentExt1::ALWAYS_EDIT;
       }
       else if (pSelectedAction == pAsNeededAction)
       {
-         editType = ImportAgentExt1::AS_NEEDED_EDIT;
+         mDroppedFilesEditType = ImportAgentExt1::AS_NEEDED_EDIT;
       }
       else if (pSelectedAction == pNeverAction)
       {
-         editType = ImportAgentExt1::NEVER_EDIT;
+         mDroppedFilesEditType = ImportAgentExt1::NEVER_EDIT;
       }
       else
       {
@@ -5292,50 +5310,7 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
       }
    }
 
-   ProgressResource pProgress("Import files...");
-   for (unsigned int i = 0; i < files.size(); ++i)
-   {
-      ImporterResource importer("Auto Importer", files[i], pProgress.get(), false);
-      importer->setEditType(editType);
-      importer->updateMruFileList(true);
-
-      if (!importer->execute())
-      {
-         if ((editType != ImportAgentExt1::NEVER_EDIT) && (i < files.size() - 1) &&
-            (displayContinueMessage == true))
-         {
-            int continueButton = QMessageBox::question(this, "Import File(s)",
-               "The " + QString::fromStdString(files[i]) + " file could not load.  "
-               "Do you want to continue importing the remaining files?",
-               QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No);
-            if (continueButton == QMessageBox::No)
-            {
-               errorContinue = false;
-            }
-            else if (continueButton == QMessageBox::YesToAll)
-            {
-               displayContinueMessage = false;
-            }
-         }
-
-         if (errorContinue == false)
-         {
-            return;
-         }
-
-         vector<DataElement*> importedDatasets = importer->getImportedElements();
-         if ((importedDatasets.empty() == true) && (pProgress.get() != NULL))
-         {
-            string msg = "Unable to import " + files[i] + ".\n";
-            pProgress->updateProgress(msg, 0, WARNING);
-         }
-      }
-   }
-
-   if (pProgress.get() != NULL)
-   {
-      pProgress->updateProgress("Finished importing", 100, NORMAL);
-   }
+   QTimer::singleShot(0, this, SLOT(importDroppedFiles()));
 }
 
 void ApplicationWindow::removeMenuCommands(const QList<QAction*>& commands)
@@ -5686,7 +5661,8 @@ const vector<PlugInDescriptor*> &ApplicationWindow::getAvailableExporters(const 
 
       string subtype = pDescriptor->getSubtype();
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove SignatureSet special case when SignatureSet no longer inherits Signature. (dsulgrov)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove SignatureSet special case when SignatureSet " \
+   "no longer inherits Signature. (dsulgrov)")
       if ((pTao->isKindOf(TypeConverter::toString<SignatureSet>()) == true) &&
          (subtype == TypeConverter::toString<Signature>()))
       {
@@ -5730,18 +5706,9 @@ bool ApplicationWindow::serialize(SessionItemSerializer &serializer) const
    XMLWriter writer("ApplicationWindow");
    QSize frame = size();
    QPoint location = pos();
-   stringstream buf;
-   writer.pushAddPoint(writer.addElement("Geometry"));
-   buf << location.x() << " " << location.y();
-   writer.addAttr("pos", buf.str());
-   buf.str("");
-   buf << frame.width() << " " << frame.height();
-   writer.addAttr("size", buf.str());
 
-   Qt::WindowStates winStates = windowState();
-   buf.str("");
-   buf << winStates;
-   writer.addAttr("windowStates", buf.str());
+   writer.pushAddPoint(writer.addElement("Geometry"));
+   writer.addText(saveState().toBase64().data());
    writer.popAddPoint();
 
    serializer.serialize(writer);
@@ -5757,17 +5724,84 @@ bool ApplicationWindow::deserialize(SessionItemDeserializer &deserializer)
    DOMElement *pConfig = dynamic_cast<DOMElement*>(findChildNode(pElement, "Geometry"));
    if(pConfig)
    {
-      LocationType pos;
-      LocationType size;
-      XmlReader::StrToLocation(pConfig->getAttribute(X("pos")), pos);
-      XmlReader::StrToLocation(pConfig->getAttribute(X("size")), size);
-      resize(size.mX, size.mY);
-      move(pos.mX, pos.mY);
-      int intState = StringUtilities::fromXmlString<int>(
-         A(pConfig->getAttribute(X("windowStates"))));
-      Qt::WindowStates winStates = static_cast< QFlags<Qt::WindowState> >(intState);
-      setWindowState(winStates);
+      DOMNode *pChld = pConfig->getFirstChild();
+      if (pChld != NULL)
+      {
+         restoreState(QByteArray::fromBase64(A(pChld->getNodeValue())));
+      }
    }
 
    return true;
+}
+
+void ApplicationWindow::importDroppedFiles()
+{
+   bool errorContinue = true;
+   bool displayContinueMessage = true;
+   ProgressResource pProgress("Import files...");
+   vector<string>::iterator it;
+   for (it=mDroppedFilesList.begin(); it!=mDroppedFilesList.end(); ++it)
+   {
+      if ((*it).empty() == false)
+      {
+         ImporterResource importer("Auto Importer", *it, pProgress.get(), false);
+         importer->setEditType(mDroppedFilesEditType);
+         importer->updateMruFileList(true);
+
+         if (!importer->execute())
+         {
+            if ((mDroppedFilesEditType != ImportAgentExt1::NEVER_EDIT) && (it != mDroppedFilesList.end()-1) &&
+               (displayContinueMessage == true))
+            {
+               int continueButton = QMessageBox::question(this, "Import File(s)",
+                  "The " + QString::fromStdString(*it) + " file could not load.  "
+                  "Do you want to continue importing the remaining files?",
+                  QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No);
+               if (continueButton == QMessageBox::No)
+               {
+                  errorContinue = false;
+               }
+               else if (continueButton == QMessageBox::YesToAll)
+               {
+                  displayContinueMessage = false;
+               }
+            }
+
+            if (errorContinue == false)
+            {
+               return;
+            }
+
+            vector<DataElement*> importedDatasets = importer->getImportedElements();
+            if ((importedDatasets.empty() == true) && (pProgress.get() != NULL))
+            {
+               string msg = "Unable to import " + *it + ".\n";
+               pProgress->updateProgress(msg, 0, WARNING);
+            }
+         }
+      }
+   }
+
+   if (pProgress.get() != NULL)
+   {
+      pProgress->updateProgress("Finished importing", 100, NORMAL);
+   }
+
+   mDroppedFilesList.clear();
+}
+
+void ApplicationWindow::showToolbarsMenu()
+{
+   mpToolbarsMenu->clear();
+
+   vector<Window*> windows = getWindows(TOOLBAR);
+   vector<Window*>::iterator winIt;
+   for (winIt = windows.begin(); winIt != windows.end(); ++winIt)
+   {
+      QToolBar* pToolbar = dynamic_cast<QToolBar*>(*winIt);
+      if (pToolbar != NULL)
+      {
+         mpToolbarsMenu->addAction(pToolbar->toggleViewAction());
+      }
+   }
 }

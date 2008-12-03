@@ -203,11 +203,12 @@ bool Nitf::AcftbParser::runAllTests(Progress* pProgress, ostream& failure)
    stringstream input5(data_error5);
    numBytes = input5.str().size();
    success = toDynamicObject(input5, numBytes, *treDO.get(), errorMessage);
-   if(success)
+   if (success)
    {
       std::stringstream tmpStream;
       status = this->isTreValid(*treDO.get(), tmpStream);  // This test should return SUSPECT
-      if(status != SUSPECT) {
+      if (status != SUSPECT)
+      {
          failure << "---Negative test failed: ENTELV should have returned SUSPECT\n";
          failure << tmpStream.str();
          treDO->clear();
@@ -253,11 +254,11 @@ Nitf::TreState Nitf::AcftbParser::isTreValid(const DynamicObject& tre, ostream& 
 
    try
    {
-      string value = dv_cast<string>(tre.getAttribute(ACFTB::SENSOR_ID_TYPE));
+      value = dv_cast<string>(tre.getAttribute(ACFTB::SENSOR_ID_TYPE));
 
       // ccff where cc indicates the sensor category, And ff indicates the sensor format:
-      string cc(value.substr(0,2));
-      string ff(value.substr(2,2));
+      string cc(value.substr(0, 2));
+      string ff(value.substr(2, 2));
       if (value.size() == 4 &&
          (cc == "IH" || cc == "IM" || cc == "IL" || cc == "MH" || cc == "MM" ||
              cc == "ML" || cc == "VH" || cc == "VM" || cc == "VL" || cc == "VF") &&
@@ -417,7 +418,7 @@ Nitf::TreState Nitf::AcftbParser::isTreValid(const DynamicObject& tre, ostream& 
    if (status != INVALID && totalFields != numFields)
    {
       reporter << "Total fields in the Dynamic Object(" <<
-         totalFields <<") did not match the number found(" << numFields << ") ";
+         totalFields << ") did not match the number found(" << numFields << ") ";
       status = INVALID;
    }
 
@@ -445,7 +446,12 @@ bool Nitf::AcftbParser::toDynamicObject(istream& input, size_t numBytes, Dynamic
 
    if (success)
    {
-      unsigned short yy(0), mm(0), dd(0), hh(0), min(0), ss(0);
+      unsigned short yy(0);
+      unsigned short mm(0);
+      unsigned short dd(0);
+      unsigned short hh(0);
+      unsigned short min(0);
+      unsigned short ss(0);
       success = readFromStream(input, buf, 12) && DtgParseCCYYMMDDhhmm(string(&buf.front()), yy, mm, dd, hh, min);
       if (success)
       {
@@ -477,13 +483,16 @@ bool Nitf::AcftbParser::toDynamicObject(istream& input, size_t numBytes, Dynamic
 
    if (success)
    {
-      unsigned short yy(0), mm(0), dd(0);
+      unsigned short yy(0);
+      unsigned short mm(0);
+      unsigned short dd(0);
       success = readFromStream(input, buf, 8) && DtgParseCCYYMMDD(string(&buf.front()), yy, mm, dd);
       if (success)
       {
          FactoryResource<DateTime> appDTG;
          success = appDTG->set(yy, mm, dd);
-         if (success) {
+         if (success)
+         {
             success = success && output.setAttribute(ACFTB::PDATE, *appDTG.get());
             if (!success)
             {
@@ -522,13 +531,16 @@ bool Nitf::AcftbParser::toDynamicObject(istream& input, size_t numBytes, Dynamic
 
    if (success)
    {
-      unsigned short yy(0), mm(0), dd(0);
+      unsigned short yy(0);
+      unsigned short mm(0);
+      unsigned short dd(0);
       success = readFromStream(input, buf, 8) && DtgParseCCYYMMDD(string(&buf.front()), yy, mm, dd);
       if (success)
       {
          FactoryResource<DateTime> appDTG;
          success = appDTG->set(yy, mm, dd);
-         if (success) {
+         if (success)
+         {
             success = success && output.setAttribute(ACFTB::CAL_DATE, *appDTG.get());
             if (!success)
             {
@@ -577,7 +589,7 @@ bool Nitf::AcftbParser::fromDynamicObject(const DynamicObject& input, ostream& o
       output << sizeString( dv_cast<string>(input.getAttribute(ACFTB::AC_TAIL_NO)), 10);
 
       // put date in form CCYYMMDDhhmm for this TAG    see: strftime() for format info
-      const DateTime *pAppDtgAcTo = dv_cast<DateTime>(&input.getAttribute(ACFTB::AC_TO));
+      const DateTime* pAppDtgAcTo = dv_cast<DateTime>(&input.getAttribute(ACFTB::AC_TO));
       if (pAppDtgAcTo == NULL)
       {
          return false;
@@ -586,13 +598,13 @@ bool Nitf::AcftbParser::fromDynamicObject(const DynamicObject& input, ostream& o
       string CCYYMMDDhhmm = pAppDtgAcTo->getFormattedUtc("%Y%m%d%H%M");
       output << sizeString(CCYYMMDDhhmm, 12);
 
-      output << sizeString( dv_cast<string>(input.getAttribute(ACFTB::SENSOR_ID_TYPE)), 4);
-      output << sizeString( dv_cast<string>(input.getAttribute(ACFTB::SENSOR_ID)), 6);
-      output <<   toString( dv_cast<int>(input.getAttribute(ACFTB::SCENE_SOURCE)), 1);
-      output <<   toString( dv_cast<int>(input.getAttribute(ACFTB::SCNUM)), 6);
+      output << sizeString(dv_cast<string>(input.getAttribute(ACFTB::SENSOR_ID_TYPE)), 4);
+      output << sizeString(dv_cast<string>(input.getAttribute(ACFTB::SENSOR_ID)), 6);
+      output << toString(dv_cast<int>(input.getAttribute(ACFTB::SCENE_SOURCE)), 1);
+      output << toString(dv_cast<int>(input.getAttribute(ACFTB::SCNUM)), 6);
 
       // put date in form CCYYMMDD for this TAG
-      const DateTime *pAppDtgPDate = dv_cast<DateTime>(&input.getAttribute(ACFTB::PDATE));
+      const DateTime* pAppDtgPDate = dv_cast<DateTime>(&input.getAttribute(ACFTB::PDATE));
       if (pAppDtgPDate == NULL)
       {
          return false;
@@ -600,26 +612,26 @@ bool Nitf::AcftbParser::fromDynamicObject(const DynamicObject& input, ostream& o
       string CCYYMMDD = pAppDtgPDate->getFormattedUtc("%Y%m%d");
       output << sizeString(CCYYMMDD, 8);
 
-      output <<   toString( dv_cast<int>(input.getAttribute(ACFTB::IMHOSTNO)), 6);
-      output <<   toString( dv_cast<int>(input.getAttribute(ACFTB::IMREQID)), 5);
-      output <<   toString( dv_cast<int>(input.getAttribute(ACFTB::MPLAN)), 3);
-      output << sizeString( dv_cast<string>(input.getAttribute(ACFTB::ENTLOC)), 25);
-      output <<   toString( dv_cast<double>(input.getAttribute(ACFTB::LOC_ACCY)), 6, 2);
-      output <<   toString( dv_cast<int>(input.getAttribute(ACFTB::ENTELV)), 6, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output << sizeString( dv_cast<string>(input.getAttribute(ACFTB::ELV_UNIT)), 1);
-      output << sizeString( dv_cast<string>(input.getAttribute(ACFTB::EXITLOC)), 25);
-      output <<   toString( dv_cast<int>(input.getAttribute(ACFTB::EXITELV)), 6, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute(ACFTB::TMAP)), 7, 3);
-      output <<   toString( dv_cast<double>(input.getAttribute(ACFTB::ROW_SPACING)), 7, 4);
-      output << sizeString( dv_cast<string>(input.getAttribute(ACFTB::ROW_SPACING_UNITS)), 1);
-      output <<   toString( dv_cast<double>(input.getAttribute(ACFTB::COL_SPACING)), 7, 4);
-      output << sizeString( dv_cast<string>(input.getAttribute(ACFTB::COL_SPACING_UNITS)), 1);
-      output <<   toString( dv_cast<double>(input.getAttribute(ACFTB::FOCAL_LENGTH)), 6, 2);
-      output <<   toString( dv_cast<int>(input.getAttribute(ACFTB::SENSERIAL)), 6);
-      output << sizeString( dv_cast<string>(input.getAttribute(ACFTB::ABSWVER)), 7);
+      output << toString(dv_cast<int>(input.getAttribute(ACFTB::IMHOSTNO)), 6);
+      output << toString(dv_cast<int>(input.getAttribute(ACFTB::IMREQID)), 5);
+      output << toString(dv_cast<int>(input.getAttribute(ACFTB::MPLAN)), 3);
+      output << sizeString(dv_cast<string>(input.getAttribute(ACFTB::ENTLOC)), 25);
+      output << toString(dv_cast<double>(input.getAttribute(ACFTB::LOC_ACCY)), 6, 2);
+      output << toString(dv_cast<int>(input.getAttribute(ACFTB::ENTELV)), 6, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << sizeString(dv_cast<string>(input.getAttribute(ACFTB::ELV_UNIT)), 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(ACFTB::EXITLOC)), 25);
+      output << toString(dv_cast<int>(input.getAttribute(ACFTB::EXITELV)), 6, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(ACFTB::TMAP)), 7, 3);
+      output << toString(dv_cast<double>(input.getAttribute(ACFTB::ROW_SPACING)), 7, 4);
+      output << sizeString(dv_cast<string>(input.getAttribute(ACFTB::ROW_SPACING_UNITS)), 1);
+      output << toString(dv_cast<double>(input.getAttribute(ACFTB::COL_SPACING)), 7, 4);
+      output << sizeString(dv_cast<string>(input.getAttribute(ACFTB::COL_SPACING_UNITS)), 1);
+      output << toString(dv_cast<double>(input.getAttribute(ACFTB::FOCAL_LENGTH)), 6, 2);
+      output << toString(dv_cast<int>(input.getAttribute(ACFTB::SENSERIAL)), 6);
+      output << sizeString(dv_cast<string>(input.getAttribute(ACFTB::ABSWVER)), 7);
 
       // put date in form CCYYMMDD for this TAG
-      const DateTime *pAppDtgCalDate = dv_cast<DateTime>(&input.getAttribute(ACFTB::CAL_DATE));
+      const DateTime* pAppDtgCalDate = dv_cast<DateTime>(&input.getAttribute(ACFTB::CAL_DATE));
       if (pAppDtgCalDate == NULL)
       {
          CCYYMMDD = "        ";
@@ -630,8 +642,8 @@ bool Nitf::AcftbParser::fromDynamicObject(const DynamicObject& input, ostream& o
       }
       output << sizeString(CCYYMMDD, 8);
 
-      output <<   toString( dv_cast<int>(input.getAttribute(ACFTB::PATCH_TOT)), 4);
-      output <<   toString( dv_cast<int>(input.getAttribute(ACFTB::MTI_TOT)), 3);
+      output << toString(dv_cast<int>(input.getAttribute(ACFTB::PATCH_TOT)), 4);
+      output << toString(dv_cast<int>(input.getAttribute(ACFTB::MTI_TOT)), 3);
    }
    catch (const bad_cast&)
    {

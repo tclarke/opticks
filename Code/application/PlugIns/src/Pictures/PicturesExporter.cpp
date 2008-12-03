@@ -24,8 +24,10 @@
 
 using namespace std;
 
-PicturesExporter::PicturesExporter(PicturesDetails *pDetails) :
-   mpProgress(NULL), mpDetails(pDetails)
+PicturesExporter::PicturesExporter(PicturesDetails* pDetails) :
+   mpProgress(NULL),
+   mpItem(NULL),
+   mpDetails(pDetails)
 {
    setVersion(APP_VERSION_NUMBER);
    setCreator("Ball Aerospace & Technologies Corp.");
@@ -48,8 +50,8 @@ bool PicturesExporter::getInputSpecification(PlugInArgList*& pArgList)
 
 bool PicturesExporter::getOutputSpecification(PlugInArgList*& pArgList)
 {
-    pArgList = NULL;
-    return true;
+   pArgList = NULL;
+   return true;
 }
 
 ValidationResultType PicturesExporter::validate(const PlugInArgList* pArgList, string& errorMessage) const
@@ -64,24 +66,28 @@ ValidationResultType PicturesExporter::validate(const PlugInArgList* pArgList, s
    return VALIDATE_SUCCESS;
 }
 
-bool PicturesExporter::execute(PlugInArgList *inArgList, PlugInArgList *outArgList)
+bool PicturesExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
    string exporterName = getName();
 
    StepResource pStep(string("Execute ") + exporterName, "app", "5075FE69-1972-4b23-BE35-EF185DE35312");
    // Get the values from the plug-in args
-   if (extractInputArgs(inArgList) == false)
+   if (extractInputArgs(pInArgList) == false)
    {
       if (mMessage.empty())
       {
          mMessage = "Unable to extract input arguments.";
       }
-      if (mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, ERRORS);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(mMessage, 0, ERRORS);
+      }
+
       pStep->finalize(Message::Failure, mMessage);
       return false;
    }
 
-   Progress *pProgress = mpProgress;
+   Progress* pProgress = mpProgress;
 
    // Add the input and output values to the message log
    pStep->addProperty("Export Name", mpItem->getName());
@@ -91,16 +97,17 @@ bool PicturesExporter::execute(PlugInArgList *inArgList, PlugInArgList *outArgLi
    // get the output height and width
    //
    QSize outputSize;
-   unsigned int outputWidth, outputHeight;
-   if(inArgList->getPlugInArgValue("Output Width", outputWidth) &&
-      inArgList->getPlugInArgValue("Output Height", outputHeight))
+   unsigned int outputWidth;
+   unsigned int outputHeight;
+   if (pInArgList->getPlugInArgValue("Output Width", outputWidth) &&
+      pInArgList->getPlugInArgValue("Output Height", outputHeight))
    {
       pStep->addProperty("Output Width", outputWidth);
       pStep->addProperty("Output Height", outputHeight);
       outputSize = QSize(outputWidth, outputHeight);
    }
 
-   if(mpProgress != NULL)
+   if (mpProgress != NULL)
    {
       mpProgress->updateProgress("Begin image export.", 0, NORMAL);
    }
@@ -112,20 +119,31 @@ bool PicturesExporter::execute(PlugInArgList *inArgList, PlugInArgList *outArgLi
    if (image.isNull() == true)
    {
       mMessage = "Unable to get the image to save.";
-      if (mpProgress) mpProgress->updateProgress(mMessage, 0, ERRORS);
+      if (mpProgress)
+      {
+         mpProgress->updateProgress(mMessage, 0, ERRORS);
+      }
+
       pStep->finalize(Message::Failure, mMessage);
       return false;
    }
 
    mMessage = "Saving data to file...";
-   if (mpProgress) mpProgress->updateProgress(mMessage, 99, NORMAL);
+   if (mpProgress)
+   {
+      mpProgress->updateProgress(mMessage, 99, NORMAL);
+   }
 
    // Save the image
    bool bSuccess = mpDetails->savePict(QString::fromStdString(mOutPath), image, mpItem);
    if (bSuccess == false)
    {
       mMessage = "Unable to save the file, check folder permissions";
-      if (mpProgress) mpProgress->updateProgress(mMessage, 0, ERRORS);
+      if (mpProgress)
+      {
+         mpProgress->updateProgress(mMessage, 0, ERRORS);
+      }
+
       pStep->finalize(Message::Failure, mMessage);
 
       remove(mOutPath.c_str());
@@ -133,7 +151,11 @@ bool PicturesExporter::execute(PlugInArgList *inArgList, PlugInArgList *outArgLi
    }
 
    mMessage = exporterName + " completed.";
-   if (mpProgress) mpProgress->updateProgress(mMessage, 100, NORMAL);
+   if (mpProgress)
+   {
+      mpProgress->updateProgress(mMessage, 100, NORMAL);
+   }
+
    pStep->finalize(Message::Success);
    return true;
 }
@@ -146,27 +168,27 @@ QWidget* PicturesExporter::getExportOptionsWidget(const PlugInArgList *pInArgLis
 bool PicturesExporter::extractInputArgs(const PlugInArgList* pInArgList)
 {
    string exporter = getName();
-   if(exporter.empty())
+   if (exporter.empty())
    {
       exporter = "Pictures Exporter";
    }
 
-   PlugInArg *pArg = NULL;
+   PlugInArg* pArg = NULL;
 
    // Progress
-   if(pInArgList->getArg(ProgressArg(), pArg) && (pArg != NULL))
+   if (pInArgList->getArg(ProgressArg(), pArg) && (pArg != NULL))
    {
       mpProgress = pArg->getPlugInArgValue<Progress>();
    }
 
    // File Descriptor
    mOutPath.erase();
-   FileDescriptor *pFileDescriptor = pInArgList->getPlugInArgValue<FileDescriptor>(ExportDescriptorArg());
-   if(pFileDescriptor != NULL)
+   FileDescriptor* pFileDescriptor = pInArgList->getPlugInArgValue<FileDescriptor>(ExportDescriptorArg());
+   if (pFileDescriptor != NULL)
    {
       mOutPath = pFileDescriptor->getFilename().getFullPathAndName();
    }
-   if(mOutPath.empty())
+   if (mOutPath.empty())
    {
       mMessage = "The destination path is invalid.";
       return false;

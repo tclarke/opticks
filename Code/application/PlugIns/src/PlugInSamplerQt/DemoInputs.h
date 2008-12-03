@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef DEMO_INPUTS_H
-#define DEMO_INPUTS_H
+#ifndef DEMOINPUTS_H
+#define DEMOINPUTS_H
 
 #include "Node.h"
 

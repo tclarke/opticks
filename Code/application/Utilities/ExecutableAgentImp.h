@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef EXECUTABLE_AGENT_IMP_H
-#define EXECUTABLE_AGENT_IMP_H
+#ifndef EXECUTABLEAGENTIMP_H
+#define EXECUTABLEAGENTIMP_H
 
 #include <string>
 
@@ -44,7 +44,8 @@ public:
    virtual const PlugIn* getPlugIn() const;
    virtual PlugIn* getPlugIn();
    virtual PlugIn* releasePlugIn();
-
+   virtual void setAutoArg(bool bAutoArg);
+   virtual bool getAutoArg() const;
 protected:
    void checkInstantiate() const;
 
@@ -85,8 +86,10 @@ private:
    PlugInArgList* mpOutArgList;
    std::string mMenuCommand;
    Progress* mpProgress;
+   bool mPlugInProgress;
    bool mProgressDialog;
    PlugInResource mPlugIn;
+   bool mAutoInArg;
 };
 
 #define EXECUTABLEAGENTADAPTER_METHODS(impClass) \
@@ -155,6 +158,14 @@ private:
    PlugIn* releasePlugIn() \
    { \
       return impClass::releasePlugIn(); \
+   } \
+   void setAutoArg(bool bAutoArg) \
+   { \
+      impClass::setAutoArg(bAutoArg); \
+   } \
+   bool getAutoArg() const \
+   { \
+      return impClass::getAutoArg(); \
    }
 
 #endif

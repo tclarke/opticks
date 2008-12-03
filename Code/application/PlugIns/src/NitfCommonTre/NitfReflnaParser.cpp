@@ -21,7 +21,6 @@ using namespace std;
 using namespace Nitf;
 using namespace Nitf::TRE;
 
-
 Nitf::ReflnaParser::ReflnaParser()
 {
    setName("REFLNA");
@@ -106,7 +105,8 @@ bool Nitf::ReflnaParser::toDynamicObject(istream& input, size_t numBytes, Dynami
    bool ok(true);
    bool success(true);
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Allow all blanks for classified fields since we do not have descriptions of them (dadkins)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Allow all blanks for classified fields " \
+   "since we do not have descriptions of them (dadkins)")
    readField<string>(input, output, success, REFLNA::FIELD1, 2, errorMessage, buf, true);
    readField<string>(input, output, success, REFLNA::FIELD2, 7, errorMessage, buf, true);
    readField<string>(input, output, success, REFLNA::FIELD3, 8, errorMessage, buf, true);
@@ -149,7 +149,7 @@ Nitf::TreState Nitf::ReflnaParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID && totalFields != numFields)
    {
       reporter << "Total fields in the Dynamic Object(" <<
-         totalFields <<") did not match the number found(" << numFields << ") ";
+         totalFields << ") did not match the number found(" << numFields << ") ";
       status = INVALID;
    }
 
@@ -174,11 +174,11 @@ bool Nitf::ReflnaParser::fromDynamicObject(const DynamicObject& input, ostream& 
 
    try
    {
-      output << sizeString( dv_cast<string>(input.getAttribute (REFLNA::FIELD1)), 2);
-      output << sizeString( dv_cast<string>(input.getAttribute (REFLNA::FIELD2)), 7);
-      output << sizeString( dv_cast<string>(input.getAttribute (REFLNA::FIELD3)), 8);
-      output << sizeString( dv_cast<string>(input.getAttribute (REFLNA::FIELD4)), 7);
-      output << sizeString( dv_cast<string>(input.getAttribute (REFLNA::FIELD5)), 8);
+      output << sizeString(dv_cast<string>(input.getAttribute(REFLNA::FIELD1)), 2);
+      output << sizeString(dv_cast<string>(input.getAttribute(REFLNA::FIELD2)), 7);
+      output << sizeString(dv_cast<string>(input.getAttribute(REFLNA::FIELD3)), 8);
+      output << sizeString(dv_cast<string>(input.getAttribute(REFLNA::FIELD4)), 7);
+      output << sizeString(dv_cast<string>(input.getAttribute(REFLNA::FIELD5)), 8);
    }
    catch (const bad_cast&)
    {

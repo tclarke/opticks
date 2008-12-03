@@ -43,25 +43,25 @@ void GeocoordLinkFunctor::operator()(ViewImp *pDestView)
       return;
    }
 
-   SpatialDataViewImp *pDstViewSpatial = dynamic_cast<SpatialDataViewImp*>(pDestView);
+   SpatialDataViewImp* pDstViewSpatial = dynamic_cast<SpatialDataViewImp*>(pDestView);
    if (pDstViewSpatial == NULL)
    {
       return;
    }
 
-   LayerList *pDstLayerList = pDstViewSpatial->getLayerList();
+   LayerList* pDstLayerList = pDstViewSpatial->getLayerList();
    if (pDstLayerList == NULL)
    {
       return;
    }
 
-   RasterElement *pDstGeo = pDstLayerList->getPrimaryRasterElement();
+   RasterElement* pDstGeo = pDstLayerList->getPrimaryRasterElement();
    if (pDstGeo == NULL || !pDstGeo->isGeoreferenced())
    {
       return;
    }
 
-   Layer *pDstLayer = pDstLayerList->getLayer(RASTER, pDstGeo);
+   Layer* pDstLayer = pDstLayerList->getLayer(RASTER, pDstGeo);
    if (pDstLayer == NULL)
    {
       return;
@@ -157,7 +157,7 @@ bool GeocoordLinkFunctor::initialize()
 
    if (mpSrcView != NULL)
    {
-      LayerList *pSrcLayerList = mpSrcView->getLayerList();
+      LayerList* pSrcLayerList = mpSrcView->getLayerList();
       if (pSrcLayerList == NULL)
       {
          return false;
@@ -196,20 +196,22 @@ bool GeocoordLinkFunctor::initialize()
    return false;
 }
 
-double GeocoordLinkFunctor::findResolution(const RasterElement *pGeo, const Layer *pLayer,
-   const LocationType &geocoord)
+double GeocoordLinkFunctor::findResolution(const RasterElement* pGeo, const Layer* pLayer,
+                                           const LocationType& geocoord)
 {
    VERIFYRV(pLayer != NULL, 1.0);
    VERIFYRV(pGeo != NULL, 1.0);
 
-   LocationType screen1, screen2, data1, data2;
-   data1 = pGeo->convertGeocoordToPixel(geocoord);
+   LocationType data1 = pGeo->convertGeocoordToPixel(geocoord);
+   LocationType screen1;
    pLayer->translateDataToScreen(data1.mX, data1.mY, screen1.mX, screen1.mY);
-   screen2 = screen1 + LocationType(LINK_TIGHTNESS, LINK_TIGHTNESS);
+
+   LocationType data2;
+   LocationType screen2 = screen1 + LocationType(LINK_TIGHTNESS, LINK_TIGHTNESS);
    pLayer->translateScreenToData(screen2.mX, screen2.mY, data2.mX, data2.mY);
+
    LocationType geocoord2 = pGeo->convertPixelToGeocoord(data2);
-   double res = hypot(geocoord2.mX - geocoord.mX, 
-      geocoord2.mY - geocoord.mY) / hypot(LINK_TIGHTNESS, LINK_TIGHTNESS);
+   double res = hypot(geocoord2.mX - geocoord.mX, geocoord2.mY - geocoord.mY) / hypot(LINK_TIGHTNESS, LINK_TIGHTNESS);
 
    return res;
 }

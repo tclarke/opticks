@@ -35,16 +35,16 @@ int Feature::addVertex(double dX, double dY, double dZ)
    mVertices.push_back(vertex);
    notify(SIGNAL_NAME(Feature, VertexAdded), boost::any(vertex));
 
-   int iIndex = static_cast<int>(mVertices.size() - 1);
+   int iIndex = static_cast<int>(mVertices.size()) - 1;
    return iIndex;
 }
 
 bool Feature::removeVertex(int iIndex)
 {
    int i = 0;
-   for(vector<FeatureVertex>::iterator iter = mVertices.begin(); iter != mVertices.end(); ++iter, ++i)
+   for (vector<FeatureVertex>::iterator iter = mVertices.begin(); iter != mVertices.end(); ++iter, ++i)
    {
-      if(i == iIndex)
+      if (i == iIndex)
       {
          FeatureVertex oldVertex = *iter;
          mVertices.erase(iter);
@@ -61,7 +61,7 @@ Feature::FeatureVertex Feature::getVertex(int iIndex) const
    FeatureVertex vertex;
 
    unsigned int uiVertices = getNumVertices();
-   if((iIndex >= 0) || (iIndex < static_cast<int>(uiVertices)))
+   if ((iIndex >= 0) || (iIndex < static_cast<int>(uiVertices)))
    {
       vertex = mVertices[iIndex];
    }
@@ -91,12 +91,12 @@ void Feature::clearVertices()
 
 bool Feature::addField(const string& name, const DataVariant &defaultValue)
 {
-   if(hasField(name))
+   if (hasField(name))
    {
       return false;
    }
 
-   if(!mpFields->setAttribute(name, defaultValue))
+   if (!mpFields->setAttribute(name, defaultValue))
    {
       return false;
    }
@@ -107,12 +107,12 @@ bool Feature::addField(const string& name, const DataVariant &defaultValue)
 
 bool Feature::removeField(const string& name)
 {
-   if(!hasField(name))
+   if (!hasField(name))
    {
       return false;
    }
 
-   if(!mpFields->removeAttribute(name))
+   if (!mpFields->removeAttribute(name))
    {
       return false;
    }
@@ -141,9 +141,9 @@ string Feature::getFieldType(const string& name) const
 
 bool Feature::setFieldValue(const string& name, const DataVariant &var)
 {
-   if(mpFields->getAttribute(name).isValid())
+   if (mpFields->getAttribute(name).isValid())
    {
-      if(!mpFields->setAttribute(name, var))
+      if (!mpFields->setAttribute(name, var))
       {
          notify(SIGNAL_NAME(Subject, Modified));
          return true;
@@ -177,7 +177,7 @@ const string& Feature::getObjectType() const
 
 bool Feature::isKindOf(const string& className) const
 {
-   if(className == getObjectType())
+   if (className == getObjectType())
    {
       return true;
    }

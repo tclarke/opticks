@@ -22,20 +22,19 @@ using namespace std;
 ProductionPlugInTester::ProductionPlugInTester()
 {
    setName("Production Plug-In Tester");
-
    setMenuLocation("[Developer Tools]\\List Not For Production Plug-Ins");
    setProductionStatus(true);
    setDescriptorId("{65DE2A1D-AA77-42f3-9FE8-425017CC79F5}");
    allowMultipleInstances(false);
 }
 
-bool ProductionPlugInTester::getInputSpecification(PlugInArgList *&pArgList)
+bool ProductionPlugInTester::getInputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
    return true;
 }
 
-bool ProductionPlugInTester::getOutputSpecification(PlugInArgList *&pArgList)
+bool ProductionPlugInTester::getOutputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
    return true;
@@ -47,7 +46,7 @@ bool ProductionPlugInTester::setBatch()
    return false;
 }
 
-bool ProductionPlugInTester::execute(PlugInArgList* pInArgs, PlugInArgList* pOutArgs)
+bool ProductionPlugInTester::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
    if (isBatch())
    {

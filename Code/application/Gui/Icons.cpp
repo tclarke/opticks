@@ -653,8 +653,8 @@ Icons::Icons()
    mScript.setMask(mScript.createHeuristicMask());
 
    // Animation toolbar
-   mAnimationFastForward = QPixmap(IconImages::FastForwardIcon);
-   mAnimationFastForward.setMask(mAnimationFastForward.createHeuristicMask());
+   mAnimationSpeedUp = QPixmap(IconImages::SpeedUpIcon);
+   mAnimationSpeedUp.setMask(mAnimationSpeedUp.createHeuristicMask());
 
    mClock = QPixmap(IconImages::ClockIcon);
    mClock.setMask(mClock.createHeuristicMask());
@@ -671,11 +671,20 @@ Icons::Icons()
    mAnimationPause = QPixmap(IconImages::PauseIcon);
    mAnimationPause.setMask(mAnimationPause.createHeuristicMask());
 
+   mAnimationBackwardDirection = QPixmap(IconImages::DirectionBackwardIcon);
+   mAnimationBackwardDirection.setMask(mAnimationBackwardDirection.createMaskFromColor(QColor(255, 255, 255)));
+
+   mAnimationChangeDirection = QPixmap(IconImages::ChangeDirectionIcon);
+   mAnimationChangeDirection.setMask(mAnimationChangeDirection.createHeuristicMask());
+
+   mAnimationForwardDirection = QPixmap(IconImages::DirectionForwardIcon);
+   mAnimationForwardDirection.setMask(mAnimationForwardDirection.createMaskFromColor(QColor(255, 255, 255)));
+   
    mAnimationStop = QPixmap(IconImages::StopIcon);
    mAnimationStop.setMask(mAnimationStop.createHeuristicMask());
 
-   mAnimationFastRewind = QPixmap(IconImages::FastRewindIcon);
-   mAnimationFastRewind.setMask(mAnimationFastRewind.createHeuristicMask());
+   mAnimationSlowDown = QPixmap(IconImages::SlowDownIcon);
+   mAnimationSlowDown.setMask(mAnimationSlowDown.createHeuristicMask());
 
    mPlayOnce = QPixmap(IconImages::PlayOnceIcon);
    mPlayOnce.setMask(mPlayOnce.createHeuristicMask());
@@ -726,6 +735,13 @@ Icons::Icons()
 
    mGcpBlank = QPixmap(IconImages::GcpBlankIcon);
    mGcpBlank.setMask(mGcpBlank.createMaskFromColor(Qt::white));
+
+   // Layers
+   mRasterLayer = QPixmap(IconImages::RasterLayerIcon);
+
+   mThresholdLayer = QPixmap(IconImages::ThresholdLayerIcon);
+
+   mPseudocolorLayer = QPixmap(IconImages::PseudocolorLayerIcon);
 }
 
 Icons::~Icons()

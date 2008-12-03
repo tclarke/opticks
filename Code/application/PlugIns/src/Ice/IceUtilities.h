@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef ICE_UTILITIES_H
-#define ICE_UTILITIES_H
+#ifndef ICEUTILITIES_H
+#define ICEUTILITIES_H
 
 #include "MessageLogResource.h"
 
@@ -24,14 +24,18 @@ class Message;
 class Hdf5ErrorDesc
 {
 public:
-   Hdf5ErrorDesc(H5E_error_t* pErr)   
+   Hdf5ErrorDesc(H5E_error_t* pErr) :
+      mLineNumber(0)
    {
-      mErrorDesc = pErr->desc;
-      mFunctionName = pErr->func_name;
-      mFilename = pErr->file_name;
-      mLineNumber = pErr->line;
-      mMajorErrorMsg = H5Eget_major(pErr->maj_num);
-      mMinorErrorMsg = H5Eget_minor(pErr->min_num);
+      if (pErr != NULL)
+      {
+         mErrorDesc = pErr->desc;
+         mFunctionName = pErr->func_name;
+         mFilename = pErr->file_name;
+         mLineNumber = pErr->line;
+         mMajorErrorMsg = H5Eget_major(pErr->maj_num);
+         mMinorErrorMsg = H5Eget_minor(pErr->min_num);
+      }
    }
 
    std::string mErrorDesc;
@@ -119,7 +123,9 @@ public:
 class IceVersion
 {
 public:
-   IceVersion(unsigned int majorVersion, unsigned int minorVersion) : mMajorVersion(majorVersion), mMinorVersion(minorVersion)
+   IceVersion(unsigned int majorVersion, unsigned int minorVersion) :
+      mMajorVersion(majorVersion),
+      mMinorVersion(minorVersion)
    {
    }
    void setFileVersion(unsigned int fileVersion)
@@ -190,9 +196,9 @@ public:
    const std::string& getCreator();
    void setCreator(const std::string& creator);
    const std::string& getCreatorVersion();
-   void setCreatorVersion(const std::string& creator);
+   void setCreatorVersion(const std::string& creatorVersion);
    const std::string& getCreatorArch();
-   void setCreatorArch(const std::string& creator);
+   void setCreatorArch(const std::string& creatorArch);
    const std::string& getCreatorOs();
    void setCreatorOs(const std::string& creator);
 
@@ -213,7 +219,16 @@ namespace IceUtilities
    IceFormatDescriptor createIceFormatDescriptor(const Hdf5Group* pRootGroup);
 };
 
-#define ICEVERIFY_MSG(condition, msg) if (!(condition)) throw IceException(__FILE__, __LINE__, string(msg));
-#define ICEVERIFY(condition) if (!(condition)) throw IceException(__FILE__, __LINE__);
+#define ICEVERIFY_MSG(condition, msg) \
+   if (!(condition)) \
+   { \
+      throw IceException(__FILE__, __LINE__, string(msg)); \
+   }
+
+#define ICEVERIFY(condition) \
+   if (!(condition)) \
+   { \
+      throw IceException(__FILE__, __LINE__); \
+   }
 
 #endif

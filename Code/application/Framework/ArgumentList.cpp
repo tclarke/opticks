@@ -7,15 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-/**
- * Argument List
- *
- * This is a singleton class.  Only one instance of this class exists at
- * a given time.  Use the instance() method to get a reference to the class.
- * ArgumentList is responsible for managing the Argument List passed into 
- * the application.
- */
-
 #include "ArgumentList.h"
 #include "AppConfig.h"
 
@@ -38,7 +29,7 @@ ArgumentList* ArgumentList::singleton = NULL;
  *
  *  @return  This method returns the singleton class instance.
  */
-ArgumentList* ArgumentList::instance() 
+ArgumentList* ArgumentList::instance()
 {
    if (singleton == NULL)
    {
@@ -56,15 +47,13 @@ ArgumentList* ArgumentList::instance()
  *  instantiate this class the ArgumentList::instance() 
  *  method must be called.
  */
-ArgumentList::ArgumentList() 
+ArgumentList::ArgumentList() :
+   mValidArgumentList(true)
 {
-    arguments.clear();
-    validArgumentList = true;
-
 #if defined(WIN_API)
-    setDelimiter("/");
+   setDelimiter("/");
 #else
-    setDelimiter("-");
+   setDelimiter("-");
 #endif
 }
 
@@ -74,7 +63,7 @@ ArgumentList::ArgumentList()
  * This destructor deletes all dynamic memory associated with the
  * class.
  */
-ArgumentList::~ArgumentList() 
+ArgumentList::~ArgumentList()
 {
 }
 
@@ -90,17 +79,22 @@ ArgumentList::~ArgumentList()
  *           The array of arguments, including the executable name 
  *           as argv[0].
  */
-void ArgumentList::set( int argc, char* argv[] )
+void ArgumentList::set(int argc, char* argv[])
 {
-    if (argv[0]!=NULL) executableName = argv[0];
+   if (argv[0] != NULL)
+   {
+      mExecutableName = argv[0];
+   }
 
-    for ( int i=0; i<argc; i++ ) {
-        if (argv[i]!=NULL) {
-            arguments.push_back( argv[i] );
-        }
-    }
+   for (int i = 0; i < argc; ++i)
+   {
+      if (argv[i] != NULL)
+      {
+         mArguments.push_back(argv[i]);
+      }
+   }
 
-    determineValidOptions();
+   determineValidOptions();
 }
 
 /**
@@ -113,21 +107,21 @@ void ArgumentList::set( int argc, char* argv[] )
  */
 string ArgumentList::getExecutableBaseName()
 {
-    unsigned int slash;
-    unsigned int period;
+   unsigned int slash;
+   unsigned int period;
 
-    string name = getExecutableName();
+   string name = getExecutableName();
 
 #if defined(WIN_API)
-    slash = name.find_last_of("\\")+1;
-    period = name.find_last_of(".");
-    name = name.substr(slash,period-slash);
+   slash = name.find_last_of("\\") + 1;
+   period = name.find_last_of(".");
+   name = name.substr(slash, period - slash);
 #else
-    slash = name.find_last_of("/")+1;
-    name = name.erase(0,slash+1);
+   slash = name.find_last_of("/") + 1;
+   name = name.erase(0, slash + 1);
 #endif
 
-    return name;
+   return name;
 }
 
 /**
@@ -143,32 +137,33 @@ string ArgumentList::getExecutableBaseName()
  *           The string name for the option without the delimiter.
  *  @return  The list of option values.
  */
-vector<string> ArgumentList::getOptions( string prefix )
+vector<string> ArgumentList::getOptions(string optionName)
 {
    vector<string>::iterator argument;
    vector<string> newArguments;
 
-   if(!prefix.empty())
+   if (!optionName.empty())
    {
-      prefix = delimiter + prefix + ":";
+      optionName = mDelimiter + optionName + ":";
    }
 
-   for (argument=arguments.begin(); argument!=arguments.end(); argument++ )
+   for (argument = mArguments.begin(); argument != mArguments.end(); ++argument)
    {
       string option(argument->c_str());
 
-      if(prefix.empty())
+      if (optionName.empty())
       {
-         if(argument != arguments.begin() && !option.empty() && option.substr(0,1) != delimiter)
+         if (argument != mArguments.begin() && !option.empty() && option.substr(0, 1) != mDelimiter)
          {
             newArguments.push_back(option);
          }
          continue;
       }
-      int pos = option.compare(0,prefix.length(),prefix);
 
-      if (pos==0) {
-         option = option.erase( 0, prefix.length() );
+      int pos = option.compare(0, optionName.length(), optionName);
+      if (pos == 0)
+      {
+         option = option.erase(0, optionName.length());
          newArguments.push_back(option);
       }
 
@@ -189,15 +184,15 @@ vector<string> ArgumentList::getOptions( string prefix )
  *           The string name for the option without the delimiter.
  *  @return  The first option value.
  */
-string ArgumentList::getOption( string option )
+string ArgumentList::getOption(string optionName)
 {
-    vector<string> values;
-    
-    values = getOptions( option );
+   vector<string> values = getOptions(optionName);
+   if (values.empty())
+   {
+      return "";
+   }
 
-    if (values.empty()) return "";
-
-    return *(values.begin());
+   return *(values.begin());
 }
 
 /**
@@ -207,40 +202,34 @@ string ArgumentList::getOption( string option )
  *           Name of the argument value.
  *  @return  Returns true if the argument exists in the argument list.
  */
-bool ArgumentList::exists( string name )
+bool ArgumentList::exists(string name)
 {
-    map<string,bool>::iterator option;
-    bool valid = false;
-    
-    option = options.find( delimiter + name );
+   bool valid = false;
 
-    if (option!=options.end()) {
-        valid = (option->second);
-    }
-    return valid;
+   map<string, bool>::iterator option = mOptions.find(mDelimiter + name);
+   if (option != mOptions.end())
+   {
+      valid = (option->second);
+   }
+
+   return valid;
 }
 
 /**
  *  Goes throught the list of options and determine if only valid
  *  options have been used.
  */
-void ArgumentList::determineValidOptions( )
+void ArgumentList::determineValidOptions()
 {
-    map<string,bool>::iterator option;
-    vector<string>::iterator argument;
+   map<string, bool>::iterator option;
+   mValidArgumentList = true;
 
-    validArgumentList = true;
-
-    for ( argument = arguments.begin();
-          argument!=arguments.end();
-          argument++ ) {
-
-        option = options.find( *argument );
-
-        if (option!=options.end()) {
-            option->second = true;
-        }
-    }
+   for (vector<string>::iterator argument = mArguments.begin(); argument != mArguments.end(); ++argument)
+   {
+      option = mOptions.find(*argument);
+      if (option != mOptions.end())
+      {
+         option->second = true;
+      }
+   }
 }
-
- 

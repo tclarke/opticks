@@ -37,9 +37,9 @@ WizardNodeImp::WizardNodeImp(WizardItem* pItem, string name, string type, string
 
 WizardNodeImp::~WizardNodeImp()
 {
-   notify(SIGNAL_NAME(Subject, Deleted));   // Call before clearing the connected nodes so that
-                                       // connected objects can have access to them
-   
+   notify(SIGNAL_NAME(Subject, Deleted));    // Call before clearing the connected nodes so that
+                                             // connected objects can have access to them
+
    clearConnectedNodes();
    deleteValue();
 }
@@ -131,8 +131,7 @@ void WizardNodeImp::setValidTypes(const vector<string>& validTypes)
 {
    mValidTypes.clear();
 
-   vector<string>::const_iterator iter;
-   for (iter = validTypes.begin(); iter != validTypes.end(); iter++)
+   for (vector<string>::const_iterator iter = validTypes.begin(); iter != validTypes.end(); ++iter)
    {
       string type = (*iter).c_str();
       mValidTypes.push_back(type);
@@ -201,8 +200,7 @@ bool WizardNodeImp::addConnectedNode(WizardNode* pNode)
       return false;
    }
 
-   string type = "";
-   type = pNode->getType();
+   string type = pNode->getType();
    if (type != mType)
    {
       return false;
@@ -211,15 +209,19 @@ bool WizardNodeImp::addConnectedNode(WizardNode* pNode)
    mConnectedNodes.push_back(pNode);
    WizardNodeChangeType eChange = ConnectedNodeAdded;
    notify(SIGNAL_NAME(Subject, Modified), boost::any(&eChange));
-   ((WizardNodeImp*) pNode)->addConnectedNode(this);
+
+   WizardNodeImp* pNodeImp = static_cast<WizardNodeImp*>(pNode);
+   if (pNodeImp != NULL)
+   {
+      pNodeImp->addConnectedNode(this);
+   }
+
    return true;
 }
 
 int WizardNodeImp::getNumConnectedNodes() const
 {
-   int iCount = 0;
-   iCount = mConnectedNodes.size();
-
+   int iCount = static_cast<int>(mConnectedNodes.size());
    return iCount;
 }
 
@@ -235,18 +237,22 @@ bool WizardNodeImp::removeConnectedNode(WizardNode* pNode)
       return false;
    }
 
-   vector<WizardNode*>::iterator iter;
-   iter = mConnectedNodes.begin();
+   vector<WizardNode*>::iterator iter = mConnectedNodes.begin();
    while (iter != mConnectedNodes.end())
    {
-      WizardNode* pCurrentNode = NULL;
-      pCurrentNode = *iter;
+      WizardNode* pCurrentNode = *iter;
       if (pCurrentNode == pNode)
       {
          mConnectedNodes.erase(iter);
          WizardNodeChangeType eChange = ConnectedNodeRemoved;
          notify(SIGNAL_NAME(Subject, Modified), boost::any(&eChange));
-         ((WizardNodeImp*) pNode)->removeConnectedNode(this);
+
+         WizardNodeImp* pNodeImp = static_cast<WizardNodeImp*>(pNode);
+         if (pNodeImp != NULL)
+         {
+            pNodeImp->removeConnectedNode(this);
+         }
+
          return true;
       }
 
@@ -279,12 +285,10 @@ bool WizardNodeImp::isNodeConnected(WizardNode* pNode) const
       return false;
    }
 
-   vector<WizardNode*>::const_iterator iter;
-   iter = mConnectedNodes.begin();
+   vector<WizardNode*>::const_iterator iter = mConnectedNodes.begin();
    while (iter != mConnectedNodes.end())
    {
-      WizardNode* pCurrentNode = NULL;
-      pCurrentNode = *iter;
+      WizardNode* pCurrentNode = *iter;
       if (pCurrentNode == pNode)
       {
          return true;
@@ -296,18 +300,19 @@ bool WizardNodeImp::isNodeConnected(WizardNode* pNode) const
    return false;
 }
 
-bool WizardNodeImp::toXml(XMLWriter* xml) const
+bool WizardNodeImp::toXml(XMLWriter* pXml) const
 {
    // This will get all of the infomation for the wizard node
    // except the description.
-   xml->addAttr("version", mVersion);
-   xml->addAttr("name", mName);
-   xml->addAttr("originalType", mOriginalType);
-   xml->addAttr("type", mType);
+   pXml->addAttr("version", mVersion);
+   pXml->addAttr("name", mName);
+   pXml->addAttr("originalType", mOriginalType);
+   pXml->addAttr("type", mType);
 
-   vector<string>::const_iterator iter;
-   for(iter = mValidTypes.begin(); iter != mValidTypes.end(); iter++)
-      xml->addText(*iter, xml->addElement("validType"));
+   for (vector<string>::const_iterator iter = mValidTypes.begin(); iter != mValidTypes.end(); ++iter)
+   {
+      pXml->addText(*iter, pXml->addElement("validType"));
+   }
 
    if (mpShallowCopyValue != NULL)
    {
@@ -322,15 +327,15 @@ bool WizardNodeImp::toXml(XMLWriter* xml) const
       {
          return false;
       }
-      xml->addText(value, xml->addElement("value"));
+      pXml->addText(value, pXml->addElement("value"));
    }
 
    return true;
 }
 
-bool WizardNodeImp::fromXml(DOMNode* document, unsigned int version)
+bool WizardNodeImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   DOMElement *elmnt(static_cast<DOMElement*>(document));
+   DOMElement* elmnt(static_cast<DOMElement*>(pDocument));
 
    mVersion = A(elmnt->getAttribute(X("version")));
    mName = A(elmnt->getAttribute(X("name")));
@@ -339,18 +344,16 @@ bool WizardNodeImp::fromXml(DOMNode* document, unsigned int version)
    deleteValue();
    mValidTypes.clear();
 
-   for(DOMNode *chld = document->getFirstChild();
-                chld != NULL;
-                chld = chld->getNextSibling())
+   for (DOMNode* pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
    {
-      if(XMLString::equals(chld->getNodeName(), X("validType")))
+      if (XMLString::equals(pChld->getNodeName(), X("validType")))
       {
-         string vt(A(chld->getTextContent()));
+         string vt(A(pChld->getTextContent()));
          mValidTypes.push_back(vt);
       }
-      else if(XMLString::equals(chld->getNodeName(), X("value")))
+      else if (XMLString::equals(pChld->getNodeName(), X("value")))
       {
-         string value(A(chld->getTextContent()));
+         string value(A(pChld->getTextContent()));
 
          DataVariant parsedValue(mType, NULL, false);
          if (!parsedValue.isValid())
@@ -373,8 +376,8 @@ bool WizardNodeImp::fromXml(DOMNode* document, unsigned int version)
 
 const string& WizardNodeImp::getObjectType() const
 {
-   static string type("WizardNodeImp");
-   return type;
+   static string sType("WizardNodeImp");
+   return sType;
 }
 
 bool WizardNodeImp::isKindOf(const string& className) const

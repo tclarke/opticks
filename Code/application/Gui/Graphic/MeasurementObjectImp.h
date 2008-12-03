@@ -66,10 +66,13 @@ public:
    bool toXml(XMLWriter* pXml) const;
    bool fromXml(DOMNode* pDocument, unsigned int version);
 
+protected:
+
 private:
    int mDistancePrecision;
    int mBearingPrecision;
    int mEndPointsPrecision;
+   mutable bool mUsingInaccurateExtrapolation;
 
    void refreshGeoInformation() const;
    std::string generateGeoStrings() const;

@@ -42,7 +42,7 @@ private:
 
    FeatureClass mCurrentFeatureClass;
    FactoryResource<DynamicObject> mpOptionsSet;
-   ListInspectorWidget *mpListInspector;
+   ListInspectorWidget* mpListInspector;
 };
 
 #endif

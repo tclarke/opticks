@@ -147,9 +147,9 @@ void NorthArrowObjectImp::orient()
       return;
    }
 
-   LayerList *pLayerList = pSpatialDataView->getLayerList();
+   LayerList* pLayerList = pSpatialDataView->getLayerList();
    VERIFYNRV(pLayerList != NULL);
-   RasterElement *pRaster = pLayerList->getPrimaryRasterElement();
+   RasterElement* pRaster = pLayerList->getPrimaryRasterElement();
    VERIFYNRV(pLayerList != NULL);
    if (!pRaster->isGeoreferenced())
    {
@@ -177,7 +177,17 @@ void NorthArrowObjectImp::orient()
    }
 
    LocationType geocoordStart = pRaster->convertPixelToGeocoord(pixelStart);
-   LocationType geocoordEnd = LocationType(geocoordStart.mX + 0.001, geocoordStart.mY);
+   LocationType oneUpPixel(pixelStart.mX, pixelStart.mY - 1.0);
+   LocationType oneUpGeo = pRaster->convertPixelToGeocoord(oneUpPixel);
+   double degLatPerPixel = abs(oneUpGeo.mX - geocoordStart.mX);
+
+   // degLatPerPixel can be extremely small for high spatial resolution data. This can result
+   // in unreliable orientation of the arrow, especially when the scene coordinate and Lat/Lon
+   // coordinate systems are closely aligned. We'll avoid this problem by insuring that a value
+   // of at least 0.001 degree (roughly 100 meters between points) is used for the calculation.
+   degLatPerPixel = max(0.001, degLatPerPixel);
+
+   LocationType geocoordEnd = LocationType(geocoordStart.mX + degLatPerPixel, geocoordStart.mY);
    LocationType pixelEnd = pRaster->convertGeocoordToPixel(geocoordEnd);
 
    double dDeltaX = pixelEnd.mX - pixelStart.mX;

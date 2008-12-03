@@ -33,7 +33,7 @@ GpuTile::~GpuTile()
 {
    delete mpImageLoader;
    delete mpImageReader;
-   for(vector<ImageFilter*>::iterator filter = mFilters.begin(); filter != mFilters.end(); ++filter)
+   for (vector<ImageFilter*>::iterator filter = mFilters.begin(); filter != mFilters.end(); ++filter)
    {
       delete *filter;
    }
@@ -71,7 +71,7 @@ void GpuTile::setupTile(void *pData, EncodingType encodingType, unsigned int ind
       setYCoords(yCoords);
 
       // create color buffer object to be used to load data to the graphics card
-      ColorBuffer *pColorBuffer(new ColorBuffer(GL_TEXTURE_RECTANGLE_ARB, internalFormat, 
+      ColorBuffer* pColorBuffer(new ColorBuffer(GL_TEXTURE_RECTANGLE_ARB, internalFormat, 
                                       static_cast<int>(texSize.mX), static_cast<int>(texSize.mY), 
                                       textureFormat, dataType, alpha));
 
@@ -84,7 +84,7 @@ void GpuTile::setupTile(void *pData, EncodingType encodingType, unsigned int ind
          int numBytes = static_cast<int>(texSize.mX) * static_cast<int>(texSize.mY) * 
             ImageUtilities::sizeOf(dataType) * ImageUtilities::getNumColorChannels(textureFormat);
 
-         PixelBufferObject *pPixelBufferObject = pResourceManager->getPixelBufferObject(numBytes, GL_WRITE_ONLY);
+         PixelBufferObject* pPixelBufferObject = pResourceManager->getPixelBufferObject(numBytes, GL_WRITE_ONLY);
          if (pPixelBufferObject != NULL)
          {
             mpImageLoader = new ImagePBO(pColorBuffer, pPixelBufferObject);
@@ -178,7 +178,7 @@ void GpuTile::draw(CGparameter outputCgTextureParam, GLint textureMode)
 
 ImageFilter *GpuTile::createFilter(ImageFilterDescriptor *pDescriptor)
 {
-   ImageFilter *pImageFilter = NULL;
+   ImageFilter* pImageFilter = NULL;
    if (hasFilter(pDescriptor) == true)
    {
       return pImageFilter;
@@ -226,12 +226,12 @@ ImageFilter *GpuTile::getFilter(ImageFilterDescriptor *pDescriptor) const
       return NULL;
    }
 
-   for(vector<ImageFilter*>::const_iterator iter = mFilters.begin(); iter != mFilters.end(); ++iter)
+   for (vector<ImageFilter*>::const_iterator iter = mFilters.begin(); iter != mFilters.end(); ++iter)
    {
-      ImageFilter *pImageFilter = (*iter);
-      if(pImageFilter != NULL)
+      ImageFilter* pImageFilter = (*iter);
+      if (pImageFilter != NULL)
       {
-         ImageFilterDescriptor *pImageFilterDescriptor = pImageFilter->getImageFilterDescriptor();
+         ImageFilterDescriptor* pImageFilterDescriptor = pImageFilter->getImageFilterDescriptor();
          if (pImageFilterDescriptor == pDescriptor)
          {
             return pImageFilter;
@@ -244,7 +244,7 @@ ImageFilter *GpuTile::getFilter(ImageFilterDescriptor *pDescriptor) const
 
 bool GpuTile::hasFilter(ImageFilterDescriptor *pDescriptor) const
 {
-   ImageFilter *pImageFilter = getFilter(pDescriptor);
+   ImageFilter* pImageFilter = getFilter(pDescriptor);
    return (pImageFilter != NULL);
 }
 
@@ -290,7 +290,7 @@ void GpuTile::destroyFilter(ImageFilterDescriptor *pDescriptor)
 
 void GpuTile::resetFilter(ImageFilterDescriptor *pDescriptor)
 {
-   ImageFilter *pImageFilter = getFilter(pDescriptor);
+   ImageFilter* pImageFilter = getFilter(pDescriptor);
    if (pImageFilter != NULL)
    {
       pImageFilter->resetBuffer();
@@ -299,7 +299,7 @@ void GpuTile::resetFilter(ImageFilterDescriptor *pDescriptor)
 
 void GpuTile::freezeFilter(ImageFilterDescriptor *pDescriptor, bool toggle)
 {
-   ImageFilter *pImageFilter = getFilter(pDescriptor);
+   ImageFilter* pImageFilter = getFilter(pDescriptor);
    if (pImageFilter != NULL)
    {
       pImageFilter->freezeBuffer(toggle);
@@ -308,7 +308,7 @@ void GpuTile::freezeFilter(ImageFilterDescriptor *pDescriptor, bool toggle)
 
 bool GpuTile::getFilterFreezeFlag(ImageFilterDescriptor *pDescriptor) const
 {
-   ImageFilter *pImageFilter = getFilter(pDescriptor);
+   ImageFilter* pImageFilter = getFilter(pDescriptor);
    if (pImageFilter != NULL)
    {
       return pImageFilter->isBufferFrozen();
@@ -324,7 +324,7 @@ bool GpuTile::isTextureReady(unsigned int index) const
 vector<ImageFilterDescriptor*> GpuTile::getFilters() const
 {
    vector<ImageFilterDescriptor*> descriptors;
-   for(vector<ImageFilter*>::const_iterator filter = mFilters.begin(); filter != mFilters.end(); ++filter)
+   for (vector<ImageFilter*>::const_iterator filter = mFilters.begin(); filter != mFilters.end(); ++filter)
    {
       descriptors.push_back((*filter)->getImageFilterDescriptor());
    }
@@ -362,7 +362,7 @@ void GpuTile::applyFilters()
 
 unsigned int GpuTile::readFilterBuffer(GLint xCoord, GLint yCoord, GLsizei width, GLsizei height, GLvoid *pPixels)
 {
-   unsigned int numElements = width * height;
+   unsigned int numElements = 0;
 
    // read back the filtered results buffer
 
@@ -372,7 +372,9 @@ unsigned int GpuTile::readFilterBuffer(GLint xCoord, GLint yCoord, GLsizei width
       GLenum textureFormat = mpOutputColorBuffer->getTextureFormat();
       GLenum dataType = mpOutputColorBuffer->getDataType();
       unsigned int alpha = mpOutputColorBuffer->getAlpha();
-      
+
+      numElements = width * height * ImageUtilities::getNumColorChannels(textureFormat);
+
       // switch to the filtered buffers color buffer with the filtered results
       Service<GpuResourceManager> pResourceManager;
 
@@ -380,13 +382,13 @@ unsigned int GpuTile::readFilterBuffer(GLint xCoord, GLint yCoord, GLsizei width
       {
          // Initialize the reader to the size of the texture to accommodate all possible reads (i.e. later reads)
          LocationType texSize = getTexSize();
-         ColorBuffer *pColorBuffer(new ColorBuffer(GL_TEXTURE_RECTANGLE_ARB, internalFormat, 
+         ColorBuffer* pColorBuffer(new ColorBuffer(GL_TEXTURE_RECTANGLE_ARB, internalFormat, 
                                                    texSize.mX, texSize.mY, textureFormat, dataType, alpha));
          if ((pColorBuffer != NULL) && (pColorBuffer->getTextureObjectId() != 0))
          {
             int numBytes = texSize.mX * texSize.mY * ImageUtilities::sizeOf(dataType) * 
                            ImageUtilities::getNumColorChannels(textureFormat);
-            PixelBufferObject *pPixelBufferObject = pResourceManager->getPixelBufferObject(numBytes, GL_READ_ONLY);
+            PixelBufferObject* pPixelBufferObject = pResourceManager->getPixelBufferObject(numBytes, GL_READ_ONLY);
             if (pPixelBufferObject != NULL)
             {
                mpImageReader = new ImagePBO(pColorBuffer, pPixelBufferObject);

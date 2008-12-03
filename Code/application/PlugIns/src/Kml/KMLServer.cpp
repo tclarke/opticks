@@ -54,7 +54,9 @@ KMLServer::KMLServer() : MuHttpServer(hasSettingKmlServerPort() ? getSettingKmlS
    executeOnStartup(true);
    destroyAfterExecute(false);
    setWizardSupported(false);
-   registerPath("images", new ImageHandler(0, this));
+
+   ImageHandler* pImageHandler = new ImageHandler(0, this);
+   registerPath("images", pImageHandler);
 }
 
 KMLServer::~KMLServer()
@@ -78,12 +80,13 @@ bool KMLServer::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
    return start();
 }
 
-MuHttpServer::Response KMLServer::getRequest(const QString &uri, const QString &contentType, const QString &body, const FormValueMap &form)
+MuHttpServer::Response KMLServer::getRequest(const QString &uri, const QString &contentType, const QString &body,
+                                             const FormValueMap &form)
 {
    Response r;
    QStringList path = uri.split("/", QString::SkipEmptyParts);
    Kml k;
-   if(path.size() == 1 && path[0] == "index.kml" && k.addSession())
+   if (path.size() == 1 && path[0] == "index.kml" && k.addSession())
    {
       r.mCode = HTTPRESPONSECODE_200_OK;
       r.mHeaders["content-type"] = "application/vnd.google-earth.kml+xml";

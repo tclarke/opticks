@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #include "ClassificationImp.h"
 #include "Classification.h"
 #include "AppVerify.h"
@@ -22,15 +20,15 @@ XERCES_CPP_NAMESPACE_USE
 
 static string trimString(string text)
 {
-   unsigned int i, j;
-   const char *pText = text.c_str();
+   const char* pText = text.c_str();
 
    if (text.size() == 0)
    {
       return text;
    }
 
-   for (i = 0; i < text.size(); i++)
+   unsigned int i;
+   for (i = 0; i < text.size(); ++i)
    {
       if (!isspace(pText[i]))
       {
@@ -38,7 +36,8 @@ static string trimString(string text)
       }
    }
 
-   for (j = text.size() - 1; j > 0; j--)
+   unsigned int j;
+   for (j = text.size() - 1; j > 0; --j)
    {
       if (!isspace(pText[j]))
       {
@@ -100,18 +99,20 @@ static string expandAndFill(string text, string fill)
    return retval;
 }
 
-ClassificationImp::ClassificationImp() : mDeclassificationDate(new DateTimeImp()),
-   mDowngradeDate(new DateTimeImp()), mSecuritySourceDate(new DateTimeImp()),
-   mCodewordsDefaulted(false)
+ClassificationImp::ClassificationImp() :
+   mCodewordsDefaulted(false),
+   mpDeclassificationDate(new DateTimeImp()),
+   mpDowngradeDate(new DateTimeImp()),
+   mpSecuritySourceDate(new DateTimeImp())
 {
    setLevel(string());
 }
 
 ClassificationImp::~ClassificationImp()
 {
-   delete mDeclassificationDate;
-   delete mDowngradeDate;
-   delete mSecuritySourceDate;
+   delete mpDeclassificationDate;
+   delete mpDowngradeDate;
+   delete mpSecuritySourceDate;
 }
 
 ClassificationImp& ClassificationImp::operator =(const ClassificationImp& rhs)
@@ -127,15 +128,15 @@ ClassificationImp& ClassificationImp::operator =(const ClassificationImp& rhs)
       mFileReleasing = rhs.mFileReleasing.c_str();
       mClassificationReason = rhs.mClassificationReason.c_str();
       mDeclassificationType = rhs.mDeclassificationType.c_str();
-      *mDeclassificationDate = *(rhs.mDeclassificationDate);
+      *mpDeclassificationDate = *(rhs.mpDeclassificationDate);
       mDeclassificationExemption = rhs.mDeclassificationExemption.c_str();
       mFileDowngrade = rhs.mFileDowngrade.c_str();
       mCountryCode = rhs.mCountryCode.c_str();
-      *mDowngradeDate = *(rhs.mDowngradeDate);
+      *mpDowngradeDate = *(rhs.mpDowngradeDate);
       mDescription = rhs.mDescription.c_str();
       mAuthority = rhs.mAuthority.c_str();
       mAuthorityType = rhs.mAuthorityType.c_str();
-      *mSecuritySourceDate = *(rhs.mSecuritySourceDate);
+      *mpSecuritySourceDate = *(rhs.mpSecuritySourceDate);
       mSecurityControlNumber = rhs.mSecurityControlNumber.c_str();
       mFileCopyNumber = rhs.mFileCopyNumber.c_str();
       mFileNumberOfCopies = rhs.mFileNumberOfCopies.c_str();
@@ -147,9 +148,9 @@ ClassificationImp& ClassificationImp::operator =(const ClassificationImp& rhs)
    return *this;
 }
 
-const string& ClassificationImp::getLevel() const 
+const string& ClassificationImp::getLevel() const
 {
-  return mLevel;
+   return mLevel;
 }
 
 void ClassificationImp::setLevel(const string& myLevel)
@@ -170,7 +171,7 @@ void ClassificationImp::setLevel(const string& myLevel)
          string::size_type slashpos = defaultLevelAndCodewords.find("//");
          if (slashpos != string::npos)
          {
-            mCodewords = defaultLevelAndCodewords.substr(slashpos+2);
+            mCodewords = defaultLevelAndCodewords.substr(slashpos + 2);
             std::replace(mCodewords.begin(), mCodewords.end(), '/', ' ');
             mCodewords = trimString(mCodewords);
             mCodewordsDefaulted = true;
@@ -226,15 +227,15 @@ void ClassificationImp::setLevel(const string& myLevel)
       mFileReleasing.clear();
       mClassificationReason.clear();
       mDeclassificationType.clear();
-      *mDeclassificationDate = DateTimeImp();
+      *mpDeclassificationDate = DateTimeImp();
       mDeclassificationExemption.clear();
       mFileDowngrade.clear();
       mCountryCode.clear();
-      *mDowngradeDate = DateTimeImp();
+      *mpDowngradeDate = DateTimeImp();
       mDescription.clear();
       mAuthority.clear();
       mAuthorityType.clear();
-      *mSecuritySourceDate = DateTimeImp();
+      *mpSecuritySourceDate = DateTimeImp();
       mSecurityControlNumber.clear();
       mFileCopyNumber.clear();
       mFileNumberOfCopies.clear();
@@ -258,7 +259,7 @@ bool ClassificationImp::hasGreaterLevel(const Classification* pClassification) c
    int iThisLevel = -1;
    int iCompareLevel = -1;
 
-   for (unsigned int i = 0; i < numLevels; i++)
+   for (unsigned int i = 0; i < numLevels; ++i)
    {
       if (mLevel == levels[i])
       {
@@ -388,12 +389,12 @@ void ClassificationImp::setDeclassificationType(const string& myDeclassification
 
 const DateTime* ClassificationImp::getDeclassificationDate() const
 {
-   return getDate(mDeclassificationDate);
+   return getDate(mpDeclassificationDate);
 }
 
 void ClassificationImp::setDeclassificationDate(const DateTime* myDeclassificationDate)
 {
-   setDate(mDeclassificationDate, myDeclassificationDate);
+   setDate(mpDeclassificationDate, myDeclassificationDate);
 }
 
 const string& ClassificationImp::getDeclassificationExemption() const
@@ -410,9 +411,9 @@ void ClassificationImp::setDeclassificationExemption(const string&
       mDeclassificationExemption = trimString(mDeclassificationExemption);
       if (mDeclassificationExemption.empty() == false)
       {
-         if (mDeclassificationDate != NULL)
+         if (mpDeclassificationDate != NULL)
          {
-            *mDeclassificationDate = DateTimeImp();
+            *mpDeclassificationDate = DateTimeImp();
          }
       }
       notify(SIGNAL_NAME(Subject, Modified));
@@ -456,12 +457,12 @@ void ClassificationImp::setCountryCode(const string& myCountryCode)
 
 const DateTime* ClassificationImp::getDowngradeDate() const
 {
-   return getDate(mDowngradeDate);
+   return getDate(mpDowngradeDate);
 }
 
 void ClassificationImp::setDowngradeDate(const DateTime* myDowngradeDate)
 {
-   setDate(mDowngradeDate, myDowngradeDate);
+   setDate(mpDowngradeDate, myDowngradeDate);
 }
 
 const string& ClassificationImp::getDescription() const
@@ -511,12 +512,12 @@ void ClassificationImp::setAuthorityType(const string& myAuthorityType)
 
 const DateTime* ClassificationImp::getSecuritySourceDate() const
 {
-   return getDate(mSecuritySourceDate);
+   return getDate(mpSecuritySourceDate);
 }
     
 void ClassificationImp::setSecuritySourceDate(const DateTime* mySecuritySourceDate)
 {
-   setDate(mSecuritySourceDate, mySecuritySourceDate);
+   setDate(mpSecuritySourceDate, mySecuritySourceDate);
 }
 
 const string& ClassificationImp::getSecurityControlNumber() const
@@ -657,7 +658,7 @@ void ClassificationImp::getClassificationText(string& classificationText) const
    }
    else
    {
-      const DateTime *pDeclassDate = getDeclassificationDate();
+      const DateTime* pDeclassDate = getDeclassificationDate();
       if (pDeclassDate != NULL && pDeclassDate->isValid())
       {
          string date = pDeclassDate->getFormattedUtc("%Y%m%d");
@@ -683,26 +684,26 @@ void ClassificationImp::setClassification(const Classification* pClassification)
    }
 }
 
-bool ClassificationImp::toXml(XMLWriter* xml) const
+bool ClassificationImp::toXml(XMLWriter* pXml) const
 {
    string dateString;
    string dateFormat = "%Y-%m-%dT%H:%M:%SZ";
 
-   VERIFY(xml != NULL);
+   VERIFY(pXml != NULL);
 
-   DOMElement *e(xml->addElement("classification"));
-   xml->pushAddPoint(e);
-   DynamicObjectImp::toXml(xml);
-   if(mLevel == "UNCLASSIFIED" ||
-      mLevel == "CONFIDENTIAL" ||
-      mLevel == "SECRET" ||
-      mLevel == "TOP SECRET" ||
-      mLevel == "U" ||
-      mLevel == "C" ||
-      mLevel == "S" ||
-      mLevel == "T")
+   DOMElement* e(pXml->addElement("classification"));
+   pXml->pushAddPoint(e);
+   DynamicObjectImp::toXml(pXml);
+   if (mLevel == "UNCLASSIFIED" ||
+       mLevel == "CONFIDENTIAL" ||
+       mLevel == "SECRET" ||
+       mLevel == "TOP SECRET" ||
+       mLevel == "U" ||
+       mLevel == "C" ||
+       mLevel == "S" ||
+       mLevel == "T")
    {
-      xml->addAttr("level",mLevel.c_str());
+      pXml->addAttr("level", mLevel.c_str());
    }
    else
    {
@@ -710,56 +711,85 @@ bool ClassificationImp::toXml(XMLWriter* xml) const
       // BTW, this should NEVER happen unless you have
       // as the default is set elsewhere in this class
       // however, it's here just in case
-      xml->addAttr("level",string(
-                     UtilityServicesImp::instance()->getDefaultClassification()));
+      pXml->addAttr("level", string(UtilityServicesImp::instance()->getDefaultClassification()));
    }
-   if(mSystem.size() > 0)
-      xml->addAttr("system",mSystem.c_str());
-   if(mCodewords.size() > 0)
-      xml->addAttr("codewords",mCodewords.c_str());
-   if(mFileControl.size() > 0)
-      xml->addAttr("fileControl",mFileControl.c_str());
-   if(mFileReleasing.size() > 0)
-      xml->addAttr("fileReleasing",mFileReleasing.c_str());
-   if(mClassificationReason.size() > 0)
-      xml->addAttr("classificationReason", mClassificationReason.c_str());
-   if(mDeclassificationType.size() > 0)
-      xml->addAttr("declassificationType", mDeclassificationType.c_str());
-   if(mDeclassificationDate->isValid())
+   if (mSystem.size() > 0)
    {
-      dateString = mDeclassificationDate->getFormattedUtc(dateFormat);
-      xml->addAttr("declassificationDate",dateString);
+      pXml->addAttr("system", mSystem.c_str());
    }
-   if(mDeclassificationExemption.size() > 0)
-      xml->addAttr("declassificationExemption",mDeclassificationExemption.c_str());
-   if(mFileDowngrade.size() > 0)
-      xml->addAttr("fileDowngrade",mFileDowngrade.c_str());
-   if(mCountryCode.size() > 0)
-      xml->addAttr("countryCode",mCountryCode.c_str());
-   if(mDowngradeDate->isValid())
+   if (mCodewords.size() > 0)
    {
-      dateString = mDowngradeDate->getFormattedUtc(dateFormat);
-      xml->addAttr("downgradeDate",dateString);
+      pXml->addAttr("codewords", mCodewords.c_str());
    }
-   if(mDescription.size() > 0)
-      xml->addAttr("description",mDescription.c_str());
-   if(mAuthority.size() > 0)
-      xml->addAttr("authority",mAuthority.c_str());
-   if(mAuthorityType.size() > 0)
-      xml->addAttr("authorityType",mAuthorityType.c_str());
-   if(mSecuritySourceDate->isValid())
+   if (mFileControl.size() > 0)
    {
-      dateString = mSecuritySourceDate->getFormattedUtc(dateFormat);
-      xml->addAttr("securitySourceDate",dateString);
+      pXml->addAttr("fileControl", mFileControl.c_str());
    }
-   if(mSecurityControlNumber.size() > 0)
-      xml->addAttr("securityControlNumber",mSecurityControlNumber.c_str());
-   if(mFileCopyNumber.size() > 0)
-      xml->addAttr("fileCopyNumber",mFileCopyNumber.c_str());
-   if(mFileNumberOfCopies.size() > 0)
-      xml->addAttr("fileNumberOfCopies",mFileNumberOfCopies.c_str());
-   xml->popAddPoint();
+   if (mFileReleasing.size() > 0)
+   {
+      pXml->addAttr("fileReleasing", mFileReleasing.c_str());
+   }
+   if (mClassificationReason.size() > 0)
+   {
+      pXml->addAttr("classificationReason", mClassificationReason.c_str());
+   }
+   if (mDeclassificationType.size() > 0)
+   {
+      pXml->addAttr("declassificationType", mDeclassificationType.c_str());
+   }
+   if (mpDeclassificationDate->isValid())
+   {
+      dateString = mpDeclassificationDate->getFormattedUtc(dateFormat);
+      pXml->addAttr("declassificationDate", dateString);
+   }
+   if (mDeclassificationExemption.size() > 0)
+   {
+      pXml->addAttr("declassificationExemption", mDeclassificationExemption.c_str());
+   }
+   if (mFileDowngrade.size() > 0)
+   {
+      pXml->addAttr("fileDowngrade", mFileDowngrade.c_str());
+   }
+   if (mCountryCode.size() > 0)
+   {
+      pXml->addAttr("countryCode", mCountryCode.c_str());
+   }
+   if (mpDowngradeDate->isValid())
+   {
+      dateString = mpDowngradeDate->getFormattedUtc(dateFormat);
+      pXml->addAttr("downgradeDate", dateString);
+   }
+   if (mDescription.size() > 0)
+   {
+      pXml->addAttr("description", mDescription.c_str());
+   }
+   if (mAuthority.size() > 0)
+   {
+      pXml->addAttr("authority", mAuthority.c_str());
+   }
+   if (mAuthorityType.size() > 0)
+   {
+      pXml->addAttr("authorityType", mAuthorityType.c_str());
+   }
+   if (mpSecuritySourceDate->isValid())
+   {
+      dateString = mpSecuritySourceDate->getFormattedUtc(dateFormat);
+      pXml->addAttr("securitySourceDate", dateString);
+   }
+   if (mSecurityControlNumber.size() > 0)
+   {
+      pXml->addAttr("securityControlNumber", mSecurityControlNumber.c_str());
+   }
+   if (mFileCopyNumber.size() > 0)
+   {
+      pXml->addAttr("fileCopyNumber", mFileCopyNumber.c_str());
+   }
+   if (mFileNumberOfCopies.size() > 0)
+   {
+      pXml->addAttr("fileNumberOfCopies", mFileNumberOfCopies.c_str());
+   }
 
+   pXml->popAddPoint();
    return true;
 }
 
@@ -767,7 +797,7 @@ bool ClassificationImp::toXml(XMLWriter* xml) const
 // if called as a sub-deserialization (from DataElement)
 // this is guarenteed. there is usually
 // no other time when this is called
-bool ClassificationImp::fromXml(DOMNode* document, unsigned int version)
+bool ClassificationImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
    // we don't check the return value
    // the schema will determine if the
@@ -775,74 +805,107 @@ bool ClassificationImp::fromXml(DOMNode* document, unsigned int version)
    // other instantiation issues (fail new, etc.)
    // will either throw an exception or are
    // ignored so we can deserialize as much as possible
-   DynamicObjectImp::fromXml(document, version);
+   DynamicObjectImp::fromXml(pDocument, version);
 
-   DOMElement *elmnt(static_cast<DOMElement *>(document));
+   DOMElement* elmnt(static_cast<DOMElement*>(pDocument));
    VERIFY(elmnt != NULL);
 
    // we don't need to check that level exists
    // as it is required by the language as defined
    // in the .xsd file
    setLevel(A(elmnt->getAttribute(X("level"))));
-   if(elmnt->hasAttribute(X("system")))
+   if (elmnt->hasAttribute(X("system")))
+   {
       mSystem = A(elmnt->getAttribute(X("system")));
-   if(elmnt->hasAttribute(X("codewords")))
+   }
+   if (elmnt->hasAttribute(X("codewords")))
+   {
       mCodewords = A(elmnt->getAttribute(X("codewords")));
-   if(elmnt->hasAttribute(X("fileControl")))
+   }
+   if (elmnt->hasAttribute(X("fileControl")))
+   {
       mFileControl = A(elmnt->getAttribute(X("fileControl")));
-   if(elmnt->hasAttribute(X("fileReleasing")))
+   }
+   if (elmnt->hasAttribute(X("fileReleasing")))
+   {
       mFileReleasing = A(elmnt->getAttribute(X("fileReleasing")));
-   if(elmnt->hasAttribute(X("classificationReason")))
+   }
+   if (elmnt->hasAttribute(X("classificationReason")))
+   {
       mClassificationReason = A(elmnt->getAttribute(X("classificationReason")));
-   if(elmnt->hasAttribute(X("declassificationType")))
+   }
+   if (elmnt->hasAttribute(X("declassificationType")))
+   {
       mDeclassificationType = A(elmnt->getAttribute(X("declassificationType")));
-   if(elmnt->hasAttribute(X("declassificationDate")))
-   {
-      if(mDeclassificationDate)
-         delete mDeclassificationDate;
-      mDeclassificationDate = new DateTimeImp(A(elmnt->getAttribute(
-                                                          X("declassificationDate"))));
    }
-   if(elmnt->hasAttribute(X("declassificationExemption")))
+   if (elmnt->hasAttribute(X("declassificationDate")))
+   {
+      if (mpDeclassificationDate)
+      {
+         delete mpDeclassificationDate;
+      }
+      mpDeclassificationDate = new DateTimeImp(A(elmnt->getAttribute(X("declassificationDate"))));
+   }
+   if (elmnt->hasAttribute(X("declassificationExemption")))
+   {
       mDeclassificationExemption = A(elmnt->getAttribute(X("declassificationExemption")));
-   if(elmnt->hasAttribute(X("fileDowngrade")))
+   }
+   if (elmnt->hasAttribute(X("fileDowngrade")))
+   {
       mFileDowngrade = A(elmnt->getAttribute(X("fileDowngrade")));
-   if(elmnt->hasAttribute(X("countryCode")))
+   }
+   if (elmnt->hasAttribute(X("countryCode")))
+   {
       mCountryCode = A(elmnt->getAttribute(X("countryCode")));
-   if(elmnt->hasAttribute(X("downgradeDate")))
-   {
-      if(mDowngradeDate)
-         delete mDowngradeDate;
-      mDowngradeDate = new DateTimeImp(A(elmnt->getAttribute(
-                                                 X("downgradeDate"))));
    }
-   if(elmnt->hasAttribute(X("description")))
+   if (elmnt->hasAttribute(X("downgradeDate")))
+   {
+      if (mpDowngradeDate)
+      {
+         delete mpDowngradeDate;
+      }
+      mpDowngradeDate = new DateTimeImp(A(elmnt->getAttribute(X("downgradeDate"))));
+   }
+   if (elmnt->hasAttribute(X("description")))
+   {
       mDescription = A(elmnt->getAttribute(X("description")));
-   if(elmnt->hasAttribute(X("authority")))
-      mAuthority = A(elmnt->getAttribute(X("authority")));
-   if(elmnt->hasAttribute(X("authorityType")))
-      mAuthorityType = A(elmnt->getAttribute(X("authorityType")));
-   if(elmnt->hasAttribute(X("securitySourceDate")))
-   {
-      if(mSecuritySourceDate)
-         delete mSecuritySourceDate;
-      mSecuritySourceDate = new DateTimeImp(A(elmnt->getAttribute(
-                                                       X("securitySourceDate"))));
    }
-   if(elmnt->hasAttribute(X("securityControlNumber")))
+   if (elmnt->hasAttribute(X("authority")))
+   {
+      mAuthority = A(elmnt->getAttribute(X("authority")));
+   }
+   if (elmnt->hasAttribute(X("authorityType")))
+   {
+      mAuthorityType = A(elmnt->getAttribute(X("authorityType")));
+   }
+   if (elmnt->hasAttribute(X("securitySourceDate")))
+   {
+      if (mpSecuritySourceDate)
+      {
+         delete mpSecuritySourceDate;
+      }
+      mpSecuritySourceDate = new DateTimeImp(A(elmnt->getAttribute(X("securitySourceDate"))));
+   }
+   if (elmnt->hasAttribute(X("securityControlNumber")))
+   {
       mSecurityControlNumber = A(elmnt->getAttribute(X("securityControlNumber")));
-   if(elmnt->hasAttribute(X("fileCopyNumber")))
+   }
+   if (elmnt->hasAttribute(X("fileCopyNumber")))
+   {
       mFileCopyNumber = A(elmnt->getAttribute(X("fileCopyNumber")));
-   if(elmnt->hasAttribute(X("fileNumberOfCopies")))
+   }
+   if (elmnt->hasAttribute(X("fileNumberOfCopies")))
+   {
       mFileNumberOfCopies = A(elmnt->getAttribute(X("fileNumberOfCopies")));
+   }
 
    return true;
 }
 
 const string& ClassificationImp::getObjectType() const
 {
-   static string type("ClassificationImp");
-   return type;
+   static string sType("ClassificationImp");
+   return sType;
 }
 
 bool ClassificationImp::isKindOf(const string& className) const

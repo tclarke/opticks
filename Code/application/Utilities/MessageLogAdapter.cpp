@@ -24,8 +24,8 @@ MessageLogAdapter::~MessageLogAdapter()
 
 const string& MessageLogAdapter::getObjectType() const
 {
-   static string type("MessageLogAdapter");
-   return type;
+   static string sType("MessageLogAdapter");
+   return sType;
 }
 
 bool MessageLogAdapter::isKindOf(const string& className) const

@@ -7,9 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "RasterElementImporterShell.h"
-#include "AppVerify.h"
 #include "AppConfig.h"
+#include "AppVerify.h"
 #include "Classification.h"
 #include "DataAccessorImpl.h"
 #include "DataRequest.h"
@@ -18,16 +17,18 @@
 #include "FileResource.h"
 #include "GcpList.h"
 #include "MessageLogResource.h"
+#include "ObjectResource.h"
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInResource.h"
 #include "Progress.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
+#include "RasterElementImporterShell.h"
 #include "RasterFileDescriptor.h"
 #include "RasterLayer.h"
 #include "RasterUtilities.h"
-#include "ObjectResource.h"
+#include "SessionManager.h"
 #include "SpatialDataView.h"
 #include "SpatialDataWindow.h"
 #include "StringUtilities.h"
@@ -35,7 +36,6 @@
 #include "UtilityServices.h"
 
 #include <limits>
-
 using namespace std;
 
 RasterElementImporterShell::RasterElementImporterShell() :
@@ -65,7 +65,7 @@ bool RasterElementImporterShell::getInputSpecification(PlugInArgList*& pArgList)
 bool RasterElementImporterShell::getOutputSpecification(PlugInArgList*& pArgList)
 {
    VERIFY((pArgList = mpPlugInManager->getPlugInArgList()) != NULL);
-   if(!isBatch())
+   if (!isBatch())
    {
       VERIFY(pArgList->addArg<SpatialDataView>("View"));
    }
@@ -142,7 +142,7 @@ bool RasterElementImporterShell::execute(PlugInArgList* pInArgList, PlugInArgLis
    return true;
 }
 
-bool RasterElementImporterShell::validate(const DataDescriptor *pDescriptor, string &errorMessage) const
+bool RasterElementImporterShell::validate(const DataDescriptor* pDescriptor, string& errorMessage) const
 {
    bool success = validateBasic(pDescriptor, errorMessage);
    if (success)
@@ -212,20 +212,15 @@ bool RasterElementImporterShell::validateBasic(const DataDescriptor* pDescriptor
       return false;
    }
 
-   // Processing location restrictions
-   ProcessingLocation processingLocation = pRasterDescriptor->getProcessingLocation();
-   if (processingLocation != IN_MEMORY)
-   {
-      // Invalid preband and postband bytes
-      unsigned int prebandBytes = pFileDescriptor->getPrebandBytes();
-      unsigned int postbandBytes = pFileDescriptor->getPostbandBytes();
-      InterleaveFormatType interleave = pFileDescriptor->getInterleaveFormat();
+   // Invalid pre-band and post-band bytes
+   unsigned int prebandBytes = pFileDescriptor->getPrebandBytes();
+   unsigned int postbandBytes = pFileDescriptor->getPostbandBytes();
+   InterleaveFormatType interleave = pFileDescriptor->getInterleaveFormat();
 
-      if (((prebandBytes != 0) || (postbandBytes != 0)) && (interleave != BSQ))
-      {
-         errorMessage = "Non-BSQ formatted data cannot have preband bytes and postband bytes!";
-         return false;
-      }
+   if (((prebandBytes != 0) || (postbandBytes != 0)) && (interleave != BSQ))
+   {
+      errorMessage = "Non-BSQ formatted data cannot have pre-band bytes and post-band bytes!";
+      return false;
    }
 
    // Multiple band file restrictions
@@ -277,8 +272,7 @@ bool RasterElementImporterShell::validateBasic(const DataDescriptor* pDescriptor
       }
 
       // Non-BSQ data
-      InterleaveFormatType fileInterleave = pFileDescriptor->getInterleaveFormat();
-      if (fileInterleave != BSQ)
+      if (interleave != BSQ)
       {
          errorMessage = "Cannot load non-BSQ data in multiple files!";
          return false;
@@ -286,6 +280,7 @@ bool RasterElementImporterShell::validateBasic(const DataDescriptor* pDescriptor
    }
 
    // Valid memory
+   ProcessingLocation processingLocation = pRasterDescriptor->getProcessingLocation();
    if (processingLocation == IN_MEMORY)
    {
       unsigned int bytesPerElement = pRasterDescriptor->getBytesPerElement();
@@ -391,7 +386,7 @@ QWidget* RasterElementImporterShell::getPreview(const DataDescriptor* pDescripto
          if ((bSuccess == true) && (pInArgList != NULL))
          {
             bSuccess = pInArgList->setPlugInArgValue(ProgressArg(), pProgress);
-            if(bSuccess)
+            if (bSuccess)
             {
                bSuccess = pInArgList->setPlugInArgValue(ImportElementArg(), pRasterElement);
             }
@@ -515,7 +510,8 @@ RasterElement* RasterElementImporterShell::getRasterElement() const
    return mpRasterElement;
 }
 
-bool RasterElementImporterShell::validateDefaultOnDiskReadOnly(const DataDescriptor *pDescriptor, std::string &errorMessage) const
+bool RasterElementImporterShell::validateDefaultOnDiskReadOnly(const DataDescriptor* pDescriptor,
+                                                               std::string& errorMessage) const
 {
    const RasterDataDescriptor* pRasterDescriptor = dynamic_cast<const RasterDataDescriptor*>(pDescriptor);
    if (pRasterDescriptor == NULL)
@@ -579,9 +575,10 @@ bool RasterElementImporterShell::validateDefaultOnDiskReadOnly(const DataDescrip
       // Interleave conversions
       InterleaveFormatType dataInterleave = pRasterDescriptor->getInterleaveFormat();
       InterleaveFormatType fileInterleave = pFileDescriptor->getInterleaveFormat();
-      if (dataInterleave != fileInterleave)
+      if (pFileDescriptor->getBandCount() > 1 && dataInterleave != fileInterleave)
       {
-         errorMessage = "Interleave format conversions are not supported with on-disk read-only processing!";
+         errorMessage = "Interleave format conversions are not supported with on-disk read-only processing"
+            " of data with more than one band!";
          return false;
       }
 
@@ -632,7 +629,7 @@ bool RasterElementImporterShell::validateDefaults(const DataDescriptor* pDescrip
 
    // Processing location restrictions
    ProcessingLocation processingLocation = pRasterDescriptor->getProcessingLocation();
-   if(!isProcessingLocationSupported(processingLocation))
+   if (!isProcessingLocationSupported(processingLocation))
    {
       errorMessage = "The requested processing location is not supported!";
       return false;
@@ -647,18 +644,19 @@ bool RasterElementImporterShell::validateDefaults(const DataDescriptor* pDescrip
 
 bool RasterElementImporterShell::performImport() const
 {
-   Progress *pProgress = getProgress();
+   Progress* pProgress = getProgress();
    StepResource pStep("Perform import", "app", "762EF4BB-8813-4e45-B1BD-4CD237F7C151");
 
    FAIL_IF(mpRasterElement == NULL, "Could not find RasterElement", return false);
 
-   RasterDataDescriptor *pDescriptor = dynamic_cast<RasterDataDescriptor*>(
+   RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(
       mpRasterElement->getDataDescriptor());
    FAIL_IF(pDescriptor == NULL, "Could not find RasterDataDescriptor", return false);
 
    string message;
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Re-evalutate this code when plug-ins are being loaded into the global symbol space (tclarke)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Re-evalutate this code when plug-ins " \
+   "are being loaded into the global symbol space (tclarke)")
    // This was changed from a try/catch due to a problem with the exceptions 
    // not being caught and propagating up to QApplication::notify on solaris.
    // it is believed this is due to how we load plug-ins;
@@ -677,7 +675,7 @@ bool RasterElementImporterShell::performImport() const
       {
          return checkAbortOrError("Could not allocate resources for new RasterElement", pStep.get());
       }
-      RasterDataDescriptor *pSourceDescriptor = RasterUtilities::generateUnchippedRasterDataDescriptor(mpRasterElement);
+      RasterDataDescriptor* pSourceDescriptor = RasterUtilities::generateUnchippedRasterDataDescriptor(mpRasterElement);
       if (pSourceDescriptor == NULL)
       {
          return checkAbortOrError("Could not get unchipped RasterDataDescriptor", pStep.get());
@@ -710,38 +708,30 @@ bool RasterElementImporterShell::performImport() const
             mpProgress->updateProgress(buffer, 100, WARNING);
          }
       }
-
-      if (mUsingMemoryMappedPager)
-      {
-         if(!checkAbortOrError("", pStep.get(), false))
-         {
-            return false;
-         }
-         DynamicObject* pMetadata = pDescriptor->getMetadata();
-         if (pMetadata != NULL)
-         {
-            pMetadata->setAttribute("Is_Original_File_Raw_Data", true);
-         }
-      }
    }
 
    pStep->finalize(Message::Success);
    return true;
 }
 
-bool RasterElementImporterShell::checkAbortOrError(string message, Step *pStep, bool checkForError) const
+bool RasterElementImporterShell::checkAbortOrError(string message, Step* pStep, bool checkForError) const
 {
    bool error = true;
-   if(isAborted())
+   if (isAborted())
    {
       error = false;
       message = getName() + " Aborted!";
    }
-   else if(!checkForError)
+   else if (!checkForError)
    {
       return true;
    }
-   if(mpProgress != NULL) mpProgress->updateProgress(message, 0, error ? ERRORS : ABORT);
+
+   if (mpProgress != NULL)
+   {
+      mpProgress->updateProgress(message, 0, error ? ERRORS : ABORT);
+   }
+
    pStep->finalize(error ? Message::Failure : Message::Abort, message);
    return false;
 }
@@ -962,8 +952,8 @@ GcpList* RasterElementImporterShell::createGcpList() const
    return pGcpList;
 }
 
-bool RasterElementImporterShell::createRasterPager(RasterElement *pRaster) const
-{   
+bool RasterElementImporterShell::createRasterPager(RasterElement* pRaster) const
+{
    string srcFile = pRaster->getFilename();
    if (srcFile.empty())
    {
@@ -983,8 +973,8 @@ bool RasterElementImporterShell::createRasterPager(RasterElement *pRaster) const
 
 namespace
 {
-   vector<DimensionDescriptor> getSelectedDims(const vector<DimensionDescriptor> &srcDims,
-      const vector<DimensionDescriptor> &chipDims)
+   vector<DimensionDescriptor> getSelectedDims(const vector<DimensionDescriptor>& srcDims,
+      const vector<DimensionDescriptor>& chipDims)
    {
       vector<DimensionDescriptor> selectedDims;
 
@@ -1001,24 +991,32 @@ namespace
       return selectedDims;
    }
 }
-bool RasterElementImporterShell::copyData(const RasterElement *pSrcElement) const
+bool RasterElementImporterShell::copyData(const RasterElement* pSrcElement) const
 {
    VERIFY(pSrcElement != NULL && mpRasterElement != NULL);
 
-   const RasterDataDescriptor *pSrcDescriptor = dynamic_cast<const RasterDataDescriptor*>(
+   const RasterDataDescriptor* pSrcDescriptor = dynamic_cast<const RasterDataDescriptor*>(
       pSrcElement->getDataDescriptor());
-   RasterDataDescriptor *pChipDescriptor = dynamic_cast<RasterDataDescriptor*>(
+   RasterDataDescriptor* pChipDescriptor = dynamic_cast<RasterDataDescriptor*>(
       mpRasterElement->getDataDescriptor());
    VERIFY(pSrcDescriptor != NULL && mpRasterElement != NULL);
 
-   vector<DimensionDescriptor> selectedRows = getSelectedDims(pSrcDescriptor->getRows(), 
+   vector<DimensionDescriptor> selectedRows = getSelectedDims(pSrcDescriptor->getRows(),
       pChipDescriptor->getRows());
    vector<DimensionDescriptor> selectedColumns = getSelectedDims(pSrcDescriptor->getColumns(),
       pChipDescriptor->getColumns());
-   vector<DimensionDescriptor> selectedBands = getSelectedDims(pSrcDescriptor->getBands(), 
+   vector<DimensionDescriptor> selectedBands = getSelectedDims(pSrcDescriptor->getBands(),
       pChipDescriptor->getBands());
- 
-   bool success = RasterUtilities::chipMetadata(mpRasterElement->getMetadata(), selectedRows, selectedColumns, selectedBands);
+
+   bool success = true;
+
+   Service<SessionManager> pSessionManager;
+   if (pSessionManager->isSessionLoading() == false)
+   {
+      success = RasterUtilities::chipMetadata(mpRasterElement->getMetadata(), selectedRows, selectedColumns,
+         selectedBands);
+   }
+
    success = success && pSrcElement->copyDataToChip(mpRasterElement, selectedRows, 
       selectedColumns, selectedBands, mAborted, mpProgress);
 

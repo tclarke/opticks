@@ -7,13 +7,15 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #include "MemoryMappedPage.h"
 #include "MemoryMappedMatrixView.h"
 
-MemoryMappedPage::MemoryMappedPage()
-:  mNumColumns(0), mNumRows(0), mInterlineBytes(0), mpRawCubePointer(NULL), mpMatrixView(NULL)
+MemoryMappedPage::MemoryMappedPage() :
+   mNumRows(0),
+   mNumColumns(0),
+   mInterlineBytes(0),
+   mpRawCubePointer(NULL),
+   mpMatrixView(NULL)
 {
 }
 
@@ -72,12 +74,16 @@ unsigned int MemoryMappedPage::getInterlineBytes()
 
 void MemoryMappedPage::setMemoryMappedMatrixView(MemoryMappedMatrixView* pView)
 {
-   if (pView == mpMatrixView) return;
+   if (pView == mpMatrixView)
+   {
+      return;
+   }
 
    if (mpMatrixView != NULL)
    {
       delete mpMatrixView;
    }
+
    mpMatrixView = pView;
 }
 

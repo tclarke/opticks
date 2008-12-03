@@ -6,11 +6,9 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
- 
 
-
-#ifndef BTHREAD_SIGNAL_DOT_H
-#define BTHREAD_SIGNAL_DOT_H
+#ifndef BTHREAD_SIGNAL_H
+#define BTHREAD_SIGNAL_H
 
 #include "thread_signal.h"
 #include "bmutex.h"

@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef HDF5_CUSTOM_WRITER_H
-#define HDF5_CUSTOM_WRITER_H
+#ifndef HDF5CUSTOMWRITER_H
+#define HDF5CUSTOMWRITER_H
 
 #include "Hdf5Resource.h"
 

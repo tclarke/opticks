@@ -44,7 +44,7 @@ using namespace std;
 
 static const int CHUNK_SIZE = 200;
 
-AlgorithmPlugIn::AlgorithmPlugIn(void *pAlgData) :
+AlgorithmPlugIn::AlgorithmPlugIn(void* pAlgData) :
    mpAlgorithm(NULL),
    mInteractive(true),
    mpAlgorithmData(pAlgData)
@@ -83,22 +83,22 @@ bool AlgorithmPlugIn::setInteractive()
    return interactiveIsSupported;
 }
 
-bool AlgorithmPlugIn::getInputSpecification(PlugInArgList *&argList)
+bool AlgorithmPlugIn::getInputSpecification(PlugInArgList*& pArgList)
 {
-   argList = mpPlugInManagerServices->getPlugInArgList();
-   VERIFY(argList != NULL);
+   pArgList = mpPlugInManagerServices->getPlugInArgList();
+   VERIFY(pArgList != NULL);
 
    if (mInteractive)
    {
-      return populateInteractiveInputArgList(argList);
+      return populateInteractiveInputArgList(pArgList);
    }
 
-   return  populateBatchInputArgList(argList);
+   return populateBatchInputArgList(pArgList);
 }
 
-bool AlgorithmPlugIn::getOutputSpecification(PlugInArgList *&argList)
+bool AlgorithmPlugIn::getOutputSpecification(PlugInArgList*& pArgList)
 {
-   argList = NULL;
+   pArgList = NULL;
 
    bool bModeSupported = mInteractive ? canRunInteractive() : canRunBatch();
    if (!bModeSupported)
@@ -106,13 +106,13 @@ bool AlgorithmPlugIn::getOutputSpecification(PlugInArgList *&argList)
       return false;
    }
 
-   argList = mpPlugInManagerServices->getPlugInArgList();
-   VERIFY(argList != NULL);
+   pArgList = mpPlugInManagerServices->getPlugInArgList();
+   VERIFY(pArgList != NULL);
 
-   return populateDefaultOutputArgList(argList);
+   return populateDefaultOutputArgList(pArgList);
 }
 
-bool AlgorithmPlugIn::runDialog(QDialog *pDialog)
+bool AlgorithmPlugIn::runDialog(QDialog* pDialog)
 {
    if (pDialog == NULL)
    {
@@ -142,17 +142,16 @@ bool AlgorithmPlugIn::runDialog(QDialog *pDialog)
    return (result == QDialog::Accepted);
 }
 
-bool AlgorithmPlugIn::execute(PlugInArgList *inputArgList,
-                              PlugInArgList *outputArgList)
+bool AlgorithmPlugIn::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
    bool success = true;
 
-   if (inputArgList == NULL)
+   if (pInArgList == NULL)
    {
       success = false;
    }
 
-   success = parseInputArgList(inputArgList);
+   success = parseInputArgList(pInArgList);
    if (success && (mpAlgorithm.get() != NULL))
    {
       success = mpAlgorithm->runPreprocess();
@@ -169,8 +168,7 @@ bool AlgorithmPlugIn::execute(PlugInArgList *inputArgList,
          }
          catch (std::bad_alloc)
          {
-            QMessageBox::critical(NULL, "Out of memory", 
-               "Insufficient memory available to create the GUI.", "OK");
+            QMessageBox::critical(NULL, "Out of memory", "Insufficient memory available to create the GUI.", "OK");
             return false;
          }
 
@@ -203,9 +201,9 @@ bool AlgorithmPlugIn::execute(PlugInArgList *inputArgList,
 
    if (success)
    {
-      if (outputArgList != NULL)
+      if (pOutArgList != NULL)
       {
-         success = setActualValuesInOutputArgList(outputArgList);
+         success = setActualValuesInOutputArgList(pOutArgList);
       }
    }
 
@@ -262,8 +260,11 @@ bool AlgorithmPlugIn::abort()
    return canAbort;
 }
 
-AlgorithmReporter::AlgorithmReporter(Progress *pProgress) : 
-   mpProgress(pProgress), mCurrentStage(0), mpStep(NULL)
+AlgorithmReporter::AlgorithmReporter(Progress* pProgress) :
+   mpStep(NULL),
+   mpProgress(pProgress),
+   mCurrentStage(0),
+   mWeightSum(0)
 {
    clearStages();
 }
@@ -305,11 +306,12 @@ void AlgorithmReporter::updateProgress(ReportingLevel rptLevel, int progress, st
             break;
          case WARNING:
          {
-            Message *pMsg = mpStep->addMessage("Warning", "app", "BEFE67AB-8398-4976-9790-F2F6BC09CE36");
+            Message* pMsg = mpStep->addMessage("Warning", "app", "BEFE67AB-8398-4976-9790-F2F6BC09CE36");
             if (pMsg != NULL)
             {
                pMsg->addProperty("Message", message);
             }
+            break;
          }
          default:
             break;
@@ -317,7 +319,7 @@ void AlgorithmReporter::updateProgress(ReportingLevel rptLevel, int progress, st
    }
 }
 
-Progress *AlgorithmReporter::getProgress() const
+Progress* AlgorithmReporter::getProgress() const
 {
    return mpProgress;
 }
@@ -377,9 +379,8 @@ AlgorithmReporter::Stage::Stage(const AlgorithmReporter::Stage& stage) :
 {
 }
 
-AlgorithmPattern::AlgorithmPattern(RasterElement* pRasterElement,
-      Progress* pProgress, bool interactive,
-      const BitMask* pRoi) :
+AlgorithmPattern::AlgorithmPattern(RasterElement* pRasterElement, Progress* pProgress, bool interactive,
+                                   const BitMask* pRoi) :
    AlgorithmReporter(pProgress),
    mpRasterElement(pRasterElement),
    mpSubCube(NULL),
@@ -442,7 +443,7 @@ bool AlgorithmPattern::runPostprocess()
    return postprocess();
 }
 
-RasterElement *AlgorithmPattern::getRasterElement() const
+RasterElement* AlgorithmPattern::getRasterElement() const
 {
    RasterElement* pRasterElement = NULL;
 
@@ -463,7 +464,7 @@ int AlgorithmPattern::getSubCube(int startRow, int numRows)
    return 0;
 }
 
-void AlgorithmPattern::setRoi(const BitMask *pRoi)
+void AlgorithmPattern::setRoi(const BitMask* pRoi)
 {
    mpRoi = pRoi;
 }
@@ -493,7 +494,7 @@ bool AlgorithmPattern::determinePixelsToProcess() const
    return true;
 }
 
-const BitMask *AlgorithmPattern::getPixelsToProcess() const
+const BitMask* AlgorithmPattern::getPixelsToProcess() const
 {
    if (mpPixelsToProcess == NULL)
    {
@@ -503,7 +504,7 @@ const BitMask *AlgorithmPattern::getPixelsToProcess() const
    return mpPixelsToProcess;
 }
 
-bool AlgorithmPattern::setGuiData(void *pAlgorithmData)
+bool AlgorithmPattern::setGuiData(void* pAlgorithmData)
 {
    if (pAlgorithmData == NULL)
    {
@@ -533,7 +534,7 @@ bool AlgorithmPattern::abort()
    return false;
 }
 
-void AlgorithmPattern::elementDeleted(Subject &subject, const string &signal, const boost::any &v)
+void AlgorithmPattern::elementDeleted(Subject& subject, const string& signal, const boost::any& v)
 {
    if (&subject != mpRasterElement)
    {
@@ -543,11 +544,8 @@ void AlgorithmPattern::elementDeleted(Subject &subject, const string &signal, co
    mpRasterElement = NULL;
 }
 
-void AlgorithmPattern::displayThresholdResults(RasterElement *pRasterElement,
-                                               ColorType color,
-                                               PassArea passArea,
-                                               double firstThreshold,
-                                               double secondThreshold,
+void AlgorithmPattern::displayThresholdResults(RasterElement* pRasterElement, ColorType color, PassArea passArea,
+                                               double firstThreshold, double secondThreshold,
                                                Opticks::PixelOffset offset)
 {
    REQUIRE(pRasterElement != NULL);
@@ -564,7 +562,7 @@ void AlgorithmPattern::displayThresholdResults(RasterElement *pRasterElement,
          SpatialDataView* pCurrentView = pWindow->getSpatialDataView();
          if (pCurrentView != NULL)
          {
-            LayerList *pLList = pCurrentView->getLayerList();
+            LayerList* pLList = pCurrentView->getLayerList();
             REQUIRE(pLList != NULL);
             vector<Layer*> layers;
             pLList->getLayers(RASTER, layers);
@@ -628,7 +626,7 @@ void AlgorithmPattern::displayThresholdResults(RasterElement *pRasterElement,
    pLayer->setYOffset(offset.mY);
 }
 
-void AlgorithmPattern::displayPseudocolorResults(RasterElement *pRasterElement, std::vector<std::string>& sigNames,
+void AlgorithmPattern::displayPseudocolorResults(RasterElement* pRasterElement, std::vector<std::string>& sigNames,
                                                  Opticks::PixelOffset offset)
 {
    REQUIRE(pRasterElement != NULL);
@@ -645,7 +643,7 @@ void AlgorithmPattern::displayPseudocolorResults(RasterElement *pRasterElement, 
          SpatialDataView* pCurrentView = pWindow->getSpatialDataView();
          if (pCurrentView != NULL)
          {
-            LayerList *pLList = pCurrentView->getLayerList();
+            LayerList* pLList = pCurrentView->getLayerList();
             REQUIRE(pLList != NULL);
             vector<Layer*> layers;
             pLList->getLayers(RASTER, layers);
@@ -669,7 +667,7 @@ void AlgorithmPattern::displayPseudocolorResults(RasterElement *pRasterElement, 
    LayerList* pLayerList = pView->getLayerList();
    if (pLayerList != NULL)
    {
-      pLayer =  static_cast<PseudocolorLayer*>(pLayerList->getLayer(PSEUDOCOLOR, pRasterElement));
+      pLayer = static_cast<PseudocolorLayer*>(pLayerList->getLayer(PSEUDOCOLOR, pRasterElement));
       if (pLayer == NULL)
       {
          pLayer = static_cast<PseudocolorLayer*>(pView->createLayer(PSEUDOCOLOR, pRasterElement));
@@ -698,9 +696,10 @@ void AlgorithmPattern::displayPseudocolorResults(RasterElement *pRasterElement, 
 
    int iSignatureCount = sigNames.size();
 
-   std::vector<ColorType> layerColors, excludeColors;
-   excludeColors.push_back(ColorType (0,0,0));
-   excludeColors.push_back(ColorType (255,255,255));
+   vector<ColorType> layerColors;
+   vector<ColorType> excludeColors;
+   excludeColors.push_back(ColorType(0, 0, 0));
+   excludeColors.push_back(ColorType(255, 255, 255));
    // 1 for each sig + no sigs + multiple sigs
    ColorType::getUniqueColors(iSignatureCount + 2, layerColors, excludeColors);
 

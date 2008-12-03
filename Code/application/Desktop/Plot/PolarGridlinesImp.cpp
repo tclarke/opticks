@@ -374,7 +374,7 @@ bool PolarGridlinesImp::toXml(XMLWriter* pXml) const
    }
 
    pXml->addAttr("radialInterval", getRadialInterval());
-   for(vector<double>::const_iterator it = mDrawLocations.begin(); it != mDrawLocations.end(); ++it)
+   for (vector<double>::const_iterator it = mDrawLocations.begin(); it != mDrawLocations.end(); ++it)
    {
       pXml->pushAddPoint(pXml->addElement("Location"));
       pXml->addText(*it);
@@ -392,9 +392,9 @@ bool PolarGridlinesImp::fromXml(DOMNode* pDocument, unsigned int version)
    }
    setRadialInterval(StringUtilities::fromXmlString<double>(
       A(static_cast<DOMElement*>(pDocument)->getAttribute(X("radialInterval")))));
-   for(DOMNode *pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
+   for (DOMNode* pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
    {
-      if(XMLString::equals(pChld->getNodeName(), X("Location")))
+      if (XMLString::equals(pChld->getNodeName(), X("Location")))
       {
          mDrawLocations.push_back(StringUtilities::fromXmlString<double>(A(pChld->getTextContent())));
       }

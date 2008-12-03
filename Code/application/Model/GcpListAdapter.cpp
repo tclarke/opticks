@@ -27,8 +27,8 @@ GcpListAdapter::~GcpListAdapter()
 // TypeAwareObject
 const string& GcpListAdapter::getObjectType() const
 {
-   static string type("GcpListAdapter");
-   return type;
+   static string sType("GcpListAdapter");
+   return sType;
 }
 
 bool GcpListAdapter::isKindOf(const string& className) const

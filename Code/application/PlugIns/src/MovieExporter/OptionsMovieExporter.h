@@ -17,6 +17,7 @@
 #include <boost/rational.hpp>
 #include <QtCore/QMetaType>
 
+class AnimationController;
 class LabeledSection;
 class QCheckBox;
 class QComboBox;
@@ -39,14 +40,10 @@ public:
    OptionsMovieExporter();
    ~OptionsMovieExporter();
 
-   SETTING(Width, MovieExporter, unsigned int, 0);
-   SETTING(Height, MovieExporter, unsigned int, 0);
    /**
     * The video stream bitrate in kbps
     */
    SETTING(Bitrate, MovieExporter, unsigned int, 0);
-   SETTING(FramerateNum, MovieExporter, int, 0);
-   SETTING(FramerateDen, MovieExporter, int, 0);
    SETTING(MeMethod, MovieExporter, std::string, std::string());
    SETTING(GopSize, MovieExporter, int, 0);
    SETTING(QCompress, MovieExporter, float, 0.0);
@@ -66,7 +63,13 @@ public:
    void getResolution(unsigned int &width, unsigned int &height) const;
    void setResolution(unsigned int width, unsigned int height);
 
+   void setRange(double start, double stop);
+   double getStart() const;
+   void setStart(double start);
+   double getStop() const;
+   void setStop(double stop);
    unsigned int getBitrate() const;
+   void setFrameType(FrameType eType);
    void setBitrate(unsigned int bitrate);
    boost::rational<int> getFramerate() const;
    void setFramerate(boost::rational<int> frameRate);
@@ -161,45 +164,49 @@ private slots:
    void frameRateListChanged(const QString &value);
 
 private:
-   QCheckBox *mpUseViewResolution;
-   QLineEdit *mpResolutionX;
-   QLineEdit *mpResolutionY;
-   QPushButton *mpResolutionAspectLock;
-   QIcon *mpLockIcon;
-   QIcon *mpUnlockIcon;
+   QCheckBox* mpUseViewResolution;
+   QLineEdit* mpResolutionX;
+   QLineEdit* mpResolutionY;
+   QPushButton* mpResolutionAspectLock;
+   QIcon* mpLockIcon;
+   QIcon* mpUnlockIcon;
    unsigned int mCurrentResolutionX;
    unsigned int mCurrentResolutionY;
 
-   QSlider *mpBitrate;
-   QLabel *mpBitrateValue;
-   QSpinBox *mpFramerateNum;
-   QSpinBox *mpFramerateDen;
-   QComboBox *mpFramerateList;
+   QSlider* mpBitrate;
+   QLabel* mpBitrateValue;
+   QLabel* mpStartLabel;
+   QDoubleSpinBox* mpStart;
+   QDoubleSpinBox* mpStop;
+   QLabel* mpStopLabel;
+   QSpinBox* mpFramerateNum;
+   QSpinBox* mpFramerateDen;
+   QComboBox* mpFramerateList;
 
-   QComboBox *mpMeMethod;
-   QSpinBox *mpGopSize;
-   QDoubleSpinBox *mpQCompress;
-   QDoubleSpinBox *mpQBlur;
-   QSpinBox *mpQMinimum;
-   QSpinBox *mpQMaximum;
-   QSpinBox *mpQDiffMaximum;
-   QSpinBox *mpMaxBFrames;
-   QDoubleSpinBox *mpBQuantFactor;
-   QDoubleSpinBox *mpBQuantOffset;
-   QSpinBox *mpDiaSize;
-   QCheckBox *mpQScale;
-   QCheckBox *mpQPel;
-   QCheckBox *mpGmc;
-   QCheckBox *mpNormalizeAqp;
-   QCheckBox *mpTrellis;
-   QCheckBox *mpAcPred;
-   QCheckBox *mpCbpRd;
-   QCheckBox *mpQpRd;
-   QCheckBox *mpObmc;
-   QCheckBox *mpClosedGop;
+   QComboBox* mpMeMethod;
+   QSpinBox* mpGopSize;
+   QDoubleSpinBox* mpQCompress;
+   QDoubleSpinBox* mpQBlur;
+   QSpinBox* mpQMinimum;
+   QSpinBox* mpQMaximum;
+   QSpinBox* mpQDiffMaximum;
+   QSpinBox* mpMaxBFrames;
+   QDoubleSpinBox* mpBQuantFactor;
+   QDoubleSpinBox* mpBQuantOffset;
+   QSpinBox* mpDiaSize;
+   QCheckBox* mpQScale;
+   QCheckBox* mpQPel;
+   QCheckBox* mpGmc;
+   QCheckBox* mpNormalizeAqp;
+   QCheckBox* mpTrellis;
+   QCheckBox* mpAcPred;
+   QCheckBox* mpCbpRd;
+   QCheckBox* mpQpRd;
+   QCheckBox* mpObmc;
+   QCheckBox* mpClosedGop;
 
    LabeledSection* mpSettingsSection;
-   QCheckBox *mpSaveSettings;
+   QCheckBox* mpSaveSettings;
 };
 
 #endif

@@ -70,6 +70,7 @@ public:
    bool setHistogram(unsigned int binCount, const double* pBinCenters, const double* pValues,
       const double* pBinWidths = NULL, bool bAbove = true);
 
+   bool isAutoZoomEnabled() const;
    QColor getHistogramColor() const;
    RasterChannelType getRasterChannelType() const;
    Layer* getLayer() const;
@@ -83,6 +84,7 @@ public:
    typedef EnumWrapper<ValuesTypeEnum> ValuesType;
 
 public slots:
+   void enableAutoZoom(bool enable);
    void setHistogramColor(const QColor& clrHistogram);
    void setComplexComponent(const ComplexComponent& eComponent);
 
@@ -136,7 +138,7 @@ private:
       void initialize();
       void update();
    private:
-      HistogramPlotImp *mpPlot;
+      HistogramPlotImp* mpPlot;
       bool mNeedsUpdated;
    };
 
@@ -158,7 +160,7 @@ private:
    HistogramImp* mpHistogram;
    RegionObjectAdapter* mpRegion;
    RegionObjectAdapter* mpRegion2;
-   const std::vector<ColorType> *mpAlternateColormap;
+   const std::vector<ColorType>* mpAlternateColormap;
    HistogramUpdater mUpdater;
 
    ValuesType meSelectedValue;
@@ -166,6 +168,7 @@ private:
    RasterChannelType mRasterChannelType;
    AttachmentPtr<Layer> mpLayer;
    AttachmentPtr<RasterElement> mpElement;
+   bool mAutoZoom;
 
    QAction* mpBelowAction;
    QAction* mpAboveAction;
@@ -198,12 +201,15 @@ private:
    QAction* mpBadValuesAction;
    QAction* mpThresholdSeparatorAction;
    QAction* mpRasterSeparatorAction;
+   QAction* mpAutoZoomAction;
+   QAction* mpRasterMenusSeparatorAction;
    QAction* mpSamplingAction;
    QAction* mpEndSeparatorAction;
 };
 
 #define HISTOGRAMPLOTADAPTEREXTENSION_CLASSES \
-   CARTESIANPLOTADAPTEREXTENSION_CLASSES
+   CARTESIANPLOTADAPTEREXTENSION_CLASSES \
+   , public HistogramPlotExt1
 
 #define HISTOGRAMPLOTADAPTER_METHODS(impClass) \
    CARTESIANPLOTADAPTER_METHODS(impClass) \
@@ -219,6 +225,14 @@ private:
       const double* pBinWidths = NULL, bool bAbove = true) \
    { \
       return impClass::setHistogram(binCount, pBinCenters, pValues, pBinWidths, bAbove); \
+   } \
+   void enableAutoZoom(bool enable) \
+   { \
+      impClass::enableAutoZoom(enable); \
+   } \
+   bool isAutoZoomEnabled() const \
+   { \
+      return impClass::isAutoZoomEnabled(); \
    } \
    void setHistogramColor(const ColorType& histogramColor) \
    { \

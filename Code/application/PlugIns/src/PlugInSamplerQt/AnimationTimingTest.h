@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef ANIMATION_TIMING_TEST_H
-#define ANIMATION_TIMING_TEST_H
+#ifndef ANIMATIONTIMINGTEST_H
+#define ANIMATIONTIMINGTEST_H
 
 #include "AnimationController.h"
 #include "AttachmentPtr.h"
@@ -55,9 +55,9 @@ private:
    Executable* mpPlugIn;
    AttachmentPtr<AnimationController> mpController;
    AttachmentPtr<RasterLayer> mpRasterLayer;
-   QLabel *mpAnimationStateLabel;
-   QLabel *mpRasterLayerNameLabel;
-   QLabel *mpFrameRateLabel;
+   QLabel* mpAnimationStateLabel;
+   QLabel* mpRasterLayerNameLabel;
+   QLabel* mpFrameRateLabel;
    int mFrameCount;
    QTime mStartTime;
    int mUpdatePeriod;

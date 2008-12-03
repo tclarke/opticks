@@ -93,7 +93,7 @@ ChippingWidget::ChippingWidget(SpatialDataView* pView, QWidget* parent) :
       for (unsigned int i = 0; i < mChipSizes.size(); i++)
       {
          unsigned int chipSize = mChipSizes.at(i);
-         if ((chipSize <= (unsigned int) dMaxY) && (chipSize <= (unsigned int) dMaxX))
+         if ((chipSize <= static_cast<unsigned int>(dMaxY)) && (chipSize <= static_cast<unsigned int>(dMaxX)))
          {
             QString strSize;
             strSize.sprintf("%u x %u", chipSize, chipSize);
@@ -256,7 +256,7 @@ void ChippingWidget::updateChip()
    {
       // Get the selected chip size
       unsigned int chipSize = 0;
-      if (iSizeIndex <= (int) mChipSizes.size())
+      if (iSizeIndex <= static_cast<int>(mChipSizes.size()))
       {
          chipSize = mChipSizes.at(iSizeIndex - 1);
       }
@@ -394,10 +394,10 @@ void ChippingWidget::updateChip()
    centerView();
 
    // Get the new rows and columns for the chip
-   unsigned int startColumn = (unsigned int) dMinX;
-   unsigned int startRow = (unsigned int) dMinY;
-   unsigned int endColumn = (unsigned int) (dMaxX - 1.0);
-   unsigned int endRow = (unsigned int) (dMaxY - 1.0);
+   unsigned int startColumn = static_cast<unsigned int>(dMinX);
+   unsigned int startRow = static_cast<unsigned int>(dMinY);
+   unsigned int endColumn = static_cast<unsigned int>(dMaxX - 1.0);
+   unsigned int endRow = static_cast<unsigned int>(dMaxY - 1.0);
 
    unsigned int numRows = 0;
    unsigned int numColumns = 0;
@@ -561,7 +561,7 @@ void ChippingWidget::centerView()
       return;
    }
 
-   RasterLayer *pLayer = getRasterLayer();
+   RasterLayer* pLayer = getRasterLayer();
    VERIFYNRV(pLayer != NULL);
 
    LocationType lowerLeft;

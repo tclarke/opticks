@@ -1741,7 +1741,8 @@ bool Nitf::RadsdaParser::toDynamicObject(istream& input, size_t numBytes, Dynami
    bool ok(true);
    bool success(true);
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Allow all blanks for classified fields since we do not have descriptions of them (dadkins)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Allow all blanks for classified fields " \
+   "since we do not have descriptions of them (dadkins)")
    readField<string>(input, output, success, RADSDA::FIELD1, 7, errorMessage, buf, true);
    readField<string>(input, output, success, RADSDA::FIELD2, 9, errorMessage, buf, true);
    readField<string>(input, output, success, RADSDA::FIELD3, 8, errorMessage, buf, true);
@@ -1929,11 +1930,15 @@ Nitf::TreState Nitf::RadsdaParser::isTreValid(const DynamicObject& tre, ostream&
    status = MaxState(status, testTagValueRange<int>(tre, reporter, &numFields, RADSDA::FIELD14, minInt, maxInt));
    status = MaxState(status, testTagValueRange<int>(tre, reporter, &numFields, RADSDA::FIELD15, minInt, maxInt));
    status = MaxState(status, testTagValueRange<int>(tre, reporter, &numFields, RADSDA::FIELD16, minInt, maxInt));
-   status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, RADSDA::FIELD17, minDouble, maxDouble));
-   status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, RADSDA::FIELD18, minDouble, maxDouble));
+   status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, RADSDA::FIELD17, minDouble,
+      maxDouble));
+   status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, RADSDA::FIELD18, minDouble,
+      maxDouble));
    status = MaxState(status, testTagValueRange<int>(tre, reporter, &numFields, RADSDA::FIELD19, minInt, maxInt));
-   status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, RADSDA::FIELD20, minDouble, maxDouble));
-   status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, RADSDA::FIELD21, minDouble, maxDouble));
+   status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, RADSDA::FIELD20, minDouble,
+      maxDouble));
+   status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, RADSDA::FIELD21, minDouble,
+      maxDouble));
 
    testSet.clear();
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
@@ -2175,7 +2180,7 @@ Nitf::TreState Nitf::RadsdaParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID && totalFields != numFields)
    {
       reporter << "Total fields in the Dynamic Object(" <<
-         totalFields <<") did not match the number found(" << numFields << ") ";
+         totalFields << ") did not match the number found(" << numFields << ") ";
       status = INVALID;
    }
 
@@ -2200,28 +2205,28 @@ bool Nitf::RadsdaParser::fromDynamicObject(const DynamicObject& input, ostream& 
 
    try
    {
-      output << sizeString( dv_cast<string>(input.getAttribute (RADSDA::FIELD1)), 7);
-      output << sizeString( dv_cast<string>(input.getAttribute (RADSDA::FIELD2)), 9);
-      output << sizeString( dv_cast<string>(input.getAttribute (RADSDA::FIELD3)), 8);
-      output << sizeString( dv_cast<string>(input.getAttribute (RADSDA::FIELD4)), 3);
-      output << sizeString( dv_cast<string>(input.getAttribute (RADSDA::FIELD5)), 15);
-      output << sizeString( dv_cast<string>(input.getAttribute (RADSDA::FIELD6)), 7);
-      output <<   toString( dv_cast<int>(input.getAttribute(RADSDA::FIELD7)), 5);
-      output <<   toString( dv_cast<int>(input.getAttribute(RADSDA::FIELD8)), 1);
-      output << sizeString( dv_cast<string>(input.getAttribute (RADSDA::FIELD9)), 24);
-      output <<   toString( dv_cast<int>(input.getAttribute(RADSDA::FIELD10)), 9, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<int>(input.getAttribute(RADSDA::FIELD11)), 9, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<int>(input.getAttribute(RADSDA::FIELD12)), 9, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<int>(input.getAttribute(RADSDA::FIELD13)), 9, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<int>(input.getAttribute(RADSDA::FIELD14)), 9, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<int>(input.getAttribute(RADSDA::FIELD15)), 9, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<int>(input.getAttribute(RADSDA::FIELD16)), 4);
-      output <<   toString( dv_cast<double>(input.getAttribute(RADSDA::FIELD17)), 6, 2, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute(RADSDA::FIELD18)), 6, 2);
-      output <<   toString( dv_cast<int>(input.getAttribute(RADSDA::FIELD19)), 4, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute(RADSDA::FIELD20)), 5, 1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute(RADSDA::FIELD21)), 5, 1);
-      output << sizeString( dv_cast<string>(input.getAttribute (RADSDA::FIELD22)), 5);
+      output << sizeString(dv_cast<string>(input.getAttribute(RADSDA::FIELD1)), 7);
+      output << sizeString(dv_cast<string>(input.getAttribute(RADSDA::FIELD2)), 9);
+      output << sizeString(dv_cast<string>(input.getAttribute(RADSDA::FIELD3)), 8);
+      output << sizeString(dv_cast<string>(input.getAttribute(RADSDA::FIELD4)), 3);
+      output << sizeString(dv_cast<string>(input.getAttribute(RADSDA::FIELD5)), 15);
+      output << sizeString(dv_cast<string>(input.getAttribute(RADSDA::FIELD6)), 7);
+      output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD7)), 5);
+      output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD8)), 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(RADSDA::FIELD9)), 24);
+      output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD10)), 9, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD11)), 9, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD12)), 9, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD13)), 9, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD14)), 9, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD15)), 9, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD16)), 4);
+      output << toString(dv_cast<double>(input.getAttribute(RADSDA::FIELD17)), 6, 2, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(RADSDA::FIELD18)), 6, 2);
+      output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD19)), 4, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(RADSDA::FIELD20)), 5, 1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(RADSDA::FIELD21)), 5, 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(RADSDA::FIELD22)), 5);
 
       vector<char> buf;
 
@@ -2241,20 +2246,19 @@ bool Nitf::RadsdaParser::fromDynamicObject(const DynamicObject& input, ostream& 
       }
       output.write(&buf[0], 1536);
 
-      output << sizeString( dv_cast<string>(input.getAttribute (RADSDA::FIELD26)), 24);
-      output << sizeString( dv_cast<string>(input.getAttribute (RADSDA::FIELD27)), 35);
-      output <<   toString( dv_cast<int>(input.getAttribute(RADSDA::FIELD28)), 2);
-      output <<   toString( dv_cast<int>(input.getAttribute(RADSDA::FIELD29)), 1);
-      output <<   toString( dv_cast<int>(input.getAttribute(RADSDA::FIELD30)), 2);
-      output <<   toString( dv_cast<int>(input.getAttribute(RADSDA::FIELD31)), 1);
-      output <<   toString( dv_cast<int>(input.getAttribute(RADSDA::FIELD32)), 1);
-      output <<   toString( dv_cast<int>(input.getAttribute(RADSDA::FIELD33)), 2);
-      output <<   toString( dv_cast<int>(input.getAttribute(RADSDA::FIELD34)), 1);
-      output <<   toString( dv_cast<int>(input.getAttribute(RADSDA::FIELD35)), 2);
-      output <<   toString( dv_cast<int>(input.getAttribute(RADSDA::FIELD36)), 2);
-      output <<   toString( dv_cast<int>(input.getAttribute(RADSDA::FIELD37)), 1);
-      output <<   toString( dv_cast<int>(input.getAttribute(RADSDA::FIELD38)), 2);
-
+      output << sizeString(dv_cast<string>(input.getAttribute(RADSDA::FIELD26)), 24);
+      output << sizeString(dv_cast<string>(input.getAttribute(RADSDA::FIELD27)), 35);
+      output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD28)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD29)), 1);
+      output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD30)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD31)), 1);
+      output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD32)), 1);
+      output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD33)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD34)), 1);
+      output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD35)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD36)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD37)), 1);
+      output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD38)), 2);
 
       int i = 0;
       for (i = 0; i < 50; ++i)
@@ -2262,182 +2266,160 @@ bool Nitf::RadsdaParser::fromDynamicObject(const DynamicObject& input, ostream& 
          stringstream strm;
          strm << setw(2) << setfill('0') << i+1;
 
-         output <<   toString( dv_cast<double>
+         output << toString(dv_cast<double>
             (input.getAttribute(RADSDA::FIELD39_ + strm.str())), 6, 2, ZERO_FILL, POS_SIGN_TRUE);
 
-         output <<   toString( dv_cast<double>
+         output << toString(dv_cast<double>
             (input.getAttribute(RADSDA::FIELD40_ + strm.str())), 6, 1);
 
-         output <<   toString( dv_cast<double>
+         output << toString(dv_cast<double>
             (input.getAttribute(RADSDA::FIELD41_ + strm.str())), 6, 1, ZERO_FILL, POS_SIGN_TRUE);
 
-         output <<   toString( dv_cast<double>
+         output << toString(dv_cast<double>
             (input.getAttribute(RADSDA::FIELD42_ + strm.str())), 6, 2);
 
-         output <<   toString( dv_cast<double>
+         output << toString(dv_cast<double>
             (input.getAttribute(RADSDA::FIELD43_ + strm.str())), 5, 3);
 
-         output <<   toString( dv_cast<double>
+         output << toString(dv_cast<double>
             (input.getAttribute(RADSDA::FIELD44_ + strm.str())), 6, 1, ZERO_FILL, POS_SIGN_TRUE);
 
-         output <<   toString( dv_cast<double>
+         output << toString(dv_cast<double>
             (input.getAttribute(RADSDA::FIELD45_ + strm.str())), 6, 2);
 
-         output <<   toString( dv_cast<double>
+         output << toString(dv_cast<double>
             (input.getAttribute(RADSDA::FIELD46_ + strm.str())), 5, 3);
       }
 
-      output << sizeString( dv_cast<string>
-         (input.getAttribute (RADSDA::FIELD47)), 53);
+      output << sizeString(dv_cast<string>(input.getAttribute(RADSDA::FIELD47)), 53);
 
-      output <<   toString( dv_cast<double>
-         (input.getAttribute(RADSDA::FIELD48)), 5, 1);
+      output << toString(dv_cast<double>(input.getAttribute(RADSDA::FIELD48)), 5, 1);
 
-      output <<   toString( dv_cast<int>
-         (input.getAttribute(RADSDA::FIELD49)), 3);
+      output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD49)), 3);
 
-      output <<   toString( dv_cast<int>
-         (input.getAttribute(RADSDA::FIELD50)), 4);
+      output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD50)), 4);
 
-      output <<   toString( dv_cast<int>
-         (input.getAttribute(RADSDA::FIELD51)), 4);
+      output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD51)), 4);
 
-      output <<   toString( dv_cast<int>
-         (input.getAttribute(RADSDA::FIELD52)), 4);
+      output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD52)), 4);
 
       for (i = 0; i < 9; ++i)
       {
          stringstream strm;
          strm << i+1;
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute(RADSDA::FIELD53_ + strm.str())), 9);
+         output << toString(dv_cast<double>(input.getAttribute(RADSDA::FIELD53_ + strm.str())), 9);
 
-         output <<   toString( dv_cast<int>
-            (input.getAttribute(RADSDA::FIELD54_ + strm.str())), 7);
+         output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD54_ + strm.str())), 7);
 
-         output <<   toString( dv_cast<int>
-            (input.getAttribute(RADSDA::FIELD55_ + strm.str())), 7);
+         output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD55_ + strm.str())), 7);
 
-         output <<   toString( dv_cast<int>
-            (input.getAttribute(RADSDA::FIELD56_ + strm.str())), 7);
+         output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD56_ + strm.str())), 7);
 
-         output <<   toString( dv_cast<int>
-            (input.getAttribute(RADSDA::FIELD57_ + strm.str())), 7);
+         output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD57_ + strm.str())), 7);
 
-         output <<   toString( dv_cast<int>
-            (input.getAttribute(RADSDA::FIELD58_ + strm.str())), 2);
+         output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD58_ + strm.str())), 2);
 
-         output <<   toString( dv_cast<int>
-            (input.getAttribute(RADSDA::FIELD59_ + strm.str())), 2);
+         output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD59_ + strm.str())), 2);
 
-         output << sizeString( dv_cast<string>
-            (input.getAttribute (RADSDA::FIELD60_ + strm.str())), 2);
+         output << sizeString(dv_cast<string>(input.getAttribute(RADSDA::FIELD60_ + strm.str())), 2);
 
-         output << sizeString( dv_cast<string>
-            (input.getAttribute (RADSDA::FIELD61_ + strm.str())), 1);
+         output << sizeString(dv_cast<string>(input.getAttribute(RADSDA::FIELD61_ + strm.str())), 1);
 
-         output <<   toString( dv_cast<int>
-            (input.getAttribute(RADSDA::FIELD62_ + strm.str())), 6, 1);
+         output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD62_ + strm.str())), 6, 1);
 
-         output <<   toString( dv_cast<int>
-            (input.getAttribute(RADSDA::FIELD63_ + strm.str())), 4, -1, ZERO_FILL, POS_SIGN_TRUE);
+         output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD63_ + strm.str())), 4, -1,
+            ZERO_FILL, POS_SIGN_TRUE);
 
-         output <<   toString( dv_cast<int>
-            (input.getAttribute(RADSDA::FIELD64_ + strm.str())), 4, -1, ZERO_FILL, POS_SIGN_TRUE);
+         output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD64_ + strm.str())), 4, -1,
+            ZERO_FILL, POS_SIGN_TRUE);
 
-         output <<   toString( dv_cast<int>
-            (input.getAttribute(RADSDA::FIELD65_ + strm.str())), 3);
+         output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD65_ + strm.str())), 3);
 
-         output <<   toString( dv_cast<int>
-            (input.getAttribute(RADSDA::FIELD66_ + strm.str())), 3);
+         output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD66_ + strm.str())), 3);
 
-         output <<   toString( dv_cast<int>
-            (input.getAttribute(RADSDA::FIELD67_ + strm.str())), 3);
+         output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD67_ + strm.str())), 3);
       }
 
-      output <<   toString( dv_cast<int>
-         (input.getAttribute(RADSDA::FIELD68)), 4, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD68)), 4, -1, ZERO_FILL, POS_SIGN_TRUE);
 
-      output <<   toString( dv_cast<int>
-         (input.getAttribute(RADSDA::FIELD69)), 4, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD69)), 4, -1, ZERO_FILL, POS_SIGN_TRUE);
 
-      output <<   toString( dv_cast<int>
-         (input.getAttribute(RADSDA::FIELD70)), 3);
+      output << toString(dv_cast<int>(input.getAttribute(RADSDA::FIELD70)), 3);
 
       for (i = 0; i < 5; ++i)
       {
          stringstream strm;
          strm << i+1;
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute(RADSDA::FIELD71_ + strm.str())), 21, -1, ZERO_FILL, POS_SIGN_TRUE, USE_SCIENTIFIC_NOTATION);
+         output << toString(dv_cast<double>(input.getAttribute(RADSDA::FIELD71_ + strm.str())), 21, -1,
+            ZERO_FILL, POS_SIGN_TRUE, USE_SCIENTIFIC_NOTATION);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute(RADSDA::FIELD72_ + strm.str())), 21, -1, ZERO_FILL, POS_SIGN_TRUE, USE_SCIENTIFIC_NOTATION);
+         output << toString(dv_cast<double>(input.getAttribute(RADSDA::FIELD72_ + strm.str())), 21, -1,
+            ZERO_FILL, POS_SIGN_TRUE, USE_SCIENTIFIC_NOTATION);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute(RADSDA::FIELD73_ + strm.str())), 21, -1, ZERO_FILL, POS_SIGN_TRUE, USE_SCIENTIFIC_NOTATION);
+         output << toString(dv_cast<double>(input.getAttribute(RADSDA::FIELD73_ + strm.str())), 21, -1,
+            ZERO_FILL, POS_SIGN_TRUE, USE_SCIENTIFIC_NOTATION);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute(RADSDA::FIELD74_ + strm.str())), 21, -1, ZERO_FILL, POS_SIGN_TRUE, USE_SCIENTIFIC_NOTATION);
+         output << toString(dv_cast<double>(input.getAttribute(RADSDA::FIELD74_ + strm.str())), 21, -1,
+            ZERO_FILL, POS_SIGN_TRUE, USE_SCIENTIFIC_NOTATION);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute(RADSDA::FIELD75_ + strm.str())), 21, -1, ZERO_FILL, POS_SIGN_TRUE, USE_SCIENTIFIC_NOTATION);
+         output << toString(dv_cast<double>(input.getAttribute(RADSDA::FIELD75_ + strm.str())), 21, -1,
+            ZERO_FILL, POS_SIGN_TRUE, USE_SCIENTIFIC_NOTATION);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute(RADSDA::FIELD76_ + strm.str())), 12, -1, ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
+         output << toString(dv_cast<double>(input.getAttribute(RADSDA::FIELD76_ + strm.str())), 12, -1,
+            ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute(RADSDA::FIELD77_ + strm.str())), 12, -1, ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
+         output << toString(dv_cast<double>(input.getAttribute(RADSDA::FIELD77_ + strm.str())), 12, -1,
+            ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute(RADSDA::FIELD78_ + strm.str())), 12, -1, ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
+         output << toString(dv_cast<double>(input.getAttribute(RADSDA::FIELD78_ + strm.str())), 12, -1,
+            ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute(RADSDA::FIELD79_ + strm.str())), 12, -1, ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
+         output << toString(dv_cast<double>(input.getAttribute(RADSDA::FIELD79_ + strm.str())), 12, -1,
+            ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute(RADSDA::FIELD80_ + strm.str())), 12, -1, ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
+         output << toString(dv_cast<double>(input.getAttribute(RADSDA::FIELD80_ + strm.str())), 12, -1,
+            ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute(RADSDA::FIELD81_ + strm.str())), 12, -1, ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
+         output << toString(dv_cast<double>(input.getAttribute(RADSDA::FIELD81_ + strm.str())), 12, -1,
+            ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute(RADSDA::FIELD82_ + strm.str())), 12, -1, ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
+         output << toString(dv_cast<double>(input.getAttribute(RADSDA::FIELD82_ + strm.str())), 12, -1,
+            ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute(RADSDA::FIELD83_ + strm.str())), 12, -1, ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
+         output << toString(dv_cast<double>(input.getAttribute(RADSDA::FIELD83_ + strm.str())), 12, -1,
+            ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute(RADSDA::FIELD84_ + strm.str())), 12, -1, ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
+         output << toString(dv_cast<double>(input.getAttribute(RADSDA::FIELD84_ + strm.str())), 12, -1,
+            ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute(RADSDA::FIELD85_ + strm.str())), 12, -1, ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
+         output << toString(dv_cast<double>(input.getAttribute(RADSDA::FIELD85_ + strm.str())), 12, -1,
+            ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute(RADSDA::FIELD86_ + strm.str())), 12, -1, ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
+         output << toString(dv_cast<double>(input.getAttribute(RADSDA::FIELD86_ + strm.str())), 12, -1,
+            ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute(RADSDA::FIELD87_ + strm.str())), 12, -1, ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
+         output << toString(dv_cast<double>(input.getAttribute(RADSDA::FIELD87_ + strm.str())), 12, -1,
+            ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute(RADSDA::FIELD88_ + strm.str())), 12, -1, ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
+         output << toString(dv_cast<double>(input.getAttribute(RADSDA::FIELD88_ + strm.str())), 12, -1,
+            ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute(RADSDA::FIELD89_ + strm.str())), 12, -1, ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
+         output << toString(dv_cast<double>(input.getAttribute(RADSDA::FIELD89_ + strm.str())), 12, -1,
+            ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute(RADSDA::FIELD90_ + strm.str())), 12, -1, ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
+         output << toString(dv_cast<double>(input.getAttribute(RADSDA::FIELD90_ + strm.str())), 12, -1,
+            ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute(RADSDA::FIELD91_ + strm.str())), 12, -1, ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
+         output << toString(dv_cast<double>(input.getAttribute(RADSDA::FIELD91_ + strm.str())), 12, -1,
+            ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute(RADSDA::FIELD92_ + strm.str())), 12, -1, ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
+         output << toString(dv_cast<double>(input.getAttribute(RADSDA::FIELD92_ + strm.str())), 12, -1,
+            ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
 
-         output <<   toString( dv_cast<double>
-            (input.getAttribute(RADSDA::FIELD93_ + strm.str())), 12, -1, ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
+         output << toString(dv_cast<double>(input.getAttribute(RADSDA::FIELD93_ + strm.str())), 12, -1,
+            ZERO_FILL, POS_SIGN_FALSE, USE_SCIENTIFIC_NOTATION);
       }
    }
    catch (const bad_cast&)

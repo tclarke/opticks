@@ -320,11 +320,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ShapeFileDlg.cpp"
+				RelativePath=".\ShapeFileExporter.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ShapeFileExporter.cpp"
+				RelativePath=".\ShapeFileOptionsWidget.cpp"
 				>
 			</File>
 		</Filter>
@@ -430,7 +430,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ShapeFileDlg.h"
+				RelativePath=".\ShapeFileExporter.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ShapeFileOptionsWidget.h"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -474,10 +478,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\ShapeFileExporter.h"
-				>
-			</File>
-			<File
 				RelativePath=".\ShapeFileTypes.h"
 				>
 			</File>
@@ -494,7 +494,7 @@
 				>
 			</File>
 			<File
-				RelativePath="$(BuildDir)\Moc\$(ProjectName)\moc_ShapeFileDlg.cpp"
+				RelativePath="$(BuildDir)\Moc\$(ProjectName)\moc_ShapeFileOptionsWidget.cpp"
 				>
 			</File>
 		</Filter>

@@ -31,12 +31,12 @@ public:
    GcpGeoreference();
    ~GcpGeoreference();
 
-   bool execute(PlugInArgList* pInParam, PlugInArgList* pOutParam);
+   bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
    bool getInputSpecification(PlugInArgList*& pArgList);
    bool setInteractive();
 
    LocationType pixelToGeo(LocationType pixel) const;
-   LocationType geoToPixel(LocationType geo) const;
+   LocationType geoToPixel(LocationType geocoord) const;
    LocationType geoToPixelQuick(LocationType geo) const;
    bool canHandleRasterElement(RasterElement *pRaster) const;
    QWidget *getGui(RasterElement *pRaster);
@@ -48,33 +48,34 @@ public:
 protected:
    LocationType evaluatePolynomial(LocationType position, const double pXCoeffs[], 
       const double pYCoeffs[], int order) const;
-   
+
    void computeAnchor(int corner);
-   void setCubeSize (unsigned int numRows, unsigned int numColumns);
+   void setCubeSize(unsigned int numRows, unsigned int numColumns);
 
 private:
-   GcpGui *mpGui;
+   GcpGui* mpGui;
 
-   RasterElement *mpRaster;
+   RasterElement* mpRaster;
    int mOrder;
    unsigned short mReverseOrder;
    double mLatCoefficients[COEFFS_FOR_ORDER(MAX_ORDER)];
    double mLonCoefficients[COEFFS_FOR_ORDER(MAX_ORDER)];
    double mXCoefficients[COEFFS_FOR_ORDER(MAX_ORDER)];
    double mYCoefficients[COEFFS_FOR_ORDER(MAX_ORDER)];
-   double computePolynomial (LocationType pixel, int order, std::vector<double> &coeffs);
-   bool computeFit (const std::vector<LocationType> &points,
+   double computePolynomial(LocationType pixel, int order, std::vector<double> &coeffs);
+   bool computeFit(const std::vector<LocationType> &points,
       const std::vector<LocationType> &values, int which, std::vector<double> &coefficients);
-   void basisFunction (const LocationType& pixelCoord, double* pBasisValues, int numBasisValues);
+   void basisFunction(const LocationType& pixelCoord, double* pBasisValues, int numBasisValues);
 
-   int mNumRows, mNumColumns;
+   int mNumRows;
+   int mNumColumns;
 
    Service<ModelServices> mpDataModel;
    Service<PlugInManagerServices> mpPlugInManager;
    Service<ApplicationServices> mpApplication;
    Service<UtilityServices> mpUtilities;
 
-   Progress *mpProgress;
+   Progress* mpProgress;
    std::string mMessageText;
 };
 

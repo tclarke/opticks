@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef NITF_EXPORTER_H
-#define NITF_EXPORTER_H
+#ifndef NITFEXPORTER_H
+#define NITFEXPORTER_H
 
 #include "ApplicationServices.h"
 #include "DesktopServices.h"
@@ -70,10 +70,10 @@ namespace Nitf
       Service<ApplicationServices> mpApplicationManager;
       std::auto_ptr<OptionsNitfExporter> mpOptionsWidget;
 
-      RasterElement *mpRaster;
-      RasterLayer *mpRasterLayer;
-      Progress *mpProgress;
-      RasterFileDescriptor *mpDestination;
+      RasterElement* mpRaster;
+      RasterLayer* mpRasterLayer;
+      Progress* mpProgress;
+      RasterFileDescriptor* mpDestination;
       bool mbAborted;
    };
 

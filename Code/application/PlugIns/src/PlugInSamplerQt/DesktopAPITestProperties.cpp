@@ -10,7 +10,6 @@
 #include <QtGui/QLabel>
 #include <QtGui/QLayout>
 
-#include "AppVersion.h"
 #include "CustomColorButton.h"
 #include "LabeledSection.h"
 #include "PlotView.h"
@@ -140,19 +139,19 @@ const string& DesktopAPITestProperties::getShortDescription()
 
 const string& DesktopAPITestProperties::getCreator()
 {
-   static string creator = "Ball Aerospace & Technologies Corp.";
+   static string creator = "Opticks Community";
    return creator;
 }
 
 const string& DesktopAPITestProperties::getCopyright()
 {
-   static string copyright = APP_COPYRIGHT_MSG;
+   static string copyright = "Copyright (C) 2008, Ball Aerospace & Technologies Corp.";
    return copyright;
 }
 
 const string& DesktopAPITestProperties::getVersion()
 {
-   static string version = APP_VERSION_NUMBER;
+   static string version = "Sample";
    return version;
 }
 

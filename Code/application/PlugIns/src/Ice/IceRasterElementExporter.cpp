@@ -17,8 +17,8 @@ using namespace std;
 
 IceRasterElementExporter::IceRasterElementExporter() :
    IceExporterShell(IceUtilities::RASTER_ELEMENT),
-   mpOutputDescriptor(NULL),
-   mpCube(NULL)
+   mpCube(NULL),
+   mpOutputDescriptor(NULL)
 {
    setName("Ice Exporter");
    setCreator("Ball Aerospace & Technologies Corp.");

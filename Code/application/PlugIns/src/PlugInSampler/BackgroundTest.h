@@ -28,7 +28,7 @@ public:
    virtual bool setInteractive();
    virtual bool getInputSpecification(PlugInArgList*& pArgList);
    virtual bool getOutputSpecification(PlugInArgList*& pArgList);
-   virtual bool execute(PlugInArgList* pInputArgList, PlugInArgList* pOutputArgList);
+   virtual bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
    virtual bool abort();
    virtual bool hasAbort();
    virtual bool isBackground() const;
@@ -49,10 +49,10 @@ protected:
       virtual Progress *progress() const;
 
    private:
-      BackgroundTest *mpPlugin;
-      BThread *mpThread;
+      BackgroundTest* mpPlugin;
+      BThread* mpThread;
       bool mReturnValue;
-      Progress *mpProgress;
+      Progress* mpProgress;
    };
 
 private:
@@ -61,8 +61,8 @@ private:
    Service<PlugInManagerServices> mpPlugInManager;
    Service<UtilityServices> mpUtility;
 
-   Progress *mpProgress;
-   BThread *mpWorkerThread;
+   Progress* mpProgress;
+   BThread* mpWorkerThread;
 };
 
 #endif

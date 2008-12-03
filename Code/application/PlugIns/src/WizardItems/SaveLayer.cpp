@@ -45,7 +45,7 @@ bool SaveLayer::getInputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
 
-   if(mbInteractive)
+   if (mbInteractive)
    {
       VERIFY(DesktopItems::getInputSpecification(pArgList) && pArgList != NULL);
 
@@ -87,7 +87,7 @@ bool SaveLayer::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    pStep->addProperty("Item", getName());
    mpStep = pStep.get();
 
-   if(!extractInputArgs(pInArgList))
+   if (!extractInputArgs(pInArgList))
    {
       reportError("Unable to extract input arguments.", "CE17C3AD-05BD-4624-A9AD-9694430E1A6C");
       return false;
@@ -95,18 +95,18 @@ bool SaveLayer::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 
    // Check for valid input values
    string filename = "";
-   if(mpOutputFilename != NULL)
+   if (mpOutputFilename != NULL)
    {
       filename = mpOutputFilename->getFullPathAndName();
    }
 
-   if(filename.empty())
+   if (filename.empty())
    {
       reportError("The filename input value is invalid!", "2682BD10-8A8E-4aed-B2D8-7F7B4CC857A4");
       return false;
    }
 
-   if(mpStep != NULL)
+   if (mpStep != NULL)
    {
       mpStep->addProperty("filename", filename);
    }
@@ -118,7 +118,7 @@ bool SaveLayer::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    }
 
    DataElement* pParent = mpElement->getParent();
-   if(mpStep != NULL)
+   if (mpStep != NULL)
    {
       if (pParent != NULL)
       {
@@ -131,23 +131,23 @@ bool SaveLayer::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    }
 
    // Get the Layer
-   Layer* pLayer;
+   Layer* pLayer = NULL;
 
    vector<Window*> windows;
    Service<DesktopServices> pDesktop;
    VERIFY(pDesktop.get() != NULL);
    pDesktop->getWindows(SPATIAL_DATA_WINDOW, windows);
 
-   for(vector<Window*>::iterator iter = windows.begin(); iter != windows.end(); ++iter)
+   for (vector<Window*>::iterator iter = windows.begin(); iter != windows.end(); ++iter)
    {
       SpatialDataWindow* pWindow = static_cast<SpatialDataWindow*>(*iter);
-      if(pWindow != NULL)
+      if (pWindow != NULL)
       {
          SpatialDataView* pCurrentView = pWindow->getSpatialDataView();
-         if(pCurrentView != NULL)
+         if (pCurrentView != NULL)
          {
             LayerList* pLayerList = pCurrentView->getLayerList();
-            if(pLayerList != NULL)
+            if (pLayerList != NULL)
             {
                vector<Layer*> layers;
                pLayerList->getLayers(layers);
@@ -169,7 +169,7 @@ bool SaveLayer::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
       }
    }
 
-   if(pLayer == NULL)
+   if (pLayer == NULL)
    {
       reportError("Could not get the layer to save!", "37EBD88F-9752-4b52-8A8A-F1BD9A98E608");
       return false;
@@ -186,7 +186,7 @@ bool SaveLayer::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    VERIFY(exporter->getPlugIn() != NULL);
    bool bSaved = exporter->execute();
 
-   if(!bSaved)
+   if (!bSaved)
    {
       reportError("Could not save the layer to the file: " + filename, "E2F6878E-E462-409b-AE8A-6E1555198316");
       return false;
@@ -198,7 +198,7 @@ bool SaveLayer::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 
 bool SaveLayer::extractInputArgs(PlugInArgList* pInArgList)
 {
-   if(!DesktopItems::extractInputArgs(pInArgList))
+   if (!DesktopItems::extractInputArgs(pInArgList))
    {
       reportError("Unable to extract input arguments.", "3F4C3D60-C1F3-4ff2-AF9C-F67F23D25037");
       return false;
@@ -207,7 +207,7 @@ bool SaveLayer::extractInputArgs(PlugInArgList* pInArgList)
    PlugInArg* pArg = NULL;
 
    // Filename
-   if(!pInArgList->getArg("Filename", pArg) || (pArg == NULL))
+   if (!pInArgList->getArg("Filename", pArg) || (pArg == NULL))
    {
       reportError("Could not read the filename input value!", "0C22B05B-ADF8-4d0c-A1AD-8B7193F8DA33");
       return false;
@@ -217,7 +217,7 @@ bool SaveLayer::extractInputArgs(PlugInArgList* pInArgList)
    // Data element
    LayerType eType = getLayerType();
 
-   if(!pInArgList->getArg("Layer Element", pArg) || (pArg == NULL))
+   if (!pInArgList->getArg("Layer Element", pArg) || (pArg == NULL))
    {
       reportError("Could not read the data element input value!", "2AA2FB55-32F7-478b-9920-3696EF55F957");
       return false;
@@ -281,10 +281,10 @@ LayerType SaveGcpList::getLayerType() const
 // SaveLayerFromDataSet //
 //////////////////////////
 
-SaveLayerFromDataSet::SaveLayerFromDataSet()
+SaveLayerFromDataSet::SaveLayerFromDataSet() :
+   mpOutputFilename(NULL),
+   mpRasterElement(NULL)
 {
-   mpOutputFilename = NULL;
-   mpRasterElement = NULL;
 }
 
 SaveLayerFromDataSet::~SaveLayerFromDataSet()
@@ -295,7 +295,7 @@ bool SaveLayerFromDataSet::getInputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
 
-   if(mbInteractive)
+   if (mbInteractive)
    {
       VERIFY(DesktopItems::getInputSpecification(pArgList) && pArgList != NULL);
    
@@ -343,7 +343,7 @@ bool SaveLayerFromDataSet::execute(PlugInArgList* pInArgList, PlugInArgList* pOu
    pStep->addProperty("Item", getName());
    mpStep = pStep.get();
 
-   if(!extractInputArgs(pInArgList))
+   if (!extractInputArgs(pInArgList))
    {
       reportError("Unable to extract input arguments.", "9A496CD9-5068-4b12-A4C4-AB561CD49523");
       return false;
@@ -351,18 +351,18 @@ bool SaveLayerFromDataSet::execute(PlugInArgList* pInArgList, PlugInArgList* pOu
 
    // Check for valid input values
    string filename;
-   if(mpOutputFilename != NULL)
+   if (mpOutputFilename != NULL)
    {
       filename = mpOutputFilename->getFullPathAndName();
    }
 
-   if(filename.empty())
+   if (filename.empty())
    {
       reportError(" The filename input value is invalid!", "DA76EB21-7E5A-45aa-A60D-0B99C72585EC");
       return false;
    }
 
-   if(mpStep != NULL)
+   if (mpStep != NULL)
    {
       mpStep->addProperty("filename", filename);
    }
@@ -373,18 +373,18 @@ bool SaveLayerFromDataSet::execute(PlugInArgList* pInArgList, PlugInArgList* pOu
       return false;
    }
 
-   if(mpStep != NULL)
+   if (mpStep != NULL)
    {
       mpStep->addProperty("dataSet", mpRasterElement->getName());
    }
 
-   if(mLayerName.empty())
+   if (mLayerName.empty())
    {
       reportError("The layer name input value is invalid!", "0DF331B8-05FF-4178-82D3-9A9CF2851DCF");
       return false;
    }
 
-   if(mpStep != NULL)
+   if (mpStep != NULL)
    {
       mpStep->addProperty("layerName", mLayerName);
    }
@@ -394,21 +394,21 @@ bool SaveLayerFromDataSet::execute(PlugInArgList* pInArgList, PlugInArgList* pOu
 
    vector<Window*> windows;
    Service<DesktopServices> pDesktop;
-   if(pDesktop.get() != NULL)
+   if (pDesktop.get() != NULL)
    {
       pDesktop->getWindows(SPATIAL_DATA_WINDOW, windows);
    }
 
-   for(vector<Window*>::iterator iter = windows.begin(); iter != windows.end(); ++iter)
+   for (vector<Window*>::iterator iter = windows.begin(); iter != windows.end(); ++iter)
    {
       SpatialDataWindow* pWindow = static_cast<SpatialDataWindow*>(*iter);
-      if(pWindow != NULL)
+      if (pWindow != NULL)
       {
          SpatialDataView* pCurrentView = pWindow->getSpatialDataView();
-         if(pCurrentView != NULL)
+         if (pCurrentView != NULL)
          {
             LayerList* pLayerList = pCurrentView->getLayerList();
-            if(pLayerList != NULL)
+            if (pLayerList != NULL)
             {
                RasterElement* pRasterElement = pLayerList->getPrimaryRasterElement();
                if (pRasterElement == mpRasterElement)
@@ -421,7 +421,7 @@ bool SaveLayerFromDataSet::execute(PlugInArgList* pInArgList, PlugInArgList* pOu
       }
    }
 
-   if(pView == NULL)
+   if (pView == NULL)
    {
       reportError("Could not get the view!", "830E3C55-561A-4c49-8269-06E1E04B1BFA");
       return false;
@@ -433,7 +433,7 @@ bool SaveLayerFromDataSet::execute(PlugInArgList* pInArgList, PlugInArgList* pOu
 
    DataElement* pElement = NULL;
    Service<ModelServices> pModel;
-   if((pModel.get() != NULL) && !modelType.empty())
+   if ((pModel.get() != NULL) && !modelType.empty())
    {
       pElement = pModel->getElement(mLayerName, modelType, mpRasterElement);
    }
@@ -442,10 +442,10 @@ bool SaveLayerFromDataSet::execute(PlugInArgList* pInArgList, PlugInArgList* pOu
    bool bSaved = false;
 
    LayerList* pLayerList = pView->getLayerList();
-   if(pLayerList != NULL)
+   if (pLayerList != NULL)
    {
       Layer* pLayer = pLayerList->getLayer(eType, pElement, mLayerName.c_str());
-      if(pLayer == NULL)
+      if (pLayer == NULL)
       {
          reportError("Could not get the layer to save!", "02F03D56-7CA8-4052-894D-BFDDFC3A814F");
          return false;
@@ -459,7 +459,7 @@ bool SaveLayerFromDataSet::execute(PlugInArgList* pInArgList, PlugInArgList* pOu
       bSaved = exporter->execute();
    }
 
-   if(!bSaved)
+   if (!bSaved)
    {
       reportError("Could not save the layer to the file: " + filename, "CAFF2CD5-E6CB-4e90-80E7-87E094F2CB1C");
       return false;
@@ -471,7 +471,7 @@ bool SaveLayerFromDataSet::execute(PlugInArgList* pInArgList, PlugInArgList* pOu
 
 bool SaveLayerFromDataSet::extractInputArgs(PlugInArgList* pInArgList)
 {
-   if(!DesktopItems::extractInputArgs(pInArgList))
+   if (!DesktopItems::extractInputArgs(pInArgList))
    {
       reportError("Unable to extract input arguments.", "1350D7A3-EAD5-4b85-8DDE-8A3C0089155D");
       return false;
@@ -480,7 +480,7 @@ bool SaveLayerFromDataSet::extractInputArgs(PlugInArgList* pInArgList)
    PlugInArg* pArg = NULL;
 
    // Filename
-   if(!pInArgList->getArg("Filename", pArg) || (pArg == NULL))
+   if (!pInArgList->getArg("Filename", pArg) || (pArg == NULL))
    {
       reportError("Could not read the filename input value!", "3BF76C5E-4DB9-49d5-B90F-04A138C11FCE");
       return false;
@@ -489,7 +489,7 @@ bool SaveLayerFromDataSet::extractInputArgs(PlugInArgList* pInArgList)
    mpOutputFilename = pArg->getPlugInArgValue<Filename>();
 
    // Data Set
-   if(!pInArgList->getArg("Data set", pArg) || (pArg == NULL))
+   if (!pInArgList->getArg("Data set", pArg) || (pArg == NULL))
    {
       reportError("Could not read the data set input value!", "C9E16D41-0137-463e-936C-605E2DDE0417");
       return false;
@@ -499,13 +499,13 @@ bool SaveLayerFromDataSet::extractInputArgs(PlugInArgList* pInArgList)
    // Layer name
    LayerType eType = getLayerType();
 
-   if(!pInArgList->getArg("Layer Name", pArg) || (pArg == NULL))
+   if (!pInArgList->getArg("Layer Name", pArg) || (pArg == NULL))
    {
       reportError("Could not read the layer name input value!", "44776565-8B6F-4ec3-9D4E-3D3359C9D23E");
       return false;
    }
-   string *pName = pArg->getPlugInArgValue<string>();
-   if(pName != NULL)
+   string* pName = pArg->getPlugInArgValue<string>();
+   if (pName != NULL)
    {
       mLayerName = *pName;
    }

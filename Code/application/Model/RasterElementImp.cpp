@@ -35,7 +35,7 @@
 #include "RasterUtilities.h"
 #include "SessionItemDeserializer.h"
 #include "SessionItemSerializer.h"
-#include "SessionManagerImp.h"
+#include "SessionManager.h"
 #include "StatisticsImp.h"
 #include "xmlwriter.h"
 
@@ -66,7 +66,7 @@ RasterElementImp::RasterElementImp(const DataDescriptorImp& descriptor, const st
          fileBands = pFileDescriptor->getBands();
          fileBandIter = fileBands.begin();
       }
-      for(vector<DimensionDescriptor>::size_type i = 0; i < bands.size(); ++i)
+      for (vector<DimensionDescriptor>::size_type i = 0; i < bands.size(); ++i)
       {
          bands[i].setActiveNumber(i);
          StatisticsImp* pStatistics = new StatisticsImp(this, bands[i]);
@@ -98,7 +98,7 @@ RasterElementImp::RasterElementImp(const DataDescriptorImp& descriptor, const st
          fileRows = pFileDescriptor->getRows();
          fileRowIter = fileRows.begin();
       }
-      for(vector<DimensionDescriptor>::size_type i = 0; i < rows.size(); ++i)
+      for (vector<DimensionDescriptor>::size_type i = 0; i < rows.size(); ++i)
       {
          rows[i].setActiveNumber(i);
          if (!fileRows.empty())
@@ -124,7 +124,7 @@ RasterElementImp::RasterElementImp(const DataDescriptorImp& descriptor, const st
          fileColumns = pFileDescriptor->getColumns();
          fileColIter = fileColumns.begin();
       }
-      for(vector<DimensionDescriptor>::size_type i = 0; i < columns.size(); ++i)
+      for (vector<DimensionDescriptor>::size_type i = 0; i < columns.size(); ++i)
       {
          columns[i].setActiveNumber(i);
          if (!fileColumns.empty())
@@ -250,14 +250,14 @@ uint64_t RasterElementImp::sanitizeData(double value)
 
             FactoryResource<DataRequest> pRequest;
             pRequest->setWritable(true);
-            pRequest->setBands(pDescriptor->getActiveBand(0), 
-               pDescriptor->getActiveBand(static_cast<unsigned int>(numBands-1)));
+            pRequest->setBands(pDescriptor->getActiveBand(0),
+               pDescriptor->getActiveBand(static_cast<unsigned int>(numBands - 1)));
 
             DataAccessor da = getDataAccessor(pRequest.release());
             for (uint64_t row = 0; row < numRows; ++row)
             {
                VERIFYRV(da.isValid(), badValueCount);
-               void *pRow = da->getRow();
+               void* pRow = da->getRow();
                VERIFYRV(pRow != NULL, badValueCount);
                badValueCount += RasterUtilities::sanitizeData(pRow, elementCount, dataType, value);
                da->nextRow();
@@ -265,7 +265,7 @@ uint64_t RasterElementImp::sanitizeData(double value)
          }
          else if (interleave == BSQ)
          {
-            const vector<DimensionDescriptor> &bands = pDescriptor->getBands();
+            const vector<DimensionDescriptor>& bands = pDescriptor->getBands();
             uint64_t elementCount = numColumns;
             for (uint64_t band = 0; band < numBands; ++band)
             {
@@ -277,7 +277,7 @@ uint64_t RasterElementImp::sanitizeData(double value)
                for (uint64_t row = 0; row < numRows; ++row)
                {
                   VERIFYRV(da.isValid(), badValueCount);
-                  void *pRow = da->getRow();
+                  void* pRow = da->getRow();
                   VERIFYRV(pRow != NULL, badValueCount);
                   badValueCount += RasterUtilities::sanitizeData(pRow, elementCount, dataType, value);
                   da->nextRow();
@@ -313,8 +313,7 @@ Statistics* RasterElementImp::getStatistics(DimensionDescriptor band) const
 {
    if (band.isValid() == false)
    {
-      const RasterDataDescriptor *pDescriptor = 
-         dynamic_cast<const RasterDataDescriptor*>(getDataDescriptor());
+      const RasterDataDescriptor* pDescriptor = dynamic_cast<const RasterDataDescriptor*>(getDataDescriptor());
       VERIFYRV(pDescriptor != NULL, NULL);
       band = pDescriptor->getActiveBand(0);
    }
@@ -344,8 +343,8 @@ bool RasterElementImp::fromXml(DOMNode* pDocument, unsigned int version)
 
 const string& RasterElementImp::getObjectType() const
 {
-   static string type("RasterElementImp");
-   return type;
+   static string sType("RasterElementImp");
+   return sType;
 }
 
 bool RasterElementImp::isKindOf(const string& className) const
@@ -381,7 +380,7 @@ void RasterElementImp::Deleter::operator()(DataAccessorImpl* pDataAccessor)
 }
 
 RasterElement* RasterElementImp::rotateAndFlip(const string& appendName ,int angle, bool horizontalFlip,
-                                         bool verticalFlip, const AoiElement* pAoi) const
+                                               bool verticalFlip, const AoiElement* pAoi) const
 {
    return NULL;
 
@@ -469,18 +468,18 @@ RasterElement* RasterElementImp::rotateAndFlip(const string& appendName ,int ang
 */
 }
 
-bool RasterElementImp::updateDims(
-   const vector<DimensionDescriptor> &srcDims,
-   const vector<DimensionDescriptor> &selectedDims, 
-   vector<DimensionDescriptor> &chipActiveDims,
-   vector<DimensionDescriptor> &chipOnDiskDims)
+bool RasterElementImp::updateDims(const vector<DimensionDescriptor>& srcDims,
+                                  const vector<DimensionDescriptor>& selectedDims,
+                                  vector<DimensionDescriptor>& chipActiveDims,
+                                  vector<DimensionDescriptor>& chipOnDiskDims)
 {
    chipActiveDims.clear();
    chipOnDiskDims.clear();
    unsigned int i = 0;
    vector<DimensionDescriptor>::const_iterator selectedDim = selectedDims.begin();
    for (vector<DimensionDescriptor>::const_iterator srcDim = srcDims.begin();
-      srcDim != srcDims.end(); ++srcDim)
+      srcDim != srcDims.end();
+      ++srcDim)
    {
       DimensionDescriptor newDimObj;
       DimensionDescriptor srcDimObj = *srcDim;
@@ -518,16 +517,15 @@ RasterElement *RasterElementImp::createChip(DataElement *pParent, const string &
    return createChipInternal(pParent, name, selectedRows, selectedColumns, selectedBands);
 }
 
-RasterElement *RasterElementImp::createChipInternal(DataElement *pParent, const string &name, 
-   const vector<DimensionDescriptor> &selectedRows,
-   const vector<DimensionDescriptor> &selectedColumns,
-   const vector<DimensionDescriptor> &selectedBands) const
+RasterElement* RasterElementImp::createChipInternal(DataElement* pParent, const string& name,
+                                                    const vector<DimensionDescriptor>& selectedRows,
+                                                    const vector<DimensionDescriptor>& selectedColumns,
+                                                    const vector<DimensionDescriptor>& selectedBands) const
 {
-   const RasterDataDescriptorImp* pDescriptor =
-      dynamic_cast<const RasterDataDescriptorImp*>(getDataDescriptor());
+   const RasterDataDescriptorImp* pDescriptor = dynamic_cast<const RasterDataDescriptorImp*>(getDataDescriptor());
    VERIFYRV(pDescriptor != NULL, NULL);
 
-   DataDescriptor *pNewDescriptor1 = pDescriptor->copy(name, pParent);
+   DataDescriptor* pNewDescriptor1 = pDescriptor->copy(name, pParent);
 
    auto_ptr<RasterDataDescriptorImp> pNewDescriptor(dynamic_cast<RasterDataDescriptorImp*>(pNewDescriptor1));
    VERIFYRV(pNewDescriptor.get() != NULL, NULL);
@@ -536,9 +534,9 @@ RasterElement *RasterElementImp::createChipInternal(DataElement *pParent, const 
    {
       pNewDescriptor->setProcessingLocation(ON_DISK);
    }
-   const RasterFileDescriptorImp *pFileDescriptorImp = dynamic_cast<const RasterFileDescriptorImp*>(
+   const RasterFileDescriptorImp* pFileDescriptorImp = dynamic_cast<const RasterFileDescriptorImp*>(
       pDescriptor->getFileDescriptor());
-   RasterFileDescriptorImp *pNewFileDescriptorImp = NULL;
+   RasterFileDescriptorImp* pNewFileDescriptorImp = NULL;
    if (pFileDescriptorImp != NULL)
    {
       pNewFileDescriptorImp = dynamic_cast<RasterFileDescriptorImp*>(pNewDescriptor->getFileDescriptor());
@@ -546,25 +544,25 @@ RasterElement *RasterElementImp::createChipInternal(DataElement *pParent, const 
    pNewDescriptor->setName(name);
    
    // Create new DimensionDescriptors
-   const vector<DimensionDescriptor> *pSelectedRows = &selectedRows;
+   const vector<DimensionDescriptor>* pSelectedRows = &selectedRows;
    if (selectedRows.empty())
    {
       pSelectedRows = &pDescriptor->getRows();
    }
-   const vector<DimensionDescriptor> *pSelectedCols = &selectedColumns;
+   const vector<DimensionDescriptor>* pSelectedCols = &selectedColumns;
    if (selectedColumns.empty())
    {
       pSelectedCols = &pDescriptor->getColumns();
    }
-   const vector<DimensionDescriptor> *pSelectedBands = &selectedBands;
+   const vector<DimensionDescriptor>* pSelectedBands = &selectedBands;
    if (selectedBands.empty())
    {
       pSelectedBands = &pDescriptor->getBands();
    }
       
-   const vector<DimensionDescriptor> *pSrcRows = &pDescriptor->getRows();
-   const vector<DimensionDescriptor> *pSrcCols = &pDescriptor->getColumns();
-   const vector<DimensionDescriptor> *pSrcBands = &pDescriptor->getBands();
+   const vector<DimensionDescriptor>* pSrcRows = &pDescriptor->getRows();
+   const vector<DimensionDescriptor>* pSrcCols = &pDescriptor->getColumns();
+   const vector<DimensionDescriptor>* pSrcBands = &pDescriptor->getBands();
    if (pFileDescriptorImp != NULL)
    {
       pSrcRows = &pFileDescriptorImp->getRows();
@@ -620,14 +618,15 @@ RasterElement *RasterElementImp::createChipInternal(DataElement *pParent, const 
 
    ModelResource<RasterElement> pRasterChip(dynamic_cast<RasterDataDescriptor*>(pNewDescriptor.release()));
    VERIFYRV(pRasterChip.get() != NULL, NULL);
-   const RasterDataDescriptor *pChipDescriptor = dynamic_cast<RasterDataDescriptor*>(
+   const RasterDataDescriptor* pChipDescriptor = dynamic_cast<RasterDataDescriptor*>(
       pRasterChip->getDataDescriptor());
    VERIFYRV(pChipDescriptor != NULL, NULL);
 
    pRasterChip->createDefaultPager();
 
    bool abort = false;
-   VERIFYRV(RasterUtilities::chipMetadata(pRasterChip->getMetadata(), *pSelectedRows, *pSelectedCols, *pSelectedBands), NULL);
+   VERIFYRV(RasterUtilities::chipMetadata(pRasterChip->getMetadata(), *pSelectedRows, *pSelectedCols,
+      *pSelectedBands), NULL);
    VERIFYRV(copyDataToChip(pRasterChip.get(), *pSelectedRows, *pSelectedCols, *pSelectedBands, abort), NULL);
 
    return pRasterChip.release();
@@ -642,7 +641,7 @@ string RasterElementImp::appendToBasename(const string &name,
                                                const string &append)
 {
    string appendedName = name;
-   int loc = name.rfind('.');
+   string::size_type loc = name.rfind('.');
    if (loc == string::npos)
    {
       appendedName.append(append);
@@ -667,8 +666,7 @@ bool RasterElementImp::copyDataToChip(RasterElement *pRasterChip,
    }
 
    VERIFY(pRasterChip != NULL);
-   RasterDataDescriptor *pDescriptorChip = dynamic_cast<RasterDataDescriptor*>(
-      pRasterChip->getDataDescriptor());
+   RasterDataDescriptor* pDescriptorChip = dynamic_cast<RasterDataDescriptor*>(pRasterChip->getDataDescriptor());
    VERIFY(pDescriptorChip != NULL);
 
    bool success = false;
@@ -690,22 +688,20 @@ bool RasterElementImp::copyDataToChip(RasterElement *pRasterChip,
 }
 
 
-bool RasterElementImp::copyDataBip(RasterElement *pChipElement, 
-      const vector<DimensionDescriptor> &selectedRows,
-      const vector<DimensionDescriptor> &selectedColumns,
-      const vector<DimensionDescriptor> &selectedBands, 
-      bool &abort, Progress *pProgress) const
+bool RasterElementImp::copyDataBip(RasterElement* pChipElement, const vector<DimensionDescriptor>& selectedRows,
+                                   const vector<DimensionDescriptor>& selectedColumns,
+                                   const vector<DimensionDescriptor>& selectedBands, bool& abort,
+                                   Progress* pProgress) const
 {
    VERIFY(pProgress != NULL);
    string progressText = "Copying data";
 
-   typedef vector<DimensionDescriptor>::const_iterator iterator;
-   const RasterDataDescriptor *pSrcDd = dynamic_cast<const RasterDataDescriptor*>(getDataDescriptor());
+   const RasterDataDescriptor* pSrcDd = dynamic_cast<const RasterDataDescriptor*>(getDataDescriptor());
    VERIFY(pSrcDd != NULL);
 
-   const vector<DimensionDescriptor> &srcActiveRows = pSrcDd->getRows();
-   const vector<DimensionDescriptor> &srcActiveCols = pSrcDd->getColumns();
-   const vector<DimensionDescriptor> &srcActiveBands = pSrcDd->getBands();
+   const vector<DimensionDescriptor>& srcActiveRows = pSrcDd->getRows();
+   const vector<DimensionDescriptor>& srcActiveCols = pSrcDd->getColumns();
+   const vector<DimensionDescriptor>& srcActiveBands = pSrcDd->getBands();
 
    int bytesPerElement = pSrcDd->getBytesPerElement();
 
@@ -736,24 +732,25 @@ bool RasterElementImp::copyDataBip(RasterElement *pChipElement,
          DataAccessor chipDa = pChipElement->getDataAccessor(pChipRequest.release());
 
          VERIFY(chipDa.isValid() && srcDa.isValid());
-         for (iterator rowIter = selectedRows.begin(); rowIter != selectedRows.end(); ++rowIter)
+         for (vector<DimensionDescriptor>::const_iterator rowIter = selectedRows.begin();
+            rowIter != selectedRows.end();
+            ++rowIter)
          {
             DimensionDescriptor rowDim = *rowIter;
             srcDa->toPixel(rowDim.getActiveNumber(), startCol);
             VERIFY(srcDa.isValid() && chipDa.isValid());
-            char *pChip = reinterpret_cast<char*>(chipDa->getRow());
-            char *pSrc = reinterpret_cast<char*>(srcDa->getRow());
+            char* pChip = reinterpret_cast<char*>(chipDa->getRow());
+            char* pSrc = reinterpret_cast<char*>(srcDa->getRow());
             memcpy(pChip, pSrc, bytesPerElement * selectedBands.size() * selectedColumns.size());
             chipDa->nextRow();
 
-            pProgress->updateProgress(progressText, (rowIndex++ * 100)/selectedRows.size(), NORMAL);
+            pProgress->updateProgress(progressText, (rowIndex++ * 100) / selectedRows.size(), NORMAL);
             if (abort)
             {
                return false;
             }
          }
          copyCompleted = true;
-        
       }
       else
       {
@@ -768,20 +765,24 @@ bool RasterElementImp::copyDataBip(RasterElement *pChipElement,
          DataAccessor chipDa = pChipElement->getDataAccessor(pChipRequest.release());
 
          VERIFY(chipDa.isValid() && srcDa.isValid());
-         for (iterator rowIter = selectedRows.begin(); rowIter != selectedRows.end(); ++rowIter)
+         for (vector<DimensionDescriptor>::const_iterator rowIter = selectedRows.begin();
+            rowIter != selectedRows.end();
+            ++rowIter)
          {
             VERIFY(chipDa.isValid());
-            char *pChip = reinterpret_cast<char*>(chipDa->getRow());
+            char* pChip = reinterpret_cast<char*>(chipDa->getRow());
             unsigned int rowOffsetChip = 0;
-            for (iterator colIter = selectedColumns.begin(); colIter != selectedColumns.end(); ++colIter)
+            for (vector<DimensionDescriptor>::const_iterator colIter = selectedColumns.begin();
+               colIter != selectedColumns.end();
+               ++colIter)
             {
                DimensionDescriptor rowDim = *rowIter;
                DimensionDescriptor colDim = *colIter;
 
                srcDa->toPixel(rowDim.getActiveNumber(), colDim.getActiveNumber());
                VERIFY(srcDa.isValid());
-               char *pSrc = reinterpret_cast<char*>(srcDa->getColumn());
-               memcpy(pChip+rowOffsetChip, pSrc, bytesPerElement * selectedBands.size());
+               char* pSrc = reinterpret_cast<char*>(srcDa->getColumn());
+               memcpy(pChip + rowOffsetChip, pSrc, bytesPerElement * selectedBands.size());
                rowOffsetChip += bytesPerElement * selectedBands.size();
             }
             chipDa->nextRow();
@@ -794,7 +795,7 @@ bool RasterElementImp::copyDataBip(RasterElement *pChipElement,
          copyCompleted = true;
       }
    }
-   
+
    if (!copyCompleted)
    {
       // slowest possible copy, per pixel, but it works for any BIP data
@@ -807,21 +808,27 @@ bool RasterElementImp::copyDataBip(RasterElement *pChipElement,
       pChipRequest->setInterleaveFormat(BIP);
       DataAccessor chipDa = pChipElement->getDataAccessor(pChipRequest.release());
 
-      for (iterator rowIter = selectedRows.begin(); rowIter != selectedRows.end(); ++rowIter)
+      for (vector<DimensionDescriptor>::const_iterator rowIter = selectedRows.begin();
+         rowIter != selectedRows.end();
+         ++rowIter)
       {
          VERIFY(chipDa.isValid());
-         char *pChip = reinterpret_cast<char*>(chipDa->getRow());
+         char* pChip = reinterpret_cast<char*>(chipDa->getRow());
          unsigned int chipOffset = 0;
-         for (iterator colIter = selectedColumns.begin(); colIter != selectedColumns.end(); ++colIter)
+         for (vector<DimensionDescriptor>::const_iterator colIter = selectedColumns.begin();
+            colIter != selectedColumns.end();
+            ++colIter)
          {
             DimensionDescriptor rowDim = *rowIter;
             DimensionDescriptor colDim = *colIter;
 
             srcDa->toPixel(rowDim.getActiveNumber(), colDim.getActiveNumber());
             VERIFY(srcDa.isValid());
-            char *pSrc = reinterpret_cast<char*>(srcDa->getColumn());
-            for (iterator bandIter = selectedBands.begin(); bandIter != selectedBands.end(); ++bandIter)
-            { 
+            char* pSrc = reinterpret_cast<char*>(srcDa->getColumn());
+            for (vector<DimensionDescriptor>::const_iterator bandIter = selectedBands.begin();
+               bandIter != selectedBands.end();
+               ++bandIter)
+            {
                DimensionDescriptor bandDim = *bandIter;
 
                memcpy(pChip+chipOffset, pSrc + bytesPerElement * (bandDim.getActiveNumber()), 
@@ -845,26 +852,23 @@ bool RasterElementImp::copyDataBip(RasterElement *pChipElement,
    return true;
 }
 
-bool RasterElementImp::copyDataBsq(RasterElement *pChipElement, 
-      const vector<DimensionDescriptor> &selectedRows,
-      const vector<DimensionDescriptor> &selectedColumns,
-      const vector<DimensionDescriptor> &selectedBands, 
-      bool &abort, Progress *pProgress) const
+bool RasterElementImp::copyDataBsq(RasterElement* pChipElement, const vector<DimensionDescriptor>& selectedRows,
+                                   const vector<DimensionDescriptor>& selectedColumns,
+                                   const vector<DimensionDescriptor>& selectedBands, bool& abort,
+                                   Progress* pProgress) const
 {
-   typedef vector<DimensionDescriptor>::const_iterator iterator;
-
    VERIFY(pChipElement != NULL);
    VERIFY(pProgress != NULL);
    string progressText = "Copying data";
 
-   const RasterDataDescriptor *pSrcDd = dynamic_cast<const RasterDataDescriptor*>(getDataDescriptor());
+   const RasterDataDescriptor* pSrcDd = dynamic_cast<const RasterDataDescriptor*>(getDataDescriptor());
    VERIFY(pSrcDd != NULL);
-   const RasterDataDescriptor *pChipDd = dynamic_cast<const RasterDataDescriptor*>(pChipElement->getDataDescriptor());
+   const RasterDataDescriptor* pChipDd = dynamic_cast<const RasterDataDescriptor*>(pChipElement->getDataDescriptor());
    VERIFY(pChipDd != NULL);
 
-   const vector<DimensionDescriptor> &srcActiveRows = pSrcDd->getRows();
-   const vector<DimensionDescriptor> &srcActiveCols = pSrcDd->getColumns();
-   const vector<DimensionDescriptor> &srcActiveBands = pSrcDd->getBands();
+   const vector<DimensionDescriptor>& srcActiveRows = pSrcDd->getRows();
+   const vector<DimensionDescriptor>& srcActiveCols = pSrcDd->getColumns();
+   const vector<DimensionDescriptor>& srcActiveBands = pSrcDd->getBands();
 
    int bytesPerElement = pSrcDd->getBytesPerElement();
 
@@ -876,7 +880,8 @@ bool RasterElementImp::copyDataBsq(RasterElement *pChipElement,
       unsigned int chipBand = 0;
       unsigned int step = 0;
       unsigned int steps = selectedRows.size() * selectedBands.size();
-      for (iterator bandItr = selectedBands.begin(); bandItr != selectedBands.end(); ++bandItr)
+      for (vector<DimensionDescriptor>::const_iterator bandItr = selectedBands.begin();
+         bandItr != selectedBands.end(); ++bandItr)
       {
          DimensionDescriptor bandDim = *bandItr;
          DimensionDescriptor startRowDim = selectedRows.front();
@@ -899,15 +904,16 @@ bool RasterElementImp::copyDataBsq(RasterElement *pChipElement,
          DataAccessor chipDa = pChipElement->getDataAccessor(pChipRequest.release());
 
          VERIFY(chipDa.isValid() && srcDa.isValid());
-         for (iterator rowItr = selectedRows.begin(); rowItr != selectedRows.end(); ++rowItr)
+         for (vector<DimensionDescriptor>::const_iterator rowItr = selectedRows.begin();
+            rowItr != selectedRows.end(); ++rowItr)
          {
+            srcDa->toPixel(rowItr->getActiveNumber(), 0);
             VERIFY(chipDa.isValid());
             VERIFY(srcDa.isValid());
-            char *pChip = reinterpret_cast<char*>(chipDa->getRow());
-            char *pSrc = reinterpret_cast<char*>(srcDa->getRow());
+            char* pChip = reinterpret_cast<char*>(chipDa->getRow());
+            char* pSrc = reinterpret_cast<char*>(srcDa->getRow());
             memcpy(pChip, pSrc, selectedColumns.size() * bytesPerElement);
             chipDa->nextRow();
-            srcDa->nextRow();
             pProgress->updateProgress(progressText, (step++ * 100)/steps, NORMAL);
             if (abort)
             {
@@ -923,7 +929,8 @@ bool RasterElementImp::copyDataBsq(RasterElement *pChipElement,
       unsigned int chipBand = 0;
       unsigned int step = 0;
       unsigned int steps = selectedBands.size() * selectedRows.size();
-      for (iterator bandItr = selectedBands.begin(); bandItr != selectedBands.end(); ++bandItr)
+      for (vector<DimensionDescriptor>::const_iterator bandItr = selectedBands.begin();
+         bandItr != selectedBands.end(); ++bandItr)
       {
          DimensionDescriptor bandDim = *bandItr;
 
@@ -940,20 +947,22 @@ bool RasterElementImp::copyDataBsq(RasterElement *pChipElement,
          DataAccessor chipDa = pChipElement->getDataAccessor(pChipRequest.release());
 
          VERIFY(chipDa.isValid() && srcDa.isValid());
-         for (iterator rowItr = selectedRows.begin(); rowItr != selectedRows.end(); ++rowItr)
+         for (vector<DimensionDescriptor>::const_iterator rowItr = selectedRows.begin();
+            rowItr != selectedRows.end(); ++rowItr)
          {
             DimensionDescriptor rowDim = *rowItr;
 
             VERIFY(chipDa.isValid());
-            char *pChip = reinterpret_cast<char*>(chipDa->getRow());
+            char* pChip = reinterpret_cast<char*>(chipDa->getRow());
             unsigned int chipOffset = 0;
-            for (iterator colItr = selectedColumns.begin(); colItr != selectedColumns.end(); ++colItr)
+            for (vector<DimensionDescriptor>::const_iterator colItr = selectedColumns.begin();
+               colItr != selectedColumns.end(); ++colItr)
             {
                DimensionDescriptor colDim = *colItr;
 
                srcDa->toPixel(rowDim.getActiveNumber(), colDim.getActiveNumber());
                VERIFY(srcDa.isValid());
-               char *pOrig = reinterpret_cast<char*>(srcDa->getColumn());
+               char* pOrig = reinterpret_cast<char*>(srcDa->getColumn());
                memcpy(pChip + chipOffset, pOrig, bytesPerElement);
                chipOffset += bytesPerElement;
             }
@@ -1033,7 +1042,7 @@ bool RasterElementImp::createTemporaryFile()
       tempPath = pTempPath->getFullPathAndName();
    }
 
-   char *pTempFilename = tempnam(tempPath.c_str(), "RE");
+   char* pTempFilename = tempnam(tempPath.c_str(), "RE");
    if (pTempFilename == NULL)
    {
       return false;
@@ -1047,7 +1056,7 @@ bool RasterElementImp::createTemporaryFile()
       return false;
    }
 
-   uint64_t totalSize = uint64_t(rows) * columns * bands * size;
+   uint64_t totalSize = static_cast<uint64_t>(rows) * columns * bands * size;
 
 #if defined(UNIX_API)
    struct statvfs sbuf;
@@ -1092,11 +1101,11 @@ bool RasterElementImp::setPager(RasterPager* pPager)
    {
       return true;
    }
+
    if (pPager == NULL)
    {
       return false;
    }
-
 
    if (mpPager != NULL)
    {
@@ -1128,42 +1137,42 @@ bool RasterElementImp::serialize(SessionItemSerializer& serializer) const
 
    XMLWriter xml(getObjectType().c_str());
    xml.addAttr("displayName", getDisplayName());
-   DataElement *pParent = getParent();
+   DataElement* pParent = getParent();
    if (pParent)
    {
       xml.addAttr("parentId", pParent->getId());
    }
    xml.addText(getDisplayText(), xml.addElement("DisplayText"));
    xml.pushAddPoint(xml.addElement("DataDescriptor"));
-   if(!pDescriptor->toXml(&xml))
+   if (!pDescriptor->toXml(&xml))
    {
       return false;
    }
    xml.popAddPoint();
-   SessionItem *pSessionGeoPlugin = dynamic_cast<SessionItem*>(mpGeoPlugin);
+   SessionItem* pSessionGeoPlugin = dynamic_cast<SessionItem*>(mpGeoPlugin);
    if (pSessionGeoPlugin)
    {
       xml.addAttr("geoPlugin", pSessionGeoPlugin->getId());
    }
 
    // statistics
-   for(map<DimensionDescriptor, StatisticsImp*>::const_iterator stat = mStatistics.begin();
+   for (map<DimensionDescriptor, StatisticsImp*>::const_iterator stat = mStatistics.begin();
                stat != mStatistics.end(); ++stat)
    {
       xml.pushAddPoint(xml.addElement("statistics"));
       xml.addAttr("band", stat->first.getActiveNumber());
-      if(!stat->second->toXml(&xml))
+      if (!stat->second->toXml(&xml))
       {
          return false;
       }
       xml.popAddPoint();
    }
-   if(!serializer.serialize(xml))
+   if (!serializer.serialize(xml))
    {
       return false;
    }
 
-   if(mModified || pDescriptor->getFileDescriptor() == NULL)
+   if (mModified || pDescriptor->getFileDescriptor() == NULL)
    {
 #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Modify this to only save when necessary (tclarke)")
       //mModified = false;
@@ -1177,28 +1186,28 @@ bool RasterElementImp::serialize(SessionItemSerializer& serializer) const
       serializer.reserve(datasetSize);
 
       // if the entire thing is contiguous so use a single serialize
-      const void *pRawData = getRawData();
-      if(pRawData != NULL)
+      const void* pRawData = getRawData();
+      if (pRawData != NULL)
       {
          return serializer.serialize(pRawData, datasetSize);
       }
 
       // write out all the data a row at a time
       unsigned int totalOuterBands = (pDescriptor->getInterleaveFormat() == BSQ) ? pDescriptor->getBandCount() : 1;
-      for(unsigned int outerBand = 0; outerBand < totalOuterBands; outerBand++)
+      for (unsigned int outerBand = 0; outerBand < totalOuterBands; ++outerBand)
       {
          // Get a data accessor with an entire concurrent row
          FactoryResource<DataRequest> pRequest;
 #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : fix this when there's a getNextBand() (tclarke)")
          // since there's not getNextBand() we need to request only 1 band for BSQ
-         if(pDescriptor->getInterleaveFormat() == BSQ)
+         if (pDescriptor->getInterleaveFormat() == BSQ)
          {
             pRequest->setBands(pDescriptor->getActiveBand(outerBand), pDescriptor->getActiveBand(outerBand), 1);
          }
          DataAccessor acc = getDataAccessor(pRequest.release());
-         for(unsigned int row = 0; row < pDescriptor->getRowCount(); row++)
+         for (unsigned int row = 0; row < pDescriptor->getRowCount(); ++row)
          {
-            if(!acc.isValid() || !serializer.serialize(acc->getRow(), acc->getRowSize()))
+            if (!acc.isValid() || !serializer.serialize(acc->getRow(), acc->getRowSize()))
             {
                return false;
             }
@@ -1209,14 +1218,14 @@ bool RasterElementImp::serialize(SessionItemSerializer& serializer) const
    return true;
 }
 
-bool RasterElementImp::deserialize(SessionItemDeserializer &deserializer)
+bool RasterElementImp::deserialize(SessionItemDeserializer& deserializer)
 {
-   RasterDataDescriptor* pDescriptor = const_cast<RasterDataDescriptor*>(
-      dynamic_cast<const RasterDataDescriptor*>(getDataDescriptor()));
+   RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(getDataDescriptor());
    VERIFY(pDescriptor);
+
    XmlReader reader(NULL, false);
-   DOMElement *pRoot = deserializer.deserialize(reader, getObjectType().c_str());
-   if(pRoot == NULL)
+   DOMElement* pRoot = deserializer.deserialize(reader, getObjectType().c_str());
+   if (pRoot == NULL)
    {
       return false;
    }
@@ -1225,7 +1234,7 @@ bool RasterElementImp::deserialize(SessionItemDeserializer &deserializer)
       string parentId = A(pRoot->getAttribute(X("parentId")));
       if (parentId.empty() == false)
       {
-         DataElement *pParent = dynamic_cast<DataElement*>(Service<SessionManager>()->getSessionItem(parentId));
+         DataElement* pParent = dynamic_cast<DataElement*>(Service<SessionManager>()->getSessionItem(parentId));
          if (pParent)
          {
             Service<ModelServices>()->setElementParent(dynamic_cast<DataElement*>(this), pParent);
@@ -1233,29 +1242,29 @@ bool RasterElementImp::deserialize(SessionItemDeserializer &deserializer)
       }
       setDisplayName(A(pRoot->getAttribute(X("displayName"))));
       mStatistics.clear();
-      const RasterDataDescriptorImp *pDataDesc = static_cast<RasterDataDescriptorImp*>(getDataDescriptor());
-      for(DOMNode *pNode = pRoot->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())
+      const RasterDataDescriptorImp* pDataDesc = static_cast<RasterDataDescriptorImp*>(getDataDescriptor());
+      for (DOMNode *pNode = pRoot->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())
       {
-         if (XMLString::equals(pNode->getNodeName(),X("DataDescriptor")))
+         if (XMLString::equals(pNode->getNodeName(), X("DataDescriptor")))
          {
-            Service<ModelServices>()->setElementName(dynamic_cast<DataElement*>(this), 
+            Service<ModelServices>()->setElementName(dynamic_cast<DataElement*>(this),
                A(static_cast<DOMElement*>(pNode)->getAttribute(X("name"))));
-            if(!const_cast<RasterDataDescriptor*>(pDescriptor)->fromXml(pNode, XmlBase::VERSION))
+            if (!pDescriptor->fromXml(pNode, XmlBase::VERSION))
             {
                return false;
             }
          }
-         else if (XMLString::equals(pNode->getNodeName(),X("DisplayText")))
+         else if (XMLString::equals(pNode->getNodeName(), X("DisplayText")))
          {
             setDisplayText(A(pNode->getTextContent()));
          }
-         else if (XMLString::equals(pNode->getNodeName(),X("statistics")))
+         else if (XMLString::equals(pNode->getNodeName(), X("statistics")))
          {
-            DOMElement *pStat = static_cast<DOMElement*>(pNode);
+            DOMElement* pStat = static_cast<DOMElement*>(pNode);
             unsigned int band = StringUtilities::fromXmlString<unsigned int>(
                A(pStat->getAttribute(X("band"))));
             DimensionDescriptor bandDesc = pDataDesc->getActiveBand(band);
-            StatisticsImp *pStatistics = new StatisticsImp(this, bandDesc);
+            StatisticsImp* pStatistics = new StatisticsImp(this, bandDesc);
             if (pStatistics == NULL || !pStatistics->fromXml(pStat, XmlBase::VERSION))
             {
                return false;
@@ -1263,42 +1272,33 @@ bool RasterElementImp::deserialize(SessionItemDeserializer &deserializer)
             mStatistics[bandDesc] = pStatistics;
          }
       }
-      if(pRoot->hasAttribute(X("geoPlugin")))
-      {
-         mpGeoPlugin = dynamic_cast<Georeference*>(
-            SessionManagerImp::instance()->getSessionItem(A(pRoot->getAttribute(X("geoPlugin")))));
-      }
-      else
-      {
-         mpGeoPlugin = NULL;
-      }
 
-      if(deserializer.getBlockSizes().size() > 1)
+      if (deserializer.getBlockSizes().size() > 1)
       {
          int64_t cubeSize = deserializer.getBlockSizes()[1];
          deserializer.nextBlock();
 
-         if(!createDefaultPager())
+         if (!createDefaultPager())
          {
             // should never have on-disk read-only data saved to the session
             return false;
          }
          unsigned int totalOuterBands = (pDescriptor->getInterleaveFormat() == BSQ) ? pDescriptor->getBandCount() : 1;
-         for(unsigned int outerBand = 0; outerBand < totalOuterBands; outerBand++)
+         for (unsigned int outerBand = 0; outerBand < totalOuterBands; ++outerBand)
          {
             // Get a data accessor with an entire concurrent row
             FactoryResource<DataRequest> pRequest;
 #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : fix this when there's a getNextBand() (tclarke)")
             // since there's not getNextBand() we need to request only 1 band for BSQ
-            if(pDescriptor->getInterleaveFormat() == BSQ)
+            if (pDescriptor->getInterleaveFormat() == BSQ)
             {
                pRequest->setBands(pDescriptor->getActiveBand(outerBand), pDescriptor->getActiveBand(outerBand), 1);
             }
             pRequest->setWritable(true);
             DataAccessor acc = getDataAccessor(pRequest.release());
-            for(unsigned int row = 0; row < pDescriptor->getRowCount(); row++)
+            for (unsigned int row = 0; row < pDescriptor->getRowCount(); ++row)
             {
-               if(!acc.isValid() || !deserializer.deserialize(acc->getRow(), acc->getRowSize()))
+               if (!acc.isValid() || !deserializer.deserialize(acc->getRow(), acc->getRowSize()))
                {
                   return false;
                }
@@ -1310,33 +1310,46 @@ bool RasterElementImp::deserialize(SessionItemDeserializer &deserializer)
       {
          // use the original importer (if available) to import the cube
          string importerName;
-         DataDescriptorImp *pDdi = dynamic_cast<DataDescriptorImp*>(pDescriptor);
-         if(pDdi != NULL)
+         DataDescriptorImp* pDdi = dynamic_cast<DataDescriptorImp*>(pDescriptor);
+         if (pDdi != NULL)
          {
             importerName = pDdi->getImporterName();
          }
-         if(importerName.empty())
+         if (importerName.empty())
          {
             importerName = "Auto Importer";
          }
          ExecutableResource importer(importerName);
          bool dummy = true;
          importer->getInArgList().setPlugInArgValue(Importer::SessionLoadArg(), &dummy);
-         importer->getInArgList().setPlugInArgValueLoose(Importer::ImportElementArg(), dynamic_cast<DataElement*>(this));
-         if(!importer->execute())
+         importer->getInArgList().setPlugInArgValueLoose(Importer::ImportElementArg(),
+            dynamic_cast<DataElement*>(this));
+         if (!importer->execute())
          {
             return false;
          }
       }
+
+      // Restore the georeference plug-in last so that the georeference plug-in will not be destroyed
+      // before it is restored if loading the data fails
+      if (pRoot->hasAttribute(X("geoPlugin")))
+      {
+         Service<SessionManager> pManager;
+         mpGeoPlugin = dynamic_cast<Georeference*>(pManager->getSessionItem(A(pRoot->getAttribute(X("geoPlugin")))));
+      }
+      else
+      {
+         mpGeoPlugin = NULL;
+      }
    }
-   catch(const XmlReader::DomParseException&)
+   catch (const XmlReader::DomParseException&)
    {
       return false;
    }
    return true;
 }
 
-void RasterElementImp::incrementDataAccessor(DataAccessorImpl &da)
+void RasterElementImp::incrementDataAccessor(DataAccessorImpl& da)
 {
    VERIFYNRV (da.mpRasterPager != NULL);
    VERIFYNRV (da.mpRasterPager != NULL);
@@ -1363,7 +1376,7 @@ void RasterElementImp::incrementDataAccessor(DataAccessorImpl &da)
    //request the same number of concurrentRows, cols, and bands
    //that we originally requested in the getDataAccessor()
    //call
-   RasterPage *pPage = NULL;
+   RasterPage* pPage = NULL;
    if (da.mAccessorRow < pDescriptor->getRowCount() &&
       da.mAccessorColumn < pDescriptor->getColumnCount() &&
       da.mAccessorBand < pDescriptor->getBandCount())
@@ -1379,7 +1392,7 @@ void RasterElementImp::incrementDataAccessor(DataAccessorImpl &da)
 
    if (da.isValid())
    {
-      da.mpPage = (char*)pPage->getRawData();
+      da.mpPage = reinterpret_cast<char*>(pPage->getRawData());
       //set the validity of the data accessor to be dependent on the seekTo
       //returning a non-null value
       da.mbValid = da.mpPage != NULL;
@@ -1431,7 +1444,7 @@ DataAccessor RasterElementImp::getDataAccessor(DataRequest *pRequestIn) const
    return const_cast<RasterElementImp*>(this)->getDataAccessor(pRequestIn);
 }
 
-DataAccessor RasterElementImp::getDataAccessor(DataRequest *pRequestIn)
+DataAccessor RasterElementImp::getDataAccessor(DataRequest* pRequestIn)
 {
    if (pRequestIn == NULL)
    {
@@ -1440,7 +1453,7 @@ DataAccessor RasterElementImp::getDataAccessor(DataRequest *pRequestIn)
    }
    FactoryResource<DataRequest> pRequest(pRequestIn);
 
-   DataAccessorImpl *pImpl = NULL;
+   DataAccessorImpl* pImpl = NULL;
 
    const RasterDataDescriptor* pDescriptor = dynamic_cast<const RasterDataDescriptor*>(getDataDescriptor());
    if (pDescriptor == NULL)
@@ -1467,7 +1480,7 @@ DataAccessor RasterElementImp::getDataAccessor(DataRequest *pRequestIn)
    InterleaveFormatType sourceInterleave = pDescriptor->getInterleaveFormat();
    InterleaveFormatType interleave = pRequest->getInterleaveFormat();
 
-   RasterPager *pPager = mpPager;
+   RasterPager* pPager = mpPager;
    if (interleave == BIP && (sourceInterleave == BSQ || sourceInterleave == BIL))
    {
       if (mpConverterPager == NULL)
@@ -1501,15 +1514,12 @@ DataAccessor RasterElementImp::getDataAccessor(DataRequest *pRequestIn)
    }
 
    //request that the data be mapped from the file on disk into memory.
-  RasterPage *pPage = pPager->getPage(pRequest.get(),
-      pRequest->getStartRow(), 
-      pRequest->getStartColumn(), 
+   RasterPage* pPage = pPager->getPage(pRequest.get(), pRequest->getStartRow(), pRequest->getStartColumn(),
       pRequest->getStartBand());
-
    if (pPage != NULL)
    {
       //if we were successful, create a DataAccessorImpl
-      char* pRawData = (char*)pPage->getRawData();
+      char* pRawData = reinterpret_cast<char*>(pPage->getRawData());
       if (pRawData != NULL)
       {
          unsigned int numPageRows = pPage->getNumRows();
@@ -1550,7 +1560,7 @@ DataAccessor RasterElementImp::getDataAccessor(DataRequest *pRequestIn)
       }
    }
 
-   DataAccessorDeleter *pDeleter = NULL;
+   DataAccessorDeleter* pDeleter = NULL;
    if (pImpl != NULL)
    {
       pDeleter = new RasterElementImp::Deleter;
@@ -1636,9 +1646,9 @@ bool RasterElementImp::createMemoryMappedPager(bool bUseDataDescriptor)
       }
    }
 
-   RasterPager *pPager = dynamic_cast<RasterPager*>(pPlugIn);
+   RasterPager* pPager = dynamic_cast<RasterPager*>(pPlugIn);
    success = success && (pPager != NULL);
-      
+
    if (success == true)
    {
       setPager(pPager);
@@ -1656,10 +1666,10 @@ bool RasterElementImp::createInMemoryPager()
    ExecutableResource pPlugin("In Memory Pager");
    VERIFY(pPlugin->getPlugIn() != NULL);
 
-   RasterPager *pPager = dynamic_cast<RasterPager*>(pPlugin->getPlugIn());
+   RasterPager* pPager = dynamic_cast<RasterPager*>(pPlugin->getPlugIn());
    VERIFY(pPager != NULL);
 
-   void *pData = NULL;
+   void* pData = NULL;
    Service<ModelServices> pModel;
    const RasterDataDescriptorImp* pRasterDescriptor = dynamic_cast<const RasterDataDescriptorImp*>(getDataDescriptor());
    if (pRasterDescriptor != NULL)
@@ -1700,7 +1710,7 @@ bool RasterElementImp::createDefaultPager()
       return true;
    }
 
-   DataDescriptorImp *pDescriptor = getDataDescriptor();
+   DataDescriptorImp* pDescriptor = getDataDescriptor();
    VERIFY(pDescriptor != NULL);
 
    switch (pDescriptor->getProcessingLocation())
@@ -1711,14 +1721,13 @@ bool RasterElementImp::createDefaultPager()
       return createTemporaryFile();
    case ON_DISK_READ_ONLY: // fall through
    default:
-     return false;
+      return false;
    }
 
    return false;
-
 }
 
-const void *RasterElementImp::getRawData() const
+const void* RasterElementImp::getRawData() const
 {
    return const_cast<RasterElementImp*>(this)->getRawData();
 }
@@ -1727,7 +1736,7 @@ void *RasterElementImp::getRawData()
 {
    if (!mCubePointerAccessor.isValid())
    {
-      const RasterDataDescriptor *pDescriptor = dynamic_cast<const RasterDataDescriptor*>(getDataDescriptor());
+      const RasterDataDescriptor* pDescriptor = dynamic_cast<const RasterDataDescriptor*>(getDataDescriptor());
       VERIFYRV(pDescriptor != NULL, NULL);
 
       if (pDescriptor->getProcessingLocation() == IN_MEMORY)
@@ -1735,7 +1744,7 @@ void *RasterElementImp::getRawData()
          unsigned int numRows = pDescriptor->getRowCount();
          mCubePointerAccessor = getDataAccessor();
 
-         RasterPage *pPage = mCubePointerAccessor->mpRasterPage;
+         RasterPage* pPage = mCubePointerAccessor->mpRasterPage;
          if (pPage == NULL || numRows != pPage->getNumRows() || pPage->getInterlineBytes() != 0)
          {
             // this does not contain the full scene

@@ -7,11 +7,11 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include "AnimationController.h"
 #include "LabeledSection.h"
 #include "OptionsMovieExporter.h"
 #include "SessionManager.h"
 
-#include <avcodec.h>
 #include <QtCore/QStringList>
 #include <QtGui/QBitmap>
 #include <QtGui/QCheckBox>
@@ -28,13 +28,19 @@
 #include <QtGui/QSpinBox>
 #include <QtGui/QVBoxLayout>
 
+#include <avcodec.h>
+#include <boost/rational.hpp>
+#include <limits>
 #include <string>
+using boost::rational;
+using boost::rational_cast;
 using namespace std;
 
 namespace
 {
    /* XPM */
-   const char *const lock_xpm[] = {
+   const char* const lock_xpm[] =
+   {
       "32 22 62 1",
       " 	c None",
       ".	c #FFFFFF",
@@ -119,115 +125,121 @@ namespace
       "       ww:111bbcgjjkkkw         ",
       "       wwwwwwwwwwwwwwww         ",
       "       wwwwwwwwwwwwwwww         ",
-      "                                "};
+      "                                "
+   };
 
-      /* XPM */
-      const char *const unlock_xpm[] = {
-         "32 22 59 1",
-         " 	c None",
-         ".	c #FFFFFF",
-         "+	c #FBFEFF",
-         "@	c #F9FAFD",
-         "#	c #E1E4EC",
-         "$	c #E0ECF6",
-         "%	c #D5F0F1",
-         "&	c #D0D7E6",
-         "*	c #C9FFFF",
-         "=	c #C7D0D9",
-         "-	c #C6D2ED",
-         ";	c #C6D0D9",
-         ">	c #C5CFD8",
-         ",	c #C0CBD4",
-         "'	c #B6C2CC",
-         ")	c #B3BFCA",
-         "!	c #B1BAC3",
-         "~	c #ACB9C4",
-         "{	c #A9B7C2",
-         "]	c #A6AEB8",
-         "^	c #A2B0BC",
-         "/	c #A1AFB9",
-         "(	c #9FAEBA",
-         "_	c #9CABB8",
-         ":	c #97A7B4",
-         "<	c #95A5B2",
-         "[	c #92A2B0",
-         "}	c #8D9EAC",
-         "|	c #8B9CAA",
-         "1	c #8A9A9F",
-         "2	c #889AA8",
-         "3	c #8898A2",
-         "4	c #8395A4",
-         "5	c #8093A2",
-         "6	c #7E91A0",
-         "7	c #7D9A9F",
-         "8	c #7C8396",
-         "9	c #7A7F8C",
-         "0	c #798D9C",
-         "a	c #768A9A",
-         "b	c #738898",
-         "c	c #71838F",
-         "d	c #6C8192",
-         "e	c #697F90",
-         "f	c #62798A",
-         "g	c #607789",
-         "h	c #5E7587",
-         "i	c #5E727E",
-         "j	c #585F69",
-         "k	c #4E6370",
-         "l	c #4D535D",
-         "m	c #424852",
-         "n	c #415864",
-         "o	c #374F5C",
-         "p	c #2F4755",
-         "q	c #2C333D",
-         "r	c #294250",
-         "s	c #212530",
-         "t	c #161A25",
-         "                                ",
-         "                                ",
-         "                                ",
-         "                 mmttttjj       ",
-         "                q11...#99s      ",
-         "                q11...#99s      ",
-         "               m7%%tttt&&8ll    ",
-         "               t*tt    tt-tt    ",
-         "               t*tt    tt-tt    ",
-         "               t*tt    tt-tt    ",
-         "    tttttttttttttttt   ttttt    ",
-         "    tttttttttttttttt   ttttt    ",
-         "    tt>,,'~~^::}400t            ",
-         "    ttppponnkiic3]]t            ",
-         "    ttppponnkiic3]]t            ",
-         "    tt){{(::}44adfft            ",
-         "    ttppponnkiic3((t            ",
-         "    ttppponnkiic3((t            ",
-         "    tt(}}}00aeeghhht            ",
-         "    tttttttttttttttt            ",
-         "    tttttttttttttttt            ",
-         "                                "};
-         
+   /* XPM */
+   const char* const unlock_xpm[] =
+   {
+      "32 22 59 1",
+      " 	c None",
+      ".	c #FFFFFF",
+      "+	c #FBFEFF",
+      "@	c #F9FAFD",
+      "#	c #E1E4EC",
+      "$	c #E0ECF6",
+      "%	c #D5F0F1",
+      "&	c #D0D7E6",
+      "*	c #C9FFFF",
+      "=	c #C7D0D9",
+      "-	c #C6D2ED",
+      ";	c #C6D0D9",
+      ">	c #C5CFD8",
+      ",	c #C0CBD4",
+      "'	c #B6C2CC",
+      ")	c #B3BFCA",
+      "!	c #B1BAC3",
+      "~	c #ACB9C4",
+      "{	c #A9B7C2",
+      "]	c #A6AEB8",
+      "^	c #A2B0BC",
+      "/	c #A1AFB9",
+      "(	c #9FAEBA",
+      "_	c #9CABB8",
+      ":	c #97A7B4",
+      "<	c #95A5B2",
+      "[	c #92A2B0",
+      "}	c #8D9EAC",
+      "|	c #8B9CAA",
+      "1	c #8A9A9F",
+      "2	c #889AA8",
+      "3	c #8898A2",
+      "4	c #8395A4",
+      "5	c #8093A2",
+      "6	c #7E91A0",
+      "7	c #7D9A9F",
+      "8	c #7C8396",
+      "9	c #7A7F8C",
+      "0	c #798D9C",
+      "a	c #768A9A",
+      "b	c #738898",
+      "c	c #71838F",
+      "d	c #6C8192",
+      "e	c #697F90",
+      "f	c #62798A",
+      "g	c #607789",
+      "h	c #5E7587",
+      "i	c #5E727E",
+      "j	c #585F69",
+      "k	c #4E6370",
+      "l	c #4D535D",
+      "m	c #424852",
+      "n	c #415864",
+      "o	c #374F5C",
+      "p	c #2F4755",
+      "q	c #2C333D",
+      "r	c #294250",
+      "s	c #212530",
+      "t	c #161A25",
+      "                                ",
+      "                                ",
+      "                                ",
+      "                 mmttttjj       ",
+      "                q11...#99s      ",
+      "                q11...#99s      ",
+      "               m7%%tttt&&8ll    ",
+      "               t*tt    tt-tt    ",
+      "               t*tt    tt-tt    ",
+      "               t*tt    tt-tt    ",
+      "    tttttttttttttttt   ttttt    ",
+      "    tttttttttttttttt   ttttt    ",
+      "    tt>,,'~~^::}400t            ",
+      "    ttppponnkiic3]]t            ",
+      "    ttppponnkiic3]]t            ",
+      "    tt){{(::}44adfft            ",
+      "    ttppponnkiic3((t            ",
+      "    ttppponnkiic3((t            ",
+      "    tt(}}}00aeeghhht            ",
+      "    tttttttttttttttt            ",
+      "    tttttttttttttttt            ",
+      "                                "
+   };
+
    QStringList defaultFramerateItems;
 };
 
 OptionsMovieExporter::OptionsMovieExporter() :
-   LabeledSectionGroup(NULL), mCurrentResolutionX(0), mCurrentResolutionY(0)
+   LabeledSectionGroup(NULL),
+   mCurrentResolutionX(0),
+   mCurrentResolutionY(0)
 {
-   if(defaultFramerateItems.isEmpty())
+   if (defaultFramerateItems.isEmpty())
    {
-      defaultFramerateItems << "Custom..."
-                            << " 1.00fps - 1/1"
-                            << "15.00fps - 15/1"
-                            << "24.00fps - 24/1"
-                            << "29.97fps - 30000/1001"
-                            << "30.00fps - 30/1";
+      defaultFramerateItems <<
+         "Custom..." <<
+         " 1.00fps - 1/1" <<
+         "15.00fps - 15/1" <<
+         "24.00fps - 24/1" <<
+         "29.97fps - 30000/1001" <<
+         "30.00fps - 30/1";
    }
-   
+
    // Resolution section
-   QWidget *pResolutionLayoutWidget = new QWidget(this);
+   QWidget* pResolutionLayoutWidget = new QWidget(this);
    mpUseViewResolution = new QCheckBox("Use View Resolution", pResolutionLayoutWidget);
    mpResolutionX = new QLineEdit(pResolutionLayoutWidget);
    mpResolutionY = new QLineEdit(pResolutionLayoutWidget);
-   QIntValidator *pValidator = new QIntValidator(pResolutionLayoutWidget);
+   QIntValidator* pValidator = new QIntValidator(pResolutionLayoutWidget);
    pValidator->setBottom(2);
    mpResolutionX->setValidator(pValidator);
    mpResolutionY->setValidator(pValidator);
@@ -248,20 +260,21 @@ OptionsMovieExporter::OptionsMovieExporter() :
    connect(mpResolutionY, SIGNAL(editingFinished()), this, SLOT(checkResolutionY()));
    connect(mpResolutionAspectLock, SIGNAL(toggled(bool)), this, SLOT(aspectLockToggled(bool)));
 
-   QGridLayout *pResolutionLayout = new QGridLayout(pResolutionLayoutWidget);
+   QGridLayout* pResolutionLayout = new QGridLayout(pResolutionLayoutWidget);
    pResolutionLayout->addWidget(mpUseViewResolution, 0, 0, 1, 2, Qt::AlignLeft);
    pResolutionLayout->addWidget(mpResolutionX, 1, 0);
    pResolutionLayout->addWidget(mpResolutionY, 2, 0);
    pResolutionLayout->addWidget(mpResolutionAspectLock, 1, 1, 2, 1, Qt::AlignCenter);
    pResolutionLayout->setColumnStretch(4, 10);
 
-   LabeledSection *pResolutionSection = new LabeledSection(pResolutionLayoutWidget, "Output Resolution Options", this);
+   LabeledSection* pResolutionSection = new LabeledSection(pResolutionLayoutWidget, "Output Resolution Options", this);
 
-   setResolution(OptionsMovieExporter::getSettingWidth(), OptionsMovieExporter::getSettingHeight());
+   setResolution(0, 0);
+   mpUseViewResolution->setChecked(true);
 
    // Bitrate/Framerate section
-   QWidget *pRateLayoutWidget = new QWidget(this);
-   QLabel *pBitrateLabel = new QLabel("Bitrate", pRateLayoutWidget);
+   QWidget* pRateLayoutWidget = new QWidget(this);
+   QLabel* pBitrateLabel = new QLabel("Bitrate", pRateLayoutWidget);
    mpBitrate = new QSlider(Qt::Horizontal, pRateLayoutWidget);
    mpBitrate->setMinimum(1);
    mpBitrate->setMaximum(9800);
@@ -271,18 +284,16 @@ OptionsMovieExporter::OptionsMovieExporter() :
    mpBitrate->setTickInterval(1000);
    mpBitrate->setTickPosition(QSlider::TicksBelow);
    mpBitrateValue = new QLabel(pRateLayoutWidget);
-   QLabel *pFramerateLabel = new QLabel("Frame Rate", pRateLayoutWidget);
+   QLabel* pFramerateLabel = new QLabel("Frame Rate", pRateLayoutWidget);
    mpFramerateNum = new QSpinBox(pRateLayoutWidget);
    mpFramerateNum->setRange(1, 100000);
-   mpFramerateNum->setSingleStep(10);
-   QLabel *pFramerateSlash = new QLabel("frames /", pRateLayoutWidget);
+   QLabel* pFramerateSlash = new QLabel("frames /", pRateLayoutWidget);
    mpFramerateDen = new QSpinBox(pRateLayoutWidget);
    mpFramerateDen->setRange(1, 100000);
-   mpFramerateDen->setSingleStep(10);
-   QLabel *pFramerateUnits = new QLabel("s", pRateLayoutWidget);
+   QLabel* pFramerateUnits = new QLabel("s", pRateLayoutWidget);
    mpFramerateList = new QComboBox(pRateLayoutWidget);
 
-   QGridLayout *pRateLayout = new QGridLayout(pRateLayoutWidget);
+   QGridLayout* pRateLayout = new QGridLayout(pRateLayoutWidget);
    pRateLayout->setMargin(0);
    pRateLayout->setSpacing(5);
    pRateLayout->addWidget(pBitrateLabel, 0, 0);
@@ -299,61 +310,71 @@ OptionsMovieExporter::OptionsMovieExporter() :
    mpBitrateValue->setMinimumWidth(
       QFontMetrics(mpBitrateValue->font()).width("10000 kbit/s"));
    connect(mpBitrate, SIGNAL(valueChanged(int)), this, SLOT(updateBitrate(int)));
-   connect(mpFramerateList, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(frameRateListChanged(const QString&)));
+   connect(mpFramerateList, SIGNAL(currentIndexChanged(const QString&)), this,
+      SLOT(frameRateListChanged(const QString&)));
    setFramerates(std::vector<boost::rational<int> >());
 
-   LabeledSection *pRateSection = new LabeledSection(pRateLayoutWidget, "Bitrate and Framerate Options", this);
+   LabeledSection* pRateSection = new LabeledSection(pRateLayoutWidget, "Bitrate and Framerate Options", this);
 
    setBitrate(OptionsMovieExporter::getSettingBitrate());
+   setFramerate(boost::rational<int>(1, 1));
 
-   try
-   {
-      setFramerate(boost::rational<int>(OptionsMovieExporter::getSettingFramerateNum(),
-                                        OptionsMovieExporter::getSettingFramerateDen()));
-   }
-   catch (const boost::bad_rational&)
-   {
-      setFramerate(boost::rational<int>(1, 1));
-   }
+   // subset options
+   QWidget* pSubsetLayoutWidget = new QWidget(this);
+   mpStartLabel = new QLabel("Start Time:", pSubsetLayoutWidget);
+   mpStopLabel = new QLabel("Stop Time:", pSubsetLayoutWidget);
+   mpStart = new QDoubleSpinBox(pSubsetLayoutWidget);
+   mpStart->setRange(0.0, 0.0);
+   mpStop = new QDoubleSpinBox(pSubsetLayoutWidget);
+   mpStop->setRange(0.0, 0.0);
+   QGridLayout* pSubsetLayout = new QGridLayout(pSubsetLayoutWidget);
+   pSubsetLayout->setMargin(0);
+   pSubsetLayout->setSpacing(5);
+   pSubsetLayout->addWidget(mpStartLabel, 0, 0);
+   pSubsetLayout->addWidget(mpStart, 0, 1);
+   pSubsetLayout->addWidget(mpStopLabel, 0, 2);
+   pSubsetLayout->addWidget(mpStop, 0, 3);
+   pSubsetLayout->setColumnStretch(5, 10);
+   LabeledSection* pSubsetSection = new LabeledSection(pSubsetLayoutWidget, "Export Subset Options", this);
 
    // Advanced Options
-   QWidget *pAdvancedLayoutWidget = new QWidget(this);
-   QLabel *pMeMethodLabel = new QLabel("Motion Estimation Method", pAdvancedLayoutWidget);
+   QWidget* pAdvancedLayoutWidget = new QWidget(this);
+   QLabel* pMeMethodLabel = new QLabel("Motion Estimation Method", pAdvancedLayoutWidget);
    mpMeMethod = new QComboBox(pAdvancedLayoutWidget);
    mpMeMethod->addItems(QStringList() << "Zero" << "PHODS" << "Log" << "X1" << "EPZS" << "Full");
    mpMeMethod->setEditable(false);
-   QLabel *pGopSizeLabel = new QLabel("GOP Size", pAdvancedLayoutWidget);
+   QLabel* pGopSizeLabel = new QLabel("GOP Size", pAdvancedLayoutWidget);
    mpGopSize = new QSpinBox(pAdvancedLayoutWidget);
    mpGopSize->setMinimum(0);
    mpGopSize->setMaximum(30);
-   QLabel *pQCompressLabel = new QLabel("Q-scale Compression", pAdvancedLayoutWidget);
+   QLabel* pQCompressLabel = new QLabel("Q-scale Compression", pAdvancedLayoutWidget);
    mpQCompress = new QDoubleSpinBox(pAdvancedLayoutWidget);
    mpQCompress->setToolTip("Amount of q-scale change between easy & hard scenes");
    mpQCompress->setMinimum(0.0);
    mpQCompress->setMaximum(1.0);
    mpQCompress->setSingleStep(0.1);
-   QLabel *pQBlurLabel = new QLabel("Q-scale Smoothing", pAdvancedLayoutWidget);
+   QLabel* pQBlurLabel = new QLabel("Q-scale Smoothing", pAdvancedLayoutWidget);
    mpQBlur = new QDoubleSpinBox(pAdvancedLayoutWidget);
    mpQBlur->setToolTip("Amount of q-scale smoothing over time");
    mpQBlur->setMinimum(0.0);
    mpQBlur->setMaximum(1.0);
    mpQBlur->setSingleStep(0.1);
-   QLabel *pQuantizerLabel = new QLabel("Quantizer Range", pAdvancedLayoutWidget);
+   QLabel* pQuantizerLabel = new QLabel("Quantizer Range", pAdvancedLayoutWidget);
    mpQMinimum = new QSpinBox(pAdvancedLayoutWidget);
    mpQMinimum->setMinimum(2);
    mpQMinimum->setMaximum(31);
    mpQMaximum = new QSpinBox(pAdvancedLayoutWidget);
    mpQMaximum->setMinimum(2);
    mpQMaximum->setMaximum(31);
-   QLabel *pQDiffMaximumLabel = new QLabel("Maximum Quantizer Difference", pAdvancedLayoutWidget);
+   QLabel* pQDiffMaximumLabel = new QLabel("Maximum Quantizer Difference", pAdvancedLayoutWidget);
    mpQDiffMaximum = new QSpinBox(pAdvancedLayoutWidget);
    mpQDiffMaximum->setMinimum(2);
    mpQDiffMaximum->setMaximum(31);
-   QLabel *pMaxBFramesLabel = new QLabel("Maximum B-Frames", pAdvancedLayoutWidget);
+   QLabel* pMaxBFramesLabel = new QLabel("Maximum B-Frames", pAdvancedLayoutWidget);
    mpMaxBFrames = new QSpinBox(pAdvancedLayoutWidget);
    mpMaxBFrames->setMinimum(0);
    mpMaxBFrames->setMaximum(30);
-   QLabel *pBQuantLabel = new QLabel("B-Frame Quantizer Factor/Offset", pAdvancedLayoutWidget);
+   QLabel* pBQuantLabel = new QLabel("B-Frame Quantizer Factor/Offset", pAdvancedLayoutWidget);
    mpBQuantFactor = new QDoubleSpinBox(pAdvancedLayoutWidget);
    mpBQuantFactor->setToolTip("Q-scale factor between IP and B frames");
    mpBQuantFactor->setMinimum(0.0);
@@ -364,12 +385,12 @@ OptionsMovieExporter::OptionsMovieExporter() :
    mpBQuantOffset->setMinimum(-1.0);
    mpBQuantOffset->setMaximum(31.0);
    mpBQuantOffset->setSingleStep(0.1);
-   QLabel *pDiaSizeLabel = new QLabel("Motion Search Range", pAdvancedLayoutWidget);
+   QLabel* pDiaSizeLabel = new QLabel("Motion Search Range", pAdvancedLayoutWidget);
    mpDiaSize = new QSpinBox(pAdvancedLayoutWidget);
    mpDiaSize->setToolTip("-1 for fast encode, 2-4 for better quality and compression");
    mpDiaSize->setMinimum(-10);
    mpDiaSize->setMaximum(10);
-   QGroupBox *pFlagsGroup = new QGroupBox("Flags", pAdvancedLayoutWidget);
+   QGroupBox* pFlagsGroup = new QGroupBox("Flags", pAdvancedLayoutWidget);
    mpQScale = new QCheckBox("Fixed Quantizer Scale", pFlagsGroup);
    mpQPel = new QCheckBox("Quarter Pixel Motion Estimation", pFlagsGroup);
    mpGmc = new QCheckBox("Global Motion Compensation", pFlagsGroup);
@@ -380,7 +401,7 @@ OptionsMovieExporter::OptionsMovieExporter() :
    mpQpRd = new QCheckBox("QP Rate Distortion", pFlagsGroup);
    mpObmc = new QCheckBox("Overlapped Block Motion Compensation", pFlagsGroup);
    mpClosedGop = new QCheckBox("Close GOP", pFlagsGroup);
-   QGridLayout *pFlagsLayout = new QGridLayout(pFlagsGroup);
+   QGridLayout* pFlagsLayout = new QGridLayout(pFlagsGroup);
    pFlagsLayout->addWidget(mpQScale, 0, 0);
    pFlagsLayout->addWidget(mpQPel, 1, 0);
    pFlagsLayout->addWidget(mpGmc, 2, 0);
@@ -393,7 +414,7 @@ OptionsMovieExporter::OptionsMovieExporter() :
    pFlagsLayout->addWidget(mpClosedGop, 4, 1);
    pFlagsGroup->setLayout(pFlagsLayout);
 
-   QGridLayout *pAdvancedLayout = new QGridLayout(pAdvancedLayoutWidget);
+   QGridLayout* pAdvancedLayout = new QGridLayout(pAdvancedLayoutWidget);
    pAdvancedLayout->setMargin(0);
    pAdvancedLayout->setSpacing(5);
    pAdvancedLayout->addWidget(pMeMethodLabel, 0, 0);
@@ -419,7 +440,7 @@ OptionsMovieExporter::OptionsMovieExporter() :
    pAdvancedLayout->addWidget(pFlagsGroup, 9, 0, 1, 3);
    pAdvancedLayout->setColumnStretch(3, 10);
 
-   LabeledSection *pAdvancedSection = new LabeledSection(pAdvancedLayoutWidget, "Advanced Options", this);
+   LabeledSection* pAdvancedSection = new LabeledSection(pAdvancedLayoutWidget, "Advanced Options", this);
    pAdvancedSection->collapse();
 
    setMeMethod(OptionsMovieExporter::getSettingMeMethod());
@@ -443,10 +464,11 @@ OptionsMovieExporter::OptionsMovieExporter() :
    // Initialization
    addSection(pResolutionSection);
    addSection(pRateSection);
+   addSection(pSubsetSection);
    addSection(pAdvancedSection);
    addSection(mpSettingsSection);
    addStretch(10);
-   setSizeHint(300, 275);
+   setSizeHint(400, 350);
 }
 
 OptionsMovieExporter::~OptionsMovieExporter()
@@ -459,13 +481,7 @@ void OptionsMovieExporter::applyChanges()
 {
    if (mpSettingsSection->isHidden() || mpSaveSettings->isChecked())
    {
-      unsigned int width=0, height=0;
-      getResolution(width, height);
-      OptionsMovieExporter::setSettingWidth(width);
-      OptionsMovieExporter::setSettingHeight(height);
       OptionsMovieExporter::setSettingBitrate(mpBitrate->value());
-      OptionsMovieExporter::setSettingFramerateNum(mpFramerateNum->value());
-      OptionsMovieExporter::setSettingFramerateDen(mpFramerateDen->value());
       OptionsMovieExporter::setSettingMeMethod(getMeMethod());
       OptionsMovieExporter::setSettingGopSize(getGopSize());
       OptionsMovieExporter::setSettingQCompress(getQCompress());
@@ -488,9 +504,10 @@ void OptionsMovieExporter::setPromptUserToSaveSettings(bool prompt)
 
 void OptionsMovieExporter::getResolution(unsigned int &width, unsigned int &height) const
 {
-   if(mpUseViewResolution->isChecked())
+   if (mpUseViewResolution->isChecked())
    {
-      width = height = 0;
+      width = 0;
+      height = 0;
    }
    else
    {
@@ -501,17 +518,17 @@ void OptionsMovieExporter::getResolution(unsigned int &width, unsigned int &heig
 
 void OptionsMovieExporter::setResolution(unsigned int width, unsigned int height)
 {
-   if(width == 0 && height == 0)
+   if (width == 0 && height == 0)
    {
       mpUseViewResolution->setChecked(true);
       return;
    }
    mpUseViewResolution->setChecked(false);
-   const QValidator *pValidX = mpResolutionX->validator();
-   const QValidator *pValidY = mpResolutionY->validator();
+   const QValidator* pValidX = mpResolutionX->validator();
+   const QValidator* pValidY = mpResolutionY->validator();
    int pos1 = 0;
    int pos2 = 0;
-   if((pValidX == NULL || pValidX->validate(QString::number(width), pos1) == QValidator::Acceptable) &&
+   if ((pValidX == NULL || pValidX->validate(QString::number(width), pos1) == QValidator::Acceptable) &&
       (pValidY == NULL || pValidY->validate(QString::number(height), pos2) == QValidator::Acceptable))
    {
       mpResolutionX->setText(QString::number(width));
@@ -529,10 +546,42 @@ unsigned int OptionsMovieExporter::getBitrate() const
 
 void OptionsMovieExporter::setBitrate(unsigned int bitrate)
 {
-   if((bitrate >= static_cast<unsigned int>(mpBitrate->minimum())) &&
+   if ((bitrate >= static_cast<unsigned int>(mpBitrate->minimum())) &&
       (bitrate <= static_cast<unsigned int>(mpBitrate->maximum())))
    {
       mpBitrate->setValue(bitrate);
+   }
+}
+
+void OptionsMovieExporter::setRange(double start, double stop)
+{
+   mpStart->setRange(start, stop);
+   mpStop->setRange(start, stop);
+}
+
+double OptionsMovieExporter::getStart() const
+{
+   return mpStart->value();
+}
+
+void OptionsMovieExporter::setStart(double start)
+{
+   if (start >= mpStart->minimum() && start <= mpStart->maximum())
+   {
+      mpStart->setValue(start);
+   }
+}
+
+double OptionsMovieExporter::getStop() const
+{
+   return mpStop->value();
+}
+
+void OptionsMovieExporter::setStop(double stop)
+{
+   if (stop >= mpStop->minimum() && stop <= mpStop->maximum())
+   {
+      mpStop->setValue(stop);
    }
 }
 
@@ -545,19 +594,17 @@ void OptionsMovieExporter::setFramerate(boost::rational<int> frameRate)
 {
    int num = frameRate.numerator();
    int den = frameRate.denominator();
-   if((num >= static_cast<int>(mpFramerateNum->minimum())) &&
-      (den >= static_cast<int>(mpFramerateDen->minimum())) &&
-      (frameRate <= boost::rational<int>(60, 1)))
+   if ((num >= static_cast<int>(mpFramerateNum->minimum())) && (den >= static_cast<int>(mpFramerateDen->minimum())))
    {
       int idx = mpFramerateList->findText(QString("%1/%2").arg(num).arg(den), Qt::MatchEndsWith);
-      if(idx != -1)
+      if (idx != -1)
       {
          mpFramerateList->setCurrentIndex(idx);
       }
       else
       {
          idx = mpFramerateList->findText("Custom...");
-         if(idx != -1)
+         if (idx != -1)
          {
             mpFramerateList->setCurrentIndex(idx);
             mpFramerateNum->setValue(num);
@@ -570,16 +617,15 @@ void OptionsMovieExporter::setFramerate(boost::rational<int> frameRate)
 void OptionsMovieExporter::setFramerates(std::vector<boost::rational<int> > frameRates)
 {
    mpFramerateList->clear();
-   for(std::vector<boost::rational<int> >::iterator frit = frameRates.begin();
-       frit != frameRates.end();
-       ++frit)
+   for (std::vector<boost::rational<int> >::iterator frit = frameRates.begin();
+       frit != frameRates.end(); ++frit)
    {
       mpFramerateList->addItem(QString("%1fps - %2/%3")
          .arg(boost::rational_cast<double>(*frit), 0, 'f', 2)
          .arg(frit->numerator())
          .arg(frit->denominator()));
    }
-   if(mpFramerateList->count() == 0)
+   if (mpFramerateList->count() == 0)
    {
       mpFramerateList->addItems(defaultFramerateItems);
    }
@@ -594,7 +640,7 @@ string OptionsMovieExporter::getMeMethod() const
 void OptionsMovieExporter::setMeMethod(const string &method)
 {
    int idx = mpMeMethod->findText(QString::fromStdString(method));
-   if(idx > -1)
+   if (idx > -1)
    {
       mpMeMethod->setCurrentIndex(idx);
    }
@@ -606,7 +652,7 @@ int OptionsMovieExporter::getGopSize() const
 
 void OptionsMovieExporter::setGopSize(int size)
 {
-   if(size >= mpGopSize->minimum() && size <= mpGopSize->maximum())
+   if (size >= mpGopSize->minimum() && size <= mpGopSize->maximum())
    {
       mpGopSize->setValue(size);
    }
@@ -619,7 +665,7 @@ float OptionsMovieExporter::getQCompress() const
 
 void OptionsMovieExporter::setQCompress(float val)
 {
-   if(val >= mpQCompress->minimum() && val <= mpQCompress->maximum())
+   if (val >= mpQCompress->minimum() && val <= mpQCompress->maximum())
    {
       mpQCompress->setValue(val);
    }
@@ -632,7 +678,7 @@ float OptionsMovieExporter::getQBlur() const
 
 void OptionsMovieExporter::setQBlur(float val)
 {
-   if(val >= mpQBlur->minimum() && val <= mpQBlur->maximum())
+   if (val >= mpQBlur->minimum() && val <= mpQBlur->maximum())
    {
       mpQBlur->setValue(val);
    }
@@ -645,7 +691,7 @@ int OptionsMovieExporter::getQMinimum() const
 
 void OptionsMovieExporter::setQMinimum(int val)
 {
-   if(val >= mpQMinimum->minimum() && val <= mpQMinimum->maximum())
+   if (val >= mpQMinimum->minimum() && val <= mpQMinimum->maximum())
    {
       mpQMinimum->setValue(val);
    }
@@ -658,7 +704,7 @@ int OptionsMovieExporter::getQMaximum() const
 
 void OptionsMovieExporter::setQMaximum(int val)
 {
-   if(val >= mpQMaximum->minimum() && val <= mpQMaximum->maximum())
+   if (val >= mpQMaximum->minimum() && val <= mpQMaximum->maximum())
    {
       mpQMaximum->setValue(val);
    }
@@ -671,7 +717,7 @@ int OptionsMovieExporter::getQDiffMaximum() const
 
 void OptionsMovieExporter::setQDiffMaximum(int val)
 {
-   if(val >= mpQDiffMaximum->minimum() && val <= mpQDiffMaximum->maximum())
+   if (val >= mpQDiffMaximum->minimum() && val <= mpQDiffMaximum->maximum())
    {
       mpQDiffMaximum->setValue(val);
    }
@@ -684,7 +730,7 @@ int OptionsMovieExporter::getMaxBFrames() const
 
 void OptionsMovieExporter::setMaxBFrames(int val)
 {
-   if(val >= mpMaxBFrames->minimum() && val <= mpMaxBFrames->maximum())
+   if (val >= mpMaxBFrames->minimum() && val <= mpMaxBFrames->maximum())
    {
       mpMaxBFrames->setValue(val);
    }
@@ -697,7 +743,7 @@ float OptionsMovieExporter::getBQuantFactor() const
 
 void OptionsMovieExporter::setBQuantFactor(float val)
 {
-   if(val >= mpBQuantFactor->minimum() && val <= mpBQuantFactor->maximum())
+   if (val >= mpBQuantFactor->minimum() && val <= mpBQuantFactor->maximum())
    {
       mpBQuantFactor->setValue(val);
    }
@@ -710,7 +756,7 @@ float OptionsMovieExporter::getBQuantOffset() const
 
 void OptionsMovieExporter::setBQuantOffset(float val)
 {
-   if(val >= mpBQuantOffset->minimum() && val <= mpBQuantOffset->maximum())
+   if (val >= mpBQuantOffset->minimum() && val <= mpBQuantOffset->maximum())
    {
       mpBQuantOffset->setValue(val);
    }
@@ -723,7 +769,7 @@ int OptionsMovieExporter::getDiaSize() const
 
 void OptionsMovieExporter::setDiaSize(int val)
 {
-   if(val >= mpDiaSize->minimum() && val <= mpDiaSize->maximum())
+   if (val >= mpDiaSize->minimum() && val <= mpDiaSize->maximum())
    {
       mpDiaSize->setValue(val);
    }
@@ -731,17 +777,48 @@ void OptionsMovieExporter::setDiaSize(int val)
 
 int OptionsMovieExporter::getFlags() const
 {
-   int flags=0;
-   if(mpQScale->isChecked()) flags |= CODEC_FLAG_QSCALE;
-   if(mpQPel->isChecked()) flags |= CODEC_FLAG_QPEL;
-   if(mpGmc->isChecked()) flags |= CODEC_FLAG_GMC;
-   if(mpNormalizeAqp->isChecked()) flags |= CODEC_FLAG_NORMALIZE_AQP;
-   if(mpTrellis->isChecked()) flags |= CODEC_FLAG_TRELLIS_QUANT;
-   if(mpAcPred->isChecked()) flags |= CODEC_FLAG_AC_PRED;
-   if(mpCbpRd->isChecked()) flags |= CODEC_FLAG_CBP_RD;
-   if(mpQpRd->isChecked()) flags |= CODEC_FLAG_QP_RD;
-   if(mpObmc->isChecked()) flags |= CODEC_FLAG_OBMC;
-   if(mpClosedGop->isChecked()) flags |= CODEC_FLAG_CLOSED_GOP;
+   int flags = 0;
+   if (mpQScale->isChecked())
+   {
+      flags |= CODEC_FLAG_QSCALE;
+   }
+   if (mpQPel->isChecked())
+   {
+      flags |= CODEC_FLAG_QPEL;
+   }
+   if (mpGmc->isChecked())
+   {
+      flags |= CODEC_FLAG_GMC;
+   }
+   if (mpNormalizeAqp->isChecked())
+   {
+      flags |= CODEC_FLAG_NORMALIZE_AQP;
+   }
+   if (mpTrellis->isChecked())
+   {
+      flags |= CODEC_FLAG_TRELLIS_QUANT;
+   }
+   if (mpAcPred->isChecked())
+   {
+      flags |= CODEC_FLAG_AC_PRED;
+   }
+   if (mpCbpRd->isChecked())
+   {
+      flags |= CODEC_FLAG_CBP_RD;
+   }
+   if (mpQpRd->isChecked())
+   {
+      flags |= CODEC_FLAG_QP_RD;
+   }
+   if (mpObmc->isChecked())
+   {
+      flags |= CODEC_FLAG_OBMC;
+   }
+   if (mpClosedGop->isChecked())
+   {
+      flags |= CODEC_FLAG_CLOSED_GOP;
+   }
+
    return flags;
 }
 
@@ -769,23 +846,23 @@ void OptionsMovieExporter::setUseViewResolution(bool v)
 
 void OptionsMovieExporter::checkResolutionX(bool ignoreAspectRatio)
 {
-   if(mpUseViewResolution->isChecked())
+   if (mpUseViewResolution->isChecked())
    {
       return;
    }
    unsigned int val = mpResolutionX->text().toUInt();
-   if((val % 2) != 0)
+   if ((val % 2) != 0)
    {
       mpResolutionX->setText(QString::number(val + 1));
    }
-   if(!ignoreAspectRatio && mpResolutionAspectLock->isChecked())
+   if (!ignoreAspectRatio && mpResolutionAspectLock->isChecked())
    {
       unsigned int newY = val;
-      if(mCurrentResolutionY > 0 && mCurrentResolutionX > 0)
+      if (mCurrentResolutionY > 0 && mCurrentResolutionX > 0)
       {
          newY = (val * mCurrentResolutionY) / static_cast<double>(mCurrentResolutionX);
       }
-      if((newY % 2) != 0)
+      if ((newY % 2) != 0)
       {
          newY++;
       }
@@ -796,23 +873,23 @@ void OptionsMovieExporter::checkResolutionX(bool ignoreAspectRatio)
 
 void OptionsMovieExporter::checkResolutionY(bool ignoreAspectRatio)
 {
-   if(mpUseViewResolution->isChecked())
+   if (mpUseViewResolution->isChecked())
    {
       return;
    }
    unsigned int val = mpResolutionY->text().toUInt();
-   if((val % 2) != 0)
+   if ((val % 2) != 0)
    {
       mpResolutionY->setText(QString::number(val + 1));
    }
-   if(!ignoreAspectRatio && mpResolutionAspectLock->isChecked())
+   if (!ignoreAspectRatio && mpResolutionAspectLock->isChecked())
    {
       unsigned int newX = val;
-      if(mCurrentResolutionX > 0 && mCurrentResolutionY > 0)
+      if (mCurrentResolutionX > 0 && mCurrentResolutionY > 0)
       {
          newX = (val * mCurrentResolutionX) / static_cast<double>(mCurrentResolutionY);
       }
-      if((newX % 2) != 0)
+      if ((newX % 2) != 0)
       {
          newX++;
       }
@@ -824,7 +901,7 @@ void OptionsMovieExporter::checkResolutionY(bool ignoreAspectRatio)
 void OptionsMovieExporter::aspectLockToggled(bool state)
 {
    mpResolutionAspectLock->setIcon(state ? *mpLockIcon : *mpUnlockIcon);
-   if(state)
+   if (state)
    {
       getResolution(mCurrentResolutionX, mCurrentResolutionY);
    }
@@ -838,20 +915,49 @@ void OptionsMovieExporter::updateBitrate(int value)
 void OptionsMovieExporter::frameRateListChanged(const QString &value)
 {
    QStringList rationalAndDecimal = value.split(" - ");
-   if(value == "Custom...")
+   if (value == "Custom...")
    {
       mpFramerateNum->setEnabled(true);
       mpFramerateDen->setEnabled(true);
    }
-   else if(rationalAndDecimal.size() == 2)
+   else if (rationalAndDecimal.size() == 2)
    {
       QStringList split = rationalAndDecimal[1].split("/");
-      if(split.size() == 2)
+      if (split.size() == 2)
       {
          mpFramerateNum->setValue(split[0].toInt());
          mpFramerateDen->setValue(split[1].toInt());
          mpFramerateNum->setEnabled(false);
          mpFramerateDen->setEnabled(false);
       }
+   }
+}
+
+void OptionsMovieExporter::setFrameType(FrameType eType)
+{
+   switch (eType)
+   {
+   case FRAME_ID:
+      mpStartLabel->setText("Start Frame");
+      mpStart->setToolTip("First frame to export, 1-based frame number");
+      mpStart->setSingleStep(1.0);
+      mpStart->setDecimals(0);
+      mpStopLabel->setText("Stop Frame");
+      mpStop->setToolTip("Last frame to export, 1-based frame number");
+      mpStop->setSingleStep(1.0);
+      mpStop->setDecimals(0);
+      break;
+   case FRAME_TIME:
+      mpStartLabel->setText("Start Time");
+      mpStart->setToolTip("Time of first frame to export");
+      mpStart->setSingleStep(0.001);
+      mpStart->setDecimals(3);
+      mpStopLabel->setText("Stop Time");
+      mpStop->setToolTip("Time of last frame to export");
+      mpStop->setSingleStep(0.001);
+      mpStop->setDecimals(3);
+      break;
+   default:
+      break;
    }
 }

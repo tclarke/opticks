@@ -11,7 +11,6 @@
 #include <QtGui/QMessageBox>
 #include <QtGui/QMouseEvent>
 
-#include "AppVersion.h"
 #include "DesktopServices.h"
 #include "DimensionDescriptor.h"
 #include "Layer.h"
@@ -55,8 +54,9 @@ MouseModePlugIn::MouseModePlugIn() :
    mpMouseModeAction(NULL)
 {
    AlgorithmShell::setName("Custom Mouse Mode Plug-In");
-   setCreator("Ball Aerospace & Technologies, Corp.");
-   setCopyright(APP_COPYRIGHT);
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setDescription("Demonstrates creating a custom mouse mode.");
    setDescriptorId("{3C32A63F-77C5-4F78-8AE2-E9DEFC2F625E}");
    setProductionStatus(false);
@@ -187,7 +187,7 @@ bool MouseModePlugIn::eventFilter(QObject* pObject, QEvent* pEvent)
                dynamic_cast<SpatialDataView*>(pDesktop->getCurrentWorkspaceWindowView());
             if (pSpatialDataView != NULL)
             {
-               QWidget* pViewWidget  = pSpatialDataView->getWidget();
+               QWidget* pViewWidget = pSpatialDataView->getWidget();
                if (pViewWidget == pObject)
                {
                   MouseMode* pMouseMode = pSpatialDataView->getCurrentMouseMode();

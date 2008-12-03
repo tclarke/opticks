@@ -34,16 +34,16 @@ public:
    bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
 
 private:
-   const char *parseParagraphA(const char *pStart);
-   const char *parseParagraphB(const char *pStart);
-   const char *parseParagraphD(const char *pStart);
-   const char *parseParagraphF(const char *pStart);
-   const char *parseParagraphG(const char *pStart);
-   const char *parseParagraphH(const char *pStart);
-   const char *parseParagraphJ(const char *pStart);
+   const char* parseParagraphA(const char* pStart);
+   const char* parseParagraphB(const char* pStart);
+   const char* parseParagraphD(const char* pStart);
+   const char* parseParagraphF(const char* pStart);
+   const char* parseParagraphG(const char* pStart);
+   const char* parseParagraphH(const char* pStart);
+   const char* parseParagraphJ(const char* pStart);
    bool deserialize(FILE* pFp);
 
-   Aspam *mpAspam;
+   Aspam* mpAspam;
 };
 
-#endif // ASPAMIMPORTER_H
+#endif

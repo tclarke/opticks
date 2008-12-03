@@ -42,7 +42,10 @@ ossimRefPtr<ossimImageData> OssimAppMemorySource::getTile(const ossimIrect& rect
 
    unsigned int bpp = pDescriptor->getBytesPerElement();
 
-   int minx, miny, maxx, maxy;
+   int minx;
+   int miny;
+   int maxx;
+   int maxy;
    rect.getBounds(minx, miny, maxx, maxy);
 
    VERIFYRV(minx <= maxx && miny <= maxy, NULL);
@@ -118,12 +121,11 @@ ossimRefPtr<ossimImageData> OssimAppMemorySource::getTile(const ossimIrect& rect
 
 ossimScalarType OssimAppMemorySource::getOutputScalarType() const
 {
-   const RasterDataDescriptor* pDescriptor = 
-      dynamic_cast<const RasterDataDescriptor*>(mCube.getDataDescriptor());
+   const RasterDataDescriptor* pDescriptor = dynamic_cast<const RasterDataDescriptor*>(mCube.getDataDescriptor());
    VERIFYRV(pDescriptor != NULL, OSSIM_SCALAR_UNKNOWN);
-   
+
 #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : TODO: Support Complex Data (leckels)")
-   switch(pDescriptor->getDataType())
+   switch (pDescriptor->getDataType())
    {
    case INT1SBYTE:
       return OSSIM_SINT8;
@@ -163,8 +165,7 @@ ossimIrect OssimAppMemorySource::getBoundingRect(ossim_uint32 resLevel) const
 
 ossim_uint32 OssimAppMemorySource::getNumberOfInputBands() const
 {
-   const RasterDataDescriptor *pDescriptor = 
-      dynamic_cast<const RasterDataDescriptor*>(mCube.getDataDescriptor());
+   const RasterDataDescriptor* pDescriptor = dynamic_cast<const RasterDataDescriptor*>(mCube.getDataDescriptor());
    VERIFYRV(pDescriptor != NULL, 0);
    return static_cast<ossim_uint32>(pDescriptor->getBandCount());
 }

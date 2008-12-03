@@ -74,6 +74,16 @@ public:
    SETTING(AutoSaveInterval, SessionManager, unsigned int, 30)
 
    /**
+    *  Emitted with a null boost::any just prior to restoring a session.
+    */
+   SIGNAL_METHOD(SessionManager, AboutToRestore)
+
+   /**
+    *  Emitted with a null boost::any when the session has finished restoring itself.
+    */
+   SIGNAL_METHOD(SessionManager, SessionRestored)
+
+   /**
     *  Emitted when a session is closed.
     *
     *  The session is still fully created when this signal is emitted.

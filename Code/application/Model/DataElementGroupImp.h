@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef DATA_ELEMENT_GROUP_IMP
-#define DATA_ELEMENT_GROUP_IMP
+#ifndef DATAELEMENTGROUPIMP_H
+#define DATAELEMENTGROUPIMP_H
 
 #include "DataElementImp.h"
 

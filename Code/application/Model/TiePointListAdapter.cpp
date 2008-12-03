@@ -24,8 +24,8 @@ TiePointListAdapter::~TiePointListAdapter()
 // TypeAwareObject
 const string& TiePointListAdapter::getObjectType() const
 {
-   static string type("TiePointListAdapter");
-   return type;
+   static string sType("TiePointListAdapter");
+   return sType;
 }
 
 bool TiePointListAdapter::isKindOf(const string& className) const

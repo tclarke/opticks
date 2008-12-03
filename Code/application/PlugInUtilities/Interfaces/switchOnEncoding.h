@@ -7,59 +7,75 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef SWITCHONENCODING
-#define SWITCHONENCODING
+#ifndef SWITCHONENCODING_H
+#define SWITCHONENCODING_H
 
 #include "ComplexData.h"
 
 #define switchOnEncoding(encoding,function,...) \
-   switch(encoding) \
+   switch (encoding) \
    { \
    case INT1UBYTE: \
-      function((unsigned char*)__VA_ARGS__); break; \
+      function((unsigned char*)__VA_ARGS__); \
+      break; \
    case INT1SBYTE: \
-      function((signed char*)__VA_ARGS__); break; \
+      function((signed char*)__VA_ARGS__); \
+      break; \
    case INT2UBYTES: \
-      function((unsigned short*)__VA_ARGS__); break; \
+      function((unsigned short*)__VA_ARGS__); \
+      break; \
    case INT2SBYTES: \
-      function((signed short*)__VA_ARGS__); break; \
+      function((signed short*)__VA_ARGS__); \
+      break; \
    case INT4UBYTES: \
-      function((unsigned int*)__VA_ARGS__); break; \
+      function((unsigned int*)__VA_ARGS__); \
+      break; \
    case INT4SBYTES: \
-      function((signed int*)__VA_ARGS__); break; \
+      function((signed int*)__VA_ARGS__); \
+      break; \
    case FLT4BYTES: \
-      function((float*)__VA_ARGS__); break; \
+      function((float*)__VA_ARGS__); \
+      break; \
    case FLT8BYTES: \
-      function((double*)__VA_ARGS__); break; \
+      function((double*)__VA_ARGS__); \
+      break; \
    default: \
       break; \
    }
 
 #define switchOnComplexEncoding(encoding,function,...) \
-   switch(encoding) \
+   switch (encoding) \
    { \
    case INT1UBYTE: \
-      function((unsigned char*)__VA_ARGS__); break; \
+      function((unsigned char*)__VA_ARGS__); \
+      break; \
    case INT1SBYTE: \
-      function((signed char*)__VA_ARGS__); break; \
+      function((signed char*)__VA_ARGS__); \
+      break; \
    case INT2UBYTES: \
-      function((unsigned short*)__VA_ARGS__); break; \
+      function((unsigned short*)__VA_ARGS__); \
+      break; \
    case INT2SBYTES: \
-      function((signed short*)__VA_ARGS__); break; \
+      function((signed short*)__VA_ARGS__); \
+      break; \
    case INT4SCOMPLEX: \
-      function((IntegerComplex*)__VA_ARGS__); break; \
+      function((IntegerComplex*)__VA_ARGS__); \
+      break; \
    case INT4UBYTES: \
-      function((unsigned int*)__VA_ARGS__); break; \
+      function((unsigned int*)__VA_ARGS__); \
+      break; \
    case INT4SBYTES: \
-      function((signed int*)__VA_ARGS__); break; \
+      function((signed int*)__VA_ARGS__); \
+      break; \
    case FLT4BYTES: \
-      function((float*)__VA_ARGS__); break; \
+      function((float*)__VA_ARGS__); \
+      break; \
    case FLT8COMPLEX: \
-      function((FloatComplex*)__VA_ARGS__); break; \
+      function((FloatComplex*)__VA_ARGS__); \
+      break; \
    case FLT8BYTES: \
-      function((double*)__VA_ARGS__); break; \
+      function((double*)__VA_ARGS__); \
+      break; \
    default: \
       break; \
    }

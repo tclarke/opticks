@@ -11,7 +11,9 @@
 
 using namespace std;
 
-Hdf5IncrementalReader::Hdf5IncrementalReader(hid_t dataSet) : mDataset(dataSet), mDataspace(-1)
+Hdf5IncrementalReader::Hdf5IncrementalReader(hid_t dataSet) :
+   mDataset(dataSet),
+   mDataspace(-1)
 {
    if (mDataset > 0)
    {

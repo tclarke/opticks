@@ -27,7 +27,8 @@
 using namespace std;
 
 FilesetWidget::FilesetWidget(QWidget* parent) :
-   QWidget(parent)
+   QWidget(parent),
+   mpFileset(NULL)
 {
    // Directory
    QLabel* pDirLabel = new QLabel("Directory:", this);

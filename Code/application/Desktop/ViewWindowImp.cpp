@@ -142,8 +142,8 @@ bool ViewWindowImp::fromXml(DOMNode* pDocument, unsigned int version)
       return false;
    }
 
-   DOMElement *pElement = static_cast<DOMElement*>(pDocument);
-   if(pElement->hasAttribute(X("viewId")))
+   DOMElement* pElement = static_cast<DOMElement*>(pDocument);
+   if (pElement->hasAttribute(X("viewId")))
    {
       Service<DesktopServices>()->deleteView(mpView);
       setView(dynamic_cast<View*>(SessionManagerImp::instance()->getSessionItem(

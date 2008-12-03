@@ -62,7 +62,7 @@ namespace
    {
       bool operator()(const DynamicObject& dynObj)
       {
-         return (dynObj.getAttribute(getCoefficient(LINE_NUMERATOR_COEF_PREFIX, 1)).getPointerToValue<double>() != NULL);
+         return dynObj.getAttribute(getCoefficient(LINE_NUMERATOR_COEF_PREFIX, 1)).getPointerToValue<double>() != NULL;
       }
    };
 }
@@ -85,7 +85,7 @@ bool Nitf::RpcGeoreference::execute(PlugInArgList* pInParam, PlugInArgList* pOut
    }
 
    mpRaster = pInParam->getPlugInArgValue<RasterElement>(DataElementArg());
-   Progress *pProgress = pInParam->getPlugInArgValue<Progress>(ProgressArg());
+   Progress* pProgress = pInParam->getPlugInArgValue<Progress>(ProgressArg());
    string messageText;
 
    if (mpRaster == NULL)
@@ -111,12 +111,12 @@ bool Nitf::RpcGeoreference::execute(PlugInArgList* pInParam, PlugInArgList* pOut
    ********************************************************************************/
    bool bInit = false;
 
-   const DynamicObject *pMetadata = mpRaster->getMetadata();
+   const DynamicObject* pMetadata = mpRaster->getMetadata();
 
    if (pMetadata == NULL)
    {
       messageText = "Invalid metadata in Raster Element!";
-      if(pProgress)
+      if (pProgress)
       {
          pProgress->updateProgress(messageText, 0, ERRORS);
       }
@@ -128,7 +128,7 @@ bool Nitf::RpcGeoreference::execute(PlugInArgList* pInParam, PlugInArgList* pOut
    if (pNitfMetadata == NULL)
    {
       messageText = "Could not find NITF metadata!";
-      if(pProgress)
+      if (pProgress)
       {
          pProgress->updateProgress(messageText, 0, ERRORS);
       }
@@ -193,7 +193,7 @@ bool Nitf::RpcGeoreference::execute(PlugInArgList* pInParam, PlugInArgList* pOut
       catch (const bad_cast&)
       {
          messageText = "RPC Georeference failed to extract all RPC fields from the RPC DynamicObject.";
-         if(pProgress)
+         if (pProgress)
          {
             pProgress->updateProgress(messageText, 0, ERRORS);
          }
@@ -201,11 +201,11 @@ bool Nitf::RpcGeoreference::execute(PlugInArgList* pInParam, PlugInArgList* pOut
          return false;
       }
 
-      RasterDataDescriptor *pDescriptor = dynamic_cast<RasterDataDescriptor*>(mpRaster->getDataDescriptor());
+      RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(mpRaster->getDataDescriptor());
       if (pDescriptor == NULL)
       {
          messageText = "Could not find Raster Data Descriptor";
-         if(pProgress)
+         if (pProgress)
          {
             pProgress->updateProgress(messageText, 0, ERRORS);
          }
@@ -215,12 +215,13 @@ bool Nitf::RpcGeoreference::execute(PlugInArgList* pInParam, PlugInArgList* pOut
 
       try
       {
-         mpChipConverter.reset(new Nitf::ChipConverter(*pDescriptor));
+         Nitf::ChipConverter* pConverter = new Nitf::ChipConverter(*pDescriptor);
+         mpChipConverter.reset(pConverter);
       }
       catch (const string& message)
       {
          messageText = message;
-         if(pProgress)
+         if (pProgress)
          {
             pProgress->updateProgress(messageText, 0, ERRORS);
          }
@@ -228,17 +229,20 @@ bool Nitf::RpcGeoreference::execute(PlugInArgList* pInParam, PlugInArgList* pOut
          return false;
       }
 
-      vector<double> xNumCoef(NUM_RPC_COEFFICIENTS), xDenCoef(NUM_RPC_COEFFICIENTS),
-         yNumCoef(NUM_RPC_COEFFICIENTS), yDenCoef(NUM_RPC_COEFFICIENTS);
-      for(int i = 0; i < NUM_RPC_COEFFICIENTS; i++)
+      vector<double> xNumCoef(NUM_RPC_COEFFICIENTS);
+      vector<double> xDenCoef(NUM_RPC_COEFFICIENTS);
+      vector<double> yNumCoef(NUM_RPC_COEFFICIENTS);
+      vector<double> yDenCoef(NUM_RPC_COEFFICIENTS);
+
+      for (int i = 0; i < NUM_RPC_COEFFICIENTS; i++)
       {
          xNumCoef[i] = sampRPCnumCoefficients[i];
          xDenCoef[i] = sampRPCdenCoefficients[i];
          yNumCoef[i] = lineRPCnumCoefficients[i];
          yDenCoef[i] = lineRPCdenCoefficients[i];
       }
-      mModel.setAttributes(rpcSampOffset,rpcLineOffset,rpcSampScale,rpcLineScale,
-         rpcLatOffset,rpcLongOffset,rpcHeightOffset,rpcLatScale,rpcLongScale,rpcHeightScale,
+      mModel.setAttributes(rpcSampOffset, rpcLineOffset, rpcSampScale, rpcLineScale,
+         rpcLatOffset, rpcLongOffset, rpcHeightOffset, rpcLatScale, rpcLongScale, rpcHeightScale,
          xNumCoef, xDenCoef, yNumCoef, yDenCoef, (mRpcVersion == "A") ? ossimRpcModel::A : ossimRpcModel::B);
 
       bInit = true;
@@ -246,7 +250,7 @@ bool Nitf::RpcGeoreference::execute(PlugInArgList* pInParam, PlugInArgList* pOut
    else
    {
       messageText = "File does not have an RPC TRE.";
-      if(pProgress)
+      if (pProgress)
       {
          pProgress->updateProgress(messageText, 0, ERRORS);
       }
@@ -257,7 +261,7 @@ bool Nitf::RpcGeoreference::execute(PlugInArgList* pInParam, PlugInArgList* pOut
    if (!bInit)
    {
       messageText = "RPC Georeference failed to initialize state for georeferencing!";
-      if(pProgress)
+      if (pProgress)
       {
          pProgress->updateProgress(messageText, 0, ERRORS);
       }
@@ -310,7 +314,7 @@ LocationType Nitf::RpcGeoreference::pixelToGeo(LocationType pixel) const
    ossimDpt imagePoint(pixel.mX, pixel.mY);
    ossimGpt worldPoint;
    mModel.lineSampleToWorld(imagePoint, worldPoint);
-   if(worldPoint.isNan())
+   if (worldPoint.isNan())
    {
       return LocationType();
    }
@@ -324,7 +328,7 @@ LocationType Nitf::RpcGeoreference::geoToPixel(LocationType geo) const
    worldPoint.lond(geo.mY);
    ossimDpt imagePoint;
    mModel.worldToLineSample(worldPoint, imagePoint);
-   if(imagePoint.isNan())
+   if (imagePoint.isNan())
    {
       return LocationType();
    }
@@ -338,10 +342,10 @@ const DynamicObject* Nitf::RpcGeoreference::getRpcInstance(RasterElement *pRaste
 
    if (pRaster != NULL)
    {
-      DataDescriptor *pDd = pRaster->getDataDescriptor();
+      DataDescriptor* pDd = pRaster->getDataDescriptor();
       if (pDd != NULL)
       {
-         DynamicObject *pMetadata = pDd->getMetadata();
+         DynamicObject* pMetadata = pDd->getMetadata();
 
          if (pMetadata != NULL)
          {
@@ -417,7 +421,7 @@ bool Nitf::RpcGeoreference::serialize(SessionItemSerializer &serializer) const
    serializer.endBlock();
 
    ossimKeywordlist kwl;
-   if(!mModel.saveState(kwl))
+   if (!mModel.saveState(kwl))
    {
       return false;
    }
@@ -428,33 +432,35 @@ bool Nitf::RpcGeoreference::serialize(SessionItemSerializer &serializer) const
 bool Nitf::RpcGeoreference::deserialize(SessionItemDeserializer &deserializer)
 {
    vector<int64_t> sizes = deserializer.getBlockSizes();
-   if(sizes.size() != 2)
+   if (sizes.size() != 2)
    {
       return false;
    }
    string id(sizes[0], '\0');
    string state(sizes[1], '\0');
-   bool success = deserializer.deserialize(const_cast<char*>(id.c_str()), id.size());
+   bool success = deserializer.deserialize(&id[0], id.size());
    deserializer.nextBlock();
-   success = success && deserializer.deserialize(const_cast<char*>(state.c_str()), state.size());
-   if(!success)
+   success = success && deserializer.deserialize(&state[0], state.size());
+   if (!success)
    {
       return false;
    }
 
    mpRaster = dynamic_cast<RasterElement*>(Service<SessionManager>()->getSessionItem(id));
-   if(mpRaster == NULL)
+   if (mpRaster == NULL)
    {
       return false;
    }
    try
    {
-      RasterDataDescriptor *pDescriptor = dynamic_cast<RasterDataDescriptor*>(mpRaster->getDataDescriptor());
-      if(pDescriptor == NULL)
+      RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(mpRaster->getDataDescriptor());
+      if (pDescriptor == NULL)
       {
          return false;
       }
-      mpChipConverter.reset(new Nitf::ChipConverter(*pDescriptor));
+
+      Nitf::ChipConverter* pConverter = new Nitf::ChipConverter(*pDescriptor);
+      mpChipConverter.reset(pConverter);
    }
    catch (const string&)
    {
@@ -463,7 +469,7 @@ bool Nitf::RpcGeoreference::deserialize(SessionItemDeserializer &deserializer)
 
    stringstream str(state);
    ossimKeywordlist kwl;
-   if(!kwl.parseStream(str))
+   if (!kwl.parseStream(str))
    {
       return false;
    }

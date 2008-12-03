@@ -24,8 +24,8 @@ RasterElementAdapter::~RasterElementAdapter()
 // TypeAwareObject
 const string& RasterElementAdapter::getObjectType() const
 {
-   static string type("RasterElementAdapter");
-   return type;
+   static string sType("RasterElementAdapter");
+   return sType;
 }
 
 bool RasterElementAdapter::isKindOf(const string& className) const

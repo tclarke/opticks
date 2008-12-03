@@ -79,12 +79,11 @@ ResultsExporter::~ResultsExporter()
 
 QWidget* ResultsExporter::getExportOptionsWidget(const PlugInArgList *pInArgList)
 {
-   const DataDescriptor *pDescriptor = NULL;
-   if(pInArgList != NULL)
+   const DataDescriptor* pDescriptor = NULL;
+   if (pInArgList != NULL)
    {
-      RasterElement *pElement =
-         pInArgList->getPlugInArgValue<RasterElement>(ExportItemArg());
-      if(pElement != NULL)
+      RasterElement* pElement = pInArgList->getPlugInArgValue<RasterElement>(ExportItemArg());
+      if (pElement != NULL)
       {
          pDescriptor = pElement->getDataDescriptor();
       }
@@ -200,7 +199,7 @@ bool ResultsExporter::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setDefaultValue(NULL);
    pArgList->addArg(*pArg);
 
-   if(!mbInteractive)
+   if (!mbInteractive)
    {
       pArg = mpPlugInManager->getPlugInArg();
       VERIFY(pArg != NULL);
@@ -259,7 +258,7 @@ bool ResultsExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
    StepResource pStep("Execute results exporter", "app", "ABF9EDE4-4672-4361-86BB-3258ADFB0793");
    mpStep = pStep.get();
 
-   if(!extractInputArgs(pInArgList))
+   if (!extractInputArgs(pInArgList))
    {
       return false;
    }
@@ -269,24 +268,36 @@ bool ResultsExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
    if (pDescriptor == NULL)
    {
       mMessage = "Could not get the data descriptor from the results matrix!";
-      if (mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, ERRORS);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(mMessage, 0, ERRORS);
+      }
+
       pStep->finalize(Message::Failure, mMessage);
       return false;
    }
 
    EncodingType eDataType = pDescriptor->getDataType();
-   if((eDataType == INT4SCOMPLEX) || (eDataType == FLT8COMPLEX))
+   if ((eDataType == INT4SCOMPLEX) || (eDataType == FLT8COMPLEX))
    {
       mMessage = "Cannot save complex data in text format!";
-      if(mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, ERRORS);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(mMessage, 0, ERRORS);
+      }
+
       pStep->finalize(Message::Failure, mMessage);
       return false;
    }
 
-   if(pDescriptor->getBandCount() > 1)
+   if (pDescriptor->getBandCount() > 1)
    {
       mMessage = "Can only export single band data.";
-      if(mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, ERRORS);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(mMessage, 0, ERRORS);
+      }
+
       pStep->finalize(Message::Failure, mMessage);
       return false;
    }
@@ -312,17 +323,21 @@ bool ResultsExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
    ofstream fileOutput;
    fileOutput.open(filename.c_str(), mbAppendFile ? ios_base::app : ios_base::trunc);
 
-   if(!fileOutput.is_open())
+   if (!fileOutput.is_open())
    {
       mMessage = "Could not open the output file for writing!";
-      if(mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, ERRORS);  
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(mMessage, 0, ERRORS);
+      }
+
       pStep->finalize(Message::Failure, mMessage);
       return false;
    }
 
-   if(!writeOutput(fileOutput))
+   if (!writeOutput(fileOutput))
    {
-      if(mbAbort)
+      if (mbAbort)
       {
          pStep->finalize(Message::Abort);
       }
@@ -331,23 +346,34 @@ bool ResultsExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
    }
 
    mMessage = "Results matrix export complete!";
-   if(mpProgress != NULL) mpProgress->updateProgress(mMessage, 100, NORMAL);
-   pStep->finalize(Message::Success);
+   if (mpProgress != NULL)
+   {
+      mpProgress->updateProgress(mMessage, 100, NORMAL);
+   }
 
+   pStep->finalize(Message::Success);
    return true;
 }
 
 bool ResultsExporter::writeOutput(ostream &stream)
 {
    mMessage = "Exporting results matrix...";
-   if(mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, NORMAL);
+   if (mpProgress != NULL)
+   {
+      mpProgress->updateProgress(mMessage, 0, NORMAL);
+   }
+
    StepResource pStep(mMessage, "app", "D890E37C-B960-4527-8AAC-D62F2DE7A541");
 
    RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(mpResults->getDataDescriptor());
    if (pDescriptor == NULL)
    {
       mMessage = "Could not get the results data descriptor!";
-      if(mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, ERRORS);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(mMessage, 0, ERRORS);
+      }
+
       pStep->finalize(Message::Failure);
       return false;
    }
@@ -363,7 +389,7 @@ bool ResultsExporter::writeOutput(ostream &stream)
    EncodingType eDataType = pDescriptor->getDataType();
    const vector<int>& badValues = pDescriptor->getBadValues();
 
-   if(mbMetadata)
+   if (mbMetadata)
    {
       stream << APP_NAME << " Results Raster\n";
       stream << "Version = 4\n";
@@ -391,13 +417,17 @@ bool ResultsExporter::writeOutput(ostream &stream)
       }
    }
 
-   RasterElement *pGeo = getGeoreferencedRaster();
+   RasterElement* pGeo = getGeoreferencedRaster();
 
    DataAccessor da = mpResults->getDataAccessor();
-   if(!da.isValid())
+   if (!da.isValid())
    {
       mMessage = "Could not access the data in the results raster!";
-      if(mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, ERRORS);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(mMessage, 0, ERRORS);
+      }
+
       pStep->finalize(Message::Failure);
       return false;
    }
@@ -405,10 +435,14 @@ bool ResultsExporter::writeOutput(ostream &stream)
    unsigned int activeRowNumber = 0;
    for (unsigned int r = 0; r < rows.size(); ++r)
    {
-      if(mbAbort)
+      if (mbAbort)
       {
          mMessage = "Results exporter aborted!";
-         if(mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, ABORT);
+         if (mpProgress != NULL)
+         {
+            mpProgress->updateProgress(mMessage, 0, ABORT);
+         }
+
          pStep->finalize(Message::Abort);
          return false;
       }
@@ -444,12 +478,12 @@ bool ResultsExporter::writeOutput(ostream &stream)
 
       // Update the progress
       int iProgress = (r * 100) / rows.size();
-      if(iProgress == 100)
+      if (iProgress == 100)
       {
          iProgress = 99;
       }
 
-      if(mpProgress != NULL)
+      if (mpProgress != NULL)
       {
          mpProgress->updateProgress(mMessage, iProgress, NORMAL);
       }
@@ -465,9 +499,9 @@ bool ResultsExporter::abort()
    return true;
 }
 
-bool ResultsExporter::extractInputArgs(PlugInArgList* pInArgList)
+bool ResultsExporter::extractInputArgs(PlugInArgList* pArgList)
 {
-   if(pInArgList == NULL)
+   if (pArgList == NULL)
    {
       mMessage = "The input arg list is invalid!";
       return false;
@@ -476,20 +510,24 @@ bool ResultsExporter::extractInputArgs(PlugInArgList* pInArgList)
    PlugInArg* pArg = NULL;
 
    // Progress
-   if(pInArgList->getArg(ProgressArg(), pArg) && (pArg != NULL))
+   if (pArgList->getArg(ProgressArg(), pArg) && (pArg != NULL))
    {
       mpProgress = pArg->getPlugInArgValue<Progress>();
    }
 
    // Results matrix
-   if(pInArgList->getArg(ExportItemArg(), pArg) && (pArg != NULL))
+   if (pArgList->getArg(ExportItemArg(), pArg) && (pArg != NULL))
    {
       mpResults = pArg->getPlugInArgValue<RasterElement>();
    }
    else
    {
       mMessage = "Could not read the results input value!";
-      if(mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, ERRORS);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(mMessage, 0, ERRORS);
+      }
+
       mpStep->finalize(Message::Failure, mMessage);
       return false;
    }
@@ -497,20 +535,28 @@ bool ResultsExporter::extractInputArgs(PlugInArgList* pInArgList)
    if (mpResults == NULL)
    {
       mMessage = "The results input value is invalid!";
-      if(mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, ERRORS);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(mMessage, 0, ERRORS);
+      }
+
       mpStep->finalize(Message::Failure, mMessage);
       return false;
    }
 
    // File descriptor
-   if (pInArgList->getArg(ExportDescriptorArg(), pArg) && (pArg != NULL))
+   if (pArgList->getArg(ExportDescriptorArg(), pArg) && (pArg != NULL))
    {
       mpFileDescriptor = pArg->getPlugInArgValue<RasterFileDescriptor>();
    }
    else
    {
       mMessage = "Could not read the file descriptor input value!";
-      if(mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, ERRORS);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(mMessage, 0, ERRORS);
+      }
+
       mpStep->finalize(Message::Failure, mMessage);
       return false;
    }
@@ -518,19 +564,23 @@ bool ResultsExporter::extractInputArgs(PlugInArgList* pInArgList)
    if (mpFileDescriptor == NULL)
    {
       mMessage = "The file descriptor input value is invalid!";
-      if(mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, ERRORS);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(mMessage, 0, ERRORS);
+      }
+
       mpStep->finalize(Message::Failure, mMessage);
       return false;
    }
 
-   if(mbInteractive)
+   if (mbInteractive)
    {
       // Get the options from the options widget
       if (mpOptionsWidget == NULL)
       {
          // Create the dialog, which sets the default values to those in the results matrix
-         PlugInArgList *pInArgList = NULL;
-         if(getInputSpecification(pInArgList) && (pInArgList != NULL))
+         PlugInArgList* pInArgList = NULL;
+         if (getInputSpecification(pInArgList) && (pInArgList != NULL))
          {
             pInArgList->setPlugInArgValue(ExportItemArg(), mpResults);
          }
@@ -550,10 +600,14 @@ bool ResultsExporter::extractInputArgs(PlugInArgList* pInArgList)
    else
    {
       // Pass area
-      if(!pInArgList->getArg("Pass Area", pArg) || (pArg == NULL))
+      if (!pArgList->getArg("Pass Area", pArg) || (pArg == NULL))
       {
          mMessage = "Could not read the pass area input value!";
-         if(mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, ERRORS);
+         if (mpProgress != NULL)
+         {
+            mpProgress->updateProgress(mMessage, 0, ERRORS);
+         }
+
          mpStep->finalize(Message::Failure, mMessage);
          return false;
       }
@@ -565,10 +619,14 @@ bool ResultsExporter::extractInputArgs(PlugInArgList* pInArgList)
       }
 
       // First threshold
-      if(!pInArgList->getArg("First Threshold", pArg) || (pArg == NULL))
+      if (!pArgList->getArg("First Threshold", pArg) || (pArg == NULL))
       {
          mMessage = "Could not read the first threshold input value!";
-         if(mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, ERRORS);
+         if (mpProgress != NULL)
+         {
+            mpProgress->updateProgress(mMessage, 0, ERRORS);
+         }
+
          mpStep->finalize(Message::Failure, mMessage);
          return false;
       }
@@ -580,12 +638,16 @@ bool ResultsExporter::extractInputArgs(PlugInArgList* pInArgList)
       }
 
       // Second threshold
-      if((mPassArea == MIDDLE) || (mPassArea == OUTSIDE))
+      if ((mPassArea == MIDDLE) || (mPassArea == OUTSIDE))
       {
-         if(!pInArgList->getArg("Second Threshold", pArg) || (pArg == NULL))
+         if (!pArgList->getArg("Second Threshold", pArg) || (pArg == NULL))
          {
             mMessage = "Could not read the second threshold input value!";
-            if(mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, ERRORS);
+            if (mpProgress != NULL)
+            {
+               mpProgress->updateProgress(mMessage, 0, ERRORS);
+            }
+
             mpStep->finalize(Message::Failure, mMessage);
             return false;
          }
@@ -598,7 +660,7 @@ bool ResultsExporter::extractInputArgs(PlugInArgList* pInArgList)
       }
 
       // Geocoord type
-      if(pInArgList->getArg("Geocoordinate Type", pArg) && (pArg != NULL))
+      if (pArgList->getArg("Geocoordinate Type", pArg) && (pArg != NULL))
       {
          GeocoordType* pGeocoordType = pArg->getPlugInArgValue<GeocoordType>();
          if (pGeocoordType != NULL)
@@ -608,7 +670,7 @@ bool ResultsExporter::extractInputArgs(PlugInArgList* pInArgList)
       }
 
       // Metadata
-      if(pInArgList->getArg("Metadata", pArg) && (pArg != NULL))
+      if (pArgList->getArg("Metadata", pArg) && (pArg != NULL))
       {
          bool* pMetadata = pArg->getPlugInArgValue<bool>();
          if (pMetadata != NULL)
@@ -618,7 +680,7 @@ bool ResultsExporter::extractInputArgs(PlugInArgList* pInArgList)
       }
 
       // Append
-      if(pInArgList->getArg("Append To File", pArg) && (pArg != NULL))
+      if (pArgList->getArg("Append To File", pArg) && (pArg != NULL))
       {
          bool* pAppend = pArg->getPlugInArgValue<bool>();
          if (pAppend != NULL)
@@ -635,7 +697,7 @@ bool ResultsExporter::isValueExported(double dValue, const vector<int>& badValue
 {
    bool bExported = false;
 
-   if(find(badValues.begin(), badValues.end(), roundDouble(dValue)) != badValues.end())
+   if (find(badValues.begin(), badValues.end(), roundDouble(dValue)) != badValues.end())
    {
       return false;
    }
@@ -643,28 +705,28 @@ bool ResultsExporter::isValueExported(double dValue, const vector<int>& badValue
    switch (mPassArea)
    {
       case LOWER:
-         if(dValue < mFirstThreshold)
+         if (dValue < mFirstThreshold)
          {
             bExported = true;
          }
          break;
 
       case UPPER:
-         if(dValue > mFirstThreshold)
+         if (dValue > mFirstThreshold)
          {
             bExported = true;
          }
          break;
 
       case MIDDLE:
-         if((dValue > mFirstThreshold) && (dValue < mSecondThreshold))
+         if ((dValue > mFirstThreshold) && (dValue < mSecondThreshold))
          {
             bExported = true;
          }
          break;
 
       case OUTSIDE:
-         if((dValue < mFirstThreshold) || (dValue > mSecondThreshold))
+         if ((dValue < mFirstThreshold) || (dValue > mSecondThreshold))
          {
             bExported = true;
          }
@@ -690,7 +752,7 @@ RasterElement* ResultsExporter::getGeoreferencedRaster() const
       return mpResults;
    }
    // Next, assume this is a "Results matrix" and check the parent
-   RasterElement *pParent = dynamic_cast<RasterElement*>(mpResults->getParent());
+   RasterElement* pParent = dynamic_cast<RasterElement*>(mpResults->getParent());
    if (pParent != NULL && pParent->isGeoreferenced())
    {
       return pParent;
@@ -699,15 +761,13 @@ RasterElement* ResultsExporter::getGeoreferencedRaster() const
    return NULL;
 }
 
-string ResultsExporter::getLocationString(unsigned int uiRow,
-                                                unsigned int uiColumn,
-                                                RasterElement *pGeo) const
+string ResultsExporter::getLocationString(unsigned int uiRow, unsigned int uiColumn, const RasterElement* pGeo) const
 {
    char buffer[1024];
    sprintf(buffer, "Pixel: (%u, %u)", uiColumn + 1, uiRow + 1);
 
    string location = buffer;
-   if(pGeo != NULL && pGeo->isGeoreferenced())
+   if (pGeo != NULL && pGeo->isGeoreferenced())
    {
       LocationType pixelCoord;
       pixelCoord.mX = uiColumn;
@@ -716,19 +776,19 @@ string ResultsExporter::getLocationString(unsigned int uiRow,
       LocationType coords = pGeo->convertPixelToGeocoord(pixelCoord);
 
       LatLonPoint latLonPoint(coords);
-      if(mGeocoordType == GEOCOORD_UTM)
+      if (mGeocoordType == GEOCOORD_UTM)
       {
          UtmPoint utmPoint(latLonPoint);
          string utmText = utmPoint.getText();
          location = "UTM: (" + utmText + ")";
       }
-      else if(mGeocoordType == GEOCOORD_MGRS)
+      else if (mGeocoordType == GEOCOORD_MGRS)
       {
          MgrsPoint mgrsPoint(latLonPoint);
          string mgrsText = mgrsPoint.getText();
          location = "MGRS: (" + mgrsText + ")";
       }
-      else if(mGeocoordType == GEOCOORD_LATLON)
+      else if (mGeocoordType == GEOCOORD_LATLON)
       {
          string latLonText = latLonPoint.getText();
          location = "Geo: (" + latLonText + ")";
@@ -788,7 +848,7 @@ bool ResultsExporter::runAllTests(Progress *pProgress, ostream& failure)
          }
          else
          {
-            float *pData = reinterpret_cast<float*>(da->getRow());
+            float* pData = reinterpret_cast<float*>(da->getRow());
             if (pData == NULL)
             {
                failure << "Data is not accessible.";

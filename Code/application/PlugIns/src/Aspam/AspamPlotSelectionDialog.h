@@ -25,9 +25,6 @@ class AspamPlotSelectionDialog : public QDialog
 {
    Q_OBJECT
 
-   QComboBox *mpPrimary;
-   QComboBox *mpPlotName;
-
 public:
    /**
     *  Create a new plot selection dialog.
@@ -38,7 +35,9 @@ public:
     *  @param pParent
     *         The parent widget.
     */
-   AspamPlotSelectionDialog(QStringList &choices, QWidget *pParent=NULL);
+   AspamPlotSelectionDialog(QStringList& choices, QWidget* pParent = NULL);
+
+   ~AspamPlotSelectionDialog();
 
    /**
     *  Accessor for the variable name which is to be used as the primary axis.
@@ -46,7 +45,7 @@ public:
     *  @return The primary axis variable name.
     */
    QString getPrimaryAxis() const;
-   
+
    /**
     *  Accessor for the name of the plot that the data should be placed on.
     *
@@ -64,7 +63,11 @@ public:
     *         The plot name which should be selected by default. If this is empty or not
     *         in the names list, "New Plot" will be selected.
     */
-   void setPlotNames(const QStringList &names, const QString &selected);
+   void setPlotNames(const QStringList& names, const QString& selected);
+
+private:
+   QComboBox* mpPrimary;
+   QComboBox* mpPlotName;
 };
 
 #endif

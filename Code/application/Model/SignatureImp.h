@@ -48,8 +48,8 @@ public:
    static void getElementTypes(std::vector<std::string>& classList);
 
 private:
-   std::map<std::string,DataVariant> mData;
-   std::map<std::string,boost::shared_ptr<UnitsImp> > mUnits;
+   std::map<std::string, DataVariant> mData;
+   std::map<std::string, boost::shared_ptr<UnitsImp> > mUnits;
    DataVariant mNullData;
 };
 

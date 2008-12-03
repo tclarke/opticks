@@ -41,10 +41,10 @@ BrightnessToolBar::BrightnessToolBar(const string& id, QWidget* parent) :
    ToolBarAdapter(id, "Brightness", parent),
    mpBrightnessSlider(NULL),
    mpBrightnessText(NULL),
-   mpResetAction(NULL),
    mpContrastSlider(NULL),
    mpContrastText(NULL),
    mpBandCombo(NULL),
+   mpResetAction(NULL),
    mRasterChannelType(GRAY),
    mRgb(false),
    mpRasterLayer(NULL)
@@ -296,7 +296,7 @@ void BrightnessToolBar::setCurrentLayer(Layer* pLayer, const RasterChannelType& 
    // Update the layer
    if (pRasterLayer != mpRasterLayer)
    {
-      LayerImp *pLayerImp = dynamic_cast<LayerImp*>(mpRasterLayer);
+      LayerImp* pLayerImp = dynamic_cast<LayerImp*>(mpRasterLayer);
       if (pLayerImp != NULL)
       {
          disconnect(pLayerImp,
@@ -455,7 +455,11 @@ void BrightnessToolBar::updateLayerCombo(bool updateCurrentRasterLayer)
    for (unsigned int i = 0; i < layers.size(); i++)
    {
       RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(layers[i]);
-      if (pRasterLayer == NULL) continue;
+      if (pRasterLayer == NULL)
+      {
+         continue;
+      }
+
       if (needToSetRasterLayer)
       {
          mpRasterLayer = pRasterLayer;
@@ -516,8 +520,9 @@ void BrightnessToolBar::updateBandCombo(bool updateCurrentBand)
          channelName = "Blue";
       }
       if ((pElement != NULL) && (band.isValid()))
-      {                              
-         strBandName = QString::fromStdString(RasterUtilities::getBandName(dynamic_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor()), band));
+      {
+         strBandName = QString::fromStdString(RasterUtilities::getBandName(
+            dynamic_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor()), band));
          strBandName.append(" - ");
          strBandName.append(channelName);
       }
@@ -645,7 +650,8 @@ void BrightnessToolBar::adjustLayerStretch()
    dUpper = mpRasterLayer->convertStretchValue(mRasterChannelType, RAW_VALUE, dUpper, PERCENTILE);
 
    // Disconnect the layer to prevent modifying the sliders from the current values
-   disconnect((RasterLayerAdapter*) mpRasterLayer, SIGNAL(stretchValuesChanged(const RasterChannelType&, double, double)),
+   disconnect(dynamic_cast<RasterLayerImp*>(mpRasterLayer),
+      SIGNAL(stretchValuesChanged(const RasterChannelType&, double, double)),
       this, SLOT(updateValues(const RasterChannelType&, double, double)));
 
    // If RGB is selected in the combo box, set the red, green and blue values all at once
@@ -702,7 +708,8 @@ void BrightnessToolBar::adjustLayerStretch()
    }
 
    // Reconnect the layer to modify the slider values
-   VERIFYNR(connect((RasterLayerAdapter*) mpRasterLayer, SIGNAL(stretchValuesChanged(const RasterChannelType&, double, double)),
+   VERIFYNR(connect(dynamic_cast<RasterLayerImp*>(mpRasterLayer),
+      SIGNAL(stretchValuesChanged(const RasterChannelType&, double, double)),
       this, SLOT(updateValues(const RasterChannelType&, double, double))));
 
    enableSliders();
@@ -738,7 +745,8 @@ void BrightnessToolBar::reset()
 
    if (mRgb == true)
    {
-      disconnect((RasterLayerAdapter*) mpRasterLayer, SIGNAL(stretchValuesChanged(const RasterChannelType&, double, double)),
+      disconnect(dynamic_cast<RasterLayerImp*>(mpRasterLayer),
+         SIGNAL(stretchValuesChanged(const RasterChannelType&, double, double)),
          this, SLOT(updateValues(const RasterChannelType&, double, double)));
 
       RasterLayerImp::getDefaultStretchValues(RED, dLower, dUpper);
@@ -751,7 +759,8 @@ void BrightnessToolBar::reset()
       RasterLayerImp::getDefaultStretchValues(BLUE, dLower, dUpper);
       mpRasterLayer->setStretchValues(BLUE, dLower, dUpper);
 
-      VERIFYNR(connect((RasterLayerAdapter*) mpRasterLayer, SIGNAL(stretchValuesChanged(const RasterChannelType&, double, double)),
+      VERIFYNR(connect(dynamic_cast<RasterLayerImp*>(mpRasterLayer),
+         SIGNAL(stretchValuesChanged(const RasterChannelType&, double, double)),
          this, SLOT(updateValues(const RasterChannelType&, double, double))));
    }
    else

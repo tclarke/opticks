@@ -25,17 +25,6 @@
  */
 class Icons
 {
-protected:
-   /**
-    *  Creates the Icons object.
-    */
-   Icons();
-
-   /**
-    *  Destroys the only Icons object.
-    */
-   ~Icons();
-
 public:
    /**
     *  Returns a pointer to the only instance of the class.
@@ -314,14 +303,17 @@ public:
    QPixmap mSaveHistogram;
 
    // Animation toolbar
-   QPixmap mAnimationFastForward;
+   QPixmap mAnimationSpeedUp;
    QPixmap mAnimationPlayBackward;
    QPixmap mAnimationAdvanceBackward;
    QPixmap mAnimationPlayForward;
    QPixmap mAnimationAdvanceForward;
    QPixmap mAnimationPause;
    QPixmap mAnimationStop;
-   QPixmap mAnimationFastRewind;
+   QPixmap mAnimationSlowDown;
+   QPixmap mAnimationBackwardDirection;
+   QPixmap mAnimationForwardDirection;
+   QPixmap mAnimationChangeDirection;
    
    QPixmap mPlayOnce;
    QPixmap mBouncePlay;
@@ -349,6 +341,22 @@ public:
    QPixmap mGcpX;
    QPixmap mGcpPlus;
    QPixmap mGcpBlank;
+
+   // Layers
+   QPixmap mRasterLayer;
+   QPixmap mThresholdLayer;
+   QPixmap mPseudocolorLayer;
+
+protected:
+   /**
+    *  Creates the Icons object.
+    */
+   Icons();
+
+   /**
+    *  Destroys the only Icons object.
+    */
+   ~Icons();
 
 private:
    static Icons* singleton;

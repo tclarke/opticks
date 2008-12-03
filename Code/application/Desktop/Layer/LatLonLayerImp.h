@@ -15,9 +15,9 @@
 
 #include "ColorType.h"
 #include "EnumWrapper.h"
+#include "FontImp.h"
 #include "LayerImp.h"
 #include "LocationType.h"
-#include "FontImp.h"
 #include "TypesFile.h"
 
 #include <string>
@@ -87,7 +87,7 @@ public:
     */
    bool getAutoTickSpacing() const;
 
-   GeocoordType getGeocoordType() const { return mGeocoordType; }
+   GeocoordType getGeocoordType() const;
 
    /**
     * Gets the current formatting that affects the display of latitude/longitude points
@@ -162,10 +162,10 @@ public slots:
    /**
     * Sets the color of the layer. Does not trigger a redraw.
     *
-    * @param clrGrid
+    * @param newColor
     *     The new color for the layer.
     */
-   void setColor(const QColor& clrGrid);
+   void setColor(const QColor& newColor);
 
    /**
     * Sets the font to use when drawing labels.  Does not trigger a redraw.
@@ -178,10 +178,10 @@ public slots:
    /**
     * Sets the current grid style. Does not trigger a redraw.
     *
-    * @param eStyle
+    * @param newStyle
     *     An enumerated value specifying which style to apply.
     */
-   void setStyle(const LatLonStyle& eStyle);
+   void setStyle(const LatLonStyle& newStyle);
 
    /**
     * Sets the current line width. Does not trigger a redraw.
@@ -203,14 +203,14 @@ public slots:
    /**
     * Turns on or off auto computed tick spacing.
     *
-    * @param bAutoSpacing
+    * @param compute
     *     A bool specifying whether to autocompute (true) or not (false).
     */
-   void setAutoTickSpacing(bool bAutoSpacing);
+   void setAutoTickSpacing(bool compute);
 
    void setGeocoordType(const GeocoordType& eGeocoord);
 
-   void setLatLonFormat(const DmsFormatType& eFormat);
+   void setLatLonFormat(const DmsFormatType& newFormat);
 
    void reset();
 
@@ -245,7 +245,8 @@ private:
    QColor mColor;                      // the current drawing color
    unsigned int mWidth;                // the current drawing width
    LocationType mCubeSize;             // the size of the cube in pixels
-   LocationType mMaxCoord, mMinCoord;  // the maximum and minimum geocoord values found on the pixel border
+   LocationType mMaxCoord;             // the maximum geocoord value found on the pixel border
+   LocationType mMinCoord;             // the minimum geocoord value found on the pixel border
    int mZone;
    char mHemisphere;
    std::string mMapGrid;
@@ -265,10 +266,19 @@ private:
     * @EnumWrapper LatLonLayerImp::BorderTypeEnum.
     */
    typedef EnumWrapper<BorderTypeEnum> BorderType;
-   BorderType getNearestBorder(const LocationType& location) const;
-   void drawLabel(const LocationType& location, bool bScreenCoords, const std::string& text,
-      const BorderType& borderType);
+   BorderType getNearestBorder(const LocationType& location, 
+      const std::vector<LocationType>& box) const;
+   void drawLabel(const LocationType& location, const LocationType& textOffset, 
+      const std::string& text, const BorderType& borderType, const double modelMatrix[16],
+      const double projectionMatrix[16], const int viewPort[4], bool adjustForRotation);
    LocationType convertPointToLatLon(const GeocoordType& type, const LocationType& point);
+   void clipToView(std::vector<LocationType>& vertices, const std::vector<LocationType>& clipBox,
+      const double modelMatrix[16], const double projectionMatrix[16], const int viewPort[4]);
+   void adjustBorderBox(std::vector<LocationType>& box, LocationType point1, LocationType point2,
+      bool latitudeLine);
+   bool isCloseTo(const LocationType& point1, const LocationType& point2, const double tolerance);
+   std::vector<LocationType> findVisibleLineSegment(const LocationType pixel1, 
+      const LocationType pixel2, const std::vector<LocationType>& box);
 };
 
 #define LATLONLAYERADAPTEREXTENSION_CLASSES \

@@ -117,6 +117,8 @@ public:
    bool toXml(XMLWriter* pXml) const;
    bool fromXml(DOMNode* pDocument, unsigned int version);
 
+   bool linkView(View *pView, LinkType type);
+
 public slots:
    void setTextureMode(const TextureMode& textureMode);
    bool showLayer(Layer* pLayer);
@@ -180,6 +182,7 @@ protected slots:
    void updateSmoothingAction(const TextureMode& textureMode);
    void changeBkgColor();
    void displayMeasurementProperties();
+   void setAoiMode();
 
 private:
    AttachmentPtr<SessionExplorer> mpExplorer;
@@ -191,7 +194,7 @@ private:
    bool mShowMeasurements;
    AttachmentPtr<Layer> mpActiveLayer;
    LayerImp* mpDrawLayer;
-   QTimer *mpPanTimer;
+   QTimer* mpPanTimer;
    int mPanKey;
    bool mShiftPressed;
    PanLimitType mPanLimit;
@@ -206,6 +209,17 @@ private:
    QAction* mpOriginUL;
    QAction* mpOriginLL;
    QAction* mpSmoothAction;
+
+private slots:
+   void setGrayBand();
+   void setRedBand();
+   void setGreenBand();
+   void setBlueBand();
+   void setBand(RasterChannelType channel);
+   void setGrayscaleMode();
+   void setRgbMode();
+   void nextBand();
+   void previousBand();
 };
 
 #define SPATIALDATAVIEWADAPTEREXTENSION_CLASSES \

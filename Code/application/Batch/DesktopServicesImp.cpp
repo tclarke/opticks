@@ -21,10 +21,9 @@ DesktopServicesImp* DesktopServicesImp::instance()
 {
    if (spInstance == NULL)
    {
-      if(mDestroyed)
+      if (mDestroyed)
       {
-         throw std::logic_error("Attempting to use DesktopServices after "
-            "destroying it.");
+         throw std::logic_error("Attempting to use DesktopServices after destroying it.");
       }
       spInstance = new DesktopServicesImp();
    }
@@ -36,9 +35,9 @@ void DesktopServicesImp::destroy()
 {
    if (mDestroyed)
    {
-      throw std::logic_error("Attempting to destroy DesktopServices after "
-         "destroying it.");
+      throw std::logic_error("Attempting to destroy DesktopServices after destroying it.");
    }
+
    delete spInstance;
    spInstance = NULL;
    mDestroyed = true;
@@ -54,8 +53,8 @@ DesktopServicesImp::~DesktopServicesImp()
 
 const string& DesktopServicesImp::getObjectType() const
 {
-   static string type("DesktopServicesImp");
-   return type;
+   static string sType("DesktopServicesImp");
+   return sType;
 }
 
 bool DesktopServicesImp::isKindOf(const string& className) const
@@ -88,12 +87,12 @@ MenuBar* DesktopServicesImp::getMainMenuBar() const
    return NULL;
 }
 
-GpuResourceManager *DesktopServicesImp::getGpuResourceManager() const
+GpuResourceManager* DesktopServicesImp::getGpuResourceManager() const
 {
    return NULL;
 }
 
-ImageFilterManager *DesktopServicesImp::getImageFilterManager() const
+ImageFilterManager* DesktopServicesImp::getImageFilterManager() const
 {
    return NULL;
 }
@@ -177,8 +176,7 @@ void DesktopServicesImp::tileWorkspaceWindows(TilingType eType)
 {
 }
 
-bool DesktopServicesImp::tileWorkspaceWindows(const vector<WorkspaceWindow*>& windows, 
-                                              bool maxFirst, TilingType eType)
+bool DesktopServicesImp::tileWorkspaceWindows(const vector<WorkspaceWindow*>& windows, bool maxFirst, TilingType eType)
 {
    return false;
 }
@@ -206,7 +204,7 @@ void DesktopServicesImp::getViewTypes(const string& className, vector<string>& c
 {
 }
 
-ProductWindow *DesktopServicesImp::deriveProduct(View *pView)
+ProductWindow* DesktopServicesImp::deriveProduct(View* pView)
 {
    return NULL;
 }
@@ -291,7 +289,7 @@ bool DesktopServicesImp::importFile(const string& importerSubtype, Progress* pPr
    return false;
 }
 
-bool DesktopServicesImp::exportSessionItem(SessionItem *pItem, FileDescriptor *pNewFileDescriptor, Progress* pProgress)
+bool DesktopServicesImp::exportSessionItem(SessionItem* pItem, FileDescriptor* pNewFileDescriptor, Progress* pProgress)
 {
    return false;
 }
@@ -325,9 +323,9 @@ void DesktopServicesImp::setStatusBarMessage(const string& messageText) const
    cout << "SHORT MESSAGE: " << messageText << endl;
 }
 
-int DesktopServicesImp::showMessageBox(const string &caption, const string &text, 
-      const string &button0, const string &button1, 
-      const string &button2, int defaultButton, int escapeButton) const
+int DesktopServicesImp::showMessageBox(const string& caption, const string& text, const string& button0,
+                                       const string& button1, const string& button2, int defaultButton,
+                                       int escapeButton) const
 {
    cout << "MESSAGE BOX: \nTitle: " << caption << ":\nMessage: " << text << endl;
    return defaultButton;
@@ -337,7 +335,7 @@ void DesktopServicesImp::useMessageBox(bool enable)
 {
 }
 
-bool DesktopServicesImp::registerCallback(PlugInCallbackType eType, PlugInCallback *callback) const
+bool DesktopServicesImp::registerCallback(PlugInCallbackType eType, PlugInCallback* pCallback) const
 {
    return false;
 }
@@ -346,36 +344,35 @@ void DesktopServicesImp::addBackgroundPlugIn(PlugIn* pPlugIn, Progress* pProgres
 {
 }
 
-DockWindowAreaType DesktopServicesImp::getDockWindowArea(const DockWindow &) const
+DockWindowAreaType DesktopServicesImp::getDockWindowArea(const DockWindow& dockWindow) const
 {
    return DockWindowAreaType();
 }
 
-bool DesktopServicesImp::setDockWindowArea(DockWindow *pDockWindow, 
-   DockWindowAreaType dockArea)
+bool DesktopServicesImp::setDockWindowArea(DockWindow* pDockWindow, DockWindowAreaType dockArea)
 {
    return false;
 }
 
-bool DesktopServicesImp::createProgressDialog(const string &caption, Progress *pProgress) const
+bool DesktopServicesImp::createProgressDialog(const string& caption, Progress* pProgress) const
 {
    return false;
 }
 
-ProgressDlg* DesktopServicesImp::createProgressDialog(const std::string &caption, Progress *pProgress,
-      QObject *pObject, const char *pSlot) const
+ProgressDlg* DesktopServicesImp::createProgressDialog(const string& caption, Progress* pProgress, QObject* pObject,
+                                                      const char* pSlot) const
 {
    return NULL;
 }
 
-const std::vector<std::string> &DesktopServicesImp::getAvailableSymbolNames() const
+const vector<string>& DesktopServicesImp::getAvailableSymbolNames() const
 {
-   static vector<string> empty;
-   return empty;
+   static vector<string> sEmpty;
+   return sEmpty;
 }
 
-const QImage &DesktopServicesImp::getSymbolImage(const std::string &symbol) const
+const QImage& DesktopServicesImp::getSymbolImage(const string& symbol) const
 {
-   static QImage image;
-   return image;
+   static QImage sImage;
+   return sImage;
 }

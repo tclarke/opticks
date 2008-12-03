@@ -23,52 +23,54 @@
 #include <QtGui/QColor>
 #include <QtGui/QImage>
 #include <QtGui/QImageWriter>
+#include <QtGui/QPainter>
 #include <QtGui/QWidget>
 
 // The encoded image size can not excede this number of bytes.
 #define MAX_ENCODED_IMAGE_SIZE (5 * 1024 * 1024)
 
-ImageHandler::ImageHandler(QObject *pParent) : MuHttpServer(0, pParent)
-{
-}
+ImageHandler::ImageHandler(QObject* pParent) :
+   MuHttpServer(0, pParent)
+{}
 
-ImageHandler::ImageHandler(int port, QObject *pParent) : MuHttpServer(port, pParent)
-{
-}
+ImageHandler::ImageHandler(int port, QObject* pParent) :
+   MuHttpServer(port, pParent)
+{}
 
 ImageHandler::~ImageHandler()
-{
-}
+{}
 
-MuHttpServer::Response ImageHandler::getRequest(const QString &uri, const QString &contentType,
-                                                const QString &body, const FormValueMap &form)
+MuHttpServer::Response ImageHandler::getRequest(const QString& uri, const QString& contentType,
+                                                const QString& body, const FormValueMap& form)
 {
    Response r;
    QStringList splitUri = uri.split(".");
    QString format = "PNG";
-   if(!splitUri.isEmpty())
+   if (!splitUri.isEmpty())
    {
       format = splitUri.back().toUpper();
    }
    splitUri.pop_back();
-   if(format == "JPG")
+   if (format == "JPG")
    {
       format = "JPEG";
    }
    bool success = !format.isEmpty();
-   if(success)
+   if (success)
    {
       QString itemId = QUrl::fromPercentEncoding(splitUri.join(".").toAscii());
-      SessionItem *pItem = Service<SessionManager>()->getSessionItem(itemId.toStdString());
+      SessionItem* pItem = Service<SessionManager>()->getSessionItem(itemId.toStdString());
       r.mOctets.resize(MAX_ENCODED_IMAGE_SIZE);
       QBuffer buffer(&r.mOctets);
       int band = -1;
       FormValueMap::const_iterator it;
-      if((it = form.find("band")) != form.end() || (it = form.find("frame")) != form.end())
+      if ((it = form.find("band")) != form.end() || (it = form.find("frame")) != form.end())
       {
          band = StringUtilities::fromXmlString<int>(it->second.sBody);
       }
-      if(success = getSessionItemImage(pItem, buffer, format, band))
+
+      success = getSessionItemImage(pItem, buffer, format, band);
+      if (success == true)
       {
          r.mCode = HTTPRESPONSECODE_200_OK;
          r.mHeaders["content-type"] = QString("image/%1").arg(format.toLower());
@@ -76,7 +78,7 @@ MuHttpServer::Response ImageHandler::getRequest(const QString &uri, const QStrin
          r.mEncoding = Response::OCTET;
       }
    }
-   if(!success)
+   if (!success)
    {
       r.mCode = HTTPRESPONSECODE_404_NOTFOUND;
       r.mHeaders["content-type"] = "text/html";
@@ -86,49 +88,79 @@ MuHttpServer::Response ImageHandler::getRequest(const QString &uri, const QStrin
    return r;
 }
 
-bool ImageHandler::getSessionItemImage(SessionItem *pItem, QBuffer &buffer, const QString &format, int band)
+bool ImageHandler::getSessionItemImage(SessionItem* pItem, QBuffer& buffer, const QString& format, int band, int* pBbox)
 {
-   if(format.isEmpty())
+   if (format.isEmpty())
    {
       return false;
    }
    bool success = true;
    QImage image;
-   Layer *pLayer = dynamic_cast<Layer*>(pItem);
-   View *pView = dynamic_cast<View*>(pItem);
-   if(pLayer != NULL)
+   Layer* pLayer = dynamic_cast<Layer*>(pItem);
+   View* pView = dynamic_cast<View*>(pItem);
+   if (pLayer != NULL)
    {
-      SpatialDataView *pSDView = dynamic_cast<SpatialDataView*>(pLayer->getView());
-      if(pSDView != NULL)
+      SpatialDataView* pSDView = dynamic_cast<SpatialDataView*>(pLayer->getView());
+      if (pSDView != NULL)
       {
          UndoLock ulock(pSDView);
          DimensionDescriptor cur;
          DisplayMode mode;
-         RasterLayer *pRasterLayer = dynamic_cast<RasterLayer*>(pLayer);
-         if(band >= 0 && pRasterLayer != NULL)
+         RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(pLayer);
+         if (band >= 0 && pRasterLayer != NULL)
          {
-            RasterElement *pRaster = pRasterLayer->getDisplayedRasterElement(GRAY);
-            DimensionDescriptor bandDesc = static_cast<RasterDataDescriptor*>(pRaster->getDataDescriptor())->getActiveBand(band);
+            RasterElement* pRaster = pRasterLayer->getDisplayedRasterElement(GRAY);
+            DimensionDescriptor bandDesc =
+               static_cast<RasterDataDescriptor*>(pRaster->getDataDescriptor())->getActiveBand(band);
             cur = pRasterLayer->getDisplayedBand(GRAY);
             mode = pRasterLayer->getDisplayMode();
             pRasterLayer->setDisplayedBand(GRAY, bandDesc);
             pRasterLayer->setDisplayMode(GRAYSCALE_MODE);
          }
-         QSize sz = pSDView->getWidget()->size();
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This generates reasonably sized exports. Ideally, we should export tiles but that requires changes to the app draw code. (tclarke)")
-         sz.scale(1024, 768, Qt::KeepAspectRatio);
-         int bbox[4] = {0,0,0,0};
+         int bbox[4] = {0, 0, 0, 0};
          QColor t = Qt::transparent;
-         ColorType transparent = QCOLOR_TO_COLORTYPE(t);
+         ColorType realTransparent = QCOLOR_TO_COLORTYPE(t);
+         {
+            QImage dummyImage;
+            int dummyBbox[4] = {0,0,0,0};
+            pSDView->getLayerImage(pLayer, dummyImage, realTransparent, dummyBbox);
+         }
+         ColorType transparent(255, 255, 254);
          success = pSDView->getLayerImage(pLayer, image, transparent, bbox);
-         if(mode.isValid())
+         if (pBbox != NULL)
+         {
+            memcpy(pBbox, bbox, sizeof(bbox));
+         }
+         QImage alphaChannel(image.size(), QImage::Format_Indexed8);
+         if (image.hasAlphaChannel())
+         {
+            alphaChannel = image.alphaChannel();
+         }
+         else
+         {
+            alphaChannel.fill(0xff);
+         }
+         QRgb realTransColor = COLORTYPE_TO_QCOLOR(realTransparent).rgb();
+         QRgb transColor = COLORTYPE_TO_QCOLOR(transparent).rgb();
+         for (int y = 0; y < image.height(); y++)
+         {
+            for (int x = 0; x < image.width(); x++)
+            {
+               if (image.pixel(x, y) == transColor || image.pixel(x, y) == realTransColor)
+               {
+                  alphaChannel.setPixel(x, y, 0x00);
+               }
+            }
+         }
+         image.setAlphaChannel(alphaChannel);
+         if (mode.isValid())
          {
             pRasterLayer->setDisplayedBand(GRAY, cur);
             pRasterLayer->setDisplayMode(mode);
          }
       }
    }
-   else if(pView != NULL)
+   else if (pView != NULL)
    {
       success = pView->getCurrentImage(image);
    }
@@ -136,7 +168,7 @@ bool ImageHandler::getSessionItemImage(SessionItem *pItem, QBuffer &buffer, cons
    {
       success = false;
    }
-   if(success)
+   if (success)
    {
       buffer.open(QIODevice::WriteOnly);
       QImageWriter writer(&buffer, format.toAscii());

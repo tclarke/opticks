@@ -22,7 +22,7 @@ SystemServicesImp* SystemServicesImp::singleton = NULL;
 
 SystemServicesImp* SystemServicesImp::instance()
 {
-   if(singleton == NULL)
+   if (singleton == NULL)
    {
       singleton = new SystemServicesImp;
    }
@@ -40,7 +40,7 @@ SystemServicesImp::SystemServicesImp() : mLoggingActive(true)
 {
    int facility(LOG_USER);
 
-   if(mLoggingActive)
+   if (mLoggingActive)
    {
       openlog(APP_NAME, LOG_PID, facility);
    }
@@ -48,7 +48,7 @@ SystemServicesImp::SystemServicesImp() : mLoggingActive(true)
 
 SystemServicesImp::~SystemServicesImp()
 {
-   if(mLoggingActive)
+   if (mLoggingActive)
    {
       closelog();
    }
@@ -56,7 +56,7 @@ SystemServicesImp::~SystemServicesImp()
 
 void SystemServicesImp::WriteLogInfo(string message)
 {
-   if(mLoggingActive)
+   if (mLoggingActive)
    {
       syslog(LOG_INFO, message.c_str());
    }
@@ -64,7 +64,7 @@ void SystemServicesImp::WriteLogInfo(string message)
 
 void SystemServicesImp::WriteLogWarning(string message)
 {
-   if(mLoggingActive)
+   if (mLoggingActive)
    {
       syslog(LOG_WARNING, message.c_str());
    }
@@ -72,7 +72,7 @@ void SystemServicesImp::WriteLogWarning(string message)
 
 void SystemServicesImp::WriteLogError(string message)
 {
-   if(mLoggingActive)
+   if (mLoggingActive)
    {
       syslog(LOG_ERR, message.c_str());
    }
@@ -96,7 +96,7 @@ SystemServicesImp::~SystemServicesImp()
 
 void SystemServicesImp::WriteLogInfo(string message)
 {
-   if(mpHandle != NULL)
+   if (mpHandle != NULL)
    {
       PCTSTR aInsertions[] = {message.c_str()};
       ReportEvent(mpHandle,EVENTLOG_INFORMATION_TYPE,0,APP_MESSAGE,NULL,1,0,aInsertions,NULL);
@@ -105,7 +105,7 @@ void SystemServicesImp::WriteLogInfo(string message)
 
 void SystemServicesImp::WriteLogWarning(string message)
 {
-   if(mpHandle != NULL)
+   if (mpHandle != NULL)
    {
       PCTSTR aInsertions[] = {message.c_str()};
       ReportEvent(mpHandle,EVENTLOG_WARNING_TYPE,0,APP_MESSAGE,NULL,1,0,aInsertions,NULL);
@@ -114,7 +114,7 @@ void SystemServicesImp::WriteLogWarning(string message)
 
 void SystemServicesImp::WriteLogError(string message)
 {
-   if(mpHandle != NULL)
+   if (mpHandle != NULL)
    {
       PCTSTR aInsertions[] = {message.c_str()};
       ReportEvent(mpHandle,EVENTLOG_ERROR_TYPE,0,APP_MESSAGE,NULL,1,0,aInsertions,NULL);

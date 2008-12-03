@@ -45,7 +45,9 @@ namespace
    string sKmlNamespace = "http://earth.google.com/kml/2.1";
 };
 
-Kml::Kml(bool exportImages) : mXml("kml", sKmlNamespace, Service<MessageLogMgr>()->getLog(), true), mExportImages(exportImages)
+Kml::Kml(bool exportImages) :
+   mXml("kml", sKmlNamespace, Service<MessageLogMgr>()->getLog(), true),
+   mExportImages(exportImages)
 {
 }
 
@@ -60,10 +62,10 @@ QString Kml::toString()
 
 bool Kml::toFile(const std::string &filename)
 {
-   if(mExportImages) // output file is a kmz
+   if (mExportImages) // output file is a kmz
    {
       zipFile pZip = zipOpen(filename.c_str(), APPEND_STATUS_CREATE);
-      if(pZip == NULL)
+      if (pZip == NULL)
       {
          return false;
       }
@@ -84,10 +86,11 @@ bool Kml::toFile(const std::string &filename)
       zipWriteInFileInZip(pZip, data.toAscii(), data.size());
       zipCloseFileInZip(pZip);
 
-      const QMap<QString,QByteArray> images = getImages();
-      for(QMap<QString,QByteArray>::const_iterator image = images.begin(); image != images.end(); ++image)
+      const QMap<QString, QByteArray> images = getImages();
+      for (QMap<QString, QByteArray>::const_iterator image = images.begin(); image != images.end(); ++image)
       {
-         zipOpenNewFileInZip(pZip, image.key().toAscii(), &nfo, NULL, 0, NULL, 0, NULL, Z_DEFLATED, Z_DEFAULT_COMPRESSION);
+         zipOpenNewFileInZip(pZip, image.key().toAscii(), &nfo, NULL, 0, NULL, 0, NULL, Z_DEFLATED,
+            Z_DEFAULT_COMPRESSION);
          zipWriteInFileInZip(pZip, image.value().data(), image.value().size());
          zipCloseFileInZip(pZip);
       }
@@ -97,7 +100,7 @@ bool Kml::toFile(const std::string &filename)
    else
    {
       FileResource pFile(filename.c_str(), "wt");
-      if(pFile == NULL)
+      if (pFile == NULL)
       {
          return false;
       }
@@ -113,9 +116,9 @@ bool Kml::addSession()
    mXml.pushAddPoint(mXml.addElement("Folder"));
    mXml.addText("Active Data Sets", mXml.addElement("name"));
    Service<DesktopServices>()->getWindows(SPATIAL_DATA_WINDOW, windows);
-   for(vector<Window*>::const_iterator window = windows.begin(); window != windows.end(); ++window)
+   for (vector<Window*>::const_iterator window = windows.begin(); window != windows.end(); ++window)
    {
-      if(!addWindow(static_cast<SpatialDataWindow*>(*window)))
+      if (!addWindow(static_cast<SpatialDataWindow*>(*window)))
       {
          return false;
       }
@@ -125,30 +128,31 @@ bool Kml::addSession()
    return true;
 }
 
-bool Kml::addWindow(SpatialDataWindow *pWindow)
+bool Kml::addWindow(const SpatialDataWindow* pWindow)
 {
-   if(pWindow == NULL)
+   if (pWindow == NULL)
    {
       return false;
    }
    return addView(pWindow->getSpatialDataView());
 }
 
-bool Kml::addView(SpatialDataView *pView)
+bool Kml::addView(const SpatialDataView* pView)
 {
-   if(pView == NULL)
+   if (pView == NULL)
    {
       return false;
    }
    // ensure we are georeferenced
-   RasterElement *pElement = static_cast<RasterElement*>(pView->getLayerList()->getPrimaryRasterElement());
-   if(pElement == NULL || !pElement->isGeoreferenced())
+   RasterElement* pElement = static_cast<RasterElement*>(pView->getLayerList()->getPrimaryRasterElement());
+   if (pElement == NULL || !pElement->isGeoreferenced())
    {
       return false;
    }
+   Layer* pPrimaryLayer = pView->getLayerList()->getLayer(RASTER, pElement);
    mXml.pushAddPoint(mXml.addElement("Folder"));
    string name = pView->getDisplayName();
-   if(name.empty())
+   if (name.empty())
    {
       name = pView->getName();
    }
@@ -157,10 +161,14 @@ bool Kml::addView(SpatialDataView *pView)
 
    vector<Layer*> layers;
    pView->getLayerList()->getLayers(layers);
-   int totalLayers = pView->getLayerList()->getNumLayers();
-   for(vector<Layer*>::const_iterator layer = layers.begin(); layer != layers.end(); ++layer)
+   int totalLayers = static_cast<int>(pView->getLayerList()->getNumLayers());
+   for (vector<Layer*>::const_iterator layer = layers.begin(); layer != layers.end(); ++layer)
    {
-      if(!addLayer(*layer, pElement, pView, totalLayers))
+      if (!pView->isLayerDisplayed(*layer))
+      {
+         continue;
+      }
+      if (!addLayer(*layer, pPrimaryLayer, pView, totalLayers))
       {
          return false;
       }
@@ -170,75 +178,100 @@ bool Kml::addView(SpatialDataView *pView)
    return true;
 }
 
-bool Kml::addLayer(Layer *pLayer, RasterElement *pGeoElement, SpatialDataView *pView, int totalLayers)
+bool Kml::addLayer(Layer* pLayer, const Layer* pGeoLayer, const SpatialDataView* pView, int totalLayers)
 {
-   if(pLayer == NULL)
+   if (pLayer == NULL)
    {
       return false;
    }
-   switch(pLayer->getLayerType())
+   switch (pLayer->getLayerType())
    {
    case ANNOTATION:
    case AOI_LAYER:
    case GRAPHIC_LAYER:
       // These are polygonal layers
       generatePolygonalLayer(dynamic_cast<GraphicLayer*>(pLayer),
-         pView->isLayerDisplayed(pLayer), totalLayers - pView->getLayerDisplayIndex(pLayer), pGeoElement);
+         pView->isLayerDisplayed(pLayer), totalLayers - pView->getLayerDisplayIndex(pLayer), pGeoLayer);
       break;
    case RASTER:
       {
-         RasterLayer *pRasterLayer = dynamic_cast<RasterLayer*>(pLayer);
-         RasterElement *pRasterElement = pRasterLayer->getDisplayedRasterElement(GRAY);
-         if(pRasterElement != NULL)
+         RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(pLayer);
+         RasterElement* pRasterElement = pRasterLayer->getDisplayedRasterElement(GRAY);
+         if (pRasterElement != NULL)
          {
             bool layerIsDisplayed = pView->isLayerDisplayed(pLayer);
             int order = totalLayers - pView->getLayerDisplayIndex(pLayer) - 1;
-            if(pView->getAnimationController() == NULL)
+            if (pView->getAnimationController() == NULL)
             {
-               generateGroundOverlayLayer(pLayer, layerIsDisplayed, order, pGeoElement, -1);
+               generateGroundOverlayLayer(pLayer, layerIsDisplayed, order, pGeoLayer, -1);
             }
             else
             {
                mXml.pushAddPoint(mXml.addElement("Folder"));
                mXml.addText("Frame Data", mXml.addElement("name"));
-               vector<DimensionDescriptor> frames = static_cast<RasterDataDescriptor*>(pRasterElement->getDataDescriptor())->getBands();
-               for(vector<DimensionDescriptor>::const_iterator frame = frames.begin(); frame != frames.end(); ++frame)
+               vector<DimensionDescriptor> frames =
+                  static_cast<RasterDataDescriptor*>(pRasterElement->getDataDescriptor())->getBands();
+               for (vector<DimensionDescriptor>::const_iterator frame = frames.begin(); frame != frames.end(); ++frame)
                {
-                  generateGroundOverlayLayer(pLayer, layerIsDisplayed, order, pGeoElement, frame->getActiveNumber());
+                  generateGroundOverlayLayer(pLayer, layerIsDisplayed, order, pGeoLayer, frame->getActiveNumber());
                }
                mXml.popAddPoint();
             }
             break;
          }
-      } // fall through...if there is no displayed raster element, export the flattened layer
+         // fall through...if there is no displayed raster element, export the flattened layer
+      }
    case PSEUDOCOLOR:
    case THRESHOLD:
       // These are image layers
-      generateGroundOverlayLayer(pLayer, pView->isLayerDisplayed(pLayer), totalLayers - pView->getLayerDisplayIndex(pLayer), pGeoElement);
+      generateGroundOverlayLayer(pLayer, pView->isLayerDisplayed(pLayer),
+         totalLayers - pView->getLayerDisplayIndex(pLayer), pGeoLayer);
       break;
    case CONTOUR_MAP:
    case LAT_LONG:
    case TIEPOINT_LAYER:
    default:
       // These are unsupported layers
-      return false;
+      return true;
    }
    return true;
 }
 
-void Kml::generateBoundingBox(RasterElement *pGeoElement)
+void Kml::generateBoundingBox(const Layer* pGeoLayer, int bbox[4])
 {
-   RasterDataDescriptor *pDesc = static_cast<RasterDataDescriptor*>(pGeoElement->getDataDescriptor());
+   VERIFYNRV(pGeoLayer != NULL);
+   double dbbox[4];
+   pGeoLayer->translateScreenToData(bbox[0], bbox[1], dbbox[0], dbbox[1]);
+   pGeoLayer->translateScreenToData(bbox[2], bbox[3], dbbox[2], dbbox[3]);
+   if (dbbox[0] > dbbox[2])
+   {
+      std::swap(dbbox[0], dbbox[2]);
+   }
+   if (dbbox[1] > dbbox[3])
+   {
+      std::swap(dbbox[1], dbbox[3]);
+   }
+
+   RasterElement* pGeoElement = dynamic_cast<RasterElement*>(pGeoLayer->getDataElement());
+   VERIFYNRV(pGeoElement != NULL);
+   RasterDataDescriptor* pDesc = static_cast<RasterDataDescriptor*>(pGeoElement->getDataDescriptor());
    unsigned int elementWidth = pDesc->getColumnCount();
    unsigned int elementHeight = pDesc->getRowCount();
    mXml.pushAddPoint(mXml.addElement("LatLonAltBox"));
    vector<LocationType> corners;
-   corners.push_back(LocationType(0, 0));
-   corners.push_back(LocationType(elementWidth, elementHeight));
+   corners.push_back(LocationType(dbbox[0], dbbox[1]));
+   if (bbox[2] == bbox[0] && bbox[3] == bbox[1])
+   {
+      corners.push_back(LocationType(elementWidth, elementHeight));
+   }
+   else
+   {
+      corners.push_back(LocationType(dbbox[2], dbbox[3]));
+   }
    vector<LocationType> geoCorners = pGeoElement->convertPixelsToGeocoords(corners);
    mXml.addText(geoCorners[0].mX, mXml.addElement("north"));
    mXml.addText(geoCorners[1].mX, mXml.addElement("south"));
-   if(geoCorners[0].mY > geoCorners[1].mY)
+   if (geoCorners[0].mY > geoCorners[1].mY)
    {
       mXml.addText(geoCorners[0].mY, mXml.addElement("east"));
       mXml.addText(geoCorners[1].mY, mXml.addElement("west"));
@@ -251,15 +284,17 @@ void Kml::generateBoundingBox(RasterElement *pGeoElement)
    mXml.popAddPoint(); // LatLonBox
 }
 
-void Kml::generatePolygonalLayer(GraphicLayer *pGraphicLayer, bool visible, int order, RasterElement *pGeoElement)
+void Kml::generatePolygonalLayer(const GraphicLayer* pGraphicLayer, bool visible, int order, const Layer* pGeoLayer)
 {
-   if(pGraphicLayer == NULL)
+   VERIFYNRV(pGeoLayer != NULL);
+   if (pGraphicLayer == NULL)
    {
       return;
    }
+   RasterElement* pGeoElement = dynamic_cast<RasterElement*>(pGeoLayer->getDataElement());
    mXml.pushAddPoint(mXml.addElement("Folder"));
    string name = pGraphicLayer->getDisplayName();
-   if(name.empty())
+   if (name.empty())
    {
       name = pGraphicLayer->getName();
    }
@@ -268,10 +303,10 @@ void Kml::generatePolygonalLayer(GraphicLayer *pGraphicLayer, bool visible, int 
    mXml.addText(visible ? "1" : "0", mXml.addElement("visibility"));
    list<GraphicObject*> objects;
    pGraphicLayer->getObjects(objects);
-   for(list<GraphicObject*>::const_iterator object = objects.begin(); object != objects.end(); ++object)
+   for (list<GraphicObject*>::const_iterator object = objects.begin(); object != objects.end(); ++object)
    {
-      GraphicObject *pObject = *object;
-      if(pObject == NULL)
+      GraphicObject* pObject = *object;
+      if (pObject == NULL)
       {
          continue;
       }
@@ -282,30 +317,33 @@ void Kml::generatePolygonalLayer(GraphicLayer *pGraphicLayer, bool visible, int 
       mXml.pushAddPoint(mXml.addElement("PolyStyle"));
       ColorType c = pObject->getFillColor();
       QChar fc('0');
-      mXml.addText(QString("%1%2%3%4").arg(c.mAlpha, 2, 16, fc).arg(c.mBlue, 2, 16, fc).arg(c.mGreen, 2, 16, fc).arg(c.mRed, 2, 16, fc).toAscii().data(),
+      mXml.addText(QString("%1%2%3%4").arg(c.mAlpha, 2, 16, fc).arg(c.mBlue, 2, 16, fc).arg(
+         c.mGreen, 2, 16, fc).arg(c.mRed, 2, 16, fc).toAscii().data(),
          mXml.addElement("color"));
       mXml.addText(pObject->getLineState() ? "1" : "0", mXml.addElement("outline"));
       mXml.addText(pObject->getFillState() ? "1" : "0", mXml.addElement("fill"));
       mXml.popAddPoint(); // PolyStyle
       mXml.pushAddPoint(mXml.addElement("LineStyle"));
       c = pObject->getLineColor();
-      mXml.addText(QString("%1%2%3%4").arg(c.mAlpha, 2, 16, fc).arg(c.mBlue, 2, 16, fc).arg(c.mGreen, 2, 16, fc).arg(c.mRed, 2, 16, fc).toAscii().data(),
+      mXml.addText(QString("%1%2%3%4").arg(c.mAlpha, 2, 16, fc).arg(c.mBlue, 2, 16, fc).arg(
+         c.mGreen, 2, 16, fc).arg(c.mRed, 2, 16, fc).toAscii().data(),
          mXml.addElement("color"));
       mXml.addText(StringUtilities::toXmlString(pObject->getLineWidth()), mXml.addElement("width"));
       mXml.popAddPoint(); // LineStyle
       mXml.popAddPoint(); // Style
-      switch(pObject->getGraphicObjectType())
+      switch (pObject->getGraphicObjectType())
       {
       case MULTIPOINT_OBJECT:
          {
             mXml.pushAddPoint(mXml.addElement("MultiGeometry"));
             vector<LocationType> vertices = static_cast<MultipointObject*>(pObject)->getVertices();
-            for(vector<LocationType>::const_iterator vertex = vertices.begin(); vertex != vertices.end(); ++vertex)
+            for (vector<LocationType>::const_iterator vertex = vertices.begin(); vertex != vertices.end(); ++vertex)
             {
                mXml.pushAddPoint(mXml.addElement("Point"));
                mXml.addText(QString::number(order).toAscii().data(), mXml.addElement("drawOrder"));
                LocationType geo = pGeoElement->convertPixelToGeocoord(*vertex);
-               mXml.addText(QString("%1,%2").arg(geo.mY, 0, 'f', 10).arg(geo.mX, 0, 'f', 10).toAscii().data(), mXml.addElement("coordinates"));
+               mXml.addText(QString("%1,%2").arg(geo.mY, 0, 'f', 10).arg(geo.mX, 0, 'f', 10).toAscii().data(),
+                  mXml.addElement("coordinates"));
                mXml.popAddPoint(); // Point
             }
             mXml.popAddPoint();
@@ -323,7 +361,7 @@ void Kml::generatePolygonalLayer(GraphicLayer *pGraphicLayer, bool visible, int 
             mXml.addText("1", mXml.addElement("tessellate"));
             QStringList coords;
             vector<LocationType> vertices;
-            if(pObject->getGraphicObjectType() == POLYLINE_OBJECT)
+            if (pObject->getGraphicObjectType() == POLYLINE_OBJECT)
             {
                vertices = static_cast<PolylineObject*>(pObject)->getVertices();
             }
@@ -334,7 +372,7 @@ void Kml::generatePolygonalLayer(GraphicLayer *pGraphicLayer, bool visible, int 
                vertices.push_back(ll);
                vertices.push_back(ur);
             }
-            for(vector<LocationType>::const_iterator vertex = vertices.begin(); vertex != vertices.end(); ++vertex)
+            for (vector<LocationType>::const_iterator vertex = vertices.begin(); vertex != vertices.end(); ++vertex)
             {
                LocationType geo = pGeoElement->convertPixelToGeocoord(*vertex);
                coords << QString("%1,%2").arg(geo.mY, 0, 'f', 10).arg(geo.mX, 0, 'f', 10);
@@ -358,14 +396,14 @@ void Kml::generatePolygonalLayer(GraphicLayer *pGraphicLayer, bool visible, int 
             LocationType center = (ll + ur);
             center.mX /= 2.0;
             center.mY /= 2.0;
-            if(pObject->getGraphicObjectType() == RECTANGLE_OBJECT)
+            if (pObject->getGraphicObjectType() == RECTANGLE_OBJECT)
             {
                vertices.push_back(ll);
                vertices.push_back(LocationType(ll.mX, ur.mY));
                vertices.push_back(ur);
                vertices.push_back(LocationType(ur.mX, ll.mY));
             }
-            else if(pObject->getGraphicObjectType() == TRIANGLE_OBJECT)
+            else if (pObject->getGraphicObjectType() == TRIANGLE_OBJECT)
             {
                double apex = pObject->getApex();
                vertices.push_back(ll);
@@ -380,7 +418,7 @@ void Kml::generatePolygonalLayer(GraphicLayer *pGraphicLayer, bool visible, int 
             QPointF qcenter(center.mX, center.mY);
             QMatrix matrix;
             matrix.rotate(pObject->getRotation());
-            for(vector<LocationType>::const_iterator vertex = vertices.begin(); vertex != vertices.end(); ++vertex)
+            for (vector<LocationType>::const_iterator vertex = vertices.begin(); vertex != vertices.end(); ++vertex)
             {
                QPointF point(vertex->mX - center.mX, vertex->mY - center.mY);
                point = point * matrix;
@@ -401,15 +439,16 @@ void Kml::generatePolygonalLayer(GraphicLayer *pGraphicLayer, bool visible, int 
    mXml.popAddPoint(); // Folder
 }
 
-void Kml::generateGroundOverlayLayer(Layer *pLayer, bool visible, int order, RasterElement *pGeoElement, int frame)
+void Kml::generateGroundOverlayLayer(Layer* pLayer, bool visible, int order, const Layer* pGeoLayer, int frame)
 {
+   VERIFYNRV(pGeoLayer != NULL && pLayer != NULL);
    mXml.pushAddPoint(mXml.addElement("GroundOverlay"));
    string name = pLayer->getDisplayName();
-   if(name.empty())
+   if (name.empty())
    {
       name = pLayer->getName();
    }
-   if(frame >= 0)
+   if (frame >= 0)
    {
       name += " frame " + StringUtilities::toDisplayString(frame+1);
    }
@@ -418,12 +457,13 @@ void Kml::generateGroundOverlayLayer(Layer *pLayer, bool visible, int order, Ras
    mXml.addText(visible ? "1" : "0", mXml.addElement("visibility"));
    mXml.addText(QString::number(order).toAscii().data(), mXml.addElement("drawOrder"));
    QString layerId = QString::fromStdString(pLayer->getId());
-   if(mExportImages)
+   int bbox[4] = {0, 0, 0, 0};
+   if (mExportImages)
    {
       QByteArray bytes(5 * 1024 * 1024, '\0');
       QBuffer buffer(&bytes);
       QString fileName = layerId;
-      if(frame >= 0)
+      if (frame >= 0)
       {
          fileName += QString("/frame%1").arg(frame);
          mXml.pushAddPoint(mXml.addElement("TimeStamp"));
@@ -433,7 +473,7 @@ void Kml::generateGroundOverlayLayer(Layer *pLayer, bool visible, int order, Ras
          mXml.popAddPoint();
       }
       fileName += ".png";
-      if(ImageHandler::getSessionItemImage(pLayer, buffer, "PNG", frame))
+      if (ImageHandler::getSessionItemImage(pLayer, buffer, "PNG", frame, bbox))
       {
          mImages[fileName] = bytes;
          mXml.pushAddPoint(mXml.addElement("Icon"));
@@ -444,8 +484,9 @@ void Kml::generateGroundOverlayLayer(Layer *pLayer, bool visible, int order, Ras
    else
    {
       layerId = QUrl::toPercentEncoding(layerId);
-      QString imageUrl(QString("http://localhost:%1/images/%2.png").arg(KMLServer::getSettingKmlServerPort()).arg(layerId));
-      if(frame >= 0)
+      QString imageUrl(QString("http://localhost:%1/images/%2.png").arg(KMLServer::getSettingKmlServerPort()).arg(
+         layerId));
+      if (frame >= 0)
       {
          imageUrl += QString("?frame=%1").arg(frame);
          mXml.pushAddPoint(mXml.addElement("TimeStamp"));
@@ -458,7 +499,7 @@ void Kml::generateGroundOverlayLayer(Layer *pLayer, bool visible, int order, Ras
       mXml.addText(imageUrl.toStdString(), mXml.addElement("href"));
       mXml.popAddPoint();
    }
-   generateBoundingBox(pGeoElement);
+   generateBoundingBox(pGeoLayer, bbox);
    mXml.popAddPoint(); // GroundOverlay
 }
 

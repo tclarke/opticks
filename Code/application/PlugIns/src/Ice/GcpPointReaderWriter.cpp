@@ -22,21 +22,35 @@ using namespace std;
 class TempGcpTransferStruct
 {
 public:
-   TempGcpTransferStruct() {}
+   TempGcpTransferStruct() :
+      mPixelX(0.0),
+      mPixelY(0.0),
+      mGeoX(0.0),
+      mGeoY(0.0)
+   {
+   }
+
    double mPixelX;
    double mPixelY;
    double mGeoX;
    double mGeoY;
 };
 
-GcpPointListReaderWriter::GcpPointListReaderWriter()
-: mpReadBuffer(NULL), mpWriteBuffer(NULL), mDataType(-1), mpValue(NULL)
+GcpPointListReaderWriter::GcpPointListReaderWriter() :
+   mpValue(NULL),
+   mpWriteBuffer(NULL),
+   mpReadBuffer(NULL),
+   mValid(false),
+   mDataType(-1)
 {
 }
 
-GcpPointListReaderWriter::GcpPointListReaderWriter(hid_t dataType)
-: mpValue(NULL), mpReadBuffer(NULL), mpWriteBuffer(NULL), mDataType(dataType),
-mValid(false)
+GcpPointListReaderWriter::GcpPointListReaderWriter(hid_t dataType) :
+   mpValue(NULL),
+   mpWriteBuffer(NULL),
+   mpReadBuffer(NULL),
+   mValid(false),
+   mDataType(dataType)
 {
    //if data cannot be read, return from constructor before setting mValid to true
    //so that isValid() will return false
@@ -86,7 +100,11 @@ Hdf5TypeResource GcpPointListReaderWriter::getReadMemoryType() const
 
 bool GcpPointListReaderWriter::setDataToWrite(void* pObject)
 {
-   if (pObject == NULL) return false;
+   if (pObject == NULL)
+   {
+      return false;
+   }
+
    mpValue = reinterpret_cast<list<GcpPoint>*>(pObject);
    delete [] mpWriteBuffer;
    mpWriteBuffer = NULL;

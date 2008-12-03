@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef HDF5_DATASET_H
-#define HDF5_DATASET_H
+#ifndef HDF5DATASET_H
+#define HDF5DATASET_H
 
 #include "EnumWrapper.h"
 #include "Hdf5CustomReader.h"

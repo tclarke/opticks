@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef HDF5_GROUP_H
-#define HDF5_GROUP_H
+#ifndef HDF5GROUP_H
+#define HDF5GROUP_H
 
 #include <string>
 #include <vector>

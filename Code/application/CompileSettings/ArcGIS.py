@@ -11,7 +11,7 @@ def generate(env):
     if not path:
        SCons.Warnings.warn(ArcGISNotFound,"Could not detect ArcGIS")
     else:
-       env.AppendUnique(CXXFLAGS="-I%s/include -I%s/com" % (path,path),
+       env.AppendUnique(CXXFLAGS=["-I%s/include" % (path), "-I%s/com" % (path)],
                         LIBPATH=["%s/bin" % path],
                         LIBS=["arcsdk"])
     env.Append(CPPDEFINES=["ESRI_UNIX"])

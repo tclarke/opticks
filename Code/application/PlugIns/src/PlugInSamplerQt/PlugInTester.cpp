@@ -62,7 +62,7 @@ bool PlugInTester::execute(PlugInArgList* pInArgs, PlugInArgList* pOutArgs)
    VERIFY(pInArgs != NULL);
 
    Progress* pProgress = NULL;
-   PlugInArg *pArg = NULL;
+   PlugInArg* pArg = NULL;
    if (pInArgs != NULL && pInArgs->getArg(ProgressArg(), pArg) && pArg != NULL)
    {
       pProgress = reinterpret_cast<Progress*>(pArg->getActualValue());
@@ -125,9 +125,11 @@ bool PlugInTester::execute(PlugInArgList* pInArgs, PlugInArgList* pOutArgs)
             msg += " with errors!";
          }
          else
+         {
             msg += "!";
+         }
 
-         if(ostr.str().size() > 0)
+         if (ostr.str().size() > 0)
          {
             msg += "\n" + ostr.str() + "\n";
          }

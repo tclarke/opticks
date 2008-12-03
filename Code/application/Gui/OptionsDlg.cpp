@@ -28,8 +28,8 @@
 #include <vector>
 using namespace std;
 
-OptionsDlg::OptionsDlg(QWidget* parent) :
-   QDialog(parent)
+OptionsDlg::OptionsDlg(QWidget* pParent) :
+   QDialog(pParent)
 {
    mpSplitter = new QSplitter();
 
@@ -77,7 +77,8 @@ OptionsDlg::OptionsDlg(QWidget* parent) :
    populateDialogWithOptions();
 
    // Connections
-   VERIFYNR(connect(mpOptionSelection, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)), this, SLOT(optionSelected(QTreeWidgetItem*))));
+   VERIFYNR(connect(mpOptionSelection, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this,
+      SLOT(optionSelected(QTreeWidgetItem*))));
    VERIFYNR(connect(pOkButton, SIGNAL(clicked()), this, SLOT(accept())));
    VERIFYNR(connect(pCancelButton, SIGNAL(clicked()), this, SLOT(reject())));
 
@@ -135,7 +136,8 @@ void OptionsDlg::populateDialogWithOptions()
                }
                if (pFoundItem == NULL)
                {
-                  QTreeWidgetItem* pNewItem = new QTreeWidgetItem(static_cast<QTreeWidgetItem*>(NULL), QStringList(optionPartName));
+                  QTreeWidgetItem* pNewItem = new QTreeWidgetItem(static_cast<QTreeWidgetItem*>(NULL),
+                     QStringList(optionPartName));
                   pCurItem->addChild(pNewItem);
                   pCurItem = pNewItem;
                }
@@ -145,7 +147,7 @@ void OptionsDlg::populateDialogWithOptions()
                }
             }
 
-            mOptionWidgets.insert(pair<QTreeWidgetItem* const,QWidget*>(pCurItem, pWidget));
+            mOptionWidgets.insert(pair<QTreeWidgetItem* const, QWidget*>(pCurItem, pWidget));
          }
       }
    }
@@ -171,9 +173,10 @@ void OptionsDlg::fixNodes(QTreeWidgetItem* pCurItem)
          {
             //we have a custom widget associated with a non-leaf node, fix this by
             //forcibly making it a leaf node
-            QTreeWidgetItem* pNewNode = new QTreeWidgetItem(static_cast<QTreeWidgetItem*>(NULL), QStringList(pCurChild->text(0)));
+            QTreeWidgetItem* pNewNode = new QTreeWidgetItem(static_cast<QTreeWidgetItem*>(NULL),
+               QStringList(pCurChild->text(0)));
             pCurChild->addChild(pNewNode);
-            mOptionWidgets.insert(pair<QTreeWidgetItem* const,QWidget*>(pNewNode, iter->second));
+            mOptionWidgets.insert(pair<QTreeWidgetItem* const, QWidget*>(pNewNode, iter->second));
             mOptionWidgets.erase(iter);
          }
       }

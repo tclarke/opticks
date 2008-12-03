@@ -51,7 +51,12 @@
 
 using namespace boost;
 
-Nitf::NitfExporter::NitfExporter()
+Nitf::NitfExporter::NitfExporter() :
+   mpRaster(NULL),
+   mpRasterLayer(NULL),
+   mpProgress(NULL),
+   mpDestination(NULL),
+   mbAborted(false)
 {
    setName("NITF Exporter");
    setExtensions("NITF Files (*.ntf *.NTF *.nitf *.NITF *.r0 *.R0)");
@@ -59,8 +64,6 @@ Nitf::NitfExporter::NitfExporter()
    setDescriptorId("{C9FC2ED1-60DF-4f4b-B428-22950FE6F04E}");
    allowMultipleInstances(true);
    setProductionStatus(APP_IS_PRODUCTION_RELEASE);
-
-   mbAborted = false;
 }
 
 Nitf::NitfExporter::~NitfExporter()
@@ -121,7 +124,7 @@ bool Nitf::NitfExporter::execute(PlugInArgList *pInParam, PlugInArgList *pOutPar
    VERIFY(mpDestination != NULL);
    mpDestination->addToMessageLog(pStep.get());
 
-   const Filename &filename = mpDestination->getFilename();
+   const Filename& filename = mpDestination->getFilename();
 
    // This is the cube to export data from.
    mpRaster = pInParam->getPlugInArgValue<RasterElement>(ExportItemArg());
@@ -130,16 +133,16 @@ bool Nitf::NitfExporter::execute(PlugInArgList *pInParam, PlugInArgList *pOutPar
    // This DynamicObject has whatever the importer for this cube wanted to put in it.
    // If it was imported as a NITF, it has whatever our NITF importer placed in it, and it should
    // get the file/image header data and TREs from it
-   const DynamicObject *pMetadata = mpRaster->getMetadata();
+   const DynamicObject* pMetadata = mpRaster->getMetadata();
 
-   const string PREFIX = "imagewriter.";
+   const string prefix = "imagewriter.";
    ossimKeywordlist kwl;
 
-   kwl.add(PREFIX.c_str(), ossimKeywordNames::TYPE_KW, "ossimImageFileWriter", true);
+   kwl.add(prefix.c_str(), ossimKeywordNames::TYPE_KW, "ossimImageFileWriter", true);
    string fn = filename.getFullPathAndName().c_str();
-   kwl.add(PREFIX.c_str(), ossimKeywordNames::FILENAME_KW, fn.c_str());
+   kwl.add(prefix.c_str(), ossimKeywordNames::FILENAME_KW, fn.c_str());
 
-   ossimRefPtr<ossimImageWriter> pOiw = ossimImageWriterFactoryRegistry::instance()->createWriter(kwl, PREFIX.c_str());
+   ossimRefPtr<ossimImageWriter> pOiw = ossimImageWriterFactoryRegistry::instance()->createWriter(kwl, prefix.c_str());
    ossimNitfWriter* pFileWriter = PTR_CAST(ossimNitfWriter, pOiw.get());
    VERIFY(pFileWriter != NULL);
 
@@ -159,7 +162,8 @@ bool Nitf::NitfExporter::execute(PlugInArgList *pInParam, PlugInArgList *pOutPar
       bandList.push_back(i);
    }
 
-   pSelector = auto_ptr<ossimBandSelector>(new ossimBandSelector);
+   ossimBandSelector* pTempSelector = new ossimBandSelector();
+   pSelector = auto_ptr<ossimBandSelector>(pTempSelector);
    VERIFY(pSelector.get() != NULL);
    pSelector->connectMyInputTo(&source);
    pSelector->setOutputBandList(bandList);
@@ -187,7 +191,7 @@ bool Nitf::NitfExporter::execute(PlugInArgList *pInParam, PlugInArgList *pOutPar
 
    bool status = true;
    string errorMessage;
-   RasterDataDescriptor *pDd = dynamic_cast<RasterDataDescriptor*>(mpRaster->getDataDescriptor());
+   RasterDataDescriptor* pDd = dynamic_cast<RasterDataDescriptor*>(mpRaster->getDataDescriptor());
    VERIFY(pDd != NULL);
 
    EncodingType dataType = pDd->getDataType();
@@ -280,10 +284,10 @@ void Nitf::NitfExporter::processEvent(ossimEvent &event)
 {
    if (event.canCastTo("ossimProcessProgressEvent"))
    {
-      ossimProcessProgressEvent *pProgressEvent = PTR_CAST(ossimProcessProgressEvent, &event);
+      ossimProcessProgressEvent* pProgressEvent = PTR_CAST(ossimProcessProgressEvent, &event);
       VERIFYNRV(pProgressEvent != NULL);
 
-      Progress *pProgress = getProgress();
+      Progress* pProgress = getProgress();
       if (pProgress != NULL)
       {
          pProgress->updateProgress("Exporting data", pProgressEvent->getPercentComplete(), NORMAL);
@@ -445,7 +449,7 @@ bool Nitf::NitfExporter::exportClassification(const PlugInArgList* pArgList, con
 ValidationResultType Nitf::NitfExporter::validate(const PlugInArgList* pArgList, std::string& errorMessage) const
 {
    VERIFYRV(pArgList != NULL, VALIDATE_FAILURE);
-   const RasterFileDescriptor* pDescriptor =pArgList->getPlugInArgValue<RasterFileDescriptor>(ExportDescriptorArg());
+   const RasterFileDescriptor* pDescriptor = pArgList->getPlugInArgValue<RasterFileDescriptor>(ExportDescriptorArg());
    if (validateExportDescriptor(pDescriptor, errorMessage) == false)
    {
       return VALIDATE_FAILURE;
@@ -522,7 +526,8 @@ QWidget* Nitf::NitfExporter::getExportOptionsWidget(const PlugInArgList* pInArgL
       const Classification* pClassification = pDataDescriptor->getClassification();
       VERIFYRV(pClassification != NULL, NULL);
 
-      mpOptionsWidget.reset(new OptionsNitfExporter(pClassification));
+      OptionsNitfExporter* pOptions = new OptionsNitfExporter(pClassification);
+      mpOptionsWidget.reset(pOptions);
       VERIFYRV(mpOptionsWidget.get() != NULL, NULL);
    }
 

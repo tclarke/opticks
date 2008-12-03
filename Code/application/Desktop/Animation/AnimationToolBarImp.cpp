@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <math.h>
-
 #include <QtCore/QDateTime>
 #include <QtCore/QEvent>
 #include <QtGui/QLayout>
@@ -17,9 +15,10 @@
 #include <QtGui/QWidgetAction>
 
 #include "Animation.h"
-#include "AnimationImp.h"
 #include "AnimationController.h"
 #include "AnimationControllerImp.h"
+#include "AnimationCycleButton.h"
+#include "AnimationImp.h"
 #include "AnimationToolBar.h"
 #include "AnimationToolBarImp.h"
 #include "AppAssert.h"
@@ -28,6 +27,8 @@
 #include "Icons.h"
 #include "PixmapGrid.h"
 #include "StringUtilities.h"
+
+#include <math.h>
 
 #include <boost/rational.hpp>
 #include <string>
@@ -47,10 +48,11 @@ void AnimationToolBarImp::WheelEventSlider::wheelEvent(QWheelEvent *e)
 
 AnimationToolBarImp::AnimationToolBarImp(const string& id, QWidget* parent) :
    ToolBarImp(id, "Animation", parent),
+   mpChangeDirectionAction(NULL),
    mpStopAction(NULL),
    mpPlayPauseAction(NULL),
-   mpBackwardAction(NULL),
-   mpForwardAction(NULL),
+   mpSlowDownAction(NULL),
+   mpSpeedUpAction(NULL),
    mpFrameSpeedCombo(NULL),
    mpStepForwardAction(NULL),
    mpStepBackwardAction(NULL),
@@ -77,62 +79,76 @@ AnimationToolBarImp::AnimationToolBarImp(const string& id, QWidget* parent) :
 
    mpPlayPauseAction = addAction(pIcons->mAnimationPlayForward, QString(), this, SLOT(playPause()));
    mpPlayPauseAction->setAutoRepeat(false);
-   mpPlayPauseAction->setToolTip("Play");
+   mpPlayPauseAction->setShortcut(QKeySequence(Qt::Key_Space));
+   mpPlayPauseAction->setToolTip("Play//Pause");
    pDesktop->initializeAction(mpPlayPauseAction, shortcutContext);
 
-   mpBackwardAction = addAction(pIcons->mAnimationFastRewind, QString(), this, SLOT(backward()));
-   mpBackwardAction->setAutoRepeat(false);
-   mpBackwardAction->setToolTip("Rewind");
-   pDesktop->initializeAction(mpBackwardAction, shortcutContext);
-
-   mpForwardAction = addAction(pIcons->mAnimationFastForward, QString(), this, SLOT(forward()));
-   mpForwardAction->setAutoRepeat(false);
-   mpForwardAction->setToolTip("Fast forward");
-   pDesktop->initializeAction(mpForwardAction, shortcutContext);
-
-   mpFrameSpeedCombo = new QComboBox(this);
-   mpFrameSpeedCombo->addItem("0.1");
-   mpFrameSpeedCombo->addItem("0.25");
-   mpFrameSpeedCombo->addItem("0.5");
-   mpFrameSpeedCombo->addItem("0.75");
-   mpFrameSpeedCombo->addItem("1");
-   mpFrameSpeedCombo->addItem("2");
-   mpFrameSpeedCombo->addItem("5");
-   mpFrameSpeedCombo->addItem("10");
-   mpFrameSpeedCombo->addItem("30");
-   mpFrameSpeedCombo->addItem("60");
-   mpFrameSpeedCombo->setInsertPolicy(QComboBox::NoInsert);
-   mpFrameSpeedCombo->setToolTip("Speed (X)");
-   mpFrameSpeedCombo->setEditable(true);
-   mpFrameSpeedCombo->setCompleter(NULL);
-   QDoubleValidator* pValidator = new QDoubleValidator(mpFrameSpeedCombo);
-   pValidator->setDecimals(2);
-
-   mpFrameSpeedCombo->setValidator(pValidator);
-   VERIFYNR(connect(mpFrameSpeedCombo, SIGNAL(activated(const QString&)), this, SLOT(setFrameSpeed(const QString&))));
-
-   QLineEdit* pSpeedEdit = mpFrameSpeedCombo->lineEdit();
-   if (pSpeedEdit != NULL)
-   {
-      VERIFYNR(connect(pSpeedEdit, SIGNAL(editingFinished()), this, SLOT(setFrameSpeed())));
-   }
-
-   addWidget(mpFrameSpeedCombo);
-
    mpStepBackwardAction = addAction(pIcons->mAnimationAdvanceBackward, QString(), this, SLOT(stepBackward()));
-   mpStepBackwardAction->setAutoRepeat(false);
+   mpStepBackwardAction->setAutoRepeat(true);
    mpStepBackwardAction->setToolTip("Step backward");
    pDesktop->initializeAction(mpStepBackwardAction, shortcutContext);
 
    mpStepForwardAction = addAction(pIcons->mAnimationAdvanceForward, QString(), this, SLOT(stepForward()));
-   mpStepForwardAction->setAutoRepeat(false);
+   mpStepForwardAction->setAutoRepeat(true);
    mpStepForwardAction->setToolTip("Step forward");
    pDesktop->initializeAction(mpStepForwardAction, shortcutContext);
 
    addSeparator();
 
+   mpSlowDownAction = addAction(pIcons->mAnimationSlowDown, QString(), this, SLOT(slowDown()));
+   mpSlowDownAction->setAutoRepeat(false);
+   mpSlowDownAction->setToolTip("Slow Down");
+   pDesktop->initializeAction(mpSlowDownAction, shortcutContext);
+
+   mpFrameSpeedCombo = new QComboBox(this);
+
+   vector<double> frameSpeeds = AnimationToolBar::getSettingFrameSpeeds();
+   for (vector<double>::iterator iter = frameSpeeds.begin(); iter != frameSpeeds.end(); ++iter)
+   {
+      mpFrameSpeedCombo->addItem(QString::number(*iter, 'g', 3));
+   }
+   mpFrameSpeedCombo->setInsertPolicy(QComboBox::NoInsert);
+   mpFrameSpeedCombo->setToolTip("Speed (X)");
+   mpFrameSpeedCombo->setEditable(true);
+   mpFrameSpeedCombo->setCompleter(NULL);
+   QDoubleValidator* pValidator = new QDoubleValidator(mpFrameSpeedCombo);
+   pValidator->setDecimals(3);
+   pValidator->setBottom(0.0);
+   mpFrameSpeedCombo->setValidator(pValidator);
+   VERIFYNR(connect(mpFrameSpeedCombo, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(setFrameSpeed(const QString&))));
+   VERIFYNR(connect(mpFrameSpeedCombo, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(setFocus())));
+
+   QLineEdit* pSpeedEdit = mpFrameSpeedCombo->lineEdit();
+   if (pSpeedEdit != NULL)
+   {
+      VERIFYNR(connect(pSpeedEdit, SIGNAL(editingFinished()), this, SLOT(setFrameSpeed())));
+      VERIFYNR(connect(pSpeedEdit, SIGNAL(returnPressed()), this, SLOT(setFocus())));
+   }
+
+   addWidget(mpFrameSpeedCombo);
+
+   mpSpeedUpAction = addAction(pIcons->mAnimationSpeedUp, QString(), this, SLOT(speedUp()));
+   mpSpeedUpAction->setAutoRepeat(false);
+   mpSpeedUpAction->setToolTip("Speed Up");
+   pDesktop->initializeAction(mpSpeedUpAction, shortcutContext);
+
+   addSeparator();
+
+   mpChangeDirectionAction = addAction(pIcons->mAnimationForwardDirection, QString(), this, SLOT(changeDirection()));
+   mpChangeDirectionAction->setAutoRepeat(false);
+   mpChangeDirectionAction->setToolTip("Change Direction");
+   pDesktop->initializeAction(mpChangeDirectionAction, shortcutContext);
+
+   // Animation cycle
+   mpCycle = new AnimationCycleButton(this);
+   mpCycle->setStatusTip("Specifies the play behavior when the end of the animation is reached");
+   mpCycle->setToolTip("Animation Cycle");
+   VERIFYNR(connect(mpCycle, SIGNAL(valueChanged(AnimationCycle)), this, SLOT(updateAnimationCycle(AnimationCycle))));
+   addWidget(mpCycle);
+   addSeparator();
+
    // Current frame slider
-   QWidget *pSliderWidget = new QWidget(this);
+   QWidget* pSliderWidget = new QWidget(this);
 
    mpFrameSlider = new WheelEventSlider(Qt::Horizontal, pSliderWidget);
    mpFrameSlider->setFixedWidth(200);
@@ -142,7 +158,7 @@ AnimationToolBarImp::AnimationToolBarImp(const string& id, QWidget* parent) :
    VERIFYNR(connect(mpFrameSlider, SIGNAL(sliderReleased()), this, SLOT(releaseSlider())));
    VERIFYNR(connect(mpFrameSlider, SIGNAL(actionTriggered(int)), this, SLOT(sliderActionTriggered(int))));
 
-   QHBoxLayout *pSliderLayout = new QHBoxLayout(pSliderWidget);
+   QHBoxLayout* pSliderLayout = new QHBoxLayout(pSliderWidget);
    pSliderLayout->setMargin(0);
    pSliderLayout->setSpacing(0);
    pSliderLayout->addSpacing(5);
@@ -156,13 +172,6 @@ AnimationToolBarImp::AnimationToolBarImp(const string& id, QWidget* parent) :
    addWidget(mpTimestampLabel);
 
    addSeparator();
-
-   // Animation cycle
-   mpCycle = new AnimationCycleButton(this);
-   mpCycle->setStatusTip("Specifies the play behavior when the end of the animation is reached");
-   mpCycle->setToolTip("Animation Cycle");
-   VERIFYNR(connect(mpCycle, SIGNAL(valueChanged(AnimationCycle)), this, SLOT(updateAnimationCycle(AnimationCycle))));
-   addWidget(mpCycle);
 
    // Drop frames
    mpDropFramesAction = addAction(pIcons->mClock, QString());
@@ -199,58 +208,24 @@ bool AnimationToolBarImp::isKindOf(const string& className) const
    return ToolBarImp::isKindOf(className);
 }
 
-void AnimationToolBarImp::forward()
+void AnimationToolBarImp::speedUp()
 {
-   if (mpController != NULL)
+   // change the speed to the next value in the list
+   int itemPos = mpFrameSpeedCombo->currentIndex();
+   int maxItems = mpFrameSpeedCombo->count();
+   if ((itemPos + 1) < maxItems)
    {
-      AnimationState state = mpController->getAnimationState();
-      if (state == PLAY_BACKWARD || state == PAUSE_FORWARD || state == PAUSE_BACKWARD || state == STOP)
-      {
-         mpController->setAnimationState(PLAY_FORWARD);
-         mpController->play();
-      }
-      else
-      {
-         // change the speed to the next value in the list
-         int itemPos = mpFrameSpeedCombo->currentIndex();
-         int maxItems = mpFrameSpeedCombo->count();
-         if ((itemPos + 1) < maxItems)
-         {
-            QString speedMultiplier = mpFrameSpeedCombo->itemText(++itemPos);
-            double multiplier = speedMultiplier.toDouble();
-
-            // use multiplier to change the speed at which the animation is playing
-            mpController->fastForward(multiplier);
-         }
-      }
+      mpFrameSpeedCombo->setCurrentIndex(itemPos + 1);
    }
 }
 
-void AnimationToolBarImp::backward()
+void AnimationToolBarImp::slowDown()
 {
-   if (mpController != NULL)
+   // change the speed to the previous value in the list
+   int itemPos = mpFrameSpeedCombo->currentIndex();
+   if (itemPos > 0)
    {
-      AnimationState state = mpController->getAnimationState();
-
-      if (state == PLAY_FORWARD || state == PAUSE_FORWARD || state == PAUSE_BACKWARD || state == STOP)
-      {
-         mpController->setAnimationState(PLAY_BACKWARD);
-         mpController->play();
-      }
-      else
-      {
-         // change the speed to the next value in the list
-         int itemPos = mpFrameSpeedCombo->currentIndex();
-         int maxItems = mpFrameSpeedCombo->count();
-         if ((itemPos + 1) < maxItems)
-         {
-            QString speedMultiplier = mpFrameSpeedCombo->itemText(++itemPos);
-            double multiplier = speedMultiplier.toDouble();
-
-            // use multiplier to change the speed at which the animation is playing
-            mpController->fastRewind(multiplier);
-         }
-      }
+      mpFrameSpeedCombo->setCurrentIndex(itemPos - 1);
    }
 }
 
@@ -266,6 +241,30 @@ void AnimationToolBarImp::playPause()
       else
       {
          mpController->play();
+      }
+   }
+}
+
+void AnimationToolBarImp::changeDirection()
+{
+   if (mpController != NULL)
+   {
+      AnimationState state = mpController->getAnimationState();
+      if (state == PLAY_FORWARD)
+      {
+         mpController->setAnimationState(PLAY_BACKWARD);
+      } 
+      else if (state == PAUSE_FORWARD)
+      {
+         mpController->setAnimationState(PAUSE_BACKWARD);
+      } 
+      else if (state == PLAY_BACKWARD)
+      {
+         mpController->setAnimationState(PLAY_FORWARD);
+      } 
+      else if (state == PAUSE_BACKWARD)
+      {
+         mpController->setAnimationState(PAUSE_FORWARD);
       }
    }
 }
@@ -293,6 +292,28 @@ void AnimationToolBarImp::setPlayButtonState(AnimationState state)
          mpStepBackwardAction->setEnabled((state == PAUSE_FORWARD) || (state == PAUSE_BACKWARD) || (state == STOP));
       }
    }
+}
+
+void AnimationToolBarImp::setChangeDirectionButtonState(AnimationState state)
+{
+   Icons* pIcons = Icons::instance();
+   REQUIRE(pIcons != NULL);
+   if (state == PLAY_FORWARD)
+   {
+      mpChangeDirectionAction->setIcon(pIcons->mAnimationForwardDirection);
+   }
+   else if (state == PAUSE_FORWARD)
+   {
+      mpChangeDirectionAction->setIcon(pIcons->mAnimationForwardDirection);
+   } 
+   else if (state == PLAY_BACKWARD)
+   {
+      mpChangeDirectionAction->setIcon(pIcons->mAnimationBackwardDirection);
+   } 
+   else if (state == PAUSE_BACKWARD)
+   {
+      mpChangeDirectionAction->setIcon(pIcons->mAnimationBackwardDirection);
+   } 
 }
 
 void AnimationToolBarImp::stop()
@@ -361,6 +382,7 @@ void AnimationToolBarImp::updateAnimationState(AnimationState state)
 {
    mpStopAction->setChecked(state == STOP);
    setPlayButtonState(state);
+   setChangeDirectionButtonState(state);
 }
 
 void AnimationToolBarImp::updateFrameRange()
@@ -413,9 +435,7 @@ void AnimationToolBarImp::updateFrameRange()
          {
             digits = log10(stopFrame+1) + 1;
          }
-         sample = QString("Frame: %1/%2")
-            .arg(int(0), digits, 10, QChar('0'))
-            .arg(static_cast<int>(stopFrame+1));
+         sample = QString("Frame: %1/%2").arg(0, digits, 10, QChar('0')).arg(static_cast<int>(stopFrame + 1));
       }
       else
       {
@@ -435,6 +455,9 @@ void AnimationToolBarImp::updateFrameRange()
 
    // Update the slider value
    updateCurrentFrame(currentFrame);
+
+   // Make sure the toolbar updates its size with the label width changing
+   adjustSize();
 }
 
 void AnimationToolBarImp::updateCurrentFrame(double frameValue)
@@ -468,8 +491,29 @@ void AnimationToolBarImp::updateCurrentFrame(double frameValue)
    mpTimestampLabel->setText(strFrameText);
 }
 
+void AnimationToolBarImp::cleanUpItems()
+{
+   vector<double> frameSpeeds = AnimationToolBar::getSettingFrameSpeeds();
+
+   if (AnimationToolBar::getSettingFrameSpeeds().size() != mpFrameSpeedCombo->count())
+   {
+      for (int i = 0; i < mpFrameSpeedCombo->count(); ++i)
+      {
+         if (std::find(frameSpeeds.begin(), frameSpeeds.end(), 
+             mpFrameSpeedCombo->itemText(i).toDouble()) == frameSpeeds.end())
+         {
+            mpFrameSpeedCombo->removeItem(i);
+            break;
+         }
+      }
+   }
+}
+
 void AnimationToolBarImp::updateFrameSpeed(double speed)
 {
+   mpFrameSpeedCombo->blockSignals(true);
+   cleanUpItems();
+
    QString strSpeed = QString::number(speed);
    int index = mpFrameSpeedCombo->findText(strSpeed);
    if (index != -1)
@@ -478,10 +522,21 @@ void AnimationToolBarImp::updateFrameSpeed(double speed)
    }
    else
    {
-      mpFrameSpeedCombo->setEditText(strSpeed);
+      int i;
+      for (i = 0; i < mpFrameSpeedCombo->count(); ++i)
+      {
+         if (mpFrameSpeedCombo->itemText(i).toDouble() > speed)
+         {
+            break;
+         }
+      }
+
+      mpFrameSpeedCombo->insertItem(i, strSpeed);
+      mpFrameSpeedCombo->setCurrentIndex(i);
    }
 
    updateFrameRange();
+   mpFrameSpeedCombo->blockSignals(false);
 }
 
 void AnimationToolBarImp::updateAnimationCycle(AnimationCycle cycle)
@@ -552,7 +607,7 @@ void AnimationToolBarImp::setAnimationController(AnimationController* pControlle
             SLOT(setCanDropFrames(bool))));
 
          mpDropFramesAction->setChecked(pControllerImp->getCanDropFrames());
-     }
+      }
    }
 
    updateAnimationControls();
@@ -594,8 +649,8 @@ void AnimationToolBarImp::updateAnimationControls()
    // Enable the widgets
    mpStopAction->setEnabled(bEnable);
    mpPlayPauseAction->setEnabled(bEnable);
-   mpBackwardAction->setEnabled(bEnable);
-   mpForwardAction->setEnabled(bEnable);
+   mpSlowDownAction->setEnabled(bEnable);
+   mpSpeedUpAction->setEnabled(bEnable);
    mpStepBackwardAction->setEnabled(bEnable);
    mpStepForwardAction->setEnabled(bEnable);
    mpTimestampLabel->setHidden(!bEnable || mHideTimestamp);
@@ -656,80 +711,4 @@ void AnimationToolBarImp::setHideTimestamp(bool hideTimestamp)
 bool AnimationToolBarImp::getHideTimestamp() const
 {
    return mHideTimestamp;
-}
-
-AnimationCycleGrid::AnimationCycleGrid(QWidget* pParent)
-: PixmapGrid(pParent)
-{
-   setNumRows(1);
-   setNumColumns(3);
-
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
-   setPixmap(0, 0, pIcons->mPlayOnce,
-      QString::fromStdString(StringUtilities::toXmlString(PLAY_ONCE)),
-      QString::fromStdString(StringUtilities::toDisplayString(PLAY_ONCE)));
-   setPixmap(0, 1, pIcons->mBouncePlay,
-      QString::fromStdString(StringUtilities::toXmlString(BOUNCE)),
-      QString::fromStdString(StringUtilities::toDisplayString(BOUNCE)));
-   setPixmap(0, 2, pIcons->mRepeatPlay,
-      QString::fromStdString(StringUtilities::toXmlString(REPEAT)),
-      QString::fromStdString(StringUtilities::toDisplayString(REPEAT)));
-
-   // Set the current symbol
-   setSelectedPixmap(QString::fromStdString(StringUtilities::toXmlString(PLAY_ONCE)));
-
-   VERIFYNR(connect(this, SIGNAL(pixmapSelected(const QString&)), this, SLOT(translateChange(const QString&))));
-}
-
-void AnimationCycleGrid::setCurrentValue(AnimationCycle value)
-{
-   QString strValue = QString::fromStdString(StringUtilities::toXmlString(value));
-   setSelectedPixmap(strValue);
-}
-
-AnimationCycle AnimationCycleGrid::getCurrentValue() const
-{
-   AnimationCycle retValue;
-   string curText = getSelectedPixmapIdentifier().toStdString();
-   if (!curText.empty())
-   {
-      retValue = StringUtilities::fromXmlString<AnimationCycle>(curText);
-   }
-   return retValue;
-}
-
-void AnimationCycleGrid::translateChange(const QString& strText)
-{
-   AnimationCycle curType = StringUtilities::fromXmlString<AnimationCycle>(strText.toStdString());
-   emit valueChanged(curType);
-}
-
-AnimationCycleButton::AnimationCycleButton(QWidget* pParent) : 
-   PixmapGridButton(pParent)
-{
-   setSyncIcon(true);
-   AnimationCycleGrid* pGrid = new AnimationCycleGrid(this);
-   setPixmapGrid(pGrid);
-   VERIFYNR(connect(pGrid, SIGNAL(valueChanged(AnimationCycle)), this, SIGNAL(valueChanged(AnimationCycle))));
-}
-
-void AnimationCycleButton::setCurrentValue(AnimationCycle value)
-{
-   AnimationCycleGrid* pGrid = dynamic_cast<AnimationCycleGrid*>(getPixmapGrid());
-   if (pGrid != NULL)
-   {
-      pGrid->setCurrentValue(value);
-   }
-}
-
-AnimationCycle AnimationCycleButton::getCurrentValue() const
-{
-   AnimationCycle retValue;
-   AnimationCycleGrid* pGrid = dynamic_cast<AnimationCycleGrid*>(getPixmapGrid());
-   if (pGrid != NULL)
-   {
-      retValue = pGrid->getCurrentValue();
-   }
-   return retValue;
 }

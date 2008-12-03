@@ -7,6 +7,7 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtCore/QEvent>
 #include <QtCore/QFileInfo>
 #include <QtGui/QGroupBox>
 #include <QtGui/QLayout>
@@ -44,6 +45,7 @@ ChippingWindow::ChippingWindow(SpatialDataView* pView, QWidget* parent) :
 {
    // View widget
    SpatialDataView* pChipView = createChipView();
+   pChipView->getWidget()->installEventFilter(this);
    mpChippingWidget = new ChippingWidget(pChipView, this);
 
    // Chip mode
@@ -125,12 +127,22 @@ SpatialDataView* ChippingWindow::createChipView() const
       return NULL;
    }
 
-   SpatialDataView* pChipView = NULL;
-   pChipView = (SpatialDataView*) (mpView->copy());
+   SpatialDataView* pChipView = dynamic_cast<SpatialDataView*>(mpView->copy());
    if (pChipView != NULL)
    {
-      LayerList* pLayerList = NULL;
-      pLayerList = pChipView->getLayerList();
+      vector<std::pair<View*, LinkType> > linkedViews;
+      pChipView->getLinkedViews(linkedViews);
+      for (unsigned int i = 0; i < linkedViews.size(); ++i)
+      {
+         if (linkedViews[i].second == NO_LINK)
+         {
+            continue;
+         }
+
+         pChipView->unlinkView(linkedViews[i].first);
+      }
+
+      LayerList* pLayerList = pChipView->getLayerList();
       if (pLayerList != NULL)
       {
          vector<Layer*> layers;
@@ -217,7 +229,8 @@ void ChippingWindow::createView()
       return;
    }
 
-   SpatialDataWindow* pWindow = static_cast<SpatialDataWindow*>(pDesktop->createWindow(pRasterChip->getName(), SPATIAL_DATA_WINDOW));
+   SpatialDataWindow* pWindow = static_cast<SpatialDataWindow*>(pDesktop->createWindow(pRasterChip->getName(),
+      SPATIAL_DATA_WINDOW));
    if (pWindow == NULL)
    {
       return;
@@ -268,9 +281,9 @@ void ChippingWindow::createView()
                RasterElement* pGrayRaster = pOrigLayer->getDisplayedRasterElement(GRAY);
                RasterElement* pRedRaster = pOrigLayer->getDisplayedRasterElement(RED);
                RasterElement* pGreenRaster = pOrigLayer->getDisplayedRasterElement(GREEN);
-               RasterElement* pBlueRaster= pOrigLayer->getDisplayedRasterElement(BLUE);
+               RasterElement* pBlueRaster = pOrigLayer->getDisplayedRasterElement(BLUE);
 
-               const RasterDataDescriptor *pDescriptor = 
+               const RasterDataDescriptor* pDescriptor = 
                   dynamic_cast<const RasterDataDescriptor*>(pRasterChip->getDataDescriptor());
                VERIFYNRV(pDescriptor != NULL);
                // Set the properties of the cube layer in the new view
@@ -422,4 +435,17 @@ void ChippingWindow::accept()
 
    // Close the dialog
    QDialog::accept();
+}
+
+bool ChippingWindow::eventFilter(QObject* pObject, QEvent* pEvent)
+{
+   if (pEvent != NULL)
+   {
+      if (pEvent->type() == QEvent::ContextMenu)
+      {
+         return true;
+      }
+   }
+
+   return QDialog::eventFilter(pObject, pEvent);
 }

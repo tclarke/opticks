@@ -30,6 +30,7 @@
 #include "Statistics.h"
 #include "StatisticsReaderWriter.h"
 #include "StringUtilities.h"
+#include "StringUtilitiesMacros.h"
 #include "TypesFile.h"
 #include "Units.h"
 #include "xmlwriter.h"
@@ -66,10 +67,19 @@ namespace
    }
 };
 
+BEGIN_ENUM_MAPPING(IceCompressionType)
+ADD_ENUM_MAPPING(NONE, "None", "none")
+ADD_ENUM_MAPPING(GZIP, "GZIP", "gzip")
+ADD_ENUM_MAPPING(SHUFFLE_AND_GZIP, "Shuffle+GZIP", "shuffle_gzip")
+END_ENUM_MAPPING()
+
 IceWriter::IceWriter(hid_t fileHandle, IceUtilities::FileType fileType) :
    mFileHandle(fileHandle),
    mAborted(false),
-   mFileType(fileType)
+   mFileType(fileType),
+   mChunkSize(std::max(IceWriter::getSettingChunkSize(), 1) * 1024 * 1024), // convert from MB to bytes
+   mCompressionType(StringUtilities::fromXmlString<IceCompressionType>(IceWriter::getSettingCompressionType())),
+   mGzipCompressionLevel(std::max(std::min(IceWriter::getSettingGzipCompressionLevel(), 9), 0))
 {
 }
 
@@ -109,7 +119,11 @@ void IceWriter::writeCube(const string& hdfPath,
    unsigned int bpe = pDataDesc->getBytesPerElement();
 
    Hdf5DataSetResource dataId;
-   if (interleave == BIP)
+   if (interleave == BIL)
+   {
+      writeBilCubeData(cubePath, pCube, pOutputFileDescriptor, dataId, pProgress);
+   }
+   else if (interleave == BIP)
    {
       writeBipCubeData(cubePath, pCube, pOutputFileDescriptor, dataId, pProgress);
    }
@@ -125,14 +139,16 @@ void IceWriter::writeCube(const string& hdfPath,
    ICEVERIFY(HdfUtilities::writeAttribute(*dataId, "InterleaveFormat", interleaveString));
 
    //Write out original numbers
-   vector<unsigned int> originalRowNums, originalColNums, originalBandNums;
+   vector<unsigned int> originalRowNums;
+   vector<unsigned int> originalColNums;
+   vector<unsigned int> originalBandNums;
    originalRowNums.reserve(rows.size());
    originalColNums.reserve(cols.size());
    originalBandNums.reserve(bands.size());
 
-   for (vector<DimensionDescriptor>::const_iterator row = rows.begin(); row != rows.end(); ++row)
+   for (vector<DimensionDescriptor>::const_iterator rowIter = rows.begin(); rowIter != rows.end(); ++rowIter)
    {
-      originalRowNums.push_back((*row).getOriginalNumber());
+      originalRowNums.push_back((*rowIter).getOriginalNumber());
    }
 
    for (vector<DimensionDescriptor>::const_iterator col = cols.begin(); col != cols.end(); ++col)
@@ -228,14 +244,18 @@ void IceWriter::writeCube(const string& hdfPath,
    {
       if (!rows.empty() && !cols.empty())
       {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This functionality should be moved into a method in a new RasterElementExporterShell class (dsulgrov)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This functionality should be moved into a method " \
+   "in a new RasterElementExporterShell class (dsulgrov)")
          list<GcpPoint> gcps;
-         unsigned int startRow, startCol, endRow, endCol;
-         startRow = rows.front().getActiveNumber();
-         endRow = rows.back().getActiveNumber();
-         startCol = cols.front().getActiveNumber();
-         endCol = cols.back().getActiveNumber();
-         GcpPoint urPoint, ulPoint, lrPoint, llPoint, centerPoint;
+         unsigned int startRow = rows.front().getActiveNumber();
+         unsigned int endRow = rows.back().getActiveNumber();
+         unsigned int startCol = cols.front().getActiveNumber();
+         unsigned int endCol = cols.back().getActiveNumber();
+         GcpPoint urPoint;
+         GcpPoint ulPoint;
+         GcpPoint lrPoint;
+         GcpPoint llPoint;
+         GcpPoint centerPoint;
          ulPoint.mPixel = LocationType(startCol, startRow);
          urPoint.mPixel = LocationType(endCol, startRow);
          llPoint.mPixel = LocationType(startCol, endRow);
@@ -250,11 +270,10 @@ void IceWriter::writeCube(const string& hdfPath,
 
          //reset the coordinates, because on import they are required to be in
          //on-disk numbers not active numbers
-         unsigned int diskStartRow, diskStartCol, diskEndRow, diskEndCol;
-         diskStartRow = rows.front().getOnDiskNumber();
-         diskEndRow = rows.back().getOnDiskNumber();
-         diskStartCol = cols.front().getOnDiskNumber();
-         diskEndCol = cols.back().getOnDiskNumber();
+         unsigned int diskStartRow = rows.front().getOnDiskNumber();
+         unsigned int diskEndRow = rows.back().getOnDiskNumber();
+         unsigned int diskStartCol = cols.front().getOnDiskNumber();
+         unsigned int diskEndCol = cols.back().getOnDiskNumber();
          ulPoint.mPixel = LocationType(diskStartCol, diskStartRow);
          urPoint.mPixel = LocationType(diskEndCol, diskStartRow);
          llPoint.mPixel = LocationType(diskStartCol, diskEndRow);
@@ -524,6 +543,188 @@ void IceWriter::writeDynamicObject(const DynamicObject* pDynObj,
    }
 }
 
+void IceWriter::writeBilCubeData(const std::string& hdfPath,
+                                 RasterElement* pCube,
+                                 const RasterFileDescriptor* pOutputFileDescriptor,
+                                 Hdf5DataSetResource& dataId,
+                                 Progress* pProgress)
+{
+   RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(pCube->getDataDescriptor());
+   ICEVERIFY(pDescriptor != NULL);
+   const vector<DimensionDescriptor>& bands = pOutputFileDescriptor->getBands();
+   const vector<DimensionDescriptor>& rows = pOutputFileDescriptor->getRows();
+   const vector<DimensionDescriptor>& cols = pOutputFileDescriptor->getColumns();
+
+   const vector<DimensionDescriptor>& cubeBands = pDescriptor->getBands();
+   const vector<DimensionDescriptor>& cubeRows = pDescriptor->getRows();
+   const vector<DimensionDescriptor>& cubeCols = pDescriptor->getColumns();
+
+   unsigned int bpe = pDescriptor->getBytesPerElement();
+
+   ICEVERIFY_MSG(!rows.empty() && !cols.empty() && !bands.empty(), "No data selected for export.")
+
+   unsigned int startRow = rows.front().getActiveNumber();
+   unsigned int endRow = rows.back().getActiveNumber();
+
+   // set up the dataspace for the amount of data to read in
+   hsize_t offset[3] = {0}; // the start offset to read in the file
+   hsize_t counts[3] = {1, 1, 1}; // how much data to read at a time
+   hsize_t dimSpace[3];
+   hsize_t compSpace[3];
+
+   dimSpace[0] = rows.size();
+   compSpace[1] = dimSpace[1] = bands.size();
+   compSpace[2] = dimSpace[2] = cols.size();
+
+   unsigned int rowSize = cols.size() * bands.size() * bpe;
+   unsigned int rowsInChunk = mChunkSize/rowSize; // determine number of rows that fit into a 1MB chunk
+   if (rowsInChunk > rows.size())
+   {
+      rowsInChunk = rows.size();
+   }
+   if (rowsInChunk == 0)
+   {
+      rowsInChunk = 1;
+   }
+   compSpace[0] = rowsInChunk;
+
+   createDatasetForCube(dimSpace, compSpace, pDescriptor->getDataType(), mFileHandle, hdfPath, dataId);
+   Hdf5DataSpaceResource dspaceId(H5Dget_space(*dataId));
+   ICEVERIFY(*dspaceId >= 0);
+   Hdf5TypeResource hdfEncoding(H5Dget_type(*dataId));
+   ICEVERIFY(*hdfEncoding >= 0);
+
+   FactoryResource<DataRequest> pRequest;
+   pRequest->setInterleaveFormat(BIL);
+   pRequest->setRows(rows.front(), rows.back());
+   DataAccessor da = pCube->getDataAccessor(pRequest.release());
+   ICEVERIFY(da.isValid());
+
+   bool bEntireRow = (cubeCols.size() == cols.size()) && (cubeBands.size() == bands.size());
+
+   vector<char> pWriteBufferRes(rowsInChunk*rowSize, 0);
+   char* pWriteBuffer = &pWriteBufferRes.front();
+
+   counts[0] = rowsInChunk;
+   counts[1] = bands.size();
+   counts[2] = cols.size();
+
+   Hdf5DataSpaceResource mspaceId(H5Screate_simple(3, counts, NULL));
+   ICEVERIFY(*mspaceId >= 0);
+   offset[1] = offset[2] = 0; // reset to beginning of rows and bands
+
+   unsigned int numChunks = rows.size() / rowsInChunk;
+   if (rows.size() % rowsInChunk != 0)
+   {
+      numChunks++;
+   }
+
+   abortIfNecessary();
+
+   int rowIndex = 0;
+   if (bEntireRow)
+   {
+      for (unsigned int chunkNumber = 0; chunkNumber < numChunks; ++chunkNumber)
+      {
+         unsigned int startChunkRow = chunkNumber * rowsInChunk;
+         unsigned int endChunkRow = (chunkNumber + 1) * rowsInChunk;
+         if (endChunkRow > rows.size())
+         {
+            endChunkRow = rows.size();
+         }
+
+         char* pBuffer = pWriteBuffer;
+         for (unsigned int rowCount = startChunkRow; rowCount < endChunkRow; ++rowCount)
+         {
+            if (pProgress != NULL)
+            {
+               pProgress->updateProgress("Exporting cube...",
+                  (rowIndex++ * 100) / rows.size(), NORMAL);
+            }
+
+            unsigned int rowActiveNum = rows[rowCount].getActiveNumber();
+            da->toPixel(rowActiveNum, 0);
+            ICEVERIFY(da.isValid());
+            memcpy(pBuffer, da->getRow(), rowSize);
+            pBuffer += rowSize;
+
+            abortIfNecessary();
+         }
+
+         offset[0] = startChunkRow;
+
+         if (chunkNumber + 1 == numChunks)
+         {
+            counts[0] = endChunkRow - startChunkRow;
+            mspaceId = Hdf5DataSpaceResource(H5Screate_simple(3, counts, NULL));
+            ICEVERIFY(*mspaceId >= 0);
+         }
+
+         herr_t status = H5Sselect_hyperslab(*dspaceId, H5S_SELECT_SET, offset, NULL, counts, NULL);
+         ICEVERIFY(status >= 0);
+
+         status = H5Dwrite(*dataId, *hdfEncoding, *mspaceId, *dspaceId, H5P_DEFAULT, pWriteBuffer);
+         ICEVERIFY(status >= 0);
+      }
+   }
+   else
+   {
+      unsigned int totalColumns = cubeCols.size();
+      for (unsigned int chunkNumber = 0; chunkNumber < numChunks; ++chunkNumber)
+      {
+         unsigned int startChunkRow = chunkNumber * rowsInChunk;
+         unsigned int endChunkRow = (chunkNumber + 1) * rowsInChunk;
+         if (endChunkRow > rows.size())
+         {
+            endChunkRow = rows.size();
+         }
+
+         char* pBuffer = pWriteBuffer;
+         for (unsigned int rowCount = startChunkRow; rowCount < endChunkRow; ++rowCount)
+         {
+            if (pProgress != NULL)
+            {
+               pProgress->updateProgress("Exporting cube...",
+                  (rowIndex++ * 100) / rows.size(), NORMAL);
+            }
+
+            unsigned int rowActiveNum = rows[rowCount].getActiveNumber();
+            da->toPixel(rowActiveNum, 0);
+            ICEVERIFY(da.isValid());
+            
+            for (unsigned int bandCount = 0; bandCount < bands.size(); ++bandCount)
+            {
+               unsigned int bandActiveNum = bands[bandCount].getActiveNumber();
+               for (unsigned int colCount = 0; colCount < cols.size(); ++colCount)
+               {
+                  unsigned int colActiveNum = cols[colCount].getActiveNumber();
+                  memcpy(pBuffer, static_cast<char*>(da->getColumn()) +
+                     (bandActiveNum * totalColumns * bpe) + (colActiveNum * bpe), bpe);
+                  pBuffer += bpe;
+               }
+            }
+
+            abortIfNecessary();
+         }
+
+         offset[0] = startChunkRow;
+
+         if (chunkNumber + 1 == numChunks)
+         {
+            counts[0] = endChunkRow - startChunkRow;
+            mspaceId = Hdf5DataSpaceResource(H5Screate_simple(3, counts, NULL));
+            ICEVERIFY(*mspaceId >= 0);
+         }
+
+         herr_t status = H5Sselect_hyperslab(*dspaceId, H5S_SELECT_SET, offset, NULL, counts, NULL);
+         ICEVERIFY(status >= 0);
+
+         status = H5Dwrite(*dataId, *hdfEncoding, *mspaceId, *dspaceId, H5P_DEFAULT, pWriteBuffer);
+         ICEVERIFY(status >= 0);
+      }
+   }
+}
+
 void IceWriter::writeBipCubeData(const string& hdfPath,
                                  RasterElement* pCube,
                                  const RasterFileDescriptor* pOutputFileDescriptor,
@@ -554,11 +755,13 @@ void IceWriter::writeBipCubeData(const string& hdfPath,
    hsize_t compSpace[3];
 
    dimSpace[0] = rows.size();
-   compSpace[1] = dimSpace[1] = cols.size();
-   compSpace[2] = dimSpace[2] = bands.size();
+   dimSpace[1] = cols.size();
+   dimSpace[2] = bands.size();
+   compSpace[1] = cols.size();
+   compSpace[2] = bands.size();
 
    unsigned int rowSize = cols.size() * bands.size() * bpe;
-   unsigned int rowsInChunk = (1024*1024)/rowSize; // determine number of rows that fit into a 1MB chunk
+   unsigned int rowsInChunk = mChunkSize/rowSize; // determine number of rows that fit into a chunk
    if (rowsInChunk > rows.size())
    {
       rowsInChunk = rows.size();
@@ -592,7 +795,8 @@ void IceWriter::writeBipCubeData(const string& hdfPath,
 
    Hdf5DataSpaceResource mspaceId(H5Screate_simple(3, counts, NULL));
    ICEVERIFY(*mspaceId >= 0);
-   offset[1] = offset[2] = 0; // reset to beginning of rows and bands
+   offset[1] = 0;
+   offset[2] = 0; // reset to beginning of rows and bands
 
    unsigned int numChunks = rows.size() / rowsInChunk;
    if (rows.size() % rowsInChunk != 0)
@@ -602,6 +806,7 @@ void IceWriter::writeBipCubeData(const string& hdfPath,
 
    abortIfNecessary();
 
+   int rowIndex = 0;
    if (bEntireRow)
    {
       for (unsigned int chunkNumber = 0; chunkNumber < numChunks; ++chunkNumber)
@@ -616,11 +821,19 @@ void IceWriter::writeBipCubeData(const string& hdfPath,
          char* pBuffer = pWriteBuffer;
          for (unsigned int rowCount = startChunkRow; rowCount < endChunkRow; ++rowCount)
          {
+            if (pProgress != NULL)
+            {
+               pProgress->updateProgress("Exporting cube...",
+                  (rowIndex++ * 100) / rows.size(), NORMAL);
+            }
+
             unsigned int rowActiveNum = rows[rowCount].getActiveNumber();
             da->toPixel( rowActiveNum, 0 );
             ICEVERIFY(da.isValid());
             memcpy(pBuffer, da->getRow(), rowSize);
             pBuffer += rowSize;
+            
+            abortIfNecessary();
          }
 
          offset[0] = startChunkRow;
@@ -638,12 +851,7 @@ void IceWriter::writeBipCubeData(const string& hdfPath,
          status = H5Dwrite(*dataId, *hdfEncoding, *mspaceId, *dspaceId, H5P_DEFAULT, pWriteBuffer);
          ICEVERIFY(status >= 0);
 
-         if (pProgress != NULL)
-         {
-            pProgress->updateProgress("Exporting cube...",
-               static_cast<int>(((chunkNumber+1.0)/numChunks)*100.0), NORMAL);
-         }
-         abortIfNecessary();
+
       }
    }
    else
@@ -660,6 +868,12 @@ void IceWriter::writeBipCubeData(const string& hdfPath,
          char* pBuffer = pWriteBuffer;
          for (unsigned int rowCount = startChunkRow; rowCount < endChunkRow; ++rowCount)
          {
+            if (pProgress != NULL)
+            {
+               pProgress->updateProgress("Exporting cube...",
+                  (rowIndex++ * 100) / rows.size(), NORMAL);
+            }
+
             for (unsigned int colCount = 0; colCount < cols.size(); ++colCount)
             {
                unsigned int rowActiveNum = rows[rowCount].getActiveNumber();
@@ -675,6 +889,8 @@ void IceWriter::writeBipCubeData(const string& hdfPath,
                   pBuffer += bpe;
                }
             }
+
+            abortIfNecessary();
          }
 
          offset[0] = startChunkRow;
@@ -691,13 +907,6 @@ void IceWriter::writeBipCubeData(const string& hdfPath,
 
          status = H5Dwrite(*dataId, *hdfEncoding, *mspaceId, *dspaceId, H5P_DEFAULT, pWriteBuffer);
          ICEVERIFY(status >= 0);
-
-         if (pProgress != NULL)
-         {
-            pProgress->updateProgress("Exporting cube...",
-               static_cast<int>(((chunkNumber+1.0)/numChunks)*100.0), NORMAL);
-         }
-         abortIfNecessary();
       }
    }
 }
@@ -733,12 +942,14 @@ void IceWriter::writeBsqCubeData(const string& hdfPath,
    dimSpace[1] = rows.size();
    dimSpace[2] = cols.size();
 
-   // compress in 1024x1024 chunks
-   compSpace[0] = counts[0] = 1; //only try to fit 1 band into a chunk
-   compSpace[2] = counts[2] = cols.size();
+   // compress in chunks
+   compSpace[0] = 1;
+   counts[0] = 1; //only try to fit 1 band into a chunk
+   compSpace[2] = cols.size();
+   counts[2] = cols.size();
 
    unsigned int rowSize = cols.size() * bpe;
-   unsigned int rowsInChunk = (1024*1024)/rowSize; // determine number of rows that fit into a 1MB chunk
+   unsigned int rowsInChunk = mChunkSize/rowSize; // determine number of rows that fit into a chunk
    if (rowsInChunk > rows.size())
    {
       rowsInChunk = rows.size();
@@ -747,7 +958,8 @@ void IceWriter::writeBsqCubeData(const string& hdfPath,
    {
       rowsInChunk = 1;
    }
-   compSpace[1] = counts[1] = rowsInChunk;
+   compSpace[1] = rowsInChunk;
+   counts[1] = rowsInChunk;
 
    createDatasetForCube(dimSpace, compSpace, pDescriptor->getDataType(), mFileHandle, hdfPath, dataId);
    Hdf5DataSpaceResource dSpaceId(H5Dget_space(*dataId));
@@ -774,6 +986,7 @@ void IceWriter::writeBsqCubeData(const string& hdfPath,
    abortIfNecessary();
 
    offset[2] = 0; //always write out a whole row
+   int rowIndex = 0;
    for (unsigned int bandCount = 0; bandCount < bands.size(); ++bandCount)
    {
       offset[0] = bandCount;
@@ -797,6 +1010,12 @@ void IceWriter::writeBsqCubeData(const string& hdfPath,
          char* pBuffer = pWriteBuffer;
          for (unsigned int rowCount = startChunkRow; rowCount < endChunkRow; ++rowCount)
          {
+            if (pProgress != NULL)
+            {
+               pProgress->updateProgress("Exporting cube...",
+                  (rowIndex++ * 100) / (bands.size() * rows.size()), NORMAL);
+            }
+
             unsigned int rowActiveNum = rows[rowCount].getActiveNumber();
             for (unsigned int colCount = 0; colCount < cols.size(); ++colCount)
             {
@@ -807,6 +1026,8 @@ void IceWriter::writeBsqCubeData(const string& hdfPath,
                memcpy(pBuffer, da->getColumn(), bpe);
                pBuffer += bpe;
             }
+
+            abortIfNecessary();
          }
 
          offset[1] = startChunkRow;
@@ -823,14 +1044,6 @@ void IceWriter::writeBsqCubeData(const string& hdfPath,
 
          status = H5Dwrite(*dataId, *hdfEncoding, memorySpace, *dSpaceId, H5P_DEFAULT, pWriteBuffer);
          ICEVERIFY(status >= 0);
-
-         if (pProgress != NULL)
-         {
-            double numer = (chunkNumber+1) * (bandCount+1);
-            double denom = static_cast<double>(bands.size() * numChunks);
-            pProgress->updateProgress("Exporting cube...", static_cast<int>((numer/denom)*100.0), NORMAL);
-         }
-         abortIfNecessary();
       }
    }
 }
@@ -846,7 +1059,7 @@ void IceWriter::createDatasetForCube(hsize_t dimSpace[3],
    bool bCompressible = true;
    hid_t hdfType = 0;
    Hdf5TypeResource hdfTypeRes;
-   switch(encoding)
+   switch (encoding)
    {
    case INT1SBYTE:
       hdfType = H5T_NATIVE_CHAR;
@@ -898,6 +1111,20 @@ void IceWriter::createDatasetForCube(hsize_t dimSpace[3],
       plist = H5Pcreate(H5P_DATASET_CREATE);
       herr_t status = H5Pset_chunk(plist, 3, chunkSpace);
       ICEVERIFY(status >= 0);
+      switch(mCompressionType)
+      {
+      case SHUFFLE_AND_GZIP:
+         status = H5Pset_shuffle(plist);
+         ICEVERIFY(status >= 0);
+         // fall through
+      case GZIP:
+         status = H5Pset_deflate(plist, mGzipCompressionLevel);
+         ICEVERIFY(status >= 0);
+         break;
+      case NONE:
+      default:
+         break;
+      }
    }
 
    Hdf5DataSpaceResource dspaceId(H5Screate_simple(3, dimSpace, NULL));
@@ -985,6 +1212,36 @@ void IceWriter::writeLayerProperties(const string& hdfPath,
 void IceWriter::abort()
 {
    mAborted = true;
+}
+
+void IceWriter::setChunkSize(int chunkSize)
+{
+   mChunkSize = chunkSize;
+}
+
+void IceWriter::setCompressionType(IceCompressionType type)
+{
+   mCompressionType = type;
+}
+
+void IceWriter::setGzipCompressionLevel(int level)
+{
+   mGzipCompressionLevel = level;
+}
+
+int IceWriter::getChunkSize() const
+{
+   return mChunkSize;
+}
+
+IceCompressionType IceWriter::getCompressionType() const
+{
+   return mCompressionType;
+}
+
+int IceWriter::getGzipCompressionLevel() const
+{
+   return mGzipCompressionLevel;
 }
 
 void IceWriter::abortIfNecessary()

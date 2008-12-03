@@ -37,9 +37,7 @@ using namespace std;
 
 LayerExporter::LayerExporter(LayerType layerType)
 {
-
-   string userLayerSubclass = 
-      StringUtilities::toDisplayString(layerType);
+   string userLayerSubclass = StringUtilities::toDisplayString(layerType);
    setName(userLayerSubclass + " Layer Exporter");
    setCreator("Ball Aerospace & Technologies Corp.");
    setCopyright(APP_COPYRIGHT);
@@ -84,7 +82,7 @@ bool LayerExporter::getInputSpecification(PlugInArgList*& pInArgList)
    pInArgList = mpPlugInManager->getPlugInArgList();
    VERIFY(pInArgList != NULL);
 
-   PlugInArg *pArg;
+   PlugInArg* pArg = NULL;
    VERIFY((pArg = mpPlugInManager->getPlugInArg()) != NULL);
    pArg->setName(ProgressArg());
    pArg->setType("Progress");
@@ -112,11 +110,11 @@ bool LayerExporter::getOutputSpecification(PlugInArgList*& pOutArgList)
    return true;
 }
 
-bool LayerExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
+bool LayerExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
-   Progress *pProgress = NULL;
-   FileDescriptor *pFileDescriptor = NULL;
-   Layer *pLayer = NULL;
+   Progress* pProgress = NULL;
+   FileDescriptor* pFileDescriptor = NULL;
+   Layer* pLayer = NULL;
 
    StepResource pStep("Export layer", "app", "D79729F9-C2D8-47F0-BC8D-3257F4744961");
 
@@ -128,9 +126,9 @@ bool LayerExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
       pMsg->addBooleanProperty("Progress Present", (pProgress != NULL));
 
       pFileDescriptor = pInArgList->getPlugInArgValue<FileDescriptor>(ExportDescriptorArg());
-      if(pFileDescriptor == NULL)
+      if (pFileDescriptor == NULL)
       {
-         if(pProgress != NULL)
+         if (pProgress != NULL)
          {
             pProgress->updateProgress("No file specified", 0, ERRORS);
          }
@@ -140,9 +138,9 @@ bool LayerExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
       pMsg->addProperty("Destination", pFileDescriptor->getFilename());
 
       pLayer = pInArgList->getPlugInArgValueUnsafe<Layer>(ExportItemArg());
-      if(pLayer == NULL)
+      if (pLayer == NULL)
       {
-         if(pProgress != NULL)
+         if (pProgress != NULL)
          {
             pProgress->updateProgress("No layer specified", 0, ERRORS);
          }
@@ -155,7 +153,7 @@ bool LayerExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
    }
 
    LayerType ltype = pLayer->getLayerType();
-   if(! (ltype == ANNOTATION ||
+   if (!(ltype == ANNOTATION ||
          ltype == AOI_LAYER ||
          ltype == GCP_LAYER ||
          ltype == GRAPHIC_LAYER ||
@@ -163,7 +161,7 @@ bool LayerExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
    {
       string msg = "Can not export layers of type ";
       msg += StringUtilities::toDisplayString(pLayer->getLayerType());
-      if(pProgress != NULL)
+      if (pProgress != NULL)
       {
          pProgress->updateProgress(msg, 0, ERRORS);
       }
@@ -171,14 +169,14 @@ bool LayerExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
       return false;
    }
 
-   if(pProgress != NULL)
+   if (pProgress != NULL)
    {
       pProgress->updateProgress("Open output file", 30, NORMAL);
    }
    FileResource pFile(pFileDescriptor->getFilename().getFullPathAndName().c_str(), "w");
-   if(pFile.get() == NULL)
+   if (pFile.get() == NULL)
    {
-      if(pProgress != NULL)
+      if (pProgress != NULL)
       {
          pProgress->updateProgress("File can not be created", 0, ERRORS);
       }
@@ -187,26 +185,26 @@ bool LayerExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
    }
 
    // before we can save, make sure the element has a valid FileDescriptor
-   DataElement *pDataElement = pLayer->getDataElement();
-   if(pDataElement != NULL)
+   DataElement* pDataElement = pLayer->getDataElement();
+   if (pDataElement != NULL)
    {
-      DataDescriptor *pElementDescriptor = pDataElement->getDataDescriptor();
-      if(pElementDescriptor->getFileDescriptor() == NULL)
+      DataDescriptor* pElementDescriptor = pDataElement->getDataDescriptor();
+      if (pElementDescriptor->getFileDescriptor() == NULL)
       {
          pElementDescriptor->setFileDescriptor(pFileDescriptor->copy());
       }
    }
 
-   if(pProgress != NULL)
+   if (pProgress != NULL)
    {
       pProgress->updateProgress("Save layer", 60, NORMAL);
    }
    string elementName;
    elementName = StringUtilities::toXmlString(pLayer->getLayerType());
-   if(elementName.empty())
+   if (elementName.empty())
    {
       string msg = "Error serializing layer type.";
-      if(pProgress != NULL)
+      if (pProgress != NULL)
       {
          pProgress->updateProgress(msg, 0, ERRORS);
       }
@@ -215,9 +213,9 @@ bool LayerExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
    }
    XMLWriter xml(elementName.c_str(),
                   Service<MessageLogMgr>()->getLog());
-   if(!pLayer->toXml(&xml))
+   if (!pLayer->toXml(&xml))
    {
-      if(pProgress != NULL)
+      if (pProgress != NULL)
       {
          pProgress->updateProgress("Error saving layer", 0, ERRORS);
       }
@@ -229,7 +227,7 @@ bool LayerExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
       xml.writeToFile(pFile);
    }
 
-   if(pProgress != NULL)
+   if (pProgress != NULL)
    {
       pProgress->updateProgress("Finished saving the layer", 100, NORMAL);
    }

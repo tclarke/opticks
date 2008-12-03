@@ -45,12 +45,11 @@ bool FileImageObjectImp::setProperty(const GraphicProperty *pProp)
       return false;
    }
 
-   bool bSuccess = false;
-   bSuccess = ImageObjectImp::setProperty(pProp);
+   bool bSuccess = ImageObjectImp::setProperty(pProp);
    if ((bSuccess == true) && (pProp->getName() == "Filename"))
    {
       QString lib = QLibraryInfo::location(QLibraryInfo::PluginsPath);
-      const string& filename = ((FileNameProperty*) pProp)->getFileName();
+      const string& filename = static_cast<const FileNameProperty*>(pProp)->getFileName();
       if (filename.empty() == false)
       {
          QImage image(QString::fromStdString(filename));
@@ -71,11 +70,11 @@ bool FileImageObjectImp::processMousePress(LocationType screenCoord,
                                Qt::MouseButtons buttons,
                                Qt::KeyboardModifiers modifiers)
 {
-   GraphicLayerImp *pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
+   GraphicLayerImp* pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
    VERIFY(pLayer != NULL);
 
-   QWidget *pWidget = NULL;
-   View *pView = pLayer->getView();
+   QWidget* pWidget = NULL;
+   View* pView = pLayer->getView();
    if (pView != NULL)
    {
       pWidget = pView->getWidget();

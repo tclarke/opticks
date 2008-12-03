@@ -7,9 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-#ifndef MESSAGELOG_RESOURCE_H
-#define MESSAGELOG_RESOURCE_H 1
+#ifndef MESSAGELOGRESOURCE_H
+#define MESSAGELOGRESOURCE_H
 
 #include "MessageLogMgr.h"
 #include "Resource.h"
@@ -24,26 +23,17 @@ class MessageObject
 public:
    struct Args
    {
-      std::string mMessageLogName;
-      std::string mStepName;
-      std::string mFailureMsg;
-      std::string mComponent;
-      std::string mKey;
-      bool mCreateStep;
-
-      Args(std::string stepName,
-           std::string component,
-           std::string key,
-           std::string defaultFailureMsg,
-           std::string messageLogName,
-           bool createStep)
-           : mStepName(stepName), mComponent(component),
-             mKey(key), mFailureMsg(defaultFailureMsg),
-             mCreateStep(createStep)
+      Args(std::string stepName, std::string component, std::string key, std::string defaultFailureMsg,
+           std::string messageLogName, bool createStep) :
+         mStepName(stepName),
+         mFailureMsg(defaultFailureMsg),
+         mComponent(component),
+         mKey(key),
+         mCreateStep(createStep)
       {
-         if (messageLogName.empty()) {
+         if (messageLogName.empty())
+         {
             Service<SessionManager> pManager;
-
             mMessageLogName = pManager->getName();
          }
          else
@@ -51,9 +41,16 @@ public:
             mMessageLogName = messageLogName;
          }
       }
+
+      std::string mMessageLogName;
+      std::string mStepName;
+      std::string mFailureMsg;
+      std::string mComponent;
+      std::string mKey;
+      bool mCreateStep;
    };
 
-   Message *obtainResource(const Args &args) const
+   Message* obtainResource(const Args& args) const
    {
       Service<MessageLogMgr> pMgr;
 
@@ -69,7 +66,6 @@ public:
       }
 
       Message* pStep = NULL;
-      
       if (args.mCreateStep)
       {
          pStep = pLog->createStep(args.mStepName, args.mComponent, args.mKey);
@@ -82,9 +78,9 @@ public:
       return pStep;
    }
 
-   void releaseResource(const Args &args, Message *pStep) const
+   void releaseResource(const Args& args, Message* pStep) const
    {
-      if ( (pStep != NULL) && (args.mCreateStep == true) )
+      if ((pStep != NULL) && (args.mCreateStep == true))
       {
          //---- go ahead an finalize the step
          //---- as having failed,  this will
@@ -98,22 +94,26 @@ public:
 class StepResource : public Resource<Step,MessageObject>
 {
 public:
-   StepResource(std::string stepName, std::string component, std::string key,
-                std::string defaultFailureMsg="", std::string messageLogName="")
-                : Resource<Step, MessageObject>(MessageObject::Args(stepName, component, key,
-                defaultFailureMsg, messageLogName, true)) {}
-   StepResource(Step* curStep, std::string defaultFailureMsg="")
-                : Resource<Step, MessageObject>(curStep,
-                MessageObject::Args("", "", "", defaultFailureMsg, "", true)) {}
+   StepResource(std::string stepName, std::string component, std::string key, std::string defaultFailureMsg = "",
+                std::string messageLogName = "") :
+      Resource<Step, MessageObject>(MessageObject::Args(stepName, component, key, defaultFailureMsg,
+         messageLogName, true))
+   {
+   }
+
+   StepResource(Step* curStep, std::string defaultFailureMsg = "") :
+      Resource<Step, MessageObject>(curStep, MessageObject::Args("", "", "", defaultFailureMsg, "", true))
+   {
+   }
 };
 
 class MessageResource : public Resource<Message, MessageObject>
 {
 public:
-   MessageResource(std::string stepName, std::string component,
-                   std::string key, std::string messageLogName="")
-                : Resource<Message, MessageObject>(MessageObject::Args(stepName, component, key,
-                "", messageLogName, false)) {}
+   MessageResource(std::string stepName, std::string component, std::string key, std::string messageLogName = "") :
+      Resource<Message, MessageObject>(MessageObject::Args(stepName, component, key, "", messageLogName, false))
+   {
+   }
 };
 
 #endif

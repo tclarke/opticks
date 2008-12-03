@@ -28,12 +28,9 @@ using namespace std;
 // DeriveAoi //
 ///////////////
 
-DeriveAoi::DeriveAoi()
+DeriveAoi::DeriveAoi() :
+   mpResults(NULL)
 {
-   mLayerName.erase();
-   mLayerType.erase();
-   mpResults = NULL;
-
    setName("Derive AOI");
    setVersion(APP_VERSION_NUMBER);
    setCreator("Ball Aerospace & Technologies, Corp.");
@@ -52,7 +49,7 @@ bool DeriveAoi::getInputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
 
-   if(mbInteractive)
+   if (mbInteractive)
    {
       VERIFY(DesktopItems::getInputSpecification(pArgList) && (pArgList != NULL));
 
@@ -116,7 +113,7 @@ bool DeriveAoi::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    pStep->addProperty("Item", getName());
    mpStep = pStep.get();
 
-   if(!extractInputArgs(pInArgList))
+   if (!extractInputArgs(pInArgList))
    {
       reportError("Unable to extract input arguments.", "4DB42DD5-2198-4d1e-BBB5-9745D4242C9D");
       return false;
@@ -125,14 +122,13 @@ bool DeriveAoi::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    // Get the view
    if (mpResults == NULL)
    {
-      reportError("The results layer is invalid!  An AOI cannot be created.",
-         "25F7A0C0-EBCF-4813-BABE-1AA5D2A2EF0F");
+      reportError("The results layer is invalid!  An AOI cannot be created.", "25F7A0C0-EBCF-4813-BABE-1AA5D2A2EF0F");
       return false;
    }
 
    DataElement* pParent = mpResults->getParent();
 
-   if(mpStep != NULL)
+   if (mpStep != NULL)
    {
       mpStep->addProperty("rasterElement", mpResults->getName());
 
@@ -150,19 +146,19 @@ bool DeriveAoi::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 
    SpatialDataView* pView = NULL;
 
-   for(vector<Window*>::iterator iter = windows.begin(); iter != windows.end(); ++iter)
+   for (vector<Window*>::iterator iter = windows.begin(); iter != windows.end(); ++iter)
    {
       SpatialDataWindow* pWindow = static_cast<SpatialDataWindow*>(*iter);
-      if(pWindow != NULL)
+      if (pWindow != NULL)
       {
          SpatialDataView* pCurrentView = pWindow->getSpatialDataView();
-         if(pCurrentView != NULL)
+         if (pCurrentView != NULL)
          {
             LayerList* pLayerList = pCurrentView->getLayerList();
-            if(pLayerList != NULL)
+            if (pLayerList != NULL)
             {
                RasterElement* pRasterElement = pLayerList->getPrimaryRasterElement();
-               if(pRasterElement != NULL)
+               if (pRasterElement != NULL)
                {
                   if ((pRasterElement == mpResults) || (pRasterElement == pParent))
                   {
@@ -175,7 +171,7 @@ bool DeriveAoi::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
       }
    }
 
-   if(pView == NULL)
+   if (pView == NULL)
    {
       reportError("Cannot get the view in which to derive the new layer!", "F23AB8FF-3080-4d2c-846D-64801F446B2E");
       return false;
@@ -183,23 +179,23 @@ bool DeriveAoi::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 
    // Get the existing layer
    Layer* pLayer = NULL;
-   if(mLayerType.empty())
+   if (mLayerType.empty())
    {
       vector<Layer*> layers;
 
       LayerList* pLayerList = pView->getLayerList();
-      if(pLayerList != NULL)
+      if (pLayerList != NULL)
       {
          pLayerList->getLayers(layers);
       }
 
-      for(unsigned int i = 0; i < layers.size(); i++)
+      for (unsigned int i = 0; i < layers.size(); i++)
       {
          Layer* pCurrentLayer = layers[i];
-         if(pCurrentLayer != NULL)
+         if (pCurrentLayer != NULL)
          {
             DataElement* pElement = pCurrentLayer->getDataElement();
-            if(pElement == mpResults)
+            if (pElement == mpResults)
             {
                pLayer = pCurrentLayer;
                break;
@@ -209,7 +205,7 @@ bool DeriveAoi::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    }
    else
    {
-      if(mpStep != NULL)
+      if (mpStep != NULL)
       {
          mpStep->addProperty("layerName", mLayerName);
          mpStep->addProperty("layerType", mLayerType);
@@ -217,20 +213,20 @@ bool DeriveAoi::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 
       LayerType eType = StringUtilities::fromDisplayString<LayerType>(mLayerType);
       LayerList* pLayerList = pView->getLayerList();
-      if(pLayerList != NULL)
+      if (pLayerList != NULL)
       {
          pLayer = pLayerList->getLayer(eType, mpResults);
       }
    }
 
-   if(pLayer == NULL)
+   if (pLayer == NULL)
    {
       reportError("Could not get the existing layer!", "E576A2D0-E3F9-49d8-8BD3-6DAD74449B17");
       return false;
    }
 
    Layer* pAoiLayer = pView->deriveLayer(pLayer, AOI_LAYER);
-   if(pAoiLayer == NULL)
+   if (pAoiLayer == NULL)
    {
       reportError("Could not derive the new AOI layer!", "2FD947ED-93AC-4a8c-A83C-A5B8C958331D");
       return false;
@@ -239,11 +235,11 @@ bool DeriveAoi::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    AoiElement* pAoi = static_cast<AoiElement*>(pAoiLayer->getDataElement());
 
    // Set the output value
-   if(pOutArgList != NULL)
+   if (pOutArgList != NULL)
    {
       PlugInArg* pArg = NULL;
 
-      if(pOutArgList->getArg("AOI", pArg) && (pArg != NULL))
+      if (pOutArgList->getArg("AOI", pArg) && (pArg != NULL))
       {
          pArg->setActualValue(pAoi);
       }
@@ -260,7 +256,7 @@ bool DeriveAoi::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 
 bool DeriveAoi::extractInputArgs(PlugInArgList* pInArgList)
 {
-   if(!DesktopItems::extractInputArgs(pInArgList))
+   if (!DesktopItems::extractInputArgs(pInArgList))
    {
       return false;
    }
@@ -268,32 +264,32 @@ bool DeriveAoi::extractInputArgs(PlugInArgList* pInArgList)
    PlugInArg* pArg = NULL;
 
    // Layer name
-   if(!pInArgList->getArg("Existing Layer Name", pArg) || (pArg == NULL))
+   if (!pInArgList->getArg("Existing Layer Name", pArg) || (pArg == NULL))
    {
       reportError("Could not read the layer name input value!", "AE89DA90-9159-4595-9808-DADBAAD37E2E");
       return false;
    }
    string* pLayerName = pArg->getPlugInArgValue<string>();
-   if(pLayerName != NULL)
+   if (pLayerName != NULL)
    {
       mLayerName = *pLayerName;
    }
 
    // Layer type
-   if(!pInArgList->getArg("Existing Layer Type", pArg) || (pArg == NULL))
+   if (!pInArgList->getArg("Existing Layer Type", pArg) || (pArg == NULL))
    {
       reportError("Could not read the layer type input value!", "321AB1C6-3946-44d7-BC11-96B3F1FA1458");
       return false;
    }
 
    string* pLayerType = pArg->getPlugInArgValue<string>();
-   if(pLayerType != NULL)
+   if (pLayerType != NULL)
    {
       mLayerType = *pLayerType;
    }
 
    // Results matrix
-   if(!pInArgList->getArg("Results Layer", pArg) || (pArg == NULL))
+   if (!pInArgList->getArg("Results Layer", pArg) || (pArg == NULL))
    {
       reportError("Could not read the results matrix input value!", "D9EE049B-4216-429d-884E-1EF3EE059032");
       return false;

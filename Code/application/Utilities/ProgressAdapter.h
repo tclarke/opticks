@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef __PROGRESSADAPTER_H
-#define __PROGRESSADAPTER_H
+#ifndef PROGRESSADAPTER_H
+#define PROGRESSADAPTER_H
 
 #include "Progress.h"
 #include "ProgressImp.h"
@@ -26,8 +24,8 @@ public:
 
    virtual const std::string& getObjectType() const
    {
-      static std::string type("ProgressAdapter");
-      return type;
+      static std::string sType("ProgressAdapter");
+      return sType;
    }
 
    virtual bool isKindOf(const std::string& className) const

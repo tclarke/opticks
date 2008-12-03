@@ -161,7 +161,8 @@ protected:
     *        Form data from the request body.
     * @return An HTTP Response.
     */
-   virtual Response postRequest(const QString &uri, const QString &contentType, const QString &body, const FormValueMap &form);
+   virtual Response postRequest(const QString& uri, const QString& contentType, const QString& body,
+      const FormValueMap& form);
 
    /**
     * This handles HTTP GET requests.
@@ -180,7 +181,8 @@ protected:
     *        Form data encoded in the request URL.
     * @return An HTTP Response.
     */
-   virtual Response getRequest(const QString &uri, const QString &contentType, const QString &body, const FormValueMap &form) = 0;
+   virtual Response getRequest(const QString& uri, const QString& contentType, const QString& body,
+      const FormValueMap& form) = 0;
 
 protected slots:
    /**
@@ -235,7 +237,7 @@ private:
    ResponseCode HandleRequest(HttpRequest *pHttpRequest, HttpResponse *pHttpResponse);
 
    EHSServerParameters mParams;
-   QTimer *mpTimer;
+   QTimer* mpTimer;
    QMap<QString, EHS*> mRegistrations;
    bool mServerIsRunning;
    bool mAllowNonLocal;

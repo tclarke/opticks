@@ -15,19 +15,19 @@
 #include <QtGui/QMessageBox>
 #include <QtGui/QFontMetrics>
 
-#include "glCommon.h"
-#include "AoiLayer.h"
-#include "AoiLayerImp.h"
 #include "AnnotationToolBar.h"
 #include "AoiElement.h"
 #include "AoiElementImp.h"
-#include "AoiToolBar.h"
+#include "AoiLayer.h"
+#include "AoiLayerImp.h"
 #include "AoiLayerUndo.h"
+#include "AoiToolBar.h"
+#include "AppVerify.h"
 #include "BitMaskImp.h"
 #include "BitMaskObjectImp.h"
-#include "AppVerify.h"
-#include "DesktopServicesImp.h"
+#include "DesktopServices.h"
 #include "DrawUtil.h"
+#include "glCommon.h"
 #include "GraphicGroup.h"
 #include "GraphicObject.h"
 #include "GraphicObjectFactory.h"
@@ -55,10 +55,14 @@
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
 
-unsigned int AoiLayerImp::msNumLayers = 0;
+unsigned int AoiLayerImp::sNumLayers = 0;
 
 AoiLayerImp::AoiLayerImp(const string& id, const string& layerName, DataElement* pElement) :
-   GraphicLayerImp(id, layerName, pElement)
+   GraphicLayerImp(id, layerName, pElement),
+   mSymbol(AoiLayer::getSettingMarkerSymbol()),
+   mLabelHandleSize(4.0),
+   mLabelHandleDrawn(false),
+   mLabelMoving(false)
 {
    addAcceptableGraphicType(LINE_OBJECT);
    addAcceptableGraphicType(HLINE_OBJECT);
@@ -79,9 +83,6 @@ AoiLayerImp::AoiLayerImp(const string& id, const string& layerName, DataElement*
       setIcon(pIcons->mDrawPixel);
    }
 
-   mLabelHandleSize = 4.0;
-   mLabelHandleDrawn = false;
-   mLabelMoving = false;
    mFont = QApplication::font();
    mFont.setBold(true);
    mFont.setPointSize(12);
@@ -89,26 +90,24 @@ AoiLayerImp::AoiLayerImp(const string& id, const string& layerName, DataElement*
    bool autoColorOn = AoiLayer::getSettingAutoColor();
    if (autoColorOn == true)
    {
-      UtilityServicesImp *Utils = UtilityServicesImp::instance();
-      ColorType color = Utils->getAutoColor(msNumLayers);
+      UtilityServicesImp* pUtils = UtilityServicesImp::instance();
+      ColorType color = pUtils->getAutoColor(sNumLayers);
       mColor = COLORTYPE_TO_QCOLOR(color);
    }
    else
    {
-      ColorType color = AoiLayer::getSettingMarkerColor();      
+      ColorType color = AoiLayer::getSettingMarkerColor();
       mColor = COLORTYPE_TO_QCOLOR(color);
    }
-
-   mSymbol = AoiLayer::getSettingMarkerSymbol();
 
    VERIFYNR(connect(this, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(modified())));
    VERIFYNR(connect(this, SIGNAL(symbolChanged(const SymbolType&)), this, SIGNAL(modified())));
    VERIFYNR(connect(this, SIGNAL(objectAdded(GraphicObject *)), this, SLOT(objectWasAdded(GraphicObject *))));
 
-   AoiElement *pAoi = dynamic_cast<AoiElement*>(pElement);
+   AoiElement* pAoi = dynamic_cast<AoiElement*>(pElement);
    if (pAoi != NULL)
    {
-      GraphicGroup *pGroup = pAoi->getGroup();
+      GraphicGroup* pGroup = pAoi->getGroup();
       if (pGroup != NULL)
       {
          ColorType color(mColor.red(), mColor.green(), mColor.blue());
@@ -123,19 +122,18 @@ AoiLayerImp::AoiLayerImp(const string& id, const string& layerName, DataElement*
       }
    }
 
-   msNumLayers++;
+   sNumLayers++;
 
    addPropertiesPage(PropertiesAoiLayer::getName());
 }
 
 AoiLayerImp::~AoiLayerImp()
-{
-}
+{}
 
 const string& AoiLayerImp::getObjectType() const
 {
-   static string type("AoiLayerImp");
-   return type;
+   static string sType("AoiLayerImp");
+   return sType;
 }
 
 bool AoiLayerImp::isKindOf(const string& className) const
@@ -210,7 +208,7 @@ bool AoiLayerImp::toXml(XMLWriter* pXml) const
    pXml->addAttr("aoiSymbol", mSymbol);
    pXml->addAttr("aoiColor", QCOLOR_TO_COLORTYPE(mColor));
 
-   if(Service<SessionManager>()->isSessionSaving())
+   if (Service<SessionManager>()->isSessionSaving())
    {
       pXml->addAttr("aoiLabelOffset", mLabelOffset);
       pXml->addAttr("aoiLabelLocation", mLabelLocation);
@@ -246,27 +244,25 @@ bool AoiLayerImp::fromXml(DOMNode* pDocument, unsigned int version)
    string symbol = A(pElement->getAttribute(X("aoiSymbol")));
    mSymbol = StringUtilities::fromXmlString<SymbolType>(symbol);
 
-   if(Service<SessionManager>()->isSessionLoading())
+   if (Service<SessionManager>()->isSessionLoading())
    {
-      mLabelOffset = StringUtilities::fromXmlString<LocationType>(
-         A(pElement->getAttribute(X("aoiLabelOffset"))));
-      mLabelLocation = StringUtilities::fromXmlString<LocationType>(
-         A(pElement->getAttribute(X("aoiLabelLocation"))));
+      mLabelOffset = StringUtilities::fromXmlString<LocationType>(A(pElement->getAttribute(X("aoiLabelOffset"))));
+      mLabelLocation = StringUtilities::fromXmlString<LocationType>(A(pElement->getAttribute(X("aoiLabelLocation"))));
    }
 
    return true;
 }
 
-void AoiLayerImp::setColor(const QColor& clrMarker)
+void AoiLayerImp::setColor(const QColor& aoiColor)
 {
-   if (clrMarker.isValid() == false)
+   if (aoiColor.isValid() == false)
    {
       return;
    }
 
-   if (mColor != clrMarker)
+   if (mColor != aoiColor)
    {
-      ColorType color(clrMarker.red(), clrMarker.green(), clrMarker.blue(), clrMarker.alpha());
+      ColorType color(aoiColor.red(), aoiColor.green(), aoiColor.blue(), aoiColor.alpha());
 
       View* pView = getView();
       if (pView != NULL)
@@ -274,7 +270,7 @@ void AoiLayerImp::setColor(const QColor& clrMarker)
          pView->addUndoAction(new SetAoiColor(dynamic_cast<AoiLayer*>(this), QCOLOR_TO_COLORTYPE(mColor), color));
       }
 
-      mColor = clrMarker;
+      mColor = aoiColor;
 
       GraphicGroup* pGroup = getGroup();
       if (pGroup != NULL)
@@ -284,22 +280,22 @@ void AoiLayerImp::setColor(const QColor& clrMarker)
          pGroup->setLineColor(color);
       }
 
-      emit colorChanged(clrMarker);
+      emit colorChanged(mColor);
       notify(SIGNAL_NAME(AoiLayer, ColorChanged), boost::any(color));
    }
 }
 
-void AoiLayerImp::setSymbol(const SymbolType& eSymbol)
+void AoiLayerImp::setSymbol(const SymbolType& aoiSymbol)
 {
-   if (mSymbol != eSymbol)
+   if (mSymbol != aoiSymbol)
    {
       View* pView = getView();
       if (pView != NULL)
       {
-         pView->addUndoAction(new SetAoiSymbol(dynamic_cast<AoiLayer*>(this), mSymbol, eSymbol));
+         pView->addUndoAction(new SetAoiSymbol(dynamic_cast<AoiLayer*>(this), mSymbol, aoiSymbol));
       }
 
-      mSymbol = eSymbol;
+      mSymbol = aoiSymbol;
 
       GraphicGroup* pGroup = getGroup();
       if (pGroup != NULL)
@@ -317,22 +313,20 @@ void AoiLayerImp::reset()
 {
    ColorType color = AoiLayer::getSettingMarkerColor();
    QColor clrAoi = COLORTYPE_TO_QCOLOR(color);
+
    bool autoColorOn = AoiLayer::getSettingAutoColor();
    if (autoColorOn == true)
    {
-      UtilityServicesImp* pUtilities = UtilityServicesImp::instance();
-      if (pUtilities != NULL)
-      {
-         ColorType color = pUtilities->getAutoColor(msNumLayers);
-         clrAoi.setRgb(color.mRed, color.mGreen, color.mBlue);
-      }
+      Service<UtilityServices> pUtilities;
+      ColorType autoColor = pUtilities->getAutoColor(sNumLayers);
+      clrAoi.setRgb(autoColor.mRed, autoColor.mGreen, autoColor.mBlue);
    }
 
    setColor(clrAoi);
    setSymbol(AoiLayer::getSettingMarkerSymbol());
 }
 
-LocationType AoiLayerImp::correctCoordinate(const LocationType &coord) const
+LocationType AoiLayerImp::correctCoordinate(const LocationType& coord) const
 {
    LocationType loc;
    loc.mX = static_cast<int>(coord.mX) + 0.5;
@@ -340,16 +334,16 @@ LocationType AoiLayerImp::correctCoordinate(const LocationType &coord) const
    return loc;
 }
 
-GraphicObject *AoiLayerImp::addObject(const GraphicObjectType &objectType, LocationType point)
+GraphicObject *AoiLayerImp::addObject(const GraphicObjectType& objectType, LocationType point)
 {
    Service<DesktopServices> pDesktop;
    AoiToolBar* pToolbar = static_cast<AoiToolBar*>(pDesktop->getWindow("AOI", TOOLBAR));
-   if((pToolbar != NULL) && (pToolbar->getAddMode() == REPLACE_AOI))
+   if ((pToolbar != NULL) && (pToolbar->getAddMode() == REPLACE_AOI))
    {
       // erase the current AOI
       clear();
    }
-   GraphicObject *pObject = GraphicLayerImp::addObject(objectType, point);
+   GraphicObject* pObject = GraphicLayerImp::addObject(objectType, point);
    if (pObject != NULL)
    {
       ColorType color(mColor.red(), mColor.green(), mColor.blue());
@@ -380,7 +374,7 @@ void AoiLayerImp::objectWasAdded(GraphicObject *pObject)
       pObject->setLineColor(color);
       pObject->setPixelSymbol(mSymbol);
       ModeType mode = mCurrentMode;
-      AoiElementImp *pAoiElement = dynamic_cast<AoiElementImp*>(getGroup());
+      AoiElementImp* pAoiElement = dynamic_cast<AoiElementImp*>(getGroup());
       if (pAoiElement != NULL)
       {
          mode = pAoiElement->correctedDrawMode(mode);
@@ -397,14 +391,14 @@ void AoiLayerImp::drawGroup()
 {
    if (mustDrawAsBitmask())
    {
-      PerspectiveView *pView = dynamic_cast<PerspectiveView*>(getView());
+      PerspectiveView* pView = dynamic_cast<PerspectiveView*>(getView());
       double zoomPercent = 100;
       if (pView != NULL)
       {
          zoomPercent = pView->getZoomPercentage();
       }
 
-      AoiElement *pAoi = static_cast<AoiElement*>(getDataElement());
+      AoiElement* pAoi = static_cast<AoiElement*>(getDataElement());
       VERIFYNRV(pAoi != NULL);
       GraphicResource<BitMaskObjectImp> pMaskObj(BITMASK_OBJECT, dynamic_cast<AoiLayer*>(this));
       pMaskObj->setFillColor(ColorType(mColor.red(), mColor.green(), mColor.blue()));
@@ -414,13 +408,13 @@ void AoiLayerImp::drawGroup()
 
       if (getShowLabels())
       {
-         GraphicGroup *pGroup = getGroup();
+         GraphicGroup* pGroup = getGroup();
          VERIFYNRV(pGroup != NULL);
-         const std::list<GraphicObject*> &objects = pGroup->getObjects();
-         for (std::list<GraphicObject*>::const_iterator iter = objects.begin();
-            iter != objects.end(); ++iter)
+
+         const list<GraphicObject*>& objects = pGroup->getObjects();
+         for (list<GraphicObject*>::const_iterator iter = objects.begin(); iter != objects.end(); ++iter)
          {
-            GraphicObjectImp *pObj = dynamic_cast<GraphicObjectImp*>(*iter);
+            GraphicObjectImp* pObj = dynamic_cast<GraphicObjectImp*>(*iter);
             if (pObj != NULL)
             {
                pObj->drawLabel();
@@ -438,17 +432,13 @@ void AoiLayerImp::draw()
 {
    GraphicLayerImp::draw();
 
-   SpatialDataViewImp* pView = dynamic_cast<SpatialDataViewImp*> (getView());
+   SpatialDataViewImp* pView = dynamic_cast<SpatialDataViewImp*>(getView());
    if (pView == NULL)
    {
       return;
    }
 
-   DesktopServicesImp* pDesktop = DesktopServicesImp::instance();
-   if (pDesktop == NULL)
-   {
-      return;
-   }
+   Service<DesktopServices> pDesktop;
 
    AoiToolBar* pToolbar = static_cast<AoiToolBar*>(pDesktop->getWindow("AOI", TOOLBAR));
    if (pToolbar == NULL)
@@ -476,30 +466,29 @@ void AoiLayerImp::draw()
       // Draw text handle if appropriate
       if (mLabelHandleDrawn)
       {
-         glColor3f(255.0,255.0,255.0);
+         glColor3f(255.0, 255.0, 255.0);
          glLineWidth(1);
 
          double zoomFactor = pView->getZoomPercentage();
          zoomFactor /= 100.0;
          zoomFactor = 1.0 / zoomFactor;
 
-         float x1,x2,y1,y2;
-         x1 = mLabelLocation.mX - mLabelHandleSize * zoomFactor / getXScaleFactor();
-         x2 = mLabelLocation.mX + mLabelHandleSize * zoomFactor / getXScaleFactor();
-         y1 = mLabelLocation.mY - mLabelHandleSize * zoomFactor / getYScaleFactor();
-         y2 = mLabelLocation.mY + mLabelHandleSize * zoomFactor / getYScaleFactor();
+         float x1 = mLabelLocation.mX - mLabelHandleSize * zoomFactor / getXScaleFactor();
+         float x2 = mLabelLocation.mX + mLabelHandleSize * zoomFactor / getXScaleFactor();
+         float y1 = mLabelLocation.mY - mLabelHandleSize * zoomFactor / getYScaleFactor();
+         float y2 = mLabelLocation.mY + mLabelHandleSize * zoomFactor / getYScaleFactor();
          glBegin(GL_POLYGON);
-         glVertex2f(x1,y1);
-         glVertex2f(x2,y1);
-         glVertex2f(x2,y2);
-         glVertex2f(x1,y2);
+         glVertex2f(x1, y1);
+         glVertex2f(x2, y1);
+         glVertex2f(x2, y2);
+         glVertex2f(x1, y2);
          glEnd();
-         glColor3f(0.0,0.0,0.0);
+         glColor3f(0.0, 0.0, 0.0);
          glBegin(GL_LINE_LOOP);
-         glVertex2f(x1,y1);
-         glVertex2f(x2,y1);
-         glVertex2f(x2,y2);
-         glVertex2f(x1,y2);
+         glVertex2f(x1, y1);
+         glVertex2f(x2, y1);
+         glVertex2f(x2, y2);
+         glVertex2f(x1, y2);
          glEnd();
       }
    }
@@ -519,13 +508,12 @@ QCursor AoiLayerImp::getMouseCursor() const
 }
 
 bool AoiLayerImp::processMousePress(const QPoint& screenCoord, Qt::MouseButton button, Qt::MouseButtons buttons,
-   Qt::KeyboardModifiers modifiers)
+                                    Qt::KeyboardModifiers modifiers)
 {
    Service<DesktopServices> pDesktop;
    AoiToolBar* pToolbar = static_cast<AoiToolBar*>(pDesktop->getWindow("AOI", TOOLBAR));
-   bool addNewLayer = (getCurrentGraphicObjectType() != MOVE_OBJECT) && (button == Qt::LeftButton) && 
-                      (pToolbar != NULL) && (pToolbar->getAddMode() == NEW_AOI) &&
-                      !getObjects().empty() && insertingObjectNull();
+   bool addNewLayer = (getCurrentGraphicObjectType() != MOVE_OBJECT) && (button == Qt::LeftButton) &&
+      (pToolbar != NULL) && (pToolbar->getAddMode() == NEW_AOI) && !getObjects().empty() && insertingObjectNull();
    if (getCurrentGraphicObjectType() == MOVE_OBJECT && button == Qt::LeftButton)
    {
       mLabelMoving = hitLabel(screenCoord);
@@ -534,7 +522,7 @@ bool AoiLayerImp::processMousePress(const QPoint& screenCoord, Qt::MouseButton b
          return true;
       }
    }
-   else if(addNewLayer)
+   else if (addNewLayer)
    {
       SpatialDataViewImp* pSpatialDataView = dynamic_cast<SpatialDataViewImp*> (getView());
       if (pSpatialDataView != NULL)
@@ -549,8 +537,8 @@ bool AoiLayerImp::processMousePress(const QPoint& screenCoord, Qt::MouseButton b
             }
             else
             {
-               AoiLayerImp *pNewLayerImp = dynamic_cast<AoiLayerImp*>(pNewLayer);
-               if(pNewLayerImp != NULL)
+               AoiLayerImp* pNewLayerImp = dynamic_cast<AoiLayerImp*>(pNewLayer);
+               if (pNewLayerImp != NULL)
                {
                   pNewLayerImp->processMousePress(screenCoord, button, buttons, modifiers);
                   return false;
@@ -571,7 +559,7 @@ bool AoiLayerImp::processMouseMove(const QPoint& screenCoord, Qt::MouseButton bu
       ViewImp* pView = dynamic_cast<ViewImp*> (getView());
       VERIFY(pView != NULL);
 
-      GraphicGroup *pGroup = getGroup();
+      GraphicGroup* pGroup = getGroup();
       VERIFY(pGroup != NULL);
 
       LocationType newLabelPos;
@@ -600,27 +588,27 @@ bool AoiLayerImp::processMouseRelease(const QPoint& screenCoord, Qt::MouseButton
 QColor AoiLayerImp::getLabelColor(const GraphicObjectImp *pObj)
 {
    QColor labelColor(mColor);
-   int h,s,v;
-   labelColor.getHsv(&h,&s,&v);
+   int h;
+   int s;
+   int v;
+   labelColor.getHsv(&h, &s, &v);
    h = (h + 180) % 360;
-   labelColor.setHsv(h,s,v);
+   labelColor.setHsv(h, s, v);
    return labelColor;
-
 }
 
 bool AoiLayerImp::mustDrawAsBitmask() const
 {
-   AoiElementImp *pAoi = dynamic_cast<AoiElementImp*>(getDataElement());
+   AoiElementImp* pAoi = dynamic_cast<AoiElementImp*>(getDataElement());
    VERIFY(pAoi != NULL);
    if (pAoi->getAllPointsToggled())
    {
       return true;
    }
-   const list<GraphicObject*> &objects = getGroup()->getObjects();
-   for (list<GraphicObject*>::const_iterator iter = objects.begin(); 
-      iter != objects.end(); ++iter)
+   const list<GraphicObject*>& objects = getGroup()->getObjects();
+   for (list<GraphicObject*>::const_iterator iter = objects.begin(); iter != objects.end(); ++iter)
    {
-      GraphicObject *pObj = *iter;
+      GraphicObject* pObj = *iter;
       if (pObj != NULL)
       {
          if (pObj->getDrawMode() != DRAW || pObj->getPixelSymbol() >= BOX)
@@ -642,7 +630,7 @@ bool AoiLayerImp::willDrawAsPixels() const
    if (mayDrawAsPixels())
    {
       double maxScale = max(getXScaleFactor(), getYScaleFactor());
-      PerspectiveView *pView = dynamic_cast<PerspectiveView*>(getView());
+      PerspectiveView* pView = dynamic_cast<PerspectiveView*>(getView());
       VERIFY(pView != NULL);
       if (pView->getZoomPercentage() > 100 / maxScale)
       {
@@ -661,7 +649,7 @@ bool AoiLayerImp::hitLabel(const QPoint& screenCoord) const
       return false;
    }
 
-   GraphicGroup *pGroup = getGroup();
+   GraphicGroup* pGroup = getGroup();
    VERIFY(pGroup != NULL);
 
    LocationType labelPos = pGroup->getLlCorner() - mLabelOffset;

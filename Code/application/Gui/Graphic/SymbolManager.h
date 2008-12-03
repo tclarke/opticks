@@ -34,7 +34,7 @@ private:
    SymbolManager(void);
    ~SymbolManager(void);
 
-   static SymbolManager *mpSingleton;
+   static SymbolManager* mpSingleton;
 
    GraphicObject *getSymbol(const std::string &symbolName);
    GraphicObject *loadSymbol(const std::string &symbolName);

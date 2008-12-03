@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef _CLASSIFICATIONADAPTER
-#define _CLASSIFICATIONADAPTER
+#ifndef CLASSIFICATIONADAPTER_H
+#define CLASSIFICATIONADAPTER_H
 
 #include "Classification.h"
 #include "ClassificationImp.h"

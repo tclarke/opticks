@@ -27,12 +27,12 @@ ImagePBO::~ImagePBO()
 void ImagePBO::loadData(void *pData)
 {
    GLenum accessMode = mpPixelBufferObject->getAccessMode();
-   if((accessMode & GL_WRITE_ONLY) != GL_WRITE_ONLY)
+   if ((accessMode & GL_WRITE_ONLY) != GL_WRITE_ONLY)
    {
       return;
    }
 
-   ColorBuffer *pColorBuffer = getColorBuffer();
+   ColorBuffer* pColorBuffer = getColorBuffer();
    if (pColorBuffer == NULL)
    {
       return;
@@ -84,7 +84,7 @@ void ImagePBO::read(GLint xCoord, GLint yCoord, GLsizei width, GLsizei height,
                     GLenum textureFormat, GLenum dataType, GLvoid *pPixels)
 {
    // get the number of bytes to allocate for the PBO
-   ColorBuffer *pColorBuffer = getColorBuffer();
+   ColorBuffer* pColorBuffer = getColorBuffer();
    if (pColorBuffer == NULL)
    {
       return;
@@ -104,7 +104,7 @@ void ImagePBO::read(GLint xCoord, GLint yCoord, GLsizei width, GLsizei height,
                            ImageUtilities::getNumColorChannels(pColorBuffer->getTextureFormat());
          // copy data from color buffer to pixel buffer object
          mpPixelBufferObject->copyBytes(pPixels, numBytes);
-        
+
          // unmap pixel buffer object to transfer data         
          mpPixelBufferObject->releaseBuffer();
       }

@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef _DATAELEMENTGROUPADAPTER
-#define _DATAELEMENTGROUPADAPTER
+#ifndef DATAELEMENTGROUPADAPTER_H
+#define DATAELEMENTGROUPADAPTER_H
 
 #include "DataElementGroup.h"
 #include "DataElementGroupImp.h"

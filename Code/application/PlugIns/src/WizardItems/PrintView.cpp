@@ -22,11 +22,10 @@
 #include <vector>
 using namespace std;
 
-PrintView::PrintView()
+PrintView::PrintView() :
+   mpRasterElement(NULL),
+   mbPrintDialog(false)
 {
-   mpRasterElement = NULL;
-   mbPrintDialog = false;
-
    setName("Print View");
    setVersion(APP_VERSION_NUMBER);
    setCreator("Ball Aerospace & Technologies, Corp.");
@@ -83,7 +82,7 @@ bool PrintView::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    pStep->addProperty("Item", getName());
    mpStep = pStep.get();
 
-   if(!extractInputArgs(pInArgList))
+   if (!extractInputArgs(pInArgList))
    {
       reportError("Unable to extract input arguments.", "9FC540AC-4BCF-4041-9E8E-484A494AF6AD");
       return false;
@@ -94,24 +93,24 @@ bool PrintView::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 
    vector<Window*> windows;
    Service<DesktopServices> pDesktop;
-   if(pDesktop.get() != NULL)
+   if (pDesktop.get() != NULL)
    {
       pDesktop->getWindows(SPATIAL_DATA_WINDOW, windows);
    }
 
-   for(vector<Window*>::iterator iter = windows.begin(); iter != windows.end(); ++iter)
+   for (vector<Window*>::iterator iter = windows.begin(); iter != windows.end(); ++iter)
    {
       SpatialDataWindow* pCurrentWindow = static_cast<SpatialDataWindow*>(*iter);
-      if(pCurrentWindow != NULL)
+      if (pCurrentWindow != NULL)
       {
          SpatialDataView* pView = pCurrentWindow->getSpatialDataView();
-         if(pView != NULL)
+         if (pView != NULL)
          {
             LayerList* pLayerList = pView->getLayerList();
             if (pLayerList != NULL)
             {
                RasterElement* pRasterElement = pLayerList->getPrimaryRasterElement();
-               if(pRasterElement != NULL && pRasterElement == mpRasterElement)
+               if (pRasterElement != NULL && pRasterElement == mpRasterElement)
                {
                   pWindow = pCurrentWindow;
                   break;
@@ -121,7 +120,7 @@ bool PrintView::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
       }
    }
 
-   if(pWindow == NULL)
+   if (pWindow == NULL)
    {
       reportError("Could not get the window for the data set!", "28355746-8AE3-44a4-9253-58684E1964C1");
       return false;
@@ -136,7 +135,7 @@ bool PrintView::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 
 bool PrintView::extractInputArgs(PlugInArgList* pInArgList)
 {
-   if(!DesktopItems::extractInputArgs(pInArgList))
+   if (!DesktopItems::extractInputArgs(pInArgList))
    {
       return false;
    }
@@ -144,35 +143,35 @@ bool PrintView::extractInputArgs(PlugInArgList* pInArgList)
    PlugInArg* pArg = NULL;
 
    // Data set
-   if(!pInArgList->getArg("Data set", pArg) || (pArg == NULL))
+   if (!pInArgList->getArg("Data set", pArg) || (pArg == NULL))
    {
       reportError("Could not read the data set input value!", "3606840C-EA86-4aa4-9E5A-F74604E5DA3E");
       return false;
    }
+
    mpRasterElement = pArg->getPlugInArgValue<RasterElement>();
-   
-   if(mpRasterElement == NULL)
+   if (mpRasterElement == NULL)
    {
       reportError("The data set input value is invalid!", "1920C97E-A786-46ca-AA84-11DE889E3A1E");
       return false;
    }
 
-   if(mpStep != NULL)
+   if (mpStep != NULL)
    {
       mpStep->addProperty("dataSet", mpRasterElement->getName()); 
    }
 
    // Setup dialog
-   if(pInArgList->getArg("Setup Dialog", pArg) && (pArg != NULL))
+   if (pInArgList->getArg("Setup Dialog", pArg) && (pArg != NULL))
    {
-      bool *pBoolVal = pArg->getPlugInArgValue<bool>();
-      if(pBoolVal != NULL)
+      bool* pBoolVal = pArg->getPlugInArgValue<bool>();
+      if (pBoolVal != NULL)
       {
          mbPrintDialog = *pBoolVal;
       }
    }
 
-   if(mpStep != NULL)
+   if (mpStep != NULL)
    {
       mpStep->addProperty("printDialog", mbPrintDialog);
    }

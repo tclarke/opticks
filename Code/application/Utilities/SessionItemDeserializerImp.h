@@ -6,8 +6,9 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
-#ifndef SESSION_ITEM_DESERIALIZER_IMP_H
-#define SESSION_ITEM_DESERIALIZER_IMP_H
+
+#ifndef SESSIONITEMDESERIALIZERIMP_H
+#define SESSIONITEMDESERIALIZERIMP_H
 
 #include "AppConfig.h"
 #include "FileResource.h"
@@ -16,7 +17,7 @@
 #include <string>
 #include <vector>
 
-class SessionItemDeserializerImp : public SessionItemDeserializer
+class SessionItemDeserializerImp : public SessionItemDeserializer, public SessionItemDeserializerExt1
 {
 public:
    SessionItemDeserializerImp(const std::string &filename, const std::vector<int64_t> &blockSizes);
@@ -27,6 +28,7 @@ public:
    XERCES_CPP_NAMESPACE_QUALIFIER DOMElement *deserialize(XmlReader &reader, const char *pRootElementName);
    void nextBlock();
    std::vector<int64_t> getBlockSizes() const;
+   int getCurrentBlock() const;
 
 private:
    void ensureFileIsClosed();

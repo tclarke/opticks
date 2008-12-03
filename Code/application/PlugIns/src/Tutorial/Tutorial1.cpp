@@ -17,10 +17,10 @@ Tutorial1::Tutorial1()
 {
    setDescriptorId("{5D8F4DD0-9B20-42B1-A060-589DFBC85D00}");
    setName("Tutorial 1");
-   setVersion("1.0");
    setDescription("Creating your first plug-in.");
-   setCreator("The Opticks Team");
-   setCopyright("Copyright 2008");
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setProductionStatus(false);
    setType("Sample");
    setMenuLocation("[Tutorial]/Tutorial 1");
@@ -46,12 +46,12 @@ bool Tutorial1::getOutputSpecification(PlugInArgList *&pOutArgList)
 
 bool Tutorial1::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
 {
-   if(pInArgList == NULL)
+   if (pInArgList == NULL)
    {
       return false;
    }
-   Progress *pProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
-   if(pProgress != NULL)
+   Progress* pProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
+   if (pProgress != NULL)
    {
       pProgress->updateProgress("This demonstrates display of a warning.", 0, WARNING);
       pProgress->updateProgress("This demonstrates display of an error.", 0, ERRORS);

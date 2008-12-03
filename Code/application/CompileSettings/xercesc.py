@@ -17,7 +17,7 @@ def generate(env):
     if not xqilla_path:
        SCons.Warnings.warn(XercesNotFound,"Could not detect XQilla")
     else:
-       env.AppendUnique(CXXFLAGS="-I%s/include/%s -I%s/include" % (xerces_path,env["PLATFORM"],xqilla_path),
+       env.AppendUnique(CXXFLAGS=["-I%s/include/%s" % (xerces_path,env["PLATFORM"]), "-I%s/include" % (xqilla_path)],
                         CPPDEFINES="APPLICATION_XERCES",
                         LIBPATH=['%s/lib/%s' % (xerces_path,env["PLATFORM"]),'%s/lib/%s' % (xqilla_path,env["PLATFORM"])],
                         LIBS=['xerces-c','xqilla'])

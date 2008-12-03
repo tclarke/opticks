@@ -11,6 +11,7 @@
 #define OPTIONSGENERAL_H
 
 #include <QtGui/QWidget>
+
 #include "AppVersion.h"
 
 class QCheckBox;

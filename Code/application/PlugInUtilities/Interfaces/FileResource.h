@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef FILE_RESOURCE_H
-#define FILE_RESOURCE_H
+#ifndef FILERESOURCE_H
+#define FILERESOURCE_H
 
 #include "AppConfig.h"
 #include "Resource.h"
@@ -45,45 +45,53 @@ class FileObject
 {
 public:
    /**
-   * This is an implementation detail of the %FileObject class. 
-   *
-   * This is an implementation detail of the FileObject class. It is used 
-   * for passing the parameters required by fopen.
-   */
+    * This is an implementation detail of the %FileObject class. 
+    *
+    * This is an implementation detail of the FileObject class. It is used 
+    * for passing the parameters required by fopen.
+    */
    class Args
    {
    public:
+      Args(std::string filename, std::string access = "r") :
+         mFilename(filename),
+         mAccess(access) {}
+
       std::string mFilename;
       std::string mAccess;
-      Args(std::string filename, std::string access="r") : mFilename(filename), mAccess(access) {}
    };
 
-   FILE *obtainResource(const Args &args) const 
+   FILE* obtainResource(const Args& args) const
    {
       FILE* pFile = fopen(args.mFilename.c_str(), args.mAccess.c_str()); // standard open
-      if (args.mAccess.find("r") >= 0 && pFile == NULL) { // opening for reads - original failed - check uppercase/lowercase
+      if (args.mAccess.find("r") >= 0 && pFile == NULL)
+      { // opening for reads - original failed - check uppercase/lowercase
          std::string fname = args.mFilename.c_str();
-         for(size_t i = 0; i < fname.size(); i++) {
+         for (size_t i = 0; i < fname.size(); ++i)
+         {
             fname[i] = (char) toupper(fname[i]);
          }
          pFile = fopen(fname.c_str(), args.mAccess.c_str());
-         if (pFile == NULL) { // try lowercase
-            for(size_t i = 0; i < fname.size(); i++) {
+         if (pFile == NULL)
+         { // try lowercase
+            for (size_t i = 0; i < fname.size(); ++i)
+            {
                fname[i] = (char) tolower(fname[i]);
             }
             pFile = fopen(fname.c_str(), args.mAccess.c_str());
-         }         
+         }
       }
       return pFile;
    }
-   void releaseResource(const Args &args, FILE *pStream) const 
+   void releaseResource(const Args& args, FILE* pStream) const
    { 
       if (pStream != NULL)
       {
-         fclose(pStream); 
+         fclose(pStream);
       }
    }
 };
+
 /**
  *  This is a %Resource class that opens and closes files. 
  *
@@ -91,7 +99,7 @@ public:
  *  operator to allow a %FileResource object to be used where ever a FILE*
  *  would normally be used.
 */
-class FileResource : public Resource<FILE,FileObject>
+class FileResource : public Resource<FILE, FileObject>
 {
 public:
    /**
@@ -108,7 +116,9 @@ public:
     *           The access mode to open the file with. These match
     *           the modes used with fopen.
     */
-   FileResource(const char *pFilename, const char *pAccess) : Resource<FILE, FileObject>(FileObject::Args(pFilename, pAccess)) {}
+   FileResource(const char* pFilename, const char* pAccess) :
+      Resource<FILE, FileObject>(FileObject::Args(pFilename, pAccess)) {}
+
    /**
     *  Returns a pointer to the underlying FILE. 
     *
@@ -118,7 +128,10 @@ public:
     *
     *  @return   A pointer to the underlying FILE.
     */
-   operator FILE*() { return get(); }
+   operator FILE*()
+   {
+      return get();
+   }
 };
 
 class LargeFileResource
@@ -134,12 +147,11 @@ public:
     *        If false, the caller is responsible for closing any opened
     *        file.
     */
-   LargeFileResource (bool bResource = true)
+   LargeFileResource(bool bResource = true)
    {
       mbOwned = bResource;
       mHandle = -1;
    }
-
 
    /**
     * Destructs this object and will close any open file if
@@ -161,14 +173,13 @@ public:
     *           The object to construct from. After this call, the source no
     *           longer owns the file.
     */
-   LargeFileResource(LargeFileResource &source)
+   LargeFileResource(LargeFileResource& source)
    {
       mHandle = source.mHandle;
       mbOwned = source.mbOwned;
 
       source.release(); // the source no longer owns the file
    }
-
 
    /**
     *  Sets this object to another one. The object assigned to
@@ -191,7 +202,6 @@ public:
       return *this;
    }
 
-
    /**
     * Opens the given filename with the given settings.
     *
@@ -213,15 +223,14 @@ public:
          LargeFileResource::close();
       }
 
-   #if defined(WIN_API)
+#if defined(WIN_API)
       mHandle = _open(filename.c_str(), openType, permissionFlag );
-   #else
+#else
       mHandle = open64(filename.c_str(), openType, permissionFlag | O_LARGEFILE );
-   #endif
+#endif
 
       return validHandle();
    }
-
 
    /**
     * Close the opened file, regardless of file ownership.
@@ -233,17 +242,16 @@ public:
       int retVal = -1;
       if (validHandle())
       {
-   #if defined(WIN_API)
-         retVal =  _close(mHandle);
-   #else
+#if defined(WIN_API)
+         retVal = _close(mHandle);
+#else
          retVal = ::close(mHandle);
-   #endif
+#endif
          mHandle = -1;
       }
 
       return retVal;
    }
-
 
    /**
     * Release ownership of the file.  This means any
@@ -254,7 +262,6 @@ public:
       mbOwned = false;
    }
 
-
    /**
     * Take ownership of the file.  This means any opened file
     * will be closed during destruction of this object.
@@ -264,7 +271,6 @@ public:
       mbOwned = true;  // grab ownership
    }
 
-   
    /**
     * Create a file with the given name and permissions.
     * This file will be opened after creation and close any
@@ -284,15 +290,14 @@ public:
          //only close any file we have open if we own it, otherwise leak it.
          LargeFileResource::close();
       }
-   #if defined(WIN_API)
+#if defined(WIN_API)
       mHandle = _creat(filename.c_str(), perm);
-   #else
+#else
       mHandle = ::creat(filename.c_str(), perm);
-   #endif
+#endif
 
       return mHandle;
    }
-
 
    /**
     * Determine if the current position is the end of the file.
@@ -305,13 +310,12 @@ public:
       {
          return -1;
       }
-   #if defined(WIN_API)
+#if defined(WIN_API)
       return _eof(mHandle);
-   #else
-      return (tell() >= fileLength());
-   #endif
+#else
+      return (tell() >= fileLength() ? 1 : 0);
+#endif
    }
-
 
    /**
     * Determine the length of the opened file in bytes.
@@ -325,17 +329,16 @@ public:
       {
          return -1;
       }
-   #if defined(WIN_API)
+#if defined(WIN_API)
       return _filelengthi64(mHandle);
-   #else
+#else
       int64_t curPos = tell();
       seek(0, SEEK_END);
       int64_t fileSize = tell();
       seek(curPos, SEEK_SET);
       return fileSize;
-   #endif       
+#endif
    }
-
 
    /**
     * Move the current position in the file the given offset in the
@@ -358,13 +361,12 @@ public:
       {
          return -1;
       }
-   #if defined(WIN_API)
+#if defined(WIN_API)
       return _lseeki64(mHandle, offset, direction);
-   #else
+#else
       return lseek64(mHandle, offset, direction);
-   #endif
+#endif
    }
-
 
    /**
     * Reads the given number of bytes from the opened file into the buffer
@@ -382,19 +384,19 @@ public:
     *         if file was opened in text mode and newline conversions were
     *         performed, -1 on error.
     */
-   int64_t read(void *pMem, int64_t bytesToRead)
+   int64_t read(void* pMem, int64_t bytesToRead)
    {
       if ((pMem == NULL) || (bytesToRead == 0) || !validHandle())
       {
          return -1;
       }
-   #if defined(WIN_API)
+#if defined(WIN_API)
       int64_t bytesRead = 0;
-      while(bytesToRead >= std::numeric_limits<unsigned int>::max())
+      while (bytesToRead >= std::numeric_limits<unsigned int>::max())
       {
          int64_t r = _read(mHandle, pMem, std::numeric_limits<unsigned int>::max()) ;
          bytesRead += r;
-         if(r < std::numeric_limits<unsigned int>::max())
+         if (r < std::numeric_limits<unsigned int>::max())
          {
             return bytesRead;
          }
@@ -403,11 +405,10 @@ public:
       }
       bytesRead += _read(mHandle, pMem, static_cast<unsigned int>(bytesToRead));
       return bytesRead;
-   #else
+#else
       return ::read(mHandle, pMem, bytesToRead);
-   #endif
+#endif
    }
-
 
    /**
     * Returns the current position in the opened file.
@@ -420,13 +421,12 @@ public:
       {
          return -1;
       }
-   #if defined(WIN_API)
+#if defined(WIN_API)
       return _telli64(mHandle);
-   #else
+#else
       return tell64(mHandle);
-   #endif       
+#endif
    }
-
 
    /**
     * Writes the given number of bytes from pMem to the opened file.
@@ -440,19 +440,19 @@ public:
     *
     * @return the number of bytes actually written to the file, -1 on error.
     */
-   int64_t write(const void *pMem, int64_t bytesToWrite)
+   int64_t write(const void* pMem, int64_t bytesToWrite)
    {
       if ((pMem == NULL) || (bytesToWrite == 0) || !validHandle())
       {
          return -1;
       }
-   #if defined(WIN_API)
+#if defined(WIN_API)
       int64_t bytesWritten = 0;
-      while(bytesToWrite >= std::numeric_limits<unsigned int>::max())
+      while (bytesToWrite >= std::numeric_limits<unsigned int>::max())
       {
          int64_t wrote = _write(mHandle, pMem, std::numeric_limits<unsigned int>::max()) ;
          bytesWritten += wrote;
-         if(wrote < std::numeric_limits<unsigned int>::max())
+         if (wrote < std::numeric_limits<unsigned int>::max())
          {
             return bytesWritten;
          }
@@ -461,12 +461,11 @@ public:
       }
       bytesWritten += _write(mHandle, pMem, static_cast<unsigned int>(bytesToWrite));
       return bytesWritten;
-   #else
+#else
       return ::write(mHandle, pMem, bytesToWrite);
-   #endif
+#endif
    }
 
-   
    /**
     * Returns true if this object has a file open.
     *
@@ -489,15 +488,15 @@ public:
     *
     * @return The line read in with the newline character stripped.
     */
-   std::string readLine(bool *pError = NULL)
+   std::string readLine(bool* pError = NULL)
    {
       std::string line;
       int64_t pos = tell();
       std::vector<char> buffer(4096, 0);
       int64_t bytesRead = read(&buffer.front(), buffer.size());
-      if(bytesRead <= 0)
+      if (bytesRead <= 0)
       {
-         if(pError != NULL)
+         if (pError != NULL)
          {
             *pError = true;
          }
@@ -505,10 +504,9 @@ public:
       }
       std::string tmp(&buffer.front(), static_cast<std::string::size_type>(bytesRead));
       std::string::size_type eolLoc = tmp.find('\n');
-      if(eolLoc == std::string::npos)
+      if (eolLoc == std::string::npos)
       {
-         seek(pos, SEEK_SET);
-         if(pError != NULL)
+         if (pError != NULL)
          {
             *pError = false;
          }
@@ -520,7 +518,7 @@ public:
          --eolLoc;
       }
       line = tmp.substr(0, eolLoc);
-      if(pError != NULL)
+      if (pError != NULL)
       {
          *pError = false;
       }

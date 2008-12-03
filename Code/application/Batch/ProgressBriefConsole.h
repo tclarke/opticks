@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef __PROGRESSBRIEFCONSOLE_H
-#define __PROGRESSBRIEFCONSOLE_H
+#ifndef PROGRESSBRIEFCONSOLE_H
+#define PROGRESSBRIEFCONSOLE_H
 
 #include "Progress.h"
 #include "SubjectImp.h"
@@ -78,4 +78,4 @@ private:
    int mCounter;
 };
 
-#endif   // __PROGRESSBRIEFCONSOLE_H
+#endif

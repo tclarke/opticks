@@ -44,7 +44,7 @@ public:
 
 protected:
    bool extractInputArgs(PlugInArgList* pInArgList);
-   void populatePlugInArgList(PlugInArgList* pArgList, WizardItem* pItem, bool bInArgs);
+   void populatePlugInArgList(PlugInArgList* pArgList, const WizardItem* pItem, bool bInArgs);
    bool launchPlugIn(WizardItem* pItem);
    void setConnectedNodeValues(WizardItem* pItem, PlugInArgList* pOutArgList = NULL);
    void resetNodeValues(WizardItem* pItem);
