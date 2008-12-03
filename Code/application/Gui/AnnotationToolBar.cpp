@@ -59,7 +59,8 @@ AnnotationToolBar::AnnotationToolBar(const string& id, QWidget* parent) :
 {
    Service<ConfigurationSettings> pSettings;
    Service<DesktopServices> pDesktop;
-   pSettings->attach(SIGNAL_NAME(ConfigurationSettings, SettingModified), Slot(this, &AnnotationToolBar::optionsModified));
+   pSettings->attach(SIGNAL_NAME(ConfigurationSettings, SettingModified),
+      Slot(this, &AnnotationToolBar::optionsModified));
 
    Icons* pIcons = Icons::instance();
    REQUIRE(pIcons != NULL);
@@ -477,7 +478,8 @@ AnnotationToolBar::AnnotationToolBar(const string& id, QWidget* parent) :
 AnnotationToolBar::~AnnotationToolBar()
 {
    Service<ConfigurationSettings> pSettings;
-   pSettings->detach(SIGNAL_NAME(ConfigurationSettings, SettingModified), Slot(this, &AnnotationToolBar::optionsModified));
+   pSettings->detach(SIGNAL_NAME(ConfigurationSettings, SettingModified),
+      Slot(this, &AnnotationToolBar::optionsModified));
 
    if (mpAnnotationLayer != NULL)
    {
@@ -567,8 +569,7 @@ bool AnnotationToolBar::setAnnotationLayer(Layer* pLayer)
 
    if (mpAnnotationLayer != NULL)
    {
-      disconnect(mpAnnotationLayer, SIGNAL(modified()), this,
-         SLOT(updateSelectedProperties()));
+      disconnect(mpAnnotationLayer, SIGNAL(modified()), this, SLOT(updateSelectedProperties()));
       disconnect(mpAnnotationLayer, SIGNAL(objectsSelected(std::list<GraphicObject*>&)),
          this, SLOT(updateSelectedProperties(std::list<GraphicObject*>&)));
       disconnect(mpAnnotationLayer, SIGNAL(currentTypeChanged(GraphicObjectType)),
@@ -642,6 +643,7 @@ void AnnotationToolBar::annotationLayerDeleted(Subject& subject, const string& s
    if (dynamic_cast<AnnotationLayerImp*>(&subject) == mpAnnotationLayer)
    {
       setAnnotationLayer(NULL);
+      setEnabled(false);
    }
 }
 
@@ -880,8 +882,7 @@ void AnnotationToolBar::updateDefaultProperties()
       list<GraphicObject*> selectedObjects;
       mpAnnotationLayer->getSelectedObjectsImpl(selectedObjects);
 
-      list<GraphicObject*>::iterator iter;
-      for (iter = selectedObjects.begin(); iter != selectedObjects.end(); iter++)
+      for (list<GraphicObject*>::iterator iter = selectedObjects.begin(); iter != selectedObjects.end(); ++iter)
       {
          GraphicObjectImp* pObject = dynamic_cast<GraphicObjectImp*>(*iter);
          if (pObject != NULL)
@@ -939,8 +940,7 @@ void AnnotationToolBar::updateSelectedProperties(list<GraphicObject*>& selectedO
    //   mpMove->setChecked(true);
    //}
 
-   list<GraphicObject*>::iterator iter;
-   for (iter = selectedObjects.begin(); iter != selectedObjects.end(); iter++)
+   for (list<GraphicObject*>::iterator iter = selectedObjects.begin(); iter != selectedObjects.end(); ++iter)
    {
       GraphicObjectImp* pObject = dynamic_cast<GraphicObjectImp*>(*iter);
       if (pObject != NULL)

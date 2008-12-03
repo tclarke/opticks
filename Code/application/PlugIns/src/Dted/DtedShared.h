@@ -6,8 +6,6 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
- 
-
 
 #ifndef DTEDSHARED_H
 #define DTEDSHARED_H
@@ -16,12 +14,9 @@
 #include <stdlib.h>
 
 // define helper functions for the data
-
-bool readLatLongInterval(FILE* pInputFile, float &lli);
-bool readLatLongCount(FILE* pInputFile, int &llc);
+bool readLatLongInterval(FILE* pInputFile, float& lli);
+bool readLatLongCount(FILE* pInputFile, int& llc);
 int hemValue(char c);
-bool readLatLong(FILE* pInputFile, float &latLong, bool lat);
+bool readLatLong(FILE* pInputFile, float& latLong, bool lat);
 
 #endif
-
- 

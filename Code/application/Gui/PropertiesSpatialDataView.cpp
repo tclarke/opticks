@@ -9,13 +9,17 @@
 
 #include <QtGui/QLabel>
 #include <QtGui/QLayout>
+#include <QtGui/QMessageBox>
 
 #include "AppVersion.h"
+#include "DesktopServices.h"
 #include "LabeledSection.h"
 #include "PanLimitTypeComboBox.h"
 #include "PropertiesSpatialDataView.h"
 #include "SpatialDataView.h"
+#include "SpatialDataWindow.h"
 #include "Undo.h"
+#include "Window.h"
 
 #include <limits>
 using namespace std;
@@ -111,9 +115,42 @@ bool PropertiesSpatialDataView::applyChanges()
    UndoGroup group(mpView, actionText);
 
    // Pan and zoom
-   mpView->setPanLimit(mpPanLimitCombo->getCurrentValue());
-   mpView->setMinimumZoom(mpMinZoomSpin->value());
-   mpView->setMaximumZoom(mpMaxZoomSpin->value() / 100.0);
+   std::vector<Window*> pWindows;
+   Service<DesktopServices> pDesktop;
+   pDesktop->getWindows(pWindows); 
+   bool bLinked = false;
+
+   for (unsigned int i = 0; i < pWindows.size(); ++i)
+   {
+      SpatialDataWindow* pWindow = dynamic_cast<SpatialDataWindow*>(pWindows[i]);
+      if (pWindow != NULL)
+      {
+         View* pView = pWindow->getView();
+         if (pView != NULL)
+         {
+            if (pView->getViewLinkType(mpView) != NO_LINK &&
+               (mpView->getPanLimit() != mpPanLimitCombo->getCurrentValue() || 
+               mpView->getMinimumZoom() != mpMinZoomSpin->value() ||
+               mpView->getMaximumZoom() != (mpMaxZoomSpin->value() / 100.0)))
+            {
+               bLinked = true;
+               mpPanLimitCombo->setCurrentValue(NO_LIMIT);
+               mpMinZoomSpin->setValue(0);
+               mpMaxZoomSpin->setValue(0);
+               QMessageBox::information(pDesktop->getMainWidget(), QString::fromStdString(mpView->getDisplayName()), 
+                     "The pan/zoom limits can't be changed if this view is linked to other views.");
+               break;
+            }
+         }
+      }
+   }
+
+   if (!bLinked)
+   {
+      mpView->setPanLimit(mpPanLimitCombo->getCurrentValue());
+      mpView->setMinimumZoom(mpMinZoomSpin->value());
+      mpView->setMaximumZoom(mpMaxZoomSpin->value() / 100.0);
+   }
 
    // Image
    TextureMode textureMode;

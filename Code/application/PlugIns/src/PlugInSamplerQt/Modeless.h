@@ -20,7 +20,7 @@ public:
    ModelessPlugIn();
    ~ModelessPlugIn();
 
-   bool execute(PlugInArgList* pInputArgList, PlugInArgList* pOutputArgList);
+   bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
    bool abort();
 
 protected:

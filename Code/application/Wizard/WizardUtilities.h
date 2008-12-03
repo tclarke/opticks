@@ -98,7 +98,7 @@ namespace WizardUtilities
     * 
     * @return Returns true if execution of the batch wizard files could be started, false otherwise.
     */
-   bool runBatchFiles(const std::vector<std::string> &batchWizardFiles, Progress *pProgress);
+   bool runBatchFiles(const std::vector<std::string>& batchWizardFiles, Progress* pProgress);
 };
 
 #endif

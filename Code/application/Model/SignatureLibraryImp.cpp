@@ -91,46 +91,37 @@ const double *SignatureLibraryImp::getOrdinateData(unsigned int index) const
    {
       if (mAbscissa.empty())
       {
-         const RasterDataDescriptor *pDesc = dynamic_cast<const RasterDataDescriptor*>(mpOdre.get()->getDataDescriptor());
-         if(pDesc != NULL)
+         const RasterDataDescriptor* pDesc =
+            dynamic_cast<const RasterDataDescriptor*>(mpOdre.get()->getDataDescriptor());
+         if (pDesc != NULL)
          {
             FactoryResource<DataRequest> pRequest;
             pRequest->setRows(pDesc->getActiveRow(index), pDesc->getActiveRow(index), 1);
             DataAccessor da = mpOdre->getDataAccessor(pRequest.release());
             if (da.isValid())
             {
-               static vector<double> originalOrdinateData;
-               originalOrdinateData.resize(mOriginalAbscissa.size());
-               switchOnEncoding(pDesc->getDataType(), 
-                  getOriginalAsDouble, da->getRow(), mOriginalAbscissa.size(), originalOrdinateData);
-               return &originalOrdinateData[0];
-            }
-            else
-            {
-               return NULL;
+               static vector<double> sOriginalOrdinateData;
+               sOriginalOrdinateData.resize(mOriginalAbscissa.size());
+               switchOnEncoding(pDesc->getDataType(), getOriginalAsDouble, da->getRow(), mOriginalAbscissa.size(),
+                  sOriginalOrdinateData);
+               return &sOriginalOrdinateData[0];
             }
          }
-         else
-         {
-            return NULL;
-         }
+
+         return NULL;
       }
-      else
-      {
-         return &mResampledData[index*getAbscissa().size()];
-      }
+
+      return &mResampledData[index * getAbscissa().size()];
    }
-   else
-   {
-      return NULL;
-   }
+
+   return NULL;
 }
 
 set<string> SignatureLibraryImp::getSignatureNames() const
 {
    set<string> names;
-   for(map<string,Signature*>::const_iterator pItem=mSignatureNames.begin();
-      pItem!=mSignatureNames.end(); ++pItem)
+   for (map<string, Signature*>::const_iterator pItem = mSignatureNames.begin();
+      pItem != mSignatureNames.end(); ++pItem)
    {
       names.insert(pItem->first);
    }
@@ -173,7 +164,7 @@ const Signature* SignatureLibraryImp::getSignature(const string& name) const
       const_cast<SignatureLibraryImp*>(this)->resample(mAbscissa);
    }
 
-   map<string,Signature*>::const_iterator pItem = mSignatureNames.find(name);
+   map<string, Signature*>::const_iterator pItem = mSignatureNames.find(name);
    if (pItem != mSignatureNames.end())
    {
       return pItem->second;
@@ -197,7 +188,7 @@ bool SignatureLibraryImp::resample(const vector<double> &abscissa)
    }
 
    PlugInResource resampler("Resampler");
-   Resampler *pResampler = dynamic_cast<Resampler*>(resampler.get());
+   Resampler* pResampler = dynamic_cast<Resampler*>(resampler.get());
    if (pResampler == NULL)
    {
       return false;
@@ -210,7 +201,7 @@ bool SignatureLibraryImp::resample(const vector<double> &abscissa)
       return true;
    }
 
-   RasterDataDescriptor *pDesc = dynamic_cast<RasterDataDescriptor*>(mpOdre->getDataDescriptor());
+   RasterDataDescriptor* pDesc = dynamic_cast<RasterDataDescriptor*>(mpOdre->getDataDescriptor());
    VERIFY(pDesc != NULL);
 
    unsigned int numSigs = pDesc->getRowCount();
@@ -229,13 +220,14 @@ bool SignatureLibraryImp::resample(const vector<double> &abscissa)
    }
 
    vector<double> originalOrdinateData(mOriginalAbscissa.size());
-   vector<double> toData, toFwhm;
+   vector<double> toData;
+   vector<double> toFwhm;
    vector<int> toBands;
    string errorMessage;
-   for (unsigned int i=0; i<mSignatures.size(); ++i)
+   for (unsigned int i = 0; i < mSignatures.size(); ++i)
    {
-      switchOnEncoding(pDesc->getDataType(), 
-         getOriginalAsDouble, da->getRow(), mOriginalAbscissa.size(), originalOrdinateData);
+      switchOnEncoding(pDesc->getDataType(), getOriginalAsDouble, da->getRow(), mOriginalAbscissa.size(),
+         originalOrdinateData);
       toData.clear();
       toData.reserve(mAbscissa.size());
       toBands.clear();
@@ -277,7 +269,7 @@ bool SignatureLibraryImp::import(const string &filename, const string &importerN
    ImporterResource importer(importerName, filename);
    vector<ImportDescriptor*> descs = importer->getImportDescriptors();
 
-   RasterDataDescriptor *pCubeDescriptor = NULL;
+   RasterDataDescriptor* pCubeDescriptor = NULL;
    if (descs.size() == 1 && descs.front() != NULL)
    {
       pCubeDescriptor = dynamic_cast<RasterDataDescriptor*>(descs.front()->getDataDescriptor());
@@ -292,13 +284,13 @@ bool SignatureLibraryImp::import(const string &filename, const string &importerN
          vector<DataElement*> importedElements = importer->getImportedElements();
          if (!importedElements.empty())
          {
-            RasterElement *pCube = dynamic_cast<RasterElement*>(importedElements.front());
+            RasterElement* pCube = dynamic_cast<RasterElement*>(importedElements.front());
             Service<ModelServices>()->setElementParent(pCube, dynamic_cast<DataElement*>(this));
             if (pCube != NULL)
             {
                clear();
                mpOdre.reset(pCube);
-               DynamicObject *pMetadata = getMetadata();
+               DynamicObject* pMetadata = getMetadata();
                if (pMetadata != NULL)
                {
                   string pCenterPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME, 
@@ -309,13 +301,13 @@ bool SignatureLibraryImp::import(const string &filename, const string &importerN
                   vector<string> sigNames = 
                      dv_cast<vector<string> >(pMetadata->getAttribute("Signature Names"), vector<string>());
 
-                  SignatureLibrary *pLib = dynamic_cast<SignatureLibrary*>(this);
+                  SignatureLibrary* pLib = dynamic_cast<SignatureLibrary*>(this);
                   VERIFY(pLib != NULL);
 
                   unsigned int numSigs = pCubeDescriptor->getRowCount();
 
                   mSignatures.reserve(numSigs);
-                  for (unsigned int i=0; i<numSigs; ++i)
+                  for (unsigned int i = 0; i < numSigs; ++i)
                   {
                      string name;
                      if (i >= sigNames.size())
@@ -328,9 +320,11 @@ bool SignatureLibraryImp::import(const string &filename, const string &importerN
                      {
                         name = sigNames[i];
                      }
-                     DataDescriptor *pDataDesc = Service<ModelServices>()->createDataDescriptor(name, "DataElement", pLib);
-                     DataDescriptorImp *pSigDesc = dynamic_cast<DataDescriptorImp*>(pDataDesc);
-                     mSignatures.push_back(new LibrarySignatureAdapter(*pSigDesc, SessionItemImp::generateUniqueId(), i, pLib));
+                     DataDescriptor* pDataDesc =
+                        Service<ModelServices>()->createDataDescriptor(name, "DataElement", pLib);
+                     DataDescriptorImp* pSigDesc = dynamic_cast<DataDescriptorImp*>(pDataDesc);
+                     mSignatures.push_back(new LibrarySignatureAdapter(*pSigDesc,
+                        SessionItemImp::generateUniqueId(), i, pLib));
                      mSignatureNames[name] = mSignatures.back();
                   }
                }
@@ -358,13 +352,13 @@ bool SignatureLibraryImp::insertSignatures(const vector<Signature*>& signatures)
       return false;
    }
 
-   SignatureLibrary *pInterface = dynamic_cast<SignatureLibrary*>(this);
+   SignatureLibrary* pInterface = dynamic_cast<SignatureLibrary*>(this);
    if (!mOriginalAbscissa.empty())
    {
       return false;
    }
 
-   const DynamicObject *pMetadata = getMetadata();
+   const DynamicObject* pMetadata = getMetadata();
    VERIFY(pMetadata != NULL);
    const vector<double>* pWavelengths =
       dv_cast<vector<double> >(&pMetadata->getAttributeByPath(CENTER_WAVELENGTHS_METADATA_PATH));
@@ -389,7 +383,7 @@ bool SignatureLibraryImp::insertSignatures(const vector<Signature*>& signatures)
    }
 
    PlugInResource resampler("Resampler");
-   Resampler *pResampler = dynamic_cast<Resampler*>(resampler.get());
+   Resampler* pResampler = dynamic_cast<Resampler*>(resampler.get());
    if (pResampler == NULL)
    {
       return false;
@@ -397,16 +391,16 @@ bool SignatureLibraryImp::insertSignatures(const vector<Signature*>& signatures)
 
    DataAccessor accessor = pRasterElement->getDataAccessor();
    vector<Signature*>::const_iterator ppSignature;
-   int i=0;
-   for (ppSignature=signatures.begin(); ppSignature!=signatures.end(); ++ppSignature, ++i)
+   int i = 0;
+   for (ppSignature = signatures.begin(); ppSignature != signatures.end(); ++ppSignature, ++i)
    {
       if (!accessor.isValid())
       {
          return false;
       }
-      double *pRasterData = reinterpret_cast<double*>(accessor->getRow());
-      const vector<double> *pFromData = dv_cast<vector<double> >(&(*ppSignature)->getData("Reflectance"));
-      const vector<double> *pFromWavelengths = dv_cast<vector<double> >(&(*ppSignature)->getData("Wavelength"));
+      double* pRasterData = reinterpret_cast<double*>(accessor->getRow());
+      const vector<double>* pFromData = dv_cast<vector<double> >(&(*ppSignature)->getData("Reflectance"));
+      const vector<double>* pFromWavelengths = dv_cast<vector<double> >(&(*ppSignature)->getData("Wavelength"));
       if (pFromData == NULL || pFromWavelengths == NULL)
       {
          return false;
@@ -415,7 +409,8 @@ bool SignatureLibraryImp::insertSignatures(const vector<Signature*>& signatures)
       vector<int> toBands;
       vector<double> toFwhm;
       string errorMessage;
-      bool success = pResampler->execute(*pFromData, toData, *pFromWavelengths, *pWavelengths, toFwhm, toBands, errorMessage);
+      bool success = pResampler->execute(*pFromData, toData, *pFromWavelengths, *pWavelengths, toFwhm,
+         toBands, errorMessage);
       if (success == false || toBands.size() != pWavelengths->size())
       {
          return false;
@@ -423,8 +418,8 @@ bool SignatureLibraryImp::insertSignatures(const vector<Signature*>& signatures)
       std::copy(toData.begin(), toData.end(), pRasterData);
       accessor->nextRow();
       string name = (*ppSignature)->getName();
-      DataDescriptor *pDataDesc = Service<ModelServices>()->createDataDescriptor(name, "DataElement", pInterface);
-      DataDescriptorImp *pSigDesc = dynamic_cast<DataDescriptorImp*>(pDataDesc);
+      DataDescriptor* pDataDesc = Service<ModelServices>()->createDataDescriptor(name, "DataElement", pInterface);
+      DataDescriptorImp* pSigDesc = dynamic_cast<DataDescriptorImp*>(pDataDesc);
       mSignatures.push_back(new LibrarySignatureAdapter(*pSigDesc, SessionItemImp::generateUniqueId(), i, pInterface));
       mSignatureNames[name] = mSignatures.back();
    }
@@ -445,8 +440,8 @@ unsigned int SignatureLibraryImp::getNumSignatures() const
 
 bool SignatureLibraryImp::hasSignature(Signature* pSignature) const
 {
-   for (vector<LibrarySignatureAdapter*>::const_iterator pItem=mSignatures.begin();
-      pItem!=mSignatures.end(); ++pItem)
+   for (vector<LibrarySignatureAdapter*>::const_iterator pItem = mSignatures.begin();
+      pItem != mSignatures.end(); ++pItem)
    {
       if (*pItem == pSignature)
       {
@@ -459,8 +454,8 @@ bool SignatureLibraryImp::hasSignature(Signature* pSignature) const
 vector<Signature*> SignatureLibraryImp::getSignatures() const
 {
    vector<Signature*> sigs;
-   for (vector<LibrarySignatureAdapter*>::const_iterator pItem=mSignatures.begin();
-      pItem!=mSignatures.end(); ++pItem)
+   for (vector<LibrarySignatureAdapter*>::const_iterator pItem = mSignatures.begin();
+      pItem != mSignatures.end(); ++pItem)
    {
       sigs.push_back(const_cast<LibrarySignatureAdapter*>(*pItem));
    }
@@ -491,9 +486,9 @@ bool SignatureLibraryImp::removeSignatures(const vector<Signature*>& signatures,
    // signatures would be O(N*N). Even though there is overhead in creating the
    // map, this is prudent because the whole point of SignatureLibrary is to
    // provide good performance with large N.
-   map<string,Signature*> sigNames;
-   for (vector<Signature*>::const_iterator pItem=signatures.begin();
-      pItem!=signatures.end(); ++pItem)
+   map<string, Signature*> sigNames;
+   for (vector<Signature*>::const_iterator pItem = signatures.begin();
+      pItem != signatures.end(); ++pItem)
    {
       if (*pItem != NULL)
       {
@@ -560,8 +555,8 @@ bool SignatureLibraryImp::fromXml(DOMNode* pDocument, unsigned int version)
 
 const string& SignatureLibraryImp::getObjectType() const
 {
-   static string type("SignatureLibraryImp");
-   return type;
+   static string sType("SignatureLibraryImp");
+   return sType;
 }
 
 bool SignatureLibraryImp::isKindOf(const string& className) const

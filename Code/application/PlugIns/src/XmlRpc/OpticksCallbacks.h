@@ -24,23 +24,23 @@ class XmlRpcStructParam;
 
 class XmlRpcAnnotationCallback : public XmlRpcCallback
 {
-   QString mObjectName;
-   GraphicLayer *mpLayer;
-   GraphicObject *mpObject;
-   OpticksXmlRpcMethods::RegisterCallback &mRegistrar;
-
 public:
-   XmlRpcAnnotationCallback(LayerType layerType, const QString &url, const QString &method, const XmlRpcStructParam &params,
-      OpticksXmlRpcMethods::RegisterCallback &callbackRegistrar, QObject *pParent=NULL);
+   XmlRpcAnnotationCallback(LayerType layerType, const QString& url, const QString& method,
+      const XmlRpcStructParam& params, OpticksXmlRpcMethods::RegisterCallback& callbackRegistrar,
+      QObject* pParent = NULL);
    virtual ~XmlRpcAnnotationCallback();
 
-   virtual void processModified(Subject &subject, const std::string &signal, const boost::any &val);
+   virtual void processModified(Subject& subject, const std::string& signal, const boost::any& val);
 
-public:
-   static bool getGraphicLayerAndObject(LayerType layerType, const QString &name, GraphicLayer *&pLayer,
-                                           GraphicObject *&pObject, SpatialDataView *pView,
-                                           bool createNewObject = false,
-                                           GraphicObjectType newObjectType = TEXT_OBJECT);
+   static bool getGraphicLayerAndObject(LayerType layerType, const QString& name, GraphicLayer*& pLayer,
+      GraphicObject*& pObject, SpatialDataView* pView, bool createNewObject = false,
+      GraphicObjectType newObjectType = TEXT_OBJECT);
+
+private:
+   QString mObjectName;
+   GraphicLayer* mpLayer;
+   GraphicObject* mpObject;
+   OpticksXmlRpcMethods::RegisterCallback& mRegistrar;
 };
 
 #endif

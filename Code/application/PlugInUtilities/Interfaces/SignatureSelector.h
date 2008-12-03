@@ -91,8 +91,7 @@ public:
     *           If true, an Apply button will appear.
     */
    SignatureSelector(Progress* pProgress, QWidget* parent = 0,
-                     QAbstractItemView::SelectionMode mode = QAbstractItemView::ExtendedSelection,
-                     bool addApply = false);
+      QAbstractItemView::SelectionMode mode = QAbstractItemView::ExtendedSelection, bool addApply = false);
 
    /**
     *  Destroys the signature selector dialog.

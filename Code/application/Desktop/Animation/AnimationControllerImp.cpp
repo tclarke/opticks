@@ -58,15 +58,16 @@ AnimationControllerImp::AnimationControllerImp(FrameType frameType, const string
    mMaxCurrentTime(0.0),
    mEffectiveCurrentTime(0.0),
    mFrequency(60),
-   mMinimumFrameRate(1, mFrequency),
-   mInterval(1.0 / mFrequency),
+   mMinimumFrameRate(mFrequency, 1),
+   mInterval(AnimationController::getSettingFrameSpeedSelection() / mFrequency),
    mState(STOP),
-   mCycle(PLAY_ONCE),
+   mCycle(AnimationController::getSettingAnimationCycleSelection()),
    mStartTime(0.0),
    mCanDropFrames(true),
    mpPlayAction(NULL),
    mpPauseAction(NULL),
    mpStopAction(NULL),
+   mpChangeDirectionAction(NULL),
    mpStepBackwardAction(NULL),
    mpStepForwardAction(NULL)
 {
@@ -79,6 +80,9 @@ AnimationControllerImp::AnimationControllerImp(FrameType frameType, const string
 
    mpStopAction = new QAction("Stop", this);
    mpStopAction->setAutoRepeat(false);
+
+   mpChangeDirectionAction = new QAction("Change Direction", this);
+   mpChangeDirectionAction->setAutoRepeat(false);
 
    mpStepBackwardAction = new QAction("Step Backward", this);
    mpStepBackwardAction->setAutoRepeat(false);
@@ -93,17 +97,19 @@ AnimationControllerImp::AnimationControllerImp(FrameType frameType, const string
       mpPlayAction->setIcon(pIcons->mAnimationPlayForward);
       mpPauseAction->setIcon(pIcons->mAnimationPause);
       mpStopAction->setIcon(pIcons->mAnimationStop);
+      mpChangeDirectionAction->setIcon(pIcons->mAnimationChangeDirection);
       mpStepBackwardAction->setIcon(pIcons->mAnimationAdvanceBackward);
       mpStepForwardAction->setIcon(pIcons->mAnimationAdvanceForward);
       setIcon(QIcon(pIcons->mAnimation));
    }
 
    // Connections
-   connect(mpPlayAction, SIGNAL(triggered()), this, SLOT(play()));
-   connect(mpPauseAction, SIGNAL(triggered()), this, SLOT(pause()));
-   connect(mpStopAction, SIGNAL(triggered()), this, SLOT(stop()));
-   connect(mpStepBackwardAction, SIGNAL(triggered()), this, SLOT(stepBackward()));
-   connect(mpStepForwardAction, SIGNAL(triggered()), this, SLOT(stepForward()));
+   VERIFYNR(connect(mpPlayAction, SIGNAL(triggered()), this, SLOT(play())));
+   VERIFYNR(connect(mpPauseAction, SIGNAL(triggered()), this, SLOT(pause())));
+   VERIFYNR(connect(mpStopAction, SIGNAL(triggered()), this, SLOT(stop())));
+   VERIFYNR(connect(mpChangeDirectionAction, SIGNAL(triggered()), this, SLOT(changeDirection())));
+   VERIFYNR(connect(mpStepBackwardAction, SIGNAL(triggered()), this, SLOT(stepBackward())));
+   VERIFYNR(connect(mpStepForwardAction, SIGNAL(triggered()), this, SLOT(stepForward())));
 }
 
 AnimationControllerImp::~AnimationControllerImp()
@@ -153,6 +159,8 @@ list<ContextMenuAction> AnimationControllerImp::getContextMenuActions() const
    }
    else
    {
+      menuActions.push_front(ContextMenuAction(mpChangeDirectionAction, 
+                             APP_ANIMATIONCONTROLLER_CHANGE_DIRECTION_ACTION));
       menuActions.push_front(ContextMenuAction(mpStopAction, APP_ANIMATIONCONTROLLER_STOP_ACTION));
       menuActions.push_front(ContextMenuAction(mpPauseAction, APP_ANIMATIONCONTROLLER_PAUSE_ACTION));
    }
@@ -319,6 +327,7 @@ void AnimationControllerImp::setIntervalMultiplier(double multiplier)
    double dInterval = multiplier / mFrequency;
    if (dInterval != mInterval)
    {
+      AnimationController::setSettingFrameSpeedSelection(multiplier); 
       mInterval = dInterval;
       emit intervalMultiplierChanged(multiplier);
       notify(SIGNAL_NAME(AnimationController, IntervalMultiplierChanged), boost::any(multiplier));
@@ -452,6 +461,28 @@ void AnimationControllerImp::pause()
    }
 }
 
+void AnimationControllerImp::changeDirection()
+{
+   AnimationState previousState = getAnimationState();
+
+   if (previousState == PLAY_FORWARD)
+   {
+      setAnimationState(PLAY_BACKWARD);
+   } 
+   else if (previousState == PAUSE_FORWARD)
+   {
+      setAnimationState(PAUSE_BACKWARD);
+   } 
+   else if (previousState == PLAY_BACKWARD)
+   {
+      setAnimationState(PLAY_FORWARD);
+   } 
+   else if (previousState == PAUSE_BACKWARD)
+   {
+      setAnimationState(PAUSE_FORWARD);
+   }
+}
+
 void AnimationControllerImp::stop()
 {
    AnimationState previousState = getAnimationState();
@@ -484,7 +515,7 @@ void AnimationControllerImp::stepForward()
    for (vector<Animation*>::const_iterator iter = mAnimations.begin();
       iter != mAnimations.end(); ++iter)
    {
-      Animation *pAnimation = *iter;
+      Animation* pAnimation = *iter;
       VERIFYNRV(pAnimation != NULL);
 
       const double startValue = pAnimation->getStartValue();
@@ -538,7 +569,7 @@ void AnimationControllerImp::stepBackward()
    for (vector<Animation*>::const_iterator iter = mAnimations.begin();
       iter != mAnimations.end(); ++iter)
    {
-      Animation *pAnimation = *iter;
+      Animation* pAnimation = *iter;
       VERIFYNRV(pAnimation != NULL);
 
       const double startValue = pAnimation->getStartValue();
@@ -729,10 +760,11 @@ void AnimationControllerImp::runAnimations()
       mppActiveController = mRunningControllers.begin();
       while (mppActiveController != mRunningControllers.end())
       {
-         AnimationControllerImp *pActiveController = *mppActiveController;
+         AnimationControllerImp* pActiveController = *mppActiveController;
          VERIFYNR(pActiveController != NULL);
          pActiveController->advance();
          QApplication::processEvents();
+         QApplication::processEvents(QEventLoop::DeferredDeletion);
          if (mppActiveController != mRunningControllers.end() && pActiveController == *mppActiveController)
          {
             ++mppActiveController;
@@ -854,10 +886,10 @@ void AnimationControllerImp::advance()
 void AnimationControllerImp::destroyAnimation()
 {
    // An object has been detached from the movie, so destroy it if the last object watching it is this player
-   AnimationImp* pAnimationImp = const_cast<AnimationImp*> (dynamic_cast<const AnimationImp*> (sender()));
+   AnimationImp* pAnimationImp = dynamic_cast<AnimationImp*>(sender());
    if (pAnimationImp != NULL)
    {
-      const list<SafeSlot> &frameChangedObservers = pAnimationImp->getSlots(SIGNAL_NAME(Animation, FrameChanged));
+      const list<SafeSlot>& frameChangedObservers = pAnimationImp->getSlots(SIGNAL_NAME(Animation, FrameChanged));
       if (frameChangedObservers.empty())
       {
          const list<SafeSlot>& deletedObservers = pAnimationImp->getSlots(SIGNAL_NAME(Subject, Deleted));
@@ -902,7 +934,7 @@ double AnimationControllerImp::getNextValue(double value) const
       for (vector<Animation*>::const_iterator iter = mAnimations.begin();
          iter != mAnimations.end(); ++iter)
       {
-         Animation *pAnimation = *iter;
+         Animation* pAnimation = *iter;
          VERIFYRV(pAnimation != NULL, -1.0);
 
          double movieValue = pAnimation->getNextFrameValue(state, 2);
@@ -921,7 +953,7 @@ double AnimationControllerImp::getNextValue(double value) const
       for (vector<Animation*>::const_iterator iter = mAnimations.begin();
          iter != mAnimations.end(); ++iter)
       {
-         Animation *pAnimation = *iter;
+         Animation* pAnimation = *iter;
          VERIFYRV(pAnimation != NULL, -1.0);
 
          double movieValue = pAnimation->getNextFrameValue(state, 1);
@@ -943,7 +975,7 @@ bool AnimationControllerImp::serialize(SessionItemSerializer& serializer) const
 {
    XMLWriter xml("AnimationController");
 
-   if(!SessionItemImp::toXml(&xml))
+   if (!SessionItemImp::toXml(&xml))
    {
       return false;
    }
@@ -961,12 +993,12 @@ bool AnimationControllerImp::serialize(SessionItemSerializer& serializer) const
    xml.addAttr("dropframes", mCanDropFrames);
 
    AnimationToolBar* pToolBar = static_cast<AnimationToolBar*>(Service<DesktopServices>()->getWindow("Animation", TOOLBAR));
-   if(pToolBar != NULL && dynamic_cast<const AnimationController*>(this) == pToolBar->getAnimationController())
+   if (pToolBar != NULL && dynamic_cast<const AnimationController*>(this) == pToolBar->getAnimationController())
    {
       xml.addAttr("selected", true);
    }
 
-   for(vector<Animation*>::const_iterator it = mAnimations.begin(); it != mAnimations.end(); ++it)
+   for (vector<Animation*>::const_iterator it = mAnimations.begin(); it != mAnimations.end(); ++it)
    {
       xml.addAttr("id", (*it)->getId(), xml.addElement("animation"));
    }
@@ -977,8 +1009,8 @@ bool AnimationControllerImp::serialize(SessionItemSerializer& serializer) const
 bool AnimationControllerImp::deserialize(SessionItemDeserializer &deserializer)
 {
    XmlReader reader(NULL, false);
-   DOMElement *pRoot = deserializer.deserialize(reader, "AnimationController");
-   if(pRoot == NULL || !SessionItemImp::fromXml(pRoot, XmlBase::VERSION))
+   DOMElement* pRoot = deserializer.deserialize(reader, "AnimationController");
+   if (pRoot == NULL || !SessionItemImp::fromXml(pRoot, XmlBase::VERSION))
    {
       return false;
    }
@@ -991,7 +1023,7 @@ bool AnimationControllerImp::deserialize(SessionItemDeserializer &deserializer)
    mCurrentFrame = StringUtilities::fromXmlString<double>(
       A(pRoot->getAttribute(X("currentframe"))));
    QStringList minFrameRate = QString(A(pRoot->getAttribute(X("minimumframerate")))).split("/");
-   if(minFrameRate.size() != 2)
+   if (minFrameRate.size() != 2)
    {
       return false;
    }
@@ -1002,17 +1034,17 @@ bool AnimationControllerImp::deserialize(SessionItemDeserializer &deserializer)
       A(pRoot->getAttribute(X("cycle"))));
    mCanDropFrames = StringUtilities::fromXmlString<bool>(
       A(pRoot->getAttribute(X("dropframes"))));
-   for(DOMNode *pNode = pRoot->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())
+   for (DOMNode *pNode = pRoot->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())
    {
-      if (XMLString::equals(pNode->getNodeName(),X("DisplayText")))
+      if (XMLString::equals(pNode->getNodeName(), X("DisplayText")))
       {
          setDisplayText(A(pNode->getTextContent()));
       }
-      else if (XMLString::equals(pNode->getNodeName(),X("animation")))
+      else if (XMLString::equals(pNode->getNodeName(), X("animation")))
       {
-         DOMElement *pElement(static_cast<DOMElement*>(pNode));
+         DOMElement* pElement(static_cast<DOMElement*>(pNode));
          string id = A(pElement->getAttribute(X("id")));
-         AnimationImp *pAnimation = dynamic_cast<AnimationImp*>(Service<SessionManager>()->getSessionItem(id));
+         AnimationImp* pAnimation = dynamic_cast<AnimationImp*>(Service<SessionManager>()->getSessionItem(id));
          if (pAnimation == NULL)
          {
             return false;
@@ -1025,10 +1057,11 @@ bool AnimationControllerImp::deserialize(SessionItemDeserializer &deserializer)
    }
    setCurrentFrame(mCurrentFrame);
 
-   if(pRoot->hasAttribute(X("selected")))
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Should this be moved into the tool bar? (mconsidine)")
+   if (pRoot->hasAttribute(X("selected")))
    {
       AnimationToolBar* pToolBar = static_cast<AnimationToolBar*>(Service<DesktopServices>()->getWindow("Animation", TOOLBAR));
-      if(pToolBar != NULL)
+      if (pToolBar != NULL)
       {
          pToolBar->setAnimationController(dynamic_cast<AnimationController*>(this));
       }

@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef FUSION_PAGE
-#define FUSION_PAGE
+#ifndef FUSIONPAGE_H
+#define FUSIONPAGE_H
 
 #include <QtGui/QWidget>
 
@@ -26,16 +26,16 @@ public:
    FusionPage(QWidget* pParent);
    virtual ~FusionPage();
 
-   void viewDeleted(Subject &subject, const std::string &signal, const boost::any &v);
+   void viewDeleted(Subject& subject, const std::string& signal, const boost::any& v);
 
    virtual void setViews(SpatialDataView* pPrimary, SpatialDataView* pSecondary);
-   virtual SpatialDataView* getPrimaryView() const { return mpPrimaryView; }
-   virtual SpatialDataView* getSecondaryView() const { return mpSecondaryView; }
+   virtual SpatialDataView* getPrimaryView() const;
+   virtual SpatialDataView* getSecondaryView() const;
 
-   virtual std::string getPreferredPrimaryMouseMode() const { return ""; } 
-   virtual std::string getPreferredSecondaryMouseMode() const { return ""; } 
-   virtual Layer* getPreferredPrimaryActiveLayer() const { return NULL; }
-   virtual Layer* getPreferredSecondaryActiveLayer() const { return NULL; }
+   virtual std::string getPreferredPrimaryMouseMode() const;
+   virtual std::string getPreferredSecondaryMouseMode() const;
+   virtual Layer* getPreferredPrimaryActiveLayer() const;
+   virtual Layer* getPreferredSecondaryActiveLayer() const;
 
    virtual bool isValid() const = 0;
 

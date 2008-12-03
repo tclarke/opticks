@@ -22,7 +22,7 @@ GraphicElementImp::GraphicElementImp(const DataDescriptorImp& descriptor, const 
    DataElementImp(descriptor, id), mpGroup(GROUP_OBJECT), mInteractive(true), mpGeocentricSource(
    SIGNAL_NAME(RasterElement, GeoreferenceModified), Slot(this, &GraphicElementImp::georeferenceModified))
 {
-   Subject *pSub = dynamic_cast<Subject*>(mpGroup.get());
+   Subject* pSub = dynamic_cast<Subject*>(mpGroup.get());
    pSub->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &GraphicElementImp::groupModified));
 }
 
@@ -39,7 +39,7 @@ bool GraphicElementImp::toXml(XMLWriter* pXml) const
    pXml->addAttr("geocentric", (mpGeocentricSource.get() != NULL) ? "true" : "false");
 
    pXml->pushAddPoint(pXml->addElement("group"));
-   const GraphicGroupImp *pGroup = dynamic_cast<const GraphicGroupImp*>(mpGroup.get());
+   const GraphicGroupImp* pGroup = dynamic_cast<const GraphicGroupImp*>(mpGroup.get());
    VERIFY(pGroup != NULL);
 
    bool success = pGroup->toXml(pXml);
@@ -61,22 +61,21 @@ bool GraphicElementImp::fromXml(DOMNode* pDocument, unsigned int version)
       if ((geocentric == "true") || (geocentric == "1"))
       {
          mpGeocentricSource.reset(dynamic_cast<RasterElement*>(getParent()));
-         GraphicGroupImp *pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
+         GraphicGroupImp* pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
          VERIFY(pGroup != NULL);
          pGroup->enableGeo();
       }
    }
 
-   DOMNode *pGroupNode = NULL;
-   for (pGroupNode = pDocument->getFirstChild();
-      pGroupNode != NULL; pGroupNode = pGroupNode->getNextSibling())
+   DOMNode* pGroupNode = NULL;
+   for (pGroupNode = pDocument->getFirstChild(); pGroupNode != NULL; pGroupNode = pGroupNode->getNextSibling())
    {
       if (XMLString::equals(pGroupNode->getNodeName(), X("group")))
       {
          break;
       }
    }
-   GraphicGroupImp *pGroup = dynamic_cast<GraphicGroupImp*>(mpGroup.get());
+   GraphicGroupImp* pGroup = dynamic_cast<GraphicGroupImp*>(mpGroup.get());
    VERIFY(pGroup != NULL);
    bool success = pGroup->fromXml(pGroupNode, version);
    return success;
@@ -84,8 +83,8 @@ bool GraphicElementImp::fromXml(DOMNode* pDocument, unsigned int version)
 
 const string& GraphicElementImp::getObjectType() const
 {
-   static string type("GraphicElementImp");
-   return type;
+   static string sType("GraphicElementImp");
+   return sType;
 }
 
 bool GraphicElementImp::isKindOf(const string& className) const
@@ -153,7 +152,7 @@ void GraphicElementImp::setInteractive(bool interactive)
    if (oldInteractive == false && interactive == true)
    {
       notify(SIGNAL_NAME(Subject, Modified), boost::any());
-      GraphicGroupImp *pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
+      GraphicGroupImp* pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
       if (pGroup != NULL)
       {
          pGroup->updateBoundingBox();
@@ -180,13 +179,13 @@ bool GraphicElementImp::setGeocentric(bool geocentric)
    {
       if (mpGeocentricSource.get() == NULL)
       {
-         const RasterElement *pGeocentricSource = getGeoreferenceElement();
+         const RasterElement* pGeocentricSource = getGeoreferenceElement();
          if (pGeocentricSource == NULL)
          {
             return false;
          }
          mpGeocentricSource.reset(const_cast<RasterElement*>(pGeocentricSource));
-         GraphicGroupImp *pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
+         GraphicGroupImp* pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
          VERIFY(pGroup != NULL);
          pGroup->enableGeo();
       }
@@ -206,7 +205,7 @@ bool GraphicElementImp::getGeocentric() const
 
 const RasterElement *GraphicElementImp::getGeoreferenceElement() const
 {
-   RasterElement *pGeoreferenceElement = dynamic_cast<RasterElement*>(getParent());
+   RasterElement* pGeoreferenceElement = dynamic_cast<RasterElement*>(getParent());
    if (pGeoreferenceElement == NULL || !pGeoreferenceElement->isGeoreferenced())
    {
       return NULL;
@@ -217,7 +216,7 @@ const RasterElement *GraphicElementImp::getGeoreferenceElement() const
 
 void GraphicElementImp::georeferenceModified(Subject &subject, const std::string &signal, const boost::any &data)
 {
-   GraphicGroupImp *pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
+   GraphicGroupImp* pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
    VERIFYNRV(pGroup != NULL);
 
    bool interactive = getInteractive();

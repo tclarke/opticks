@@ -527,13 +527,11 @@ bool PolygonPlotObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
    {
       return false;
    }
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
-   mFillStyle = StringUtilities::fromXmlString<FillStyle>(
-      A(pElem->getAttribute(X("fillStyle"))));
-   mHatchStyle = StringUtilities::fromXmlString<SymbolType>(
-      A(pElem->getAttribute(X("hatchStyle"))));
-   ColorType color = StringUtilities::fromXmlString<ColorType>(
-      A(pElem->getAttribute(X("fillColor"))));
+
+   DOMElement* pElem = static_cast<DOMElement*>(pDocument);
+   mFillStyle = StringUtilities::fromXmlString<FillStyle>(A(pElem->getAttribute(X("fillStyle"))));
+   mHatchStyle = StringUtilities::fromXmlString<SymbolType>(A(pElem->getAttribute(X("hatchStyle"))));
+   ColorType color = StringUtilities::fromXmlString<ColorType>(A(pElem->getAttribute(X("fillColor"))));
    mFillColor = COLORTYPE_TO_QCOLOR(color);
 
    return true;

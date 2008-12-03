@@ -65,7 +65,10 @@ public:
     * @return A pointer of type T; for all template specializations,
     *         this is guaranteed to be non-null.
     */
-   T *operator->() const { return get(); }
+   T *operator->() const
+   {
+      return get();
+   }
 };
 
 #endif

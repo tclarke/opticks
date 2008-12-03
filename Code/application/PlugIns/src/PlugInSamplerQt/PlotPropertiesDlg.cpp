@@ -45,11 +45,11 @@ PlotPropertiesDlg::PlotPropertiesDlg(PlotWidget* pPlot, QWidget* pParent) :
    mpGridlineStyleCombo(NULL),
    mpGridlineWidthCombo(NULL),
    mpGridlineColorButton(NULL),
-   mpXScaleCombo(NULL),
-   mpYScaleCombo(NULL),
    mpLineStyleCombo(NULL),
    mpLineWidthCombo(NULL),
    mpObjectColorButton(NULL),
+   mpXScaleCombo(NULL),
+   mpYScaleCombo(NULL),
    mpSymbolSizeCombo(NULL),
    mpDisplayMethodCombo(NULL),
    mpSelectionModeCombo(NULL),
@@ -153,13 +153,11 @@ PlotPropertiesDlg::PlotPropertiesDlg(PlotWidget* pPlot, QWidget* pParent) :
    mpGridlineColorButton->usePopupGrid(true);
 
    // Axes
-   PlotType ePlotType = CARTESIAN_PLOT;
 
    PlotView* pPlotView = mpPlot->getPlot();
-   if (pPlotView != NULL)
-   {
-      ePlotType = pPlotView->getPlotType();
-   }
+   REQUIRE(pPlotView != NULL);
+
+   PlotType ePlotType = pPlotView->getPlotType();
 
    QHBoxLayout* pAxesLayout = NULL;
    QLabel* pXScaleLabel = NULL;
@@ -304,38 +302,51 @@ PlotPropertiesDlg::PlotPropertiesDlg(PlotWidget* pPlot, QWidget* pParent) :
          mpSymbolChooserCombo = new QComboBox(pPlotWidget);
          mpSymbolChooserCombo->setEditable(false);
          mpSymbolChooserCombo->setFixedWidth(175);
-         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::SOLID))); 
-         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::X))); 
-         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::CROSS_HAIR))); 
-         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::ASTERISK))); 
-         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::HORIZONTAL_LINE)));
-         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::VERTICAL_LINE))); 
-         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::FORWARD_SLASH))); 
+         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::SOLID)));
+         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::X)));
+         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::CROSS_HAIR)));
+         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::ASTERISK)));
+         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(
+            Point::HORIZONTAL_LINE)));
+         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::VERTICAL_LINE)));
+         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::FORWARD_SLASH)));
          mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::BACK_SLASH)));
-         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::BOX))); 
-         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::BOXED_X))); 
-         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::BOXED_CROSS_HAIR))); 
-         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::BOXED_ASTERISK))); 
-         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::BOXED_HORIZONTAL_LINE)));
-         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::BOXED_VERTICAL_LINE))); 
-         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::BOXED_FORWARD_SLASH))); 
-         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::BOXED_BACK_SLASH)));
-         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::DIAMOND))); 
-         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::DIAMOND_FILLED))); 
-         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::DIAMOND_CROSS_HAIR))); 
-         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::TRIANGLE))); 
-         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::TRIANGLE_FILLED)));
-         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::RIGHT_TRIANGLE))); 
-         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::RIGHT_TRIANGLE_FILLED))); 
-         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::LEFT_TRIANGLE))); 
-         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::LEFT_TRIANGLE_FILLED)));
-         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::DOWN_TRIANGLE))); 
-         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::DOWN_TRIANGLE_FILLED))); 
-         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::CIRCLE))); 
-         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::CIRCLE_FILLED))); 
+         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::BOX)));
+         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::BOXED_X)));
+         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(
+            Point::BOXED_CROSS_HAIR)));
+         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(
+            Point::BOXED_ASTERISK)));
+         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(
+            Point::BOXED_HORIZONTAL_LINE)));
+         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(
+            Point::BOXED_VERTICAL_LINE)));
+         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(
+            Point::BOXED_FORWARD_SLASH)));
+         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(
+            Point::BOXED_BACK_SLASH)));
+         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::DIAMOND)));
+         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::DIAMOND_FILLED)));
+         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(
+            Point::DIAMOND_CROSS_HAIR)));
+         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::TRIANGLE)));
+         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(
+            Point::TRIANGLE_FILLED)));
+         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::RIGHT_TRIANGLE)));
+         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(
+            Point::RIGHT_TRIANGLE_FILLED)));
+         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::LEFT_TRIANGLE)));
+         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(
+            Point::LEFT_TRIANGLE_FILLED)));
+         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::DOWN_TRIANGLE)));
+         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(
+            Point::DOWN_TRIANGLE_FILLED)));
+         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::CIRCLE)));
+         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::CIRCLE_FILLED)));
          mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::OCTAGON)));
-         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::OCTAGON_FILLED))); 
-         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::OCTAGON_CROSS_HAIR)));
+         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(Point::OCTAGON_FILLED)));
+         mpSymbolChooserCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(
+            Point::OCTAGON_CROSS_HAIR)));
 
          // Create the shading check box
          mpEnableShading = new QCheckBox("Enable Shading");
@@ -486,9 +497,6 @@ PlotPropertiesDlg::PlotPropertiesDlg(PlotWidget* pPlot, QWidget* pParent) :
       }
 
       mpOrgColorButton->setColor(orgColor);
-
-      PlotView* pPlotView = mpPlot->getPlot();
-      REQUIRE(pPlotView != NULL);
 
       // Selection mode
       if (mpSelectionModeCombo != NULL)
@@ -647,7 +655,6 @@ PlotPropertiesDlg::PlotPropertiesDlg(PlotWidget* pPlot, QWidget* pParent) :
       }
 
       // Plot objects
-      PlotType ePlotType = pPlotView->getPlotType();
       if ((ePlotType == CARTESIAN_PLOT) || (ePlotType == SIGNATURE_PLOT))
       {
          list<PlotObject*> objects;
@@ -659,12 +666,10 @@ PlotPropertiesDlg::PlotPropertiesDlg(PlotWidget* pPlot, QWidget* pParent) :
          list<PlotObject*>::iterator iter = objects.begin();
          while (iter != objects.end())
          {
-            PlotObject* pObject = NULL;
-            pObject = *iter++;
+            PlotObject* pObject = *iter++;
             if (pObject != NULL)
             {
-               PointSet* pPointSet = NULL;
-               pPointSet = dynamic_cast<PointSet*> (pObject);
+               PointSet* pPointSet = dynamic_cast<PointSet*> (pObject);
                if (pPointSet != NULL)
                {
                   ColorType currentColor = pPointSet->getLineColor();
@@ -690,7 +695,8 @@ PlotPropertiesDlg::PlotPropertiesDlg(PlotWidget* pPlot, QWidget* pParent) :
                      if (pPoint != NULL)
                      {
                         mpSymbolSizeCombo->setCurrentIndex(pPoint->getSymbolSize()-1);
-                        int index = mpSymbolChooserCombo->findText(QString::fromStdString(StringUtilities::toDisplayString(pPoint->getSymbol())));
+                        int index = mpSymbolChooserCombo->findText(QString::fromStdString(
+                           StringUtilities::toDisplayString(pPoint->getSymbol())));
                         if (index != -1)
                         {
                            mpSymbolChooserCombo->setCurrentIndex(index);
@@ -728,12 +734,10 @@ PlotPropertiesDlg::PlotPropertiesDlg(PlotWidget* pPlot, QWidget* pParent) :
          iter = objects.begin();
          while (iter != objects.end())
          {
-            PlotObject* pObject = NULL;
-            pObject = *iter++;
+            PlotObject* pObject = *iter++;
             if (pObject != NULL)
             {
-               PointSet* pPointSet = NULL;
-               pPointSet = dynamic_cast<PointSet*> (pObject);
+               PointSet* pPointSet = dynamic_cast<PointSet*> (pObject);
                if (pPointSet != NULL)
                {
                   int iCurrentWidth = pPointSet->getLineWidth();
@@ -753,8 +757,7 @@ PlotPropertiesDlg::PlotPropertiesDlg(PlotWidget* pPlot, QWidget* pParent) :
             }
          }
 
-         int iNumWidths = 0;
-         iNumWidths = mpLineWidthCombo->count();
+         int iNumWidths = mpLineWidthCombo->count();
          if (iLineWidth > iNumWidths)
          {
             iLineWidth = iNumWidths;
@@ -771,12 +774,10 @@ PlotPropertiesDlg::PlotPropertiesDlg(PlotWidget* pPlot, QWidget* pParent) :
          iter = objects.begin();
          while (iter != objects.end())
          {
-            PlotObject* pObject = NULL;
-            pObject = *iter++;
+            PlotObject* pObject = *iter++;
             if (pObject != NULL)
             {
-               PointSet* pPointSet = NULL;
-               pPointSet = dynamic_cast<PointSet*> (pObject);
+               PointSet* pPointSet = dynamic_cast<PointSet*> (pObject);
                if (pPointSet != NULL)
                {
                   LineStyle eCurrentStyle = pPointSet->getLineStyle();
@@ -1072,7 +1073,8 @@ void PlotPropertiesDlg::applyChanges()
                pPointSet->displaySymbols(symbols);
 
                // Set Symbol and Symbol Size
-               Point::PointSymbolType eSymbol = StringUtilities::fromDisplayString<Point::PointSymbolType>(mpSymbolChooserCombo->currentText().toStdString());
+               Point::PointSymbolType eSymbol = StringUtilities::fromDisplayString<Point::PointSymbolType>(
+                  mpSymbolChooserCombo->currentText().toStdString());
                int symbolSize = mpSymbolSizeCombo->currentText().toInt();
 
                // Get the list of points to set the current symbol and symbol size

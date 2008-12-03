@@ -129,13 +129,13 @@ void FeatureLayerImporter::createFeatureClassIfNeeded(const DataDescriptor *pDes
       FactoryResource<DynamicObject> pDynObj;
       VERIFYNRV(pDynObj.get() != NULL);
 
-      DynamicObject *pFeatureDynObj = mpFeatureDynObj;
+      DynamicObject* pFeatureDynObj = mpFeatureDynObj;
       
       if (pFeatureDynObj == NULL)
       {
 
          VERIFYNRV(pDescriptor != NULL);
-         const FileDescriptor *pFileDescriptor = pDescriptor->getFileDescriptor();
+         const FileDescriptor* pFileDescriptor = pDescriptor->getFileDescriptor();
          // If pFileDescriptor is NULL, then FILE_PLACEHOLDER must have been used.
          // Either mpFeatureDynObj is non-NULL (use that) or the FeatureClass should be default-constructed
          if (pFileDescriptor != NULL)
@@ -147,8 +147,16 @@ void FeatureLayerImporter::createFeatureClassIfNeeded(const DataDescriptor *pDes
             if (pDoc == NULL)
             {
                mMessageText = "Could not read file.";
-               if(mpProgress) mpProgress->updateProgress(mMessageText, 0, ERRORS);
-               if(mpStep) mpStep->finalize(Message::Failure, mMessageText);
+               if (mpProgress)
+               {
+                  mpProgress->updateProgress(mMessageText, 0, ERRORS);
+               }
+
+               if (mpStep)
+               {
+                  mpStep->finalize(Message::Failure, mMessageText);
+               }
+
                return;
             }
 
@@ -156,17 +164,25 @@ void FeatureLayerImporter::createFeatureClassIfNeeded(const DataDescriptor *pDes
             if (pRootElement == NULL)
             {
                mMessageText = "Could not read file.";
-               if(mpProgress) mpProgress->updateProgress(mMessageText, 0, ERRORS);
-               if(mpStep) mpStep->finalize(Message::Failure, mMessageText);
+               if (mpProgress)
+               {
+                  mpProgress->updateProgress(mMessageText, 0, ERRORS);
+               }
+
+               if (mpStep)
+               {
+                  mpStep->finalize(Message::Failure, mMessageText);
+               }
+
                return;
             }
 
             bool deserialized = false;
             unsigned int formatVersion = atoi(A(pRootElement->getAttribute(X("version"))));
-            for(DOMNode *pChild = pRootElement->getFirstChild(); 
+            for (DOMNode *pChild = pRootElement->getFirstChild(); 
                pChild != NULL && !deserialized; pChild = pChild->getNextSibling())
             {
-               if(XMLString::equals(pChild->getNodeName(), X("DynamicObject")))
+               if (XMLString::equals(pChild->getNodeName(), X("DynamicObject")))
                {
                   deserialized = pDynObj->fromXml(pChild, formatVersion);
                }
@@ -174,8 +190,16 @@ void FeatureLayerImporter::createFeatureClassIfNeeded(const DataDescriptor *pDes
             if (!deserialized)
             {
                mMessageText = "Could not read file.";
-               if(mpProgress) mpProgress->updateProgress(mMessageText, 0, ERRORS);
-               if(mpStep) mpStep->finalize(Message::Failure, mMessageText);
+               if (mpProgress)
+               {
+                  mpProgress->updateProgress(mMessageText, 0, ERRORS);
+               }
+
+               if (mpStep)
+               {
+                  mpStep->finalize(Message::Failure, mMessageText);
+               }
+
                return;
             }
          }
@@ -185,8 +209,16 @@ void FeatureLayerImporter::createFeatureClassIfNeeded(const DataDescriptor *pDes
       if (pFeatureClass.get() == NULL)
       {
          mMessageText = "Could not read file.";
-         if(mpProgress) mpProgress->updateProgress(mMessageText, 0, ERRORS);
-         if(mpStep) mpStep->finalize(Message::Failure, mMessageText);
+         if (mpProgress)
+         {
+            mpProgress->updateProgress(mMessageText, 0, ERRORS);
+         }
+
+         if (mpStep)
+         {
+            mpStep->finalize(Message::Failure, mMessageText);
+         }
+
          return;
       }
         
@@ -195,8 +227,16 @@ void FeatureLayerImporter::createFeatureClassIfNeeded(const DataDescriptor *pDes
          if (!pFeatureClass->fromDynamicObject(pFeatureDynObj))
          {
             mMessageText = "Could not read file.";
-            if(mpProgress) mpProgress->updateProgress(mMessageText, 0, ERRORS);
-            if(mpStep) mpStep->finalize(Message::Failure, mMessageText);
+            if (mpProgress)
+            {
+               mpProgress->updateProgress(mMessageText, 0, ERRORS);
+            }
+
+            if (mpStep)
+            {
+               mpStep->finalize(Message::Failure, mMessageText);
+            }
+
             return;
          }
       }
@@ -206,7 +246,7 @@ void FeatureLayerImporter::createFeatureClassIfNeeded(const DataDescriptor *pDes
 
 std::vector<ArcProxyLib::ConnectionType> FeatureLayerImporter::getAvailableConnectionTypes()
 {
-   FeatureProxyConnector *pProxy = FeatureProxyConnector::instance();
+   FeatureProxyConnector* pProxy = FeatureProxyConnector::instance();
    VERIFYRV(pProxy != NULL, std::vector<ArcProxyLib::ConnectionType>());
 
    return pProxy->getAvailableConnectionTypes();

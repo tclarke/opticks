@@ -186,6 +186,11 @@ void DockWindowImp::undocked(bool isUndocked)
    }
 }
 
+bool DockWindowImp::isShown() const
+{
+   return isVisible();
+}
+
 bool DockWindowImp::event(QEvent* pEvent)
 {
    if (pEvent != NULL)
@@ -241,105 +246,47 @@ void DockWindowImp::contextMenuEvent(QContextMenuEvent* pEvent)
    QDockWidget::contextMenuEvent(pEvent);
 }
 
-bool DockWindowImp::toXml(XMLWriter* pXml) const
+void DockWindowImp::saveState() const
 {
-   if (!ViewWindowImp::toXml(pXml))
+   string dockName = getName();
+   if (dockName.empty() == false)
    {
-      return false;
+      Service<ConfigurationSettings> pSettings;
+      string settingPathBase = "DockWindow/" + dockName;
+      Service<DesktopServices> pDesktop;
+      DockWindow* pDockWindow = dynamic_cast<DockWindow*>(const_cast<DockWindowImp*>(this));
+      int iArea = static_cast<int>(pDesktop->getDockWindowArea(*pDockWindow));
+      pSettings->setSetting(settingPathBase + "/DockArea", iArea);
+
+      QByteArray dockState = saveGeometry().toBase64();
+      string stateData = dockState.data();
+      pSettings->setSetting(settingPathBase + "/Geometry", stateData);
    }
-
-   pXml->addAttr("features", static_cast<unsigned int>(features()));
-   pXml->addAttr("allowedAreas", static_cast<unsigned int>(allowedAreas()));
-   pXml->addAttr("floating", isFloating());
-   pXml->addAttr("shown", isVisible());
-   // save geometry
-   QRect geom = geometry();
-   stringstream buf;
-   pXml->pushAddPoint(pXml->addElement("Geometry"));
-   buf << geom.x() << " " << geom.y();
-   pXml->addAttr("pos", buf.str());
-   buf.str("");
-   buf << geom.width() << " " << geom.height();
-   pXml->addAttr("size", buf.str().c_str());
-   pXml->popAddPoint();
-
-   return true;
 }
 
-bool DockWindowImp::fromXml(DOMNode* pDocument, unsigned int version)
+void DockWindowImp::restoreState()
 {
-   if (pDocument == NULL)
+   string dockName = getName();
+   if (dockName.empty() == false)
    {
-      return false;
-   }
+      Service<ConfigurationSettings> pSettings;
+      string settingPathBase = "DockWindow/" + dockName;
 
-   if (!ViewWindowImp::fromXml(pDocument, version))
-   {
-      return false;
-   }
-
-   DockWidgetFeatures features;
-   Qt::DockWidgetAreas areas;
-   bool floating(false);
-
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
-   if (pElem == NULL)
-   {
-      return false;
-   }
-
-   features = static_cast<DockWidgetFeatures>(StringUtilities::fromXmlString<unsigned int>
-      (A(pElem->getAttribute(X("features")))));
-   areas = static_cast<Qt::DockWidgetAreas>(StringUtilities::fromXmlString<unsigned int>
-      (A(pElem->getAttribute(X("allowedAreas")))));
-   floating = StringUtilities::fromXmlString<bool>(A(pElem->getAttribute(X("floating"))));
-   bool shown = StringUtilities::fromXmlString<bool>(A(pElem->getAttribute(X("shown"))));
-   setFeatures(features);
-   setAllowedAreas(areas);
-   setFloating(floating);
-
-   // connect view to be restored
-   string viewId = A(pElem->getAttribute(X("viewId")));
-   if (!viewId.empty())
-   {
-      View* pView(NULL);
-      SessionItem* pItem = Service<SessionManager>()->getSessionItem(viewId);
-      pView = dynamic_cast<View*>(pItem);
-      if (pView != NULL)
+      DataVariant dockArea = pSettings->getSetting(settingPathBase + "/DockArea");
+      if (dockArea.isValid() && dockArea.getTypeName() == "int")
       {
-         View* pCurrentView = getView();
-         if (pCurrentView != NULL)
-         {
-            setView(NULL);
-            setWidget(NULL);
-            Service<DesktopServices> pDesktop;
-            pDesktop->deleteView(pCurrentView);
-         }
-         setWidget(dynamic_cast<ViewImp*>(pView));
+         int iArea = dv_cast<int>(dockArea);
+         DockWindowAreaType eDockArea = static_cast<DockWindowAreaTypeEnum>(iArea);
+         Service<DesktopServices> pDesktop;
+         pDesktop->setDockWindowArea(dynamic_cast<DockWindow*>(this), eDockArea);
+      }
+
+      DataVariant dockGeom = pSettings->getSetting(settingPathBase + "/Geometry");
+      if (dockGeom.isValid() && dockGeom.getTypeName() == "string")
+      {
+         string stateData = dv_cast<string>(dockGeom);
+         QByteArray dockState(stateData.c_str(), stateData.size());
+         restoreGeometry(QByteArray::fromBase64(dockState));
       }
    }
-
-   // get sub elements
-   for (DOMNode *pChld = pDocument->getFirstChild();
-      pChld != NULL;
-      pChld = pChld->getNextSibling())
-   {
-      string name = A(pChld->getNodeName());
-      if(XMLString::equals(pChld->getNodeName(), X("Geometry")))
-      {
-         LocationType pos, size;
-         pElem = static_cast<DOMElement*>(pChld);
-         if (pElem != NULL)
-         {
-            XmlReader::StrToLocation(pElem->getAttribute(X("pos")), pos);
-            XmlReader::StrToLocation(pElem->getAttribute(X("size")), size);
-            resize(size.mX, size.mY);
-            move(pos.mX, pos.mY);
-         }
-      }
-   }
-
-   setVisible(shown);
-
-   return true;
 }

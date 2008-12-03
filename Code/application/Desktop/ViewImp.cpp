@@ -157,8 +157,8 @@ void ViewImp::viewDeleted(Subject &subject, const string &signal, const boost::a
 
 void ViewImp::animationControllerDeleted(Subject &subject, const string &signal, const boost::any &v)
 {
-   AnimationController *pAnimationController = dynamic_cast<AnimationController*>(&subject);
-   if(pAnimationController != NULL)
+   AnimationController* pAnimationController = dynamic_cast<AnimationController*>(&subject);
+   if (pAnimationController != NULL)
    {
       setAnimationController(NULL);
    }
@@ -225,11 +225,6 @@ void ViewImp::setName(const string& viewName)
    }
 }
 
-unsigned int ViewImp::getViewId() const
-{
-   return mId;
-}
-
 void ViewImp::setClassification(const Classification* pClassification)
 {
    QString strClassification;
@@ -278,14 +273,14 @@ AnimationController *ViewImp::getAnimationController() const
 
 void ViewImp::setAnimationController(AnimationController *pPlayer)
 {
-   if(mpAnimationController != pPlayer)
+   if (mpAnimationController != pPlayer)
    {
-      if(mpAnimationController != NULL)
+      if (mpAnimationController != NULL)
       {
          mpAnimationController->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &ViewImp::animationControllerDeleted));
       }
       mpAnimationController = pPlayer;
-      if(mpAnimationController != NULL)
+      if (mpAnimationController != NULL)
       {
          mpAnimationController->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &ViewImp::animationControllerDeleted));
       }
@@ -324,6 +319,7 @@ bool ViewImp::removeMouseMode(const MouseMode* pMouseMode)
          }
 
          mMouseModes.erase(pMouseMode);
+         emit mouseModeRemoved(pMouseMode);
          return true;
       }
    }
@@ -362,7 +358,11 @@ bool ViewImp::setMouseMode(const MouseMode* pMouseMode)
    QCursor mouseCursor(Qt::ArrowCursor);
    if (mpMouseMode != NULL)
    {
-      mouseCursor = ((MouseModeImp*) pMouseMode)->getCursor();
+      const MouseModeImp* pMouseModeImp = dynamic_cast<const MouseModeImp*>(mpMouseMode);
+      if (pMouseModeImp != NULL)
+      {
+         mouseCursor = pMouseModeImp->getCursor();
+      }
    }
 
    setCursor(mouseCursor);
@@ -507,7 +507,9 @@ LocationType ViewImp::getVisibleCenter() const
 void ViewImp::translateWorldToScreen(double dWorldX, double dWorldY, double& dScreenX, double& dScreenY,
                                      bool* pVisible) const
 {
-   GLdouble winX, winY, winZ;
+   GLdouble winX;
+   GLdouble winY;
+   GLdouble winZ;
    gluProject(dWorldX, dWorldY, 0.0, mModelMatrix, mProjMatrix, mViewPort, &winX, &winY, &winZ);
 
    dScreenX = winX;
@@ -534,7 +536,8 @@ inline double magdiff2(LocationType temp1, LocationType temp2)
 double ViewImp::getPixelSize(const LocationType& lowerLeft, const LocationType& upperRight) const
 {
    double pixelSize = 0.0;
-   LocationType temp1, temp2;
+   LocationType temp1;
+   LocationType temp2;
 
    translateWorldToScreen(lowerLeft.mX, lowerLeft.mY, temp1.mX, temp1.mY);
    translateWorldToScreen(lowerLeft.mX + 1.0, lowerLeft.mY, temp2.mX, temp2.mY);
@@ -619,20 +622,24 @@ QImage ViewImp::getCurrentImage()
 
 bool ViewImp::getCurrentImage(QImage &image)
 {
-   if(QGLFramebufferObject::hasOpenGLFramebufferObjects())
+   if (QGLFramebufferObject::hasOpenGLFramebufferObjects())
    {
       int curWidth = width();
       int curHeight = height();
       int iWidth = curWidth;
       int iHeight = curHeight;
-      if(!image.isNull())
+      if (!image.isNull())
       {
          iWidth = image.width();
          iHeight = image.height();
       }
-      LocationType ll, ul, ur, lr;
 
-      if((curWidth != iWidth) || (curHeight != iHeight))
+      LocationType ll;
+      LocationType ul;
+      LocationType ur;
+      LocationType lr;
+
+      if ((curWidth != iWidth) || (curHeight != iHeight))
       {
          getVisibleCorners(ll, ul, ur, lr);
          resize(iWidth, iHeight);
@@ -645,7 +652,7 @@ bool ViewImp::getCurrentImage(QImage &image)
       fbo.bind();
       drawImage(iWidth, iHeight);
       fbo.release();
-      if(image.isNull())
+      if (image.isNull())
       {
          image = fbo.toImage();
       }
@@ -656,7 +663,7 @@ bool ViewImp::getCurrentImage(QImage &image)
          memcpy(image.bits(), tmpImage.bits(), image.numBytes());
       }
 
-      if((curWidth != iWidth) || (curHeight != iHeight))
+      if ((curWidth != iWidth) || (curHeight != iHeight))
       {
          resize(curWidth, curHeight);
          zoomToBox(ll, ur);
@@ -672,16 +679,19 @@ bool ViewImp::getCurrentImage(QImage &image)
       {
          image = QImage(width(), height(), QImage::Format_ARGB32);
       }
-      if(image.format() != QImage::Format_ARGB32)
+      if (image.format() != QImage::Format_ARGB32)
       {
          image.convertToFormat(QImage::Format_ARGB32);
       }
 
       int iWidth = image.width();
       int iHeight = image.height();
-      LocationType ll, ul, ur, lr;
+      LocationType ll;
+      LocationType ul;
+      LocationType ur;
+      LocationType lr;
 
-      if((curWidth != iWidth) || (curHeight != iHeight))
+      if ((curWidth != iWidth) || (curHeight != iHeight))
       {
          getVisibleCorners(ll, ul, ur, lr);
          resize(iWidth, iHeight);
@@ -703,12 +713,12 @@ bool ViewImp::getCurrentImage(QImage &image)
       reorderImage(&pixels.front(), iWidth, iHeight);
 
       unsigned char* pBits = image.bits();
-      if(pBits != NULL)
+      if (pBits != NULL)
       {
          memcpy(pBits, &pixels.front(), iWidth * iHeight * 4);
       }
 
-      if((curWidth != iWidth) || (curHeight != iHeight))
+      if ((curWidth != iWidth) || (curHeight != iHeight))
       {
          resize(curWidth, curHeight);
          zoomToBox(ll, ur);
@@ -740,10 +750,13 @@ ViewImp::SubImageIteratorImp::SubImageIteratorImp(ViewImp *pView, const QSize &t
 
    // move the view to the first sub-image
    //
-   double extentMinX, extentMinY, extentMaxX, extentMaxY;
+   double extentMinX;
+   double extentMinY;
+   double extentMaxX;
+   double extentMaxY;
    mpView->getExtents(extentMinX, extentMinY, extentMaxX, extentMaxY);
    LocationType worldTileSize(fabs(extentMaxX - extentMinX) / mTotalTilesX, 0);
-   if(mpView->getDataOrigin() == LOWER_LEFT)
+   if (mpView->getDataOrigin() == LOWER_LEFT)
    {
       worldTileSize.mY = fabs(extentMaxY - extentMinY) / mTotalTilesY;
       mStartLowerLeft = LocationType(extentMinX, extentMinY);
@@ -773,12 +786,12 @@ bool ViewImp::SubImageIteratorImp::hasNext() const
 
 bool ViewImp::SubImageIteratorImp::next(QImage &image)
 {
-   if(!hasNext())
+   if (!hasNext())
    {
       return false;
    }
    mCurrentTileX++;
-   if(mCurrentTileX >= mTotalTilesX)
+   if (mCurrentTileX >= mTotalTilesX)
    {
       mCurrentTileY++;
       mCurrentTileX = 0;
@@ -786,12 +799,15 @@ bool ViewImp::SubImageIteratorImp::next(QImage &image)
 
    // move the view if not on the first tile
    //
-   if(mCurrentTileX > 0 || mCurrentTileY > 0)
+   if (mCurrentTileX > 0 || mCurrentTileY > 0)
    {
-      LocationType visLl, visUr, dummy;
+      LocationType visLl;
+      LocationType visUr;
+      LocationType dummy;
       mpView->getVisibleCorners(visLl, dummy, visUr, dummy);
-      double deltaX = 0, deltaY = 0;
-      if(mCurrentTileX == 0)
+      double deltaX = 0;
+      double deltaY = 0;
+      if (mCurrentTileX == 0)
       {
          // reset the x direction and move the y direction
          //
@@ -826,7 +842,7 @@ void ViewImp::SubImageIteratorImp::count(int &x, int &y) const
 
 View::SubImageIterator *ViewImp::getSubImageIterator(const QSize &totalSize, const QSize &subImageSize)
 {
-   if(mpSubImageIterator == NULL)
+   if (mpSubImageIterator == NULL)
    {
       mpSubImageIterator = new SubImageIteratorImp(this, totalSize, subImageSize);
    }
@@ -882,7 +898,7 @@ LinkType ViewImp::getViewLinkType(View* pView) const
       return NO_LINK;
    }
 
-   for (vector<pair<View*,LinkType> >::const_iterator iter = mLinkedViews.begin();
+   for (vector<pair<View*, LinkType> >::const_iterator iter = mLinkedViews.begin();
       iter != mLinkedViews.end(); ++iter)
    {
       View* pLinkedView = iter->first;
@@ -1009,7 +1025,8 @@ const vector<LocationType>& ViewImp::getSelectionBox() const
 void ViewImp::reorderImage(unsigned int pImage[], int iWidth, int iHeight)
 {
    int numPixels = iWidth * iHeight;
-   int i, j;
+   int i;
+   int j;
 
    if (Endian::getSystemEndian() == BIG_ENDIAN)
    {
@@ -1024,7 +1041,7 @@ void ViewImp::reorderImage(unsigned int pImage[], int iWidth, int iHeight)
       unsigned char* pPixel = NULL;
       for (i = 0; i < numPixels; i++)
       {
-         pPixel = (unsigned char*) &pImage[i];
+         pPixel = reinterpret_cast<unsigned char*>(&pImage[i]);
          tempColor = *pPixel;
          *pPixel = pPixel[2];
          pPixel[2] = tempColor;
@@ -1053,11 +1070,12 @@ void ViewImp::reorderImage(unsigned int pImage[], int iWidth, int iHeight)
 void ViewImp::setClassificationText(const QString& strClassification)
 {
    QString strNewClassification = strClassification.trimmed();
-   if(strNewClassification.isEmpty())
+   if (strNewClassification.isEmpty())
    {
       strNewClassification = QString::fromStdString(Service<UtilityServices>()->getDefaultClassification());
    }
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This should check available classification markings to ensure the classification string starts with a valid level (tclarke)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This should check available classification markings " \
+   "to ensure the classification string starts with a valid level (tclarke)")
    // pseudocode
    // stringlist valid = Service<something>()->getValidClassificationLevels();
    // bool found = false;
@@ -1160,7 +1178,7 @@ bool ViewImp::setExtents(double dMinX, double dMinY, double dMaxX, double dMaxY)
 
    emit extentsChanged(dMinX, dMinY, dMaxX, dMaxY);
    notify(SIGNAL_NAME(View, ExtentsChanged), boost::any(
-      boost::tuple<double,double,double,double>(dMinX, dMinY, dMaxX, dMaxY)));
+      boost::tuple<double, double, double, double>(dMinX, dMinY, dMaxX, dMaxY)));
    return true;
 }
 
@@ -1195,8 +1213,8 @@ void ViewImp::zoomInset(bool in)
    }
 
    // ensure 1 <= zoomMultiplier <= 256
-   zoomMultiplier = max(zoomMultiplier, (unsigned int)1);
-   zoomMultiplier = min(zoomMultiplier, (unsigned int)256);
+   zoomMultiplier = max(zoomMultiplier, static_cast<unsigned int>(1));
+   zoomMultiplier = min(zoomMultiplier, static_cast<unsigned int>(256));
 
    View::setSettingInsetZoom(zoomMultiplier);
 
@@ -1263,7 +1281,8 @@ void ViewImp::panBy(int iScreenDeltaX, int iScreenDeltaY)
 
 void ViewImp::panBy(double dWorldDeltaX, double dWorldDeltaY)
 {
-   double dCenterX, dCenterY;
+   double dCenterX;
+   double dCenterY;
    translateScreenToWorld(width() / 2, height() / 2, dCenterX, dCenterY);
 
    LocationType newCenter(dCenterX + dWorldDeltaX, dCenterY + dWorldDeltaY);
@@ -1450,7 +1469,8 @@ void ViewImp::drawSelectionBox()
 
    vector<LocationType> screenCoords;
 
-   double modelMatrix[16], projectionMatrix[16];
+   double modelMatrix[16];
+   double projectionMatrix[16];
    int viewPort[4];
    glGetIntegerv(GL_VIEWPORT, viewPort);
    glGetDoublev(GL_PROJECTION_MATRIX, projectionMatrix);
@@ -1604,7 +1624,8 @@ const QGLWidget* ViewImp::getShareWidget()
 void ViewImp::drawImage()
 {
    // Save matrices
-   double modelMatrix[16], projectionMatrix[16];
+   double modelMatrix[16];
+   double projectionMatrix[16];
    int viewPort[4];
    glGetIntegerv(GL_VIEWPORT, viewPort);
    glGetDoublev(GL_PROJECTION_MATRIX, projectionMatrix);
@@ -1632,7 +1653,8 @@ void ViewImp::drawImage()
 void ViewImp::drawImage(int width, int height)
 {
    // Save matrices
-   double modelMatrix[16], projectionMatrix[16];
+   double modelMatrix[16];
+   double projectionMatrix[16];
    int viewPort[4];
    glGetIntegerv(GL_VIEWPORT, viewPort);
    glGetDoublev(GL_PROJECTION_MATRIX, projectionMatrix);
@@ -1814,8 +1836,11 @@ bool ViewImp::toXml(XMLWriter* pXml) const
    pXml->addAttr("type", getObjectType());
 
    pXml->addAttr("visibleCenter", getVisibleCenter());
-   double a,b,c,d;
-   getExtents(a,b,c,d);
+   double a;
+   double b;
+   double c;
+   double d;
+   getExtents(a, b, c, d);
    stringstream str;
    str << a << " " << b << " " << c << " " << d;
    pXml->addAttr("extents", str.str());
@@ -1870,7 +1895,7 @@ bool ViewImp::fromXml(DOMNode* pDocument, unsigned int version)
       return false;
    }
 
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
+   DOMElement* pElem = static_cast<DOMElement*>(pDocument);
 
    string name(A(pElem->getAttribute(X("name"))));
    setName(name);
@@ -1879,7 +1904,10 @@ bool ViewImp::fromXml(DOMNode* pDocument, unsigned int version)
    string displayText(A(pElem->getAttribute(X("displayText"))));
    setDisplayText(displayText);
 
-   double a=0.0, b=0.0, c=1.0, d=1.0;
+   double a = 0.0;
+   double b = 0.0;
+   double c = 1.0;
+   double d = 1.0;
    XmlReader::StrToQuadCoord(pElem->getAttribute(X("extents")), a, b, c, d);
    setExtents(a, b, c, d);
    panTo(StringUtilities::fromXmlString<LocationType>(

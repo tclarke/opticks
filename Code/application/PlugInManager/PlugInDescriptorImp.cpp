@@ -86,14 +86,14 @@ PlugInDescriptorImp::PlugInDescriptorImp(const string& id, PlugIn* pPlugIn) :
          mWizardSupport = pExecutable->hasWizardSupport();
 
          mBatchSupport = pExecutable->setBatch();
-         if(mBatchSupport)
+         if (mBatchSupport)
          {
             pExecutable->getInputSpecification(mpBatchInArgList);
             pExecutable->getOutputSpecification(mpBatchOutArgList);
          }
 
          mInteractiveSupport = pExecutable->setInteractive();
-         if(mInteractiveSupport)
+         if (mInteractiveSupport)
          {
             pExecutable->getInputSpecification(mpInteractiveInArgList);
             pExecutable->getOutputSpecification(mpInteractiveOutArgList);
@@ -500,12 +500,12 @@ void PlugInDescriptorImp::destroyPlugIns()
    mPlugIns.clear();
 }
 
-bool PlugInDescriptorImp::serialize(SessionItemSerializer &serializer) const
+bool PlugInDescriptorImp::serialize(SessionItemSerializer& serializer) const
 {
    return serializer.serialize(NULL, 0);
 }
 
-bool PlugInDescriptorImp::deserialize(SessionItemDeserializer &deserializer)
+bool PlugInDescriptorImp::deserialize(SessionItemDeserializer& deserializer)
 {
    return true;
 }

@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #ifndef MATRIX_H
 #define MATRIX_H
 
@@ -20,7 +18,9 @@
 
 #include <limits>
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Many methods in this class are duplicated by MatrixFunctions.h (dadkins)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Many methods in this class are duplicated " \
+   "by MatrixFunctions.h (dadkins)")
+
 template<class T>
 class Matrix
 {
@@ -28,12 +28,16 @@ class Matrix
       Matrix() {}
       Matrix(size_t rows, size_t columns);
       Matrix(const Matrix& srcMatrix);
-      ~Matrix() { } 
+      ~Matrix() {}
 
-      inline const Vector<T>& operator[] ( const size_t row ) const;
-      inline Vector<T>& operator[] ( const size_t row );
+      inline const Vector<T>& operator[](const size_t row) const;
+      inline Vector<T>& operator[](const size_t row);
 
-      inline int getNumRows() const { return (int)mMatrix.size( ); }
+      inline int getNumRows() const
+      {
+         return static_cast<int>(mMatrix.size());
+      }
+
       inline int getNumColumns() const;
 
       void setToIdentity();
@@ -41,16 +45,19 @@ class Matrix
 
       void print() const;
 
-      inline int count() { return (getNumRows() * getNumColumns()); }
+      inline int count()
+      {
+         return (getNumRows() * getNumColumns());
+      }
 
       T determinant() const;
       Matrix<T> invert() const;
-      inline Matrix<T>& operator= (const Matrix<T>& rhs);
+      inline Matrix<T>& operator=(const Matrix<T>& rhs);
 
-      inline Matrix<T> operator+ (const Matrix<T>& rhs) const;
-      inline Matrix<T> operator- (const Matrix<T>& rhs) const;
-      inline Matrix<T> operator* (const Matrix<T>& rhs) const;
-      inline Matrix<T> operator* (const double scalar) const;
+      inline Matrix<T> operator+(const Matrix<T>& rhs) const;
+      inline Matrix<T> operator-(const Matrix<T>& rhs) const;
+      inline Matrix<T> operator*(const Matrix<T>& rhs) const;
+      inline Matrix<T> operator*(const double scalar) const;
 
       /**
        * Computes the transpose of the matrix.
@@ -59,12 +66,12 @@ class Matrix
        */
       inline Matrix<T> operator~() const;
 
-      inline bool operator== ( const Matrix<T>& rhs) const;
-      inline bool operator!= ( const Matrix<T>& rhs) const;
+      inline bool operator==(const Matrix<T>& rhs) const;
+      inline bool operator!=(const Matrix<T>& rhs) const;
 
-      inline Matrix<T>& operator+= (const Matrix<T>& opMatrix);
-      inline Matrix<T>& operator-= (const Matrix<T>& opMatrix);
-      inline Matrix<T>& operator*= (const double scalar);
+      inline Matrix<T>& operator+=(const Matrix<T>& opMatrix);
+      inline Matrix<T>& operator-=(const Matrix<T>& opMatrix);
+      inline Matrix<T>& operator*=(const double scalar);
 
    private:
       Vector<Vector<T> > mMatrix;
@@ -82,7 +89,7 @@ class Matrix
        *            Throws a FusionException with string text descibing why the operation
        *            failed. Most likely cause is a singular or non-square matrix.
        */
-      void LuDecompose( Vector<int>& index, T& detVal );
+      void LuDecompose(Vector<int>& index, T& detVal);
 
       /**
        * Used privately to invert matrices. Can also be used to
@@ -102,9 +109,9 @@ class Matrix
 };
 
 template<class T>
-Matrix<T>::Matrix( size_t rows, size_t columns )
+Matrix<T>::Matrix(size_t rows, size_t columns)
 {
-   mMatrix.reserve( rows );
+   mMatrix.reserve(rows);
    for (size_t i = 0; i < rows; i++)
    {
       mMatrix.push_back(Vector<T>(columns));
@@ -113,7 +120,7 @@ Matrix<T>::Matrix( size_t rows, size_t columns )
 }
 
 template<class T>
-Matrix<T>::Matrix( const Matrix<T>& srcMatrix )
+Matrix<T>::Matrix(const Matrix<T>& srcMatrix)
 {
    mMatrix.resize(srcMatrix.mMatrix.size());
 
@@ -124,7 +131,7 @@ Matrix<T>::Matrix( const Matrix<T>& srcMatrix )
 }
 
 template<class T>
-inline const Vector<T>& Matrix<T>::operator[] (const size_t row) const
+inline const Vector<T>& Matrix<T>::operator[](const size_t row) const
 {
    if (row < mMatrix.size())
    {
@@ -132,12 +139,12 @@ inline const Vector<T>& Matrix<T>::operator[] (const size_t row) const
    }
    else
    {
-      throw FusionException(std::string( "Out of bounds" ), __LINE__, __FILE__ );
+      throw FusionException(std::string("Out of bounds"), __LINE__, __FILE__);
    }
 }
 
 template<class T>
-inline Vector<T>& Matrix<T>::operator[] ( const size_t row )
+inline Vector<T>& Matrix<T>::operator[](const size_t row)
 {
    if (row < mMatrix.size())
    {
@@ -145,20 +152,20 @@ inline Vector<T>& Matrix<T>::operator[] ( const size_t row )
    }
    else
    {
-      throw FusionException(std::string( "Out of bounds" ), __LINE__, __FILE__ );
+      throw FusionException(std::string("Out of bounds"), __LINE__, __FILE__);
    }
 }
 
 template<class T>
-inline int Matrix<T>::getNumColumns() const 
-{ 
+inline int Matrix<T>::getNumColumns() const
+{
    try
    {
-      return (int)mMatrix[0].size( );
+      return static_cast<int>(mMatrix[0].size());
    }
-   catch(std::out_of_range exc)
+   catch (std::out_of_range exc)
    {
-      throw FusionException(std::string( "Out of bounds" ), __LINE__, __FILE__ );
+      throw FusionException(std::string("Out of bounds"), __LINE__, __FILE__);
    }
 }
 
@@ -202,19 +209,19 @@ T Matrix<T>::determinant() const
    //----- Determinant only has meaning for square matrix
    if (getNumColumns() != getNumRows())
    {
-      throw FusionException(std::string( "Matrix is not square" ), __LINE__, __FILE__ );
+      throw FusionException(std::string("Matrix is not square"), __LINE__, __FILE__);
    }
 
    //----- Create needed pivot array
-   Vector<int> pivotInd( getNumRows() );
+   Vector<int> pivotInd(getNumRows());
 
    //----- Copy values into working matrix.  Need a copy because
    //----- the LuDecompose method alters the matrix.
-   Matrix<T> detMatrix( *this );
+   Matrix<T> detMatrix(*this);
 
    //----- Get determinant value from LuDecompose.
    //----- Perform lower-upper triangle decomposition
-   detMatrix.LuDecompose( pivotInd, detVal );
+   detMatrix.LuDecompose(pivotInd, detVal);
    for (int i = 0; i < detMatrix.getNumRows(); i++)
    {
       detVal *= detMatrix[i][i];
@@ -228,16 +235,17 @@ Matrix<T> Matrix<T>::invert() const
 {
    T detVal = (T)0;
 
-   int i,j;
-   Vector<int> indexVector( getNumRows() );
-   Vector<T> columnVector( getNumRows() );
+   int i;
+   int j;
+   Vector<int> indexVector(getNumRows());
+   Vector<T> columnVector(getNumRows());
 
    //----- Create copy of this Matrix
-   Matrix<T> decMatrix( *this );
+   Matrix<T> decMatrix(*this);
    //----- Decompose the copy.  Check for invalid values
-   decMatrix.LuDecompose( indexVector, detVal );
+   decMatrix.LuDecompose(indexVector, detVal);
    //----- Create return Matrix
-   Matrix<T> transMatrix( getNumRows(), getNumColumns() );
+   Matrix<T> transMatrix(getNumRows(), getNumColumns());
    //----- Find inverse by column.
    for (j = 0; j < getNumRows(); j++)
    {
@@ -245,9 +253,9 @@ Matrix<T> Matrix<T>::invert() const
       {
          columnVector[i] = (T)0;
       }
-      
+
       columnVector[j] = (T)1;
-      decMatrix.LuBackSubstitution( indexVector, columnVector );
+      decMatrix.LuBackSubstitution(indexVector, columnVector);
       for (i = 0; i < getNumRows(); i++)
       {
          transMatrix[i][j] = columnVector[i];
@@ -257,13 +265,13 @@ Matrix<T> Matrix<T>::invert() const
 }
 
 template<class T>
-inline Matrix<T>& Matrix<T>::operator= ( const Matrix<T>& srcMatrix )
+inline Matrix<T>& Matrix<T>::operator=(const Matrix<T>& srcMatrix)
 {
    Vector< Vector<T> >::const_iterator iter;
    if (this != &srcMatrix)
    {
       mMatrix.clear();
-      mMatrix.reserve( getNumRows() );
+      mMatrix.reserve(getNumRows());
 
       // for every row in srcMatrix, make a copy and push_back onto mMatrix
       for (iter = srcMatrix.mMatrix.begin(); iter != srcMatrix.mMatrix.end(); iter++)
@@ -276,40 +284,38 @@ inline Matrix<T>& Matrix<T>::operator= ( const Matrix<T>& srcMatrix )
 }
 
 template<class T>
-inline Matrix<T> Matrix<T>::operator+ ( const Matrix<T>& opMatrix ) const
+inline Matrix<T> Matrix<T>::operator+(const Matrix<T>& opMatrix) const
 {
-   Matrix<T> returnMatrix( *this );
+   Matrix<T> returnMatrix(*this);
    returnMatrix += opMatrix;
    return returnMatrix;
 }
 
 template<class T>
-inline Matrix<T> Matrix<T>::operator- ( const Matrix<T>& opMatrix ) const
+inline Matrix<T> Matrix<T>::operator-(const Matrix<T>& opMatrix) const
 {
-   Matrix<T> returnMatrix( *this );
+   Matrix<T> returnMatrix(*this);
    returnMatrix -= opMatrix;
    return returnMatrix;
 }
 
 template<class T>
-inline Matrix<T> Matrix<T>::operator* ( double scalar ) const
+inline Matrix<T> Matrix<T>::operator*(double scalar) const
 {
-   Matrix<T> returnMatrix( *this );
+   Matrix<T> returnMatrix(*this);
    returnMatrix *= scalar;
    return returnMatrix;
 }
 
 template<class T>
-inline Matrix<T> Matrix<T>::operator* ( const Matrix<T>& opMatrix ) const
+inline Matrix<T> Matrix<T>::operator*(const Matrix<T>& opMatrix) const
 {
-   Matrix<T> returnMatrix( getNumRows(), opMatrix.getNumColumns() );
+   Matrix<T> returnMatrix(getNumRows(), opMatrix.getNumColumns());
 
    //----- Can only multiply if LHS columns == RHS rows
    if (getNumColumns() != opMatrix.getNumRows())
    {
-      throw FusionException(std::string( "Size mismatch" ), 
-                           __LINE__, 
-                           __FILE__ );
+      throw FusionException(std::string("Size mismatch"), __LINE__, __FILE__);
    }
 
    for (int row = 0; row < getNumRows(); row++)
@@ -328,28 +334,25 @@ inline Matrix<T> Matrix<T>::operator* ( const Matrix<T>& opMatrix ) const
 }
 
 template<class T>
-inline bool Matrix<T>::operator== ( const Matrix<T>& rhs) const
+inline bool Matrix<T>::operator==(const Matrix<T>& rhs) const
 {
    return !(*this != rhs);
 }
 
 template<class T>
-inline bool Matrix<T>::operator!= ( const Matrix<T>& rhs) const
+inline bool Matrix<T>::operator!=(const Matrix<T>& rhs) const
 {
    Vector< Vector<T> >::const_iterator iter;
    Vector< Vector<T> >::const_iterator rhsIter;
 
-   if ( (rhs.getNumRows() != getNumRows()) || 
-        (rhs.getNumColumns() != getNumColumns()) )
+   if ((rhs.getNumRows() != getNumRows()) || (rhs.getNumColumns() != getNumColumns()))
    {
-      throw FusionException(std::string( "Size mismatch" ), 
-                              __LINE__, 
-                              __FILE__ );
+      throw FusionException(std::string("Size mismatch"), __LINE__, __FILE__);
    }
 
    for (iter = mMatrix.begin(), rhsIter = rhs.mMatrix.begin();
-         iter != mMatrix.end() && rhsIter != rhs.mMatrix.end();
-         iter++, rhsIter++)
+      iter != mMatrix.end() && rhsIter != rhs.mMatrix.end();
+      iter++, rhsIter++)
    {
       if (*iter != *rhsIter)
       {
@@ -361,14 +364,14 @@ inline bool Matrix<T>::operator!= ( const Matrix<T>& rhs) const
 }
 
 template<class T>
-inline Matrix<T> Matrix<T>::operator~ () const
+inline Matrix<T> Matrix<T>::operator~() const
 {
-   if (getNumColumns( ) != getNumRows( ))
+   if (getNumColumns() != getNumRows())
    {
-      throw FusionException(std::string( "Matrix is not square" ), __LINE__, __FILE__ );
+      throw FusionException(std::string("Matrix is not square"), __LINE__, __FILE__);
    }
 
-   Matrix<T> returnMatrix( getNumRows(), getNumColumns() );
+   Matrix<T> returnMatrix(getNumRows(), getNumColumns());
 
    for (int i = 0; i < getNumRows(); i++)
    {
@@ -382,7 +385,7 @@ inline Matrix<T> Matrix<T>::operator~ () const
 }
 
 template<class T>
-inline Matrix<T>& Matrix<T>::operator+= ( const Matrix& srcMatrix )
+inline Matrix<T>& Matrix<T>::operator+=(const Matrix& srcMatrix)
 {
    Vector< Vector<T> >::iterator iter;
    Vector< Vector<T> >::const_iterator srcIter;
@@ -390,7 +393,7 @@ inline Matrix<T>& Matrix<T>::operator+= ( const Matrix& srcMatrix )
    // size mismatch error
    if ((srcMatrix.getNumRows() != getNumRows()) || (srcMatrix.getNumColumns() != getNumColumns()))
    {
-      throw FusionException(std::string( "Size mismatch" ), __LINE__, __FILE__ );
+      throw FusionException(std::string("Size mismatch"), __LINE__, __FILE__);
    }
 
    for (iter = mMatrix.begin(), srcIter = srcMatrix.mMatrix.begin();
@@ -404,18 +407,18 @@ inline Matrix<T>& Matrix<T>::operator+= ( const Matrix& srcMatrix )
 }
 
 template<class T>
-inline Matrix<T>& Matrix<T>::operator-= ( const Matrix& srcMatrix )
+inline Matrix<T>& Matrix<T>::operator-=(const Matrix& srcMatrix)
 {
    (*this) += (srcMatrix * -1);
    return *this;
 }
 
 template<class T>
-inline Matrix<T>& Matrix<T>::operator*= ( const double scalar )
+inline Matrix<T>& Matrix<T>::operator*=(const double scalar)
 {
    Matrix<T>::iterator iter;
 
-   for (iter = begin(); iter != end( ); iter++)
+   for (iter = begin(); iter != end(); iter++)
    {
       *iter *= scalar;
    }
@@ -424,23 +427,23 @@ inline Matrix<T>& Matrix<T>::operator*= ( const double scalar )
 }
 
 template<class T>
-void Matrix<T>::LuDecompose( Vector<int>& index, T& detVal )
+void Matrix<T>::LuDecompose(Vector<int>& index, T& detVal)
 {
    T verySmallValue = numeric_limits<T>::epsilon();
    T currentVal = (T)0, detSum = (T)0, largestVal = (T)0, sum = (T)0;
    // Interim calculation values
    int pivotVal = 0;
    int rank = getNumRows(); // Calculated deterministic values
-   int i,j,k;
+   int i;
+   int j;
+   int k;
 
    detVal = (T)1;
 
    //----- LuDecompose only has meaning for square matrix
    if (getNumColumns() != getNumRows())
    {
-      throw FusionException(std::string( "Size mismatch" ), 
-         __LINE__, 
-         __FILE__ );
+      throw FusionException(std::string("Size mismatch"), __LINE__, __FILE__);
    }
 
    //----- Create scaling array for column calculation
@@ -452,7 +455,7 @@ void Matrix<T>::LuDecompose( Vector<int>& index, T& detVal )
       largestVal = (T)0;
       for (j = 0; j < rank; j++) 
       {
-         currentVal = (T)fabs( (double)mMatrix[i][j] );
+         currentVal = (T)fabs((double)mMatrix[i][j]);
          if (currentVal > largestVal)
          {
             largestVal = currentVal;
@@ -461,9 +464,7 @@ void Matrix<T>::LuDecompose( Vector<int>& index, T& detVal )
       //----- Check for singularity --> no non-zero largest element
       if (largestVal == (T)0)
       {
-         throw FusionException(std::string( "Matrix singular" ), 
-            __LINE__, 
-            __FILE__ );
+         throw FusionException(std::string("Matrix singular"), __LINE__, __FILE__);
       }
       else
       {
@@ -541,7 +542,7 @@ void Matrix<T>::LuDecompose( Vector<int>& index, T& detVal )
 }
 
 template<class T>
-void Matrix<T>::LuBackSubstitution( Vector<int> index, Vector<T>& bx ) const
+void Matrix<T>::LuBackSubstitution(Vector<int> index, Vector<T>& bx) const
 {
    int    intermed_ndx = 0, pivot_ndx = 0; // Indices used in calculation
    int    vect_size = getNumRows();        // Size of column to calculate
@@ -550,14 +551,14 @@ void Matrix<T>::LuBackSubstitution( Vector<int> index, Vector<T>& bx ) const
    //----- LuBackSubstitution only has meaning for square matrix
    if (getNumRows() != getNumColumns())
    {
-      throw FusionException(std::string( "Matrix is not square" ), __LINE__, __FILE__ );
+      throw FusionException(std::string("Matrix is not square"), __LINE__, __FILE__);
    }
    //----- When intermed_ndx is set to a positive value, it will become the
    //----- index of the first nonvanishing element of bx.
    for (i = 0; i < vect_size; i++)
    {
       pivot_ndx = index[i];
-      hold_val  = bx[pivot_ndx];
+      hold_val = bx[pivot_ndx];
       bx[pivot_ndx] = bx[i];
       if (intermed_ndx > 0)
       {
@@ -575,7 +576,7 @@ void Matrix<T>::LuBackSubstitution( Vector<int> index, Vector<T>& bx ) const
    for (i = vect_size - 1; i >= 0; i--)
    {
       hold_val = bx[i];
-      for ( j =i + 1; j < getNumRows(); j++)
+      for (j = i + 1; j < getNumRows(); j++)
       {
          hold_val -= mMatrix[i][j] * bx[j];
       }
@@ -584,4 +585,4 @@ void Matrix<T>::LuBackSubstitution( Vector<int> index, Vector<T>& bx ) const
    }
 }
 
-#endif   // MATRIX_H
+#endif

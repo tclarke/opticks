@@ -46,9 +46,12 @@ bool StringUtilities::readSTLString(FILE* pInputFile, size_t readSize, string &t
       vector<char> buf(readSize + 1);
 
       buf[readSize] = '\0';
-      char *pBuffer = &buf.at(0);
-      
-      if (0 == fread(pBuffer, 1, readSize, pInputFile)) return false; // bad read -> kick out
+      char* pBuffer = &buf.at(0);
+
+      if (0 == fread(pBuffer, 1, readSize, pInputFile))
+      {
+         return false; // bad read -> kick out
+      }
 
       target = pBuffer;
    }
@@ -56,8 +59,15 @@ bool StringUtilities::readSTLString(FILE* pInputFile, size_t readSize, string &t
    {
       for (size_t i = 0; i < readSize; i++)
       {
-         if (success) success = 0 < fread(&c, 1, 1, pInputFile); // read it
-         if (success) target.append(1, c);
+         if (success)
+         {
+            success = 0 < fread(&c, 1, 1, pInputFile); // read it
+         }
+
+         if (success)
+         {
+            target.append(1, c);
+         }
       }
    }
 
@@ -113,8 +123,11 @@ bool StringUtilities::isAllBlank(const string &source)
 {
    static const basic_string <char>::size_type npos = -1;
    basic_string <char>::size_type findIndex = source.find_first_not_of(" ");
-   if(findIndex == npos)        
+   if (findIndex == npos)
+   {
       return true;      // Found an all blank string
+   }
+
    return false;
 }
 
@@ -179,8 +192,12 @@ string StringUtilities::latLonToText(LocationType latLonCoords)
    return latLon.getText().c_str();
 }
 
-string StringUtilities::expandVariables(const string& originalString)
+string StringUtilities::expandVariables(const string& originalString,
+   const vector<string>& ignoredExpansions)
 {
+   bool allowV = (find(ignoredExpansions.begin(), ignoredExpansions.end(), "V") == ignoredExpansions.end());
+   bool allowC = (find(ignoredExpansions.begin(), ignoredExpansions.end(), "C") == ignoredExpansions.end());
+   bool allowE = (find(ignoredExpansions.begin(), ignoredExpansions.end(), "E") == ignoredExpansions.end());
    Service<ConfigurationSettings> pSettings;
    string newString = originalString;
    for (int i = 0; i < 50; i++)
@@ -206,7 +223,7 @@ string StringUtilities::expandVariables(const string& originalString)
                   string::size_type closeParen = newString.find(')', pos+2);
                   string variableName = newString.substr(pos+3, closeParen-(pos+2)-1);
                   string replacementString;
-                  if (type == "V")
+                  if (type == "V" && allowV)
                   {
                      if (variableName == "APP_HOME")
                      {
@@ -233,7 +250,7 @@ string StringUtilities::expandVariables(const string& originalString)
                         replaced = true;
                      }
                   }
-                  else if (type == "E")
+                  else if (type == "E" && allowE)
                   {
                      char* value = getenv(variableName.c_str());
                      if (value != NULL)
@@ -247,7 +264,7 @@ string StringUtilities::expandVariables(const string& originalString)
                         replaced = true;
                      }
                   }
-                  else if (type == "C")
+                  else if (type == "C" && allowC)
                   {
                      const DataVariant& value = pSettings->getSetting(variableName);
                      if (value.isValid())
@@ -917,7 +934,10 @@ ColorType StringUtilities::fromDisplayString<ColorType>(string value, bool* pErr
             greenStr = value.substr(5, 2);
             blueStr = value.substr(7, 2);
          }
-         unsigned int alpha = 255, red = 0, green = 0, blue = 0;
+         unsigned int alpha = 255;
+         unsigned int red = 0;
+         unsigned int green = 0;
+         unsigned int blue = 0;
          bool parseSuccess = true;
          if (!alphaStr.empty())
          {
@@ -1526,4 +1546,3 @@ vector<UInt64> StringUtilities::fromXmlString<vector<UInt64> >(string value, boo
    transform(tempValues.begin(), tempValues.end(), back_inserter(retValues), UInt64Functors::CreateUInt64Object());
    return retValues;
 }
-

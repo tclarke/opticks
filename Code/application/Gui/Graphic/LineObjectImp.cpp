@@ -60,7 +60,7 @@ void LineObjectImp::drawVector(double zoomFactor) const
 #if defined(WIN_API)
    glEnable(GL_LINE_SMOOTH);
 #else
-   if(lineWidth == 1.0)
+   if (lineWidth == 1.0)
    {
       glEnable(GL_LINE_SMOOTH);
    }
@@ -111,14 +111,11 @@ void LineObjectImp::drawVector(double zoomFactor) const
 
 void LineObjectImp::drawPixels(double zoomFactor) const
 {
-
    ColorType color = getLineColor();
-
    glColor3ub(color.mRed, color.mGreen, color.mBlue);
 
    DrawUtil::PixelDrawer drawer(getPixelSymbol());
    DrawUtil::drawPixelLine(getLlCorner(), getUrCorner(), drawer);
-
 }
 
 bool LineObjectImp::hit(LocationType pixelCoord) const
@@ -180,7 +177,7 @@ const BitMask* LineObjectImp::getPixels(int iStartColumn, int iStartRow, int iEn
 
 bool LineObjectImp::setProperty(const GraphicProperty* pProp)
 {
-   const BoundingBoxProperty *pBbOld = dynamic_cast<const BoundingBoxProperty*>(pProp);
+   const BoundingBoxProperty* pBbOld = dynamic_cast<const BoundingBoxProperty*>(pProp);
    if (pBbOld != NULL)
    {
       bool changed = false;
@@ -203,16 +200,15 @@ bool LineObjectImp::setProperty(const GraphicProperty* pProp)
          return GraphicObjectImp::setProperty(&bbNew);
       }
    }
-   return GraphicObjectImp::setProperty(pProp);
 
+   return GraphicObjectImp::setProperty(pProp);
 }
 
-void LineObjectImp::moveHandle(int handle, LocationType pixel, 
-                               bool bMaintainAspect)
+void LineObjectImp::moveHandle(int handle, LocationType pixel, bool bMaintainAspect)
 {
    VERIFYNRV(static_cast<unsigned int>(handle) < mHandles.size());
    GraphicObjectType type = getGraphicObjectType();
-   
+
    LocationType ll = getLlCorner();
    LocationType ur = getUrCorner();
 
@@ -237,7 +233,8 @@ void LineObjectImp::moveHandle(int handle, LocationType pixel,
       case TOP_CENTER: // fall through
       case BOTTOM_CENTER:
          // move the whole thing
-         ll.mY = ur.mY = pixel.mY;
+         ll.mY = pixel.mY;
+         ur.mY = pixel.mY;
          ll.mX = ll.mX - (mHandles[handle].mX - pixel.mX);
          ur.mX = ur.mX - (mHandles[handle].mX - pixel.mX);
          break;
@@ -266,7 +263,8 @@ void LineObjectImp::moveHandle(int handle, LocationType pixel,
       case MIDDLE_LEFT: // fall through
       case MIDDLE_RIGHT:
          // move the whole thing
-         ll.mX = ur.mX = pixel.mX;
+         ll.mX = pixel.mX;
+         ur.mX = pixel.mX;
          ll.mY = ll.mY - (mHandles[handle].mY - pixel.mY);
          ur.mY = ur.mY - (mHandles[handle].mY - pixel.mY);
          break;
@@ -284,8 +282,8 @@ void LineObjectImp::moveHandle(int handle, LocationType pixel,
 
 const string& LineObjectImp::getObjectType() const
 {
-   static string type("LineObjectImp");
-   return type;
+   static string sType("LineObjectImp");
+   return sType;
 }
 
 bool LineObjectImp::isKindOf(const string& className) const
@@ -319,4 +317,3 @@ bool LineObjectImp::setUseHitTolerance(bool bUse)
    mUseHitTolerance = bUse;
    return true;
 }
-

@@ -265,9 +265,9 @@ private:
    QSpinBox* mpCopyNumberSpinBox;
    QSpinBox* mpNumberOfCopiesSpinBox;
    QTextEdit* mpMarkingsEdit;
-   QPushButton *mpAddButton;
+   QPushButton* mpAddButton;
 
-   QComboBox *mpFavoritesCombo;
+   QComboBox* mpFavoritesCombo;
 
    Classification* mpClass;
 

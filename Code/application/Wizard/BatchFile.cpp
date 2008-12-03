@@ -11,15 +11,15 @@
 
 using namespace std;
 
-BatchFile::BatchFile()
+BatchFile::BatchFile() :
+   mbUsed(false)
 {
-   mbUsed = false;
 }
 
-BatchFile::BatchFile(const string& filename)
+BatchFile::BatchFile(const string& filename) :
+   mFilename(filename),
+   mbUsed(false)
 {
-   mFilename = filename.c_str();
-   mbUsed = false;
 }
 
 BatchFile::~BatchFile()
@@ -28,7 +28,7 @@ BatchFile::~BatchFile()
 
 void BatchFile::setFileName(const string& filename)
 {
-   mFilename = filename.c_str();
+   mFilename = filename;
 }
 
 const string& BatchFile::getFileName() const

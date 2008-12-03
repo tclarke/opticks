@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef GCPOVERLAYUNDO_H
-#define GCPOVERLAYUNDO_H
+#ifndef GCPLAYERUNDO_H
+#define GCPLAYERUNDO_H
 
 #include "ColorType.h"
 #include "LayerUndo.h"

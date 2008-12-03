@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef HDF4_DATASET_H
-#define HDF4_DATASET_H
+#ifndef HDF4DATASET_H
+#define HDF4DATASET_H
 
 #include "EnumWrapper.h"
 #include "Hdf4Element.h"
@@ -26,19 +24,19 @@ public:
     */
    enum HdfTypeEnum
    {
-      INT1SBYTE = 0,      /**< char */
-      INT1UBYTE = 1,      /**< unsigned char */
-      INT2SBYTES = 2,     /**< short */
-      INT2UBYTES = 3,     /**< unsigned short */
-      INT4SCOMPLEX = 4,   /**< complex short */
-      INT4SBYTES = 5,     /**< int */
-      INT4UBYTES = 6,     /**< unsigned int */
-      FLT4BYTES = 7,      /**< float */
-      FLT8COMPLEX = 8,    /**< complex float */
-      FLT8BYTES = 9,      /**< double */
-      STRING = 10,        /**< std::string */
-      COMPOUND = 11,      /**< Compund or VDATA dataset */
-      UNSUPPORTED = 12    /**< Indicates a value unsupported by HdfPlugInLib */
+      INT1SBYTE = 0,    /**< char */
+      INT1UBYTE = 1,    /**< unsigned char */
+      INT2SBYTES = 2,   /**< short */
+      INT2UBYTES = 3,   /**< unsigned short */
+      INT4SCOMPLEX = 4, /**< complex short */
+      INT4SBYTES = 5,   /**< int */
+      INT4UBYTES = 6,   /**< unsigned int */
+      FLT4BYTES = 7,    /**< float */
+      FLT8COMPLEX = 8,  /**< complex float */
+      FLT8BYTES = 9,    /**< double */
+      STRING = 10,      /**< std::string */
+      COMPOUND = 11,    /**< Compund or VDATA dataset */
+      UNSUPPORTED = 12  /**< Indicates a value unsupported by HdfPlugInLib */
    };
 
    /**

@@ -28,7 +28,7 @@ FontImp::~FontImp()
 {
 }
 
-FontImp& FontImp::operator= (const FontImp& font)
+FontImp& FontImp::operator=(const FontImp& font)
 {
    if (this != &font)
    {
@@ -38,12 +38,12 @@ FontImp& FontImp::operator= (const FontImp& font)
    return *this;
 }
 
-bool FontImp::operator== (const FontImp& font) const
+bool FontImp::operator==(const FontImp& font) const
 {
    return (mFont == font.mFont);
 }
 
-bool FontImp::operator!= (const FontImp& font) const
+bool FontImp::operator!=(const FontImp& font) const
 {
    return (mFont != font.mFont);
 }
@@ -133,19 +133,17 @@ bool FontImp::toXml(XMLWriter* pXml) const
 
 bool FontImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   if(pDocument == NULL)
+   DOMElement* pElmnt = static_cast<DOMElement*>(pDocument);
+   if (pElmnt == NULL)
    {
       return false;
    }
-   DOMElement *pElmnt = static_cast<DOMElement*>(pDocument);
+
    setFace(A(pElmnt->getAttribute(X("face"))));
-   setPointSize(StringUtilities::fromXmlString<int>(
-      A(pElmnt->getAttribute(X("pointSize")))));
-   setBold(StringUtilities::fromXmlString<bool>(
-      A(pElmnt->getAttribute(X("bold")))));
-   setItalic(StringUtilities::fromXmlString<bool>(
-      A(pElmnt->getAttribute(X("italic")))));
-   setUnderline(StringUtilities::fromXmlString<bool>(
-      A(pElmnt->getAttribute(X("underline")))));
+   setPointSize(StringUtilities::fromXmlString<int>(A(pElmnt->getAttribute(X("pointSize")))));
+   setBold(StringUtilities::fromXmlString<bool>(A(pElmnt->getAttribute(X("bold")))));
+   setItalic(StringUtilities::fromXmlString<bool>(A(pElmnt->getAttribute(X("italic")))));
+   setUnderline(StringUtilities::fromXmlString<bool>(A(pElmnt->getAttribute(X("underline")))));
+
    return true;
 }

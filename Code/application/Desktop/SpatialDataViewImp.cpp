@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <math.h>
-
 #include "Animation.h"
 #include "AnimationController.h"
 #include "AnimationServices.h"
@@ -17,6 +15,7 @@
 #include "AoiElementImp.h"
 #include "AoiLayer.h"
 #include "AoiLayerImp.h"
+#include "AoiToolBar.h"
 #include "AppAssert.h"
 #include "AppConfig.h"
 #include "ApplicationWindow.h"
@@ -32,6 +31,8 @@
 #include "Georeference.h"
 #include "glCommon.h"
 #include "GraphicGroupImp.h"
+#include "HistogramWindow.h"
+#include "HistogramWindowImp.h"
 #include "Icons.h"
 #include "LatLonLayer.h"
 #include "LayerListAdapter.h"
@@ -52,8 +53,8 @@
 #include "Statistics.h"
 #include "StatusBar.h"
 #include "StringUtilities.h"
-#include "TiePointLayerAdapter.h"
 #include "ThresholdLayerImp.h"
+#include "TiePointLayerAdapter.h"
 #include "TypesFile.h"
 #include "Undo.h"
 #include "Units.h"
@@ -70,6 +71,8 @@
 #include <QtGui/QMouseEvent>
 #include <QtGui/QToolTip>
 #include <QtOpenGL/QGLFramebufferObject>
+
+#include <math.h>
 
 #include <boost/bind.hpp>
 
@@ -98,8 +101,8 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
    mpAoiAction(NULL),
    mpGcpAction(NULL),
    mpTiePointAction(NULL),
-   mpOriginLL(NULL),
    mpOriginUL(NULL),
+   mpOriginLL(NULL),
    mpSmoothAction(NULL)
 {
    // Measurements layer
@@ -140,6 +143,7 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
       pDesktop->initializeAction(mpTiePointAction, newLayerContext);
 
       pNewLayerMenu->addActions(pGroup->actions());
+      VERIFYNR(connect(mpAoiAction, SIGNAL(triggered()), this, SLOT(setAoiMode())));
       connect(pGroup, SIGNAL(triggered(QAction*)), this, SLOT(createLayer(QAction*)));
    }
 
@@ -148,7 +152,7 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
    pOriginSeparatorAction->setSeparator(true);
 
    // Origin
-   QMenu* pOriginMenu = new QMenu("Origin",this);
+   QMenu* pOriginMenu = new QMenu("Origin", this);
    if (pOriginMenu != NULL)
    {
       string originContext = shortcutContext + "/Origin";
@@ -201,6 +205,63 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
    pMeasurementsAction->setAutoRepeat(false);
    pDesktop->initializeAction(pMeasurementsAction, shortcutContext);
 
+   // Keyboard shortcut actions
+   QAction* pGrayAction = new QAction("Set Gray Band", this);
+   pGrayAction->setAutoRepeat(false);
+   pGrayAction->setShortcut(QKeySequence(Qt::Key_X));
+   pGrayAction->setShortcutContext(Qt::WidgetShortcut);
+   pDesktop->initializeAction(pGrayAction, shortcutContext);
+   addAction(pGrayAction);
+
+   QAction* pRedAction = new QAction("Set Red Band", this);
+   pRedAction->setAutoRepeat(false);
+   pRedAction->setShortcut(QKeySequence(Qt::Key_R));
+   pRedAction->setShortcutContext(Qt::WidgetShortcut);
+   pDesktop->initializeAction(pRedAction, shortcutContext);
+   addAction(pRedAction);
+
+   QAction* pGreenAction = new QAction("Set Green Band", this);
+   pGreenAction->setAutoRepeat(false);
+   pGreenAction->setShortcut(QKeySequence(Qt::Key_G));
+   pGreenAction->setShortcutContext(Qt::WidgetShortcut);
+   pDesktop->initializeAction(pGreenAction, shortcutContext);
+   addAction(pGreenAction);
+
+   QAction* pBlueAction = new QAction("Set Blue Band", this);
+   pBlueAction->setAutoRepeat(false);
+   pBlueAction->setShortcut(QKeySequence(Qt::Key_B));
+   pBlueAction->setShortcutContext(Qt::WidgetShortcut);
+   pDesktop->initializeAction(pBlueAction, shortcutContext);
+   addAction(pBlueAction);
+
+   QAction* pGrayscaleAction = new QAction("Set Grayscale Mode", this);
+   pGrayscaleAction->setAutoRepeat(false);
+   pGrayscaleAction->setShortcut(QKeySequence(Qt::Key_O));
+   pGrayscaleAction->setShortcutContext(Qt::WidgetShortcut);
+   pDesktop->initializeAction(pGrayscaleAction, shortcutContext);
+   addAction(pGrayscaleAction);
+
+   QAction* pRgbAction = new QAction("Set RGB Mode", this);
+   pRgbAction->setAutoRepeat(false);
+   pRgbAction->setShortcut(QKeySequence(Qt::Key_T));
+   pRgbAction->setShortcutContext(Qt::WidgetShortcut);
+   pDesktop->initializeAction(pRgbAction, shortcutContext);
+   addAction(pRgbAction);
+
+   QAction* pNextBandAction = new QAction("Next Grayscale Band", this);
+   pNextBandAction->setAutoRepeat(false);
+   pNextBandAction->setShortcut(QKeySequence(Qt::Key_PageUp));
+   pNextBandAction->setShortcutContext(Qt::WidgetShortcut);
+   pDesktop->initializeAction(pNextBandAction, shortcutContext);
+   addAction(pNextBandAction);
+
+   QAction* pPreviousBandAction = new QAction("Previous Grayscale Band", this);
+   pPreviousBandAction->setAutoRepeat(false);
+   pPreviousBandAction->setShortcut(QKeySequence(Qt::Key_PageDown));
+   pPreviousBandAction->setShortcutContext(Qt::WidgetShortcut);
+   pDesktop->initializeAction(pPreviousBandAction, shortcutContext);
+   addAction(pPreviousBandAction);
+
    // Initialization
    if (mpMeasurementsLayer != NULL)
    {
@@ -245,6 +306,14 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
       this, SLOT(updateSmoothingAction(const TextureMode&))));
    VERIFYNR(connect(pColorAction, SIGNAL(triggered()), this, SLOT(changeBkgColor())));
    VERIFYNR(connect(pMeasurementsAction, SIGNAL(triggered()), this, SLOT(displayMeasurementProperties())));
+   VERIFYNR(connect(pGrayAction, SIGNAL(triggered()), this, SLOT(setGrayBand())));
+   VERIFYNR(connect(pRedAction, SIGNAL(triggered()), this, SLOT(setRedBand())));
+   VERIFYNR(connect(pGreenAction, SIGNAL(triggered()), this, SLOT(setGreenBand())));
+   VERIFYNR(connect(pBlueAction, SIGNAL(triggered()), this, SLOT(setBlueBand())));
+   VERIFYNR(connect(pGrayscaleAction, SIGNAL(triggered()), this, SLOT(setGrayscaleMode())));
+   VERIFYNR(connect(pRgbAction, SIGNAL(triggered()), this, SLOT(setRgbMode())));
+   VERIFYNR(connect(pNextBandAction, SIGNAL(triggered()), this, SLOT(nextBand())));
+   VERIFYNR(connect(pPreviousBandAction, SIGNAL(triggered()), this, SLOT(previousBand())));
 
    if (mpLayerList != NULL)
    {
@@ -263,6 +332,15 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
    {
       VERIFYNR(connect(this, SIGNAL(mouseModeAdded(const MouseMode*)),
          pAppWindow, SLOT(addMouseModeToGroup(const MouseMode*))));
+   }
+
+   HistogramWindowImp* pHistWindow =
+      dynamic_cast<HistogramWindowImp*>(pDesktop->getWindow("Histogram Window", PLOT_WINDOW));
+   if (pHistWindow != NULL)
+   {
+      VERIFYNR(connect(this, SIGNAL(layerAdded(Layer*)), pHistWindow, SLOT(createPlot(Layer*))));
+      VERIFYNR(connect(this, SIGNAL(layerActivated(Layer*)), pHistWindow, SLOT(setCurrentPlot(Layer*))));
+      VERIFYNR(connect(this, SIGNAL(layerDeleted(Layer*)), pHistWindow, SLOT(deletePlot(Layer*))));
    }
 }
 
@@ -329,8 +407,8 @@ SpatialDataViewImp::~SpatialDataViewImp()
 
 const string& SpatialDataViewImp::getObjectType() const
 {
-   static string type("SpatialDataViewImp");
-   return type;
+   static string sType("SpatialDataViewImp");
+   return sType;
 }
 
 bool SpatialDataViewImp::isKindOf(const string& className) const
@@ -415,7 +493,7 @@ void SpatialDataViewImp::elementModified(Subject &subject, const string &signal,
 
 void SpatialDataViewImp::attached(Subject &subject, const string &signal, const Slot &slot)
 {
-   if(dynamic_cast<DataElement*>(&subject) != NULL)
+   if (dynamic_cast<DataElement*>(&subject) != NULL)
    {
       elementModified(subject, signal, boost::any());
    }
@@ -493,6 +571,12 @@ SpatialDataViewImp& SpatialDataViewImp::operator= (const SpatialDataViewImp& spa
                   {
                      hideLayer(pNewLayer);
                   }
+
+                  // Activate the layer if necessary
+                  if (spatialDataView.getActiveLayer() == pLayer)
+                  {
+                     setActiveLayer(pNewLayer);
+                  }
                }
             }
          }
@@ -515,12 +599,12 @@ View* SpatialDataViewImp::copy(QGLContext* drawContext, QWidget* parent) const
       *dynamic_cast<SpatialDataViewImp*>(pView) = *this;
    }
 
-   return (View*) pView;
+   return static_cast<View*>(pView);
 }
 
 bool SpatialDataViewImp::copy(View *pView) const
 {
-   SpatialDataViewImp *pViewImp = dynamic_cast<SpatialDataViewImp*>(pView);
+   SpatialDataViewImp* pViewImp = dynamic_cast<SpatialDataViewImp*>(pView);
    if (pViewImp != NULL)
    {
       UndoLock lock(pView);
@@ -947,6 +1031,10 @@ Layer* SpatialDataViewImp::deriveLayer(const Layer* pLayer, const LayerType& new
    Layer* pNewLayer = createLayer(newLayerType, pElement, strLayerName);
    if (pNewLayer != NULL)
    {
+      pNewLayer->setXOffset(pLayer->getXOffset());
+      pNewLayer->setYOffset(pLayer->getYOffset());
+      pNewLayer->setXScaleFactor(pLayer->getXScaleFactor());
+      pNewLayer->setYScaleFactor(pLayer->getYScaleFactor());
       updateGL();
    }
 
@@ -974,6 +1062,17 @@ Layer* SpatialDataViewImp::convertLayer(Layer* pLayer, const LayerType& newLayer
    {
       // Delete the original layer
       deleteLayer(pLayer);
+
+      // Create a histogram plot if necessary because it may not have been created
+      // if it already existed when the new layer was created
+      Service<DesktopServices> pDesktop;
+
+      HistogramWindow* pHistWindow =
+         dynamic_cast<HistogramWindow*>(pDesktop->getWindow("Histogram Window", PLOT_WINDOW));
+      if (pHistWindow != NULL)
+      {
+         pHistWindow->createPlot(pNewLayer);
+      }
    }
 
    return pNewLayer;
@@ -1089,7 +1188,7 @@ bool SpatialDataViewImp::deleteLayer(Layer* pLayer, bool bClearUndo)
    UndoGroup group(dynamic_cast<View*>(this), actionText);
 
    // Disconnect
-   LayerImp *pLayerImp = dynamic_cast<LayerImp*>(pLayer);
+   LayerImp* pLayerImp = dynamic_cast<LayerImp*>(pLayer);
    disconnect(pLayerImp, SIGNAL(modified()), this, SLOT(refresh()));
    disconnect(pLayerImp, SIGNAL(modified()), this, SLOT(notifyLayerModified()));
    disconnect(pLayerImp, SIGNAL(extentsModified()), this, SLOT(updateExtents()));
@@ -1262,32 +1361,34 @@ QImage SpatialDataViewImp::getLayerImage(Layer* pLayer, ColorType& transparent, 
    }
 
    QColor clrBackground = getBackgroundColor();
-   if(!transparent.isValid())
+   if (!transparent.isValid())
    {
       vector<ColorType> layerColors = pLayerImp->getColors();
       transparent = ColorType::getUniqueColor(layerColors);
    }
-   if(transparent.isValid())
+   if (transparent.isValid())
    {
       clrBackground = COLORTYPE_TO_QCOLOR(transparent);
    }
 
    // Save matrices
-   double modelMatrix[16], projectionMatrix[16];
+   double modelMatrix[16];
+   double projectionMatrix[16];
    int viewPort[4];
    glGetIntegerv(GL_VIEWPORT, viewPort);
    glGetDoublev(GL_PROJECTION_MATRIX, projectionMatrix);
    glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
 
-   if(QGLFramebufferObject::hasOpenGLFramebufferObjects())
+   if (QGLFramebufferObject::hasOpenGLFramebufferObjects())
    {
       // Set to draw to an off screen buffer
       makeCurrent();
-      int w=width(), h=height();
-      if(bbox[0] > 0 && bbox[0] <= w && bbox[1] > 0 && bbox[1] <= h)
+      int w = width();
+      int h = height();
+      if (bbox[0] > 0 && bbox[0] <= w && bbox[1] > 0 && bbox[1] <= h)
       {
-         w=bbox[0];
-         h=bbox[1];
+         w = bbox[0];
+         h = bbox[1];
       }
       QGLFramebufferObject fbo(w, h);
       fbo.bind();
@@ -1322,7 +1423,8 @@ QImage SpatialDataViewImp::getLayerImage(Layer* pLayer, ColorType& transparent, 
       // Initialize the bounding box
       bbox[0] = iWidth;
       bbox[1] = iHeight;
-      bbox[2] = bbox[3] = 0;
+      bbox[2] = 0;
+      bbox[3] = 0;
 
       // Scan the buffer to find the actual bounding box that contains all pixels not equal to the background color
       unsigned int backgroundCpack = clrBackground.red() + (clrBackground.green() << 8) + (clrBackground.blue() << 16);
@@ -1410,7 +1512,8 @@ QImage SpatialDataViewImp::getLayerImage(Layer* pLayer, ColorType& transparent, 
       // Initialize the bounding box
       bbox[0] = iWidth;
       bbox[1] = iHeight;
-      bbox[2] = bbox[3] = 0;
+      bbox[2] = 0;
+      bbox[3] = 0;
 
       // Scan the buffer to find the actual bounding box that contains all pixels not equal to the background color
       unsigned int backgroundCpack = clrBackground.red() + (clrBackground.green() << 8) + (clrBackground.blue() << 16);
@@ -1481,7 +1584,7 @@ QImage SpatialDataViewImp::getLayerImage(Layer* pLayer, ColorType& transparent, 
 
 void SpatialDataViewImp::generateFullImage()
 {
-   RasterLayerImp *pRasterLayer = dynamic_cast<RasterLayerImp*>(getTopMostLayer(RASTER));
+   RasterLayerImp* pRasterLayer = dynamic_cast<RasterLayerImp*>(getTopMostLayer(RASTER));
    if (pRasterLayer)
    {
       pRasterLayer->generateFullImage();
@@ -1801,10 +1904,10 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
    }
 
    bool geoCanExtrapolate = false;
-   RasterElement *pPrimaryRasterElement = mpLayerList->getPrimaryRasterElement();
+   RasterElement* pPrimaryRasterElement = mpLayerList->getPrimaryRasterElement();
    if (pPrimaryRasterElement)
    {
-      GeoreferenceExt1 *pGeoExt1 = dynamic_cast<GeoreferenceExt1*>(pPrimaryRasterElement->getGeoreferencePlugin());
+      GeoreferenceExt1* pGeoExt1 = dynamic_cast<GeoreferenceExt1*>(pPrimaryRasterElement->getGeoreferencePlugin());
       if (pGeoExt1 != NULL)
       {
          geoCanExtrapolate = pGeoExt1->canExtrapolate();
@@ -1850,7 +1953,7 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
                DataElement* pElement = pLayer->getDataElement();
                if (pElement != NULL)
                {
-                  RasterElement *pRaster = dynamic_cast<RasterElement*>(pElement);
+                  RasterElement* pRaster = dynamic_cast<RasterElement*>(pElement);
                   if (pRaster != NULL)
                   {
                      // Get the original pixel coordinates
@@ -1895,7 +1998,8 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
                               if (pTerrain != NULL)
                               {
                                  // Do not need a valid band for elevation information
-                                 double dValue = pTerrain->getPixelValue(columnDim, rowDim, DimensionDescriptor(), eComponent);
+                                 double dValue = pTerrain->getPixelValue(columnDim, rowDim, DimensionDescriptor(),
+                                    eComponent);
 
                                  const Units* pElevationUnits = NULL;
 
@@ -1960,7 +2064,8 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
                                     RasterElement* pDisplayedRaster = pRasterLayer->getDisplayedRasterElement(RED);
                                     if (pDisplayedRaster != NULL)
                                     {
-                                       dRedValue = pDisplayedRaster->getPixelValue(columnDim, rowDim, redBand, eComponent);
+                                       dRedValue = pDisplayedRaster->getPixelValue(columnDim, rowDim, redBand,
+                                          eComponent);
                                     }
 
                                     // Multiply the value by the units scale factor
@@ -1982,7 +2087,8 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
                                     RasterElement* pDisplayedRaster = pRasterLayer->getDisplayedRasterElement(GREEN);
                                     if (pDisplayedRaster != NULL)
                                     {
-                                       dGreenValue = pDisplayedRaster->getPixelValue(columnDim, rowDim, greenBand, eComponent);
+                                       dGreenValue = pDisplayedRaster->getPixelValue(columnDim, rowDim, greenBand,
+                                          eComponent);
                                     }
 
                                     // Multiply the value by the units scale factor
@@ -2004,7 +2110,8 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
                                     RasterElement* pDisplayedRaster = pRasterLayer->getDisplayedRasterElement(BLUE);
                                     if (pDisplayedRaster != NULL)
                                     {
-                                       dBlueValue = pDisplayedRaster->getPixelValue(columnDim, rowDim, blueBand, eComponent);
+                                       dBlueValue = pDisplayedRaster->getPixelValue(columnDim, rowDim, blueBand,
+                                          eComponent);
                                     }
 
                                     // Multiply the value by the units scale factor
@@ -2032,7 +2139,7 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
                               ComplexComponent eComponent = RasterLayer::getSettingComplexComponent();
                               DimensionDescriptor bandDim;
 
-                              RasterLayer *pRasterLayer = dynamic_cast<RasterLayer*>(pLayer);
+                              RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(pLayer);
                               if (pRasterLayer != NULL)
                               {
                                  eComponent = pRasterLayer->getComplexComponent();
@@ -2045,7 +2152,7 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
                               int numRows = pDescriptor->getRowCount();
                               int numCols = pDescriptor->getColumnCount();
 
-                              std::vector<int> badValues;
+                              vector<int> badValues;
 
                               Statistics* pStatistics = pRaster->getStatistics(bandDim);
                               if (pStatistics != NULL)
@@ -2053,13 +2160,15 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
                                  badValues = pStatistics->getBadValues();
                               }
 
-                              if ((dataCoord.mX >= 0) && (dataCoord.mX < numCols) && (dataCoord.mY >= 0) && (dataCoord.mY < numRows))
+                              if ((dataCoord.mX >= 0) && (dataCoord.mX < numCols) && (dataCoord.mY >= 0) &&
+                                 (dataCoord.mY < numRows))
                               {
                                  DimensionDescriptor column = pDescriptor->getActiveColumn(dataCoord.mX);
                                  DimensionDescriptor row = pDescriptor->getActiveRow(dataCoord.mY);
 
                                  double dValue = pRaster->getPixelValue(column, row, bandDim, eComponent);
-                                 if (std::find(badValues.begin(), badValues.end(), roundDouble(dValue)) == badValues.end())
+                                 if (std::find(badValues.begin(), badValues.end(),
+                                    roundDouble(dValue)) == badValues.end())
                                  {
                                     pBar->setResultValue(strLayerName, dValue, pDescriptor->getUnits());
                                  }
@@ -2090,10 +2199,11 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
 void SpatialDataViewImp::updateExtents()
 {
    vector<Layer*> layers;
-   switch(mPanLimit)
+   switch (mPanLimit)
    {
    case NO_LIMIT:       // fall through
    case MAX_EXTENTS:
+   default:
       layers = getDisplayedLayers();   // get extents from all displayed layers
       break;
 
@@ -2116,7 +2226,10 @@ void SpatialDataViewImp::updateExtents()
    double dMinY = 1e38;
    double dMaxX = -1e38;
    double dMaxY = -1e38;
-   double x1, y1, x4, y4;
+   double x1;
+   double y1;
+   double x4;
+   double y4;
 
    if (layers.size() == 0)
    {
@@ -2126,9 +2239,9 @@ void SpatialDataViewImp::updateExtents()
    vector<Layer*>::iterator it = layers.begin();
    for (; it != layers.end(); ++it)
    {
-      LayerImp *pImp = dynamic_cast<LayerImp*>(*it);
+      LayerImp* pImp = dynamic_cast<LayerImp*>(*it);
       VERIFYNRV(pImp != NULL);
-      if(pImp->getExtents(x1, y1, x4, y4))
+      if (pImp->getExtents(x1, y1, x4, y4))
       {
          dMinX = min(dMinX, x1);
          dMinY = min(dMinY, y1);
@@ -2210,10 +2323,10 @@ void SpatialDataViewImp::drawOrigin()
    qglColor(Qt::white);
    glLineWidth (1.0);
    glBegin(GL_LINES);
-   glVertex2f(  0.0,   0.0);
-   glVertex2f(  0.0, -10.0);
-   glVertex2f(  0.0,   0.0);
-   glVertex2f(-10.0,   0.0);
+   glVertex2f(0.0, 0.0);
+   glVertex2f(0.0, -10.0);
+   glVertex2f(0.0, 0.0);
+   glVertex2f(-10.0, 0.0);
    glEnd();
 }
 
@@ -2249,20 +2362,20 @@ void SpatialDataViewImp::drawAxis(float fX, float fY)
    glBegin(GL_LINES);
 
    // draw the arrow for the x axis
-   glVertex2f( 0.0,  0.0);
-   glVertex2f(15.0 * flippedMultiplier,  0.0);
+   glVertex2f(0.0, 0.0);
+   glVertex2f(15.0 * flippedMultiplier, 0.0);
    glVertex2f(10.0 * flippedMultiplier, -3.0 * flippedMultiplier);
-   glVertex2f(15.0 * flippedMultiplier,  0.0);
-   glVertex2f(10.0 * flippedMultiplier,  3.0 * flippedMultiplier);
-   glVertex2f(15.0 * flippedMultiplier,  0.0);
+   glVertex2f(15.0 * flippedMultiplier, 0.0);
+   glVertex2f(10.0 * flippedMultiplier, 3.0 * flippedMultiplier);
+   glVertex2f(15.0 * flippedMultiplier, 0.0);
 
    // draw an arrow for y axis
-   glVertex2f( 0.0,  0.0);
-   glVertex2f( 0.0, 15.0);
+   glVertex2f(0.0, 0.0);
+   glVertex2f(0.0, 15.0);
    glVertex2f(-3.0, 10.0);
-   glVertex2f( 0.0, 15.0);
-   glVertex2f( 3.0, 10.0);
-   glVertex2f( 0.0, 15.0);
+   glVertex2f(0.0, 15.0);
+   glVertex2f(3.0, 10.0);
+   glVertex2f(0.0, 15.0);
    glEnd();
 
    // Draw the X and Y labels
@@ -2398,15 +2511,15 @@ void SpatialDataViewImp::toolTipEvent(QHelpEvent* pEvent)
       return;
    }
 
-   LayerList *pLayerList = getLayerList();
+   LayerList* pLayerList = getLayerList();
    VERIFYNRV(pLayerList != NULL);
 
-   RasterElement *pRaster = pLayerList->getPrimaryRasterElement();
+   RasterElement* pRaster = pLayerList->getPrimaryRasterElement();
    if (pRaster != NULL && pRaster->isGeoreferenced())
    {
       LocationType dataCoord(dX, dY);
-      
-      Layer *pLayer = pLayerList->getLayer(RASTER, pRaster);
+
+      Layer* pLayer = pLayerList->getLayer(RASTER, pRaster);
       if (pLayer != NULL)
       {
          pLayer->translateWorldToData(dX, dY, dataCoord.mX, dataCoord.mY);
@@ -2414,7 +2527,7 @@ void SpatialDataViewImp::toolTipEvent(QHelpEvent* pEvent)
 
       GeocoordType geocoordType = LatLonLayer::getSettingGeocoordType();
       DmsFormatType dmsFormat = LatLonLayer::getSettingFormat();
-      LatLonLayer *pLatLonLayer = dynamic_cast<LatLonLayer*>(pLayerList->getLayer(LAT_LONG, pRaster));
+      LatLonLayer* pLatLonLayer = dynamic_cast<LatLonLayer*>(pLayerList->getLayer(LAT_LONG, pRaster));
       if (pLatLonLayer != NULL)
       {
          geocoordType = pLatLonLayer->getGeocoordType();
@@ -2494,221 +2607,31 @@ void SpatialDataViewImp::keyPressEvent(QKeyEvent* pEvent)
    {
       PerspectiveViewImp::keyPressEvent(pEvent);
 
-      RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(getTopMostLayer(RASTER));
-      RasterChannelType colorToChange = BLUE;
-
-      switch (pEvent->key())
+      if (pEvent->key() == Qt::Key_Delete)
       {
-         case Qt::Key_R:
-            colorToChange = RED;
-            // Intentional fall through to set the displayed bands
-
-         case Qt::Key_G:
-            if (colorToChange == BLUE)
-            {
-               colorToChange = GREEN;
-            }
-            // Intentional fall through to set the displayed bands
-
-         case Qt::Key_X:
-            if (colorToChange == BLUE)
-            {
-               colorToChange = GRAY;
-            }
-            // Intentional fall through to set the displayed bands
-
-         case Qt::Key_B:
-            if (pRasterLayer != NULL)
-            {
-               if (sKeyboardNumber > 0)
-               {
-                  sKeyboardNumber--;
-               }
-
-               DataElement* pElement = pRasterLayer->getDataElement();
-               if (pElement != NULL)
-               {
-                  const RasterDataDescriptor* pDescriptor =
-                     dynamic_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor());
-                  if (pDescriptor != NULL)
-                  {
-                     const vector<DimensionDescriptor>& activeBands = pDescriptor->getBands();
-                     for (unsigned int i = 0; i < activeBands.size(); ++i)
-                     {
-                        DimensionDescriptor bandDim = activeBands[i];
-                        if (bandDim.isValid())
-                        {
-                           unsigned int currentNumber = bandDim.getOriginalNumber();
-                           if (currentNumber == sKeyboardNumber)
-                           {
-                              pRasterLayer->setDisplayedBand(colorToChange, bandDim);
-                              break;
-                           }
-                        }
-                     }
-                  }
-               }
-            }
-
-            sKeyboardNumber = 0;
-            break;
-
-         case Qt::Key_T:
-            if (pRasterLayer != NULL)
-            {
-               pRasterLayer->setDisplayMode(RGB_MODE);
-            }
-
-            sKeyboardNumber = 0;
-            break;
-
-         case Qt::Key_O:
-            if (pRasterLayer != NULL)
-            {
-               pRasterLayer->setDisplayMode(GRAYSCALE_MODE);
-            }
-
-            sKeyboardNumber = 0;
-            break;
-
-         case Qt::Key_PageUp:
-            if (pRasterLayer != NULL)
-            {
-               DisplayMode eDisplayMode = pRasterLayer->getDisplayMode();
-               if (eDisplayMode == GRAYSCALE_MODE)
-               {
-                  DataElement* pElement = pRasterLayer->getDataElement();
-                  if (pElement != NULL)
-                  {
-                     const RasterDataDescriptor* pDescriptor =
-                        dynamic_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor());
-                     if (pDescriptor != NULL)
-                     {
-                        DimensionDescriptor currentBand = pRasterLayer->getDisplayedBand(GRAY);
-                        DimensionDescriptor newBand;
-
-                        const vector<DimensionDescriptor>& activeBands = pDescriptor->getBands();
-                        if (currentBand.isValid() == false)
-                        {
-                           if (activeBands.empty() == false)
-                           {
-                              newBand = activeBands.front();
-                           }
-                        }
-                        else
-                        {
-                           bool bFound = false;
-
-                           vector<DimensionDescriptor>::const_iterator iter;
-                           for (iter = activeBands.begin(); iter != activeBands.end(); ++iter)
-                           {
-                              DimensionDescriptor activeBand = *iter;
-                              if (bFound == true)
-                              {
-                                 newBand = activeBand;
-                                 break;
-                              }
-
-                              if (activeBand == currentBand)
-                              {
-                                 bFound = true;
-                              }
-                           }
-                        }
-
-                        pRasterLayer->setDisplayedBand(GRAY, newBand);
-                     }
-                  }
-               }
-            }
-
-            break;
-
-         case Qt::Key_PageDown:
-            if (pRasterLayer != NULL)
-            {
-               DisplayMode eDisplayMode = pRasterLayer->getDisplayMode();
-               if (eDisplayMode == GRAYSCALE_MODE)
-               {
-                  DataElement* pElement = pRasterLayer->getDataElement();
-                  if (pElement != NULL)
-                  {
-                     const RasterDataDescriptor* pDescriptor =
-                        dynamic_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor());
-                     if (pDescriptor != NULL)
-                     {
-                        DimensionDescriptor currentBand = pRasterLayer->getDisplayedBand(GRAY);
-                        DimensionDescriptor newBand;
-
-                        const vector<DimensionDescriptor>& activeBands = pDescriptor->getBands();
-                        if (currentBand.isValid() == false)
-                        {
-                           if (activeBands.empty() == false)
-                           {
-                              newBand = activeBands.back();
-                           }
-                        }
-                        else
-                        {
-                           bool bFound = false;
-
-                           vector<DimensionDescriptor>::const_reverse_iterator iter;
-                           for (iter = activeBands.rbegin(); iter != activeBands.rend(); ++iter)
-                           {
-                              DimensionDescriptor activeBand = *iter;
-                              if (bFound == true)
-                              {
-                                 newBand = activeBand;
-                                 break;
-                              }
-
-                              if (activeBand == currentBand)
-                              {
-                                 bFound = true;
-                              }
-                           }
-                        }
-
-                        pRasterLayer->setDisplayedBand(GRAY, newBand);
-                     }
-                  }
-               }
-            }
-
-            break;
-
-         case Qt::Key_Delete:
+         const MouseMode* pMouseMode = getCurrentMouseMode();
+         if (pMouseMode != NULL)
          {
-            const MouseMode* pMouseMode = getCurrentMouseMode();
-            if (pMouseMode != NULL)
+            GraphicLayerImp* pLayer = NULL;
+
+            string mouseMode = "";
+            pMouseMode->getName(mouseMode);
+            if (mouseMode == "LayerMode")
             {
-               GraphicLayerImp* pLayer = NULL;
-
-               string mouseMode = "";
-               pMouseMode->getName(mouseMode);
-               if (mouseMode == "LayerMode")
-               {
-                  pLayer = dynamic_cast<GraphicLayerImp*>(getActiveLayer());
-               }
-               else if (mouseMode == "MeasurementMode")
-               {
-                  pLayer = dynamic_cast<GraphicLayerImp*> (getMeasurementsLayer());
-               }
-
-               if (pLayer != NULL)
-               {
-                  pLayer->deleteSelectedObjects();
-               }
+               pLayer = dynamic_cast<GraphicLayerImp*>(getActiveLayer());
+            }
+            else if (mouseMode == "MeasurementMode")
+            {
+               pLayer = dynamic_cast<GraphicLayerImp*> (getMeasurementsLayer());
             }
 
-            break;
+            if (pLayer != NULL)
+            {
+               pLayer->deleteSelectedObjects();
+               refresh();
+            }
          }
-
-         default:
-            return;
       }
-
-      refresh();
    }
 }
 
@@ -2748,7 +2671,7 @@ void SpatialDataViewImp::keyPan()
       distance = SpatialDataView::getSettingSlowPanSpeed();
    }
 
-   switch(mPanKey)
+   switch (mPanKey)
    {
       case Qt::Key_Up:
          ViewImp::pan(QPoint(0, 0), QPoint(0, distance));
@@ -2980,7 +2903,7 @@ void SpatialDataViewImp::setInsetPoint(const LocationType &worldCoord)
    if (mbLinking == false)
    {
       PerspectiveViewImp::setInsetPoint(worldCoord);
-      LayerList *pLayerList = getLayerList();
+      LayerList* pLayerList = getLayerList();
       VERIFYNRV(pLayerList != NULL);
       RasterElement* pRaster = pLayerList->getPrimaryRasterElement();
       if (pRaster != NULL && pRaster->isGeoreferenced())
@@ -2999,7 +2922,7 @@ void SpatialDataViewImp::setInsetPointGeo(const LocationType &geoCoord)
    if (mbLinking == false)
    {
       LocationType worldCoord;
-      LayerList *pLayerList = getLayerList();
+      LayerList* pLayerList = getLayerList();
       VERIFYNRV(pLayerList != NULL);
       RasterElement* pRaster = pLayerList->getPrimaryRasterElement();
       if (pRaster != NULL && pRaster->isGeoreferenced())
@@ -3017,15 +2940,15 @@ bool SpatialDataViewImp::canLinkWithView(View *pView, LinkType type)
 {
    if (type == GEOCOORD_LINK)
    {
-      SpatialDataViewImp *pSpatial = dynamic_cast<SpatialDataViewImp*>(pView);
+      SpatialDataViewImp* pSpatial = dynamic_cast<SpatialDataViewImp*>(pView);
       if (pSpatial != NULL)
       {
-         LayerList *pLayerList = getLayerList();
-         LayerList *pOtherLayerList = pSpatial->getLayerList();
+         LayerList* pLayerList = getLayerList();
+         LayerList* pOtherLayerList = pSpatial->getLayerList();
          VERIFY(pOtherLayerList != NULL && pLayerList != NULL);
 
-         RasterElement *pRaster = pLayerList->getPrimaryRasterElement();
-         RasterElement *pOtherRaster = pLayerList->getPrimaryRasterElement();
+         RasterElement* pRaster = pLayerList->getPrimaryRasterElement();
+         RasterElement* pOtherRaster = pLayerList->getPrimaryRasterElement();
 
          if (pRaster != NULL && pRaster->isGeoreferenced() && 
             pOtherRaster != NULL && pOtherRaster->isGeoreferenced())
@@ -3101,7 +3024,10 @@ double SpatialDataViewImp::limitZoomPercentage(double dPercent)
    double newPixSize = dPercent * 0.01;
 
    // get scene size
-   double minX, minY, maxX, maxY;
+   double minX;
+   double minY;
+   double maxX;
+   double maxY;
    getExtents(minX, minY, maxX, maxY);   // this will depend on the current pan limit
    double sceneWidth = abs(maxX-minX+1);
    double sceneHeight = abs(maxY-minY+1);
@@ -3172,7 +3098,8 @@ LocationType SpatialDataViewImp::limitPanCenter(LocationType center)
       return center;
    }
 
-   LocationType mins, maxs;
+   LocationType mins;
+   LocationType maxs;
    getExtents(mins.mX, mins.mY, maxs.mX, maxs.mY);
 
    center.clampMinimum(mins);
@@ -3606,7 +3533,7 @@ void SpatialDataViewImp::setOrigin(QAction* pAction)
          refresh();
       }
    }
-   else if (pAction = mpOriginUL)
+   else if (pAction == mpOriginUL)
    {
       if (getDataOrigin() != UPPER_LEFT)
       {
@@ -3713,11 +3640,11 @@ bool SpatialDataViewImp::toXml(XMLWriter* pXml) const
    pXml->addAttr("primary", mpLayerList->getPrimaryRasterElement()->getId());
    vector<Layer*> layers;
    mpLayerList->getLayers(layers);
-   for(vector<Layer*>::const_iterator lit = layers.begin(); lit != layers.end(); ++lit)
+   for (vector<Layer*>::const_iterator lit = layers.begin(); lit != layers.end(); ++lit)
    {
       pXml->pushAddPoint(pXml->addElement("layer"));
       pXml->addAttr("id", (*lit)->getId());
-      if(*lit == mpPrimaryRasterLayer.get())
+      if (*lit == mpPrimaryRasterLayer.get())
       {
          pXml->addAttr("primary", true);
       }
@@ -3739,21 +3666,15 @@ bool SpatialDataViewImp::fromXml(DOMNode* pDocument, unsigned int version)
       return false;
    }
 
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
-   setTextureMode(StringUtilities::fromXmlString<TextureMode>(
-      A(pElem->getAttribute(X("textureMode")))));
-   mShowMeasurements = StringUtilities::fromXmlString<bool>(
-      A(pElem->getAttribute(X("showMeasurements"))));
-   mPanKey = StringUtilities::fromXmlString<int>(
-      A(pElem->getAttribute(X("panKey"))));
-   setPanLimit(StringUtilities::fromXmlString<PanLimitType>(
-      A(pElem->getAttribute(X("panLimit")))));
-   setMinimumZoom(StringUtilities::fromXmlString<double>(
-      A(pElem->getAttribute(X("minZoom")))));
-   setMaximumZoom(StringUtilities::fromXmlString<double>(
-      A(pElem->getAttribute(X("maxZoom")))));
+   DOMElement* pElem = static_cast<DOMElement*>(pDocument);
+   setTextureMode(StringUtilities::fromXmlString<TextureMode>(A(pElem->getAttribute(X("textureMode")))));
+   mShowMeasurements = StringUtilities::fromXmlString<bool>(A(pElem->getAttribute(X("showMeasurements"))));
+   mPanKey = StringUtilities::fromXmlString<int>(A(pElem->getAttribute(X("panKey"))));
+   setPanLimit(StringUtilities::fromXmlString<PanLimitType>(A(pElem->getAttribute(X("panLimit")))));
+   setMinimumZoom(StringUtilities::fromXmlString<double>(A(pElem->getAttribute(X("minZoom")))));
+   setMaximumZoom(StringUtilities::fromXmlString<double>(A(pElem->getAttribute(X("maxZoom")))));
 
-   if(pElem->hasAttribute(X("activeLayerId")))
+   if (pElem->hasAttribute(X("activeLayerId")))
    {
       mpActiveLayer.reset(dynamic_cast<Layer*>(
          SessionManagerImp::instance()->getSessionItem(A(pElem->getAttribute(X("activeLayerId"))))));
@@ -3763,16 +3684,17 @@ bool SpatialDataViewImp::fromXml(DOMNode* pDocument, unsigned int version)
       mpActiveLayer.reset(NULL);
    }
 
-   if(pElem->hasAttribute(X("drawLayerId")))
+   if (pElem->hasAttribute(X("drawLayerId")))
    {
-      mpDrawLayer = dynamic_cast<LayerImp*>(SessionManagerImp::instance()->getSessionItem(A(pElem->getAttribute(X("drawLayerId")))));
+      mpDrawLayer = dynamic_cast<LayerImp*>(SessionManagerImp::instance()->getSessionItem(
+         A(pElem->getAttribute(X("drawLayerId")))));
    }
    else
    {
       mpDrawLayer = NULL;
    }
 
-   if(pElem->hasAttribute(X("measurementLayerId")))
+   if (pElem->hasAttribute(X("measurementLayerId")))
    {
       MeasurementLayerAdapter* pMeasLayer = dynamic_cast<MeasurementLayerAdapter*>(
          SessionManagerImp::instance()->getSessionItem(A(pElem->getAttribute(X("measurementLayerId")))));
@@ -3791,19 +3713,19 @@ bool SpatialDataViewImp::fromXml(DOMNode* pDocument, unsigned int version)
    }
 
    VERIFY(mpLayerList != NULL);
-   mpLayerList->setPrimaryRasterElement(
-      dynamic_cast<RasterElement*>(SessionManagerImp::instance()->getSessionItem(A(pElem->getAttribute(X("primary"))))));
-   for(DOMNode *pNode = pElem->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())
+   mpLayerList->setPrimaryRasterElement(dynamic_cast<RasterElement*>(
+      SessionManagerImp::instance()->getSessionItem(A(pElem->getAttribute(X("primary"))))));
+   for (DOMNode *pNode = pElem->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())
    {
-      if(XMLString::equals(pNode->getNodeName(),X("layer")))
+      if (XMLString::equals(pNode->getNodeName(), X("layer")))
       {
-         DOMElement *pLayerElement = static_cast<DOMElement*>(pNode);
-         Layer *pLayer = dynamic_cast<Layer*>(
+         DOMElement* pLayerElement = static_cast<DOMElement*>(pNode);
+         Layer* pLayer = dynamic_cast<Layer*>(
             SessionManagerImp::instance()->getSessionItem(A(pLayerElement->getAttribute(X("id")))));
-         if(pLayer != NULL)
+         if (pLayer != NULL)
          {
             addLayer(pLayer);
-            if(pLayerElement->hasAttribute(X("primary")))
+            if (pLayerElement->hasAttribute(X("primary")))
             {
                mpPrimaryRasterLayer.reset(dynamic_cast<RasterLayer*>(pLayer));
             }
@@ -3812,4 +3734,232 @@ bool SpatialDataViewImp::fromXml(DOMNode* pDocument, unsigned int version)
    }
 
    return true;
+}
+
+void SpatialDataViewImp::setGrayBand()
+{
+   setBand(GRAY);
+}
+
+void SpatialDataViewImp::setRedBand()
+{
+   setBand(RED);
+}
+
+void SpatialDataViewImp::setGreenBand()
+{
+   setBand(GREEN);
+}
+
+void SpatialDataViewImp::setBlueBand()
+{
+   setBand(BLUE);
+}
+
+void SpatialDataViewImp::setBand(RasterChannelType channel)
+{
+   RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(getTopMostLayer(RASTER));
+   if (pRasterLayer != NULL)
+   {
+      if (sKeyboardNumber > 0)
+      {
+         sKeyboardNumber--;
+      }
+
+      DataElement* pElement = pRasterLayer->getDataElement();
+      if (pElement != NULL)
+      {
+         const RasterDataDescriptor* pDescriptor =
+            dynamic_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor());
+         if (pDescriptor != NULL)
+         {
+            const vector<DimensionDescriptor>& activeBands = pDescriptor->getBands();
+            for (unsigned int i = 0; i < activeBands.size(); ++i)
+            {
+               DimensionDescriptor bandDim = activeBands[i];
+               if (bandDim.isValid())
+               {
+                  unsigned int currentNumber = bandDim.getOriginalNumber();
+                  if (currentNumber == sKeyboardNumber)
+                  {
+                     pRasterLayer->setDisplayedBand(channel, bandDim);
+                     break;
+                  }
+               }
+            }
+         }
+      }
+   }
+
+   sKeyboardNumber = 0;
+}
+
+void SpatialDataViewImp::setGrayscaleMode()
+{
+   RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(getTopMostLayer(RASTER));
+   if (pRasterLayer != NULL)
+   {
+      pRasterLayer->setDisplayMode(GRAYSCALE_MODE);
+   }
+
+   sKeyboardNumber = 0;
+}
+
+void SpatialDataViewImp::setRgbMode()
+{
+   RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(getTopMostLayer(RASTER));
+   if (pRasterLayer != NULL)
+   {
+      pRasterLayer->setDisplayMode(RGB_MODE);
+   }
+
+   sKeyboardNumber = 0;
+}
+
+void SpatialDataViewImp::nextBand()
+{
+   RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(getTopMostLayer(RASTER));
+   if ((pRasterLayer == NULL) || (pRasterLayer->getDisplayMode() == RGB_MODE))
+   {
+      return;
+   }
+
+   DataElement* pElement = pRasterLayer->getDataElement();
+   if (pElement == NULL)
+   {
+      return;
+   }
+
+   const RasterDataDescriptor* pDescriptor = dynamic_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor());
+   if (pDescriptor == NULL)
+   {
+      return;
+   }
+
+   DimensionDescriptor currentBand = pRasterLayer->getDisplayedBand(GRAY);
+   DimensionDescriptor newBand;
+
+   const vector<DimensionDescriptor>& activeBands = pDescriptor->getBands();
+   if (currentBand.isValid() == false)
+   {
+      if (activeBands.empty() == false)
+      {
+         newBand = activeBands.front();
+      }
+   }
+   else
+   {
+      bool bFound = false;
+      for (vector<DimensionDescriptor>::const_iterator iter = activeBands.begin(); iter != activeBands.end(); ++iter)
+      {
+         DimensionDescriptor activeBand = *iter;
+         if (bFound == true)
+         {
+            newBand = activeBand;
+            break;
+         }
+
+         if (activeBand == currentBand)
+         {
+            bFound = true;
+         }
+      }
+   }
+
+   pRasterLayer->setDisplayedBand(GRAY, newBand);
+}
+
+void SpatialDataViewImp::previousBand()
+{
+   RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(getTopMostLayer(RASTER));
+   if ((pRasterLayer == NULL) || (pRasterLayer->getDisplayMode() == RGB_MODE))
+   {
+      return;
+   }
+
+   DataElement* pElement = pRasterLayer->getDataElement();
+   if (pElement == NULL)
+   {
+      return;
+   }
+
+   const RasterDataDescriptor* pDescriptor = dynamic_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor());
+   if (pDescriptor == NULL)
+   {
+      return;
+   }
+
+   DimensionDescriptor currentBand = pRasterLayer->getDisplayedBand(GRAY);
+   DimensionDescriptor newBand;
+
+   const vector<DimensionDescriptor>& activeBands = pDescriptor->getBands();
+   if (currentBand.isValid() == false)
+   {
+      if (activeBands.empty() == false)
+      {
+         newBand = activeBands.back();
+      }
+   }
+   else
+   {
+      bool bFound = false;
+
+      vector<DimensionDescriptor>::const_reverse_iterator iter;
+      for (iter = activeBands.rbegin(); iter != activeBands.rend(); ++iter)
+      {
+         DimensionDescriptor activeBand = *iter;
+         if (bFound == true)
+         {
+            newBand = activeBand;
+            break;
+         }
+
+         if (activeBand == currentBand)
+         {
+            bFound = true;
+         }
+      }
+   }
+
+   pRasterLayer->setDisplayedBand(GRAY, newBand);
+}
+
+bool SpatialDataViewImp::linkView(View *pView, LinkType type)
+{
+   if (type != NO_LINK && getViewLinkType(pView) == NO_LINK)
+   {
+      SpatialDataView* pSourceView = dynamic_cast<SpatialDataView*>(pView);
+      if (pSourceView != NULL)
+      {
+         if (pSourceView->getMaximumZoom() != 0 || pSourceView->getMinimumZoom() != 0 ||
+            pSourceView->getPanLimit() != NO_LIMIT)
+         {
+            int buttonPressed = QMessageBox::information(this, QString::fromStdString(getDisplayName()),
+               "Zoom/Pan limits will be disabled for this " + QString::fromStdString(pSourceView->getDisplayName()) +
+               " view. Do you want to continue linking the views?", QMessageBox::Ok, QMessageBox::Cancel);
+
+            if (buttonPressed == QMessageBox::Cancel)
+            {
+               return false;
+            }
+         }
+
+         pSourceView->setMaximumZoom(0);
+         pSourceView->setMinimumZoom(0);
+         pSourceView->setPanLimit(NO_LIMIT);
+      }
+   }
+
+   return ViewImp::linkView(pView, type);
+}
+
+void SpatialDataViewImp::setAoiMode()
+{
+   Service<DesktopServices> pDesktop;
+
+   AoiToolBar* pToolbar = static_cast<AoiToolBar*>(pDesktop->getWindow("AOI", TOOLBAR));
+   if (pToolbar != NULL)
+   {
+      pToolbar->setSelectionTool(pToolbar->getSelectionTool(), DRAW);
+   }
 }

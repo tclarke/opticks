@@ -78,21 +78,23 @@ GraphicLayerImp::GraphicLayerImp(const string& id, const string& layerName, Data
    LayerImp(id, layerName, pElement),
    mpExplorer(Service<SessionExplorer>().get(), SIGNAL_NAME(SessionExplorer, AboutToShowSessionItemContextMenu),
       Slot(this, &GraphicLayerImp::updateContextMenu)),
-   mHandleSize (4.0),
+   mbHideSelectionBox(false),
+   mShowLabels(false),
+   mLayerLocked(false),
    mProcessingMouseEvent(false),
-   mGroupHasLayerSet(false), 
+   mGroupHasLayerSet(false),
    mpInsertingObject(NULL),
    mCurrentType(MOVE_OBJECT),
    mpUndoLock(NULL),
-   mLayerLocked(false)
+   mHandleSize(4.0)
 {
    addAcceptableGraphicType(MOVE_OBJECT);
    addAcceptableGraphicType(ROTATE_OBJECT);
-   
-   GraphicElementImp *pGraphicElement = dynamic_cast<GraphicElementImp*>(pElement);
+
+   GraphicElementImp* pGraphicElement = dynamic_cast<GraphicElementImp*>(pElement);
    if (pGraphicElement != NULL)
    {
-      GraphicGroupImp *pGroup = dynamic_cast<GraphicGroupImp*>(pGraphicElement->getGroup());
+      GraphicGroupImp* pGroup = dynamic_cast<GraphicGroupImp*>(pGraphicElement->getGroup());
       if (pGroup != NULL)
       {
          pGroup->addProperty("PaperSize");
@@ -100,8 +102,6 @@ GraphicLayerImp::GraphicLayerImp(const string& id, const string& layerName, Data
          VERIFYNR(connect(pGroup, SIGNAL(modified()), this, SIGNAL(modified())));
       }
    }
-   mbHideSelectionBox = false;
-   mShowLabels = false;
 }
 
 GraphicLayerImp::~GraphicLayerImp()
@@ -111,8 +111,8 @@ GraphicLayerImp::~GraphicLayerImp()
 
 const string& GraphicLayerImp::getObjectType() const
 {
-   static string type("GraphicLayerImp");
-   return type;
+   static string sType("GraphicLayerImp");
+   return sType;
 }
 
 bool GraphicLayerImp::isKindOf(const string& className) const
@@ -150,7 +150,7 @@ LayerType GraphicLayerImp::getLayerType() const
 void GraphicLayerImp::setPaperSize(LocationType size)
 {
    PaperSizeProperty prop(size);
-   GraphicGroupImp *pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
+   GraphicGroupImp* pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
    if (pGroup != NULL)
    {
       pGroup->setProperty(&prop);
@@ -160,10 +160,10 @@ void GraphicLayerImp::setPaperSize(LocationType size)
 LocationType GraphicLayerImp::getPaperSize() const
 {
    LocationType size(11.0, 8.5);
-   GraphicGroupImp *pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
+   GraphicGroupImp* pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
    if (pGroup != NULL)
    {
-      PaperSizeProperty *pProp = static_cast<PaperSizeProperty*>(pGroup->getProperty("PaperSize"));
+      PaperSizeProperty* pProp = static_cast<PaperSizeProperty*>(pGroup->getProperty("PaperSize"));
       if (pProp != NULL)
       {
          size = pProp->getSize();
@@ -185,14 +185,14 @@ vector<ColorType> GraphicLayerImp::getColors() const
 
 void GraphicLayerImp::drawGroup()
 {
-   PerspectiveView *pView = dynamic_cast<PerspectiveView*>(getView());
+   PerspectiveView* pView = dynamic_cast<PerspectiveView*>(getView());
    double zoomPercent = 100;
    if (pView != NULL)
    {
       zoomPercent = pView->getZoomPercentage();
    }
 
-   GraphicGroupImp *pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
+   GraphicGroupImp* pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
    if (pGroup != NULL)
    {
       pGroup->draw(zoomPercent/100);
@@ -201,10 +201,10 @@ void GraphicLayerImp::drawGroup()
 
 void GraphicLayerImp::draw()
 {
-   std::vector<LocationType> selectionNodes;
+   vector<LocationType> selectionNodes;
    bool bSuccess = true;
 
-   GraphicElement *pElement = dynamic_cast<GraphicElement*>(getDataElement());
+   GraphicElement* pElement = dynamic_cast<GraphicElement*>(getDataElement());
    if (pElement != NULL)
    {
       if (!pElement->getInteractive())
@@ -216,24 +216,25 @@ void GraphicLayerImp::draw()
    UndoLock lock(getView());
    drawGroup();
 
-   LocationType p1(1e30, 1e30), p2(-1e30, -1e30), p3;
+   LocationType p1(1e30, 1e30);
+   LocationType p2(-1e30, -1e30);
+   LocationType p3;
    bool handlesFound = false;
    unsigned int i = 0;
 
-   for (std::list<GraphicObject*>::iterator it = mSelectedObjects.begin(); 
-      bSuccess && it != mSelectedObjects.end(); it++)
+   for (list<GraphicObject*>::iterator it = mSelectedObjects.begin(); bSuccess && it != mSelectedObjects.end(); ++it)
    {
-      GraphicObject *pObj = *it;
-      GraphicObjectImp *pImpl = dynamic_cast<GraphicObjectImp*>(pObj);
+      GraphicObject* pObj = *it;
+      GraphicObjectImp* pImpl = dynamic_cast<GraphicObjectImp*>(pObj);
       VERIFYNRV(pImpl != NULL);
 
       selectionNodes = pImpl->getHandles();
       /*
       try
       {
-         selectionNodes = pImpl->getHandles ();
+         selectionNodes = pImpl->getHandles();
       }
-      catch(...)
+      catch (...)
       {
          // this stuff will move to a slot method that is connected to a Group's signal stating that something went wrong
          mpGroup->removeObject(pObj, false);
@@ -252,35 +253,44 @@ void GraphicLayerImp::draw()
          sHasMoved = false;
       }
       */
-      
-      for (i = 0; bSuccess && i < selectionNodes.size(); i++)
+
+      for (i = 0; bSuccess && i < selectionNodes.size(); ++i)
       {
          if (selectionNodes[i].mX < p1.mX)
+         {
             p1.mX = selectionNodes[i].mX;
+         }
+
          if (selectionNodes[i].mX > p2.mX)
+         {
             p2.mX = selectionNodes[i].mX;
-         
+         }
+
          if (selectionNodes[i].mY < p1.mY)
+         {
             p1.mY = selectionNodes[i].mY;
+         }
+
          if (selectionNodes[i].mY > p2.mY)
+         {
             p2.mY = selectionNodes[i].mY;
-         
+         }
+
          handlesFound = true;
       }
    }
 
    if (handlesFound && bSuccess && !mbHideSelectionBox)
    {
-      for (std::list<GraphicObject*>::iterator it = mSelectedObjects.begin(); 
-         it != mSelectedObjects.end(); it++)
+      for (list<GraphicObject*>::iterator it = mSelectedObjects.begin(); it != mSelectedObjects.end(); ++it)
       {
-         GraphicObjectImp *pObj = dynamic_cast<GraphicObjectImp*>(*it);
+         GraphicObjectImp* pObj = dynamic_cast<GraphicObjectImp*>(*it);
          pObj->rotateViewMatrix();
 
          selectionNodes = pObj->getHandles();
          drawSelectionRectangle (pObj->getLlCorner(), pObj->getUrCorner());
          bool hasCornerHandles = pObj->hasCornerHandles();
-         for (i = 0; i < selectionNodes.size(); i++)
+         for (i = 0; i < selectionNodes.size(); ++i)
          {
             bool bSelectionHandle = false;
             if (i > 7 || !hasCornerHandles)
@@ -331,13 +341,12 @@ bool GraphicLayerImp::removeObject(GraphicObject* pObject, bool bDelete)
       return false;
    }
 
-   bool bSelected = false;
-   bSelected = isObjectSelected(pObject);
+   bool bSelected = isObjectSelected(pObject);
    if (bSelected == true)
    {
       deselectObject(pObject);
    }
-   GraphicObjectImp *pObjImp = dynamic_cast<GraphicObjectImp*>(pObject);
+   GraphicObjectImp* pObjImp = dynamic_cast<GraphicObjectImp*>(pObject);
    if (pObjImp == mpInsertingObject)
    {
       mpInsertingObject = NULL;
@@ -366,8 +375,8 @@ bool GraphicLayerImp::hasObject(GraphicObject* pObject) const
 
 list<GraphicObject*> GraphicLayerImp::getObjects() const
 {
-   GraphicGroup *pGroup = getGroup();
-   if(pGroup == NULL)
+   GraphicGroup* pGroup = getGroup();
+   if (pGroup == NULL)
    {
       return list<GraphicObject*>();
    }
@@ -383,8 +392,7 @@ list<GraphicObject*> GraphicLayerImp::getObjects(const GraphicObjectType& object
    list<GraphicObject*>::const_iterator iter = allObjects.begin();
    while (iter != allObjects.end())
    {
-      GraphicObject* pObject = NULL;
-      pObject = *iter;
+      GraphicObject* pObject = *iter;
       if (pObject != NULL)
       {
          if (pObject->getGraphicObjectType() == objectType)
@@ -411,12 +419,12 @@ unsigned int GraphicLayerImp::getNumObjects(const GraphicObjectType& objectType)
    return objects.size();
 }
 
-GraphicObject* GraphicLayerImp::getObjectByName(const std::string &name) const
+GraphicObject* GraphicLayerImp::getObjectByName(const string& name) const
 {
    const list<GraphicObject*>& allObjects = getObjects();
 
    list<GraphicObject*>::const_iterator iter;
-   for(iter = allObjects.begin(); iter != allObjects.end(); ++iter)
+   for (iter = allObjects.begin(); iter != allObjects.end(); ++iter)
    {
       GraphicObject* pObject = *iter;
       if (pObject != NULL)
@@ -439,8 +447,7 @@ bool GraphicLayerImp::selectObject(GraphicObject* pObject)
       return false;
    }
 
-   std::list<GraphicObject*>::reverse_iterator it;
-   it = std::find(mSelectedObjects.rbegin(), mSelectedObjects.rend(), pObject);
+   list<GraphicObject*>::reverse_iterator it = find(mSelectedObjects.rbegin(), mSelectedObjects.rend(), pObject);
    if (it == mSelectedObjects.rend())
    {
       mSelectedObjects.push_back(pObject);
@@ -455,13 +462,10 @@ bool GraphicLayerImp::selectObject(GraphicObject* pObject)
 
 void GraphicLayerImp::selectAllObjects()
 {
-   std::list<GraphicObject*> objects = getObjects();
-
-   std::list<GraphicObject*>::iterator iter;
-   for (iter = objects.begin(); iter != objects.end(); iter++)
+   list<GraphicObject*> objects = getObjects();
+   for (list<GraphicObject*>::iterator iter = objects.begin(); iter != objects.end(); ++iter)
    {
-      GraphicObject* pObject = NULL;
-      pObject = (*iter);
+      GraphicObject* pObject = *iter;
       if (pObject != NULL)
       {
          selectObject(pObject);
@@ -476,8 +480,7 @@ bool GraphicLayerImp::isObjectSelected(GraphicObject* pObject) const
       return false;
    }
 
-   std::list<GraphicObject*>::const_iterator it;
-   it = std::find(mSelectedObjects.begin(), mSelectedObjects.end(), pObject);
+   list<GraphicObject*>::const_iterator it = find(mSelectedObjects.begin(), mSelectedObjects.end(), pObject);
    if (it != mSelectedObjects.end())
    {
       return true;
@@ -498,21 +501,20 @@ void GraphicLayerImp::getSelectedObjectsImpl(list<GraphicObject*>& selectedObjec
 }
 
 void GraphicLayerImp::getSelectedObjects(const GraphicObjectType& objectType,
-                                            list<GraphicObject*>& selectedObjects) const
+                                         list<GraphicObject*>& selectedObjects) const
 {
    getSelectedObjectsImpl(objectType, selectedObjects);
 }
 
 void GraphicLayerImp::getSelectedObjectsImpl(const GraphicObjectType& objectType,
-                                                list<GraphicObject*>& selectedObjects) const
+                                             list<GraphicObject*>& selectedObjects) const
 {
    selectedObjects.clear();
 
    list<GraphicObject*>::const_iterator iter = mSelectedObjects.begin();
    while (iter != mSelectedObjects.end())
    {
-      GraphicObject* pObject = NULL;
-      pObject = *iter;
+      GraphicObject* pObject = *iter;
       if (pObject != NULL)
       {
          if (pObject->getGraphicObjectType() == objectType)
@@ -564,8 +566,7 @@ bool GraphicLayerImp::deselectObject(GraphicObject* pObject)
       return false;
    }
 
-   std::list<GraphicObject*>::iterator it;
-   it = std::find(mSelectedObjects.begin(), mSelectedObjects.end(), pObject);
+   list<GraphicObject*>::iterator it = find(mSelectedObjects.begin(), mSelectedObjects.end(), pObject);
    if (it != mSelectedObjects.end())
    {
       mSelectedObjects.erase(it);
@@ -593,22 +594,19 @@ void GraphicLayerImp::deleteSelectedObjects()
 {
    if (!mLayerLocked)
    {
-      std::list<GraphicObject*> objects = getObjects();
+      list<GraphicObject*> objects = getObjects();
 
       UndoGroup group(getView(), "Delete Selected Objects");
 
-      std::list<GraphicObject*>::iterator iter;
-      for (iter = objects.begin(); iter != objects.end(); iter++)
+      for (list<GraphicObject*>::iterator iter = objects.begin(); iter != objects.end(); ++iter)
       {
-         GraphicObject* pObject = NULL;
-         pObject = (*iter);
+         GraphicObject* pObject = *iter;
          if (pObject == NULL)
          {
             continue;
          }
 
-         bool bSelected = false;
-         bSelected = isObjectSelected(pObject);
+         bool bSelected = isObjectSelected(pObject);
          if (bSelected == true)
          {
             GlContextSave contextSave;
@@ -616,8 +614,7 @@ void GraphicLayerImp::deleteSelectedObjects()
          }
       }
 
-      View* pView = NULL;
-      pView = getView();
+      View* pView = getView();
       if (pView != NULL)
       {
          pView->refresh();
@@ -627,19 +624,19 @@ void GraphicLayerImp::deleteSelectedObjects()
 
 void GraphicLayerImp::clear()
 {
-   if(!mLayerLocked)
+   if (!mLayerLocked)
    {
       UndoGroup group(getView(), "Clear Objects");
-      std::list<GraphicObject*> objects = getObjects();
-      for(std::list<GraphicObject*>::iterator oit = objects.begin(); oit != objects.end(); ++oit)
+      list<GraphicObject*> objects = getObjects();
+      for (list<GraphicObject*>::iterator oit = objects.begin(); oit != objects.end(); ++oit)
       {
-         if(*oit != NULL)
+         if (*oit != NULL)
          {
             removeObject(*oit, true);
          }
       }
-      View* pView = NULL;
-      pView = getView();
+
+      View* pView = getView();
       if (pView != NULL)
       {
          pView->refresh();
@@ -672,23 +669,21 @@ bool GraphicLayerImp::fromXml(DOMNode* pDocument, unsigned int version)
       return false;
    }
    DOMElement* pElement = static_cast<DOMElement*> (pDocument);
-   mShowLabels = StringUtilities::fromXmlString<bool>(
-      A(pElement->getAttribute(X("showLabels"))));
-   setLayerLocked(StringUtilities::fromXmlString<bool>(
-      A(pElement->getAttribute(X("layerLocked")))));
+   mShowLabels = StringUtilities::fromXmlString<bool>(A(pElement->getAttribute(X("showLabels"))));
+   setLayerLocked(StringUtilities::fromXmlString<bool>(A(pElement->getAttribute(X("layerLocked")))));
    initializeFromGroup();
 
    return true;
 }
 
-void GraphicLayerImp::drawSelectionRectangle (LocationType ll, LocationType ur) const
+void GraphicLayerImp::drawSelectionRectangle(LocationType ll, LocationType ur) const
 {
    glEnable(GL_LINE_STIPPLE);
 
    glLineWidth(1);
 
    glLineStipple(1, 0x7070);
-   glColor3ub (255, 255, 255);
+   glColor3ub(255, 255, 255);
    glBegin(GL_LINE_LOOP);
    glVertex2f(ll.mX, ll.mY);
    glVertex2f(ll.mX, ur.mY);
@@ -697,7 +692,7 @@ void GraphicLayerImp::drawSelectionRectangle (LocationType ll, LocationType ur) 
    glEnd();
 
    glLineStipple(1, 0x0707);
-   glColor3ub (0,0,0);
+   glColor3ub(0, 0, 0);
    glBegin(GL_LINE_LOOP);
    glVertex2f(ll.mX, ll.mY);
    glVertex2f(ll.mX, ur.mY);
@@ -794,9 +789,7 @@ bool GraphicLayerImp::acceptsMouseEvents() const
    return true;
 }
 
-bool GraphicLayerImp::processMousePress(const QPoint& screenCoord, 
-                                        Qt::MouseButton button,
-                                        Qt::MouseButtons buttons, 
+bool GraphicLayerImp::processMousePress(const QPoint& screenCoord, Qt::MouseButton button, Qt::MouseButtons buttons,
                                         Qt::KeyboardModifiers modifiers)
 {
    if (mProcessingMouseEvent)
@@ -807,7 +800,7 @@ bool GraphicLayerImp::processMousePress(const QPoint& screenCoord,
 
    LocationType point;
 
-   View *pView = getView();
+   View* pView = getView();
    if (pView != NULL)
    {
       pView->translateScreenToWorld(screenCoord.x(), screenCoord.y(), point.mX, point.mY);
@@ -821,7 +814,7 @@ bool GraphicLayerImp::processMousePress(const QPoint& screenCoord,
       {
          mpUndoLock = new UndoLock(pView);
 
-         GraphicObject *pObj = addObject(getCurrentGraphicObjectType(), point);
+         GraphicObject* pObj = addObject(getCurrentGraphicObjectType(), point);
          mpInsertingObject = dynamic_cast<GraphicObjectImp*>(pObj);
          if (mpInsertingObject == NULL)
          {
@@ -848,7 +841,7 @@ bool GraphicLayerImp::processMousePress(const QPoint& screenCoord,
 
    if (bUsedEvent)
    {
-      GraphicGroupImp *pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
+      GraphicGroupImp* pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
       if (pGroup != NULL)
       {
          pGroup->updateBoundingBox();
@@ -860,8 +853,8 @@ bool GraphicLayerImp::processMousePress(const QPoint& screenCoord,
 
 }
 
-bool GraphicLayerImp::processMouseMove(const QPoint& screenCoord, Qt::MouseButton button,
-                                          Qt::MouseButtons buttons, Qt::KeyboardModifiers modifiers)
+bool GraphicLayerImp::processMouseMove(const QPoint& screenCoord, Qt::MouseButton button, Qt::MouseButtons buttons,
+                                       Qt::KeyboardModifiers modifiers)
 {
    if (mProcessingMouseEvent)
    {
@@ -881,12 +874,11 @@ bool GraphicLayerImp::processMouseMove(const QPoint& screenCoord, Qt::MouseButto
    bool bUsedEvent = false;
    if (mpInsertingObject != NULL)
    {
-      bUsedEvent =  mpInsertingObject->processMouseMove(
-         point, button, buttons, modifiers);
+      bUsedEvent = mpInsertingObject->processMouseMove(point, button, buttons, modifiers);
    }
    if (bUsedEvent)
    {
-      GraphicGroupImp *pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
+      GraphicGroupImp* pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
       if (pGroup != NULL)
       {
          pGroup->updateBoundingBox();
@@ -894,22 +886,21 @@ bool GraphicLayerImp::processMouseMove(const QPoint& screenCoord, Qt::MouseButto
       emit modified();
       notify(SIGNAL_NAME(Subject, Modified));
    }
-   return bUsedEvent;
 
+   return bUsedEvent;
 }
 
 int GraphicLayerImp::selectObjects(const LocationType& corner1, const LocationType& corner2)
 {
    int count = 0;
-   double minx, miny, maxx, maxy;
-   minx = min(corner1.mX, corner2.mX);
-   maxx = max(corner1.mX, corner2.mX);
-   miny = min(corner1.mY, corner2.mY);
-   maxy = max(corner1.mY, corner2.mY);
+   double minx = min(corner1.mX, corner2.mX);
+   double maxx = max(corner1.mX, corner2.mX);
+   double miny = min(corner1.mY, corner2.mY);
+   double maxy = max(corner1.mY, corner2.mY);
    deselectAllObjects();
-   std::list<GraphicObject*>::iterator it;
-   std::list<GraphicObject*> objects = getObjects();
-   for (it=objects.begin(); it!=objects.end(); it++)
+
+   list<GraphicObject*> objects = getObjects();
+   for (list<GraphicObject*>::iterator it = objects.begin(); it != objects.end(); ++it)
    {
       GraphicObjectImp* pObject = dynamic_cast<GraphicObjectImp*>(*it);
       if (pObject != NULL)
@@ -947,9 +938,12 @@ int GraphicLayerImp::selectObjects(const LocationType& corner1, const LocationTy
          proj[3].mX = adjustedLrCorner.mX;
          proj[3].mY = adjustedLrCorner.mY;
 
-         double minProjx=1e38, minProjy=1e38, maxProjx=-1e38, maxProjy=-1e38;
+         double minProjx = 1e38;
+         double minProjy = 1e38;
+         double maxProjx = -1e38;
+         double maxProjy = -1e38;
          int i;
-         for (i=0; i<4; ++i)
+         for (i = 0; i < 4; ++i)
          {
             minProjx = min(minProjx, proj[i].mX);
             maxProjx = max(maxProjx, proj[i].mX);
@@ -978,9 +972,7 @@ int GraphicLayerImp::selectObjects(const LocationType& corner1, const LocationTy
 }
 
 
-bool GraphicLayerImp::processMouseRelease(const QPoint& screenCoord,
-                                          Qt::MouseButton button,
-                                          Qt::MouseButtons buttons, 
+bool GraphicLayerImp::processMouseRelease(const QPoint& screenCoord, Qt::MouseButton button, Qt::MouseButtons buttons,
                                           Qt::KeyboardModifiers modifiers)
 {
    if (mProcessingMouseEvent)
@@ -1005,7 +997,7 @@ bool GraphicLayerImp::processMouseRelease(const QPoint& screenCoord,
    }
    if (bUsedEvent)
    {
-      GraphicGroupImp *pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
+      GraphicGroupImp* pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
       if (pGroup != NULL)
       {
          pGroup->updateBoundingBox();
@@ -1038,7 +1030,7 @@ bool GraphicLayerImp::processMouseDoubleClick(const QPoint& screenCoord, Qt::Mou
    bool bUsedEvent = false;
    if (mpInsertingObject != NULL)
    {
-      bUsedEvent =  mpInsertingObject->processMouseDoubleClick(point, button, buttons, modifiers);
+      bUsedEvent = mpInsertingObject->processMouseDoubleClick(point, button, buttons, modifiers);
    }
 
    if (bUsedEvent)
@@ -1056,20 +1048,21 @@ bool GraphicLayerImp::processMouseDoubleClick(const QPoint& screenCoord, Qt::Mou
    return bUsedEvent;
 }
 
-bool GraphicLayerImp::grabHandle(const QPoint& screenCoord, GraphicObject *&pObject, int &handle) const
+bool GraphicLayerImp::grabHandle(const QPoint& screenCoord, GraphicObject*& pObject, int& handle) const
 {
    LocationType sceneCoord;
-   View *pView = getView();
+
+   View* pView = getView();
    if (pView != NULL)
    {
-      pView->translateScreenToWorld(screenCoord.x(), screenCoord.y(), 
-         sceneCoord.mX, sceneCoord.mY);
+      pView->translateScreenToWorld(screenCoord.x(), screenCoord.y(), sceneCoord.mX, sceneCoord.mY);
       translateWorldToData(sceneCoord.mX, sceneCoord.mY, sceneCoord.mX, sceneCoord.mY);
    }
+
    return grabHandle(sceneCoord, pObject, handle);
 }
 
-bool GraphicLayerImp::grabHandle(LocationType sceneCoord, GraphicObject *&pObject, int &handle) const
+bool GraphicLayerImp::grabHandle(LocationType sceneCoord, GraphicObject*& pObject, int& handle) const
 {
    // Compute the size of the handle between the center and edges in data coordinates
    double dScreenX = 0.0;
@@ -1088,20 +1081,19 @@ bool GraphicLayerImp::grabHandle(LocationType sceneCoord, GraphicObject *&pObjec
 
    int i = -1;
 
-   std::list<GraphicObject*>::const_reverse_iterator it;
-   for (it=mSelectedObjects.rbegin(); it!=mSelectedObjects.rend(); it++)
+   list<GraphicObject*>::const_reverse_iterator it;
+   for (it = mSelectedObjects.rbegin(); it != mSelectedObjects.rend(); ++it)
    {
-      GraphicObjectImp* pObject = NULL;
-      pObject = dynamic_cast<GraphicObjectImp*>(*it);
-      if (pObject != NULL)
+      GraphicObjectImp* pSelectedObject = dynamic_cast<GraphicObjectImp*>(*it);
+      if (pSelectedObject != NULL)
       {
          LocationType adjustedCoord = sceneCoord;
 
-         double dRotation = pObject->getRotation();
+         double dRotation = pSelectedObject->getRotation();
          if (dRotation != 0.0)
          {
-            LocationType llCorner = pObject->getLlCorner();
-            LocationType urCorner = pObject->getUrCorner();
+            LocationType llCorner = pSelectedObject->getLlCorner();
+            LocationType urCorner = pSelectedObject->getUrCorner();
 
             LocationType center;
             center.mX = (llCorner.mX + urCorner.mX) / 2.0;
@@ -1110,9 +1102,9 @@ bool GraphicLayerImp::grabHandle(LocationType sceneCoord, GraphicObject *&pObjec
             adjustedCoord = DrawUtil::getRotatedCoordinate(sceneCoord, center, -dRotation);
          }
 
-         std::vector<LocationType> handles = pObject->getHandles();
-         std::vector<LocationType>::reverse_iterator cit;
-         for (i = handles.size() - 1, cit = handles.rbegin(); cit != handles.rend(); cit++, i--)
+         vector<LocationType> handles = pSelectedObject->getHandles();
+         vector<LocationType>::reverse_iterator cit;
+         for (i = handles.size() - 1, cit = handles.rbegin(); cit != handles.rend(); ++cit, --i)
          {
             if ((fabs(adjustedCoord.mX - (*cit).mX) < xSize) && (fabs(adjustedCoord.mY - (*cit).mY) < ySize))
             {
@@ -1141,7 +1133,7 @@ bool GraphicLayerImp::grabHandle(LocationType sceneCoord, GraphicObject *&pObjec
 
 void GraphicLayerImp::groupSelection()
 {
-   std::list<GraphicObject*> selected = mSelectedObjects;
+   list<GraphicObject*> selected = mSelectedObjects;
    if (selected.size() < 2)
    {
       return;
@@ -1152,22 +1144,22 @@ void GraphicLayerImp::groupSelection()
    {
       UndoLock lock(pView);
 
-      std::for_each(selected.begin(), selected.end(), boost::bind(&GraphicLayerImp::removeObject, this, _1, false));
+      for_each(selected.begin(), selected.end(), boost::bind(&GraphicLayerImp::removeObject, this, _1, false));
 
       pGroup = static_cast<GraphicGroup*>(addObject(GROUP_OBJECT, LocationType()));
       if (pGroup == NULL)
       {
-         GraphicGroup *pBaseGroup = getGroup();
+         GraphicGroup* pBaseGroup = getGroup();
          if (pBaseGroup != NULL)
          {
-            std::for_each(selected.begin(), selected.end(), boost::bind(&GraphicGroup::insertObject, pBaseGroup, _1));
-            std::for_each(selected.begin(), selected.end(), boost::bind(&GraphicLayerImp::selectObject, this, _1));
+            for_each(selected.begin(), selected.end(), boost::bind(&GraphicGroup::insertObject, pBaseGroup, _1));
+            for_each(selected.begin(), selected.end(), boost::bind(&GraphicLayerImp::selectObject, this, _1));
          }
 
          return;
       }
 
-      std::for_each(selected.begin(), selected.end(), boost::bind(&GraphicGroup::insertObject, pGroup, _1));
+      for_each(selected.begin(), selected.end(), boost::bind(&GraphicGroup::insertObject, pGroup, _1));
    }
 
    UndoGroup group(pView, "Group Objects");
@@ -1177,7 +1169,7 @@ void GraphicLayerImp::groupSelection()
       pView->addUndoAction(pUndoAction);
    }
 
-   GraphicGroupImp *pGroupImp = dynamic_cast<GraphicGroupImp*>(pGroup);
+   GraphicGroupImp* pGroupImp = dynamic_cast<GraphicGroupImp*>(pGroup);
    REQUIRE(pGroupImp != NULL);
    pGroupImp->updateBoundingBox();
    selectObject(pGroup);
@@ -1188,23 +1180,20 @@ void GraphicLayerImp::groupSelection()
 void GraphicLayerImp::ungroupSelection()
 {
    int iGroupCount = 0;
-   std::list<GraphicObject*> objects = getObjects();
+   list<GraphicObject*> objects = getObjects();
 
    View* pView = getView();
    UndoGroup group(pView, "Ungroup Objects");
 
-   std::list<GraphicObject*>::iterator iter;
-   for (iter = objects.begin(); iter != objects.end(); iter++)
+   for (list<GraphicObject*>::iterator iter = objects.begin(); iter != objects.end(); ++iter)
    {
-      GraphicObject* pObject = NULL;
-      pObject = (*iter);
+      GraphicObject* pObject = *iter;
       if (pObject == NULL)
       {
          continue;
       }
 
-      bool bSelected = false;
-      bSelected = isObjectSelected(pObject);
+      bool bSelected = isObjectSelected(pObject);
       if (bSelected == false)
       {
          continue;
@@ -1238,13 +1227,12 @@ void GraphicLayerImp::ungroupSelection()
          angleGroup = 0.0;
       }
 
-      std::list<GraphicObject*> groupObjects = pGroup->getObjects();
+      list<GraphicObject*> groupObjects = pGroup->getObjects();
 
-      std::list<GraphicObject*>::iterator groupIter;
-      for (groupIter = groupObjects.begin(); groupIter != groupObjects.end(); groupIter++)
+      list<GraphicObject*>::iterator groupIter;
+      for (groupIter = groupObjects.begin(); groupIter != groupObjects.end(); ++groupIter)
       {
-         GraphicObject* pGroupObject = NULL;
-         pGroupObject = (*groupIter);
+         GraphicObject* pGroupObject = *groupIter;
          if (pGroupObject == NULL)
          {
             continue;
@@ -1259,17 +1247,15 @@ void GraphicLayerImp::ungroupSelection()
 
          double corC1x = centerItem.mX - centerGroup.mX; 
          double corC1y = centerItem.mY - centerGroup.mY;
-         double angleGroupRad = (PI/180.0) * angleGroup;
+         double angleGroupRad = (PI / 180.0) * angleGroup;
          double calcCos1 = cos(angleGroupRad) - 1;
          double calcSin = sin(angleGroupRad);
          double xOffset = (corC1x * calcCos1) - (calcSin * corC1y);
          double yOffset = (corC1y * calcCos1) + (corC1x * calcSin);
 
-         dynamic_cast<GraphicObjectImp*>(pGroupObject)->
-            move(LocationType(xOffset, yOffset));
+         dynamic_cast<GraphicObjectImp*>(pGroupObject)->move(LocationType(xOffset, yOffset));
 
-         double angleObject = 0.0;
-         angleObject = pGroupObject->getRotation();
+         double angleObject = pGroupObject->getRotation();
          if (angleObject < 0.0)
          {
             angleObject = 0.0;
@@ -1296,16 +1282,15 @@ void GraphicLayerImp::ungroupSelection()
 
 void GraphicLayerImp::pushSelectedObjectToBack()
 {
-   std::list<GraphicObject*>::reverse_iterator sit;
-   std::list<GraphicObject*>::iterator it;
+   list<GraphicObject*>::reverse_iterator sit;
 
    View* pView = getView();
    UndoGroup group(pView, "Move Objects To Back");
-   for (sit=mSelectedObjects.rbegin(); sit!=mSelectedObjects.rend(); sit++)
+   for (sit = mSelectedObjects.rbegin(); sit != mSelectedObjects.rend(); ++sit)
    {
       int oldIndex = getObjectStackingIndex(*sit);
 
-      GraphicGroupImp *pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
+      GraphicGroupImp* pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
       bool bSuccess = pGroup != NULL && pGroup->moveObjectToBack(*sit);
       if (bSuccess == true)
       {
@@ -1324,16 +1309,15 @@ void GraphicLayerImp::pushSelectedObjectToBack()
 
 void GraphicLayerImp::popSelectedObjectToFront()
 {
-   std::list<GraphicObject*>::iterator sit;
-   std::list<GraphicObject*>::iterator it;
+   list<GraphicObject*>::iterator sit;
 
    View* pView = getView();
    UndoGroup group(pView, "Move Objects To Front");
-   for (sit=mSelectedObjects.begin(); sit!=mSelectedObjects.end(); sit++)
+   for (sit = mSelectedObjects.begin(); sit != mSelectedObjects.end(); ++sit)
    {
       int oldIndex = getObjectStackingIndex(*sit);
 
-      GraphicGroupImp *pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
+      GraphicGroupImp* pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
       bool bSuccess = pGroup != NULL && pGroup->moveObjectToFront(*sit);
       if (bSuccess == true)
       {
@@ -1352,7 +1336,7 @@ void GraphicLayerImp::popSelectedObjectToFront()
 
 int GraphicLayerImp::getObjectStackingIndex(GraphicObject* pObject) const
 {
-   GraphicGroupImp *pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
+   GraphicGroupImp* pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
    if (pGroup != NULL)
    {
       return pGroup->getObjectStackingIndex(pObject);
@@ -1370,7 +1354,7 @@ void GraphicLayerImp::setObjectStackingIndex(GraphicObject* pObject, int index)
    int currentIndex = getObjectStackingIndex(pObject);
    if (index != currentIndex)
    {
-      GraphicGroupImp *pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
+      GraphicGroupImp* pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
       VERIFYNRV(pGroup != NULL);
 
       View* pView = getView();
@@ -1401,15 +1385,14 @@ bool GraphicLayerImp::load(const QString& strFilename)
 
    FilenameImp filename(fileName);
    Service<MessageLogMgr> pLogMgr;
-   MessageLog *pLog = pLogMgr->getLog();
+   MessageLog* pLog = pLogMgr->getLog();
    XmlReader xml(pLog);
 
    XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* pDocument = NULL;
    pDocument = xml.parse(&filename);
    if (pDocument != NULL)
    {
-      DOMElement* pRootElement = NULL;
-      pRootElement = pDocument->getDocumentElement();
+      DOMElement* pRootElement = pDocument->getDocumentElement();
       if (pRootElement != NULL)
       {
          unsigned int version = atoi(A(pRootElement->getAttribute(X("version"))));
@@ -1428,8 +1411,8 @@ bool GraphicLayerImp::load(const QString& strFilename)
    // Try to load in CGM format
    if (bSuccess == false)
    {
-      GraphicObject *pObject = getGroup()->addObject(CGM_OBJECT);
-      CgmObjectImp *pCgm = dynamic_cast<CgmObjectImp*>(pObject);
+      GraphicObject* pObject = getGroup()->addObject(CGM_OBJECT);
+      CgmObjectImp* pCgm = dynamic_cast<CgmObjectImp*>(pObject);
       if (pObject != NULL && pCgm != NULL)
       {
          bSuccess = pCgm->deserializeCgm(fileName);
@@ -1453,7 +1436,7 @@ bool GraphicLayerImp::load(const QString& strFilename)
    return bSuccess;
 }
 
-void GraphicLayerImp::cleanUpBadObject(GraphicObject *pObj)
+void GraphicLayerImp::cleanUpBadObject(GraphicObject* pObj)
 {
    // this stuff will move to a slot method that is connected to a Group's signal stating that something went wrong
    getGroup()->removeObject(pObj, false);
@@ -1467,22 +1450,18 @@ void GraphicLayerImp::updateHandles(GraphicProperty* pProperty)
       return;
    }
 
-   if( getGroup() != NULL )
+   if (getGroup() != NULL)
    {
-      std::list<GraphicObject*> objects = getObjects();
-
-      std::list<GraphicObject*>::iterator iter;
-      for (iter = objects.begin(); iter != objects.end(); iter++)
+      list<GraphicObject*> objects = getObjects();
+      for (list<GraphicObject*>::iterator iter = objects.begin(); iter != objects.end(); ++iter)
       {
-         GraphicObjectImp* pObject = NULL;
-         pObject = dynamic_cast<GraphicObjectImp*>(*iter);
+         GraphicObjectImp* pObject = dynamic_cast<GraphicObjectImp*>(*iter);
          if (pObject != NULL)
          {
-            std::vector<GraphicProperty*> properties = pObject->getProperties();
+            vector<GraphicProperty*> properties = pObject->getProperties();
 
-            std::vector<GraphicProperty*>::iterator iter;
-            iter = std::find(properties.begin(), properties.end(), pProperty);
-            if (iter != properties.end())
+            vector<GraphicProperty*>::iterator propIter = find(properties.begin(), properties.end(), pProperty);
+            if (propIter != properties.end())
             {
                pObject->updateHandles();
             }
@@ -1493,13 +1472,13 @@ void GraphicLayerImp::updateHandles(GraphicProperty* pProperty)
 
 void GraphicLayerImp::cloneSelection(GraphicLayer* pDest)
 {
-   GraphicLayerImp *pDestImp = dynamic_cast<GraphicLayerImp*>(pDest);
-   std::list<GraphicObject*> objects = getObjects();
+   GraphicLayerImp* pDestImp = dynamic_cast<GraphicLayerImp*>(pDest);
+   list<GraphicObject*> objects = getObjects();
 
    View* pView = getView();
    UndoGroup group(pView, "Copy Object");
-   std::list<GraphicObject*>::iterator iter;
-   for (iter = objects.begin(); iter != objects.end(); iter++)
+
+   for (list<GraphicObject*>::iterator iter = objects.begin(); iter != objects.end(); ++iter)
    {
       GraphicObject* pObject = *iter;
       if (pObject == NULL)
@@ -1507,8 +1486,7 @@ void GraphicLayerImp::cloneSelection(GraphicLayer* pDest)
          continue;
       }
 
-      bool bSelected = false;
-      bSelected = isObjectSelected(pObject);
+      bool bSelected = isObjectSelected(pObject);
       if (bSelected == false)
       {
          continue;
@@ -1519,8 +1497,7 @@ void GraphicLayerImp::cloneSelection(GraphicLayer* pDest)
       GraphicObject* pCloneObject = pDest->addObject(eType);
       if (pCloneObject != NULL)
       {
-         bool bSuccess = false;
-         bSuccess = dynamic_cast<GraphicObjectImp*>(pCloneObject)->replicateObject(pObject);
+         bool bSuccess = dynamic_cast<GraphicObjectImp*>(pCloneObject)->replicateObject(pObject);
          if (bSuccess == false)
          {
             return;
@@ -1547,22 +1524,24 @@ void GraphicLayerImp::cloneSelection(GraphicLayer* pDest)
 GraphicObject* GraphicLayerImp::hit(const QPoint& screenCoord) const
 {
    LocationType sceneCoord;
-   View *pView = getView();
+
+   View* pView = getView();
    if (pView != NULL)
    {
       pView->translateScreenToWorld(screenCoord.x(), screenCoord.y(), sceneCoord.mX, sceneCoord.mY);
       translateWorldToData(sceneCoord.mX, sceneCoord.mY, sceneCoord.mX, sceneCoord.mY);
    }
+
    return hit(sceneCoord);
 }
 
-GraphicObject *GraphicLayerImp::hit(LocationType sceneCoord) const 
+GraphicObject* GraphicLayerImp::hit(LocationType sceneCoord) const
 {
-   std::list<GraphicObject*>::const_reverse_iterator iter;
-   for (iter = mSelectedObjects.rbegin(); iter != mSelectedObjects.rend(); iter++)
+   list<GraphicObject*>::const_reverse_iterator iter;
+   for (iter = mSelectedObjects.rbegin(); iter != mSelectedObjects.rend(); ++iter)
    {
-      GraphicObject *pObject = *iter;
-      GraphicObjectImp *pObjectImp = dynamic_cast<GraphicObjectImp*>(pObject);
+      GraphicObject* pObject = *iter;
+      GraphicObjectImp* pObjectImp = dynamic_cast<GraphicObjectImp*>(pObject);
       if (pObject != NULL && pObjectImp != NULL)
       {
          bool bHit = false;
@@ -1591,12 +1570,12 @@ GraphicObject *GraphicLayerImp::hit(LocationType sceneCoord) const
          }
       }
    }
-   GraphicGroupImp *pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
+   GraphicGroupImp* pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
    VERIFY(pGroup != NULL);
    return pGroup->hitObject(sceneCoord);
 }
 
-void GraphicLayerImp::replicateObject(GraphicObject *pDest, GraphicObject *pSource)
+void GraphicLayerImp::replicateObject(GraphicObject* pDest, GraphicObject* pSource)
 {
    GraphicObjectImp* pDestImp = dynamic_cast<GraphicObjectImp*>(pDest);
    if (pDestImp && pSource)
@@ -1608,12 +1587,14 @@ void GraphicLayerImp::replicateObject(GraphicObject *pDest, GraphicObject *pSour
 
 void GraphicLayerImp::nudgeSelectedObjects(int x, int y)
 {
-   LocationType data1, data2;
+   LocationType data1;
+   LocationType data2;
 
-   View *pView = getView();
+   View* pView = getView();
    if (pView != NULL)
    {
-      LocationType world1, world2;
+      LocationType world1;
+      LocationType world2;
       pView->translateScreenToWorld(0, 0, world1.mX, world1.mY);
       translateWorldToData(world1.mX, world1.mY, data1.mX, data1.mY);
       pView->translateScreenToWorld(x, y, world2.mX, world2.mY);
@@ -1628,8 +1609,7 @@ void GraphicLayerImp::moveSelectedObjects(LocationType delta)
 {
    UndoGroup group(getView(), "Move Objects");
 
-   std::list<GraphicObject*>::iterator it;
-   for (it=mSelectedObjects.begin(); it!=mSelectedObjects.end(); it++)
+   for (list<GraphicObject*>::iterator it = mSelectedObjects.begin(); it != mSelectedObjects.end(); ++it)
    {
       dynamic_cast<GraphicObjectImp*>(*it)->move(delta);
    }
@@ -1637,9 +1617,10 @@ void GraphicLayerImp::moveSelectedObjects(LocationType delta)
    notify(SIGNAL_NAME(Subject, Modified));
 }
 
-static void alignCorners(LocationType &llCorner, LocationType &urCorner)
+static void alignCorners(LocationType& llCorner, LocationType& urCorner)
 {
-   LocationType alignedLlCorner, alignedUrCorner;
+   LocationType alignedLlCorner;
+   LocationType alignedUrCorner;
 
    alignedLlCorner.mX = min(llCorner.mX, urCorner.mX);
    alignedLlCorner.mY = min(llCorner.mY, urCorner.mY);
@@ -1650,7 +1631,8 @@ static void alignCorners(LocationType &llCorner, LocationType &urCorner)
    urCorner = alignedUrCorner;
 }
 
-static bool getGroupedBoundingBox(const std::list<GraphicObject*> &objectList, LocationType &llCorner, LocationType &urCorner)
+static bool getGroupedBoundingBox(const list<GraphicObject*>& objectList, LocationType& llCorner,
+                                  LocationType& urCorner)
 {
    if (objectList.size() == 0)
    {
@@ -1660,12 +1642,10 @@ static bool getGroupedBoundingBox(const std::list<GraphicObject*> &objectList, L
    llCorner.mX = llCorner.mY = 1e38;
    urCorner.mX = urCorner.mY = -1e38;
 
-   std::list<GraphicObject*>::const_iterator it;
-   for (it=objectList.begin(); it!=objectList.end(); it++)
+   for (list<GraphicObject*>::const_iterator it = objectList.begin(); it != objectList.end(); ++it)
    {
-      LocationType objectLlCorner, objectUrCorner;
-      objectLlCorner = (*it)->getLlCorner();
-      objectUrCorner = (*it)->getUrCorner();
+      LocationType objectLlCorner = (*it)->getLlCorner();
+      LocationType objectUrCorner = (*it)->getUrCorner();
       alignCorners(objectLlCorner, objectUrCorner);
 
       llCorner.mX = min(llCorner.mX, objectLlCorner.mX);
@@ -1679,9 +1659,8 @@ static bool getGroupedBoundingBox(const std::list<GraphicObject*> &objectList, L
 
 void GraphicLayerImp::alignSelectedObjects(GraphicAlignment alignment)
 {
-   double desiredLocation;
-   LocationType llCorner, urCorner; // maximum extents of the selected objects' bounding boxes
-
+   LocationType llCorner;
+   LocationType urCorner; // maximum extents of the selected objects' bounding boxes
    if (!getGroupedBoundingBox(mSelectedObjects, llCorner, urCorner))
    {
       return;
@@ -1691,9 +1670,10 @@ void GraphicLayerImp::alignSelectedObjects(GraphicAlignment alignment)
    bool bVerticalFlip = false;
    isFlipped(llCorner, urCorner, bHorizontalFlip, bVerticalFlip);
 
+   double desiredLocation = llCorner.mX;
    double llMultiplier = 1.0;
    double urMultiplier = 1.0;
-   switch(alignment)
+   switch (alignment)
    {
       case ALIGN_LEFT:
          desiredLocation = bHorizontalFlip ? urCorner.mX : llCorner.mX;
@@ -1701,7 +1681,7 @@ void GraphicLayerImp::alignSelectedObjects(GraphicAlignment alignment)
          urMultiplier = bHorizontalFlip ? 1.0 : 0.0;
          break;
       case ALIGN_CENTER:
-         desiredLocation = (llCorner.mX+urCorner.mX)/2.0; 
+         desiredLocation = (llCorner.mX + urCorner.mX) / 2.0;
          llMultiplier = urMultiplier = 0.5;
          break;
       case ALIGN_RIGHT:
@@ -1715,7 +1695,7 @@ void GraphicLayerImp::alignSelectedObjects(GraphicAlignment alignment)
          urMultiplier = bVerticalFlip ? 0.0 : 1.0;
          break;
       case ALIGN_MIDDLE:
-         desiredLocation = (llCorner.mY+urCorner.mY)/2.0; 
+         desiredLocation = (llCorner.mY + urCorner.mY) / 2.0;
          llMultiplier = urMultiplier = 0.5;
          break;
       case ALIGN_BOTTOM:
@@ -1723,16 +1703,18 @@ void GraphicLayerImp::alignSelectedObjects(GraphicAlignment alignment)
          llMultiplier = bVerticalFlip ? 0.0 : 1.0;
          urMultiplier = bVerticalFlip ? 1.0 : 0.0;
          break;
+      default:
+         break;
    }
 
    bool horizontal = (alignment == ALIGN_LEFT || alignment == ALIGN_CENTER || alignment == ALIGN_RIGHT);
 
    UndoGroup group(getView(), "Align Objects");
 
-   std::list<GraphicObject*>::iterator it;
-   LocationType delta(0.0,0.0);
-   LocationType objectLlCorner, objectUrCorner;
-   for (it=mSelectedObjects.begin(); it!=mSelectedObjects.end(); it++)
+   LocationType delta(0.0, 0.0);
+   LocationType objectLlCorner;
+   LocationType objectUrCorner;
+   for (list<GraphicObject*>::iterator it = mSelectedObjects.begin(); it != mSelectedObjects.end(); ++it)
    {
       objectLlCorner = (*it)->getLlCorner();
       objectUrCorner = (*it)->getUrCorner();
@@ -1758,24 +1740,29 @@ void GraphicLayerImp::distributeSelectedObjects(GraphicDistribution distribution
    LocationType corner[2];
    int i;
 
-   if (mSelectedObjects.size() < 3) { return; }
+   if (mSelectedObjects.size() < 3)
+   {
+      return;
+   }
 
    // find left and right most objects
-   std::list<GraphicObject*> objectList = mSelectedObjects;
-   std::list<GraphicObject*>::iterator it, minIter=objectList.begin(), maxIter=objectList.begin();
-   double minEdgePos=1e38;
-   double maxEdgePos=-1e38;
-   GraphicObject *minEdgeObject = NULL;
-   GraphicObject *maxEdgeObject = NULL;
-   for (it=objectList.begin(); it!=objectList.end(); ++it)
+   list<GraphicObject*> objectList = mSelectedObjects;
+   list<GraphicObject*>::iterator it;
+   list<GraphicObject*>::iterator minIter = objectList.begin();
+   list<GraphicObject*>::iterator maxIter = objectList.begin();
+   double minEdgePos = 1e38;
+   double maxEdgePos = -1e38;
+   GraphicObject* minEdgeObject = NULL;
+   GraphicObject* maxEdgeObject = NULL;
+   for (it = objectList.begin(); it != objectList.end(); ++it)
    {
       corner[0] = (*it)->getLlCorner();
       corner[1] = (*it)->getUrCorner();
       alignCorners(corner[0], corner[1]);
-      for(i=0; i<2; ++i)
+      for (i = 0; i < 2; ++i)
       {
          double edgePos = corner[i].mX*xMultiplier+corner[i].mY*yMultiplier;
-         if (edgePos<minEdgePos)
+         if (edgePos < minEdgePos)
          {
             minEdgePos = edgePos;
             minIter = it;
@@ -1791,7 +1778,10 @@ void GraphicLayerImp::distributeSelectedObjects(GraphicDistribution distribution
    minEdgeObject = *minIter;
    maxEdgeObject = *maxIter;
 
-   if (minEdgeObject == maxEdgeObject) { return; }
+   if (minEdgeObject == maxEdgeObject)
+   {
+      return;
+   }
 
    // sort remaining objects from left to right based on their left side
    objectList.erase(maxIter);
@@ -1803,7 +1793,7 @@ void GraphicLayerImp::distributeSelectedObjects(GraphicDistribution distribution
    corner[0] = maxEdgeObject->getLlCorner();
    corner[1] = maxEdgeObject->getUrCorner();
    alignCorners(corner[0], corner[1]);
-   maxEdgePos = min(corner[0].mX,corner[1].mX)*xMultiplier+min(corner[0].mY,corner[1].mY)*yMultiplier;
+   maxEdgePos = min(corner[0].mX, corner[1].mX) * xMultiplier + min(corner[0].mY, corner[1].mY) * yMultiplier;
 
    double totalDistance = maxEdgePos - minEdgePos;
    double spacing = totalDistance / (mSelectedObjects.size()-1);
@@ -1812,8 +1802,8 @@ void GraphicLayerImp::distributeSelectedObjects(GraphicDistribution distribution
 
    //for each object in sorted list (index=0; index++)
       //move it so that its left edge is at index*spacing
-   LocationType delta(0.0,0.0);
-   for(i=1, it=objectList.begin(); it!=objectList.end(); ++i, ++it)
+   LocationType delta(0.0, 0.0);
+   for (i = 1, it = objectList.begin(); it != objectList.end(); ++i, ++it)
    {
       double desiredLocation = spacing*i + minEdgePos;
       corner[0] = (*it)->getLlCorner();
@@ -1876,10 +1866,10 @@ void GraphicLayerImp::reset()
    // nothing to reset
 }
 
-GraphicGroup *GraphicLayerImp::getGroup() const
+GraphicGroup* GraphicLayerImp::getGroup() const
 {
-   GraphicElement *pGraph = dynamic_cast<GraphicElement*>(getDataElement());
-   GraphicGroup *pGroup = NULL;
+   GraphicElement* pGraph = dynamic_cast<GraphicElement*>(getDataElement());
+   GraphicGroup* pGroup = NULL;
    if (pGraph != NULL)
    {
       pGroup = pGraph->getGroup();
@@ -1887,7 +1877,7 @@ GraphicGroup *GraphicLayerImp::getGroup() const
 
    if (pGroup != NULL && !mGroupHasLayerSet)
    {
-      GraphicGroupImp *pImp = dynamic_cast<GraphicGroupImp*>(pGroup);
+      GraphicGroupImp* pImp = dynamic_cast<GraphicGroupImp*>(pGroup);
       VERIFY(pImp != NULL);
       pImp->setLayer(const_cast<GraphicLayer*>(dynamic_cast<const GraphicLayer*>(this)));
       mGroupHasLayerSet = true;
@@ -1911,14 +1901,14 @@ GraphicObjectType GraphicLayerImp::getCurrentGraphicObjectType() const
    return mCurrentType;
 }
 
-LocationType GraphicLayerImp::correctCoordinate(const LocationType &coord) const
+LocationType GraphicLayerImp::correctCoordinate(const LocationType& coord) const
 {
    return coord;
 }
 
 void GraphicLayerImp::completeInsertion(bool bValidObject)
 {
-   GraphicObject *pInsertingObject = dynamic_cast<GraphicObject*>(mpInsertingObject);
+   GraphicObject* pInsertingObject = dynamic_cast<GraphicObject*>(mpInsertingObject);
    if (mpInsertingObject != NULL)
    {
       disconnect(mpInsertingObject, SIGNAL(destroyed()), this, SLOT(clearInsertingObject()));
@@ -1959,14 +1949,14 @@ void GraphicLayerImp::completeInsertion(bool bValidObject)
 
 void GraphicLayerImp::onElementModified()
 {
-   View *pView = getView();
+   View* pView = getView();
    if (pView != NULL)
    {
       pView->refresh();
    }
 }
 
-QColor GraphicLayerImp::getLabelColor(const GraphicObjectImp *pObj)
+QColor GraphicLayerImp::getLabelColor(const GraphicObjectImp* pObj)
 {
    return QColor();
 }
@@ -1989,9 +1979,8 @@ bool GraphicLayerImp::getExtents(double& x1, double& y1, double& x4, double& y4)
       return false;
    }
 
-   LocationType ll, ur;
-   ll = pGroup->getLlCorner();
-   ur = pGroup->getUrCorner();
+   LocationType ll = pGroup->getLlCorner();
+   LocationType ur = pGroup->getUrCorner();
    x1 = min(ll.mX, ur.mX);
    y1 = min(ll.mY, ur.mY);
    x4 = max(ll.mX, ur.mX);
@@ -2020,15 +2009,15 @@ void GraphicLayerImp::setLayerLocked(bool bLocked)
    }
 }
 
-void GraphicLayerImp::drawSymbols(const std::string &symbolName, const std::vector<LocationType> &points, 
-                double screenSize, double objectRotation)
+void GraphicLayerImp::drawSymbols(const string& symbolName, const vector<LocationType>& points, double screenSize,
+                                  double objectRotation)
 {
    if (symbolName.empty())
    {
       return;
    }
 
-   SymbolManager *pSymMgr = SymbolManager::instance();
+   SymbolManager* pSymMgr = SymbolManager::instance();
    VERIFYNRV(pSymMgr != NULL);
 
    double zoomPercent = 100;
@@ -2038,7 +2027,7 @@ void GraphicLayerImp::drawSymbols(const std::string &symbolName, const std::vect
    double xScale = getXScaleFactor();
    double yScale = getYScaleFactor();
 
-   PerspectiveView *pPerView = dynamic_cast<PerspectiveView*>(getView());
+   PerspectiveView* pPerView = dynamic_cast<PerspectiveView*>(getView());
    if (pPerView != NULL)
    {
       zoomPercent = pPerView->getZoomPercentage();
@@ -2052,15 +2041,15 @@ void GraphicLayerImp::drawSymbols(const std::string &symbolName, const std::vect
       LocationType pixelSize = pOrthView->getPixelSize();
       xScale *= pixelSize.mX;
       yScale *= pixelSize.mY;
-   }   
+   }
 
-   pSymMgr->drawSymbols(symbolName, points, screenSize, zoomPercent/100, 
-      rotation, pitch, xScale, yScale, objectRotation);
+   pSymMgr->drawSymbols(symbolName, points, screenSize, zoomPercent / 100, rotation, pitch, xScale, yScale,
+      objectRotation);
 }
 
 void GraphicLayerImp::temporaryGlContextChange()
 {
-   GraphicGroupImp *pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
+   GraphicGroupImp* pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
    if (pGroup != NULL)
    {
       pGroup->temporaryGlContextChange();
@@ -2191,7 +2180,7 @@ void GraphicLayerImp::layerActivated(bool activated)
 {
    if (activated == false)
    {
-      completeInsertion(false);
+      completeInsertion();
       deselectAllObjects();
    }
 }

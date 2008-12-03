@@ -103,12 +103,12 @@ GenericHdf5Importer::~GenericHdf5Importer()
 {
 }
 
-unsigned char GenericHdf5Importer::getFileAffinity(const std::string& filename)
+unsigned char GenericHdf5Importer::getFileAffinity(const string& filename)
 {
    herr_t status = H5Fis_hdf5(filename.c_str());
    if (status > 0)
    {
-      return Importer::CAN_LOAD_FILE_TYPE;      
+      return Importer::CAN_LOAD_FILE_TYPE;
    }
    return Importer::CAN_NOT_LOAD;
 }
@@ -136,7 +136,7 @@ vector<ImportDescriptor*> GenericHdf5Importer::getImportDescriptors(const string
          deque<Hdf5Element*> elementsToProcess;
          std::copy(elements.begin(), elements.end(), std::back_inserter(elementsToProcess));
 
-         while (elementsToProcess.size() > 0)
+         while (elementsToProcess.empty() == false)
          {
             Hdf5Element* pFirst = elementsToProcess.front();
             elementsToProcess.pop_front();
@@ -223,7 +223,8 @@ bool GenericHdf5Importer::runAllTests(Progress* pProgress, std::ostream& failure
 
    testFile = getTestDataPath() + "Hdf/small.h5";
 
-   pFile = auto_ptr<Hdf5File>(new Hdf5File(testFile));
+   Hdf5File* pHdfFile = new Hdf5File(testFile);
+   pFile = auto_ptr<Hdf5File>(pHdfFile);
    VERIFY(pFile.get() != NULL);
    
    h5f = Hdf5FileResource(testFile);
@@ -235,7 +236,8 @@ bool GenericHdf5Importer::runAllTests(Progress* pProgress, std::ostream& failure
    VERIFY(pRoot != NULL);
 
    string datasetLocation = "/Data/Frame/FPA1/0000000001/Frame Data";
-   const Hdf5Dataset* pDatasetUsingFullPath = dynamic_cast<const Hdf5Dataset*>(pRoot->getElementByPath(datasetLocation));
+   const Hdf5Dataset* pDatasetUsingFullPath =
+      dynamic_cast<const Hdf5Dataset*>(pRoot->getElementByPath(datasetLocation));
    // now try it piecemeal to see if opening Data --> Frame --> FPA1 --> XXXX --> 'Frame Data' works
    const Hdf5Group* pGroup = dynamic_cast<const Hdf5Group*>(pRoot->getElement("Data"));
    VERIFY(pGroup != NULL);
@@ -311,12 +313,12 @@ bool GenericHdf5Importer::runAllTests(Progress* pProgress, std::ostream& failure
    ModelResource<RasterElement> pRaster(dynamic_cast<RasterElement*>(elements.front()));
    VERIFY(pRaster.get() != NULL);
 
-   RasterDataDescriptor *pDescriptor = dynamic_cast<RasterDataDescriptor*>(pRaster->getDataDescriptor());
+   RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(pRaster->getDataDescriptor());
    VERIFY(pDescriptor != NULL);
 
-   const vector<DimensionDescriptor> &importedRows = pDescriptor->getRows();
-   const vector<DimensionDescriptor> &importedCols = pDescriptor->getColumns();
-   const vector<DimensionDescriptor> &importedBands = pDescriptor->getBands();
+   const vector<DimensionDescriptor>& importedRows = pDescriptor->getRows();
+   const vector<DimensionDescriptor>& importedCols = pDescriptor->getColumns();
+   const vector<DimensionDescriptor>& importedBands = pDescriptor->getBands();
 
    VERIFY(pRaster->getPixelValue(importedCols[2], importedRows[0], importedBands[0]) == 31);
    VERIFY(pRaster->getPixelValue(importedCols[15], importedRows[8], importedBands[0]) == 71);

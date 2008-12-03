@@ -39,7 +39,7 @@ public:
    static void destroy();
 
    const std::string& getObjectType() const;
-   bool isKindOf(const std::string& type) const;
+   bool isKindOf(const std::string& className) const;
 
    SUBJECTADAPTER_METHODS(SubjectImp)
 
@@ -54,9 +54,9 @@ public:
    void buildPlugInList(const std::string& plugInPath);
    void clear();
    std::vector<PlugInDescriptor*> getPlugInDescriptors(const std::string& plugInType = "") const;
-   std::vector<PlugIn*> getPlugInInstances(const std::string &plugInName=std::string());
+   std::vector<PlugIn*> getPlugInInstances(const std::string& plugInName = std::string());
    PlugIn* createPlugIn(const std::string& plugInName);
-   PlugIn* createPlugInInstance(const std::string &plugInName, const std::string &id=std::string());
+   PlugIn* createPlugInInstance(const std::string& plugInName, const std::string& id = std::string());
    bool destroyPlugIn(PlugIn* pPlugIn);
    PlugInDescriptor* getPlugInDescriptor(const std::string& plugInName) const;
    PlugInDescriptor* getPlugInDescriptor(PlugIn* pPlugIn) const;
@@ -74,9 +74,9 @@ protected:
    PlugInManagerServicesImp();
    virtual ~PlugInManagerServicesImp();
 
-   ModuleDescriptor* addModule(const std::string& moduleFilename, std::map<std::string, std::string> &plugInIds);
+   ModuleDescriptor* addModule(const std::string& moduleFilename, std::map<std::string, std::string>& plugInIds);
    bool containsModule(ModuleDescriptor* pModule);
-   bool removeModule(ModuleDescriptor* pModule, std::map<std::string, std::string> &plugInIds);
+   bool removeModule(ModuleDescriptor* pModule, std::map<std::string, std::string>& plugInIds);
 
 private:
    static PlugInManagerServicesImp* spInstance;

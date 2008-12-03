@@ -51,7 +51,7 @@ StatisticsDlg::StatisticsDlg(const QString& strCaption, const vector<string>& ao
    mpAoiCombo->setEditable(false);
    mpAoiCombo->setMinimumWidth(150);
 
-   for(vector<string>::const_iterator iter = aoiNames.begin(); iter != aoiNames.end(); iter++)
+   for (vector<string>::const_iterator iter = aoiNames.begin(); iter != aoiNames.end(); ++iter)
    {
       mpAoiCombo->addItem(QString::fromStdString(*iter));
    }
@@ -100,7 +100,7 @@ StatisticsDlg::StatisticsDlg(const QString& strCaption, const vector<string>& ao
    pLayout->addLayout(pButtonLayout);
 
    // Initialization
-   if(strCaption.isEmpty())
+   if (strCaption.isEmpty())
    {
       setWindowTitle("PCA Statistics");
    }
@@ -122,7 +122,7 @@ StatisticsDlg::~StatisticsDlg()
 int StatisticsDlg::getRowFactor() const
 {
    int iFactor = -1;
-   if(mpFactorRadio->isChecked())
+   if (mpFactorRadio->isChecked())
    {
       iFactor = mpRowSpin->value();
    }
@@ -133,7 +133,7 @@ int StatisticsDlg::getRowFactor() const
 int StatisticsDlg::getColumnFactor() const
 {
    int iFactor = -1;
-   if(mpFactorRadio->isChecked())
+   if (mpFactorRadio->isChecked())
    {
       iFactor = mpColumnSpin->value();
    }
@@ -144,7 +144,7 @@ int StatisticsDlg::getColumnFactor() const
 QString StatisticsDlg::getAoiName() const
 {
    QString strAoiName;
-   if(mpAoiRadio->isChecked())
+   if (mpAoiRadio->isChecked())
    {
       strAoiName = mpAoiCombo->currentText();
    }

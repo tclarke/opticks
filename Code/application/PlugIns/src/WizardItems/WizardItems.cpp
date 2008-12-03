@@ -71,7 +71,7 @@ bool WizardItems::extractInputArgs(PlugInArgList* pInArgList)
 
 void WizardItems::reportProgress(const string& progressMsg, int iPercent, const string &key)
 {
-   if(mpProgress != NULL)
+   if (mpProgress != NULL)
    {
       mpProgress->updateProgress(progressMsg, iPercent, NORMAL);
    }
@@ -82,7 +82,7 @@ void WizardItems::reportProgress(const string& progressMsg, int iPercent, const 
 
 void WizardItems::reportWarning(const string& warningMsg, const string &key)
 {
-   if(mpProgress != NULL)
+   if (mpProgress != NULL)
    {
       mpProgress->updateProgress(warningMsg, 0, WARNING);
    }
@@ -93,7 +93,7 @@ void WizardItems::reportWarning(const string& warningMsg, const string &key)
 
 void WizardItems::reportError(const string &errorMsg, const string &key)
 {
-   if(mpProgress != NULL)
+   if (mpProgress != NULL)
    {
       mpProgress->updateProgress(errorMsg, 0, ERRORS);
    }
@@ -101,7 +101,7 @@ void WizardItems::reportError(const string &errorMsg, const string &key)
    MessageResource msg("Error", "app", "54B3BF7F-C573-42B4-BC34-292B2FF93550");
    msg->addProperty("Message", errorMsg);
 
-   if(mpStep != NULL)
+   if (mpStep != NULL)
    {
       mpStep->finalize(Message::Failure, errorMsg);
    }
@@ -111,16 +111,16 @@ void WizardItems::reportComplete()
 {
    string plugInName = getName();
  
-   if(plugInName.empty())
+   if (plugInName.empty())
    {
       plugInName = "WizardItem";
    }
 
-   if(mpProgress != NULL)
+   if (mpProgress != NULL)
    {
       mpProgress->updateProgress((plugInName + " complete!"), 100, NORMAL);
    }
-   if(mpStep != NULL)
+   if (mpStep != NULL)
    {
       mpStep->finalize(Message::Success);
    }

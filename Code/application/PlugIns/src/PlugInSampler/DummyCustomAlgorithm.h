@@ -7,13 +7,12 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef DUMMYCUSTOMALGORITHM_H__
-#define DUMMYCUSTOMALGORITHM_H__
+#ifndef DUMMYCUSTOMALGORITHM_H
+#define DUMMYCUSTOMALGORITHM_H
 
 #include "AlgorithmShell.h"
 #include "ModelServices.h"
 #include "PlugInManagerServices.h"
-#include "Service.h"
 
 class DummyCustomAlgorithm : public AlgorithmShell
 {
@@ -22,14 +21,13 @@ public:
    ~DummyCustomAlgorithm();
 
 public:
-   bool getInputSpecification( PlugInArgList *& );
-   bool getOutputSpecification( PlugInArgList *& );
-   bool execute( PlugInArgList *, PlugInArgList * );
+   bool getInputSpecification(PlugInArgList*&);
+   bool getOutputSpecification(PlugInArgList*&);
+   bool execute(PlugInArgList*, PlugInArgList*);
 
 private:
    Service<PlugInManagerServices> mpPlugInManager;
    Service<ModelServices> mpModel;
-
 };
 
 #endif

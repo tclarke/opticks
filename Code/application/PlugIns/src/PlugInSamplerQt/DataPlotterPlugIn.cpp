@@ -7,7 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "AppVersion.h"
 #include "DataPlotterDlg.h"
 #include "DataPlotterPlugIn.h"
 #include "DataVariant.h"
@@ -22,8 +21,9 @@ DataPlotterPlugIn::DataPlotterPlugIn() :
    mInteractive(true)
 {
    AlgorithmShell::setName("Data Plotter");
-   setCreator("Ball Aerospace & Technologies, Corp.");
-   setCopyright(APP_COPYRIGHT);
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setDescription("Demonstrates use of portions of the PlotWindow API.");
    setMenuLocation("[Demo]\\Data Plotter");
    setDescriptorId("{69DD0E12-8D6B-4e23-A742-469447E4EC2F}");
@@ -60,7 +60,7 @@ bool DataPlotterPlugIn::getOutputSpecification(PlugInArgList*& pArgList)
 
 namespace
 {
-double sBandNumbers[]  = {
+double sBandNumbers[] = {
 1.0,
 2.0,
 3.0,
@@ -230,7 +230,7 @@ double sBandNumbers[]  = {
 167.0,
 168.0 };
 
-double sWavelengths[]  = {
+double sWavelengths[] = {
 0.413967,
 0.417388,
 0.420847,
@@ -749,10 +749,10 @@ bool DataPlotterPlugIn::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
    }
 
    Service<ModelServices> pModel;
-   Signature *pSig = static_cast<Signature*>(pModel->getElement("DataPlotter", "Signature", NULL));
+   Signature* pSig = static_cast<Signature*>(pModel->getElement("DataPlotter", "Signature", NULL));
    if (!pSig)
    {
-      DataDescriptor *pDescriptor = pModel->createDataDescriptor("DataPlotter", "Signature", NULL);
+      DataDescriptor* pDescriptor = pModel->createDataDescriptor("DataPlotter", "Signature", NULL);
       pSig = static_cast<Signature*>(pModel->createElement(pDescriptor));
 
       if (!pSig) 

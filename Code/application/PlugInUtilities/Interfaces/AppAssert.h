@@ -6,8 +6,6 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
- 
-
 
 #ifndef APPASSERT_H
 #define APPASSERT_H
@@ -17,16 +15,24 @@
 class AssertException
 {
 public:
-   explicit AssertException (const char *pText) : mText(pText) {}
-   explicit AssertException (const std::string &str) : mText(str.c_str()) {}
-   std::string getText() const { return mText; }
+   explicit AssertException(const char* pText) :
+      mText(pText) {}
+
+   explicit AssertException(const std::string& str) :
+      mText(str) {}
+
+   std::string getText() const
+   {
+      return mText;
+   }
+
 private:
    std::string mText;
 };
 
-extern void AppAssert(const char *pExpression, const char *pFilename, unsigned line);
+extern void AppAssert(const char* pExpression, const char* pFilename, unsigned line);
 
-#define APP_ASSERT(test) ((test)?(void)0 : AppAssert(#test, __FILE__, __LINE__))
+#define APP_ASSERT(test) ((test) ? (void)0 : AppAssert(#test, __FILE__, __LINE__))
 
 #define REQUIRE(test) APP_ASSERT(test)
 #define ENSURE(test) APP_ASSERT(test)
@@ -43,5 +49,3 @@ extern void AppAssert(const char *pExpression, const char *pFilename, unsigned l
 #endif
 
 #endif
-
- 

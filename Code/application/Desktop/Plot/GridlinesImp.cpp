@@ -222,7 +222,7 @@ bool GridlinesImp::fromXml(DOMNode* pDocument, unsigned int version)
       return false;
    }
 
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
+   DOMElement* pElem = static_cast<DOMElement*>(pDocument);
    if (pElem == NULL)
    {
       return false;

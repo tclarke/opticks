@@ -29,7 +29,7 @@ ossimNitfFile* Nitf::OssimFileObject::obtainResource(const Args &args) const
       if (readTest.get() == NULL)
       {
          fname = args.mFilename.c_str();
-         for(size_t i = 0; i < fname.size(); i++)
+         for (size_t i = 0; i < fname.size(); i++)
          {
             fname[i] = static_cast<char>(toupper(fname[i]));
          }
@@ -39,7 +39,7 @@ ossimNitfFile* Nitf::OssimFileObject::obtainResource(const Args &args) const
       if (readTest.get() == NULL)
       {
          fname = args.mFilename.c_str();
-         for(size_t i = 0; i < fname.size(); i++)
+         for (size_t i = 0; i < fname.size(); i++)
          {
             fname[i] = static_cast<char>(tolower(fname[i]));
          }
@@ -67,11 +67,11 @@ void Nitf::OssimFileObject::releaseResource(const Args &args, ossimNitfFile* pFi
 
 ossimImageHandler *Nitf::OssimImageHandlerObject::obtainResource(const Args &args) const
 {
-   ossimImageHandler *pHandler = NULL;
+   ossimImageHandler* pHandler = NULL;
    if (args.mFilename.empty() == false)
    {
       pHandler = ossimImageHandlerRegistry::instance()->open(ossimString(args.mFilename.c_str()));
-      if(!pHandler)
+      if (!pHandler)
       {
          ossimInit::instance()->setPluginLoaderEnabledFlag(true);
          ossimInit::instance()->initialize();

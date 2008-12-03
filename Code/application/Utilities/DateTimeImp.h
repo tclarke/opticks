@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #ifndef DATETIMEIMP_H
 #define DATETIMEIMP_H
 
@@ -20,7 +18,7 @@ public:
    DateTimeImp();
    DateTimeImp(const DateTimeImp& rhs);
    DateTimeImp(const time_t& fromTime);
-   DateTimeImp(const std::string &fromTime);
+   DateTimeImp(const std::string& fromTime);
    virtual ~DateTimeImp();
 
    virtual DateTimeImp& operator =(const DateTimeImp& rhs);
@@ -34,12 +32,12 @@ public:
    double getSecondsSince(const DateTime& other) const;
 
    // Mutators
-   virtual void setStructured(time_t val);
+   virtual void setStructured(time_t fromTime);
    virtual void setToCurrentTime();
    virtual bool set(unsigned short year, unsigned short month, unsigned short day,
       unsigned short hour, unsigned short minute, unsigned short second);
    virtual bool set(unsigned short year = 2000, unsigned short month = 01, unsigned short day = 01);
-   virtual bool set(const std::string &fromTime);
+   virtual bool set(const std::string& fromTime);
    virtual bool isTimeValid() const;
    virtual bool isValid() const;
 

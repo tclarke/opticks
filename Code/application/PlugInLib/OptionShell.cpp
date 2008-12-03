@@ -8,14 +8,14 @@
  */
 
 #include "OptionShell.h"
-
 #include "PlugInManagerServices.h"
 
 #include <QtGui/QWidget>
 
 using namespace std;
 
-OptionShell::OptionShell() : mpOptionWidget(NULL)
+OptionShell::OptionShell() :
+   mpOptionWidget(NULL)
 {
    setType(PlugInManagerServices::OptionType());
 }
@@ -41,6 +41,7 @@ QWidget* OptionShell::getWidget()
    {
       mpOptionWidget = createOptionsWidget();
    }
+
    return mpOptionWidget;
 }
 

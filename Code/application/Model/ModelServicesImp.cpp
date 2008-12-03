@@ -48,7 +48,7 @@ ModelServicesImp* ModelServicesImp::instance()
 {
    if (spInstance == NULL)
    {
-      if(mDestroyed)
+      if (mDestroyed)
       {
          throw std::logic_error("Attempting to use ModelServices after "
             "destroying it.");
@@ -94,8 +94,8 @@ ModelServicesImp::~ModelServicesImp()
 
 const string& ModelServicesImp::getObjectType() const
 {
-   static string type = "ModelServicesImp";
-   return type;
+   static string sType = "ModelServicesImp";
+   return sType;
 }
 
 bool ModelServicesImp::isKindOf(const string& className) const
@@ -125,14 +125,15 @@ DataDescriptor* ModelServicesImp::createDataDescriptor(const string& name, const
    return pDescriptor;
 }
 
-DataDescriptor* ModelServicesImp::createDataDescriptor(const string &name, const string &type, const vector<string> &parent) const
+DataDescriptor* ModelServicesImp::createDataDescriptor(const string& name, const string& type,
+                                                       const vector<string>& parent) const
 {
-   DataDescriptor *pDescriptor = NULL;
-   if(isKindOfElement(type, "RasterElement"))
+   DataDescriptor* pDescriptor = NULL;
+   if (isKindOfElement(type, "RasterElement"))
    {
       pDescriptor = new RasterDataDescriptorAdapter(name, type, parent);
    }
-   else if(isKindOfElement(type, "DataElement"))
+   else if (isKindOfElement(type, "DataElement"))
    {
       pDescriptor = new DataDescriptorAdapter(name, type, parent);
    }
@@ -229,9 +230,9 @@ namespace
 {
    struct ElementDepthComparitor : greater<vector<string>::size_type >
    {
-      bool operator()(DataDescriptor *pA, DataDescriptor *pB)
+      bool operator()(DataDescriptor* pA, DataDescriptor* pB)
       {
-         if(pA == NULL || pB == NULL)
+         if (pA == NULL || pB == NULL)
          {
             return false;
          }
@@ -243,26 +244,32 @@ namespace
 vector<DataElement*> ModelServicesImp::createElements(const vector<DataDescriptor*> &descriptors)
 {
    vector<DataElement*> elements;
-   priority_queue<DataDescriptor*, vector<DataDescriptor*>, ElementDepthComparitor> q(ElementDepthComparitor(), descriptors);
-   for(; !q.empty(); q.pop())
+   priority_queue<DataDescriptor*, vector<DataDescriptor*>, ElementDepthComparitor> q(ElementDepthComparitor(),
+      descriptors);
+   for (; !q.empty(); q.pop())
    {
-      elements.push_back(createElement(q.top()));
+      DataElement* pElement = createElement(q.top());
+      if (pElement != NULL)
+      {
+         elements.push_back(pElement);
+      }
    }
    return elements;
 }
 
-DataElement* ModelServicesImp::createElement(const DataDescriptor* pDescriptor, const string &id)
+DataElement* ModelServicesImp::createElement(const DataDescriptor* pDescriptor, const string& id)
 {
    const DataDescriptorImp* pDescriptorImp = dynamic_cast<const DataDescriptorImp*>(pDescriptor);
    if (pDescriptorImp == NULL)
    {
       return NULL;
    }
-   if(pDescriptorImp->getParent() == NULL && !pDescriptorImp->getParentDesignator().empty())
+   if (pDescriptorImp->getParent() == NULL && !pDescriptorImp->getParentDesignator().empty())
    {
       // const_cast since the designator and parent pointer are usually in synch except before creation
       // this synchs them back up...this is an implementation detail
-      const_cast<DataDescriptorImp*>(pDescriptorImp)->setParent(getElement(pDescriptorImp->getParentDesignator(), string()));
+      const_cast<DataDescriptorImp*>(pDescriptorImp)->setParent(getElement(pDescriptorImp->getParentDesignator(),
+         string()));
    }
 
    // Check if an element with the same name, type, and parent already exists
@@ -385,7 +392,8 @@ multimap<ModelServicesImp::Key, DataElement*>::iterator ModelServicesImp::findEl
    return findElement(key, pElement->getObjectType());
 }
 
-multimap<ModelServicesImp::Key, DataElement*>::iterator ModelServicesImp::findElement(const Key& key, const string& type)
+multimap<ModelServicesImp::Key, DataElement*>::iterator ModelServicesImp::findElement(const Key& key,
+                                                                                      const string& type)
 {
    multimap<Key, DataElement*>::iterator iter = mElements.find(key);
    if (type.empty() == true)
@@ -408,7 +416,8 @@ multimap<ModelServicesImp::Key, DataElement*>::iterator ModelServicesImp::findEl
    return mElements.end();
 }
 
-multimap<ModelServicesImp::Key, DataElement*>::const_iterator ModelServicesImp::findElement(const Key& key, const string& type) const
+multimap<ModelServicesImp::Key, DataElement*>::const_iterator ModelServicesImp::findElement(const Key& key,
+                                                                                            const string& type) const
 {
    multimap<Key, DataElement*>::const_iterator iter = mElements.find(key);
    if (type.empty() == true)
@@ -451,12 +460,12 @@ DataElement* ModelServicesImp::getElement(const string& name, const string& type
 
 DataElement* ModelServicesImp::getElement(const vector<string>& designator, const string &type) const
 {
-   if(designator.empty())
+   if (designator.empty())
    {
       return false;
    }
-   DataElement *pElement = NULL;
-   for(vector<string>::const_iterator part = designator.begin(); part != designator.end(); ++part)
+   DataElement* pElement = NULL;
+   for (vector<string>::const_iterator part = designator.begin(); part != designator.end(); ++part)
    {
       pElement = getElement(*part, string(), pElement);
    }
@@ -607,8 +616,7 @@ vector<string> ModelServicesImp::getElementNames(const string& filename, const s
 
 bool ModelServicesImp::setElementName(DataElement* pElement, const string& name)
 {
-   DataDescriptorImp* pDescriptor =
-      const_cast<DataDescriptorImp*>(dynamic_cast<const DataDescriptorImp*>(pElement->getDataDescriptor()));
+   DataDescriptorImp* pDescriptor = dynamic_cast<DataDescriptorImp*>(pElement->getDataDescriptor());
    VERIFY(pDescriptor != NULL);
 
    if (getElement(name, pDescriptor->getType(), pDescriptor->getParent()) != NULL)
@@ -625,8 +633,7 @@ bool ModelServicesImp::setElementName(DataElement* pElement, const string& name)
 
 bool ModelServicesImp::setElementParent(DataElement* pElement, DataElement *pParent)
 {
-   DataDescriptorImp* pDescriptor =
-      const_cast<DataDescriptorImp*>(dynamic_cast<const DataDescriptorImp*>(pElement->getDataDescriptor()));
+   DataDescriptorImp* pDescriptor = dynamic_cast<DataDescriptorImp*>(pElement->getDataDescriptor());
    VERIFY(pDescriptor != NULL);
 
    if (getElement(pDescriptor->getName(), pDescriptor->getType(), pParent) != NULL)
@@ -669,16 +676,16 @@ bool ModelServicesImp::destroyElement(DataElement* pElement)
    AttachmentPtr<DataElement> pParent(pElement);
 
    // Destroy the element's children
-   vector<DataElement*> children = getElements(pElement, string());
-
-   vector<DataElement*>::iterator iter;
-   for (iter = children.begin(); iter != children.end(); ++iter)
+   vector<DataElement*> children = getElements(pParent.get(), string());
+   while ((pParent.get() != NULL) && (children.empty() == false))
    {
-      DataElement* pChild = *iter;
+      DataElement* pChild = children.front();
       if (pChild != NULL)
       {
          destroyElement(pChild);
       }
+
+      children = getElements(pParent.get(), string());
    }
 
    // Check if the parent element was destroyed as a result of destroying its children
@@ -776,7 +783,8 @@ bool ModelServicesImp::isKindOfElement(const string& className, const string& el
    {
       bSuccess = DataElementImp::isKindOfElement(elementName);
    }
-   else if ((className == "DataElementGroup") || (className == "DataElementGroupAdapter") || (className == "DataElementGroupImp"))
+   else if ((className == "DataElementGroup") || (className == "DataElementGroupAdapter") ||
+      (className == "DataElementGroupImp"))
    {
       bSuccess = DataElementGroupImp::isKindOfElement(elementName);
    }
@@ -789,7 +797,8 @@ bool ModelServicesImp::isKindOfElement(const string& className, const string& el
    {
       bSuccess = GraphicElementImp::isKindOfElement(elementName);
    }
-   else if ((className == "RasterElement") || (className == "RasterElementAdapter") || (className == "RasterElementImp"))
+   else if ((className == "RasterElement") || (className == "RasterElementAdapter") ||
+      (className == "RasterElementImp"))
    {
       bSuccess = RasterElementImp::isKindOfElement(elementName);
    }
@@ -797,7 +806,8 @@ bool ModelServicesImp::isKindOfElement(const string& className, const string& el
    {
       bSuccess = SignatureImp::isKindOfElement(elementName);
    }
-   else if ((className == "SignatureLbrary") || (className == "SignatureLbraryAdapter") || (className == "SignatureLbraryImp"))
+   else if ((className == "SignatureLibrary") || (className == "SignatureLibraryAdapter") ||
+      (className == "SignatureLibraryImp"))
    {
       bSuccess = SignatureLibraryImp::isKindOfElement(elementName);
    }
@@ -842,7 +852,8 @@ void ModelServicesImp::getElementTypes(const string& className, vector<string>& 
    {
       DataElementImp::getElementTypes(classList);
    }
-   else if ((className == "DataElementGroup") || (className == "DataElementGroupAdapter") || (className == "DataElementGroupImp"))
+   else if ((className == "DataElementGroup") || (className == "DataElementGroupAdapter") ||
+      (className == "DataElementGroupImp"))
    {
       DataElementGroupImp::getElementTypes(classList);
    }
@@ -855,7 +866,8 @@ void ModelServicesImp::getElementTypes(const string& className, vector<string>& 
    {
       GraphicElementImp::getElementTypes(classList);
    }
-   else if ((className == "RasterElement") || (className == "RasterElementAdapter") || (className == "RasterElementImp"))
+   else if ((className == "RasterElement") || (className == "RasterElementAdapter") ||
+      (className == "RasterElementImp"))
    {
       RasterElementImp::getElementTypes(classList);
    }
@@ -863,11 +875,13 @@ void ModelServicesImp::getElementTypes(const string& className, vector<string>& 
    {
       SignatureImp::getElementTypes(classList);
    }
-   else if ((className == "SignatureLbrary") || (className == "SignatureLbraryAdapter") || (className == "SignatureLbraryImp"))
+   else if ((className == "SignatureLibrary") || (className == "SignatureLibraryAdapter") ||
+      (className == "SignatureLibraryImp"))
    {
       SignatureLibraryImp::getElementTypes(classList);
    }
-   else if ((className == "SignatureSet") || (className == "SignatureSetAdapter") || (className == "SignatureSetImp"))
+   else if ((className == "SignatureSet") || (className == "SignatureSetAdapter") ||
+      (className == "SignatureSetImp"))
    {
       SignatureSetImp::getElementTypes(classList);
    }
@@ -954,17 +968,17 @@ bool ModelServicesImp::addElement(DataElement* pElement)
    return true;
 }
 
-bool ModelServicesImp::serialize(SessionItemSerializer &serializer) const
+bool ModelServicesImp::serialize(SessionItemSerializer& serializer) const
 {
    XMLWriter writer("ModelServices");
    XML_ADD_CONTAINER(writer, elementTypes, mElementTypes.begin(), mElementTypes.end());
    return serializer.serialize(writer);
 }
 
-bool ModelServicesImp::deserialize(SessionItemDeserializer &deserializer)
+bool ModelServicesImp::deserialize(SessionItemDeserializer& deserializer)
 {
    XmlReader reader(NULL, false);
-   DOMElement *pRootElement = deserializer.deserialize(reader, "ModelServices");
+   DOMElement* pRootElement = deserializer.deserialize(reader, "ModelServices");
    if (pRootElement)
    {
       mElementTypes.clear();

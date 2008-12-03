@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef TIEPOINT_LAYER_UNDO_H
-#define TIEPOINT_LAYER_UNDO_H
+#ifndef TIEPOINTLAYERUNDO_H
+#define TIEPOINTLAYERUNDO_H
 
 #include "LayerUndo.h"
 #include "UndoAction.h"

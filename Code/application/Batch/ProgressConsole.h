@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef __PROGRESSCONSOLE_H
-#define __PROGRESSCONSOLE_H
+#ifndef PROGRESSCONSOLE_H
+#define PROGRESSCONSOLE_H
 
 #include "Progress.h"
 #include "SubjectImp.h"
@@ -45,9 +45,9 @@ public:
     *           For partial completion status changes, this figure represents
     *           what percent (0-100) of the activity has cumulatively been
     *           completed.
-    *  @param   state
+    *  @param   status
     *           The type of message.  The following are valid values 
-    *           for state (NORMAL, WARNING, ERRORS, and ABORT).
+    *           for status (NORMAL, WARNING, ERRORS, and ABORT).
     *<pre>
     *         Level        Description
     *         ==========   ========================================================
@@ -57,7 +57,7 @@ public:
     *         ABORT        A message showing the process was aborted.
     *</pre>  
     */
-   void updateProgress(const std::string& text, int percent, ReportingLevel state);
+   void updateProgress(const std::string& text, int percent, ReportingLevel status);
 
    /**
     *  Report the activity that has taken place.
@@ -68,14 +68,14 @@ public:
     *           For partial completion status changes, this figure represents
     *           what percent (0-100) of the activity has cumulatively been
     *           completed.
-    *  @param   state
+    *  @param   status
     *           Reporting level granularity, allowing clients to filter out
     *           activity changes they are not interested in. For example,
     *           most clients would ignore debugging mode notifications.
     */
-   void getProgress(std::string& text, int& percent, ReportingLevel& state) const;
+   void getProgress(std::string& text, int& percent, ReportingLevel& status) const;
 
-   // 
+   //
    // Inherited from TypeAwareObject
    //
 
@@ -100,36 +100,19 @@ public:
     */
    bool isKindOf(const std::string& className) const;
 
-   // 
+   //
    // Inherited from Subject
    //
 
-   /**
-    *  Allow another object to register an interest in this object.
-    *
-    *  @param   watcher
-    *           Pointer to another object whose update method is to be
-    *           called when this object experiences a mutation.
-    */
-
-   /**
-    *  Allow a former subscriber to be dropped from the list of objects
-    *  to be notified when this object mutates.
-    *
-    *  @param   ignorer
-    *           Pointer to the object to be removed from the subscription
-    *           list.
-    */
-
-   bool attach(const std::string &signal, const Slot &slot)
+   bool attach(const std::string& signal, const Slot& slot)
    {
       return SubjectImp::attach(signal, slot);
    }
-   bool detach(const std::string &signal, const Slot &slot)
+
+   bool detach(const std::string& signal, const Slot& slot)
    {
       return SubjectImp::detach(signal, slot);
    }
-
 
 private:
    std::string mMessage;
@@ -137,4 +120,4 @@ private:
    ReportingLevel mReportLevel;
 };
 
-#endif   // __PROGRESSCONSOLE_H
+#endif

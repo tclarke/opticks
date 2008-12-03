@@ -7,36 +7,15 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-/**
- * Module Manager 
- *
- * The Module Manager is used to inform the main application about the
- * Plug-Ins within the Module.  It is also used to create, destroy, and provide
- * access to the Plug-Ins.  Plug-In developers edit this class to build
- * a Plug-In Module composed of thier Plug-Ins. This is a singleton class.  
- * Only one instance of this class exists at a given time.  Use the instance() 
- * method to get a reference to the class.
- *
- * To create (1) Add the include directories "..\interfaces, ..\pluginlib"
- *           (2) Add the library directories "..\pluginlib"
- *           (3) Add pluginlib.lib to the link directives
- *           (4) Change the name of the DLL to "spXXXX.dll" with XXXX being
- *               the name of the Module.
- */
-
+#include "BatchWizardExecutor.h"
 #include "ModuleManager.h"
 #include "WizardExecutor.h"
-#include "BatchWizardExecutor.h"
 
-//
-// These static variables are used to describe the Module.  Set 
-// these according to how you want the Module configured.  
-//
 const char* ModuleManager::mspName = "Wizard Executor";
 const char* ModuleManager::mspVersion = "1.0.0";
 const char* ModuleManager::mspDescription = "Executor for launching wizards";
 const char* ModuleManager::mspValidationKey = "none";
-const char *ModuleManager::mspUniqueId = "{13192489-18B5-43e6-8DD4-024405CA95BA}";
+const char* ModuleManager::mspUniqueId = "{13192489-18B5-43e6-8DD4-024405CA95BA}";
 
 unsigned int ModuleManager::getTotalPlugIns()
 {
@@ -46,15 +25,14 @@ unsigned int ModuleManager::getTotalPlugIns()
 PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
 {
    PlugIn* pPlugIn = NULL;
-
    switch (plugInNumber)
    {
       case 0:
-         pPlugIn = static_cast<PlugIn*>(new WizardExecutor);
+         pPlugIn = new WizardExecutor();
          break;
 
       case 1:
-         pPlugIn = static_cast<PlugIn*>(new BatchWizardExecutor);
+         pPlugIn = new BatchWizardExecutor();
          break;
 
       default:

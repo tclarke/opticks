@@ -6,13 +6,13 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
- 
+
 #include "TimeStruct.h"
 
-static const unsigned int secondsPerDay = 24*3600;
-static const unsigned int daysPerMonth[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
+static const unsigned int secondsPerDay = 24 * 3600;
+static const unsigned int daysPerMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 // return 0 == Midnight, 1Jan, 1940
-unsigned int TimeStruct::ToSam(struct tm *pTimeStruct)
+unsigned int TimeStruct::ToSam(struct tm* pTimeStruct)
 {
    if (pTimeStruct->tm_year < 40 || pTimeStruct->tm_year > 175)
    {
@@ -22,7 +22,7 @@ unsigned int TimeStruct::ToSam(struct tm *pTimeStruct)
    unsigned int years = pTimeStruct->tm_year + 1900 - 1940;
    unsigned int daysThisYear = 0;
    int i;
-   for (i=0; i<pTimeStruct->tm_mon; i++)
+   for (i = 0; i < pTimeStruct->tm_mon; ++i)
    {
       daysThisYear += daysPerMonth[i];
    }
@@ -34,7 +34,7 @@ unsigned int TimeStruct::ToSam(struct tm *pTimeStruct)
    }
 
    int leapYears = 0;
-   for (i=1940; i<(int)(years+1940); i++)
+   for (i = 1940; i < static_cast<int>(years + 1940); ++i)
    {
       if (IsLeapYear(i))
       {
@@ -49,7 +49,7 @@ unsigned int TimeStruct::ToSam(struct tm *pTimeStruct)
    return seconds; // seconds after midnight, 1Jan, 1940
 }
 
-struct tm *TimeStruct::FromSam(unsigned int sam)
+struct tm* TimeStruct::FromSam(unsigned int sam)
 {
    static struct tm timeStruct;
    unsigned int seconds = sam % 60; // 60 == seconds / minute
@@ -64,7 +64,7 @@ struct tm *TimeStruct::FromSam(unsigned int sam)
    timeStruct.tm_wday = (1+totalDays) % 7; // 1Jan,1940 is a Monday, hence the '+1'
    int i;
    int leapYears = 0; // used in day-of-week computation
-   for (i=1940; totalDays > 0; i++)
+   for (i = 1940; totalDays > 0; ++i)
    {
       unsigned int daysThisYear = 365;
       if (IsLeapYear(i))
@@ -81,8 +81,7 @@ struct tm *TimeStruct::FromSam(unsigned int sam)
          totalDays -= daysThisYear;
       }
    }
-   if (IsLeapYear(i) &&
-      totalDays > (31+29))
+   if (IsLeapYear(i) && totalDays > (31 + 29))
    {
       leapYears++;
    }
@@ -91,7 +90,7 @@ struct tm *TimeStruct::FromSam(unsigned int sam)
    timeStruct.tm_yday = totalDays;
    timeStruct.tm_isdst = 0;
    int monthDaySum = 0;
-   for (i=0; i<12; i++)
+   for (i = 0; i < 12; ++i)
    {
       unsigned int daysThisMonth = daysPerMonth[i];
       if (i == 1 && IsLeapYear(year))
@@ -115,7 +114,5 @@ struct tm *TimeStruct::FromSam(unsigned int sam)
 
 bool TimeStruct::IsLeapYear(int year)
 {
-   return (year%4==0 && (year%400==0 || year%100!=0));
+   return (year % 4 == 0 && (year % 400 == 0 || year % 100 != 0));
 }
-
- 

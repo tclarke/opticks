@@ -130,14 +130,14 @@ bool UnitsImp::toXml(XMLWriter* pXml) const
 
 bool UnitsImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   DOMElement *pElmnt(static_cast<DOMElement*>(pDocument));
+   DOMElement* pElmnt(static_cast<DOMElement*>(pDocument));
 
    mUnitType = StringUtilities::fromXmlString<UnitType>(
       A(pElmnt->getAttribute(X("type"))));
 
    mUnitName = A(pElmnt->getAttribute(X("name")));
 
-   vector<double> *pRange(static_cast<vector<double>*>(
+   vector<double>* pRange(static_cast<vector<double>*>(
             XmlReader::StrToVector<double,
                                    XmlReader::StringStreamAssigner<double> >(
                                           pElmnt->getAttribute(X("range")))));
@@ -146,7 +146,7 @@ bool UnitsImp::fromXml(DOMNode* pDocument, unsigned int version)
       mRangeMin = pRange->at(0);
       mRangeMax = pRange->at(1);
    }
-   catch(...)
+   catch (...)
    {
       return false;
    }
@@ -158,8 +158,8 @@ bool UnitsImp::fromXml(DOMNode* pDocument, unsigned int version)
 
 const string& UnitsImp::getObjectType() const
 {
-   static string type("UnitsImp");
-   return type;
+   static string sType("UnitsImp");
+   return sType;
 }
 
 bool UnitsImp::isKindOf(const string& className) const

@@ -16,53 +16,54 @@ class Filename;
 
 vector<string> PlugInArgImp::mArgTypes;
 
-PlugInArgImp::PlugInArgImp()
+PlugInArgImp::PlugInArgImp() :
+   mDefaultSet(false),
+   mpDefaultValueShallowCopy(NULL),
+   mActualSet(false),
+   mpActualValueShallowCopy(NULL)
 {
-   mType = "";
-   mName = "";
-   mActualSet = false;
-   mpActualValueShallowCopy = NULL;
-   mDefaultSet = false;
-   mpDefaultValueShallowCopy = NULL;
    initArgTypes();
 }
 
-PlugInArgImp::PlugInArgImp(const string& type, const string& name)
+PlugInArgImp::PlugInArgImp(const string& type, const string& name) :
+   mType(type),
+   mName(name),
+   mDefaultSet(false),
+   mpDefaultValueShallowCopy(NULL),
+   mActualSet(false),
+   mpActualValueShallowCopy(NULL)
 {
-   mType = type.c_str();
-   mName = name.c_str();
-   mActualSet = false;
-   mpActualValueShallowCopy = NULL;
-   mDefaultSet = false;
-   mpDefaultValueShallowCopy = NULL;
    initArgTypes();
 }
 
-PlugInArgImp::PlugInArgImp(const string& type, const string& name, const void *pDefaultValue) 
+PlugInArgImp::PlugInArgImp(const string& type, const string& name, const void* pDefaultValue) :
+   mType(type),
+   mName(name),
+   mDefaultSet(false),
+   mpDefaultValueShallowCopy(NULL),
+   mActualSet(false),
+   mpActualValueShallowCopy(NULL)
 {
-   mType = type.c_str();
-   mName = name.c_str();
-   mActualSet = false;
-   mpActualValueShallowCopy = NULL;
    initArgTypes();
-
    setDefaultValue(pDefaultValue);
 }
 
-PlugInArgImp::PlugInArgImp(const string& type, const string& name, 
-   const void *pDefaultValue, const void *pActualValue) 
+PlugInArgImp::PlugInArgImp(const string& type, const string& name, const void* pDefaultValue,
+                           const void* pActualValue) :
+   mType(type),
+   mName(name),
+   mDefaultSet(false),
+   mpDefaultValueShallowCopy(NULL),
+   mActualSet(false),
+   mpActualValueShallowCopy(NULL)
 {
-   mType = type.c_str();
-   mName = name.c_str();
    initArgTypes();
-
    setDefaultValue(pDefaultValue);
    setActualValue(pActualValue);
 }
 
 PlugInArgImp::~PlugInArgImp()
-{
-}
+{}
 
 const string& PlugInArgImp::getName() const
 {
@@ -94,8 +95,7 @@ bool PlugInArgImp::isActualSet() const
    return mActualSet;
 }
 
-static void setValue(const void *pValue, void **pShallowValue, DataVariant& deepValue, std::string type,
-                     bool tryDeepCopy)
+static void setValue(const void* pValue, void** pShallowValue, DataVariant& deepValue, string type, bool tryDeepCopy)
 {
    if (pValue == *pShallowValue)
    {
@@ -117,7 +117,7 @@ static void setValue(const void *pValue, void **pShallowValue, DataVariant& deep
             *pShallowValue = deepValue.getPointerToValueAsVoid();
          }
       }
-      
+
       if (*pShallowValue == NULL)
       {
          *pShallowValue = const_cast<void*>(pValue);
@@ -125,51 +125,49 @@ static void setValue(const void *pValue, void **pShallowValue, DataVariant& deep
    }
 }
 
-void PlugInArgImp::setDefaultValue(const void* defValue, bool tryDeepCopy)
+void PlugInArgImp::setDefaultValue(const void* pValue, bool tryDeepCopy)
 {
-   setValue(defValue, &mpDefaultValueShallowCopy, mDefaultValueDeepCopy, mType, tryDeepCopy);
-
+   setValue(pValue, &mpDefaultValueShallowCopy, mDefaultValueDeepCopy, mType, tryDeepCopy);
    mDefaultSet = true;
 }
 
-void PlugInArgImp::setActualValue(const void* value, bool tryDeepCopy)
+void PlugInArgImp::setActualValue(const void* pValue, bool tryDeepCopy)
 {
-   setValue(value, &mpActualValueShallowCopy, mActualValueDeepCopy, mType, tryDeepCopy);
-
+   setValue(pValue, &mpActualValueShallowCopy, mActualValueDeepCopy, mType, tryDeepCopy);
    mActualSet = true;
 }
 
-void PlugInArgImp::setName(const string& value)
+void PlugInArgImp::setName(const string& name)
 {
-   mName = value.c_str();
+   mName = name;
 }
 
-bool PlugInArgImp::setType(const string& value)
+bool PlugInArgImp::setType(const string& type)
 {
    // Make sure the type is valid
-   if (isArgType(value) == false)
+   if (isArgType(type) == false)
    {
-      mArgTypes.push_back(value);
+      mArgTypes.push_back(type);
    }
 
-   mType = value.c_str();
+   mType = type;
    return true;
 }
 
-void PlugInArgImp::setDescription(const std::string &description)
+void PlugInArgImp::setDescription(const string& description)
 {
    mDescription = description;
 }
 
-const std::string &PlugInArgImp::getDescription() const
+const string& PlugInArgImp::getDescription() const
 {
    return mDescription;
 }
 
 const string& PlugInArgImp::getObjectType() const
 {
-   static string type("PlugInArgImp");
-   return type;
+   static string sType("PlugInArgImp");
+   return sType;
 }
 
 bool PlugInArgImp::isKindOf(const string& className) const
@@ -255,11 +253,10 @@ void PlugInArgImp::initArgTypes()
 
 bool PlugInArgImp::isArgType(const string& type)
 {
-   return std::find(mArgTypes.begin(), mArgTypes.end(), type) != mArgTypes.end();
+   return find(mArgTypes.begin(), mArgTypes.end(), type) != mArgTypes.end();
 }
 
 const vector<string>& PlugInArgImp::getArgTypes()
 {
    return mArgTypes;
 }
-

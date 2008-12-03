@@ -15,15 +15,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-EndianSwapPage::EndianSwapPage(void *pSrcData, EncodingType encoding, unsigned int rows, unsigned int columns,
-                               unsigned int bytesPerRow, unsigned int interlineBytes, unsigned char *pEndOfSegment) :
+EndianSwapPage::EndianSwapPage(void* pSrcData, EncodingType encoding, unsigned int rows, unsigned int columns,
+                               unsigned int bytesPerRow, unsigned int interlineBytes, unsigned char* pEndOfSegment) :
    mData(rows * bytesPerRow), mRows(rows), mColumns(columns)
 {
-   if(interlineBytes == 0)
+   if (interlineBytes == 0)
    {
       // if there are no interline bytes, then we can do this more efficiently
       unsigned int count = bytesPerRow * rows;
-      if(pEndOfSegment != NULL)
+      if (pEndOfSegment != NULL)
       {
          count = std::min(count, static_cast<unsigned int>(pEndOfSegment - static_cast<unsigned char*>(pSrcData)));
       }
@@ -33,20 +33,20 @@ EndianSwapPage::EndianSwapPage(void *pSrcData, EncodingType encoding, unsigned i
    {
       unsigned int destOffset = 0;
       unsigned int srcOffset = 0;
-      for(unsigned int row = 0; row < rows; row++)
+      for (unsigned int row = 0; row < rows; row++)
       {
-         unsigned char *pStart = static_cast<unsigned char*>(pSrcData) + srcOffset;
+         unsigned char* pStart = static_cast<unsigned char*>(pSrcData) + srcOffset;
          unsigned int count = bytesPerRow;
-         if(pEndOfSegment != NULL)
+         if (pEndOfSegment != NULL)
          {
-            if(pStart >= pEndOfSegment)
+            if (pStart >= pEndOfSegment)
             {
                break;
             }
             count = std::min(count, static_cast<unsigned int>(pEndOfSegment - pStart));
          }
          memcpy(&mData[destOffset], pStart, count);
-         if(count < bytesPerRow)
+         if (count < bytesPerRow)
          {
             break;
          }

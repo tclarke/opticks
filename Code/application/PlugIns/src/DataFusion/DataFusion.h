@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef DATA_FUSION_H
-#define DATA_FUSION_H
+#ifndef DATAFUSION_H
+#define DATAFUSION_H
 
 #include "ViewerShell.h"
 #include "PlugInManagerServices.h"
@@ -19,20 +19,20 @@ class DataFusionDlg;
 
 class DataFusion : public ViewerShell, public Testable
 {
- public:
+public:
    DataFusion();
    ~DataFusion();
 
-   bool getInputSpecification(PlugInArgList* &pInputArgs);
-   bool getOutputSpecification(PlugInArgList* &pOutputArgs);
+   bool getInputSpecification(PlugInArgList*& pArgList);
+   bool getOutputSpecification(PlugInArgList*& pArgList);
 
    bool setBatch();
    bool setInteractive();
    bool abort();
    bool execute(PlugInArgList* pInputArgs, PlugInArgList* pOutputArgs);
 
-   bool runOperationalTests(Progress *pProgress, std::ostream& failure);
-   bool runAllTests(Progress *pProgress, std::ostream& failure);
+   bool runOperationalTests(Progress* pProgress, std::ostream& failure);
+   bool runAllTests(Progress* pProgress, std::ostream& failure);
 
    static const std::string PLUGIN_NAME;
 

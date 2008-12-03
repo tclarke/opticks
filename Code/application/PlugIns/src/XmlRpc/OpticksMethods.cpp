@@ -46,7 +46,8 @@
 #include <string>
 #include <vector>
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove qDebug() calls after debugging is complete (tclarke)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove qDebug() calls " \
+   "after debugging is complete (tclarke)")
 
 using namespace OpticksXmlRpcMethods;
 
@@ -54,75 +55,73 @@ int XML_RPC_INTERFACE_VERSION = 1;
 
 namespace // utility functions
 {
-   PerspectiveView *getView(const XmlRpcParams &params, int paramNumber)
+   PerspectiveView* getView(const XmlRpcParams& params, int paramNumber)
    {
       Service<DesktopServices> pDesktop;
-      WorkspaceWindow *pWindow = NULL;
-      if(params.size() < (paramNumber + 1))
+      WorkspaceWindow* pWindow = NULL;
+      if (params.size() < (paramNumber + 1))
       {
          pWindow = pDesktop->getCurrentWorkspaceWindow();
       }
       else
       {
-         const XmlRpcParam *pViewId = params[paramNumber];
-         if((pViewId == NULL) || (pViewId->type() != STRING_PARAM))
+         const XmlRpcParam* pViewId = params[paramNumber];
+         if ((pViewId == NULL) || (pViewId->type() != STRING_PARAM))
          {
             throw XmlRpcMethodFault(200);
          }
          pWindow = dynamic_cast<WorkspaceWindow*>(
             Service<SessionManager>()->getSessionItem(pViewId->value().toString().toStdString()));
       }
-      PerspectiveView *pView = NULL;
-      if(pWindow != NULL)
+      PerspectiveView* pView = NULL;
+      if (pWindow != NULL)
       {
          pDesktop->setCurrentWorkspaceWindow(pWindow);
          pView = dynamic_cast<PerspectiveView*>(pWindow->getView());
       }
-      if(pView == NULL)
+      if (pView == NULL)
       {
          throw XmlRpcMethodFault(300);
       }
       return pView;
    }
 
-   void setAnnotationProperties(GraphicObject &object, const XmlRpcStructParam &properties)
+   void setAnnotationProperties(GraphicObject& object, const XmlRpcStructParam& properties)
    {
-      for(XmlRpcStructParam::type::const_iterator it = properties.begin();
-                                                  it != properties.end();
-                                                  ++it)
+      for (XmlRpcStructParam::type::const_iterator it = properties.begin(); it != properties.end(); ++it)
       {
-         const XmlRpcParam *pValue = it.value();
+         const XmlRpcParam* pValue = it.value();
          const QString type(pValue->type());
          const QString val(pValue->value().toString());
 
-         if(pValue == NULL)
+         if (pValue == NULL)
          {
             continue;
          }
-         if(it.key() == "Alpha")
+         if (it.key() == "Alpha")
          {
             object.setAlpha(pValue->value().toDouble());
          }
-         else if(it.key() == "FillColor")
+         else if (it.key() == "FillColor")
          {
             ColorType newColor = StringUtilities::fromXmlString<ColorType>(pValue->value().toString().toStdString());
-            if(newColor.isValid())
+            if (newColor.isValid())
             {
                object.setFillColor(newColor);
             }
          }
-         else if(it.key() == "FillStyle")
+         else if (it.key() == "FillStyle")
          {
             FillStyle newFill = StringUtilities::fromXmlString<FillStyle>(pValue->value().toString().toStdString());
-            if(newFill.isValid())
+            if (newFill.isValid())
             {
                object.setFillStyle(newFill);
             }
          }
-         else if(it.key() == "LineColor")
+         else if (it.key() == "LineColor")
          {
             ColorType newColor = StringUtilities::fromXmlString<ColorType>(pValue->value().toString().toStdString());
-            if(newColor.isValid())
+            if (newColor.isValid())
             {
                object.setLineColor(newColor);
             }
@@ -131,10 +130,10 @@ namespace // utility functions
                qDebug() << "Could not convert" << pValue;
             }
          }
-         else if(it.key() == "Position" && pValue->type() == "array")
+         else if (it.key() == "Position" && pValue->type() == "array")
          {
-            const XmlRpcArrayParam *pArray = static_cast<const XmlRpcArrayParam*>(pValue);
-            if(pArray->size() == 2)
+            const XmlRpcArrayParam* pArray = static_cast<const XmlRpcArrayParam*>(pValue);
+            if (pArray->size() == 2)
             {
                LocationType ll((*pArray)[0]->value().toDouble(), (*pArray)[1]->value().toDouble());
                LocationType sz(object.getUrCorner() - object.getLlCorner());
@@ -142,25 +141,25 @@ namespace // utility functions
                object.setBoundingBox(ll, ur);
             }
          }
-         else if(it.key() == "Text")
+         else if (it.key() == "Text")
          {
             object.setText(pValue->value().toString().toStdString());
          }
-         else if(it.key() == "TextColor")
+         else if (it.key() == "TextColor")
          {
             ColorType newColor = StringUtilities::fromXmlString<ColorType>(pValue->value().toString().toStdString());
-            if(newColor.isValid())
+            if (newColor.isValid())
             {
                object.setTextColor(newColor);
             }
          }
-         else if(it.key() == "Points" && pValue->type() == "array")
+         else if (it.key() == "Points" && pValue->type() == "array")
          {
-            const XmlRpcArrayParam *pArray = static_cast<const XmlRpcArrayParam*>(pValue);
-            if(pArray->size() % 2 == 0)
+            const XmlRpcArrayParam* pArray = static_cast<const XmlRpcArrayParam*>(pValue);
+            if (pArray->size() % 2 == 0)
             {
-               RectangleObject *pRectObject = dynamic_cast<RectangleObject*>(&object);
-               if(pRectObject != NULL)
+               RectangleObject* pRectObject = dynamic_cast<RectangleObject*>(&object);
+               if (pRectObject != NULL)
                {
                   VERIFYNR(pArray->size() == 4);
                   LocationType ll((*pArray)[0]->value().toDouble(), (*pArray)[1]->value().toDouble());
@@ -171,7 +170,7 @@ namespace // utility functions
                {
                   std::vector<LocationType> points;
 
-                  for(int i = 0; i < pArray->size(); i += 2)
+                  for (int i = 0; i < pArray->size(); i += 2)
                   {
                      LocationType pos((*pArray)[i]->value().toDouble(), (*pArray)[i+1]->value().toDouble());
                      points.push_back(pos);
@@ -184,13 +183,13 @@ namespace // utility functions
    }
 }
 
-XmlRpcParam *Version::operator()(const XmlRpcParams &params)
+XmlRpcParam* Version::operator()(const XmlRpcParams& params)
 {
-   if(!params.empty())
+   if (!params.empty())
    {
       throw XmlRpcMethodFault(200);
    }
-   XmlRpcArrayParam *pRval = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pRval = new XmlRpcArrayParam;
    *pRval << new XmlRpcParam(INT_PARAM, XML_RPC_INTERFACE_VERSION) << new XmlRpcParam(STRING_PARAM, APP_VERSION_NUMBER);
    return pRval;
 }
@@ -202,61 +201,63 @@ QString Version::getHelp()
                   "The second return value is the version of "APP_NAME".");
 }
 
-XmlRpcArrayParam *Version::getSignature()
+XmlRpcArrayParam* Version::getSignature()
 {
-   XmlRpcArrayParam *pSignatures = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pSignatures = new XmlRpcArrayParam;
 
-   XmlRpcArrayParam *pParams = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pParams = new XmlRpcArrayParam;
    *pParams << new XmlRpcParam(STRING_PARAM, "[XML-RPC version, "APP_NAME" version]");
    *pSignatures << pParams;
 
    return pSignatures;
 }
 
-XmlRpcParam *Annotation::Create::operator()(const XmlRpcParams &params)
+XmlRpcParam* Annotation::Create::operator()(const XmlRpcParams& params)
 {
-   if((params.size() < 1 || params.size() > 4))
+   if ((params.size() < 1 || params.size() > 4))
    {
       throw XmlRpcMethodFault(200);
    }
-   SpatialDataView *pView = dynamic_cast<SpatialDataView*>(getView(params, 3));
-   if(pView == NULL)
+   SpatialDataView* pView = dynamic_cast<SpatialDataView*>(getView(params, 3));
+   if (pView == NULL)
    {
       throw XmlRpcMethodFault(300);
    }
    QString annotationId;
-   const XmlRpcParam *pAnnotationId = params[0];
-   if(pAnnotationId != NULL)
+   const XmlRpcParam* pAnnotationId = params[0];
+   if (pAnnotationId != NULL)
    {
       annotationId = pAnnotationId->value().toString();
    }
    GraphicObjectType newObjectType;
-   if(params.size() >= 2)
+   if (params.size() >= 2)
    {
-      const XmlRpcParam *pAnnotationType = params[1];
-      if(pAnnotationType != NULL)
+      const XmlRpcParam* pAnnotationType = params[1];
+      if (pAnnotationType != NULL)
       {
-         newObjectType = StringUtilities::fromXmlString<GraphicObjectType>(pAnnotationType->value().toString().toStdString());
+         newObjectType =
+            StringUtilities::fromXmlString<GraphicObjectType>(pAnnotationType->value().toString().toStdString());
       }
    }
-   GraphicLayer *pLayer = NULL;
-   GraphicObject *pObject = NULL;   
-   if(!XmlRpcAnnotationCallback::getGraphicLayerAndObject(getLayerType(), annotationId, pLayer, pObject, pView, true, newObjectType))
+   GraphicLayer* pLayer = NULL;
+   GraphicObject* pObject = NULL;
+   if (!XmlRpcAnnotationCallback::getGraphicLayerAndObject(getLayerType(), annotationId, pLayer, pObject,
+      pView, true, newObjectType))
    {
-      if(pLayer == NULL)
+      if (pLayer == NULL)
       {
          throw XmlRpcMethodFault(305);
       }
-      if(pObject != NULL)
+      if (pObject != NULL)
       {
          throw XmlRpcMethodFault(304, getNamespace());
       }
       throw XmlRpcMethodFault(200);
    }
    pView->setActiveLayer(pLayer);
-   if(params.size() >= 3 && params[2]->type() == "struct")
+   if (params.size() >= 3 && params[2]->type() == "struct")
    {
-      const XmlRpcStructParam *pProperties = static_cast<const XmlRpcStructParam*>(params[2]);
+      const XmlRpcStructParam* pProperties = static_cast<const XmlRpcStructParam*>(params[2]);
       setAnnotationProperties(*pObject, *pProperties);
       pView->refresh();
    }
@@ -265,15 +266,16 @@ XmlRpcParam *Annotation::Create::operator()(const XmlRpcParams &params)
 
 QString Annotation::Create::getHelp()
 {
-   return QString("Create an %1. %1ID is either LayerName[ObjectName], LayerName[ObjectType:ObjectIndex], or just LayerName. "
-          "Allowed properties: Alpha, FillColor, FillStyle, LineColor, Position, Text, TextColor, and Points.").arg(getNamespace());
+   return QString("Create an %1. %1ID is either LayerName[ObjectName], LayerName[ObjectType:ObjectIndex], or "
+      "just LayerName. Allowed properties: Alpha, FillColor, FillStyle, LineColor, Position, Text, TextColor, "
+      "and Points.").arg(getNamespace());
 }
 
-XmlRpcArrayParam *Annotation::Create::getSignature()
+XmlRpcArrayParam* Annotation::Create::getSignature()
 {
-   XmlRpcArrayParam *pSignatures = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pSignatures = new XmlRpcArrayParam;
 
-   XmlRpcArrayParam *pParams = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pParams = new XmlRpcArrayParam;
    *pParams << new XmlRpcParam(STRING_PARAM, "null");
    *pParams << new XmlRpcParam(STRING_PARAM, QString("string %1ID").arg(getNamespace()));
    *pSignatures << pParams;
@@ -302,45 +304,45 @@ XmlRpcArrayParam *Annotation::Create::getSignature()
    return pSignatures;
 }
 
-XmlRpcParam *Annotation::Delete::operator()(const XmlRpcParams &params)
+XmlRpcParam* Annotation::Delete::operator()(const XmlRpcParams& params)
 {
-   if((params.size() != 1) && (params.size() != 2))
+   if ((params.size() != 1) && (params.size() != 2))
    {
       throw XmlRpcMethodFault(200);
    }
-   SpatialDataView *pView = dynamic_cast<SpatialDataView*>(getView(params, 1));
-   if(pView == NULL)
+   SpatialDataView* pView = dynamic_cast<SpatialDataView*>(getView(params, 1));
+   if (pView == NULL)
    {
       throw XmlRpcMethodFault(300);
    }
 
    QString annotationId;
-   const XmlRpcParam *pAnnotationId = params[0];
-   if(pAnnotationId != NULL)
+   const XmlRpcParam* pAnnotationId = params[0];
+   if (pAnnotationId != NULL)
    {
       annotationId = pAnnotationId->value().toString();
-      if(annotationId.isEmpty() || annotationId.isNull())
+      if (annotationId.isEmpty() || annotationId.isNull())
       {
          throw XmlRpcMethodFault(200);
       }
    }
-   GraphicLayer *pLayer = NULL;
-   GraphicObject *pObject = NULL;
-   if(!XmlRpcAnnotationCallback::getGraphicLayerAndObject(getLayerType(), annotationId, pLayer, pObject, pView))
+   GraphicLayer* pLayer = NULL;
+   GraphicObject* pObject = NULL;
+   if (!XmlRpcAnnotationCallback::getGraphicLayerAndObject(getLayerType(), annotationId, pLayer, pObject, pView))
    {
-      if(pLayer == NULL)
+      if (pLayer == NULL)
       {
          throw XmlRpcMethodFault(305);
       }
    }
 
-   if(pObject != NULL)
+   if (pObject != NULL)
    {
       pLayer->removeObject(pObject, true);
    }
    else
    {
-      if(!pView->deleteLayer(pLayer))
+      if (!pView->deleteLayer(pLayer))
       {
          throw XmlRpcMethodFault(308);
       }
@@ -354,11 +356,11 @@ QString Annotation::Delete::getHelp()
    return "Delete an %1. %1ID is either LayerName[ObjectName] or just LayerName.";
 }
 
-XmlRpcArrayParam *Annotation::Delete::getSignature()
+XmlRpcArrayParam* Annotation::Delete::getSignature()
 {
-   XmlRpcArrayParam *pSignatures = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pSignatures = new XmlRpcArrayParam;
 
-   XmlRpcArrayParam *pParams = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pParams = new XmlRpcArrayParam;
    *pParams << new XmlRpcParam(STRING_PARAM, "null");
    *pParams << new XmlRpcParam(STRING_PARAM, QString("string %1ID").arg(getNamespace()));
    *pSignatures << pParams;
@@ -372,71 +374,71 @@ XmlRpcArrayParam *Annotation::Delete::getSignature()
    return pSignatures;
 }
 
-XmlRpcParam *Aoi::GetBoundingBox::operator()(const XmlRpcParams &params)
+XmlRpcParam* Aoi::GetBoundingBox::operator()(const XmlRpcParams& params)
 {
-   if((params.size() != 1) && (params.size() != 2))
+   if ((params.size() != 1) && (params.size() != 2))
    {
       throw XmlRpcMethodFault(200);
    }
-   SpatialDataView *pView = dynamic_cast<SpatialDataView*>(getView(params, 1));
-   if(pView == NULL)
+   SpatialDataView* pView = dynamic_cast<SpatialDataView*>(getView(params, 1));
+   if (pView == NULL)
    {
       throw XmlRpcMethodFault(300);
    }
 
    std::string aoiLayerName;
-   const XmlRpcParam *pAoiLayerName = params[0];
-   if(pAoiLayerName != NULL)
+   const XmlRpcParam* pAoiLayerName = params[0];
+   if (pAoiLayerName != NULL)
    {
       QString str = pAoiLayerName->value().toString();
-      if(str.isEmpty() || str.isNull())
+      if (str.isEmpty() || str.isNull())
       {
          throw XmlRpcMethodFault(200);
       }
       aoiLayerName = str.toStdString();
    }
 
-   LayerList *pLayerList = pView->getLayerList();
+   LayerList* pLayerList = pView->getLayerList();
    std::vector<Layer*> aoiLayers;
    pLayerList->getLayers(AOI_LAYER, aoiLayers);
-   AoiLayer *pAoiLayer = NULL;
-   for(std::vector<Layer*>::iterator lit = aoiLayers.begin(); lit != aoiLayers.end(); ++lit)
+   AoiLayer* pAoiLayer = NULL;
+   for (std::vector<Layer*>::iterator lit = aoiLayers.begin(); lit != aoiLayers.end(); ++lit)
    {
-      Layer *pLayer = *lit;
-      if(pLayer != NULL)
+      Layer* pLayer = *lit;
+      if (pLayer != NULL)
       {
          std::string layerName = pLayer->getName();
-         if(layerName == aoiLayerName)
+         if (layerName == aoiLayerName)
          {
             pAoiLayer = static_cast<AoiLayer*>(pLayer);
             break;
          }
       }
    }
-   if(pAoiLayer == NULL)
+   if (pAoiLayer == NULL)
    {
       throw XmlRpcMethodFault(305);
    }
 
-   GraphicElement *pElement = static_cast<GraphicElement*>(pAoiLayer->getDataElement());
-   if(pElement == NULL)
+   GraphicElement* pElement = static_cast<GraphicElement*>(pAoiLayer->getDataElement());
+   if (pElement == NULL)
    {
       throw XmlRpcMethodFault(305);
    }
-   GraphicGroup *pGroup = pElement->getGroup();
-   if(pGroup == NULL)
+   GraphicGroup* pGroup = pElement->getGroup();
+   if (pGroup == NULL)
    {
       throw XmlRpcMethodFault(305);
    }
    LocationType ll = pGroup->getLlCorner();
    LocationType ur = pGroup->getUrCorner();
-   XmlRpcArrayParam *pRval = new XmlRpcArrayParam;
-   if(pRval == NULL)
+   XmlRpcArrayParam* pRval = new XmlRpcArrayParam;
+   if (pRval == NULL)
    {
       throw XmlRpcMethodFault(201);
    }
-   XmlRpcArrayParam *pTuple = new XmlRpcArrayParam;
-   if(pTuple == NULL)
+   XmlRpcArrayParam* pTuple = new XmlRpcArrayParam;
+   if (pTuple == NULL)
    {
       throw XmlRpcMethodFault(201);
    }
@@ -444,7 +446,7 @@ XmlRpcParam *Aoi::GetBoundingBox::operator()(const XmlRpcParams &params)
            << new XmlRpcParam(DOUBLE_PARAM, ll.mY);
    *pRval << pTuple;
    pTuple = new XmlRpcArrayParam;
-   if(pTuple == NULL)
+   if (pTuple == NULL)
    {
       throw XmlRpcMethodFault(201);
    }
@@ -461,11 +463,11 @@ QString Aoi::GetBoundingBox::getHelp()
           "Returns an array of 2-tuples. [[x1, y1], [x2, y2]]";
 }
 
-XmlRpcArrayParam *Aoi::GetBoundingBox::getSignature()
+XmlRpcArrayParam* Aoi::GetBoundingBox::getSignature()
 {
-   XmlRpcArrayParam *pSignatures = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pSignatures = new XmlRpcArrayParam;
 
-   XmlRpcArrayParam *pParams = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pParams = new XmlRpcArrayParam;
    *pParams << new XmlRpcParam(STRING_PARAM, "array");
    *pParams << new XmlRpcParam(STRING_PARAM, "string AOIID");
    *pSignatures << pParams;
@@ -479,35 +481,35 @@ XmlRpcArrayParam *Aoi::GetBoundingBox::getSignature()
    return pSignatures;
 }
 
-XmlRpcParam *Aoi::SetMode::operator()(const XmlRpcParams &params)
+XmlRpcParam* Aoi::SetMode::operator()(const XmlRpcParams& params)
 {
-   if((params.size() != 2) && (params.size() != 3))
+   if ((params.size() != 2) && (params.size() != 3))
    {
       throw XmlRpcMethodFault(200);
    }
-   SpatialDataView *pView = dynamic_cast<SpatialDataView*>(getView(params, 3));
-   if(pView == NULL)
+   SpatialDataView* pView = dynamic_cast<SpatialDataView*>(getView(params, 3));
+   if (pView == NULL)
    {
       throw XmlRpcMethodFault(300);
    }
 
    GraphicObjectType aoiTool;
-   const XmlRpcParam *pAoiTool = params[1];
-   if(pAoiTool != NULL)
+   const XmlRpcParam* pAoiTool = params[1];
+   if (pAoiTool != NULL)
    {
       aoiTool = StringUtilities::fromXmlString<GraphicObjectType>(pAoiTool->value().toString().toStdString());
    }
-   if(!aoiTool.isValid())
+   if (!aoiTool.isValid())
    {
       throw XmlRpcMethodFault(200);
    }
    ModeType aoiMode;
-   const XmlRpcParam *pAoiMode = params[0];
-   if(pAoiMode != NULL)
+   const XmlRpcParam* pAoiMode = params[0];
+   if (pAoiMode != NULL)
    {
       aoiMode = StringUtilities::fromXmlString<ModeType>(pAoiMode->value().toString().toStdString());
    }
-   if(!aoiMode.isValid())
+   if (!aoiMode.isValid())
    {
       throw XmlRpcMethodFault(200);
    }
@@ -524,11 +526,11 @@ QString Aoi::SetMode::getHelp()
       "AOI tools are: pixel, rectangle, row, column, polygon, polyline, line, hline, vline.";
 }
 
-XmlRpcArrayParam *Aoi::SetMode::getSignature()
+XmlRpcArrayParam* Aoi::SetMode::getSignature()
 {
-   XmlRpcArrayParam *pSignatures = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pSignatures = new XmlRpcArrayParam;
 
-   XmlRpcArrayParam *pParams = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pParams = new XmlRpcArrayParam;
    *pParams << new XmlRpcParam(STRING_PARAM, "null");
    *pParams << new XmlRpcParam(STRING_PARAM, "string AOIMode");
    *pParams << new XmlRpcParam(STRING_PARAM, "string AOITool");
@@ -544,24 +546,24 @@ XmlRpcArrayParam *Aoi::SetMode::getSignature()
    return pSignatures;
 }
 
-XmlRpcParam *Close::operator()(const XmlRpcParams &params)
+XmlRpcParam* Close::operator()(const XmlRpcParams& params)
 {
-   if(params.size() > 1)
+   if (params.size() > 1)
    {
       throw XmlRpcMethodFault(200);
    }
-   SpatialDataView *pView = dynamic_cast<SpatialDataView*>(getView(params, 0));
-   if(pView == NULL)
+   SpatialDataView* pView = dynamic_cast<SpatialDataView*>(getView(params, 0));
+   if (pView == NULL)
    {
       throw XmlRpcMethodFault(300);
    }
    Service<DesktopServices> pDesktop;
    std::vector<Window*> windows;
    pDesktop->getWindows(SPATIAL_DATA_WINDOW, windows);
-   for(std::vector<Window*>::iterator wit = windows.begin(); wit != windows.end(); ++wit)
+   for (std::vector<Window*>::iterator wit = windows.begin(); wit != windows.end(); ++wit)
    {
-      SpatialDataWindow *pWindow = static_cast<SpatialDataWindow*>(*wit);
-      if(static_cast<SpatialDataView*>(pWindow->getView()) == pView)
+      SpatialDataWindow* pWindow = static_cast<SpatialDataWindow*>(*wit);
+      if (static_cast<SpatialDataView*>(pWindow->getView()) == pView)
       {
          pDesktop->deleteWindow(pWindow);
          break;
@@ -575,11 +577,11 @@ QString Close::getHelp()
    return "Close a data set and the associated window.";
 }
 
-XmlRpcArrayParam *Close::getSignature()
+XmlRpcArrayParam* Close::getSignature()
 {
-   XmlRpcArrayParam *pSignatures = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pSignatures = new XmlRpcArrayParam;
 
-   XmlRpcArrayParam *pParams = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pParams = new XmlRpcArrayParam;
    *pParams << new XmlRpcParam(STRING_PARAM, "null");
    *pSignatures << pParams;
 
@@ -591,20 +593,20 @@ XmlRpcArrayParam *Close::getSignature()
    return pSignatures;
 }
 
-XmlRpcParam *CreateView::operator()(const XmlRpcParams &params)
+XmlRpcParam* CreateView::operator()(const XmlRpcParams& params)
 {
-   if((params.size() != 1) && (params.size() != 2))
+   if ((params.size() != 1) && (params.size() != 2))
    {
       throw XmlRpcMethodFault(200);
    }
-   SpatialDataView *pView = dynamic_cast<SpatialDataView*>(getView(params, 1));
+   SpatialDataView* pView = dynamic_cast<SpatialDataView*>(getView(params, 1));
    
    std::string newViewName;
-   const XmlRpcParam *pNewViewName = params[0];
-   if(pNewViewName != NULL)
+   const XmlRpcParam* pNewViewName = params[0];
+   if (pNewViewName != NULL)
    {
       QString str = pNewViewName->value().toString();
-      if(str.isEmpty() || str.isNull())
+      if (str.isEmpty() || str.isNull())
       {
          throw XmlRpcMethodFault(200);
       }
@@ -612,15 +614,15 @@ XmlRpcParam *CreateView::operator()(const XmlRpcParams &params)
    }
 
    Service<DesktopServices> pDesktop;
-   SpatialDataWindow *pNewWindow = static_cast<SpatialDataWindow*>(
+   SpatialDataWindow* pNewWindow = static_cast<SpatialDataWindow*>(
       pDesktop->createWindow(newViewName, SPATIAL_DATA_WINDOW));
-   if(pNewWindow == NULL)
+   if (pNewWindow == NULL)
    {
       throw XmlRpcMethodFault(309);
    }
 
-   SpatialDataView *pNewView = pNewWindow->getSpatialDataView();
-   if(pNewView == NULL)
+   SpatialDataView* pNewView = pNewWindow->getSpatialDataView();
+   if (pNewView == NULL)
    {
       pDesktop->deleteWindow(pNewWindow);
       throw XmlRpcMethodFault(309);
@@ -632,14 +634,15 @@ XmlRpcParam *CreateView::operator()(const XmlRpcParams &params)
 
 QString CreateView::getHelp()
 {
-   return "Create a new view on an existing data set. The arguments are a new view name and an optional existing view name.";
+   return "Create a new view on an existing data set. The arguments are a new view name and an optional "
+      "existing view name.";
 }
 
-XmlRpcArrayParam *CreateView::getSignature()
+XmlRpcArrayParam* CreateView::getSignature()
 {
-   XmlRpcArrayParam *pSignatures = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pSignatures = new XmlRpcArrayParam;
 
-   XmlRpcArrayParam *pParams = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pParams = new XmlRpcArrayParam;
    *pParams << new XmlRpcParam(STRING_PARAM, "null");
    *pParams << new XmlRpcParam(STRING_PARAM, "string NewViewName");
    *pSignatures << pParams;
@@ -653,44 +656,49 @@ XmlRpcArrayParam *CreateView::getSignature()
    return pSignatures;
 }
 
-XmlRpcParam *GetViewInfo::operator()(const XmlRpcParams &params)
+XmlRpcParam* GetViewInfo::operator()(const XmlRpcParams& params)
 {
-   WorkspaceWindow *pWindow = NULL;
-   if(params.size() > 1)
+   WorkspaceWindow* pWindow = NULL;
+   if (params.size() > 1)
    {
       throw XmlRpcMethodFault(200);
    }
-   PerspectiveView *pView = getView(params, 0);
-   
-   XmlRpcStructParam *pRval = new XmlRpcStructParam;
+   PerspectiveView* pView = getView(params, 0);
 
-   QString backgroundColor = QString::fromStdString(StringUtilities::toXmlString<ColorType>(pView->getBackgroundColor()));
+   XmlRpcStructParam* pRval = new XmlRpcStructParam;
+
+   QString backgroundColor =
+      QString::fromStdString(StringUtilities::toXmlString<ColorType>(pView->getBackgroundColor()));
    pRval->insert("background color", new XmlRpcParam(STRING_PARAM, backgroundColor));
 
-   double minX(0), minY(0), maxX(0), maxY(0);
+   double minX(0.0);
+   double minY(0.0);
+   double maxX(0.0);
+   double maxY(0.0);
    pView->getExtents(minX, minY, maxX, maxY);
-   XmlRpcArrayParam *pExtents = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pExtents = new XmlRpcArrayParam;
    *pExtents << new XmlRpcParam(DOUBLE_PARAM, minX) << new XmlRpcParam(DOUBLE_PARAM, minY)
              << new XmlRpcParam(DOUBLE_PARAM, maxX) << new XmlRpcParam(DOUBLE_PARAM, maxY);
    pRval->insert("extents", pExtents);
 
-   XmlRpcArrayParam *pVisibleCenter = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pVisibleCenter = new XmlRpcArrayParam;
    *pVisibleCenter << new XmlRpcParam(DOUBLE_PARAM, pView->getVisibleCenter().mX)
                    << new XmlRpcParam(DOUBLE_PARAM, pView->getVisibleCenter().mY);
    pRval->insert("visible center", pVisibleCenter);
    pRval->insert("rotation", new XmlRpcParam(DOUBLE_PARAM, pView->getRotation()));
    pRval->insert("zoom percentage", new XmlRpcParam(DOUBLE_PARAM, pView->getZoomPercentage()));
-   SpatialDataView *pSpatialDataView = dynamic_cast<SpatialDataView*>(pView);
-   if(pSpatialDataView != NULL)
+   SpatialDataView* pSpatialDataView = dynamic_cast<SpatialDataView*>(pView);
+   if (pSpatialDataView != NULL)
    {
-      RasterElement *pRasterElement = dynamic_cast<RasterElement*>(pSpatialDataView->getLayerList()->getPrimaryRasterElement());
-      if(pRasterElement != NULL)
+      RasterElement* pRasterElement =
+         dynamic_cast<RasterElement*>(pSpatialDataView->getLayerList()->getPrimaryRasterElement());
+      if (pRasterElement != NULL)
       {
-         FileDescriptor *pFileDescriptor = pRasterElement->getDataDescriptor()->getFileDescriptor();
-         if(pFileDescriptor != NULL)
+         FileDescriptor* pFileDescriptor = pRasterElement->getDataDescriptor()->getFileDescriptor();
+         if (pFileDescriptor != NULL)
          {
-            QString filename = QString::fromStdString(static_cast<RasterFileDescriptor*>(pFileDescriptor)->getFilename().getFullPathAndName());
-            if(!filename.isEmpty())
+            QString filename = QString::fromStdString(pFileDescriptor->getFilename().getFullPathAndName());
+            if (!filename.isEmpty())
             {
                pRval->insert("filename", new XmlRpcParam(STRING_PARAM, filename));
             }
@@ -713,11 +721,11 @@ QString GetViewInfo::getHelp()
       "filename = string indicating the filename of the loaded data (not present if there is no on-disk file)";
 }
 
-XmlRpcArrayParam *GetViewInfo::getSignature()
+XmlRpcArrayParam* GetViewInfo::getSignature()
 {
-   XmlRpcArrayParam *pSignatures = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pSignatures = new XmlRpcArrayParam;
 
-   XmlRpcArrayParam *pParams = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pParams = new XmlRpcArrayParam;
    *pParams << new XmlRpcParam(STRING_PARAM, "struct");
    *pSignatures << pParams;
    
@@ -729,24 +737,23 @@ XmlRpcArrayParam *GetViewInfo::getSignature()
    return pSignatures;
 }
 
-XmlRpcParam *GetViews::operator()(const XmlRpcParams &params)
+XmlRpcParam* GetViews::operator()(const XmlRpcParams& params)
 {
    Service<DesktopServices> pDesktop;
-   WorkspaceWindow *pWindow = NULL;
-   if(params.size() != 0)
+   if (params.size() != 0)
    {
       throw XmlRpcMethodFault(200);
    }
 
-   XmlRpcArrayParam *pRval = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pRval = new XmlRpcArrayParam;
    std::vector<Window*> windows;
    pDesktop->getWindows(SPATIAL_DATA_WINDOW, windows);
-   for(std::vector<Window*>::const_iterator wit = windows.begin(); wit != windows.end(); ++wit)
+   for (std::vector<Window*>::const_iterator wit = windows.begin(); wit != windows.end(); ++wit)
    {
-      SpatialDataWindow *pWindow = static_cast<SpatialDataWindow*>(*wit);
-      if(pWindow != NULL)
+      SpatialDataWindow* pWindow = static_cast<SpatialDataWindow*>(*wit);
+      if (pWindow != NULL)
       {
-         XmlRpcStructParam *pStruct = new XmlRpcStructParam;
+         XmlRpcStructParam* pStruct = new XmlRpcStructParam;
          pStruct->insert("name", new XmlRpcParam(STRING_PARAM, QString::fromStdString(pWindow->getName())));
          pStruct->insert("id", new XmlRpcParam(STRING_PARAM, QString::fromStdString(pWindow->getId())));
          *pRval << pStruct;
@@ -761,32 +768,32 @@ QString GetViews::getHelp()
    return "Retrieve an array of available view names and IDs.";
 }
 
-XmlRpcArrayParam *GetViews::getSignature()
+XmlRpcArrayParam* GetViews::getSignature()
 {
-   XmlRpcArrayParam *pSignatures = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pSignatures = new XmlRpcArrayParam;
 
-   XmlRpcArrayParam *pParams = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pParams = new XmlRpcArrayParam;
    *pParams << new XmlRpcParam(STRING_PARAM, "array");
    *pSignatures << pParams;
 
    return pSignatures;
 }
 
-XmlRpcParam *LinkViews::operator()(const XmlRpcParams &params)
+XmlRpcParam* LinkViews::operator()(const XmlRpcParams& params)
 {
-   if(params.size() != 2)
+   if (params.size() != 2)
    {
       throw XmlRpcMethodFault(200);
    }
-   SpatialDataView *pPrimaryView = dynamic_cast<SpatialDataView*>(getView(params, 0));
-   SpatialDataView *pLinkedView = dynamic_cast<SpatialDataView*>(getView(params, 1));
-   
-   if((pPrimaryView == NULL) || (pLinkedView == NULL))
+   SpatialDataView* pPrimaryView = dynamic_cast<SpatialDataView*>(getView(params, 0));
+   SpatialDataView* pLinkedView = dynamic_cast<SpatialDataView*>(getView(params, 1));
+
+   if ((pPrimaryView == NULL) || (pLinkedView == NULL))
    {
       throw XmlRpcMethodFault(300);
    }
 
-   if(!pPrimaryView->linkView(pLinkedView, AUTOMATIC_LINK))
+   if (!pPrimaryView->linkView(pLinkedView, AUTOMATIC_LINK))
    {
       throw XmlRpcMethodFault(310);
    }
@@ -799,11 +806,11 @@ QString LinkViews::getHelp()
    return "Link two views.";
 }
 
-XmlRpcArrayParam *LinkViews::getSignature()
+XmlRpcArrayParam* LinkViews::getSignature()
 {
-   XmlRpcArrayParam *pSignatures = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pSignatures = new XmlRpcArrayParam;
 
-   XmlRpcArrayParam *pParams = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pParams = new XmlRpcArrayParam;
    *pParams << new XmlRpcParam(STRING_PARAM, "null");
    *pParams << new XmlRpcParam(STRING_PARAM, "string PrimaryViewID");
    *pParams << new XmlRpcParam(STRING_PARAM, "string LinkedViewID");
@@ -812,68 +819,67 @@ XmlRpcArrayParam *LinkViews::getSignature()
    return pSignatures;
 }
 
-XmlRpcParam *Open::operator()(const XmlRpcParams &params)
+XmlRpcParam* Open::operator()(const XmlRpcParams& params)
 {
    std::string filename;
-   if(params.size() < 1)
+   if (params.size() < 1)
    {
       throw XmlRpcMethodFault(200);
    }
-   const XmlRpcParam *pFilenameParam = params[0];
-   if((pFilenameParam == NULL) || (pFilenameParam->type() != STRING_PARAM))
+   const XmlRpcParam* pFilenameParam = params[0];
+   if ((pFilenameParam == NULL) || (pFilenameParam->type() != STRING_PARAM))
    {
       throw XmlRpcMethodFault(200);
    }
    filename = XmlBase::URLtoPath(X(pFilenameParam->value().toString().toAscii()));
-   if(filename.empty())
+   if (filename.empty())
    {
       throw XmlRpcMethodFault(200);
    }
 
    ProcessingLocation location;
-   if(params.size() >= 2)
+   if (params.size() >= 2)
    {
-      const XmlRpcParam *pProcessingLocation = params[1];
-      if((pProcessingLocation == NULL) || (pProcessingLocation->type() != STRING_PARAM))
+      const XmlRpcParam* pProcessingLocation = params[1];
+      if ((pProcessingLocation == NULL) || (pProcessingLocation->type() != STRING_PARAM))
       {
          throw XmlRpcMethodFault(200);
       }
-      location = StringUtilities::fromXmlString<ProcessingLocation>(pProcessingLocation->value().toString().toStdString());
+      location =
+         StringUtilities::fromXmlString<ProcessingLocation>(pProcessingLocation->value().toString().toStdString());
    }
 
    // See if the cube has already been imported
    std::vector<Window*> windows;
    Service<DesktopServices>()->getWindows(SPATIAL_DATA_WINDOW, windows);
 
-   for(std::vector<Window*>::const_iterator wit = windows.begin(); wit != windows.end(); ++wit)
+   for (std::vector<Window*>::const_iterator wit = windows.begin(); wit != windows.end(); ++wit)
    {
-      SpatialDataWindow *pWindow = static_cast<SpatialDataWindow*>(*wit);
-      if(pWindow != NULL)
+      SpatialDataWindow* pWindow = static_cast<SpatialDataWindow*>(*wit);
+      if (pWindow != NULL)
       {
-         RasterElement *pRasterElement = dynamic_cast<RasterElement*>(pWindow->getSpatialDataView()
-            ->getLayerList()->getPrimaryRasterElement());
-         if(pRasterElement != NULL)
+         RasterElement* pRasterElement =
+            dynamic_cast<RasterElement*>(pWindow->getSpatialDataView()->getLayerList()->getPrimaryRasterElement());
+         if (pRasterElement != NULL)
          {
-            FileDescriptor *pFileDescriptor = pRasterElement->getDataDescriptor()->getFileDescriptor();
+            FileDescriptor* pFileDescriptor = pRasterElement->getDataDescriptor()->getFileDescriptor();
             if (pFileDescriptor != NULL)
             {
-               QString pathname = 
-                  QString::fromStdString(static_cast<RasterFileDescriptor*>(pFileDescriptor)->getFilename().getFullPathAndName());
-               if((pathname.toStdString()) == filename)
+               QString pathname = QString::fromStdString(pFileDescriptor->getFilename().getFullPathAndName());
+               if ((pathname.toStdString()) == filename)
                {
                   return new XmlRpcParam("string", QString::fromStdString(pWindow->getId()));
                }
             }
          }
-
       }
    }
 
    ImporterResource pImporter("Auto Importer", filename, NULL, false);
    pImporter->createProgressDialog(true);
 
-   Importer *pImp = dynamic_cast<Importer*>(pImporter->getPlugIn());
-   if(pImp == NULL)
+   Importer* pImp = dynamic_cast<Importer*>(pImporter->getPlugIn());
+   if (pImp == NULL)
    {
       return NULL;
    }
@@ -881,23 +887,24 @@ XmlRpcParam *Open::operator()(const XmlRpcParams &params)
    bool modified = false;
    bool cubePresent = false;
    std::vector<ImportDescriptor*> descriptors = pImporter->getImportDescriptors();
-   for(std::vector<ImportDescriptor*>::iterator descriptor = descriptors.begin(); descriptor != descriptors.end(); ++descriptor)
+   for (std::vector<ImportDescriptor*>::iterator descriptor = descriptors.begin();
+      descriptor != descriptors.end(); ++descriptor)
    {
-      if(*descriptor != NULL && (*descriptor)->getDataDescriptor() != NULL)
+      if (*descriptor != NULL && (*descriptor)->getDataDescriptor() != NULL)
       {
-         if(dynamic_cast<RasterDataDescriptor*>((*descriptor)->getDataDescriptor()) != NULL)
+         if (dynamic_cast<RasterDataDescriptor*>((*descriptor)->getDataDescriptor()) != NULL)
          {
             cubePresent = true;
          }
-         if(location.isValid() && (*descriptor)->getDataDescriptor()->getProcessingLocation() != location)
+         if (location.isValid() && (*descriptor)->getDataDescriptor()->getProcessingLocation() != location)
          {
             (*descriptor)->getDataDescriptor()->setProcessingLocation(location);
             modified = true;
          }
          std::string errorMessage;
-         if(!pImp->validate((*descriptor)->getDataDescriptor(), errorMessage) && !errorMessage.empty())
+         if (!pImp->validate((*descriptor)->getDataDescriptor(), errorMessage) && !errorMessage.empty())
          {
-            if(!errors.isEmpty())
+            if (!errors.isEmpty())
             {
                errors += "\n";
             }
@@ -905,29 +912,27 @@ XmlRpcParam *Open::operator()(const XmlRpcParams &params)
          }
       }
    }
-   if(modified)
+   if (modified)
    {
       pImporter->setImportDescriptors(descriptors);
    }
-   if(!cubePresent)
+   if (!cubePresent)
    {
       throw XmlRpcMethodFault(200, "File does not contain a data cube");
    }
 
-   if(!pImporter->execute())
+   if (!pImporter->execute())
    {
       throw XmlRpcMethodFault(302, errors);
    }
 
    std::vector<DataElement*> elements = pImporter->getImportedElements();
-   if(!elements.empty())
+   if (!elements.empty())
    {
-      std::vector<Window*> windows;
-      Service<DesktopServices>()->getWindows(SPATIAL_DATA_WINDOW, windows);
-      for(std::vector<Window*>::const_iterator wit = windows.begin(); wit != windows.end(); ++wit)
+      for (std::vector<Window*>::const_iterator wit = windows.begin(); wit != windows.end(); ++wit)
       {
-         SpatialDataWindow *pWindow = static_cast<SpatialDataWindow*>(*wit);
-         if(pWindow != NULL && static_cast<SpatialDataView*>(pWindow->getSpatialDataView())->
+         SpatialDataWindow* pWindow = static_cast<SpatialDataWindow*>(*wit);
+         if (pWindow != NULL && static_cast<SpatialDataView*>(pWindow->getSpatialDataView())->
             getLayerList()->getPrimaryRasterElement() == elements.front())
          {
             return new XmlRpcParam("string", QString::fromStdString(pWindow->getId()));
@@ -944,11 +949,11 @@ QString Open::getHelp()
           "The file path is specified as a file:// URL. Returns the ID of the new view.";
 }
 
-XmlRpcArrayParam *Open::getSignature()
+XmlRpcArrayParam* Open::getSignature()
 {
-   XmlRpcArrayParam *pSignatures = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pSignatures = new XmlRpcArrayParam;
 
-   XmlRpcArrayParam *pParams = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pParams = new XmlRpcArrayParam;
    *pParams << new XmlRpcParam(STRING_PARAM, "string");
    *pParams << new XmlRpcParam(STRING_PARAM, "string URL");
    *pSignatures << pParams;
@@ -962,17 +967,17 @@ XmlRpcArrayParam *Open::getSignature()
    return pSignatures;
 }
 
-XmlRpcParam *PanBy::operator()(const XmlRpcParams &params)
+XmlRpcParam* PanBy::operator()(const XmlRpcParams& params)
 {
-   if(params.size() < 2 || params.size() > 3)
+   if (params.size() < 2 || params.size() > 3)
    {
       throw XmlRpcMethodFault(200);
    }
-   PerspectiveView *pView = getView(params, 2);
+   PerspectiveView* pView = getView(params, 2);
 
-   const XmlRpcParam *pPanXAmount = params[0];
-   const XmlRpcParam *pPanYAmount = params[1];
-   if((pPanXAmount == NULL) || (pPanYAmount == NULL) ||
+   const XmlRpcParam* pPanXAmount = params[0];
+   const XmlRpcParam* pPanYAmount = params[1];
+   if ((pPanXAmount == NULL) || (pPanYAmount == NULL) ||
                                ((pPanXAmount->type() != DOUBLE_PARAM) &&
                                 (pPanXAmount->type() != INT_PARAM)) ||
                                ((pPanYAmount->type() != DOUBLE_PARAM) &&
@@ -994,11 +999,11 @@ QString PanBy::getHelp()
    return "Pan a " APP_NAME " view by a certain amount.";
 }
 
-XmlRpcArrayParam *PanBy::getSignature()
+XmlRpcArrayParam* PanBy::getSignature()
 {
-   XmlRpcArrayParam *pSignatures = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pSignatures = new XmlRpcArrayParam;
 
-   XmlRpcArrayParam *pParams = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pParams = new XmlRpcArrayParam;
    *pParams << new XmlRpcParam(STRING_PARAM, "null");
    *pParams << new XmlRpcParam(STRING_PARAM, "double PanByX");
    *pParams << new XmlRpcParam(STRING_PARAM, "double PanByY");
@@ -1027,17 +1032,17 @@ XmlRpcArrayParam *PanBy::getSignature()
    return pSignatures;
 }
 
-XmlRpcParam *PanTo::operator()(const XmlRpcParams &params)
+XmlRpcParam* PanTo::operator()(const XmlRpcParams& params)
 {
-   if(params.size() < 2 || params.size() > 3)
+   if (params.size() < 2 || params.size() > 3)
    {
       throw XmlRpcMethodFault(200);
    }
-   PerspectiveView *pView = getView(params, 2);
+   PerspectiveView* pView = getView(params, 2);
 
-   const XmlRpcParam *pPanXAmount = params[0];
-   const XmlRpcParam *pPanYAmount = params[1];
-   if((pPanXAmount == NULL) || (pPanYAmount == NULL) ||
+   const XmlRpcParam* pPanXAmount = params[0];
+   const XmlRpcParam* pPanYAmount = params[1];
+   if ((pPanXAmount == NULL) || (pPanYAmount == NULL) ||
                                ((pPanXAmount->type() != DOUBLE_PARAM) &&
                                 (pPanXAmount->type() != INT_PARAM)) ||
                                ((pPanYAmount->type() != DOUBLE_PARAM) &&
@@ -1058,11 +1063,11 @@ QString PanTo::getHelp()
    return "Pan a " APP_NAME " view to a location.";
 }
 
-XmlRpcArrayParam *PanTo::getSignature()
+XmlRpcArrayParam* PanTo::getSignature()
 {
-   XmlRpcArrayParam *pSignatures = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pSignatures = new XmlRpcArrayParam;
 
-   XmlRpcArrayParam *pParams = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pParams = new XmlRpcArrayParam;
    *pParams << new XmlRpcParam(STRING_PARAM, "null");
    *pParams << new XmlRpcParam(STRING_PARAM, "double PanToX");
    *pParams << new XmlRpcParam(STRING_PARAM, "double PanToY");
@@ -1093,17 +1098,17 @@ XmlRpcArrayParam *PanTo::getSignature()
 
 RegisterCallback::~RegisterCallback()
 {
-   for(std::list<XmlRpcCallback*>::iterator cit = mCallbacks.begin(); cit != mCallbacks.end(); ++cit)
+   for (std::list<XmlRpcCallback*>::iterator cit = mCallbacks.begin(); cit != mCallbacks.end(); ++cit)
    {
       delete *cit;
    }
 }
 
-void RegisterCallback::unRegister(XmlRpcCallback *pCallback)
+void RegisterCallback::unRegister(XmlRpcCallback* pCallback)
 {
-   if(pCallback != NULL)
+   if (pCallback != NULL)
    {
-      if(find(mCallbacks.begin(), mCallbacks.end(), pCallback) != mCallbacks.end())
+      if (find(mCallbacks.begin(), mCallbacks.end(), pCallback) != mCallbacks.end())
       {
          mCallbacks.remove(pCallback);
          delete pCallback;
@@ -1111,17 +1116,17 @@ void RegisterCallback::unRegister(XmlRpcCallback *pCallback)
    }
 }
 
-XmlRpcParam *RegisterCallback::operator()(const XmlRpcParams &params)
+XmlRpcParam* RegisterCallback::operator()(const XmlRpcParams& params)
 {
-   if(params.size() < 3 || params.size() > 4)
+   if (params.size() < 3 || params.size() > 4)
    {
       throw XmlRpcMethodFault(200);
    }
    LayerType callbackType = StringUtilities::fromXmlString<LayerType>(params[0]->value().toString().toStdString());
    QString callbackUrl = params[1]->value().toString();
    QString callbackMethod = params[2]->value().toString();
-   const XmlRpcStructParam *pArgs = NULL;
-   if(params.size() == 4)
+   const XmlRpcStructParam* pArgs = NULL;
+   if (params.size() == 4)
    {
       pArgs = dynamic_cast<const XmlRpcStructParam*>(params[3]);
    }
@@ -1132,24 +1137,25 @@ XmlRpcParam *RegisterCallback::operator()(const XmlRpcParams &params)
 QString RegisterCallback::getHelp()
 {
    return "Register a callback for " APP_NAME " events.<br/>"
-          "The currently supported callback types, their registration parameters and the parameters passed to the callback are:<br/>"
-          "<table><tr><th>Callback type</th><th>Registration parameters</th><th>Callback parameters</th></tr>"
-          "<tr><td>annotation: Activated when certain events happen to annotation objects</td>"
-          "<td>string name: an Annotation object specifier. LayerName[ObjectIndex], "
-          "LayerName[ObjectType:TypeIndex], or LayerName[ObjectName]<br/>"
-          "string event: deleted<br/>"
-          "variable data...: The new annotation data</td></tr>"
-          "<tr><td>aoi: Activated when certain events happen to AOIs</td>"
-          "<td>string name: an AOI layer name.</td>"
-          "string event: modified</td></tr>"
-          "</table>";
+      "The currently supported callback types, their registration parameters and the parameters passed to "
+      "the callback are:<br/>"
+      "<table><tr><th>Callback type</th><th>Registration parameters</th><th>Callback parameters</th></tr>"
+      "<tr><td>annotation: Activated when certain events happen to annotation objects</td>"
+      "<td>string name: an Annotation object specifier. LayerName[ObjectIndex], "
+      "LayerName[ObjectType:TypeIndex], or LayerName[ObjectName]<br/>"
+      "string event: deleted<br/>"
+      "variable data...: The new annotation data</td></tr>"
+      "<tr><td>aoi: Activated when certain events happen to AOIs</td>"
+      "<td>string name: an AOI layer name.</td>"
+      "string event: modified</td></tr>"
+      "</table>";
 }
 
-XmlRpcArrayParam *RegisterCallback::getSignature()
+XmlRpcArrayParam* RegisterCallback::getSignature()
 {
-   XmlRpcArrayParam *pSignatures = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pSignatures = new XmlRpcArrayParam;
 
-   XmlRpcArrayParam *pParams = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pParams = new XmlRpcArrayParam;
    *pParams << new XmlRpcParam(STRING_PARAM, "null");
    *pParams << new XmlRpcParam(STRING_PARAM, "string CallbackType");
    *pParams << new XmlRpcParam(STRING_PARAM, "string CallbackURL");
@@ -1167,16 +1173,16 @@ XmlRpcArrayParam *RegisterCallback::getSignature()
    return pSignatures;
 }
 
-XmlRpcParam *RotateBy::operator()(const XmlRpcParams &params)
+XmlRpcParam* RotateBy::operator()(const XmlRpcParams& params)
 {
-   if(params.size() < 1 || params.size() > 2)
+   if (params.size() < 1 || params.size() > 2)
    {
       throw XmlRpcMethodFault(200);
    }
-   PerspectiveView *pView = getView(params, 1);
+   PerspectiveView* pView = getView(params, 1);
 
-   const XmlRpcParam *pRotationAmount = params[0];
-   if((pRotationAmount == NULL) || ((pRotationAmount->type() != DOUBLE_PARAM) &&
+   const XmlRpcParam* pRotationAmount = params[0];
+   if ((pRotationAmount == NULL) || ((pRotationAmount->type() != DOUBLE_PARAM) &&
                                     (pRotationAmount->type() != INT_PARAM)))
    {
       throw XmlRpcMethodFault(200);
@@ -1191,14 +1197,14 @@ XmlRpcParam *RotateBy::operator()(const XmlRpcParams &params)
 
 QString RotateBy::getHelp()
 {
-   return "Rotate a " APP_NAME " view by a certain amount.";
+   return "Rotate an " APP_NAME " view by a certain amount.";
 }
 
-XmlRpcArrayParam *RotateBy::getSignature()
+XmlRpcArrayParam* RotateBy::getSignature()
 {
-   XmlRpcArrayParam *pSignatures = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pSignatures = new XmlRpcArrayParam;
 
-   XmlRpcArrayParam *pParams = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pParams = new XmlRpcArrayParam;
    *pParams << new XmlRpcParam(STRING_PARAM, "null");
    *pParams << new XmlRpcParam(STRING_PARAM, "double RotateBy");
    *pSignatures << pParams;
@@ -1223,16 +1229,16 @@ XmlRpcArrayParam *RotateBy::getSignature()
    return pSignatures;
 }
 
-XmlRpcParam *RotateTo::operator()(const XmlRpcParams &params)
+XmlRpcParam* RotateTo::operator()(const XmlRpcParams& params)
 {
-   if(params.size() < 1 || params.size() > 2)
+   if (params.size() < 1 || params.size() > 2)
    {
       throw XmlRpcMethodFault(200);
    }
-   PerspectiveView *pView = getView(params, 1);
+   PerspectiveView* pView = getView(params, 1);
 
-   const XmlRpcParam *pRotationAmount = params[0];
-   if((pRotationAmount == NULL) || ((pRotationAmount->type() != DOUBLE_PARAM) &&
+   const XmlRpcParam* pRotationAmount = params[0];
+   if ((pRotationAmount == NULL) || ((pRotationAmount->type() != DOUBLE_PARAM) &&
                                     (pRotationAmount->type() != INT_PARAM)))
    {
       throw XmlRpcMethodFault(200);
@@ -1247,14 +1253,14 @@ XmlRpcParam *RotateTo::operator()(const XmlRpcParams &params)
 
 QString RotateTo::getHelp()
 {
-   return "Rotate a " APP_NAME " view to a certain rotational position.";
+   return "Rotate an " APP_NAME " view to a certain rotational position.";
 }
 
-XmlRpcArrayParam *RotateTo::getSignature()
+XmlRpcArrayParam* RotateTo::getSignature()
 {
-   XmlRpcArrayParam *pSignatures = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pSignatures = new XmlRpcArrayParam;
 
-   XmlRpcArrayParam *pParams = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pParams = new XmlRpcArrayParam;
    *pParams << new XmlRpcParam(STRING_PARAM, "null");
    *pParams << new XmlRpcParam(STRING_PARAM, "double RotateTo");
    *pSignatures << pParams;
@@ -1279,21 +1285,21 @@ XmlRpcArrayParam *RotateTo::getSignature()
    return pSignatures;
 }
 
-XmlRpcParam *UnlinkViews::operator()(const XmlRpcParams &params)
+XmlRpcParam* UnlinkViews::operator()(const XmlRpcParams& params)
 {
-   if(params.size() != 2)
+   if (params.size() != 2)
    {
       throw XmlRpcMethodFault(200);
    }
-   SpatialDataView *pPrimaryView = dynamic_cast<SpatialDataView*>(getView(params, 0));
-   SpatialDataView *pLinkedView = dynamic_cast<SpatialDataView*>(getView(params, 1));
-   
-   if((pPrimaryView == NULL) || (pLinkedView == NULL))
+   SpatialDataView* pPrimaryView = dynamic_cast<SpatialDataView*>(getView(params, 0));
+   SpatialDataView* pLinkedView = dynamic_cast<SpatialDataView*>(getView(params, 1));
+
+   if ((pPrimaryView == NULL) || (pLinkedView == NULL))
    {
       throw XmlRpcMethodFault(300);
    }
 
-   if(!pPrimaryView->unlinkView(pLinkedView))
+   if (!pPrimaryView->unlinkView(pLinkedView))
    {
       throw XmlRpcMethodFault(310);
    }
@@ -1306,11 +1312,11 @@ QString UnlinkViews::getHelp()
    return "Unlink two previously linked views.";
 }
 
-XmlRpcArrayParam *UnlinkViews::getSignature()
+XmlRpcArrayParam* UnlinkViews::getSignature()
 {
-   XmlRpcArrayParam *pSignatures = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pSignatures = new XmlRpcArrayParam;
 
-   XmlRpcArrayParam *pParams = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pParams = new XmlRpcArrayParam;
    *pParams << new XmlRpcParam(STRING_PARAM, "null");
    *pParams << new XmlRpcParam(STRING_PARAM, "string PrimaryViewID");
    *pParams << new XmlRpcParam(STRING_PARAM, "string LinkedViewID");
@@ -1319,16 +1325,16 @@ XmlRpcArrayParam *UnlinkViews::getSignature()
    return pSignatures;
 }
 
-XmlRpcParam *Zoom::operator()(const XmlRpcParams &params)
+XmlRpcParam* Zoom::operator()(const XmlRpcParams& params)
 {
-   if(params.size() < 1 || params.size() > 2)
+   if (params.size() < 1 || params.size() > 2)
    {
       throw XmlRpcMethodFault(200);
    }
-   PerspectiveView *pView = getView(params, 1);
+   PerspectiveView* pView = getView(params, 1);
 
-   const XmlRpcParam *pZoomLevel = params[0];
-   if((pZoomLevel == NULL) || ((pZoomLevel->type() != DOUBLE_PARAM) &&
+   const XmlRpcParam* pZoomLevel = params[0];
+   if ((pZoomLevel == NULL) || ((pZoomLevel->type() != DOUBLE_PARAM) &&
                                (pZoomLevel->type() != INT_PARAM)))
    {
       throw XmlRpcMethodFault(200);
@@ -1343,14 +1349,14 @@ XmlRpcParam *Zoom::operator()(const XmlRpcParams &params)
 
 QString Zoom::getHelp()
 {
-   return "Change the zoom level of a " APP_NAME " view.";
+   return "Change the zoom level of an " APP_NAME " view.";
 }
 
-XmlRpcArrayParam *Zoom::getSignature()
+XmlRpcArrayParam* Zoom::getSignature()
 {
-   XmlRpcArrayParam *pSignatures = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pSignatures = new XmlRpcArrayParam;
 
-   XmlRpcArrayParam *pParams = new XmlRpcArrayParam;
+   XmlRpcArrayParam* pParams = new XmlRpcArrayParam;
    *pParams << new XmlRpcParam(STRING_PARAM, "null");
    *pParams << new XmlRpcParam(STRING_PARAM, "double ZoomLevel");
    *pSignatures << pParams;

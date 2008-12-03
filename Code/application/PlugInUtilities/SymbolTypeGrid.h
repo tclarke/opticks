@@ -25,7 +25,7 @@ public:
    SymbolTypeGrid(QWidget* pParent);
    void setCurrentValue(SymbolType value);
    SymbolType getCurrentValue() const;
-   void setBorderedSymbols(bool show);
+   void setBorderedSymbols(bool showSymbols);
 
 signals: 
    void valueChanged(SymbolType value);

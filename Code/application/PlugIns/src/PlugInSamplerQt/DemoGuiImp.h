@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef DEMO_GUI_IMP
-#define DEMO_GUI_IMP
+#ifndef DEMOGUIIMP_H
+#define DEMOGUIIMP_H
 
 #include "ui_DynamicColormap.h"
 #include "TypesFile.h"
@@ -42,8 +42,11 @@ public slots:
 private:
    void setButtonColors();
 
-   AlgorithmRunner *mpRunner;
-   QColor mColor1, mColor2, mColor3, mColor4;
+   AlgorithmRunner* mpRunner;
+   QColor mColor1;
+   QColor mColor2;
+   QColor mColor3;
+   QColor mColor4;
 };
 
 #endif

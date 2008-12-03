@@ -32,19 +32,22 @@ public:
       AlgorithmShell::setBatch();
       return false;
    }
-   bool getInputSpecification(PlugInArgList *&pInArgList);
-   bool getOutputSpecification(PlugInArgList *&pOutArgList);
-   bool execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList);
+
+   bool getInputSpecification(PlugInArgList*& pInArgList);
+   bool getOutputSpecification(PlugInArgList*& pOutArgList);
+   bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
 
 protected:
-   void registerMethodCall(const QString &name, XmlRpcMethodCallImp *pMethodCall);
-   MuHttpServer::Response getRequest(const QString &uri, const QString &contentType, const QString &body, const FormValueMap &form);
-   MuHttpServer::Response postRequest(const QString &uri, const QString &contentType, const QString &body, const FormValueMap &form);
-   void processMethodCall(const XmlRpcMethodCall &call, MuHttpServer::Response &rsp);
+   void registerMethodCall(const QString& name, XmlRpcMethodCallImp* pMethodCall);
+   MuHttpServer::Response getRequest(const QString& uri, const QString& contentType, const QString& body,
+      const FormValueMap& form);
+   MuHttpServer::Response postRequest(const QString& uri, const QString& contentType, const QString& body,
+      const FormValueMap& form);
+   void processMethodCall(const XmlRpcMethodCall& call, MuHttpServer::Response& rsp);
 
 protected slots:
-   void debug(HttpRequest *pHttpRequest);
-   void warning(const QString &msg);
+   void debug(HttpRequest* pHttpRequest);
+   void warning(const QString& msg);
 
 private:
    QMap<QString, XmlRpcMethodCallImp*> mMethodCalls;

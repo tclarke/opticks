@@ -137,7 +137,7 @@ private:
    unsigned int mMaxColorBufferAttachments;  // maximum number of color buffer attachments
    unsigned int mNextBuffer;        // next color buffer id to use when attaching next color buffer
 
-   ColorBuffer *mpPrevColorBuffer;
+   ColorBuffer* mpPrevColorBuffer;
 };
 
 #endif

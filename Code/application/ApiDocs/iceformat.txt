@@ -1,6 +1,6 @@
 /** \page iceformat Ice Format Specification
 This document describes the format of the .ice.h5 file.
-The Ice Format is designed to support import/export of data from Opticks that preserves the Opticks specific data structures.
+The Ice Format is designed to support import/export of data from %Opticks that preserves the %Opticks specific data structures.
 The Ice Format is actually written as an HDF5 file.
 Information on HDF5 can be found at http://www.hdfgroup.org/HDF5/.
 This document will describe how the data is stored within the HDF5 file for various versions of the Ice Format.
@@ -347,10 +347,10 @@ This HDF5 Dataset will only be present if the band names were present in the ori
 <b>Optional In:</b> Version >= 0.70 <br>
 <b>Contents:</b> 
 This HDF5 dataset contains additional metadata associated with the cube.
-The Opticks application allows plug-in developers to store a wide variety of additional metadata for a cube, therefore the Ice specification cannot provide specific details on the contents or purpose of the metadata stored here.
+The %Opticks application allows plug-in developers to store a wide variety of additional metadata for a cube, therefore the Ice specification cannot provide specific details on the contents or purpose of the metadata stored here.
 The metadata associated with a cube will be converted a XML formatted string and then stored in this HDF5 dataset.
 The specifics of the XML format will not be documented in the Ice specification.
-The reason for this is because the ability to save and load the metadata from an Ice formatted file is internal to the Opticks application.
+The reason for this is because the ability to save and load the metadata from an Ice formatted file is internal to the %Opticks application.
 The reading and writing of this HDF5 dataset should not be performed by other applications that read or write Ice formatted files.
 
 \section ClassificationSection Classification

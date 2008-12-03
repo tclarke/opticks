@@ -121,7 +121,7 @@ void GcpLayerImp::draw()
 
    unsigned int gcpNumber = 1;
    list<GcpPoint>::const_iterator iter;
-   for (iter = points.begin(); iter != points.end(); iter++, gcpNumber++)
+   for (iter = points.begin(); iter != points.end(); ++iter, ++gcpNumber)
    {
       glMatrixMode(GL_MODELVIEW);
       glPushMatrix();
@@ -288,7 +288,7 @@ bool GcpLayerImp::processMousePress(const QPoint& screenCoord, Qt::MouseButton b
 
 bool GcpLayerImp::toXml(XMLWriter* pXml) const
 {
-   if(!LayerImp::toXml(pXml))
+   if (!LayerImp::toXml(pXml))
    {
       return false;
    }
@@ -311,7 +311,7 @@ bool GcpLayerImp::toXml(XMLWriter* pXml) const
 
 bool GcpLayerImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   if(pDocument->getNodeType() != DOMNode::ELEMENT_NODE)
+   if (pDocument->getNodeType() != DOMNode::ELEMENT_NODE)
    {
       return false;
    }
@@ -324,8 +324,8 @@ bool GcpLayerImp::fromXml(DOMNode* pDocument, unsigned int version)
       oldPoints = pGcpList->getSelectedPoints();
    }
 
-   DOMElement *pElement = static_cast<DOMElement*>(pDocument);
-   if((pElement == NULL) || !LayerImp::fromXml(pDocument, version))
+   DOMElement* pElement = static_cast<DOMElement*>(pDocument);
+   if ((pElement == NULL) || !LayerImp::fromXml(pDocument, version))
    {
       return false;
    }
@@ -369,26 +369,18 @@ void GcpLayerImp::setColor(const QColor& clrGcp)
 
       mColor = clrGcp;
       emit colorChanged(mColor);
-      notify(SIGNAL_NAME(GcpLayer, ColorChanged), boost::any(ColorType(mColor.red(),mColor.green(),mColor.blue())));
+      notify(SIGNAL_NAME(GcpLayer, ColorChanged), boost::any(ColorType(mColor.red(), mColor.green(), mColor.blue())));
 
       mbLinking = true;
 
       vector<Layer*> linkedLayers = getLinkedLayers();
-
-      vector<Layer*>::iterator iter = linkedLayers.begin();
-      while (iter != linkedLayers.end())
+      for (vector<Layer*>::iterator iter = linkedLayers.begin(); iter != linkedLayers.end(); ++iter)
       {
-         Layer* pLayer = NULL;
-         pLayer = *iter;
+         GcpLayerImp* pLayer = dynamic_cast<GcpLayerImp*>(*iter);
          if (pLayer != NULL)
          {
-            if (pLayer->isKindOf("GcpLayer") == true)
-            {
-               ((GcpLayerAdapter*) pLayer)->GcpLayerImp::setColor(clrGcp);
-            }
+            pLayer->setColor(clrGcp);
          }
-
-         ++iter;
       }
 
       mbLinking = false;
@@ -417,21 +409,13 @@ void GcpLayerImp::setSymbol(const GcpSymbol& gcpSymbol)
       mbLinking = true;
 
       vector<Layer*> linkedLayers = getLinkedLayers();
-
-      vector<Layer*>::iterator iter = linkedLayers.begin();
-      while (iter != linkedLayers.end())
+      for (vector<Layer*>::iterator iter = linkedLayers.begin(); iter != linkedLayers.end(); ++iter)
       {
-         Layer* pLayer = NULL;
-         pLayer = *iter;
+         GcpLayer* pLayer = dynamic_cast<GcpLayer*>(*iter);
          if (pLayer != NULL)
          {
-            if (pLayer->isKindOf("GcpLayer") == true)
-            {
-               ((GcpLayer*) pLayer)->setSymbol(gcpSymbol);
-            }
+            pLayer->setSymbol(gcpSymbol);
          }
-
-         ++iter;
       }
 
       mbLinking = false;
@@ -460,21 +444,13 @@ void GcpLayerImp::setSymbolSize(int iSize)
       mbLinking = true;
 
       vector<Layer*> linkedLayers = getLinkedLayers();
-
-      vector<Layer*>::iterator iter = linkedLayers.begin();
-      while (iter != linkedLayers.end())
+      for (vector<Layer*>::iterator iter = linkedLayers.begin(); iter != linkedLayers.end(); ++iter)
       {
-         Layer* pLayer = NULL;
-         pLayer = *iter;
+         GcpLayer* pLayer = dynamic_cast<GcpLayer*>(*iter);
          if (pLayer != NULL)
          {
-            if (pLayer->isKindOf("GcpLayer") == true)
-            {
-               ((GcpLayer*) pLayer)->setSymbolSize(iSize);
-            }
+            pLayer->setSymbolSize(iSize);
          }
-
-         ++iter;
       }
 
       mbLinking = false;

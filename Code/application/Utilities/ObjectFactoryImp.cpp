@@ -118,93 +118,93 @@ namespace
    static void* CreateVectorWizardObject();
    static void DestroyVectorWizardObject(void* pObj);
 
-   void* CreateUnsignedChar ();
-   void* CreateChar ();
-   void* CreateUnsignedShort ();
-   void* CreateShort ();
-   void* CreateUnsignedInt ();
-   void* CreateInt ();
-   void* CreateUnsignedLong ();
-   void* CreateLong ();
-   void* CreateFloat ();
-   void* CreateDouble ();
-   void* CreateBool ();
-   void* CreateString ();
+   void* CreateUnsignedChar();
+   void* CreateChar();
+   void* CreateUnsignedShort();
+   void* CreateShort();
+   void* CreateUnsignedInt();
+   void* CreateInt();
+   void* CreateUnsignedLong();
+   void* CreateLong();
+   void* CreateFloat();
+   void* CreateDouble();
+   void* CreateBool();
+   void* CreateString();
 
-   void DestroyUnsignedChar (void*);
-   void DestroyChar (void*);
-   void DestroyUnsignedShort (void*);
-   void DestroyShort (void*);
-   void DestroyUnsignedInt (void*);
-   void DestroyInt (void*);
-   void DestroyUnsignedLong (void*);
-   void DestroyLong (void*);
-   void DestroyFloat (void*);
-   void DestroyDouble (void*);
-   void DestroyBool (void*);
-   void DestroyString (void*);
+   void DestroyUnsignedChar(void*);
+   void DestroyChar(void*);
+   void DestroyUnsignedShort(void*);
+   void DestroyShort(void*);
+   void DestroyUnsignedInt(void*);
+   void DestroyInt(void*);
+   void DestroyUnsignedLong(void*);
+   void DestroyLong(void*);
+   void DestroyFloat(void*);
+   void DestroyDouble(void*);
+   void DestroyBool(void*);
+   void DestroyString(void*);
 
-   void* CreateVectorUnsignedChar ();
-   void* CreateVectorChar ();
-   void* CreateVectorUnsignedShort ();
-   void* CreateVectorShort ();
-   void* CreateVectorUnsignedInt ();
-   void* CreateVectorInt ();
-   void* CreateVectorUnsignedLong ();
-   void* CreateVectorLong ();
-   void* CreateVectorFloat ();
-   void* CreateVectorDouble ();
-   void* CreateVectorBool ();
-   void* CreateVectorString ();
-   void* CreateVectorVoidPtr ();
-   void* CreateVectorUnsignedCharPtr ();
-   void* CreateVectorCharPtr ();
-   void* CreateVectorUnsignedShortPtr ();
-   void* CreateVectorShortPtr ();
-   void* CreateVectorUnsignedIntPtr ();
-   void* CreateVectorIntPtr ();
-   void* CreateVectorUnsignedLongPtr ();
-   void* CreateVectorLongPtr ();
-   void* CreateVectorFloatPtr ();
-   void* CreateVectorDoublePtr ();
-   void* CreateVectorBoolPtr ();
-   void* CreateVectorStringPtr ();
+   void* CreateVectorUnsignedChar();
+   void* CreateVectorChar();
+   void* CreateVectorUnsignedShort();
+   void* CreateVectorShort();
+   void* CreateVectorUnsignedInt();
+   void* CreateVectorInt();
+   void* CreateVectorUnsignedLong();
+   void* CreateVectorLong();
+   void* CreateVectorFloat();
+   void* CreateVectorDouble();
+   void* CreateVectorBool();
+   void* CreateVectorString();
+   void* CreateVectorVoidPtr();
+   void* CreateVectorUnsignedCharPtr();
+   void* CreateVectorCharPtr();
+   void* CreateVectorUnsignedShortPtr();
+   void* CreateVectorShortPtr();
+   void* CreateVectorUnsignedIntPtr();
+   void* CreateVectorIntPtr();
+   void* CreateVectorUnsignedLongPtr();
+   void* CreateVectorLongPtr();
+   void* CreateVectorFloatPtr();
+   void* CreateVectorDoublePtr();
+   void* CreateVectorBoolPtr();
+   void* CreateVectorStringPtr();
 
-   void DestroyVectorUnsignedChar (void*);
-   void DestroyVectorChar (void*);
-   void DestroyVectorUnsignedShort (void*);
-   void DestroyVectorShort (void*);
-   void DestroyVectorUnsignedInt (void*);
-   void DestroyVectorInt (void*);
-   void DestroyVectorUnsignedLong (void*);
-   void DestroyVectorLong (void*);
-   void DestroyVectorFloat (void*);
-   void DestroyVectorDouble (void*);
-   void DestroyVectorBool (void*);
-   void DestroyVectorString (void*);
-   void DestroyVectorVoidPtr (void*);
-   void DestroyVectorUnsignedCharPtr (void*);
-   void DestroyVectorCharPtr (void*);
-   void DestroyVectorUnsignedShortPtr (void*);
-   void DestroyVectorShortPtr (void*);
-   void DestroyVectorUnsignedIntPtr (void*);
-   void DestroyVectorIntPtr (void*);
-   void DestroyVectorUnsignedLongPtr (void*);
-   void DestroyVectorLongPtr (void*);
-   void DestroyVectorFloatPtr (void*);
-   void DestroyVectorDoublePtr (void*);
-   void DestroyVectorBoolPtr (void*);
-   void DestroyVectorStringPtr (void*);
+   void DestroyVectorUnsignedChar(void*);
+   void DestroyVectorChar(void*);
+   void DestroyVectorUnsignedShort(void*);
+   void DestroyVectorShort(void*);
+   void DestroyVectorUnsignedInt(void*);
+   void DestroyVectorInt(void*);
+   void DestroyVectorUnsignedLong(void*);
+   void DestroyVectorLong(void*);
+   void DestroyVectorFloat(void*);
+   void DestroyVectorDouble(void*);
+   void DestroyVectorBool(void*);
+   void DestroyVectorString(void*);
+   void DestroyVectorVoidPtr(void*);
+   void DestroyVectorUnsignedCharPtr(void*);
+   void DestroyVectorCharPtr(void*);
+   void DestroyVectorUnsignedShortPtr(void*);
+   void DestroyVectorShortPtr(void*);
+   void DestroyVectorUnsignedIntPtr(void*);
+   void DestroyVectorIntPtr(void*);
+   void DestroyVectorUnsignedLongPtr(void*);
+   void DestroyVectorLongPtr(void*);
+   void DestroyVectorFloatPtr(void*);
+   void DestroyVectorDoublePtr(void*);
+   void DestroyVectorBoolPtr(void*);
+   void DestroyVectorStringPtr(void*);
 }
 
-typedef  map<string,void*(*)()> ObjectMapType;
-typedef  map<string,void*(*)()> VectorMapType;
-typedef  map<string,void(*)(void*)> ObjectMapType2;
-typedef  map<string,void(*)(void*)> VectorMapType2;
-static ObjectMapType CreateObjectMap;
-static ObjectMapType2 DestroyObjectMap;
-static VectorMapType CreateObjectVectorMap;
-static VectorMapType2 DestroyObjectVectorMap;
+typedef map<string,void*(*)()> ObjectMapType;
+typedef map<string,void*(*)()> VectorMapType;
+typedef map<string,void(*)(void*)> ObjectMapType2;
+typedef map<string,void(*)(void*)> VectorMapType2;
+static ObjectMapType sCreateObjectMap;
+static ObjectMapType2 sDestroyObjectMap;
+static VectorMapType sCreateObjectVectorMap;
+static VectorMapType2 sDestroyObjectVectorMap;
 
 ObjectFactoryImp* ObjectFactoryImp::spInstance = NULL;
 bool ObjectFactoryImp::mDestroyed = false;
@@ -229,173 +229,204 @@ ObjectFactoryImp* ObjectFactoryImp::instance()
 {
    if (spInstance == NULL) 
    {
-      if(mDestroyed)
+      if (mDestroyed)
       {
          throw std::logic_error("Attempting to use ObjectFactory after "
             "destroying it.");
       }
       spInstance = new ObjectFactoryImp;
 
-      CreateObjectMap.insert(ObjectMapType::value_type("unsigned char", (void*(*)())CreateUnsignedChar));
-      CreateObjectMap.insert(ObjectMapType::value_type("char", (void*(*)())CreateChar));
-      CreateObjectMap.insert(ObjectMapType::value_type("unsigned short", (void*(*)())CreateUnsignedShort));
-      CreateObjectMap.insert(ObjectMapType::value_type("short", (void*(*)())CreateShort));
-      CreateObjectMap.insert(ObjectMapType::value_type("unsigned int", (void*(*)())CreateUnsignedInt));
-      CreateObjectMap.insert(ObjectMapType::value_type("int", (void*(*)())CreateInt));
-      CreateObjectMap.insert(ObjectMapType::value_type("unsigned long", (void*(*)())CreateUnsignedLong));
-      CreateObjectMap.insert(ObjectMapType::value_type("long", (void*(*)())CreateLong));
-      CreateObjectMap.insert(ObjectMapType::value_type("float", (void*(*)())CreateFloat));
-      CreateObjectMap.insert(ObjectMapType::value_type("double", (void*(*)())CreateDouble));
-      CreateObjectMap.insert(ObjectMapType::value_type("bool", (void*(*)())CreateBool));
-      CreateObjectMap.insert(ObjectMapType::value_type("string", (void*(*)())CreateString));
-      CreateObjectMap.insert(ObjectMapType::value_type("BitMask", (void*(*)())CreateBitMask));
-      CreateObjectMap.insert(ObjectMapType::value_type("Classification", (void*(*)())CreateClassification));
-      CreateObjectMap.insert(ObjectMapType::value_type("DataRequest", (void*(*)())CreateDataRequest));
-      CreateObjectMap.insert(ObjectMapType::value_type("DataVariantAnyData", (void*(*)())CreateDataVariantAnyData));
-      CreateObjectMap.insert(ObjectMapType::value_type("DateTime", (void*(*)())CreateDateTime));
-      CreateObjectMap.insert(ObjectMapType::value_type("DynamicObject", (void*(*)())CreateDynamicObject));
-      CreateObjectMap.insert(ObjectMapType::value_type("FileDescriptor", (void*(*)())CreateFileDescriptor));
-      CreateObjectMap.insert(ObjectMapType::value_type("FileFinder", (void*(*)())CreateFileFinder));
-      CreateObjectMap.insert(ObjectMapType::value_type("Filename", (void*(*)())CreateFilename));
-      CreateObjectMap.insert(ObjectMapType::value_type("Font", (void*(*)())CreateFontObject));
-      CreateObjectMap.insert(ObjectMapType::value_type("RasterFileDescriptor", (void*(*)())CreateRasterFileDescriptor));
-      CreateObjectMap.insert(ObjectMapType::value_type("SettableSessionItem", (void*(*)())CreateSettableSessionItem));
-      CreateObjectMap.insert(ObjectMapType::value_type("ExecutableAgent", (void*(*)())CreateExecutableAgent));
-      CreateObjectMap.insert(ObjectMapType::value_type("ExecutableAgentCommon", (void*(*)())CreateExecutableAgent));
-      CreateObjectMap.insert(ObjectMapType::value_type("ImportAgent", (void*(*)())CreateImportAgent));
-      CreateObjectMap.insert(ObjectMapType::value_type("ImportAgentCommon", (void*(*)())CreateImportAgent));
-      CreateObjectMap.insert(ObjectMapType::value_type("ExportAgent", (void*(*)())CreateExportAgent));
-      CreateObjectMap.insert(ObjectMapType::value_type("ExportAgentCommon", (void*(*)())CreateExportAgent));
-      CreateObjectMap.insert(ObjectMapType::value_type("Units", (void*(*)())CreateUnits));
-      CreateObjectMap.insert(ObjectMapType::value_type("WizardObject", (void*(*)())CreateWizardObject));
-      CreateObjectMap.insert(ObjectMapType::value_type(typeid(unsigned char).name(), (void*(*)())CreateUnsignedChar));
-      CreateObjectMap.insert(ObjectMapType::value_type(typeid(char).name(), (void*(*)())CreateChar));
-      CreateObjectMap.insert(ObjectMapType::value_type(typeid(unsigned short).name(), (void*(*)())CreateUnsignedShort));
-      CreateObjectMap.insert(ObjectMapType::value_type(typeid(short).name(), (void*(*)())CreateShort));
-      CreateObjectMap.insert(ObjectMapType::value_type(typeid(unsigned int).name(), (void*(*)())CreateUnsignedInt));
-      CreateObjectMap.insert(ObjectMapType::value_type(typeid(int).name(), (void*(*)())CreateInt));
-      CreateObjectMap.insert(ObjectMapType::value_type(typeid(unsigned long).name(), (void*(*)())CreateUnsignedLong));
-      CreateObjectMap.insert(ObjectMapType::value_type(typeid(long).name(), (void*(*)())CreateLong));
-      CreateObjectMap.insert(ObjectMapType::value_type(typeid(float).name(), (void*(*)())CreateFloat));
-      CreateObjectMap.insert(ObjectMapType::value_type(typeid(double).name(), (void*(*)())CreateDouble));
-      CreateObjectMap.insert(ObjectMapType::value_type(typeid(bool).name(), (void*(*)())CreateBool));
-      CreateObjectMap.insert(ObjectMapType::value_type(typeid(string).name(), (void*(*)())CreateString));
-      CreateObjectMap.insert(ObjectMapType::value_type(typeid(BitMask*).name(), (void*(*)())CreateBitMask));
-      CreateObjectMap.insert(ObjectMapType::value_type(typeid(Classification*).name(), (void*(*)())CreateClassification));
-      CreateObjectMap.insert(ObjectMapType::value_type(typeid(DateTime*).name(), (void*(*)())CreateDateTime));
-      CreateObjectMap.insert(ObjectMapType::value_type(typeid(DynamicObject*).name(), (void*(*)())CreateDynamicObject));
-      CreateObjectMap.insert(ObjectMapType::value_type(typeid(FileFinder*).name(), (void*(*)())CreateFileFinder));
-      CreateObjectMap.insert(ObjectMapType::value_type(typeid(Filename*).name(), (void*(*)())CreateFilename));
-      CreateObjectMap.insert(ObjectMapType::value_type(typeid(Units*).name(), (void*(*)())CreateUnits));
+      sCreateObjectMap.insert(ObjectMapType::value_type("unsigned char", (void*(*)())CreateUnsignedChar));
+      sCreateObjectMap.insert(ObjectMapType::value_type("char", (void*(*)())CreateChar));
+      sCreateObjectMap.insert(ObjectMapType::value_type("unsigned short", (void*(*)())CreateUnsignedShort));
+      sCreateObjectMap.insert(ObjectMapType::value_type("short", (void*(*)())CreateShort));
+      sCreateObjectMap.insert(ObjectMapType::value_type("unsigned int", (void*(*)())CreateUnsignedInt));
+      sCreateObjectMap.insert(ObjectMapType::value_type("int", (void*(*)())CreateInt));
+      sCreateObjectMap.insert(ObjectMapType::value_type("unsigned long", (void*(*)())CreateUnsignedLong));
+      sCreateObjectMap.insert(ObjectMapType::value_type("long", (void*(*)())CreateLong));
+      sCreateObjectMap.insert(ObjectMapType::value_type("float", (void*(*)())CreateFloat));
+      sCreateObjectMap.insert(ObjectMapType::value_type("double", (void*(*)())CreateDouble));
+      sCreateObjectMap.insert(ObjectMapType::value_type("bool", (void*(*)())CreateBool));
+      sCreateObjectMap.insert(ObjectMapType::value_type("string", (void*(*)())CreateString));
+      sCreateObjectMap.insert(ObjectMapType::value_type("BitMask", (void*(*)())CreateBitMask));
+      sCreateObjectMap.insert(ObjectMapType::value_type("Classification", (void*(*)())CreateClassification));
+      sCreateObjectMap.insert(ObjectMapType::value_type("DataRequest", (void*(*)())CreateDataRequest));
+      sCreateObjectMap.insert(ObjectMapType::value_type("DataVariantAnyData", (void*(*)())CreateDataVariantAnyData));
+      sCreateObjectMap.insert(ObjectMapType::value_type("DateTime", (void*(*)())CreateDateTime));
+      sCreateObjectMap.insert(ObjectMapType::value_type("DynamicObject", (void*(*)())CreateDynamicObject));
+      sCreateObjectMap.insert(ObjectMapType::value_type("FileDescriptor", (void*(*)())CreateFileDescriptor));
+      sCreateObjectMap.insert(ObjectMapType::value_type("FileFinder", (void*(*)())CreateFileFinder));
+      sCreateObjectMap.insert(ObjectMapType::value_type("Filename", (void*(*)())CreateFilename));
+      sCreateObjectMap.insert(ObjectMapType::value_type("Font", (void*(*)())CreateFontObject));
+      sCreateObjectMap.insert(ObjectMapType::value_type("RasterFileDescriptor",
+         (void*(*)())CreateRasterFileDescriptor));
+      sCreateObjectMap.insert(ObjectMapType::value_type("SettableSessionItem", (void*(*)())CreateSettableSessionItem));
+      sCreateObjectMap.insert(ObjectMapType::value_type("ExecutableAgent", (void*(*)())CreateExecutableAgent));
+      sCreateObjectMap.insert(ObjectMapType::value_type("ExecutableAgentCommon", (void*(*)())CreateExecutableAgent));
+      sCreateObjectMap.insert(ObjectMapType::value_type("ExecutableAgentCommon1", (void*(*)())CreateExecutableAgent));
+      sCreateObjectMap.insert(ObjectMapType::value_type("ImportAgent", (void*(*)())CreateImportAgent));
+      sCreateObjectMap.insert(ObjectMapType::value_type("ImportAgentCommon", (void*(*)())CreateImportAgent));
+      sCreateObjectMap.insert(ObjectMapType::value_type("ExportAgent", (void*(*)())CreateExportAgent));
+      sCreateObjectMap.insert(ObjectMapType::value_type("ExportAgentCommon", (void*(*)())CreateExportAgent));
+      sCreateObjectMap.insert(ObjectMapType::value_type("Units", (void*(*)())CreateUnits));
+      sCreateObjectMap.insert(ObjectMapType::value_type("WizardObject", (void*(*)())CreateWizardObject));
+      sCreateObjectMap.insert(ObjectMapType::value_type(typeid(unsigned char).name(), (void*(*)())CreateUnsignedChar));
+      sCreateObjectMap.insert(ObjectMapType::value_type(typeid(char).name(), (void*(*)())CreateChar));
+      sCreateObjectMap.insert(ObjectMapType::value_type(typeid(unsigned short).name(),
+         (void*(*)())CreateUnsignedShort));
+      sCreateObjectMap.insert(ObjectMapType::value_type(typeid(short).name(), (void*(*)())CreateShort));
+      sCreateObjectMap.insert(ObjectMapType::value_type(typeid(unsigned int).name(), (void*(*)())CreateUnsignedInt));
+      sCreateObjectMap.insert(ObjectMapType::value_type(typeid(int).name(), (void*(*)())CreateInt));
+      sCreateObjectMap.insert(ObjectMapType::value_type(typeid(unsigned long).name(), (void*(*)())CreateUnsignedLong));
+      sCreateObjectMap.insert(ObjectMapType::value_type(typeid(long).name(), (void*(*)())CreateLong));
+      sCreateObjectMap.insert(ObjectMapType::value_type(typeid(float).name(), (void*(*)())CreateFloat));
+      sCreateObjectMap.insert(ObjectMapType::value_type(typeid(double).name(), (void*(*)())CreateDouble));
+      sCreateObjectMap.insert(ObjectMapType::value_type(typeid(bool).name(), (void*(*)())CreateBool));
+      sCreateObjectMap.insert(ObjectMapType::value_type(typeid(string).name(), (void*(*)())CreateString));
+      sCreateObjectMap.insert(ObjectMapType::value_type(typeid(BitMask*).name(), (void*(*)())CreateBitMask));
+      sCreateObjectMap.insert(ObjectMapType::value_type(typeid(Classification*).name(),
+         (void*(*)())CreateClassification));
+      sCreateObjectMap.insert(ObjectMapType::value_type(typeid(DateTime*).name(), (void*(*)())CreateDateTime));
+      sCreateObjectMap.insert(ObjectMapType::value_type(typeid(DynamicObject*).name(),
+         (void*(*)())CreateDynamicObject));
+      sCreateObjectMap.insert(ObjectMapType::value_type(typeid(FileFinder*).name(), (void*(*)())CreateFileFinder));
+      sCreateObjectMap.insert(ObjectMapType::value_type(typeid(Filename*).name(), (void*(*)())CreateFilename));
+      sCreateObjectMap.insert(ObjectMapType::value_type(typeid(Units*).name(), (void*(*)())CreateUnits));
 
-      DestroyObjectMap.insert(ObjectMapType2::value_type("unsigned char", (void(*)(void*))DestroyUnsignedChar));
-      DestroyObjectMap.insert(ObjectMapType2::value_type("char", (void(*)(void*))DestroyChar));
-      DestroyObjectMap.insert(ObjectMapType2::value_type("unsigned short", (void(*)(void*))DestroyUnsignedShort));
-      DestroyObjectMap.insert(ObjectMapType2::value_type("short", (void(*)(void*))DestroyShort));
-      DestroyObjectMap.insert(ObjectMapType2::value_type("unsigned int", (void(*)(void*))DestroyUnsignedInt));
-      DestroyObjectMap.insert(ObjectMapType2::value_type("int", (void(*)(void*))DestroyInt));
-      DestroyObjectMap.insert(ObjectMapType2::value_type("unsigned long", (void(*)(void*))DestroyUnsignedLong));
-      DestroyObjectMap.insert(ObjectMapType2::value_type("long", (void(*)(void*))DestroyLong));
-      DestroyObjectMap.insert(ObjectMapType2::value_type("float", (void(*)(void*))DestroyFloat));
-      DestroyObjectMap.insert(ObjectMapType2::value_type("double", (void(*)(void*))DestroyDouble));
-      DestroyObjectMap.insert(ObjectMapType2::value_type("bool", (void(*)(void*))DestroyBool));
-      DestroyObjectMap.insert(ObjectMapType2::value_type("string", (void(*)(void*))DestroyString));
-      DestroyObjectMap.insert(ObjectMapType2::value_type("BitMask", (void(*)(void*))DestroyBitMask));
-      DestroyObjectMap.insert(ObjectMapType2::value_type("Classification", (void(*)(void*))DestroyClassification));
-      DestroyObjectMap.insert(ObjectMapType2::value_type("DataRequest", (void(*)(void*))DestroyDataRequest));
-      DestroyObjectMap.insert(ObjectMapType2::value_type("DataVariantAnyData", (void(*)(void*))DestroyDataVariantAnyData));
-      DestroyObjectMap.insert(ObjectMapType2::value_type("DateTime", (void(*)(void*))DestroyDateTime));
-      DestroyObjectMap.insert(ObjectMapType2::value_type("DynamicObject", (void(*)(void*))DestroyDynamicObject));
-      DestroyObjectMap.insert(ObjectMapType2::value_type("FileDescriptor", (void(*)(void*))DestroyFileDescriptor));
-      DestroyObjectMap.insert(ObjectMapType2::value_type("FileFinder", (void(*)(void*))DestroyFileFinder));
-      DestroyObjectMap.insert(ObjectMapType2::value_type("Filename", (void(*)(void*))DestroyFilename));
-      DestroyObjectMap.insert(ObjectMapType2::value_type("Font", (void(*)(void*))DestroyFontObject));
-      DestroyObjectMap.insert(ObjectMapType2::value_type("RasterFileDescriptor", (void(*)(void*))DestroyRasterFileDescriptor));
-      DestroyObjectMap.insert(ObjectMapType2::value_type("SettableSessionItem", (void(*)(void*))DestroySettableSessionItem));
-      DestroyObjectMap.insert(ObjectMapType2::value_type("ExecutableAgent", (void(*)(void*))DestroyExecutableAgent));
-      DestroyObjectMap.insert(ObjectMapType2::value_type("ExecutableAgentCommon", (void(*)(void*))DestroyExecutableAgent));
-      DestroyObjectMap.insert(ObjectMapType2::value_type("ImportAgent", (void(*)(void*))DestroyImportAgent));
-      DestroyObjectMap.insert(ObjectMapType2::value_type("ImportAgentCommon", (void(*)(void*))DestroyImportAgent));
-      DestroyObjectMap.insert(ObjectMapType2::value_type("ExportAgent", (void(*)(void*))DestroyExportAgent));
-      DestroyObjectMap.insert(ObjectMapType2::value_type("ExportAgentCommon", (void(*)(void*))DestroyExportAgent));
-      DestroyObjectMap.insert(ObjectMapType2::value_type("Units", (void(*)(void*))DestroyUnits));
-      DestroyObjectMap.insert(ObjectMapType2::value_type("WizardObject", (void(*)(void*))DestroyWizardObject));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("unsigned char", (void(*)(void*))DestroyUnsignedChar));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("char", (void(*)(void*))DestroyChar));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("unsigned short", (void(*)(void*))DestroyUnsignedShort));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("short", (void(*)(void*))DestroyShort));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("unsigned int", (void(*)(void*))DestroyUnsignedInt));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("int", (void(*)(void*))DestroyInt));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("unsigned long", (void(*)(void*))DestroyUnsignedLong));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("long", (void(*)(void*))DestroyLong));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("float", (void(*)(void*))DestroyFloat));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("double", (void(*)(void*))DestroyDouble));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("bool", (void(*)(void*))DestroyBool));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("string", (void(*)(void*))DestroyString));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("BitMask", (void(*)(void*))DestroyBitMask));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("Classification", (void(*)(void*))DestroyClassification));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("DataRequest", (void(*)(void*))DestroyDataRequest));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("DataVariantAnyData",
+         (void(*)(void*))DestroyDataVariantAnyData));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("DateTime", (void(*)(void*))DestroyDateTime));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("DynamicObject", (void(*)(void*))DestroyDynamicObject));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("FileDescriptor", (void(*)(void*))DestroyFileDescriptor));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("FileFinder", (void(*)(void*))DestroyFileFinder));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("Filename", (void(*)(void*))DestroyFilename));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("Font", (void(*)(void*))DestroyFontObject));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("RasterFileDescriptor",
+         (void(*)(void*))DestroyRasterFileDescriptor));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("SettableSessionItem",
+         (void(*)(void*))DestroySettableSessionItem));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("ExecutableAgent", (void(*)(void*))DestroyExecutableAgent));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("ExecutableAgentCommon",
+         (void(*)(void*))DestroyExecutableAgent));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("ExecutableAgentCommon1",
+         (void(*)(void*))DestroyExecutableAgent));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("ImportAgent", (void(*)(void*))DestroyImportAgent));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("ImportAgentCommon", (void(*)(void*))DestroyImportAgent));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("ExportAgent", (void(*)(void*))DestroyExportAgent));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("ExportAgentCommon", (void(*)(void*))DestroyExportAgent));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("Units", (void(*)(void*))DestroyUnits));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("WizardObject", (void(*)(void*))DestroyWizardObject));
 
-      CreateObjectVectorMap.insert(VectorMapType::value_type("unsigned char", (void*(*)())CreateVectorUnsignedChar));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("char", (void*(*)())CreateVectorChar));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("unsigned short", (void*(*)())CreateVectorUnsignedShort));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("short", (void*(*)())CreateVectorShort));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("unsigned int", (void*(*)())CreateVectorUnsignedInt));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("int", (void*(*)())CreateVectorInt));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("unsigned long", (void*(*)())CreateVectorUnsignedLong));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("long", (void*(*)())CreateVectorLong));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("float", (void*(*)())CreateVectorFloat));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("double", (void*(*)())CreateVectorDouble));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("bool", (void*(*)())CreateVectorBool));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("string", (void*(*)())CreateVectorString));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("void*", (void*(*)())CreateVectorVoidPtr));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("unsigned char*", (void*(*)())CreateVectorUnsignedCharPtr));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("char*", (void*(*)())CreateVectorCharPtr));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("unsigned short*", (void*(*)())CreateVectorUnsignedShortPtr));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("short*", (void*(*)())CreateVectorShortPtr));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("unsigned int*", (void*(*)())CreateVectorUnsignedIntPtr));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("int*", (void*(*)())CreateVectorIntPtr));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("unsigned long*", (void*(*)())CreateVectorUnsignedLongPtr));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("long*", (void*(*)())CreateVectorLongPtr));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("float*", (void*(*)())CreateVectorFloatPtr));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("double*", (void*(*)())CreateVectorDoublePtr));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("bool*", (void*(*)())CreateVectorBoolPtr));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("string*", (void*(*)())CreateVectorStringPtr));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("GraphicObject", (void*(*)())CreateVectorGraphicObject));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("BitMask", (void*(*)())CreateVectorBitMask));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("Classification", (void*(*)())CreateVectorClassification));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("DateTime", (void*(*)())CreateVectorDateTime));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("DynamicObject", (void*(*)())CreateVectorDynamicObject));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("FileDescriptor", (void*(*)())CreateVectorFileDescriptor));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("FileFinder", (void*(*)())CreateVectorFileFinder));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("Filename", (void*(*)())CreateVectorFilename));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("Layer", (void*(*)())CreateVectorLayer));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("RasterFileDescriptor", (void*(*)())CreateVectorRasterFileDescriptor));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("Units", (void*(*)())CreateVectorUnits));
-      CreateObjectVectorMap.insert(VectorMapType::value_type("WizardObject", (void*(*)())CreateVectorWizardObject));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("unsigned char", (void*(*)())CreateVectorUnsignedChar));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("char", (void*(*)())CreateVectorChar));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("unsigned short", (void*(*)())CreateVectorUnsignedShort));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("short", (void*(*)())CreateVectorShort));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("unsigned int", (void*(*)())CreateVectorUnsignedInt));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("int", (void*(*)())CreateVectorInt));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("unsigned long", (void*(*)())CreateVectorUnsignedLong));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("long", (void*(*)())CreateVectorLong));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("float", (void*(*)())CreateVectorFloat));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("double", (void*(*)())CreateVectorDouble));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("bool", (void*(*)())CreateVectorBool));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("string", (void*(*)())CreateVectorString));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("void*", (void*(*)())CreateVectorVoidPtr));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("unsigned char*",
+         (void*(*)())CreateVectorUnsignedCharPtr));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("char*", (void*(*)())CreateVectorCharPtr));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("unsigned short*",
+         (void*(*)())CreateVectorUnsignedShortPtr));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("short*", (void*(*)())CreateVectorShortPtr));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("unsigned int*", (void*(*)())CreateVectorUnsignedIntPtr));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("int*", (void*(*)())CreateVectorIntPtr));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("unsigned long*",
+         (void*(*)())CreateVectorUnsignedLongPtr));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("long*", (void*(*)())CreateVectorLongPtr));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("float*", (void*(*)())CreateVectorFloatPtr));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("double*", (void*(*)())CreateVectorDoublePtr));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("bool*", (void*(*)())CreateVectorBoolPtr));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("string*", (void*(*)())CreateVectorStringPtr));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("GraphicObject", (void*(*)())CreateVectorGraphicObject));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("BitMask", (void*(*)())CreateVectorBitMask));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("Classification",
+         (void*(*)())CreateVectorClassification));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("DateTime", (void*(*)())CreateVectorDateTime));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("DynamicObject", (void*(*)())CreateVectorDynamicObject));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("FileDescriptor",
+         (void*(*)())CreateVectorFileDescriptor));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("FileFinder", (void*(*)())CreateVectorFileFinder));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("Filename", (void*(*)())CreateVectorFilename));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("Layer", (void*(*)())CreateVectorLayer));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("RasterFileDescriptor",
+         (void*(*)())CreateVectorRasterFileDescriptor));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("Units", (void*(*)())CreateVectorUnits));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("WizardObject", (void*(*)())CreateVectorWizardObject));
 
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("unsigned char", (void(*)(void*))DestroyVectorUnsignedChar));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("char", (void(*)(void*))DestroyVectorChar));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("unsigned short", (void(*)(void*))DestroyVectorUnsignedShort));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("short", (void(*)(void*))DestroyVectorShort));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("unsigned int", (void(*)(void*))DestroyVectorUnsignedInt));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("int", (void(*)(void*))DestroyVectorInt));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("unsigned long", (void(*)(void*))DestroyVectorUnsignedLong));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("long", (void(*)(void*))DestroyVectorLong));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("float", (void(*)(void*))DestroyVectorFloat));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("double", (void(*)(void*))DestroyVectorDouble));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("bool", (void(*)(void*))DestroyVectorBool));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("string", (void(*)(void*))DestroyVectorString));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("void*", (void(*)(void*))DestroyVectorVoidPtr));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("unsigned char*", (void(*)(void*))DestroyVectorUnsignedCharPtr));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("char*", (void(*)(void*))DestroyVectorCharPtr));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("unsigned short*", (void(*)(void*))DestroyVectorUnsignedShortPtr));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("short*", (void(*)(void*))DestroyVectorShortPtr));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("unsigned int*", (void(*)(void*))DestroyVectorUnsignedIntPtr));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("int*", (void(*)(void*))DestroyVectorIntPtr));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("unsigned long*", (void(*)(void*))DestroyVectorUnsignedLongPtr));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("long*", (void(*)(void*))DestroyVectorLongPtr));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("float*", (void(*)(void*))DestroyVectorFloatPtr));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("double*", (void(*)(void*))DestroyVectorDoublePtr));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("bool*", (void(*)(void*))DestroyVectorBoolPtr));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("string*", (void(*)(void*))DestroyVectorStringPtr));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("GraphicObject", (void(*)(void*))DestroyVectorGraphicObject));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("BitMask", (void(*)(void*))DestroyVectorBitMask));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("Classification", (void(*)(void*))DestroyVectorClassification));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("DateTime", (void(*)(void*))DestroyVectorDateTime));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("DynamicObject", (void(*)(void*))DestroyVectorDynamicObject));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("FileDescriptor", (void(*)(void*))DestroyVectorFileDescriptor));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("FileFinder", (void(*)(void*))DestroyVectorFileFinder));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("Filename", (void(*)(void*))DestroyVectorFilename));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("Layer", (void(*)(void*))DestroyVectorLayer));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("RasterFileDescriptor", (void(*)(void*))DestroyVectorRasterFileDescriptor));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("Units", (void(*)(void*))DestroyVectorUnits));
-      DestroyObjectVectorMap.insert(VectorMapType2::value_type("WizardObject", (void(*)(void*))DestroyVectorWizardObject));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("unsigned char",
+         (void(*)(void*))DestroyVectorUnsignedChar));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("char", (void(*)(void*))DestroyVectorChar));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("unsigned short",
+         (void(*)(void*))DestroyVectorUnsignedShort));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("short", (void(*)(void*))DestroyVectorShort));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("unsigned int",
+         (void(*)(void*))DestroyVectorUnsignedInt));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("int", (void(*)(void*))DestroyVectorInt));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("unsigned long",
+         (void(*)(void*))DestroyVectorUnsignedLong));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("long", (void(*)(void*))DestroyVectorLong));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("float", (void(*)(void*))DestroyVectorFloat));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("double", (void(*)(void*))DestroyVectorDouble));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("bool", (void(*)(void*))DestroyVectorBool));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("string", (void(*)(void*))DestroyVectorString));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("void*", (void(*)(void*))DestroyVectorVoidPtr));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("unsigned char*",
+         (void(*)(void*))DestroyVectorUnsignedCharPtr));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("char*", (void(*)(void*))DestroyVectorCharPtr));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("unsigned short*",
+         (void(*)(void*))DestroyVectorUnsignedShortPtr));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("short*", (void(*)(void*))DestroyVectorShortPtr));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("unsigned int*",
+         (void(*)(void*))DestroyVectorUnsignedIntPtr));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("int*", (void(*)(void*))DestroyVectorIntPtr));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("unsigned long*",
+         (void(*)(void*))DestroyVectorUnsignedLongPtr));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("long*", (void(*)(void*))DestroyVectorLongPtr));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("float*", (void(*)(void*))DestroyVectorFloatPtr));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("double*", (void(*)(void*))DestroyVectorDoublePtr));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("bool*", (void(*)(void*))DestroyVectorBoolPtr));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("string*", (void(*)(void*))DestroyVectorStringPtr));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("GraphicObject",
+         (void(*)(void*))DestroyVectorGraphicObject));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("BitMask", (void(*)(void*))DestroyVectorBitMask));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("Classification",
+         (void(*)(void*))DestroyVectorClassification));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("DateTime", (void(*)(void*))DestroyVectorDateTime));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("DynamicObject",
+         (void(*)(void*))DestroyVectorDynamicObject));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("FileDescriptor",
+         (void(*)(void*))DestroyVectorFileDescriptor));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("FileFinder", (void(*)(void*))DestroyVectorFileFinder));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("Filename", (void(*)(void*))DestroyVectorFilename));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("Layer", (void(*)(void*))DestroyVectorLayer));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("RasterFileDescriptor",
+         (void(*)(void*))DestroyVectorRasterFileDescriptor));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("Units", (void(*)(void*))DestroyVectorUnits));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("WizardObject",
+         (void(*)(void*))DestroyVectorWizardObject));
    }
 
    return spInstance;
@@ -403,7 +434,7 @@ ObjectFactoryImp* ObjectFactoryImp::instance()
 
 void ObjectFactoryImp::destroy()
 {
-   if(mDestroyed)
+   if (mDestroyed)
    {
       throw std::logic_error("Attempting to destroy ObjectFactory after "
          "destroying it.");
@@ -417,15 +448,16 @@ void* ObjectFactoryImp::createObject(const std::string& className)
 {
    // call createObjectVector if it is a vector
    string vectorName;
-   if (parseClassString(className, vectorName)) {
+   if (parseClassString(className, vectorName))
+   {
       return createObjectVector(vectorName);
    }
 
-   map<string,void*(*)()>::iterator itr;
+   map<string, void*(*)()>::iterator itr;
 
    // Fabricate the entry point name, using the class name argument
-   itr = CreateObjectMap.find(className);
-   if (itr != CreateObjectMap.end())
+   itr = sCreateObjectMap.find(className);
+   if (itr != sCreateObjectMap.end())
    {
       return ((*itr).second) ();
    }
@@ -440,16 +472,17 @@ void ObjectFactoryImp::destroyObject(void* pObject, const std::string& className
 
    // call destroyObjectVector if it is a vector
    string vectorName;
-   if (parseClassString(className, vectorName)) {
+   if (parseClassString(className, vectorName))
+   {
       destroyObjectVector(pObject, vectorName);
       return;
    }
 
-   map<string,void(*)(void*)>::iterator itr;
+   map<string, void(*)(void*)>::iterator itr;
 
    // Fabricate the entry point name, using the class name argument
-   itr = DestroyObjectMap.find(className);
-   if (itr != DestroyObjectMap.end())
+   itr = sDestroyObjectMap.find(className);
+   if (itr != sDestroyObjectMap.end())
    {
       ((*itr).second) (pObject);
       return;
@@ -459,13 +492,13 @@ void ObjectFactoryImp::destroyObject(void* pObject, const std::string& className
    VERIFYNRV_MSG(false, msg.c_str());
 }
 
-void* ObjectFactoryImp::createObjectVector (const string& className)
+void* ObjectFactoryImp::createObjectVector(const string& className)
 {
-   map<string,void*(*)()>::iterator itr;
+   map<string, void*(*)()>::iterator itr;
 
    // Fabricate the entry point name, using the class name argument
-   itr = CreateObjectVectorMap.find (className);
-   if (itr != CreateObjectVectorMap.end())
+   itr = sCreateObjectVectorMap.find (className);
+   if (itr != sCreateObjectVectorMap.end())
    {
       return ((*itr).second) ();
    }
@@ -474,15 +507,15 @@ void* ObjectFactoryImp::createObjectVector (const string& className)
    VERIFYRV_MSG(false, NULL, msg.c_str());
 }
 
-void ObjectFactoryImp::destroyObjectVector (void* pVector, const string& className)
+void ObjectFactoryImp::destroyObjectVector(void* pVector, const string& className)
 {
    VERIFYNRV (pVector!= NULL);
 
-   map<string,void(*)(void*)>::iterator itr;
+   map<string, void(*)(void*)>::iterator itr;
 
    // Fabricate the entry point name, using the class name argument
-   itr = DestroyObjectVectorMap.find (className);
-   if (itr != DestroyObjectVectorMap.end())
+   itr = sDestroyObjectVectorMap.find (className);
+   if (itr != sDestroyObjectVectorMap.end())
    {
       ((*itr).second) (pVector);
    }
@@ -495,82 +528,70 @@ void ObjectFactoryImp::destroyObjectVector (void* pVector, const string& classNa
 
 namespace
 {
-// For maintenance ease, please keep the following 
-// alphabetized by object class name.
 //=============================
-void* 
-CreateVectorGraphicObject()
+// GraphicObject
+void* CreateVectorGraphicObject()
 {
-   return new vector<GraphicObject*>;
+   return new vector<GraphicObject*>();
 }
 
-void
-DestroyVectorGraphicObject(void* pObj)
+void DestroyVectorGraphicObject(void* pObj)
 {
-    vector<GraphicObject*>* myObj = (vector<GraphicObject*>*) pObj;
-   delete myObj;
+   delete reinterpret_cast<vector<GraphicObject*>*>(pObj);
 }
+
 //=============================
-BitMask* 
-CreateBitMask()
+// BitMask
+BitMask* CreateBitMask()
 {
-   return new BitMaskImp;
+   return new BitMaskImp();
 }
 
-void
-DestroyBitMask(void* pObj)
+void DestroyBitMask(void* pObj)
 {
-   delete (BitMaskImp*) pObj;
+   delete reinterpret_cast<BitMaskImp*>(pObj);
 }
 
-void* 
-CreateVectorBitMask()
+void* CreateVectorBitMask()
 {
-   return new vector<BitMask*>;
+   return new vector<BitMask*>();
 }
 
-void
-DestroyVectorBitMask(void* pObj)
+void DestroyVectorBitMask(void* pObj)
 {
-    vector<BitMask*>* myObj = (vector<BitMask*>*) pObj;
-   delete myObj;
+   delete reinterpret_cast<vector<BitMask*>*>(pObj);
 }
+
 //=============================
-Classification* 
-CreateClassification()
+// Classification
+Classification* CreateClassification()
 {
-   return new ClassificationAdapter;
+   return new ClassificationAdapter();
 }
 
-void
-DestroyClassification(void* pObj)
+void DestroyClassification(void* pObj)
 {
-   delete (ClassificationAdapter*) pObj;
+   delete reinterpret_cast<ClassificationAdapter*>(pObj);
 }
 
-void* 
-CreateVectorClassification()
+void* CreateVectorClassification()
 {
-   return new vector<Classification*>;
+   return new vector<Classification*>();
 }
 
-void
-DestroyVectorClassification(void* pObj)
+void DestroyVectorClassification(void* pObj)
 {
-    vector<Classification*>* myObj = (vector<Classification*>*) pObj;
-   delete myObj;
+   delete reinterpret_cast<vector<Classification*>*>(pObj);
 }
 
 //=============================
 // DataRequest
-DataRequest* 
-CreateDataRequest()
+DataRequest* CreateDataRequest()
 {
-   return new DataRequestImp;
+   return new DataRequestImp();
 }
 
-void
-DestroyDataRequest(void* pObj)
+void DestroyDataRequest(void* pObj)
 {
    delete reinterpret_cast<DataRequestImp*>(pObj);
 }
@@ -586,61 +607,56 @@ void DestroyDataVariantAnyData(void* pObj)
 {
    delete reinterpret_cast<DataVariantAnyData*>(pObj);
 }
+
 //=============================
-DateTime*
-CreateDateTime()
+// DateTime
+DateTime* CreateDateTime()
 {
-   return new DateTimeImp;
+   return new DateTimeImp();
 }
 
-void
-DestroyDateTime(void* pObj)
+void DestroyDateTime(void* pObj)
 {
-   delete (DateTimeImp*) pObj;
+   delete reinterpret_cast<DateTimeImp*>(pObj);
 }
 
-void*
-CreateVectorDateTime()
+void* CreateVectorDateTime()
 {
-   return new vector<DateTime*>;
+   return new vector<DateTime*>();
 }
 
-void
-DestroyVectorDateTime(void* pObj)
+void DestroyVectorDateTime(void* pObj)
 {
-   vector<DateTime*>* myObj = (vector<DateTime*>*) pObj;
-   delete myObj;
+   delete reinterpret_cast<vector<DateTime*>*>(pObj);
 }
+
 //=============================
-DynamicObject*
-CreateDynamicObject()
+// DynamicObject
+DynamicObject* CreateDynamicObject()
 {
-   return new DynamicObjectAdapter;
+   return new DynamicObjectAdapter();
 }
 
-void
-DestroyDynamicObject(void* pObj)
+void DestroyDynamicObject(void* pObj)
 {
-   delete (DynamicObjectAdapter*) pObj;
+   delete reinterpret_cast<DynamicObjectAdapter*>(pObj);
 }
 
-void*
-CreateVectorDynamicObject()
+void* CreateVectorDynamicObject()
 {
-   return new vector<DynamicObject*>;
+   return new vector<DynamicObject*>();
 }
 
-void
-DestroyVectorDynamicObject(void* pObj)
+void DestroyVectorDynamicObject(void* pObj)
 {
-   vector<DynamicObject*>* myObj = (vector<DynamicObject*>*) pObj;
-   delete myObj;
+   delete reinterpret_cast<vector<DynamicObject*>*>(pObj);
 }
+
 //=============================
 // FileDescriptor
 FileDescriptor* CreateFileDescriptor()
 {
-   return new FileDescriptorAdapter;
+   return new FileDescriptorAdapter();
 }
 
 void DestroyFileDescriptor(void* pObj)
@@ -650,91 +666,87 @@ void DestroyFileDescriptor(void* pObj)
 
 void* CreateVectorFileDescriptor()
 {
-   return new vector<FileDescriptor*>;
+   return new vector<FileDescriptor*>();
 }
 
 void DestroyVectorFileDescriptor(void* pObj)
 {
    delete reinterpret_cast<vector<FileDescriptor*>*>(pObj);
 }
+
 //=============================
-FileFinder* 
-CreateFileFinder()
+// FileFinder
+FileFinder* CreateFileFinder()
 {
-   return new FileFinderImp;
+   return new FileFinderImp();
 }
 
-void
-DestroyFileFinder(void* pObj)
+void DestroyFileFinder(void* pObj)
 {
-   delete (FileFinderImp*) pObj;
+   delete reinterpret_cast<FileFinderImp*>(pObj);
 }
 
-void* 
-CreateVectorFileFinder()
+void* CreateVectorFileFinder()
 {
-   return new vector<FileFinder*>;
+   return new vector<FileFinder*>();
 }
 
-void
-DestroyVectorFileFinder(void* pObj)
+void DestroyVectorFileFinder(void* pObj)
 {
-    vector<FileFinder*>* myObj = (vector<FileFinder*>*) pObj;
-   delete myObj;
+   delete reinterpret_cast<vector<FileFinder*>*>(pObj);
 }
+
 //=============================
-Filename* 
-CreateFilename()
+// Filename
+Filename* CreateFilename()
 {
-   return new FilenameImp;
+   return new FilenameImp();
 }
 
-void
-DestroyFilename(void* pObj)
+void DestroyFilename(void* pObj)
 {
-   delete (FilenameImp*) pObj;
+   delete reinterpret_cast<FilenameImp*>(pObj);
 }
 
-void* 
-CreateVectorFilename()
+void* CreateVectorFilename()
 {
-   return new vector<Filename*>;
+   return new vector<Filename*>();
 }
 
-void
-DestroyVectorFilename(void* pObj)
+void DestroyVectorFilename(void* pObj)
 {
-    vector<Filename*>* myObj = (vector<Filename*>*) pObj;
-   delete myObj;
+   delete reinterpret_cast<vector<Filename*>*>(pObj);
 }
+
 //=============================
+// Font
 Font* CreateFontObject()
 {
-   return new FontImp;
+   return new FontImp();
 }
 
 void DestroyFontObject(void* pObj)
 {
    delete reinterpret_cast<FontImp*>(pObj);
 }
+
 //=============================
-void* 
-CreateVectorLayer()
+// Layer
+void* CreateVectorLayer()
 {
-   return new vector<Layer*>;
+   return new vector<Layer*>();
 }
 
-void
-DestroyVectorLayer(void* pObj)
+void DestroyVectorLayer(void* pObj)
 {
-    vector<Layer*>* myObj = (vector<Layer*>*) pObj;
-   delete myObj;
+   delete reinterpret_cast<vector<Layer*>*>(pObj);
 }
+
 //=============================
 // RasterFileDescriptor
 RasterFileDescriptor* CreateRasterFileDescriptor()
 {
-   return new RasterFileDescriptorAdapter;
+   return new RasterFileDescriptorAdapter();
 }
 
 void DestroyRasterFileDescriptor(void* pObj)
@@ -744,14 +756,16 @@ void DestroyRasterFileDescriptor(void* pObj)
 
 void* CreateVectorRasterFileDescriptor()
 {
-   return new vector<RasterFileDescriptor*>;
+   return new vector<RasterFileDescriptor*>();
 }
 
 void DestroyVectorRasterFileDescriptor(void* pObj)
 {
    delete reinterpret_cast<vector<RasterFileDescriptor*>*>(pObj);
 }
+
 //=============================
+// SettableSessionItem
 SettableSessionItem* CreateSettableSessionItem()
 {
    return new SettableSessionItemAdapter(SessionItemImp::generateUniqueId());
@@ -761,7 +775,9 @@ void DestroySettableSessionItem(void* pObj)
 {
    delete reinterpret_cast<SettableSessionItemAdapter*>(pObj);
 }
+
 //=============================
+// ExecutableAgent
 ExecutableAgent* CreateExecutableAgent()
 {
    return new ExecutableAgentAdapter();
@@ -771,7 +787,9 @@ void DestroyExecutableAgent(void* pObj)
 {
    delete reinterpret_cast<ExecutableAgentAdapter*>(pObj);
 }
+
 //=============================
+// ImportAgent
 ImportAgent* CreateImportAgent()
 {
    return new ImportAgentAdapter();
@@ -781,7 +799,9 @@ void DestroyImportAgent(void* pObj)
 {
    delete reinterpret_cast<ImportAgentAdapter*>(pObj);
 }
+
 //=============================
+// ExportAgent
 ExportAgent* CreateExportAgent()
 {
    return new ExportAgentAdapter();
@@ -791,36 +811,34 @@ void DestroyExportAgent(void* pObj)
 {
    delete reinterpret_cast<ExportAgentAdapter*>(pObj);
 }
+
 //=============================
-Units*  
-CreateUnits()
+// Units
+Units* CreateUnits()
 {
-   return new UnitsImp;
+   return new UnitsImp();
 }
 
-void
-DestroyUnits(void* pObj)
+void DestroyUnits(void* pObj)
 {
-   delete (UnitsImp*) pObj;
+   delete reinterpret_cast<UnitsImp*>(pObj);
 }
 
-void* 
-CreateVectorUnits()
+void* CreateVectorUnits()
 {
-   return new vector<Units*>;
+   return new vector<Units*>();
 }
 
-void
-DestroyVectorUnits(void* pObj)
+void DestroyVectorUnits(void* pObj)
 {
-    vector<Units*>* myObj = (vector<Units*>*) pObj;
-   delete myObj;
+   delete reinterpret_cast<vector<Units*>*>(pObj);
 }
+
 //=============================
 // WizardObject
 WizardObject* CreateWizardObject()
 {
-   return new WizardObjectAdapter;
+   return new WizardObjectAdapter();
 }
 
 void DestroyWizardObject(void* pObj)
@@ -830,91 +848,384 @@ void DestroyWizardObject(void* pObj)
 
 static void* CreateVectorWizardObject()
 {
-   return new vector<WizardObject*>;
+   return new vector<WizardObject*>();
 }
 
 void DestroyVectorWizardObject(void* pObj)
 {
    delete reinterpret_cast<vector<WizardObject*>*>(pObj);
 }
+
 //=============================
+// Basic types
+void* CreateUnsignedChar()
+{
+   return new unsigned char();
+}
 
-void* CreateUnsignedChar () { return new unsigned char; }
-void* CreateChar () { return new char; }
-void* CreateUnsignedShort () { return new unsigned short; }
-void* CreateShort () { return new short; }
-void* CreateUnsignedInt () { return new unsigned int; }
-void* CreateInt () { return new int; }
-void* CreateUnsignedLong () { return new unsigned long; }
-void* CreateLong () { return new long; }
-void* CreateFloat () { return new float; }
-void* CreateDouble () { return new double; }
-void* CreateBool () { return new bool; }
-void* CreateString () { return new string; }
+void* CreateChar()
+{
+   return new char();
+}
 
-void DestroyUnsignedChar (void* ptr) { delete (unsigned char*) ptr;}
-void DestroyChar (void* ptr) { delete (char*) ptr;}
-void DestroyUnsignedShort (void* ptr) { delete (unsigned short*) ptr;}
-void DestroyShort (void* ptr) { delete (short*) ptr;}
-void DestroyUnsignedInt (void* ptr) { delete (unsigned int*) ptr;}
-void DestroyInt (void* ptr) { delete (int*) ptr;}
-void DestroyUnsignedLong (void* ptr) { delete (unsigned long*) ptr;}
-void DestroyLong (void* ptr) { delete (long*) ptr;}
-void DestroyFloat (void* ptr) { delete (float*) ptr;}
-void DestroyDouble (void* ptr) { delete (double*) ptr;}
-void DestroyBool (void* ptr) { delete (bool*) ptr;}
-void DestroyString (void* ptr) { delete (string*) ptr;}
+void* CreateUnsignedShort()
+{
+   return new unsigned short();
+}
 
-void* CreateVectorUnsignedChar () {return new vector<unsigned char>;}
-void* CreateVectorChar () {return new vector<char>;}
-void* CreateVectorUnsignedShort () {return new vector<unsigned short>;}
-void* CreateVectorShort () {return new vector<short>;}
-void* CreateVectorUnsignedInt () {return new vector<unsigned int>;}
-void* CreateVectorInt () {return new vector<int>;}
-void* CreateVectorUnsignedLong () {return new vector<unsigned long>;}
-void* CreateVectorLong () {return new vector<long>;}
-void* CreateVectorFloat () {return new vector<float>;}
-void* CreateVectorDouble () {return new vector<double>;}
-void* CreateVectorBool () {return new vector<bool>;}
-void* CreateVectorString () {return new vector<string>;}
-void* CreateVectorVoidPtr () {return new vector<void*>;}
-void* CreateVectorUnsignedCharPtr () {return new vector<unsigned char*>;}
-void* CreateVectorCharPtr () {return new vector<char*>;}
-void* CreateVectorUnsignedShortPtr () {return new vector<unsigned short*>;}
-void* CreateVectorShortPtr () {return new vector<short*>;}
-void* CreateVectorUnsignedIntPtr () {return new vector<unsigned int*>;}
-void* CreateVectorIntPtr () {return new vector<int*>;}
-void* CreateVectorUnsignedLongPtr () {return new vector<unsigned long*>;}
-void* CreateVectorLongPtr () {return new vector<long*>;}
-void* CreateVectorFloatPtr () {return new vector<float*>;}
-void* CreateVectorDoublePtr () {return new vector<double*>;}
-void* CreateVectorBoolPtr () {return new vector<bool*>;}
-void* CreateVectorStringPtr () {return new vector<string*>;}
+void* CreateShort()
+{
+   return new short();
+}
 
-void DestroyVectorUnsignedChar (void* ptr) {delete (vector<unsigned char>*)ptr;}
-void DestroyVectorChar (void* ptr) {delete (vector<char>*) ptr;}
-void DestroyVectorUnsignedShort (void* ptr) {delete (vector<unsigned short>*)ptr;}
-void DestroyVectorShort (void* ptr) {delete (vector<short>*)ptr;}
-void DestroyVectorUnsignedInt (void* ptr) {delete (vector<unsigned int>*)ptr;}
-void DestroyVectorInt (void* ptr) {delete (vector<int>*)ptr;}
-void DestroyVectorUnsignedLong (void* ptr) {delete (vector<unsigned long>*)ptr;}
-void DestroyVectorLong (void* ptr) {delete (vector<long>*)ptr;}
-void DestroyVectorFloat (void* ptr) {delete (vector<float>*)ptr;}
-void DestroyVectorDouble (void* ptr) {delete (vector<double>*)ptr;}
-void DestroyVectorBool (void* ptr) {delete (vector<bool>*)ptr;}
-void DestroyVectorString (void* ptr) {delete (vector<string>*)ptr;}
-void DestroyVectorVoidPtr (void* ptr) {delete (vector<void*>*)ptr;}
-void DestroyVectorUnsignedCharPtr (void* ptr) {delete (vector<unsigned char*>*)ptr;}
-void DestroyVectorCharPtr (void* ptr) {delete (vector<char*>*) ptr;}
-void DestroyVectorUnsignedShortPtr (void* ptr) {delete (vector<unsigned short*>*)ptr;}
-void DestroyVectorShortPtr (void* ptr) {delete (vector<short*>*)ptr;}
-void DestroyVectorUnsignedIntPtr (void* ptr) {delete (vector<unsigned int*>*)ptr;}
-void DestroyVectorIntPtr (void* ptr) {delete (vector<int*>*)ptr;}
-void DestroyVectorUnsignedLongPtr (void* ptr) {delete (vector<unsigned long*>*)ptr;}
-void DestroyVectorLongPtr (void* ptr) {delete (vector<long*>*)ptr;}
-void DestroyVectorFloatPtr (void* ptr) {delete (vector<float*>*)ptr;}
-void DestroyVectorDoublePtr (void* ptr) {delete (vector<double*>*)ptr;}
-void DestroyVectorBoolPtr (void* ptr) {delete (vector<bool*>*)ptr;}
-void DestroyVectorStringPtr (void* ptr) {delete (vector<string*>*)ptr;}
+void* CreateUnsignedInt()
+{
+   return new unsigned int();
+}
+
+void* CreateInt()
+{
+   return new int();
+}
+
+void* CreateUnsignedLong()
+{
+   return new unsigned long();
+}
+
+void* CreateLong()
+{
+   return new long();
+}
+
+void* CreateFloat()
+{
+   return new float();
+}
+
+void* CreateDouble()
+{
+   return new double();
+}
+
+void* CreateBool()
+{
+   return new bool();
+}
+
+void* CreateString()
+{
+   return new string();
+}
+
+void DestroyUnsignedChar(void* pObj)
+{
+   delete reinterpret_cast<unsigned char*>(pObj);
+}
+
+void DestroyChar(void* pObj)
+{
+   delete reinterpret_cast<char*>(pObj);
+}
+
+void DestroyUnsignedShort(void* pObj)
+{
+   delete reinterpret_cast<unsigned short*>(pObj);
+}
+
+void DestroyShort(void* pObj)
+{
+   delete reinterpret_cast<short*>(pObj);
+}
+
+void DestroyUnsignedInt(void* pObj)
+{
+   delete reinterpret_cast<unsigned int*>(pObj);
+}
+
+void DestroyInt(void* pObj)
+{
+   delete reinterpret_cast<int*>(pObj);
+}
+
+void DestroyUnsignedLong(void* pObj)
+{
+   delete reinterpret_cast<unsigned long*>(pObj);
+}
+
+void DestroyLong(void* pObj)
+{
+   delete reinterpret_cast<long*>(pObj);
+}
+
+void DestroyFloat(void* pObj)
+{
+   delete reinterpret_cast<float*>(pObj);
+}
+
+void DestroyDouble(void* pObj)
+{
+   delete reinterpret_cast<double*>(pObj);
+}
+
+void DestroyBool(void* pObj)
+{
+   delete reinterpret_cast<bool*>(pObj);
+}
+
+void DestroyString(void* pObj)
+{
+   delete reinterpret_cast<string*>(pObj);
+}
+
+void* CreateVectorUnsignedChar()
+{
+   return new vector<unsigned char>();
+}
+
+void* CreateVectorChar()
+{
+   return new vector<char>();
+}
+
+void* CreateVectorUnsignedShort()
+{
+   return new vector<unsigned short>();
+}
+
+void* CreateVectorShort()
+{
+   return new vector<short>();
+}
+
+void* CreateVectorUnsignedInt()
+{
+   return new vector<unsigned int>();
+}
+
+void* CreateVectorInt()
+{
+   return new vector<int>();
+}
+
+void* CreateVectorUnsignedLong()
+{
+   return new vector<unsigned long>();
+}
+
+void* CreateVectorLong()
+{
+   return new vector<long>();
+}
+
+void* CreateVectorFloat()
+{
+   return new vector<float>();
+}
+
+void* CreateVectorDouble()
+{
+   return new vector<double>();
+}
+
+void* CreateVectorBool()
+{
+   return new vector<bool>();
+}
+
+void* CreateVectorString()
+{
+   return new vector<string>();
+}
+
+void* CreateVectorVoidPtr()
+{
+   return new vector<void*>();
+}
+
+void* CreateVectorUnsignedCharPtr()
+{
+   return new vector<unsigned char*>();
+}
+
+void* CreateVectorCharPtr()
+{
+   return new vector<char*>();
+}
+
+void* CreateVectorUnsignedShortPtr()
+{
+   return new vector<unsigned short*>();
+}
+
+void* CreateVectorShortPtr()
+{
+   return new vector<short*>();
+}
+
+void* CreateVectorUnsignedIntPtr()
+{
+   return new vector<unsigned int*>();
+}
+
+void* CreateVectorIntPtr()
+{
+   return new vector<int*>();
+}
+
+void* CreateVectorUnsignedLongPtr()
+{
+   return new vector<unsigned long*>();
+}
+
+void* CreateVectorLongPtr()
+{
+   return new vector<long*>();
+}
+
+void* CreateVectorFloatPtr()
+{
+   return new vector<float*>();
+}
+
+void* CreateVectorDoublePtr()
+{
+   return new vector<double*>();
+}
+
+void* CreateVectorBoolPtr()
+{
+   return new vector<bool*>();
+}
+
+void* CreateVectorStringPtr()
+{
+   return new vector<string*>();
+}
+
+void DestroyVectorUnsignedChar(void* pObj)
+{
+   delete reinterpret_cast<vector<unsigned char>*>(pObj);
+}
+
+void DestroyVectorChar(void* pObj)
+{
+   delete reinterpret_cast<vector<char>*>(pObj);
+}
+
+void DestroyVectorUnsignedShort(void* pObj)
+{
+   delete reinterpret_cast<vector<unsigned short>*>(pObj);
+}
+
+void DestroyVectorShort(void* pObj)
+{
+   delete reinterpret_cast<vector<short>*>(pObj);
+}
+
+void DestroyVectorUnsignedInt(void* pObj)
+{
+   delete reinterpret_cast<vector<unsigned int>*>(pObj);
+}
+
+void DestroyVectorInt(void* pObj)
+{
+   delete reinterpret_cast<vector<int>*>(pObj);
+}
+
+void DestroyVectorUnsignedLong(void* pObj)
+{
+   delete reinterpret_cast<vector<unsigned long>*>(pObj);
+}
+
+void DestroyVectorLong(void* pObj)
+{
+   delete reinterpret_cast<vector<long>*>(pObj);
+}
+
+void DestroyVectorFloat(void* pObj)
+{
+   delete reinterpret_cast<vector<float>*>(pObj);
+}
+
+void DestroyVectorDouble(void* pObj)
+{
+   delete reinterpret_cast<vector<double>*>(pObj);
+}
+
+void DestroyVectorBool(void* pObj)
+{
+   delete reinterpret_cast<vector<bool>*>(pObj);
+}
+
+void DestroyVectorString(void* pObj)
+{
+   delete reinterpret_cast<vector<string>*>(pObj);
+}
+
+void DestroyVectorVoidPtr(void* pObj)
+{
+   delete reinterpret_cast<vector<void*>*>(pObj);
+}
+
+void DestroyVectorUnsignedCharPtr(void* pObj)
+{
+   delete reinterpret_cast<vector<unsigned char*>*>(pObj);
+}
+
+void DestroyVectorCharPtr(void* pObj)
+{
+   delete reinterpret_cast<vector<char*>*>(pObj);
+}
+
+void DestroyVectorUnsignedShortPtr(void* pObj)
+{
+   delete reinterpret_cast<vector<unsigned short*>*>(pObj);
+}
+
+void DestroyVectorShortPtr(void* pObj)
+{
+   delete reinterpret_cast<vector<short*>*>(pObj);
+}
+
+void DestroyVectorUnsignedIntPtr(void* pObj)
+{
+   delete reinterpret_cast<vector<unsigned int*>*>(pObj);
+}
+
+void DestroyVectorIntPtr(void* pObj)
+{
+   delete reinterpret_cast<vector<int*>*>(pObj);
+}
+
+void DestroyVectorUnsignedLongPtr(void* pObj)
+{
+   delete reinterpret_cast<vector<unsigned long*>*>(pObj);
+}
+
+void DestroyVectorLongPtr(void* pObj)
+{
+   delete reinterpret_cast<vector<long*>*>(pObj);
+}
+
+void DestroyVectorFloatPtr(void* pObj)
+{
+   delete reinterpret_cast<vector<float*>*>(pObj);
+}
+
+void DestroyVectorDoublePtr(void* pObj)
+{
+   delete reinterpret_cast<vector<double*>*>(pObj);
+}
+
+void DestroyVectorBoolPtr(void* pObj)
+{
+   delete reinterpret_cast<vector<bool*>*>(pObj);
+}
+
+void DestroyVectorStringPtr(void* pObj)
+{
+   delete reinterpret_cast<vector<string*>*>(pObj);
+}
 
 } // end of anonymous namespace

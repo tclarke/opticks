@@ -37,6 +37,25 @@ ExportDlg::ExportDlg(ExporterResource& pExporter,
    setPlugInLabel("Exporter");
    enableOptions(true);
 
+   // Set the initial directory
+   string directory;
+   const Filename* pWorkingDir = NULL;
+   Service<ConfigurationSettings> pSettings;
+   pWorkingDir = pSettings->getSetting(ConfigurationSettings::getSettingPluginWorkingDirectoryKey("Exporter")).getPointerToValue<Filename>();
+   if (pWorkingDir == NULL)
+   {
+      pWorkingDir = ConfigurationSettings::getSettingExportPath();
+   }
+   if (pWorkingDir != NULL)
+   {
+      directory = pWorkingDir->getFullPathAndName();
+   }
+
+   if(!directory.empty())
+   {
+      setDirectory(QString::fromStdString(directory));
+   }
+
    if (isDefaultPlugIn())
    {
       setSelectedPlugIn("Ice Exporter");
@@ -63,7 +82,8 @@ ExportDlg::ExportDlg(ExporterResource& pExporter,
       strFilename = updateExtension(strFilename);
       selectFile(strFilename);
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Do not clear the initial list view selection when it is removed from the internal QFileDialog list of items that are not filtered! (Qt 4.3.1) (dsulgrov)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Do not clear the initial list view selection " \
+   "when it is removed from the internal QFileDialog list of items that are not filtered! (Qt 4.3.1) (dsulgrov)")
       QListView* pListView = findChild<QListView*>("listView");
       if (pListView != NULL)
       {
@@ -106,18 +126,18 @@ void ExportDlg::accept()
 
       // Update the file descriptor with the selected file
       QString strFilename = getExportFile();
-      if(QFileInfo(strFilename).isDir())
+      if (QFileInfo(strFilename).isDir())
       {
          break;
       }
       updateFromFile(updateExtension(strFilename, true, false));
-      switch(mpExporter->validate(errorMessage))
+      switch (mpExporter->validate(errorMessage))
       {
       case VALIDATE_SUCCESS:
          validating = false;
          break;
       case VALIDATE_FAILURE:
-         if(errorMessage.empty())
+         if (errorMessage.empty())
          {
             errorMessage = "Unable to validate inputs.";
          }
@@ -127,14 +147,14 @@ void ExportDlg::accept()
          // Exporter's returning VALIDATE_INFO must provide a value
          // for error message...not providing a value is a programmer error
          VERIFYNRV(!errorMessage.empty());
-         switch(pDesktop->showMessageBox("Validation Information", errorMessage,
+         switch (pDesktop->showMessageBox("Validation Information", errorMessage,
             "&Ok", "&Options", "&Cancel", 0, 2))
          {
          case 0: // Ok
             validating = false;
             break;
          case 1: // Options
-            if(invokeOptionsDialog())
+            if (invokeOptionsDialog())
             {
                break;
             }
@@ -144,7 +164,7 @@ void ExportDlg::accept()
          }
          break;
       case VALIDATE_INPUT_REQUIRED:
-         if(!invokeOptionsDialog())
+         if (!invokeOptionsDialog())
          {
             return;
          }
@@ -153,7 +173,7 @@ void ExportDlg::accept()
          VERIFYNRV_MSG(false, "An invalid verification type was returned.");
       }
    }
-   while(validating);
+   while (validating);
 
    FilePlugInDlg::accept();
 }
@@ -180,7 +200,7 @@ QString ExportDlg::getExportFile() const
 
 void ExportDlg::updateFromFile(const QString& strFilename)
 {
-   FileDescriptor *pFileDescriptor = mpExporter->getFileDescriptor();
+   FileDescriptor* pFileDescriptor = mpExporter->getFileDescriptor();
    if (pFileDescriptor != NULL)
    {
       string filename;

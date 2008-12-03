@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef DATA_VARIANT_FACTORY_IMP_H
-#define DATA_VARIANT_FACTORY_IMP_H
+#ifndef DATAVARIANTFACTORYIMP_H
+#define DATAVARIANTFACTORYIMP_H
 
 #include "DataVariantFactory.h"
 
@@ -20,11 +20,11 @@ class DataValueWrapper;
 class DataVariantFactoryImp : public DataVariantFactory
 {
 public:
-   static DataVariantFactoryImp *instance();
+   static DataVariantFactoryImp* instance();
    static void destroy();
 
-   DataValueWrapper* createWrapper(const void *pObject, const std::string &className, bool strict = true);
-   DataValueWrapper* createWrapper(DOMNode *pDocument, int version);
+   DataValueWrapper* createWrapper(const void* pObject, const std::string& className, bool strict = true);
+   DataValueWrapper* createWrapper(DOMNode* pDocument, int version);
 
 protected:
    DataVariantFactoryImp()
@@ -35,7 +35,7 @@ protected:
 
 private:   
    typedef DataValueWrapper*(*WrapperCreatorProc)(const void*);
-   typedef std::map<std::string,WrapperCreatorProc> ObjectMapType3;
+   typedef std::map<std::string, WrapperCreatorProc> ObjectMapType3;
 
    void registerType(const std::string type, WrapperCreatorProc creationFunc);
 
@@ -50,9 +50,9 @@ private:
       }
    }
 
-   ObjectMapType3 sCreateWrapperMap;
+   ObjectMapType3 mCreateWrapperMap;
 
-   static DataVariantFactoryImp *spInstance;
+   static DataVariantFactoryImp* spInstance;
    static bool mDestroyed;
 
    void initializeMaps();

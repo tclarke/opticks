@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef BATCH_H__
-#define BATCH_H__
+#ifndef BATCHAPPLICATION_H
+#define BATCHAPPLICATION_H
 
 #include "Application.h"
 #include "SubjectAdapter.h"
@@ -28,7 +28,6 @@ public:
    int test(int argc, char** argv);
    int version(int argc, char** argv);
 
-protected:
    void reportWarning(const std::string& warningMessage) const;
    void reportError(const std::string& errorMessage) const;
 };

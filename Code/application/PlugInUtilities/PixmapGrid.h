@@ -62,7 +62,7 @@ protected:
    void paintEvent(QPaintEvent* pEvent);
 
    CellPixmap cellToPixmap(int iRow, int iColumn) const;
-   void pixmapToCell(const QPixmap& cellPix, int& iRow, int& iColumn) const;
+   void pixmapToCell(const QPixmap& pix, int& iRow, int& iColumn) const;
    void identifierToCell(const QString& identifier, int& iRow, int& iColumn) const;
 
 protected slots:

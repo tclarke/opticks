@@ -12,6 +12,7 @@
 #include "DataAccessorImpl.h"
 #include "DrawUtil.h"
 #include "glCommon.h"
+#include "Icons.h"
 #include "MathUtil.h"
 #include "ModelServices.h"
 #include "PropertiesThresholdLayer.h"
@@ -38,26 +39,34 @@ template<class PassArea, class T>
 class PixelOper
 {
 public:
-   PixelOper(const T* pData, int rows, int cols, const PassArea &passArea, 
-      const std::vector<int>& badValues = std::vector<int>()) : 
-      mpData(pData), mRows(rows), mCols(cols), mPassArea(passArea),
+   PixelOper(const T* pData, int rows, int cols, const PassArea& passArea,
+             const vector<int>& badValues = vector<int>()) :
+      mpData(pData),
+      mRows(rows),
+      mCols(cols),
+      mPassArea(passArea),
       mBadValues(badValues) {}
+
    inline bool operator()(int row, int col) const
    {
-      double value = ModelServices::getDataValue((T)mpData[row*mCols+col], COMPLEX_MAGNITUDE);
+      double value = ModelServices::getDataValue(static_cast<T>(mpData[row * mCols + col]), COMPLEX_MAGNITUDE);
       bool passed = mPassArea.contains(value);
       if (passed)
       {
-         if (std::find(mBadValues.begin(), mBadValues.end(), roundDouble(value)) != mBadValues.end()) return false;
+         if (find(mBadValues.begin(), mBadValues.end(), roundDouble(value)) != mBadValues.end())
+         {
+            return false;
+         }
       }
       return passed;
    }
+
 private:
    const T* mpData;
    int mRows;
    int mCols;
-   const PassArea &mPassArea;
-   std::vector<int> mBadValues;
+   const PassArea& mPassArea;
+   vector<int> mBadValues;
 };
 
 ThresholdLayerImp::ThresholdLayerImp(const string& id, const string& layerName, DataElement* pElement) :
@@ -81,14 +90,17 @@ ThresholdLayerImp::ThresholdLayerImp(const string& id, const string& layerName, 
    mSymbol = ThresholdLayer::getSettingMarkerSymbol();
    meRegionUnits = ThresholdLayer::getSettingRegionUnits();
    mePassArea = ThresholdLayer::getSettingPassArea();
-   mdFirstThreshold = convertThreshold(meRegionUnits, 
-                              ThresholdLayer::getSettingFirstValue(),
-                              RAW_VALUE);
-   mdSecondThreshold = convertThreshold(meRegionUnits,
-                              ThresholdLayer::getSettingSecondValue(),
-                              RAW_VALUE);
+   mdFirstThreshold = convertThreshold(meRegionUnits, ThresholdLayer::getSettingFirstValue(), RAW_VALUE);
+   mdSecondThreshold = convertThreshold(meRegionUnits, ThresholdLayer::getSettingSecondValue(), RAW_VALUE);
 
    addPropertiesPage(PropertiesThresholdLayer::getName());
+
+   // Setting up the icon.
+   Icons* pIcons = Icons::instance();
+   if (pIcons != NULL)
+   {
+      setIcon(pIcons->mThresholdLayer);
+   }
 
    VERIFYNR(connect(this, SIGNAL(firstThresholdChanged(double)), this, SIGNAL(modified())));
    VERIFYNR(connect(this, SIGNAL(secondThresholdChanged(double)), this, SIGNAL(modified())));
@@ -101,13 +113,12 @@ ThresholdLayerImp::ThresholdLayerImp(const string& id, const string& layerName, 
 }
 
 ThresholdLayerImp::~ThresholdLayerImp()
-{
-}
+{}
 
 const string& ThresholdLayerImp::getObjectType() const
 {
-   static string type("ThresholdLayerImp");
-   return type;
+   static string sType("ThresholdLayerImp");
+   return sType;
 }
 
 bool ThresholdLayerImp::isKindOf(const string& className) const
@@ -120,7 +131,7 @@ bool ThresholdLayerImp::isKindOf(const string& className) const
    return LayerImp::isKindOf(className);
 }
 
-ThresholdLayerImp& ThresholdLayerImp::operator= (const ThresholdLayerImp& thresholdLayer)
+ThresholdLayerImp& ThresholdLayerImp::operator=(const ThresholdLayerImp& thresholdLayer)
 {
    if (this != &thresholdLayer)
    {
@@ -156,46 +167,43 @@ vector<ColorType> ThresholdLayerImp::getColors() const
 }
 
 template<class T, class PassArea>
-void drawMarkers(T*pData, int uiStopColumn, int uiStopRow, 
-                 int uiVisStartColumn, int uiVisStartRow, 
-                 int uiVisEndColumn, int uiVisEndRow, 
-                 SymbolType eSymbol, QColor clrMarker, 
-                 const PassArea &area, const std::vector<int> &badValues,
-                 int row = -1)
+void drawMarkers(T* pData, int stopColumn, int stopRow, int visStartColumn, int visStartRow, int visEndColumn,
+                 int visEndRow, SymbolType eSymbol, QColor clrMarker, const PassArea& area,
+                 const vector<int>& badValues, int row = -1)
 {
    if (row < 0) // in memory so process all rows
    {
-      PixelOper<PassArea,T> oper(pData, uiStopRow+1, uiStopColumn+1, area, badValues);
-      SymbolRegionDrawer::drawMarkers(0, 0, uiStopColumn, uiStopRow, uiVisStartColumn, uiVisStartRow, uiVisEndColumn,
-         uiVisEndRow, eSymbol, clrMarker, oper);
+      PixelOper<PassArea, T> oper(pData, stopRow + 1, stopColumn + 1, area, badValues);
+      SymbolRegionDrawer::drawMarkers(0, 0, stopColumn, stopRow, visStartColumn, visStartRow, visEndColumn,
+         visEndRow, eSymbol, clrMarker, oper);
    }
    else // on disk so being processed one row at a time
    {
-      PixelOper<PassArea,T> oper(pData, 1, 0, area, badValues);
-      SymbolRegionDrawer::drawMarkers(0, row, uiStopColumn, row, uiVisStartColumn, uiVisStartRow, uiVisEndColumn,
-         uiVisEndRow, eSymbol, clrMarker, oper);
+      PixelOper<PassArea, T> oper(pData, 1, 0, area, badValues);
+      SymbolRegionDrawer::drawMarkers(0, row, stopColumn, row, visStartColumn, visStartRow, visEndColumn,
+         visEndRow, eSymbol, clrMarker, oper);
    }
 }
 
 void ThresholdLayerImp::draw()
 {
-   DataAccessor accessor(NULL,NULL);
+   DataAccessor accessor(NULL, NULL);
 
    DataElement* pElement = getDataElement();
    if (pElement != NULL)
    {
-      unsigned int uiColumns = 0;
-      unsigned int uiRows = 0;
-      void *pData = NULL;
+      int columns = 0;
+      int rows = 0;
+      void* pData = NULL;
       EncodingType eType;
-      std::vector<int> badValues;
+      vector<int> badValues;
 
       const RasterDataDescriptor* pDescriptor =
          dynamic_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor());
       if (pDescriptor != NULL)
       {
-         uiColumns = pDescriptor->getColumnCount();
-         uiRows = pDescriptor->getRowCount();
+         columns = static_cast<int>(pDescriptor->getColumnCount());
+         rows = static_cast<int>(pDescriptor->getRowCount());
          eType = pDescriptor->getDataType();
       }
 
@@ -223,89 +231,96 @@ void ThresholdLayerImp::draw()
       SymbolType eSymbol = getSymbol();
       QColor clrMarker = mColor;
 
-      unsigned int uiVisStartColumn = 0;
-      unsigned int uiVisEndColumn = uiColumns - 1;
-      unsigned int uiVisStartRow = 0;
-      unsigned int uiVisEndRow = uiRows - 1;
+      int visStartColumn = 0;
+      int visEndColumn = columns - 1;
+      int visStartRow = 0;
+      int visEndRow = rows - 1;
 
-      DrawUtil::restrictToViewport(uiVisStartColumn, uiVisStartRow, uiVisEndColumn, uiVisEndRow);
+      DrawUtil::restrictToViewport(visStartColumn, visStartRow, visEndColumn, visEndRow);
 
       double firstThreshold = mdFirstThreshold;
       double secondThreshold = mdSecondThreshold;
 
-
       if (pData == NULL)
       {
-         for (unsigned int row=0; row<uiRows; row++)
+         for (int row = 0; row < rows; ++row)
          {
-            if (!accessor.isValid()) break;
+            if (!accessor.isValid())
+            {
+               break;
+            }
+
             pData = accessor->getColumn();
-            switch(mePassArea)
+            switch (mePassArea)
             {
             case LOWER:
                {
                   PassAreaType::Below passArea(firstThreshold);
-                  switchOnEncoding(eType, drawMarkers, pData, uiColumns - 1, row, uiVisStartColumn, row, uiVisEndColumn,
+                  switchOnEncoding(eType, drawMarkers, pData, columns - 1, row, visStartColumn, row, visEndColumn,
                      row, eSymbol, clrMarker, passArea, badValues, row);
                   break;
                }
             case UPPER:
                {
                   PassAreaType::Above passArea(firstThreshold);
-                  switchOnEncoding(eType, drawMarkers, pData, uiColumns - 1, row, uiVisStartColumn, row, uiVisEndColumn,
+                  switchOnEncoding(eType, drawMarkers, pData, columns - 1, row, visStartColumn, row, visEndColumn,
                      row, eSymbol, clrMarker, passArea, badValues, row);
                   break;
                }
             case MIDDLE:
                {
                   PassAreaType::Between passArea(firstThreshold, secondThreshold);
-                  switchOnEncoding(eType, drawMarkers, pData, uiColumns - 1, row, uiVisStartColumn, row, uiVisEndColumn,
+                  switchOnEncoding(eType, drawMarkers, pData, columns - 1, row, visStartColumn, row, visEndColumn,
                      row, eSymbol, clrMarker, passArea, badValues, row);
                   break;
                }
             case OUTSIDE:
                {
                   PassAreaType::Outside passArea(firstThreshold, secondThreshold);
-                  switchOnEncoding(eType, drawMarkers, pData, uiColumns - 1, row, uiVisStartColumn, row, uiVisEndColumn,
+                  switchOnEncoding(eType, drawMarkers, pData, columns - 1, row, visStartColumn, row, visEndColumn,
                      row, eSymbol, clrMarker, passArea, badValues, row);
                   break;
                }
+            default:
+               break;
             }
             accessor->nextRow();
          }
       }
       else
       {
-         switch(mePassArea)
+         switch (mePassArea)
          {
             case LOWER:
             {
                PassAreaType::Below passArea(firstThreshold);
-               switchOnEncoding(eType, drawMarkers, pData, uiColumns - 1, uiRows - 1, uiVisStartColumn, uiVisStartRow, uiVisEndColumn,
-                  uiVisEndRow, eSymbol, clrMarker, passArea, badValues);
+               switchOnEncoding(eType, drawMarkers, pData, columns - 1, rows - 1, visStartColumn, visStartRow,
+                  visEndColumn, visEndRow, eSymbol, clrMarker, passArea, badValues);
                break;
             }
             case UPPER:
             {
                PassAreaType::Above passArea(firstThreshold);
-               switchOnEncoding(eType, drawMarkers, pData, uiColumns - 1, uiRows - 1, uiVisStartColumn, uiVisStartRow, uiVisEndColumn,
-                  uiVisEndRow, eSymbol, clrMarker, passArea, badValues);
+               switchOnEncoding(eType, drawMarkers, pData, columns - 1, rows - 1, visStartColumn, visStartRow,
+                  visEndColumn, visEndRow, eSymbol, clrMarker, passArea, badValues);
                break;
             }
             case MIDDLE:
             {
                PassAreaType::Between passArea(firstThreshold, secondThreshold);
-               switchOnEncoding(eType, drawMarkers, pData, uiColumns - 1, uiRows - 1, uiVisStartColumn, uiVisStartRow, uiVisEndColumn,
-                  uiVisEndRow, eSymbol, clrMarker, passArea, badValues);
+               switchOnEncoding(eType, drawMarkers, pData, columns - 1, rows - 1, visStartColumn, visStartRow,
+                  visEndColumn, visEndRow, eSymbol, clrMarker, passArea, badValues);
                break;
             }
             case OUTSIDE:
             {
                PassAreaType::Outside passArea(firstThreshold, secondThreshold);
-               switchOnEncoding(eType, drawMarkers, pData, uiColumns - 1, uiRows - 1, uiVisStartColumn, uiVisStartRow, uiVisEndColumn,
-                  uiVisEndRow, eSymbol, clrMarker, passArea, badValues);
+               switchOnEncoding(eType, drawMarkers, pData, columns - 1, rows - 1, visStartColumn, visStartRow,
+                  visEndColumn, visEndRow, eSymbol, clrMarker, passArea, badValues);
                break;
             }
+            default:
+               break;
          }
       }
    }
@@ -315,7 +330,7 @@ bool ThresholdLayerImp::getExtents(double& x1, double& y1, double& x4, double& y
 {
    DataElement* pElement = getDataElement();
    VERIFY(pElement != NULL);
-   
+
    const RasterDataDescriptor* pDescriptor =
       dynamic_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor());
    VERIFY(pDescriptor != NULL);
@@ -361,17 +376,22 @@ QString ThresholdLayerImp::getRegionUnitsAsString() const
          return "%ile";
 
       case STD_DEV:
+      {
          QChar tmpchar = QChar(0x03C3);    // Unicode sigma
          QString tmpstr;
-         tmpstr.setUnicode((const QChar*) &tmpchar, 1);
+         tmpstr.setUnicode(&tmpchar, 1);
          return tmpstr;
+      }
+
+      default:
+         break;
    }
 
    return QString();
 }
 
 double ThresholdLayerImp::convertThreshold(const RegionUnits& eUnits, double dThreshold,
-   const RegionUnits& eNewUnits) const
+                                           const RegionUnits& eNewUnits) const
 {
    double dNewThreshold = 0.0;
 
@@ -407,6 +427,9 @@ double ThresholdLayerImp::convertThreshold(const RegionUnits& eUnits, double dTh
       case STD_DEV:
          dRawValue = (dThreshold * dStdDev) + dAverage;
          break;
+
+      default:
+         break;
    }
 
    // Convert the raw threshold value to the new value
@@ -429,6 +452,9 @@ double ThresholdLayerImp::convertThreshold(const RegionUnits& eUnits, double dTh
          {
             dNewThreshold = (dRawValue - dAverage) / dStdDev;
          }
+         break;
+
+      default:
          break;
    }
 
@@ -463,9 +489,7 @@ void ThresholdLayerImp::setRegionUnits(const RegionUnits& eUnits)
       mbLinking = true;
 
       vector<Layer*> linkedLayers = getLinkedLayers();
-
-      for (vector<Layer*>::iterator iter = linkedLayers.begin();
-           iter != linkedLayers.end(); ++iter)
+      for (vector<Layer*>::iterator iter = linkedLayers.begin(); iter != linkedLayers.end(); ++iter)
       {
          ThresholdLayer* pLayer = dynamic_cast<ThresholdLayer*>(*iter);
          if (pLayer != NULL)
@@ -501,21 +525,13 @@ void ThresholdLayerImp::setPassArea(const PassArea& eArea)
       mbLinking = true;
 
       vector<Layer*> linkedLayers = getLinkedLayers();
-
-      vector<Layer*>::iterator iter = linkedLayers.begin();
-      while (iter != linkedLayers.end())
+      for (vector<Layer*>::iterator iter = linkedLayers.begin(); iter != linkedLayers.end(); ++iter)
       {
-         Layer* pLayer = NULL;
-         pLayer = *iter;
+         ThresholdLayer* pLayer = dynamic_cast<ThresholdLayer*>(*iter);
          if (pLayer != NULL)
          {
-            if (pLayer->isKindOf("ThresholdLayer") == true)
-            {
-               ((ThresholdLayer*) pLayer)->setPassArea(eArea);
-            }
+            pLayer->setPassArea(eArea);
          }
-
-         ++iter;
       }
 
       mbLinking = false;
@@ -546,9 +562,7 @@ void ThresholdLayerImp::setFirstThreshold(double dRawValue)
       mbLinking = true;
 
       vector<Layer*> linkedLayers = getLinkedLayers();
-
-      vector<Layer*>::iterator iter;
-      for (iter = linkedLayers.begin(); iter != linkedLayers.end(); ++iter)
+      for (vector<Layer*>::iterator iter = linkedLayers.begin(); iter != linkedLayers.end(); ++iter)
       {
          ThresholdLayer* pLayer = dynamic_cast<ThresholdLayer*>(*iter);
          if (pLayer != NULL)
@@ -585,9 +599,7 @@ void ThresholdLayerImp::setSecondThreshold(double dRawValue)
       mbLinking = true;
 
       vector<Layer*> linkedLayers = getLinkedLayers();
-
-      vector<Layer*>::iterator iter;
-      for (iter = linkedLayers.begin(); iter != linkedLayers.end(); ++iter)
+      for (vector<Layer*>::iterator iter = linkedLayers.begin(); iter != linkedLayers.end(); ++iter)
       {
          ThresholdLayer* pLayer = dynamic_cast<ThresholdLayer*>(*iter);
          if (pLayer != NULL)
@@ -604,24 +616,23 @@ void ThresholdLayerImp::reset()
 {
    ColorType color = ThresholdLayer::getSettingMarkerColor();
    QColor clrThreshold = COLORTYPE_TO_QCOLOR(color);
+
    bool autoColorOn = ThresholdLayer::getSettingAutoColor();
    if (autoColorOn == true)
    {
       Service<UtilityServices> pUtilities;
-      ColorType color = pUtilities->getAutoColor(msThresholdLayers);
-      clrThreshold = COLORTYPE_TO_QCOLOR(color);
+      ColorType autoColor = pUtilities->getAutoColor(msThresholdLayers);
+      clrThreshold = COLORTYPE_TO_QCOLOR(autoColor);
    }
 
    setColor(clrThreshold);
    setSymbol(ThresholdLayer::getSettingMarkerSymbol());
    setRegionUnits(ThresholdLayer::getSettingRegionUnits());
    setPassArea(ThresholdLayer::getSettingPassArea());
-   setFirstThreshold(convertThreshold(ThresholdLayer::getSettingRegionUnits(), 
-                                      ThresholdLayer::getSettingFirstValue(),
-                                      RAW_VALUE));
+   setFirstThreshold(convertThreshold(ThresholdLayer::getSettingRegionUnits(),
+      ThresholdLayer::getSettingFirstValue(), RAW_VALUE));
    setSecondThreshold(convertThreshold(ThresholdLayer::getSettingRegionUnits(),
-                                       ThresholdLayer::getSettingSecondValue(),
-                                       RAW_VALUE));
+      ThresholdLayer::getSettingSecondValue(), RAW_VALUE));
 }
 
 Statistics* ThresholdLayerImp::getStatistics(RasterChannelType eColor) const
@@ -649,7 +660,7 @@ double ThresholdLayerImp::percentileToRaw(double value, const double* pdPercenti
       return pdPercentiles[0] + value * (pdPercentiles[1000] - pdPercentiles[0]) / 100.0;
    }
 
-   int lower = (int) (10.0 * value);
+   int lower = static_cast<int>(10.0 * value);
    if (lower < 0)
    {
       return pdPercentiles[0];
@@ -659,7 +670,8 @@ double ThresholdLayerImp::percentileToRaw(double value, const double* pdPercenti
       return pdPercentiles[1000];
    }
 
-   return pdPercentiles[lower] + (pdPercentiles[lower + 1] - pdPercentiles[lower]) * (10.0 * value - (double) lower);
+   return pdPercentiles[lower] + (pdPercentiles[lower + 1] - pdPercentiles[lower]) *
+      (10.0 * value - static_cast<double>(lower));
 }
 
 double ThresholdLayerImp::rawToPercentile(double value, const double* pdPercentiles) const
@@ -675,7 +687,7 @@ double ThresholdLayerImp::rawToPercentile(double value, const double* pdPercenti
    }
 
    int i = 0;
-   for (i = 0; i < 1000; i++)
+   for (i = 0; i < 1000; ++i)
    {
       if (pdPercentiles[i] >= value)
       {
@@ -696,9 +708,12 @@ double ThresholdLayerImp::rawToPercentile(double value, const double* pdPercenti
    return (lower + (value - pdPercentiles[lower]) / (pdPercentiles[lower + 1] - pdPercentiles[lower])) / 10.0;
 }
 
-void ThresholdLayerImp::getBoundingBox(int &x1, int &y1, int &x2, int &y2) const
+void ThresholdLayerImp::getBoundingBox(int& x1, int& y1, int& x2, int& y2) const
 {
-   x1 = y1 = x2 = y2 = 0;
+   x1 = 0;
+   y1 = 0;
+   x2 = 0;
+   y2 = 0;
 
    DataElement* pElement = getDataElement();
    if (pElement != NULL)
@@ -714,17 +729,17 @@ void ThresholdLayerImp::getBoundingBox(int &x1, int &y1, int &x2, int &y2) const
 }
 
 template<class T, class Drawer, class PassArea>
-void fillRegion(T* pData, DataAccessor &da, Drawer drawer, double firstThreshold, double secondThreshold, unsigned int numRows, 
-                unsigned int numColumns, const PassArea &area, const std::vector<int> &badValues)
+void fillRegion(T* pData, DataAccessor& da, Drawer drawer, double firstThreshold, double secondThreshold,
+                unsigned int numRows, unsigned int numColumns, const PassArea& area, const vector<int>& badValues)
 {
-   for (unsigned int uiRow = 0; uiRow < numRows; uiRow++)
+   for (unsigned int uiRow = 0; uiRow < numRows; ++uiRow)
    {
-      for (unsigned int uiColumn = 0; uiColumn < numColumns; uiColumn++)
+      for (unsigned int uiColumn = 0; uiColumn < numColumns; ++uiColumn)
       {
-         double value = ModelServices::getDataValue(*((T*)da->getColumn()), COMPLEX_MAGNITUDE);
+         double value = ModelServices::getDataValue(*(reinterpret_cast<T*>(da->getColumn())), COMPLEX_MAGNITUDE);
          if (area.contains(value))
          {
-            if (std::find(badValues.begin(), badValues.end(), (int)(value+0.5)) == badValues.end())
+            if (find(badValues.begin(), badValues.end(), static_cast<int>(value + 0.5)) == badValues.end())
             {
                drawer(uiColumn, uiRow);
             }
@@ -737,7 +752,7 @@ void fillRegion(T* pData, DataAccessor &da, Drawer drawer, double firstThreshold
    }
 }
 
-const BitMask *ThresholdLayerImp::getSelectedPixels() const
+const BitMask* ThresholdLayerImp::getSelectedPixels() const
 {
    if (mbModified)
    {
@@ -764,7 +779,7 @@ const BitMask *ThresholdLayerImp::getSelectedPixels() const
             double dFirstThreshold = mdFirstThreshold;
             double dSecondThreshold = mdSecondThreshold;
 
-            std::vector<int> badValues;
+            vector<int> badValues;
 
             Statistics* pStatistics = pRasterElement->getStatistics();
             if (pStatistics != NULL)
@@ -803,6 +818,9 @@ const BitMask *ThresholdLayerImp::getSelectedPixels() const
                      uiNumColumns, passArea, badValues);
                   break;
                }
+
+               default:
+                  break;
             }
          }
       }
@@ -815,10 +833,11 @@ const BitMask *ThresholdLayerImp::getSelectedPixels() const
 
 bool ThresholdLayerImp::toXml(XMLWriter* pXml) const
 {
-   if(!LayerImp::toXml(pXml))
+   if (!LayerImp::toXml(pXml))
    {
       return false;
    }
+
    pXml->addAttr("regionUnits", static_cast<int>(meRegionUnits));
    pXml->addAttr("passArea", static_cast<int>(mePassArea));
    pXml->addAttr("firstThreshold", mdFirstThreshold);
@@ -831,11 +850,11 @@ bool ThresholdLayerImp::toXml(XMLWriter* pXml) const
 
 bool ThresholdLayerImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   if(!LayerImp::fromXml(pDocument, version))
+   if (!LayerImp::fromXml(pDocument, version))
    {
       return false;
    }
-   DOMElement *pElement = dynamic_cast<DOMElement*>(pDocument);
+   DOMElement* pElement = dynamic_cast<DOMElement*>(pDocument);
    if (pElement)
    {
       meRegionUnits = static_cast<RegionUnitsEnum>(atoi(A(pElement->getAttribute(X("regionUnits")))));
@@ -859,7 +878,7 @@ SymbolType ThresholdLayerImp::getSymbol() const
    return mSymbol;
 }
 
-void ThresholdLayerImp::setColor(const QColor &color)
+void ThresholdLayerImp::setColor(const QColor& color)
 {
    if (color.isValid() == false)
    {

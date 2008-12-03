@@ -61,11 +61,11 @@ protected:
 protected slots:
    void setDrawMode(bool on);
    void showLayer(bool bShow);
-   void setDrawBearingLabel(bool drawLabel);
-   void setDrawDistanceLabel(bool drawLabel);
-   void setDrawEndPointsLabel(bool drawLabel);
+   void setDrawBearingLabel(bool drawLabels);
+   void setDrawDistanceLabel(bool drawLabels);
+   void setDrawEndPointsLabel(bool drawLabels);
    void setLocationUnit(GeocoordType geoType, DmsFormatType geoFormat);
-   void setDistanceUnit(DistanceUnits units);
+   void setDistanceUnit(DistanceUnits unit);
    void redrawObjects();
    void setSelectionObject(GraphicObjectType eType);
    void updateGeoreference();

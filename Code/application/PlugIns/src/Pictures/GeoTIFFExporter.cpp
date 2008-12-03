@@ -41,7 +41,7 @@ namespace
 {
    int getTiffSampleFormat(EncodingType type)
    {
-      switch(type)
+      switch (type)
       {
       case INT1UBYTE:
       case INT2UBYTES:
@@ -56,6 +56,8 @@ namespace
          return SAMPLEFORMAT_IEEEFP;
       case UNKNOWN:
          return SAMPLEFORMAT_VOID;
+      default:
+         break;
       }
       return SAMPLEFORMAT_VOID;
    }
@@ -98,7 +100,11 @@ bool GeoTIFFExporter::execute(PlugInArgList* pInParam, PlugInArgList* pOutParam)
    if (mpRaster == NULL)
    {
       mMessage = "The raster element input value is invalid!";
-      if (mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, ERRORS);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(mMessage, 0, ERRORS);
+      }
+
       pStep->finalize(Message::Failure, mMessage);
       return false;
    }
@@ -116,10 +122,14 @@ bool GeoTIFFExporter::execute(PlugInArgList* pInParam, PlugInArgList* pOutParam)
       dataType = pDescriptor->getDataType();
    }
 
-   if((dataType == INT4SCOMPLEX) || (dataType == FLT8COMPLEX))
+   if ((dataType == INT4SCOMPLEX) || (dataType == FLT8COMPLEX))
    {
       mMessage = "Complex data is not supported!";
-      if(mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, ERRORS);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(mMessage, 0, ERRORS);
+      }
+
       pStep->finalize(Message::Failure, mMessage);
       return false;
    }
@@ -131,7 +141,11 @@ bool GeoTIFFExporter::execute(PlugInArgList* pInParam, PlugInArgList* pOutParam)
    if (mpFileDescriptor == NULL)
    {
       mMessage = "The file descriptor input value is invalid!";
-      if (mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, ERRORS);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(mMessage, 0, ERRORS);
+      }
+
       pStep->finalize(Message::Failure, mMessage);
       return false;
    }
@@ -141,17 +155,27 @@ bool GeoTIFFExporter::execute(PlugInArgList* pInParam, PlugInArgList* pOutParam)
    pMessage->finalize(Message::Success);
 
    mMessage = "Start GeoTIFF Exporter";
-   if(mpProgress) mpProgress->updateProgress(mMessage, 0, NORMAL);
+   if (mpProgress)
+   {
+      mpProgress->updateProgress(mMessage, 0, NORMAL);
+   }
 
    string filename = mpFileDescriptor->getFilename();
    mMessage = "File is: " + filename;
-   if (mpProgress) mpProgress->updateProgress(mMessage, 0, NORMAL);
+   if (mpProgress)
+   {
+      mpProgress->updateProgress(mMessage, 0, NORMAL);
+   }
 
    TIFF* pOut = XTIFFOpen(filename.c_str(), "w");
-   if(pOut == NULL)
+   if (pOut == NULL)
    {
       mMessage = "Unable to open GeoTIFF file for writing!  Check folder permissions.";
-      if(mpProgress) mpProgress->updateProgress(mMessage, 0, ERRORS);
+      if (mpProgress)
+      {
+         mpProgress->updateProgress(mMessage, 0, ERRORS);
+      }
+
       pStep->finalize(Message::Failure, mMessage);
       return false;
    }
@@ -159,10 +183,14 @@ bool GeoTIFFExporter::execute(PlugInArgList* pInParam, PlugInArgList* pOutParam)
    bool success = writeCube(pOut);
    XTIFFClose(pOut);
 
-   if(success)
+   if (success)
    {
       mMessage = "GeoTIFF export complete.";
-      if(mpProgress) mpProgress->updateProgress(mMessage, 100, NORMAL);
+      if (mpProgress)
+      {
+         mpProgress->updateProgress(mMessage, 100, NORMAL);
+      }
+
       pStep->finalize(Message::Success);
    }
    else
@@ -176,8 +204,13 @@ bool GeoTIFFExporter::execute(PlugInArgList* pInParam, PlugInArgList* pOutParam)
 
 bool GeoTIFFExporter::abort()
 {
-    mAbortFlag = true;
-    return true;
+   mAbortFlag = true;
+   return true;
+}
+
+bool GeoTIFFExporter::hasAbort()
+{
+   return true;
 }
 
 bool GeoTIFFExporter::getInputSpecification(PlugInArgList*& pArgList)
@@ -219,18 +252,18 @@ QWidget* GeoTIFFExporter::getExportOptionsWidget(const PlugInArgList *)
 void GeoTIFFExporter::updateProgress(int current, int total, string progressString, ReportingLevel l)
 {
    int lTotal = total;
-   if(lTotal == 0)
+   if (lTotal == 0)
    {
       lTotal = 1;
    }
 
    int percentDone = percentDone = (current * 100 / lTotal);
-   if(percentDone >= 100)
+   if (percentDone >= 100)
    {
       percentDone = 99;
    }
 
-   if(mpProgress)
+   if (mpProgress)
    {
       mpProgress->updateProgress(progressString, percentDone, l);
    }
@@ -254,8 +287,9 @@ bool GeoTIFFExporter::writeCube(TIFF* pOut)
 
    int size = 0;
    int row = 0;
-   unsigned char *pTempPtr = NULL, *pBuffer = NULL;
-   unsigned char *pDataCubePtr = NULL;
+   unsigned char* pTempPtr = NULL;
+   unsigned char* pBuffer = NULL;
+   unsigned char* pDataCubePtr = NULL;
    unsigned short numRows = pDescriptor->getRowCount();
    unsigned short numCols = pDescriptor->getColumnCount();
    unsigned short numBands = pDescriptor->getBandCount();
@@ -266,18 +300,25 @@ bool GeoTIFFExporter::writeCube(TIFF* pOut)
    FactoryResource<DataRequest> pRequest;
    pRequest->setInterleaveFormat(BIP);
    DataAccessor accessor = mpRaster->getDataAccessor(pRequest.release());
-   if(!accessor.isValid())
+   if (!accessor.isValid())
    {
       mMessage = "Could not get a valid BIP accessor for this dataset.";
-      if(mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, ERRORS);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(mMessage, 0, ERRORS);
+      }
+
       return false;
    }
 
    InterleaveFormatType eInterleave = pDescriptor->getInterleaveFormat();
-   if(eInterleave != BIP)
+   if (eInterleave != BIP)
    {
       mMessage = "Data will be saved in BIP format.";
-      if(mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, WARNING);
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(mMessage, 0, WARNING);
+      }
    }
 
    unsigned int bytesPerElement(pDescriptor->getBytesPerElement());
@@ -308,27 +349,38 @@ bool GeoTIFFExporter::writeCube(TIFF* pOut)
 
    //ready to test write
    mMessage = "Writing out GeoTIFF file...";
-   if(mpProgress) mpProgress->updateProgress( mMessage, 0, NORMAL);
+   if (mpProgress)
+   {
+      mpProgress->updateProgress( mMessage, 0, NORMAL);
+   }
 
    if ((numRows == srows) && (numCols == scols) && (numBands == sbands))   // full cube write from memory
    {
-      for(row = 0; row < srows; row++)
+      for (row = 0; row < srows; row++)
       {
-         if(mAbortFlag)
+         if (mAbortFlag)
          {
             mMessage = "GeoTIFF export aborted!";
-            if(mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, ERRORS);
+            if (mpProgress != NULL)
+            {
+               mpProgress->updateProgress(mMessage, 0, ERRORS);
+            }
+
             return false;
          }
 
          VERIFY(accessor.isValid());
          pBuffer = reinterpret_cast<unsigned char*>(accessor->getRow());
-         if(pBuffer != NULL)
+         if (pBuffer != NULL)
          {
-            if(TIFFWriteScanline(pOut, pBuffer, row, size) < 0)
+            if (TIFFWriteScanline(pOut, pBuffer, row, size) < 0)
             {
                mMessage = "Unable to save GeoTIFF file, check folder permissions.";
-               if(mpProgress) mpProgress->updateProgress(mMessage, 0, ERRORS);
+               if (mpProgress)
+               {
+                  mpProgress->updateProgress(mMessage, 0, ERRORS);
+               }
+
                return false;
             }
 
@@ -351,7 +403,11 @@ bool GeoTIFFExporter::writeCube(TIFF* pOut)
          if (mAbortFlag == true)
          {
             mMessage = "GeoTIFF export aborted!";
-            if (mpProgress != NULL) mpProgress->updateProgress(mMessage, 0, ERRORS);
+            if (mpProgress != NULL)
+            {
+               mpProgress->updateProgress(mMessage, 0, ERRORS);
+            }
+
             return false;
          }
 
@@ -370,7 +426,11 @@ bool GeoTIFFExporter::writeCube(TIFF* pOut)
             if (rowData.empty())
             {
                mMessage = "Error GeoTIFFExporter008: Unable to allocate row buffer.";
-               if(mpProgress) mpProgress->updateProgress(mMessage, 0, ERRORS);
+               if (mpProgress)
+               {
+                  mpProgress->updateProgress(mMessage, 0, ERRORS);
+               }
+
                return false;
             }
 
@@ -420,7 +480,11 @@ bool GeoTIFFExporter::writeCube(TIFF* pOut)
                if (TIFFWriteScanline(pOut, &rowData[0], outRow, size) < 0)
                {
                   mMessage = "Error GeoTIFFExporter006: Unable to save GeoTIFF file, check folder permissions.";
-                  if(mpProgress) mpProgress->updateProgress(mMessage, 0, ERRORS);
+                  if (mpProgress)
+                  {
+                     mpProgress->updateProgress(mMessage, 0, ERRORS);
+                  }
+
                   return false;
                }
 
@@ -437,14 +501,17 @@ bool GeoTIFFExporter::writeCube(TIFF* pOut)
    //assumed everything has been done correctly up to now
    //copy over Geo ref info if there are any, else
    //try to look for world file in same directory and apply
-   if(!(applyWorldFile(pOut)))
+   if (!(applyWorldFile(pOut)))
    {
-      if(!(CreateGeoTIFF(pOut)))
+      if (!(CreateGeoTIFF(pOut)))
       {
          //no geo info found, where is it located?
          mMessage = "Geo data is unavailable and will not be written to the output file!";
          updateProgress(srows, srows, mMessage, WARNING);
-         if (mpStep != NULL) mpStep->addMessage(mMessage, "app", "9C1E7ADE-ADC4-468c-B15E-FEB53D5FEF5B", true);
+         if (mpStep != NULL)
+         {
+            mpStep->addMessage(mMessage, "app", "9C1E7ADE-ADC4-468c-B15E-FEB53D5FEF5B", true);
+         }
       }
    }
 
@@ -458,10 +525,10 @@ bool GeoTIFFExporter::CreateGeoTIFF(TIFF *pOut)
       return false;
    }
 
-   GTIF *pGtif = GTIFNew(pOut);
-   if(pGtif == NULL)
+   GTIF* pGtif = GTIFNew(pOut);
+   if (pGtif == NULL)
    {
-       return false;
+      return false;
    }
 
    // Get the exported lower left corner location
@@ -490,7 +557,10 @@ bool GeoTIFFExporter::CreateGeoTIFF(TIFF *pOut)
 
    LocationType llPixel(startColumn, startRow);
    LocationType urPixel = llPixel + 1.0;
-   LocationType llGeoCoord, lrGeoCoord, ulGeoCoord, urGeoCoord;
+   LocationType llGeoCoord;
+   LocationType lrGeoCoord;
+   LocationType ulGeoCoord;
+   LocationType urGeoCoord;
 
    bool bGeocoords = false;
 
@@ -522,44 +592,46 @@ bool GeoTIFFExporter::CreateGeoTIFF(TIFF *pOut)
       bGeocoords = true;
    }
    bool isOrthoRectified = false;
-   DynamicObject *pMetaData = mpRaster->getMetadata();
+   DynamicObject* pMetaData = mpRaster->getMetadata();
    bool hasMetaDataTag = false;
-   if(pMetaData != NULL)
+   if (pMetaData != NULL)
    {
       try
       {
          isOrthoRectified = dv_cast<bool>(pMetaData->getAttribute("orthorectified"));
          hasMetaDataTag = true;
       }
-      catch(bad_cast&)
+      catch (bad_cast&)
       {
          // attribute is not present or is not a bool, so calculate isOrthoRectified
       }
    }
-   if(!hasMetaDataTag)
+   if (!hasMetaDataTag)
    {
       // calculate the value of isOrthoRectified
-      if(mpRaster->isGeoreferenced() && !rows.empty() && !columns.empty())
+      if (mpRaster->isGeoreferenced() && !rows.empty() && !columns.empty())
       {
-         int endRow(-1), endColumn(-1);
-         for(vector<DimensionDescriptor>::const_reverse_iterator rowIt = rows.rbegin(); rowIt != rows.rend(); ++rowIt)
+         int endRow(-1);
+         int endColumn(-1);
+         for (vector<DimensionDescriptor>::const_reverse_iterator rowIt = rows.rbegin(); rowIt != rows.rend(); ++rowIt)
          {
-            if(rowIt->isActiveNumberValid())
+            if (rowIt->isActiveNumberValid())
             {
                endRow = rowIt->getActiveNumber();
                break;
             }
          }
-         for(vector<DimensionDescriptor>::const_reverse_iterator colIt = columns.rbegin(); colIt != columns.rend(); ++colIt)
+         for (vector<DimensionDescriptor>::const_reverse_iterator colIt = columns.rbegin();
+            colIt != columns.rend(); ++colIt)
          {
-            if(colIt->isActiveNumberValid())
+            if (colIt->isActiveNumberValid())
             {
                endColumn = colIt->getActiveNumber();
                break;
             }
          }
 
-         if(endRow != -1 && endColumn != -1 &&
+         if (endRow != -1 && endColumn != -1 &&
             static_cast<unsigned int>(endRow) > startRow && static_cast<unsigned int>(endColumn) > startColumn)
          {
             // the chip's (0,0)
@@ -590,16 +662,16 @@ bool GeoTIFFExporter::CreateGeoTIFF(TIFF *pOut)
 
    if (bGeocoords == false)
    {
-     GTIFFree(pGtif);
-     return false;
+      GTIFFree(pGtif);
+      return false;
    }
 
-   LocationType GeoCoordCenter((llGeoCoord.mX + lrGeoCoord.mX + ulGeoCoord.mX + urGeoCoord.mX) / 4.0,
+   LocationType geoCoordCenter((llGeoCoord.mX + lrGeoCoord.mX + ulGeoCoord.mX + urGeoCoord.mX) / 4.0,
                                (llGeoCoord.mY + lrGeoCoord.mY + ulGeoCoord.mY + urGeoCoord.mY) / 4.0);
 
 
    // if the data is orthorectified, write out the appropriate tags
-   if(isOrthoRectified)
+   if (isOrthoRectified)
    {
       double pTiepoints[6] = {0.0, 0.0, 0.0, llGeoCoord.mY, llGeoCoord.mX, 0.0};
       TIFFSetField(pOut, TIFFTAG_GEOTIEPOINTS, 6, pTiepoints);
@@ -622,7 +694,8 @@ bool GeoTIFFExporter::CreateGeoTIFF(TIFF *pOut)
       double e = lrGeoCoord.mX - llGeoCoord.mX;
       double f = ulGeoCoord.mX - llGeoCoord.mX;
       double h = llGeoCoord.mX;
-      double k = 1.0, p = 1.0;
+      double k = 1.0;
+      double p = 1.0;
 
       double tMatrix[16] = {a, b, 0.0, d,
          e, f, 0.0, h,
@@ -634,11 +707,11 @@ bool GeoTIFFExporter::CreateGeoTIFF(TIFF *pOut)
 
    GTIFKeySet(pGtif, GTModelTypeGeoKey, TYPE_SHORT, 1, ModelGeographic);
    GTIFKeySet(pGtif, GTRasterTypeGeoKey, TYPE_SHORT, 1, RasterPixelIsArea);
-   GTIFKeySet(pGtif, GeogAngularUnitsGeoKey, TYPE_SHORT,  1, Angular_Degree);
-   GTIFKeySet(pGtif, GeogLinearUnitsGeoKey, TYPE_SHORT,  1, Linear_Meter);
+   GTIFKeySet(pGtif, GeogAngularUnitsGeoKey, TYPE_SHORT, 1, Angular_Degree);
+   GTIFKeySet(pGtif, GeogLinearUnitsGeoKey, TYPE_SHORT, 1, Linear_Meter);
    GTIFKeySet(pGtif, GeographicTypeGeoKey, TYPE_SHORT, 1, GCS_WGS_84);
-   GTIFKeySet(pGtif, ProjCenterLongGeoKey, TYPE_DOUBLE,  1, GeoCoordCenter.mY);
-   GTIFKeySet(pGtif, ProjCenterLatGeoKey, TYPE_DOUBLE,  1, GeoCoordCenter.mX);
+   GTIFKeySet(pGtif, ProjCenterLongGeoKey, TYPE_DOUBLE, 1, geoCoordCenter.mY);
+   GTIFKeySet(pGtif, ProjCenterLatGeoKey, TYPE_DOUBLE, 1, geoCoordCenter.mX);
 
    ///* Here we violate the GTIF abstraction to retarget on another file.
    //   We should just have a function for copying tags from one GTIF object
@@ -655,32 +728,38 @@ bool GeoTIFFExporter::CreateGeoTIFF(TIFF *pOut)
 
 bool GeoTIFFExporter::applyWorldFile(TIFF *pOut)
 {
-   FILE *pTfw;
+   FILE* pTfw = NULL;
    int size = 0;
-   double pPixsize[3], xoff, yoff, pTiepoint[6], x_rot, y_rot, pAdfMatrix[16];
+   double pPixsize[3];
+   double xoff;
+   double yoff;
+   double pTiepoint[6];
+   double x_rot;
+   double y_rot;
+   double pAdfMatrix[16];
 
-   DataDescriptor *pDescriptor = mpRaster->getDataDescriptor();
+   DataDescriptor* pDescriptor = mpRaster->getDataDescriptor();
    if (pDescriptor == NULL)
    {
       return false;
    }
 
-   FileDescriptor *pFileDescriptor = pDescriptor->getFileDescriptor();
+   FileDescriptor* pFileDescriptor = pDescriptor->getFileDescriptor();
    if (pFileDescriptor == NULL)
    {
       return false;
    }
 
-   const Filename &filename = pFileDescriptor->getFilename();
+   const Filename& filename = pFileDescriptor->getFilename();
    string path = filename.getPath();
    string title = filename.getTitle();
 
    std::string worldFilename = path + SLASH + title + ".tfw";
 
    pTfw = fopen(worldFilename.c_str(), "rt");
-   if(pTfw == NULL)
+   if (pTfw == NULL)
    {
-       return false;
+      return false;
    }
 
    fscanf(pTfw, "%lf", pPixsize + 0);
@@ -692,31 +771,31 @@ bool GeoTIFFExporter::applyWorldFile(TIFF *pOut)
    fclose(pTfw);
 
    // Write out pixel scale, and tiepoint information.
-   if((x_rot == 0.0) && (y_rot == 0.0))
+   if ((x_rot == 0.0) && (y_rot == 0.0))
    {
-       pPixsize[1] = abs(pPixsize[1]);
-       pPixsize[2] = 0.0;
-       TIFFSetField(pOut, GTIFF_PIXELSCALE, 3, pPixsize);
-       pTiepoint[0] = 0.5;
-       pTiepoint[1] = 0.5;
-       pTiepoint[2] = 0.0;
-       pTiepoint[3] = xoff;
-       pTiepoint[4] = yoff;
-       pTiepoint[5] = 0.0;
-       TIFFSetField(pOut, GTIFF_TIEPOINTS, 6, pTiepoint);
+      pPixsize[1] = abs(pPixsize[1]);
+      pPixsize[2] = 0.0;
+      TIFFSetField(pOut, GTIFF_PIXELSCALE, 3, pPixsize);
+      pTiepoint[0] = 0.5;
+      pTiepoint[1] = 0.5;
+      pTiepoint[2] = 0.0;
+      pTiepoint[3] = xoff;
+      pTiepoint[4] = yoff;
+      pTiepoint[5] = 0.0;
+      TIFFSetField(pOut, GTIFF_TIEPOINTS, 6, pTiepoint);
    }
    else
    {
-       memset(pAdfMatrix, 0, sizeof(double) * 16);       
-       pAdfMatrix[0] = pPixsize[0];
-       pAdfMatrix[1] = x_rot;
-       pAdfMatrix[3] = xoff - (pPixsize[0] + x_rot) * 0.5;
-       pAdfMatrix[4] = y_rot;
-       pAdfMatrix[5] = pPixsize[1];
-       pAdfMatrix[7] = yoff - (pPixsize[1] + y_rot) * 0.5;
-       pAdfMatrix[15] = 1.0;
-        
-       TIFFSetField(pOut, TIFFTAG_GEOTRANSMATRIX, 16, pAdfMatrix);
+      memset(pAdfMatrix, 0, sizeof(double) * 16);       
+      pAdfMatrix[0] = pPixsize[0];
+      pAdfMatrix[1] = x_rot;
+      pAdfMatrix[3] = xoff - (pPixsize[0] + x_rot) * 0.5;
+      pAdfMatrix[4] = y_rot;
+      pAdfMatrix[5] = pPixsize[1];
+      pAdfMatrix[7] = yoff - (pPixsize[1] + y_rot) * 0.5;
+      pAdfMatrix[15] = 1.0;
+
+      TIFFSetField(pOut, TIFFTAG_GEOTRANSMATRIX, 16, pAdfMatrix);
    }
 
    return true;

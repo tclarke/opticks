@@ -17,7 +17,6 @@
 #include "AoiElement.h"
 #include "Arrow.h"
 #include "ApplicationServices.h"
-#include "AppVersion.h"
 #include "BitMask.h"
 #include "DesktopServices.h"
 #include "DimensionDescriptor.h"
@@ -25,6 +24,7 @@
 #include "LayerList.h"
 #include "ModelServices.h"
 #include "ObjectFactory.h"
+#include "PlotManager.h"
 #include "PlotView.h"
 #include "PlotWidget.h"
 #include "Point.h"
@@ -142,20 +142,16 @@ AddPlotDlg::AddPlotDlg(QWidget* pParent) :
    // Initialization
    RasterElement* pRasterElement = NULL;
 
-   WorkspaceWindow* pWindow = mpDesktop->getCurrentWorkspaceWindow();
+   SpatialDataWindow* pWindow = dynamic_cast<SpatialDataWindow*>(mpDesktop->getCurrentWorkspaceWindow());
    if (pWindow != NULL)
    {
-      if (pWindow->isKindOf("SpatialDataWindow") == true)
+      SpatialDataView* pView = pWindow->getSpatialDataView();
+      if (pView != NULL)
       {
-         SpatialDataView* pView = NULL;
-         pView = ((SpatialDataWindow*) pWindow)->getSpatialDataView();
-         if (pView != NULL)
+         LayerList* pLayerList = pView->getLayerList();
+         if (pLayerList != NULL)
          {
-            LayerList* pLayerList = pView->getLayerList();
-            if (pLayerList != NULL)
-            {
-               pRasterElement = pLayerList->getPrimaryRasterElement();
-            }
+            pRasterElement = pLayerList->getPrimaryRasterElement();
          }
       }
    }
@@ -404,7 +400,10 @@ void AddPlotDlg::setPlot(PlotWidget* pPlot) const
             BitMask* pMask = const_cast<BitMask*>(pAoi->getSelectedPoints());
             if (pMask != NULL)
             {
-               int x1, x2, y1, y2;
+               int x1;
+               int x2;
+               int y1;
+               int y2;
                pMask->getBoundingBox(x1, y1, x2, y2);
 
                const bool** pRegion = pMask->getRegion(x1, y1, x2, y2);
@@ -471,7 +470,7 @@ void AddPlotDlg::setPlot(PlotWidget* pPlot) const
                      {
                         for (i = 0; i < uiCount; i++)
                         {
-                           pLocations[i] = (double) pHistogramLocations[i];
+                           pLocations[i] = pHistogramLocations[i];
                         }
                      }
 
@@ -480,13 +479,13 @@ void AddPlotDlg::setPlot(PlotWidget* pPlot) const
                      {
                         for (i = 0; i < uiCount; i++)
                         {
-                           pCounts[i] = (double) pHistogramCounts[i];
+                           pCounts[i] = pHistogramCounts[i];
                         }
                      }
 
                      pHistogramPlot->setHistogram(uiCount, pLocations, pCounts);
-                     delete pLocations;
-                     delete pCounts;
+                     delete [] pLocations;
+                     delete [] pCounts;
                   }
                }
             }
@@ -509,22 +508,21 @@ void AddPlotDlg::updateDataWidgets(QAbstractButton* pButton)
    {
       mpDataLabel->setText("Spectral Band:");
 
-      RasterElement *pRasterElement = NULL;
+      RasterElement* pRasterElement = NULL;
 
-      WorkspaceWindow* pWindow = NULL;
-      pWindow = mpDesktop->getCurrentWorkspaceWindow();
+      WorkspaceWindow* pWindow = mpDesktop->getCurrentWorkspaceWindow();
       if (pWindow != NULL)
       {
          SpatialDataView* pView = NULL;
 
-         SpatialDataWindow* pSpatialDataWindow = dynamic_cast<SpatialDataWindow*> (pWindow);
+         SpatialDataWindow* pSpatialDataWindow = dynamic_cast<SpatialDataWindow*>(pWindow);
          if (pSpatialDataWindow != NULL)
          {
             pView = pSpatialDataWindow->getSpatialDataView();
          }
          else
          {
-            ProductWindow* pProductWindow = dynamic_cast<ProductWindow*> (pWindow);
+            ProductWindow* pProductWindow = dynamic_cast<ProductWindow*>(pWindow);
             if (pProductWindow != NULL)
             {
                ProductView* pProductView = pProductWindow->getProductView();
@@ -551,12 +549,12 @@ void AddPlotDlg::updateDataWidgets(QAbstractButton* pButton)
             dynamic_cast<const RasterDataDescriptor*>(pRasterElement->getDataDescriptor());
          if (pDescriptor != NULL)
          {
-            const vector<DimensionDescriptor> &bands = pDescriptor->getBands();
+            const vector<DimensionDescriptor>& bands = pDescriptor->getBands();
 
             vector<DimensionDescriptor>::const_iterator iter;
             for (iter = bands.begin(); iter != bands.end(); ++iter)
             {
-               const DimensionDescriptor &bandDim = *iter;
+               const DimensionDescriptor& bandDim = *iter;
                if (bandDim.isValid())
                {
                   unsigned int originalNumber = bandDim.getOriginalNumber() + 1;
@@ -582,7 +580,7 @@ void AddPlotDlg::accept()
    QString strName = getName();
    if (strName.isEmpty() == true)
    {
-      QMessageBox::critical(this, APP_NAME, "Please enter a name for the plot!");
+      QMessageBox::critical(this, PLOT_MANAGER_NAME, "Please enter a name for the plot!");
       return;
    }
 

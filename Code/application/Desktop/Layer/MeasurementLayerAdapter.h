@@ -18,7 +18,7 @@ class AnnotationElement;
 class MeasurementLayerAdapter : public MeasurementLayer, public MeasurementLayerImp
 {
 public:
-   MeasurementLayerAdapter(const std::string& id, const std::string& layerName, AnnotationElement* pAnno);
+   MeasurementLayerAdapter(const std::string& id, const std::string& layerName, AnnotationElement* pElement);
    ~MeasurementLayerAdapter();
 
    // TypeAwareObject

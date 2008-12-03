@@ -32,7 +32,7 @@ protected:
    virtual std::vector<ArcProxyLib::ConnectionType> getAvailableConnectionTypes();
 
 private:
-   DynamicObject *mpFeatureDynObj;
+   DynamicObject* mpFeatureDynObj;
 };
 
 #endif

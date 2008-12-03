@@ -140,12 +140,6 @@ void CurveImp::draw()
 
    if (isSelected() == true)
    {
-      PlotViewImp* pPlot = getPlot();
-      if (pPlot == NULL)
-      {
-         return;
-      }
-
       glColor3ub(0, 0, 0);
 
       for (i = 0; i < numPoints; i++)
@@ -389,14 +383,14 @@ void CurveImp::setLineStyle(LineStyle eStyle)
 
 bool CurveImp::toXml(XMLWriter* pXml) const
 {
-   if(!PlotObjectImp::toXml(pXml))
+   if (!PlotObjectImp::toXml(pXml))
    {
       return false;
    }
    pXml->addAttr("color", QCOLOR_TO_COLORTYPE(mColor));
    pXml->addAttr("lineWidth", mLineWidth);
    pXml->addAttr("lineStyle", mLineStyle);
-   for(vector<LocationType>::const_iterator it = mPoints.begin(); it != mPoints.end(); ++it)
+   for (vector<LocationType>::const_iterator it = mPoints.begin(); it != mPoints.end(); ++it)
    {
       pXml->pushAddPoint(pXml->addElement("Point"));
       pXml->addText(StringUtilities::toXmlString(*it));
@@ -411,21 +405,20 @@ bool CurveImp::fromXml(DOMNode* pDocument, unsigned int version)
    {
       return false;
    }
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
-   ColorType color = StringUtilities::fromXmlString<ColorType>(
-      A(pElem->getAttribute(X("color"))));
+
+   DOMElement* pElem = static_cast<DOMElement*>(pDocument);
+   ColorType color = StringUtilities::fromXmlString<ColorType>(A(pElem->getAttribute(X("color"))));
    mColor = COLORTYPE_TO_QCOLOR(color);
-   mLineWidth = StringUtilities::fromXmlString<int>(
-      A(pElem->getAttribute(X("lineWidth"))));
-   mLineStyle = StringUtilities::fromXmlString<LineStyle>(
-      A(pElem->getAttribute(X("lineStyle"))));
-   for(DOMNode *pChld = pElem->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
+   mLineWidth = StringUtilities::fromXmlString<int>(A(pElem->getAttribute(X("lineWidth"))));
+   mLineStyle = StringUtilities::fromXmlString<LineStyle>(A(pElem->getAttribute(X("lineStyle"))));
+
+   for (DOMNode* pChld = pElem->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
    {
-      if(XMLString::equals(pChld->getNodeName(), X("Point")))
+      if (XMLString::equals(pChld->getNodeName(), X("Point")))
       {
-         mPoints.push_back(StringUtilities::fromXmlString<LocationType>(
-            A(pChld->getTextContent())));
+         mPoints.push_back(StringUtilities::fromXmlString<LocationType>(A(pChld->getTextContent())));
       }
    }
+
    return true;
 }

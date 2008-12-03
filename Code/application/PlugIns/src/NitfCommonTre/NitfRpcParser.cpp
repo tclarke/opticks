@@ -319,8 +319,8 @@ bool Nitf::RpcParser::toDynamicObject(const ossimNitfRegisteredTag& input, Dynam
       status = status && output.setAttribute(LAT_OFFSET, pBase->getGeodeticLatOffset().toDouble());
       status = status && output.setAttribute(HEIGHT_SCALE, pBase->getGeodeticHeightScale().toInt());
       status = status && output.setAttribute(HEIGHT_OFFSET, pBase->getGeodeticHeightOffset().toInt());
-      status = status && output.setAttribute(ERR_RAND, pBase->getErrorRand().toDouble());;
-      status = status && output.setAttribute(ERR_BIAS, pBase->getErrorBias().toDouble());;
+      status = status && output.setAttribute(ERR_RAND, pBase->getErrorRand().toDouble());
+      status = status && output.setAttribute(ERR_BIAS, pBase->getErrorBias().toDouble());
 
       unsigned int u;
       for (u = 1; u <= 20; ++u)
@@ -455,7 +455,7 @@ Nitf::TreState Nitf::RpcParser::isTreValid(const DynamicObject& tre, ostream& re
    if (status != INVALID && totalFields != numFields)
    {
       reporter << "Total fields in the Dynamic Object(" <<
-         totalFields <<") did not match the number found(" << numFields << ") ";
+         totalFields << ") did not match the number found(" << numFields << ") ";
       status = INVALID;
    }
 
@@ -484,7 +484,7 @@ bool Nitf::RpcParser::fromDynamicObject(const DynamicObject& input, ostream& out
    // types are different for SUCCESS. OSSIM == bool, ours == unsigned int
    try
    {
-      string temp = toString( dv_cast<unsigned int>(input.getAttribute(SUCCESS)), 1);
+      string temp = toString(dv_cast<unsigned int>(input.getAttribute(SUCCESS)), 1);
    }
    catch (const bad_cast&)
    {
@@ -495,42 +495,42 @@ bool Nitf::RpcParser::fromDynamicObject(const DynamicObject& input, ostream& out
    {
       if (!ossimImported)
       {
-         output <<   toString( dv_cast<bool>(input.getAttribute(SUCCESS)), 1);
+         output << toString(dv_cast<bool>(input.getAttribute(SUCCESS)), 1);
       }
-      output <<   toString( dv_cast<double>(input.getAttribute(ERR_BIAS)), 7, 2);
-      output <<   toString( dv_cast<double>(input.getAttribute(ERR_RAND)), 7, 2);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(LINE_OFFSET)), 6);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(SAMP_OFFSET)), 5);
-      output <<   toString( dv_cast<double>(input.getAttribute(LAT_OFFSET)), 8, 4, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute(LONG_OFFSET)), 9, 4, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<int>(input.getAttribute(HEIGHT_OFFSET)), 5, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(LINE_SCALE)), 6);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(SAMP_SCALE)), 5);
-      output <<   toString( dv_cast<double>(input.getAttribute(LAT_SCALE)), 8, 4, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute(LONG_SCALE)), 9, 4, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<int>(input.getAttribute(HEIGHT_SCALE)), 5, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(ERR_BIAS)), 7, 2);
+      output << toString(dv_cast<double>(input.getAttribute(ERR_RAND)), 7, 2);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(LINE_OFFSET)), 6);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(SAMP_OFFSET)), 5);
+      output << toString(dv_cast<double>(input.getAttribute(LAT_OFFSET)), 8, 4, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(LONG_OFFSET)), 9, 4, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<int>(input.getAttribute(HEIGHT_OFFSET)), 5, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(LINE_SCALE)), 6);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(SAMP_SCALE)), 5);
+      output << toString(dv_cast<double>(input.getAttribute(LAT_SCALE)), 8, 4, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(LONG_SCALE)), 9, 4, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<int>(input.getAttribute(HEIGHT_SCALE)), 5, -1, ZERO_FILL, POS_SIGN_TRUE);
 
       unsigned int u;
 
       for (u = 1; u <= 20; ++u)
       {
-         output <<   toString( dv_cast<double>(input.getAttribute(getCoefficient(LINE_NUMERATOR_COEF_PREFIX, u))),
-                              12, 6, ZERO_FILL, POS_SIGN_TRUE, USE_SCIENTIFIC_NOTATION, ONE_EXP_DIGIT);
+         output << toString(dv_cast<double>(input.getAttribute(getCoefficient(LINE_NUMERATOR_COEF_PREFIX, u))),
+            12, 6, ZERO_FILL, POS_SIGN_TRUE, USE_SCIENTIFIC_NOTATION, ONE_EXP_DIGIT);
       }
       for (u = 1; u <= 20; ++u)
       {
-         output <<   toString( dv_cast<double>(input.getAttribute(getCoefficient(LINE_DENOMINATOR_COEF_PREFIX, u))),
-                              12, 6, ZERO_FILL, POS_SIGN_TRUE, USE_SCIENTIFIC_NOTATION, ONE_EXP_DIGIT);
+         output << toString(dv_cast<double>(input.getAttribute(getCoefficient(LINE_DENOMINATOR_COEF_PREFIX, u))),
+            12, 6, ZERO_FILL, POS_SIGN_TRUE, USE_SCIENTIFIC_NOTATION, ONE_EXP_DIGIT);
       }
       for (u = 1; u <= 20; ++u)
       {
-         output <<   toString( dv_cast<double>(input.getAttribute(getCoefficient(SAMPLE_NUMERATOR_COEF_PREFIX, u))),
-                              12, 6, ZERO_FILL, POS_SIGN_TRUE, USE_SCIENTIFIC_NOTATION, ONE_EXP_DIGIT);
+         output << toString(dv_cast<double>(input.getAttribute(getCoefficient(SAMPLE_NUMERATOR_COEF_PREFIX, u))),
+            12, 6, ZERO_FILL, POS_SIGN_TRUE, USE_SCIENTIFIC_NOTATION, ONE_EXP_DIGIT);
       }
       for (u = 1; u <= 20; ++u)
       {
-         output <<   toString( dv_cast<double>(input.getAttribute(getCoefficient(SAMPLE_DENOMINATOR_COEF_PREFIX, u))),
-                              12, 6, ZERO_FILL, POS_SIGN_TRUE, USE_SCIENTIFIC_NOTATION, ONE_EXP_DIGIT);
+         output << toString(dv_cast<double>(input.getAttribute(getCoefficient(SAMPLE_DENOMINATOR_COEF_PREFIX, u))),
+            12, 6, ZERO_FILL, POS_SIGN_TRUE, USE_SCIENTIFIC_NOTATION, ONE_EXP_DIGIT);
       }
    }
    catch (const bad_cast&)

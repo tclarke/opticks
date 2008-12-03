@@ -20,8 +20,7 @@ class XmlReader;
  *  Used by SessionItems during session deserialization to restore their state 
  *  from the saved session.
  *
- *  @see        SessionItem
- *  @see        SessionItemSerializer
+ *  @see        SessionItem, SessionItemSerializer, SessionItemDeserializerExt1
  */
 class SessionItemDeserializer
 {
@@ -115,6 +114,27 @@ public:
     *  @return A vector containing the size of each block.
     */
    virtual std::vector<int64_t> getBlockSizes() const = 0;
+};
+
+/**
+ *  Extension class for SessionItemDeserializer which adds an accessor for the current block.
+ *
+ *  This class provides additional capability for the SessionItemDeserializer interface class.
+ *  A pointer to this class can be obtained by performing a dynamic cast on a
+ *  pointer to SessionItemDeserializer.
+ *
+ *  @warning A pointer to this class can only be used to call methods contained
+ *           in this extension class and cannot be used to call any methods in SessionItemDeserializer.
+ */
+class SessionItemDeserializerExt1
+{
+public:
+   /**
+    *  Accessor for the current block index.
+    *
+    *  @return The block number of the current block.
+    */
+   virtual int getCurrentBlock() const = 0;
 };
 
 #endif

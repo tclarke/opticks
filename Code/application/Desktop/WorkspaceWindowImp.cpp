@@ -12,7 +12,7 @@
 #include <QtGui/QMessageBox>
 
 #include "ApplicationWindow.h"
-#include "WorkspaceWindowImp.h"
+#include "ContextMenuActions.h"
 #include "DesktopServices.h"
 #include "OverviewWindow.h"
 #include "ProductView.h"
@@ -21,6 +21,7 @@
 #include "ViewImp.h"
 #include "Workspace.h"
 #include "WorkspaceWindow.h"
+#include "WorkspaceWindowImp.h"
 #include "xmlreader.h"
 
 #include <algorithm>
@@ -32,14 +33,19 @@ using namespace std;
 WorkspaceWindowImp::WorkspaceWindowImp(const string& id, const string& windowName, QWidget* parent) :
    QMainWindow(parent),
    ViewWindowImp(id, windowName),
-   mSessionClosedReceived(false),
-   mpApplicationServices(Service<ApplicationServices>().get(),
-                         SIGNAL_NAME(ApplicationServices, SessionClosed),
-                         Slot(this, &WorkspaceWindowImp::sessionClosed))
+   mpApplicationServices(Service<ApplicationServices>().get(), SIGNAL_NAME(ApplicationServices, SessionClosed),
+      Slot(this, &WorkspaceWindowImp::sessionClosed)),
+   mSessionClosedReceived(false)
 {
    setWindowTitle(QString::fromStdString(windowName));
    setAttribute(Qt::WA_DeleteOnClose);
    setFocusPolicy(Qt::StrongFocus);
+
+   mpActiveAction = new QAction("Activate", this);
+   mpActiveAction->setStatusTip("Display the window on top of all other workspace windows.");
+   mpActiveAction->setAutoRepeat(false);
+
+   VERIFYNR(connect(mpActiveAction, SIGNAL(triggered()), this, SLOT(activate())));
 }
 
 WorkspaceWindowImp::~WorkspaceWindowImp()
@@ -49,6 +55,12 @@ WorkspaceWindowImp::~WorkspaceWindowImp()
 list<ContextMenuAction> WorkspaceWindowImp::getContextMenuActions() const
 {
    list<ContextMenuAction> menuActions = ViewWindowImp::getContextMenuActions();
+
+   Service<DesktopServices> pDesktop;
+   if (this != dynamic_cast<WorkspaceWindowImp*>(pDesktop->getCurrentWorkspaceWindow()))
+   {
+      menuActions.push_back(ContextMenuAction(mpActiveAction, APP_WORKSPACEWINDOW_ACTIVATE_ACTION));
+   }
 
    View* pView = getView();
    if (pView != NULL)
@@ -65,8 +77,8 @@ list<ContextMenuAction> WorkspaceWindowImp::getContextMenuActions() const
 
 const string& WorkspaceWindowImp::getObjectType() const
 {
-   static string type("WorkspaceWindowImp");
-   return type;
+   static string sType("WorkspaceWindowImp");
+   return sType;
 }
 
 bool WorkspaceWindowImp::isKindOf(const string& className) const
@@ -79,7 +91,7 @@ bool WorkspaceWindowImp::isKindOf(const string& className) const
    return ViewWindowImp::isKindOf(className);
 }
 
-void WorkspaceWindowImp::viewDeleted(Subject &subject, const string &signal, const boost::any &value)
+void WorkspaceWindowImp::viewDeleted(Subject& subject, const string& signal, const boost::any& value)
 {
    View* pDeletedView = dynamic_cast<View*>(&subject);
    if (pDeletedView == NULL)
@@ -105,7 +117,7 @@ void WorkspaceWindowImp::viewDeleted(Subject &subject, const string &signal, con
    }
 }
 
-void WorkspaceWindowImp::sessionClosed(Subject &subject, const std::string &signal, const boost::any &value)
+void WorkspaceWindowImp::sessionClosed(Subject& subject, const string& signal, const boost::any& value)
 {
    Q_UNUSED(subject);
    Q_UNUSED(signal);
@@ -252,9 +264,8 @@ void WorkspaceWindowImp::closeEvent(QCloseEvent* pEvent)
 {
    if (WorkspaceWindow::getSettingConfirmClose() == true && mSessionClosedReceived == false)
    {
-      int button = QMessageBox::question(this, "Confirm Close", 
-            "Are you sure that you want to close \"" + windowTitle() + "\"?", "Yes", "No", QString(), 0, 1);
-
+      int button = QMessageBox::question(this, "Confirm Close", "Are you sure that you want to close \"" +
+         windowTitle() + "\"?", "Yes", "No", QString(), 0, 1);
       if (button == 1)
       {
          pEvent->ignore();
@@ -317,8 +328,8 @@ bool WorkspaceWindowImp::fromXml(DOMNode* pDocument, unsigned int version)
       return false;
    }
 
-   View *pCurrentView = getView();
-   if(pCurrentView != NULL)
+   View* pCurrentView = getView();
+   if (pCurrentView != NULL)
    {
       pCurrentView->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &WorkspaceWindowImp::viewDeleted));
    }
@@ -334,8 +345,8 @@ bool WorkspaceWindowImp::fromXml(DOMNode* pDocument, unsigned int version)
    }
 
    // connect view to be restored
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
-   View *pView = dynamic_cast<View*>(Service<SessionManager>()->getSessionItem(A(pElem->getAttribute(X("viewId")))));
+   DOMElement* pElem = static_cast<DOMElement*>(pDocument);
+   View* pView = dynamic_cast<View*>(Service<SessionManager>()->getSessionItem(A(pElem->getAttribute(X("viewId")))));
    if (pView != NULL)
    {
       setWidget(dynamic_cast<ViewImp*>(pView));
@@ -343,15 +354,15 @@ bool WorkspaceWindowImp::fromXml(DOMNode* pDocument, unsigned int version)
    }
 
    // make sure that the zoom percentage toolbar item, etc. are properly connected to the window and view.
-   ApplicationWindow *pAppWindow = dynamic_cast<ApplicationWindow*>(Service<DesktopServices>()->getMainWidget());
-   if(pAppWindow != NULL)
+   ApplicationWindow* pAppWindow = dynamic_cast<ApplicationWindow*>(Service<DesktopServices>()->getMainWidget());
+   if (pAppWindow != NULL)
    {
       pAppWindow->setCurrentWorkspaceWindow(dynamic_cast<WorkspaceWindow*>(this));
    }
 
    // restore the workspace window geometry
-   DOMElement *pConfig = dynamic_cast<DOMElement*>(findChildNode(pDocument, "Geometry"));
-   if(pConfig)
+   DOMElement* pConfig = dynamic_cast<DOMElement*>(findChildNode(pDocument, "Geometry"));
+   if (pConfig)
    {
       LocationType pos;
       LocationType size;
@@ -359,14 +370,14 @@ bool WorkspaceWindowImp::fromXml(DOMNode* pDocument, unsigned int version)
       XmlReader::StrToLocation(pConfig->getAttribute(X("size")), size);
       pParent->resize(size.mX, size.mY);
       pParent->move(pos.mX, pos.mY);
-      bool isMinimized = StringUtilities::fromXmlString<bool>(
-         A(pConfig->getAttribute(X("minimized"))));
+
+      bool isMinimized = StringUtilities::fromXmlString<bool>(A(pConfig->getAttribute(X("minimized"))));
       if (isMinimized)
       {
          minimize();
       }
-      bool isMaximized = StringUtilities::fromXmlString<bool>(
-         A(pConfig->getAttribute(X("maximized"))));
+
+      bool isMaximized = StringUtilities::fromXmlString<bool>(A(pConfig->getAttribute(X("maximized"))));
       if (isMaximized)
       {
          maximize();
@@ -374,4 +385,10 @@ bool WorkspaceWindowImp::fromXml(DOMNode* pDocument, unsigned int version)
    }
 
    return true;
+}
+
+void WorkspaceWindowImp::activate()
+{
+   Service<DesktopServices> pDesktop;
+   pDesktop->setCurrentWorkspaceWindow(dynamic_cast<WorkspaceWindow*>(this));
 }

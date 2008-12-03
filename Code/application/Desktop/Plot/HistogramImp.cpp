@@ -26,8 +26,7 @@ HistogramImp::HistogramImp(PlotViewImp* pPlot, bool bPrimary) :
    PlotObjectImp(pPlot, bPrimary),
    mColor(Qt::black)
 {
-   VERIFYNR(connect(this, SIGNAL(histogramChanged()),
-      this, SIGNAL(extentsChanged())));
+   VERIFYNR(connect(this, SIGNAL(histogramChanged()), this, SIGNAL(extentsChanged())));
    VERIFYNR(connect(this, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(legendPixmapChanged())));
 
 }
@@ -374,7 +373,7 @@ void HistogramImp::setColor(const QColor& clrBins)
 
       emit colorChanged(clrBins);
       notify(SIGNAL_NAME(Histogram, ColorChanged), boost::any(
-         ColorType(clrBins.red(),clrBins.green(),clrBins.blue())));
+         ColorType(clrBins.red(), clrBins.green(), clrBins.blue())));
    }
 }
 
@@ -425,7 +424,7 @@ bool HistogramImp::fromXml(DOMNode* pDocument, unsigned int version)
       return false;
    }
 
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
+   DOMElement* pElem = static_cast<DOMElement*>(pDocument);
    ColorType color = StringUtilities::fromXmlString<ColorType>(A(pElem->getAttribute(X("color"))));
    mColor = COLORTYPE_TO_QCOLOR(color);
 

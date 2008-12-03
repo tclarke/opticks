@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef PIXELASPECTRATIO_H__
-#define PIXELASPECTRATIO_H__
+#ifndef PIXELASPECTRATIO_H
+#define PIXELASPECTRATIO_H
 
 #include "ViewerShell.h"
 #include "PixelAspectRatioGui.h"
@@ -16,21 +16,22 @@
 class PixelAspectRatio : public QObject, public ViewerShell
 {
    Q_OBJECT
+
 public:
    PixelAspectRatio();
    ~PixelAspectRatio();
-   bool execute( PlugInArgList *, PlugInArgList * );
+
+   bool execute(PlugInArgList*, PlugInArgList*);
    QWidget* getWidget() const;
-   bool serialize(SessionItemSerializer &serializer) const;
-   bool deserialize(SessionItemDeserializer &deserializer);
+   bool serialize(SessionItemSerializer& serializer) const;
+   bool deserialize(SessionItemDeserializer& deserializer);
 
 public slots:
    void dialogClosed();
 
 private:
    bool showGui();
-   PixelAspectRatioGui *mpGui;
-
+   PixelAspectRatioGui* mpGui;
 };
 
 #endif

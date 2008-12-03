@@ -7,57 +7,54 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "Sio.h"
 #include "ApplicationServices.h"
 #include "AppVerify.h"
 #include "DataVariant.h"
 #include "DateTime.h"
 #include "Endian.h"
-#include "StringUtilities.h"
+#include "Sio.h"
 
 #include <sstream>
-
 using namespace std;
 
 Attribute_Metadata gpzAttribute_Descriptor[INVALID_LAST_ENUM_ITEM_FLAG] =
-{// Type                Enumeration ID                 Serialize?
-   {CSTRING_PARM,       "ORIGINAL_SENSOR",             true},
-   {LONG_PARM,          "IMAGE_WIDTH",                 false},
-   {LONG_PARM,          "IMAGE_HEIGHT",                false},
-   {LONG_PARM,          "IMAGE_DATA_FORMAT",           false},
-   {LONG_PARM,          "IMAGE_BYTES_PER_PIXEL",       true},
-   {LONG_PARM,          "IMAGE_BANDS",                 false},
-   {CSTRING_PARM,       "IMAGE_INTERLEAVING",          true},
-   {CSTRING_PARM,       "IMAGE_COORDINATE_SYSTEM",     true},
-   {LONG_PARM,          "IMAGE_HEADER_BYTES",          true},
-   {LONG_PARM,          "IMAGE_BYTE_ORDER",            true},
-   {DOUBLE_PARM,        "UPPER_LEFT_CORNER_LAT",       true},
-   {DOUBLE_PARM,        "UPPER_LEFT_CORNER_LONG",      true},
-   {DOUBLE_PARM,        "UPPER_RIGHT_CORNER_LAT",      true},
-   {DOUBLE_PARM,        "UPPER_RIGHT_CORNER_LONG",     true},
-   {DOUBLE_PARM,        "LOWER_RIGHT_CORNER_LAT",      true},
-   {DOUBLE_PARM,        "LOWER_RIGHT_CORNER_LONG",     true},
-   {DOUBLE_PARM,        "LOWER_LEFT_CORNER_LAT",       true},
-   {DOUBLE_PARM,        "LOWER_LEFT_CORNER_LONG",      true},
-   {DOUBLE_PARM,        "CENTER_LAT",                  true},
-   {DOUBLE_PARM,        "CENTER_LONG",                 true},
-   {FLOAT_VECTOR_PARM,  "CENTER_FREQUENCY_VECTOR",     true},
-   {FLOAT_VECTOR_PARM,  "LOW_POWER_FREQUENCY_VECTOR",  true},
-   {FLOAT_VECTOR_PARM,  "HIGH_POWER_FREQUENCY_VECTOR", true},
-   {FLOAT_PARM,         "SUN_AZIMUTH",                 true},
-   {FLOAT_PARM,         "SUN_ELEVATION",               true},
-   {LONG_PARM,          "BAD_BANDS_COUNT",             false},
-   {LONG_VECTOR_PARM,   "BAD_BANDS_VECTOR",            false},
-   {LONG_PARM,          "DISPLAY_WIDTH",               false},
-   {LONG_PARM,          "DISPLAY_HEIGHT",              false},
-   {LONG_PARM,          "DISPLAY_DEPTH",               false},
-   {LONG_VECTOR_PARM,   "DISPLAY_BANDS_VECTOR",        false},
-   {LONG_VECTOR_PARM,   "DISPLAY_COLUMNS_VECTOR",      false},
-   {LONG_VECTOR_PARM,   "DISPLAY_ROWS_VECTOR",         false},
-   {DOUBLE_VECTOR_PARM, "LATITUDE_VECTOR",             true},
-   {DOUBLE_VECTOR_PARM, "LONGITUDE_VECTOR",            true},
-   {CSTRING_PARM,       "STATISTICS_BOOLS",            true}
-//   INVALID_LAST_ENUM_ITEM_FLAG   MUST ALWAYS BE LAST ENUM VALUE!!!
+{  // Type, Enumeration ID , Serialize?
+   {CSTRING_PARM, "ORIGINAL_SENSOR", true},
+   {LONG_PARM, "IMAGE_WIDTH", false},
+   {LONG_PARM, "IMAGE_HEIGHT", false},
+   {LONG_PARM, "IMAGE_DATA_FORMAT", false},
+   {LONG_PARM, "IMAGE_BYTES_PER_PIXEL", true},
+   {LONG_PARM, "IMAGE_BANDS", false},
+   {CSTRING_PARM, "IMAGE_INTERLEAVING", true},
+   {CSTRING_PARM, "IMAGE_COORDINATE_SYSTEM", true},
+   {LONG_PARM, "IMAGE_HEADER_BYTES", true},
+   {LONG_PARM, "IMAGE_BYTE_ORDER", true},
+   {DOUBLE_PARM, "UPPER_LEFT_CORNER_LAT", true},
+   {DOUBLE_PARM, "UPPER_LEFT_CORNER_LONG", true},
+   {DOUBLE_PARM, "UPPER_RIGHT_CORNER_LAT", true},
+   {DOUBLE_PARM, "UPPER_RIGHT_CORNER_LONG", true},
+   {DOUBLE_PARM, "LOWER_RIGHT_CORNER_LAT", true},
+   {DOUBLE_PARM, "LOWER_RIGHT_CORNER_LONG", true},
+   {DOUBLE_PARM, "LOWER_LEFT_CORNER_LAT", true},
+   {DOUBLE_PARM, "LOWER_LEFT_CORNER_LONG", true},
+   {DOUBLE_PARM, "CENTER_LAT", true},
+   {DOUBLE_PARM, "CENTER_LONG", true},
+   {FLOAT_VECTOR_PARM, "CENTER_FREQUENCY_VECTOR", true},
+   {FLOAT_VECTOR_PARM, "LOW_POWER_FREQUENCY_VECTOR", true},
+   {FLOAT_VECTOR_PARM, "HIGH_POWER_FREQUENCY_VECTOR", true},
+   {FLOAT_PARM, "SUN_AZIMUTH", true},
+   {FLOAT_PARM, "SUN_ELEVATION", true},
+   {LONG_PARM, "BAD_BANDS_COUNT", false},
+   {LONG_VECTOR_PARM, "BAD_BANDS_VECTOR", false},
+   {LONG_PARM, "DISPLAY_WIDTH", false},
+   {LONG_PARM, "DISPLAY_HEIGHT", false},
+   {LONG_PARM, "DISPLAY_DEPTH", false},
+   {LONG_VECTOR_PARM, "DISPLAY_BANDS_VECTOR", false},
+   {LONG_VECTOR_PARM, "DISPLAY_COLUMNS_VECTOR", false},
+   {LONG_VECTOR_PARM, "DISPLAY_ROWS_VECTOR", false},
+   {DOUBLE_VECTOR_PARM, "LATITUDE_VECTOR", true},
+   {DOUBLE_VECTOR_PARM, "LONGITUDE_VECTOR", true},
+   {CSTRING_PARM, "STATISTICS_BOOLS", true}
 };
 
 static double convertData(UNION_VALUE& value, int datatype)
@@ -121,7 +118,11 @@ static void formatDate(const string& value, DateTime* pDateTime)
 
 static void formatBandBadValuesVector(vector< vector<int> >& vec, string val)
 {
-   int len, i, k, numBadValues, badValue;
+   int len;
+   int i;
+   int k;
+   int numBadValues;
+   int badValue;
    vector<int> badValues;
    bool noBadValues = true;
 
@@ -132,7 +133,7 @@ static void formatBandBadValuesVector(vector< vector<int> >& vec, string val)
    input >> len;
    VERIFYNRV( len >= 1 );
 
-   for ( i = 0; i < len; i++)
+   for (i = 0; i < len; i++)
    {
       input >> numBadValues;
 
@@ -161,20 +162,20 @@ static bool readDynamicObjectTags(DynamicObject* pDynObjRoot, string key, string
       return false;
    }
 
-   DynamicObject *pDynObj = pDynObjRoot;
+   DynamicObject* pDynObj = pDynObjRoot;
    string treeType = "DynamicObject";
-   int firstPos = 0;
-   int lastPos = key.find(':');
+   string::size_type firstPos = 0;
+   string::size_type lastPos = key.find(':');
    while (lastPos != string::npos && treeType == "DynamicObject")
    {
       string keyTok = key.substr(firstPos, lastPos);
       DataVariant& attrValue = pDynObj->getAttribute(keyTok);
       treeType = attrValue.getTypeName();
       pDynObj = attrValue.getPointerToValue<DynamicObject>();
-      firstPos = lastPos+1;
+      firstPos = lastPos + 1;
       lastPos = key.find(':', firstPos);
-
    }
+
    if (lastPos == string::npos)
    {
       if (treeType != "DynamicObject")
@@ -215,14 +216,14 @@ static bool readDynamicObjectTags(DynamicObject* pDynObjRoot, string key, string
 
 SioFile::SioFile() :
    mVersion(8),
-   mBitsPerElement(0),
+   mEndian(Endian::getSystemEndian()),
    mDataType(UNKNOWN),
+   mBitsPerElement(0),
    mColumns(0),
    mRows(0),
    mBands(0),
    mBadBands(0),
    mOptimizations(-1),
-   mEndian(Endian::getSystemEndian()),
    mUnitType(DIGITAL_NO),
    mUnitName(string()),
    mRangeMin(0.0),
@@ -236,7 +237,7 @@ SioFile::~SioFile()
    std::vector<double*>::iterator mPercentileIter;
    for (mPercentileIter = mStatPercentile.begin(); mPercentileIter != mStatPercentile.end(); ++mPercentileIter)
    {
-      double *pPercentile = *mPercentileIter;
+      double* pPercentile = *mPercentileIter;
       if (pPercentile != NULL)
       {
          delete pPercentile;
@@ -246,7 +247,7 @@ SioFile::~SioFile()
    std::vector<double*>::iterator mCenterIter;
    for (mCenterIter = mStatBinCenter.begin(); mCenterIter != mStatBinCenter.end(); ++mCenterIter)
    {
-      double *pCenter = *mCenterIter;
+      double* pCenter = *mCenterIter;
       if (pCenter != NULL)
       {
          delete pCenter;
@@ -256,7 +257,7 @@ SioFile::~SioFile()
    std::vector<unsigned int*>::iterator mHistogramIter;
    for (mHistogramIter = mStatHistogram.begin(); mHistogramIter != mStatHistogram.end(); ++mHistogramIter)
    {
-      unsigned int *pHistogram = *mHistogramIter;
+      unsigned int* pHistogram = *mHistogramIter;
       if (pHistogram != NULL)
       {
          delete pHistogram;
@@ -279,7 +280,8 @@ bool SioFile::deserialize(FILE* pFile)
 //Version 9 sio's are only written by the temporary Sio Exporter provided in Opticks
 //The exporter has bugs and will be removed in Opticks, therefore version 9 sio's
 //will never be supported by the Opticks Team.
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : When Sio Exporter is removed from Opticks, remove the ability to load version 9 sio's (kstreith)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : When Sio Exporter is removed from Opticks, " \
+   "remove the ability to load version 9 sio's (kstreith)")
    // Endian
    if ((mVersion != 5) && (mVersion != 6) && (mVersion != 7) && (mVersion != 8) && (mVersion != 9))
    {
@@ -627,8 +629,8 @@ bool SioFile::deserialize(FILE* pFile)
 
    try
    {
-      bool Sentinel_Found = false;
-      while (Sentinel_Found == false)
+      bool sentinelFound = false;
+      while (sentinelFound == false)
       {
          int length = 0;
          int elements_read = fread(&length, sizeof(int), 1, pFile);
@@ -647,7 +649,7 @@ bool SioFile::deserialize(FILE* pFile)
 
             if (strcmp(pczBuffer, ATTRIBUTE_SERIALIZATION_SENTINEL) == 0)
             {
-               Sentinel_Found = true;
+               sentinelFound = true;
                break;
             }
 
@@ -732,28 +734,40 @@ bool SioFile::deserialize(FILE* pFile)
                      fread(&mParameters[i].uParameter_Value.lData, sizeof(int), 1, pFile);
                      endian.swapValue(mParameters[i].uParameter_Value.lData);
                      if (mParameters[i].uParameter_Value.lData == -1)
+                     {
                         mParameters[i].eParameter_Initialized = false;
+                     }
                      else
+                     {
                         mParameters[i].eParameter_Initialized = true;
+                     }
                      break;
 
                   case FLOAT_PARM:
                      fread(&mParameters[i].uParameter_Value.fData, sizeof(float), 1, pFile);
                      endian.swapValue(mParameters[i].uParameter_Value.fData);
                      if (mParameters[i].uParameter_Value.fData == -1)
+                     {
                         mParameters[i].eParameter_Initialized = false;
+                     }
                      else
+                     {
                         mParameters[i].eParameter_Initialized = true;
-                        break;
+                     }
+                     break;
 
                   case DOUBLE_PARM:
                      fread(&mParameters[i].uParameter_Value.dData, sizeof(double), 1, pFile);
                      endian.swapValue(mParameters[i].uParameter_Value.dData);
                      if (mParameters[i].uParameter_Value.dData == -1)
+                     {
                         mParameters[i].eParameter_Initialized = false;
+                     }
                      else
+                     {
                         mParameters[i].eParameter_Initialized = true;
-                        break;
+                     }
+                     break;
 
                   default:
                      mParameters[i].eParameter_Initialized = false;
@@ -763,7 +777,7 @@ bool SioFile::deserialize(FILE* pFile)
          }
       }
    }
-   catch(...)
+   catch (...)
    {
       return false;
    }
@@ -806,13 +820,13 @@ bool SioFile::deserialize(FILE* pFile)
       // Parse the string
       if (key.empty() == false)
       {
-         int colonPos = key.find_first_of(':');
+         string::size_type colonPos = key.find_first_of(':');
          if (colonPos == string::npos)
          {
             // Add to metadata
             if (key != "Metadata") // don't add if the root "Metadata" tag
             {
-               int delimPos = value.find('\n');
+               string::size_type delimPos = value.find('\n');
                string type = value.substr(0, delimPos);
                string actualValue = value.substr(delimPos + 1);
                readDynamicObjectTags(mpMetadata.get(), key, type, actualValue);
@@ -917,7 +931,7 @@ bool SioFile::deserialize(FILE* pFile)
             }
             else if (destination == "Metadata")
             {
-               int delimPos = value.find('\n');
+               string::size_type delimPos = value.find('\n');
                string type = value.substr(0, delimPos);
                string actualValue = value.substr(delimPos + 1);
                readDynamicObjectTags(mpMetadata.get(), shortKey, type, actualValue);

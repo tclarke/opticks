@@ -82,8 +82,7 @@ bool GraphicUtilities::setBoundingBox(const list<GraphicObject*>& objects, Locat
 
 LocationType GraphicUtilities::getLlCorner(const list<GraphicObject*>& objects)
 {
-   const BoundingBoxProperty* pProperty =
-      dynamic_cast<const BoundingBoxProperty*>(getProperty(objects, "BoundingBox"));
+   const BoundingBoxProperty* pProperty = dynamic_cast<const BoundingBoxProperty*>(getProperty(objects, "BoundingBox"));
    if (pProperty != NULL)
    {
       return pProperty->getLlCorner();
@@ -94,8 +93,7 @@ LocationType GraphicUtilities::getLlCorner(const list<GraphicObject*>& objects)
 
 LocationType GraphicUtilities::getUrCorner(const list<GraphicObject*>& objects)
 {
-   const BoundingBoxProperty* pProperty =
-      dynamic_cast<const BoundingBoxProperty*>(getProperty(objects, "BoundingBox"));
+   const BoundingBoxProperty* pProperty = dynamic_cast<const BoundingBoxProperty*>(getProperty(objects, "BoundingBox"));
    if (pProperty != NULL)
    {
       return pProperty->getUrCorner();

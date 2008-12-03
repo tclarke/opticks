@@ -52,8 +52,8 @@ private:
    QCheckBox* mpShapeCheck;
 
    // Statistics
-   QLabel *mpPixelCount;
-   QLabel *mpObjectCount;
+   QLabel* mpPixelCount;
+   QLabel* mpObjectCount;
 };
 
 #endif

@@ -155,7 +155,7 @@ bool HdfUtilities::readHdf4Attribute(int32 obj_id, int32 attr_index, DataVariant
          {
             string temp;
             temp.resize(count + 1);
-            int iSuccess = SDreadattr(obj_id, attr_index, &(temp[0]));
+            iSuccess = SDreadattr(obj_id, attr_index, &(temp[0]));
             if (iSuccess != SUCCEED)
             {
                return false;
@@ -166,7 +166,7 @@ bool HdfUtilities::readHdf4Attribute(int32 obj_id, int32 attr_index, DataVariant
          else
          {
             char temp;
-            int iSuccess = SDreadattr(obj_id, attr_index, &temp);
+            iSuccess = SDreadattr(obj_id, attr_index, &temp);
             if (iSuccess != SUCCEED)
             {
                return false;

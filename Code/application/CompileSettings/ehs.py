@@ -16,7 +16,7 @@ def generate(env):
     if not path:
        SCons.Warnings.warn(EhsNotFound,"Could not detect ehs")
     else:
-       env.AppendUnique(CXXFLAGS="-I%s/include -I%s/include -I%s/include" % (ehspath,pcrepath,pmepath),
+       env.AppendUnique(CXXFLAGS=["-I%s/include" % (ehspath), "-I%s/include" % (pcrepath), "-I%s/include" % (pmepath)],
                         LIBPATH=['%s/lib/%s' % (ehspath,env["PLATFORM"])],
                         LIBS=["ehs"])
 

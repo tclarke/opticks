@@ -69,7 +69,7 @@ FlickerControls::~FlickerControls()
    }
 }
 
-void FlickerControls::windowHidden(Subject& subject, const std::string &signal, const boost::any& v)
+void FlickerControls::windowHidden(Subject& subject, const std::string& signal, const boost::any& v)
 {
    DockWindow* pWindow = static_cast<DockWindow*>(mpDesktop->getWindow("Flicker Window", DOCK_WINDOW));
    if (pWindow != NULL)
@@ -81,7 +81,7 @@ void FlickerControls::windowHidden(Subject& subject, const std::string &signal, 
    }
 }
 
-void FlickerControls::windowShown(Subject& subject, const std::string &signal, const boost::any& v)
+void FlickerControls::windowShown(Subject& subject, const std::string& signal, const boost::any& v)
 {
    DockWindow* pWindow = static_cast<DockWindow*>(mpDesktop->getWindow("Flicker Window", DOCK_WINDOW));
    if (pWindow != NULL)
@@ -93,11 +93,29 @@ void FlickerControls::windowShown(Subject& subject, const std::string &signal, c
    }
 }
 
-bool FlickerControls::execute(PlugInArgList *pInputArgList, PlugInArgList *pOutputArgList)
+bool FlickerControls::execute(PlugInArgList* pInputArgList, PlugInArgList* pOutputArgList)
 {
    createMenuItem();
 
    return createFlickerWindow() && mpWindowAction != NULL;
+}
+
+bool FlickerControls::getInputSpecification(PlugInArgList*& pArgList)
+{
+   pArgList = NULL;
+   return true;
+}
+
+bool FlickerControls::getOutputSpecification(PlugInArgList*& pArgList)
+{
+   pArgList = NULL;
+   return true;
+}
+
+bool FlickerControls::setBatch()
+{
+   AlgorithmShell::setBatch();
+   return false;
 }
 
 void FlickerControls::createMenuItem()
@@ -166,9 +184,9 @@ bool FlickerControls::createFlickerWindow()
    return true;
 }
 
-void FlickerControls::attachToFlickerWindow(DockWindow *pFlickerWindow)
+void FlickerControls::attachToFlickerWindow(DockWindow* pFlickerWindow)
 {
-   if (pFlickerWindow)
+   if (pFlickerWindow != NULL)
    {
       pFlickerWindow->attach(SIGNAL_NAME(DockWindow, Shown), Slot(this, &FlickerControls::windowShown));
       pFlickerWindow->attach(SIGNAL_NAME(DockWindow, Hidden), Slot(this, &FlickerControls::windowHidden));
@@ -199,7 +217,7 @@ void FlickerControls::displayFlickerWindow(bool bDisplay)
    }
 }
 
-bool FlickerControls::serialize(SessionItemSerializer &serializer) const
+bool FlickerControls::serialize(SessionItemSerializer& serializer) const
 {
    if (mpWindowAction != NULL)
    {
@@ -215,7 +233,7 @@ bool FlickerControls::serialize(SessionItemSerializer &serializer) const
    return false;
 }
 
-bool FlickerControls::deserialize(SessionItemDeserializer &deserializer)
+bool FlickerControls::deserialize(SessionItemDeserializer& deserializer)
 {
    createMenuItem();
 
@@ -226,7 +244,7 @@ bool FlickerControls::deserialize(SessionItemDeserializer &deserializer)
       if (pRootElement)
       {
          std::string windowId = A(pRootElement->getAttribute(X("windowId")));
-         DockWindow *pFlickerWindow = dynamic_cast<DockWindow*>(Service<SessionManager>()->getSessionItem(windowId));
+         DockWindow* pFlickerWindow = dynamic_cast<DockWindow*>(Service<SessionManager>()->getSessionItem(windowId));
          if (pFlickerWindow != NULL)
          {
             attachToFlickerWindow(pFlickerWindow);
@@ -236,5 +254,6 @@ bool FlickerControls::deserialize(SessionItemDeserializer &deserializer)
          }
       }
    }
+
    return false;
 }

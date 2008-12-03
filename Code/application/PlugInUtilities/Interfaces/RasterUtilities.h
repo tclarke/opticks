@@ -25,6 +25,7 @@
 #endif
 
 #include <limits>
+#include <string>
 #include <vector>
 
 class DataDescriptor;
@@ -34,6 +35,7 @@ class FileDescriptor;
 class RasterDataDescriptor;
 class RasterDataDescriptor;
 class RasterElement;
+class RasterFileDescriptor;
 
 /**
  * This namespace contains a number of convenience functions
@@ -99,7 +101,7 @@ namespace RasterUtilities
    /**
     * Returns a subset DimensionDescriptor vector.
     *
-    * @param origVector
+    * @param origValues
     *        The DimensionDescriptor vector that should be subset.
     * @param start
     *        The DimensionDescriptor that specifies the start of the subset.
@@ -121,11 +123,8 @@ namespace RasterUtilities
     *
     * @return A new DimensionDescriptor vector that has been subset as specified.
     */
-   std::vector<DimensionDescriptor> subsetDimensionVector(
-      const std::vector<DimensionDescriptor>& origVector,
-      const DimensionDescriptor& start,
-      const DimensionDescriptor& stop,
-      unsigned int skipFactor = 0);
+   std::vector<DimensionDescriptor> subsetDimensionVector(const std::vector<DimensionDescriptor>& origValues,
+      const DimensionDescriptor& start, const DimensionDescriptor& stop, unsigned int skipFactor = 0);
 
    /**
     * Returns a FileDescriptor to go with a passed in DataDescriptor.
@@ -357,9 +356,8 @@ namespace RasterUtilities
     *         FileDescriptor.  Note that original numbers for 
     *         rows, columns, and bands will go from 0 to n.
     */
-   RasterDataDescriptor *generateRasterDataDescriptor(
-      const std::string &name, DataElement *pParent, unsigned int rows, 
-      unsigned int columns, unsigned int bands, InterleaveFormatType interleave,
+   RasterDataDescriptor* generateRasterDataDescriptor(const std::string& name, DataElement* pParent,
+      unsigned int rows, unsigned int columns, unsigned int bands, InterleaveFormatType interleave,
       EncodingType encoding, ProcessingLocation location);
 
    /**
@@ -383,9 +381,8 @@ namespace RasterUtilities
     *         FileDescriptor.  Note that original numbers for 
     *         rows, and columns will go from 0 to n.
     */
-   RasterDataDescriptor *generateRasterDataDescriptor(
-      const std::string &name, DataElement *pParent, unsigned int rows, 
-      unsigned int columns, EncodingType encoding, ProcessingLocation location);
+   RasterDataDescriptor* generateRasterDataDescriptor(const std::string& name, DataElement* pParent,
+      unsigned int rows, unsigned int columns, EncodingType encoding, ProcessingLocation location);
 
    /**
     * Generate a populated RasterDataDescriptor with RasterFileDescriptor
@@ -855,6 +852,24 @@ namespace RasterUtilities
             return 0;
       }
    }
+
+   /**
+    *  Calculate size of data file.
+    *
+    *  This function will calculate the size of the file described in
+    *  the given RasterFileDescriptor. For a BSQ multiple file data set, it will
+    *  calculate the required size for an individual file, not the total
+    *  of all the files. 
+    *
+    *  @param pDescriptor
+    *         The RasterFileDescriptor to use in calculation of file size.
+    *
+    *  @return The calculated file size. For BSQ multiple files, it will return
+    *          calculated size that each of the files should require.
+    *          Will return -1 if errors occurred during calculation, e.g.
+    *          if pDescriptor is NULL.
+    */
+   int64_t calculateFileSize(const RasterFileDescriptor* pDescriptor);
 }
 
 #endif

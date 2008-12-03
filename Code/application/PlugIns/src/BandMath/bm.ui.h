@@ -7,13 +7,17 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#ifndef BM_UI_H
+#define BM_UI_H
+
 #include "RasterDataDescriptor.h"
 #include <stdio.h>
 
 bool bFirst;
 int iPos;
 
-struct sLast {
+struct Last
+{
     bool bUnaryOps;
     bool bBinaryOps;
     bool bNumbers;
@@ -23,7 +27,7 @@ struct sLast {
     bool bBands;
 } sLast;
 
-QString frmBM::getExpression(bool bLoadedBands) const
+QString FrmBM::getExpression(bool bLoadedBands) const
 {
    QString strOrigExpression = txtExpression->text();
    if (bLoadedBands == false)
@@ -50,8 +54,7 @@ QString frmBM::getExpression(bool bLoadedBands) const
          if (sscanf(strOrigExpression.toStdString().c_str(), "b%d", &ulOrigBand) == 1)
          {
             // Get the loaded band number
-            unsigned int ulLoadedBand = 0;
-            ulLoadedBand = getLoadedBandNumber(ulOrigBand) + 1;
+            unsigned int ulLoadedBand = getLoadedBandNumber(ulOrigBand) + 1;
 
             // Add the value in the loaded expression
             strLoadedExpression += QString::number(ulLoadedBand);
@@ -85,7 +88,7 @@ QString frmBM::getExpression(bool bLoadedBands) const
    return strLoadedExpression;
 }
 
-bool frmBM::isDegrees() const
+bool FrmBM::isDegrees() const
 {
    bool bDegrees = false;
    bDegrees = rbDegrees->isChecked();
@@ -93,7 +96,7 @@ bool frmBM::isDegrees() const
    return bDegrees;
 }
 
-bool frmBM::isMultiCube() const
+bool FrmBM::isMultiCube() const
 {
    bool bMultiCube = false;
    bMultiCube = rbCube->isChecked();
@@ -101,7 +104,7 @@ bool frmBM::isMultiCube() const
    return bMultiCube;
 }
 
-bool frmBM::isResultsMatrix() const
+bool FrmBM::isResultsMatrix() const
 {
    bool bResultsMatrix = false;
    bResultsMatrix = cbResults->isChecked();
@@ -109,15 +112,15 @@ bool frmBM::isResultsMatrix() const
    return bResultsMatrix;
 }
 
-void frmBM::clear()
+void FrmBM::clear()
 {
-    int i;
-    
-    bFirst = true;
-    iPos = -1;
-    
-    //do it twice so the fields of sLast are set correctly
-    for (i = 1; i <= 2; i++)
+   int i;
+
+   bFirst = true;
+   iPos = -1;
+
+   //do it twice so the fields of sLast are set correctly
+   for (i = 1; i <= 2; i++)
    {
       setUnaryOps(true);
       setBinaryOps(false);
@@ -126,18 +129,18 @@ void frmBM::clear()
       setButtons(false);
       setProcess(false);
       setList(true);
-    }
+   }
 
-    bgOperators->button(31)->setEnabled(true);
-    bgOperators->button(32)->setEnabled(false);
+   bgOperators->button(31)->setEnabled(true);
+   bgOperators->button(32)->setEnabled(false);
 }
 
-void frmBM::addBand()
+void FrmBM::addBand()
 {
    QString qsTmp;
 
    qsTmp = txtExpression->text();
-   sLast.qsExpr=qsTmp;
+   sLast.qsExpr = qsTmp;
 
    // Get original band number
    unsigned int originalBandNumber = 0;
@@ -147,13 +150,14 @@ void frmBM::addBand()
       DimensionDescriptor desc = mpDescriptor->getActiveBand(index);
       if (desc.isValid())
       {
-         originalBandNumber = desc.getOriginalNumber() + 1; //BandMath is using 1-based numbers, original numbers are 0-based numbers
+         // BandMath is using 1-based numbers, original numbers are 0-based numbers
+         originalBandNumber = desc.getOriginalNumber() + 1;
       }
    }
    
    if (iPos > 0)
    {
-      if(rbBand->isChecked())
+      if (rbBand->isChecked())
       {
          qsTmp.insert(iPos, QString("b%1").arg(originalBandNumber));
       }
@@ -163,11 +167,11 @@ void frmBM::addBand()
       }
 
       bgOperators->button(32)->setEnabled(true);
-      iPos=qsTmp.indexOf(')',iPos);
+      iPos = qsTmp.indexOf(')', iPos);
    }
    else
    {
-      if(rbBand->isChecked())
+      if (rbBand->isChecked())
       {
          qsTmp = QString("%1b%2").arg(txtExpression->text()).arg(originalBandNumber);
       }
@@ -179,7 +183,7 @@ void frmBM::addBand()
 
    if (bFirst == true)
    {
-      bFirst=false;
+      bFirst = false;
    }
 
    setProcess(!bFirst);
@@ -195,85 +199,85 @@ void frmBM::addBand()
    bFirst = false;
 }
 
-void frmBM::addNumber( int iButton )
+void FrmBM::addNumber( int iButton )
 {
-    QString qsTmp;
+   QString qsTmp;
 
-    QString textToAdd = bgNumbers->button(iButton)->text();
-    if (textToAdd == "p")
-    {
-        textToAdd = "pi";
-    }
-    
-    qsTmp = txtExpression->text();
-    sLast.qsExpr = qsTmp;
- 
-    if (iPos > 0)
+   QString textToAdd = bgNumbers->button(iButton)->text();
+   if (textToAdd == "p")
    {
-      qsTmp.insert(iPos,textToAdd);
+      textToAdd = "pi";
+   }
+
+   qsTmp = txtExpression->text();
+   sLast.qsExpr = qsTmp;
+
+   if (iPos > 0)
+   {
+      qsTmp.insert(iPos, textToAdd);
       bgOperators->button(32)->setEnabled(true);
-      iPos=qsTmp.indexOf(')',iPos);
-    }
-    else
+      iPos = qsTmp.indexOf(')', iPos);
+   }
+   else
    {
       qsTmp.append(textToAdd);
-    }
-    
-    setUnaryOps(false);
-    setBinaryOps(true);
-    setExpression(qsTmp);
-    setButtons(true);
-    setProcess(!bFirst);
-    setList(false);
-    
-    setUnaryOps(false);
-    setBinaryOps(true);
-    setList(false);
-    
-    if (iButton == 10)
-   {            //.
+   }
+
+   setUnaryOps(false);
+   setBinaryOps(true);
+   setExpression(qsTmp);
+   setButtons(true);
+   setProcess(!bFirst);
+   setList(false);
+
+   setUnaryOps(false);
+   setBinaryOps(true);
+   setList(false);
+
+   if (iButton == 10)
+   {
       setNumbers(true);
       bgNumbers->button(10)->setEnabled(false);
       bgNumbers->button(11)->setEnabled(false);
       bgNumbers->button(12)->setEnabled(false);
-    }
-    else if ((iButton == 11) || (iButton == 12))
+   }
+   else if ((iButton == 11) || (iButton == 12))
    {   //pi or e
       setNumbers(false);
-    }
-    else
+   }
+   else
    {
       setNumbers(true);
       bgNumbers->button(11)->setEnabled(false);
       bgNumbers->button(12)->setEnabled(false);
-    }
-    
-    bgOperators->button(31)->setEnabled(false);
-    
-    bFirst = false;
+   }
+
+   bgOperators->button(31)->setEnabled(false);
+
+   bFirst = false;
 }
 
-void frmBM::addOperator(int iButton)
+void FrmBM::addOperator(int iButton)
 {
-    QString qsTmp;
-    
-    qsTmp = txtExpression->text();
-    sLast.qsExpr = qsTmp;
-    
-    if ((iButton >= 1) && (iButton <= 5))
+   QString qsTmp;
+
+   qsTmp = txtExpression->text();
+   sLast.qsExpr = qsTmp;
+
+   if ((iButton >= 1) && (iButton <= 5))
    {
       setUnaryOps(true);
       setBinaryOps(false);
       setNumbers(true);
       setProcess(false);
       setList(true);
-      
+
       if (iPos > 0)
       {
-         qsTmp.insert(iPos,bgOperators->button(iButton)->text());
+         qsTmp.insert(iPos, bgOperators->button(iButton)->text());
          bgOperators->button(31)->setEnabled(true);
          bgOperators->button(32)->setEnabled(false);
-         iPos=qsTmp.indexOf(')',iPos);
+         iPos = qsTmp.indexOf(')', iPos);
       }
       else
       {
@@ -281,8 +285,8 @@ void frmBM::addOperator(int iButton)
          bgOperators->button(31)->setEnabled(true);
          bgOperators->button(32)->setEnabled(false);
       }
-    }
-    else if ((iButton >= 6) && (iButton <= 30))
+   }
+   else if ((iButton >= 6) && (iButton <= 30))
    {
       setUnaryOps(true);
       setBinaryOps(false);
@@ -292,31 +296,31 @@ void frmBM::addOperator(int iButton)
 
       if (iPos > 0)
       {
-         qsTmp.insert(iPos,QString("%1()").arg(bgOperators->button(iButton)->text()));
+         qsTmp.insert(iPos, QString("%1()").arg(bgOperators->button(iButton)->text()));
          bgOperators->button(31)->setEnabled(true);
          bgOperators->button(32)->setEnabled(false);
       }
       else
       {
-         iPos=strlen(qsTmp.toStdString().c_str());
+         iPos = strlen(qsTmp.toStdString().c_str());
          qsTmp.append(QString("%1()").arg(bgOperators->button(iButton)->text()));
          bgOperators->button(31)->setEnabled(false);
          bgOperators->button(32)->setEnabled(false);
       }
       
-      iPos=qsTmp.indexOf(')',iPos);
-    }
-    else if (iButton == 31)      //in paren
+      iPos = qsTmp.indexOf(')', iPos);
+   }
+   else if (iButton == 31)      //in paren
    {
       if (iPos > 0)
       {
-         qsTmp.insert(iPos,bgOperators->button(iButton)->text());
-         iPos=qsTmp.indexOf(')',iPos);
+         qsTmp.insert(iPos, bgOperators->button(iButton)->text());
+         iPos = qsTmp.indexOf(')', iPos);
       }
       else
       {
          qsTmp.append("()");
-         iPos=strlen(qsTmp.toStdString().c_str())-1;
+         iPos = strlen(qsTmp.toStdString().c_str())-1;
       }
       
       setUnaryOps(true);
@@ -327,8 +331,8 @@ void frmBM::addOperator(int iButton)
 
       bgOperators->button(31)->setEnabled(false);
       bgOperators->button(32)->setEnabled(true);
-    }
-    else if (iButton == 32)      //out paren
+   }
+   else if (iButton == 32)      //out paren
    {
       setUnaryOps(false);
       setBinaryOps(true);
@@ -336,8 +340,9 @@ void frmBM::addOperator(int iButton)
       setProcess(true);
       setList(false);
       
-      iPos=qsTmp.indexOf(')',iPos+1);
-      if (iPos > 0) {
+      iPos = qsTmp.indexOf(')', iPos+1);
+      if (iPos > 0)
+      {
          bgOperators->button(31)->setEnabled(false);
          bgOperators->button(32)->setEnabled(true);
       }
@@ -346,21 +351,21 @@ void frmBM::addOperator(int iButton)
          bgOperators->button(31)->setEnabled(false);
          bgOperators->button(32)->setEnabled(false);
       }
-    }
-    
-    bFirst = false;
-    
-    setButtons(true);
-    setExpression(qsTmp);
+   }
+
+   bFirst = false;
+
+   setButtons(true);
+   setExpression(qsTmp);
 }
 
-void frmBM::undo()
+void FrmBM::undo()
 {
-    if (sLast.qsExpr == "")
+   if (sLast.qsExpr == "")
    {
       clear();
-    }
-    else
+   }
+   else
    {
       setUnaryOps(sLast.bUnaryOps);
       setBinaryOps(sLast.bBinaryOps);
@@ -370,77 +375,79 @@ void frmBM::undo()
       setProcess(sLast.bProcess);
       setList(sLast.bBands);
       btnUndo->setEnabled(false);
-    }
+   }
 }
 
-void frmBM::setUnaryOps(bool bVal)
+void FrmBM::setUnaryOps(bool bVal)
 {
-    int i;
-    
-    sLast.bUnaryOps=btnSin->isEnabled();
-    
-    for (i=6; i<=30; i++) {
-   bgOperators->button(i)->setEnabled(bVal);
-    }
+   int i;
+
+   sLast.bUnaryOps = btnSin->isEnabled();
+
+   for (i = 6; i <= 30; i++)
+   {
+      bgOperators->button(i)->setEnabled(bVal);
+   }
 }
 
-void frmBM::setBinaryOps(bool bVal)
+void FrmBM::setBinaryOps(bool bVal)
 {
-    int i;
-    
-    sLast.bBinaryOps=btnPlus->isEnabled();
-     
-    for (i=1; i<=5; i++) {
-   bgOperators->button(i)->setEnabled(bVal);
-    }
+   int i;
+
+   sLast.bBinaryOps = btnPlus->isEnabled();
+
+   for (i = 1; i <= 5; i++)
+   {
+      bgOperators->button(i)->setEnabled(bVal);
+   }
 }
 
-void frmBM::setNumbers(bool bVal)
+void FrmBM::setNumbers(bool bVal)
 {
-    sLast.bNumbers=btn1->isEnabled();
+   sLast.bNumbers = btn1->isEnabled();
 
-    QList<QAbstractButton*> numberButtons = bgNumbers->buttons();
-    for (int i = 0; i < numberButtons.count(); ++i)
-    {
-       QAbstractButton* pButton = numberButtons[i];
-       if (pButton != NULL)
-       {
-          pButton->setEnabled(bVal);
-       }
-    }
+   QList<QAbstractButton*> numberButtons = bgNumbers->buttons();
+   for (int i = 0; i < numberButtons.count(); ++i)
+   {
+      QAbstractButton* pButton = numberButtons[i];
+      if (pButton != NULL)
+      {
+         pButton->setEnabled(bVal);
+      }
+   }
 }
 
-void frmBM::setExpression(QString qsExpr)
+void FrmBM::setExpression(QString qsExpr)
 {
-    sLast.qsExpr=txtExpression->text();
+   sLast.qsExpr = txtExpression->text();
 
-    txtExpression->setText(qsExpr);
+   txtExpression->setText(qsExpr);
    adjustSize();
 }
 
-void frmBM::setButtons(bool bVal)
+void FrmBM::setButtons(bool bVal)
 {
-    sLast.bButtons=btnClear->isEnabled();
-    
-    btnClear->setEnabled(bVal);
-    btnUndo->setEnabled(bVal);
+   sLast.bButtons = btnClear->isEnabled();
+
+   btnClear->setEnabled(bVal);
+   btnUndo->setEnabled(bVal);
 }
 
-void frmBM::setProcess(bool bVal)
+void FrmBM::setProcess(bool bVal)
 {
-    sLast.bProcess=btnProcess->isEnabled();
-    
-    btnProcess->setEnabled(bVal);
+   sLast.bProcess = btnProcess->isEnabled();
+
+   btnProcess->setEnabled(bVal);
 }
 
-void frmBM::setList(bool bVal)
+void FrmBM::setList(bool bVal)
 {
-    sLast.bBands=lisBands->isEnabled();
-    
-    lisBands->setEnabled(bVal);
+   sLast.bBands = lisBands->isEnabled();
+
+   lisBands->setEnabled(bVal);
 }
 
-unsigned int frmBM::getLoadedBandNumber(unsigned int ulOrigBand) const
+unsigned int FrmBM::getLoadedBandNumber(unsigned int ulOrigBand) const
 {
    if (mpDescriptor != NULL)
    {
@@ -453,7 +460,7 @@ unsigned int frmBM::getLoadedBandNumber(unsigned int ulOrigBand) const
    return 0;
 }
 
-void frmBM::setCubeList(int iButton)
+void FrmBM::setCubeList(int iButton)
 {
    clear();
    mpBandsLabel->clear();
@@ -472,3 +479,5 @@ void frmBM::setCubeList(int iButton)
       cbResults->setEnabled(false);
    }
 }
+
+#endif

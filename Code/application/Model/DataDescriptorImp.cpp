@@ -25,8 +25,10 @@ DataDescriptorImp::DataDescriptorImp(const string& name, const string& type, Dat
    mpFileDescriptor(NULL)
 {
    // Attach to the metadata object, classification to notify when the metadata changes
-   mMetadata.attach(SIGNAL_NAME(Subject, Modified), Signal(dynamic_cast<Subject*>(this), SIGNAL_NAME(Subject, Modified)));
-   mClassification.attach(SIGNAL_NAME(Subject, Modified), Signal(dynamic_cast<Subject*>(this), SIGNAL_NAME(Subject, Modified)));
+   mMetadata.attach(SIGNAL_NAME(Subject, Modified), Signal(dynamic_cast<Subject*>(this),
+      SIGNAL_NAME(Subject, Modified)));
+   mClassification.attach(SIGNAL_NAME(Subject, Modified), Signal(dynamic_cast<Subject*>(this),
+      SIGNAL_NAME(Subject, Modified)));
 
    generateParentDesignator();
 }
@@ -40,8 +42,10 @@ DataDescriptorImp::DataDescriptorImp(const string& name, const string& type, con
    mpFileDescriptor(NULL)
 {
    // Attach to the metadata object, classification to notify when the metadata changes
-   mMetadata.attach(SIGNAL_NAME(Subject, Modified), Signal(dynamic_cast<Subject*>(this), SIGNAL_NAME(Subject, Modified)));
-   mClassification.attach(SIGNAL_NAME(Subject, Modified), Signal(dynamic_cast<Subject*>(this), SIGNAL_NAME(Subject, Modified)));
+   mMetadata.attach(SIGNAL_NAME(Subject, Modified), Signal(dynamic_cast<Subject*>(this),
+      SIGNAL_NAME(Subject, Modified)));
+   mClassification.attach(SIGNAL_NAME(Subject, Modified), Signal(dynamic_cast<Subject*>(this),
+      SIGNAL_NAME(Subject, Modified)));
 }
 
 DataDescriptorImp::~DataDescriptorImp()
@@ -411,8 +415,8 @@ bool DataDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version)
 
 const string& DataDescriptorImp::getObjectType() const
 {
-   static string type("DataDescriptorImp");
-   return type;
+   static string sType("DataDescriptorImp");
+   return sType;
 }
 
 bool DataDescriptorImp::isKindOf(const string& className) const
@@ -448,4 +452,14 @@ void DataDescriptorImp::generateParentDesignator()
       mParentDesignator = mpParent->getParentDesignator();
       mParentDesignator.push_back(mpParent->getName());
    }
+}
+
+void DataDescriptorImp::setImporterName(const string& name)
+{
+   mImporterName = name;
+}
+
+string DataDescriptorImp::getImporterName() const
+{
+   return mImporterName;
 }

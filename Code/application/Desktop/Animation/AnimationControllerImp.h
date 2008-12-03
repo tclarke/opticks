@@ -80,6 +80,7 @@ public slots:
    void play();
    void pause();
    void stop();
+   void changeDirection();
 
    void stepForward();
    void stepBackward();
@@ -135,6 +136,7 @@ private:
    QAction* mpPlayAction;
    QAction* mpPauseAction;
    QAction* mpStopAction;
+   QAction* mpChangeDirectionAction;
    QAction* mpStepBackwardAction;
    QAction* mpStepForwardAction;
    static std::list<AnimationControllerImp*> mRunningControllers;

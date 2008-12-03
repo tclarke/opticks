@@ -65,7 +65,7 @@ PropertiesAoiLayer::PropertiesAoiLayer() :
    mpPixelCount = new QLabel(pStatisticsWidget);
    mpObjectCount = new QLabel(pStatisticsWidget);
    LabeledSection* pStatisticsSection = new LabeledSection(pStatisticsWidget, "Statistics", this);
-   QVBoxLayout *pStatisticsLayout = new QVBoxLayout(pStatisticsWidget);
+   QVBoxLayout* pStatisticsLayout = new QVBoxLayout(pStatisticsWidget);
    pStatisticsLayout->setMargin(0);
    pStatisticsLayout->setSpacing(5);
    pStatisticsLayout->addWidget(mpPixelCount);
@@ -99,15 +99,16 @@ bool PropertiesAoiLayer::initialize(SessionItem* pSessionItem)
    mpShapeCheck->setChecked(mpAoiLayer->getShowLabels());
 
    // Statistics
-   size_t pixelCount = 0, objectCount = 0;
-   AoiElement *pElement = dynamic_cast<AoiElement*>(mpAoiLayer->getDataElement());
-   GraphicGroup *pGroup = NULL;
-   if(pElement != NULL)
+   size_t pixelCount = 0;
+   size_t objectCount = 0;
+   AoiElement* pElement = dynamic_cast<AoiElement*>(mpAoiLayer->getDataElement());
+   GraphicGroup* pGroup = NULL;
+   if (pElement != NULL)
    {
       pGroup = pElement->getGroup();
       pixelCount = pElement->getPixelCount();
    }
-   if(pGroup != NULL)
+   if (pGroup != NULL)
    {
       objectCount = pGroup->getObjects().size();
    }

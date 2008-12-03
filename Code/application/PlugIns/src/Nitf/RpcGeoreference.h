@@ -27,17 +27,17 @@ namespace Nitf
    class RpcGeoreference : public GeoreferenceShell
    {
    public:
-       RpcGeoreference();
-       ~RpcGeoreference();
+      RpcGeoreference();
+      ~RpcGeoreference();
 
-       bool execute(PlugInArgList* pInParam, PlugInArgList* pOutParam);
-       bool getInputSpecification(PlugInArgList*& pArgList);
-       bool getOutputSpecification(PlugInArgList*& pArgList);
+      bool execute(PlugInArgList* pInParam, PlugInArgList* pOutParam);
+      bool getInputSpecification(PlugInArgList*& pArgList);
+      bool getOutputSpecification(PlugInArgList*& pArgList);
 
       LocationType pixelToGeo(LocationType pixel) const;
       LocationType geoToPixel(LocationType geo) const;
       bool canHandleRasterElement(RasterElement* pRaster) const;
-      
+
       bool hasAbort();
 
       bool serialize(SessionItemSerializer &serializer) const;
@@ -48,9 +48,9 @@ namespace Nitf
    private:
       const DynamicObject* getRpcInstance(RasterElement *pRaster) const;
 
-      RasterElement *mpRaster;
+      RasterElement* mpRaster;
       mutable std::string mRpcVersion;
-      
+
       std::auto_ptr<Nitf::ChipConverter> mpChipConverter;
 
       ossimRpcModel mModel;

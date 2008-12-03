@@ -16,38 +16,7 @@
 using namespace std;
 
 PlugInArgListImp::PlugInArgListImp()
-{
-}
-
-PlugInArgListImp::PlugInArgListImp(const PlugInArgList& rhs)
-{
-   const PlugInArgList* listInterface = &rhs;
-   const PlugInArgListImp* list = reinterpret_cast<const PlugInArgListImp*>(listInterface);
-   PlugInArgImp *arg;
-   bool success;
-
-   for (int i=0; i<list->getCount(); i++) {
-      success = list->getArg( i, (PlugInArg*&)arg);
-      if (!success) break;
-      success = addArg(*arg);
-      if (!success) break;
-   }
-}
-
-PlugInArgListImp::PlugInArgListImp(const PlugInArgListImp& rhs)
-{
-    if (&rhs != this) {
-      PlugInArgImp *arg;
-      bool success;
-
-      for (int i=0; i<rhs.getCount(); i++) {
-         success = rhs.getArg( i, (PlugInArg*&)arg);
-         if (!success) break;
-         success = addArg(*arg);
-         if (!success) break;
-      }
-    }
-}
+{}
 
 /**
  *  Destructor for the Plug-In Argument List.
@@ -56,7 +25,7 @@ PlugInArgListImp::PlugInArgListImp(const PlugInArgListImp& rhs)
  */
 PlugInArgListImp::~PlugInArgListImp()
 {
-    emptyList();
+   emptyList();
 }
 
 /**
@@ -68,8 +37,8 @@ PlugInArgListImp::~PlugInArgListImp()
  */
 void PlugInArgListImp::emptyList()
 {
-    mArgList.clear();
-};
+   mArgList.clear();
+}
 
 /**
  *  Add a Plug-In Argument to the list.
@@ -84,19 +53,20 @@ void PlugInArgListImp::emptyList()
  *  @return  The method returns true if the Plug-In Argument was 
  *           successfully added to the list, otherwise returns false.
  */
-bool PlugInArgListImp::addArg( const PlugInArg& piArg )
+bool PlugInArgListImp::addArg(const PlugInArg& piArg)
 {
-    const PlugInArgImp* temp = reinterpret_cast<const PlugInArgImp*>(&piArg);
-    try
-    {
-        mArgList.push_back( (PlugInArgImp*) temp );
-    }
-    catch(...)
-    {
-        // An error occured, so return false
-        return false;
-    }
-    return true;
+   const PlugInArgImp* pTemp = static_cast<const PlugInArgImp*>(&piArg);
+   try
+   {
+      mArgList.push_back(const_cast<PlugInArgImp*>(pTemp));
+   }
+   catch (...)
+   {
+      // An error occured, so return false
+      return false;
+   }
+
+   return true;
 }
 
 /**
@@ -116,16 +86,16 @@ bool PlugInArgListImp::addArg( const PlugInArg& piArg )
  *  @return  The method returns true if the Plug-In Argument was 
  *           successfully found in the list, otherwise returns false.
  */
-bool PlugInArgListImp::getArg( const string& name, PlugInArg*& piArg ) const
+bool PlugInArgListImp::getArg(const string& name, PlugInArg*& piArg) const
 {
    piArg = NULL;
 
-   for (unsigned int i = 0; i < mArgList.size(); i++)
+   for (unsigned int i = 0; i < mArgList.size(); ++i)
    {
       string s1 = mArgList[i]->getName();
       if (s1 == name)
       {
-         piArg = (PlugInArg*) mArgList[i];
+         piArg = mArgList[i];
          return true;
       }
    }
@@ -156,15 +126,14 @@ bool PlugInArgListImp::getArg( const string& name, PlugInArg*& piArg ) const
  *  @return  The method returns true if the index was a valid index in 
  *           the list, otherwise returns false.
  */
-bool PlugInArgListImp::getArg( int argNumber, PlugInArg*& piArg ) const
+bool PlugInArgListImp::getArg(int argNumber, PlugInArg*& piArg) const
 {
    piArg = NULL;
 
-   int iArgs = 0;
-   iArgs = mArgList.size();
+   int iArgs = static_cast<int>(mArgList.size());
    if (argNumber < iArgs)
    {
-      piArg = (PlugInArg*) mArgList[argNumber];
+      piArg = mArgList[argNumber];
       return true;
    }
 
@@ -197,17 +166,24 @@ unsigned short PlugInArgListImp::getCount() const
  *  @return  The method returns true if all items in argList were 
  *           successfully added to this list, otherwise returns false.
  */
-bool PlugInArgListImp::catenateLists( const PlugInArgList& plugInArg )
+bool PlugInArgListImp::catenateLists(const PlugInArgList& plugInArg)
 {
-    PlugInArgImp *arg = NULL;
-    bool success;
+   PlugInArg* pArg = NULL;
+   bool success;
 
-    for (int i=0; i<plugInArg.getCount(); i++)
-    {
-        success = plugInArg.getArg( i, (PlugInArg*&)arg);
-        if (!success) return false;
-        success = addArg(*arg);
-        if (!success) return false;
-    }
-    return true;
+   for (int i = 0; i < static_cast<int>(plugInArg.getCount()); ++i)
+   {
+      success = plugInArg.getArg(i, pArg);
+      if (!success)
+      {
+         return false;
+      }
+
+      success = addArg(*pArg);
+      if (!success)
+      {
+         return false;
+      }
+   }
+   return true;
 }

@@ -33,8 +33,8 @@ SessionItemImp::SessionItemImp(const string& id) :
 
 SessionItemImp::SessionItemImp(const string& id, const string& name) :
    mId(id),
-   mName(name),
    mpIcon(new QIcon()),
+   mName(name),
    mFilenameDisplay(true),
    mIdLocked(false)
 {
@@ -123,7 +123,8 @@ vector<string> SessionItemImp::getPropertiesPages() const
    return mPropertiesPages;
 }
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : These should eventually be pure virtual, once all of the implementations are written (TJOHNSON)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : These should eventually be pure virtual, " \
+   "once all of the implementations are written (TJOHNSON)")
 bool SessionItemImp::serialize(SessionItemSerializer &serializer) const
 {
    return false;
@@ -149,7 +150,7 @@ bool SessionItemImp::fromXml(DOMNode* pDocument, unsigned int version)
    {
       return false;
    }
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
+   DOMElement* pElem = static_cast<DOMElement*>(pDocument);
    setName(A(pElem->getAttribute(X("name"))));
    setDisplayName(A(pElem->getAttribute(X("displayName"))));
    setDisplayText(A(pElem->getAttribute(X("displayText"))));

@@ -106,18 +106,18 @@ bool Nitf::TrePlugInResource::writeTag(const DynamicObject &input, const ossim_u
    string tagName = getArgs().mPlugInName;
 
    // Check the list of excluded TREs to ensure that the config setting takes precedence over any existing plugins.
-   const vector<string> &excluded = getSettingExcludedTres();
+   const vector<string>& excluded = getSettingExcludedTres();
    if (find(excluded.begin(), excluded.end(), tagName) != excluded.end())
    {
       return true;
    }
 
-   ossimNitfTagFactoryRegistry *pRegistry = ossimNitfTagFactoryRegistry::instance();
+   ossimNitfTagFactoryRegistry* pRegistry = ossimNitfTagFactoryRegistry::instance();
    ossimRefPtr<ossimNitfRegisteredTag> pTag = pRegistry->create(tagName);
    VERIFY(pTag != NULL);
 
    const TreParser* pParser = dynamic_cast<const TreParser*>(get());
-   ossimNitfUnknownTag *pUnknown = NULL;
+   ossimNitfUnknownTag* pUnknown = NULL;
    if (pTag->canCastTo("ossimNitfUnknownTag"))
    {
       pUnknown = PTR_CAST(ossimNitfUnknownTag, pTag.get());
@@ -138,7 +138,7 @@ bool Nitf::TrePlugInResource::writeTag(const DynamicObject &input, const ossim_u
       else
       {
          PlugInResource pUnknownPlugin(UnknownTreParser::PLUGIN_NAME);
-         const TreParser *pUnknownParser = dynamic_cast<const TreParser*>(pUnknownPlugin.get());
+         const TreParser* pUnknownParser = dynamic_cast<const TreParser*>(pUnknownPlugin.get());
          VERIFY(pUnknownParser != NULL);
          success = pUnknownParser->fromDynamicObject(input, strm, numBytesWritten, errorMessage);
       }
@@ -166,7 +166,7 @@ bool Nitf::TrePlugInResource::writeTag(const DynamicObject &input, const ossim_u
 bool Nitf::TrePlugInResource::exportMetadata(const RasterDataDescriptor &descriptor, 
    const RasterFileDescriptor &exportDescriptor, ossimNitfWriter &writer, string &errorMessage) const
 {
-   const TreParser *pParser = dynamic_cast<const TreParser*>(get());
+   const TreParser* pParser = dynamic_cast<const TreParser*>(get());
    VERIFY(pParser != NULL);
 
    string treErrorMessage;
@@ -223,8 +223,8 @@ namespace
          mStr = mStream.str();
       }
    private:
-      string &mStr;
-      ostringstream &mStream;
+      string& mStr;
+      ostringstream& mStream;
    };
 }
 
@@ -232,11 +232,12 @@ bool Nitf::importMetadata(const unsigned int& currentImage, const Nitf::OssimFil
    const ossimNitfFileHeaderV2_X* pFileHeader, const ossimNitfImageHeaderV2_X* pImageSubheader,
    RasterDataDescriptor *pDescriptor, string &errorMessage)
 {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Separate the file header parsing from the subheader parsing (dadkins)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Separate the file header parsing " \
+   "from the subheader parsing (dadkins)")
 
    VERIFY(pFileHeader != NULL && pImageSubheader != NULL && pDescriptor != NULL);
 
-   DynamicObject *pMetadata = pDescriptor->getMetadata();
+   DynamicObject* pMetadata = pDescriptor->getMetadata();
    VERIFY(pMetadata != NULL);
 
    ostringstream errorStream;
@@ -274,7 +275,8 @@ bool Nitf::importMetadata(const unsigned int& currentImage, const Nitf::OssimFil
    }
 
    // Now do the TREs
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Combine the TRE Information and TRE fields when not in binary lockdown (dadkins)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Combine the TRE Information and TRE fields " \
+   "when not in binary lockdown (dadkins)")
    FactoryResource<DynamicObject> pTres;
    FactoryResource<DynamicObject> pTreInfo;
 
@@ -333,13 +335,14 @@ bool Nitf::importMetadata(const unsigned int& currentImage, const Nitf::OssimFil
    // trust the ICHIPB more than the other tags; only create an ICHIPB if none exist
    if (pTres->getAttribute("STDIDB").isValid() == true && pTres->getAttribute("ICHIPB").isValid() == false)
    {
-      int x_pixel_block_size = pImageSubheader->getNumberOfPixelsPerBlockHoriz(),
-          y_pixel_block_size = pImageSubheader->getNumberOfPixelsPerBlockVert();
+      int x_pixel_block_size = pImageSubheader->getNumberOfPixelsPerBlockHoriz();
+      int y_pixel_block_size = pImageSubheader->getNumberOfPixelsPerBlockVert();
 
-      unsigned int imgRows = pImageSubheader->getNumberOfRows(),
-                   imgCols = pImageSubheader->getNumberOfCols();
-      
-      int blockRow = 1, blockCol = 1;
+      unsigned int imgRows = pImageSubheader->getNumberOfRows();
+      unsigned int imgCols = pImageSubheader->getNumberOfCols();
+
+      int blockRow = 1;
+      int blockCol = 1;
       //the ftitle we only need a small portion of, we can extract
       //the displayed blocks included in this image from a properly
       //named ftitle.  
@@ -377,14 +380,18 @@ bool Nitf::importMetadata(const unsigned int& currentImage, const Nitf::OssimFil
       --blockCol;
 
       // compute the start coordinates of the scene using original numbers to produce FI_X, FI_Y numbers
-      double startRow = 0.5 + y_pixel_block_size * blockRow, startCol = 0.5 + x_pixel_block_size * blockCol;
+      double startRow = 0.5 + y_pixel_block_size * blockRow;
+      double startCol = 0.5 + x_pixel_block_size * blockCol;
 
       LocationType fi_11(startCol, startRow);
       LocationType fi_12(startCol + imgCols-1, startRow);
       LocationType fi_21(startCol, startRow + imgRows-1);
       LocationType fi_22(startCol + imgCols-1, startRow + imgRows-1);
 
-      LocationType op_11, op_12, op_21, op_22;
+      LocationType op_11;
+      LocationType op_12;
+      LocationType op_21;
+      LocationType op_22;
       op_11.mX = fi_11.mX - blockCol*x_pixel_block_size;
       op_11.mY = fi_11.mY - blockRow*y_pixel_block_size;
       op_12.mX = fi_12.mX - blockCol*x_pixel_block_size;
@@ -493,7 +500,7 @@ bool Nitf::exportMetadata(const RasterDataDescriptor *pDescriptor,
 {
    VERIFY(pDescriptor != NULL && pExportDescriptor != NULL && pNitf != NULL);
 
-   const DynamicObject *pMetadata = pDescriptor->getMetadata();
+   const DynamicObject* pMetadata = pDescriptor->getMetadata();
    VERIFY(pMetadata != NULL);
 
    ossimRefPtr<ossimProperty> pFileProp = pNitf->getProperty("file_header");
@@ -507,7 +514,7 @@ bool Nitf::exportMetadata(const RasterDataDescriptor *pDescriptor,
    pNitf->setProperty(pFileProp.get());
 
    string pDesPath[] = { NITF_METADATA, DES_METADATA, END_METADATA_NAME };
-   const DynamicObject *pDesMetadata = pMetadata->getAttributeByPath(pDesPath).getPointerToValue<DynamicObject>();
+   const DynamicObject* pDesMetadata = pMetadata->getAttributeByPath(pDesPath).getPointerToValue<DynamicObject>();
    if (pDesMetadata != NULL)
    {
       unsigned int numDes = pDesMetadata->getNumAttributes();
@@ -570,10 +577,10 @@ bool Nitf::exportMetadata(const RasterDataDescriptor *pDescriptor,
    }
 
    string pTrePath[] = { NITF_METADATA, TRE_METADATA, END_METADATA_NAME };
-   const DynamicObject *pTres = pMetadata->getAttributeByPath(pTrePath).getPointerToValue<DynamicObject>();
+   const DynamicObject* pTres = pMetadata->getAttributeByPath(pTrePath).getPointerToValue<DynamicObject>();
 
    string pTreInfoPath[] = { NITF_METADATA, TRE_INFO_METADATA, END_METADATA_NAME };
-   const DynamicObject *pTreInfos = pMetadata->getAttributeByPath(pTreInfoPath).getPointerToValue<DynamicObject>();
+   const DynamicObject* pTreInfos = pMetadata->getAttributeByPath(pTreInfoPath).getPointerToValue<DynamicObject>();
    if (pTres != NULL && pTreInfos != NULL)
    {
       vector<string> names;
@@ -585,13 +592,13 @@ bool Nitf::exportMetadata(const RasterDataDescriptor *pDescriptor,
          {
             continue;
          }
-         const DynamicObject *pTreInstances = pTres->getAttribute(*nameIter).getPointerToValue<DynamicObject>();
+         const DynamicObject* pTreInstances = pTres->getAttribute(*nameIter).getPointerToValue<DynamicObject>();
          if (!NN(pTreInstances))
          {
             continue;
          }
 
-         const DynamicObject *pTreInfoInstances = pTreInfos->getAttribute(*nameIter).getPointerToValue<DynamicObject>();
+         const DynamicObject* pTreInfoInstances = pTreInfos->getAttribute(*nameIter).getPointerToValue<DynamicObject>();
          if (!NN(pTreInfoInstances))
          {
             continue;
@@ -604,14 +611,13 @@ bool Nitf::exportMetadata(const RasterDataDescriptor *pDescriptor,
          for (vector<string>::const_iterator instanceIter = treInstanceNames.begin();
             instanceIter != treInstanceNames.end(); ++instanceIter)
          {
-            const DynamicObject *pTre = pTreInstances->getAttribute(
-               *instanceIter).getPointerToValue<DynamicObject>();
+            const DynamicObject* pTre = pTreInstances->getAttribute(*instanceIter).getPointerToValue<DynamicObject>();
             if (!NN(pTre))
             {
                continue;
             }
 
-            const DynamicObject *pTreInfo = pTreInfoInstances->getAttribute(
+            const DynamicObject* pTreInfo = pTreInfoInstances->getAttribute(
                *instanceIter).getPointerToValue<DynamicObject>();
             if (!NN(pTreInfo))
             {

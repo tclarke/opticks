@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef __SUBJECTIMP_H
-#define __SUBJECTIMP_H
+#ifndef SUBJECTIMP_H
+#define SUBJECTIMP_H
 
 #include "SafeSlot.h"
 #include "TypesFile.h"
@@ -70,10 +68,10 @@ public:
    const std::list<SafeSlot>& getSlots(const std::string &signal);
 
 protected:
-   void notify(const std::string &signal, const boost::any &data=boost::any());
+   void notify(const std::string& signal, const boost::any& data = boost::any());
 
 private:
-   SubjectImpPrivate *mpImpPrivate;
+   SubjectImpPrivate* mpImpPrivate;
 };
 
 #define SUBJECTADAPTEREXTENSION_CLASSES
@@ -88,4 +86,4 @@ private:
       return impClass::detach(signal, slot); \
    }
 
-#endif   // __SUBJECTIMP_H
+#endif

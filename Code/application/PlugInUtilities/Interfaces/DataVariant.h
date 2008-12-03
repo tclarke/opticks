@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef DATA_VARIANT_H
-#define DATA_VARIANT_H
+#ifndef DATAVARIANT_H
+#define DATAVARIANT_H
 
 #include <string>
 #include <typeinfo>
@@ -540,7 +540,7 @@ private:
  *     pFilename2 = &dv_cast<Filename>(variant);
  *     pDateTime = &dv_cast<DateTime>(variant); // will throw
  *  }
- *  catch(std::bad_cast &e)
+ *  catch (std::bad_cast &e)
  *  {
  *  }
  *  // j == 5 at this point
@@ -588,7 +588,7 @@ const T &dv_cast(const DataVariant &variant)
  *     pFilename2 = &dv_cast<Filename>(variant);
  *     pDateTime = &dv_cast<DateTime>(variant); // will throw
  *  }
- *  catch(std::bad_cast &e)
+ *  catch (std::bad_cast &e)
  *  {
  *  }
  *  // j == 5 at this point
@@ -656,7 +656,8 @@ T dv_cast_with_verification(const DataVariant &variant, const T& defaultValue)
    bool success = variant.getValue(retValue);
    if (!success)
    {
-      VERIFYNR_MSG(false, std::string("Invalid dv_cast when provided variant is of type " + variant.getTypeName()).c_str());
+      VERIFYNR_MSG(false, std::string("Invalid dv_cast when provided variant is of type " +
+         variant.getTypeName()).c_str());
    }
    return retValue;
 }

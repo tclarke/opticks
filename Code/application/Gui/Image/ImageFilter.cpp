@@ -30,10 +30,20 @@ ImageFilter::ImageFilter(ImageFilterDescriptor *pDescriptor) :
    mpInputColorBuffer(NULL),
    mpResultsBuffer(NULL),
    mpDescriptor(pDescriptor),
-   mFreezeFlag(false)
+   mFreezeFlag(false),
+   mRunBackwards(true)
 {
    // check for valid image filter descriptor
    REQUIRE(mpDescriptor != NULL);
+
+   if (getFilterType() == ImageFilterDescriptor::FEEDBACK_FILTER)
+   {
+      ImageFilterDescriptorExt1 *pDescriptorExt = dynamic_cast<ImageFilterDescriptorExt1*>(pDescriptor);
+      if (pDescriptorExt != NULL)
+      {
+         mRunBackwards = dv_cast<bool>(pDescriptorExt->getParameter("runBackwards"), mRunBackwards);
+      }
+   }
 
    // get GPU program descriptors
    const vector<GpuProgramDescriptor*>& gpuProgramDescriptors = mpDescriptor->getGpuPrograms();
@@ -46,12 +56,12 @@ ImageFilter::ImageFilter(ImageFilterDescriptor *pDescriptor) :
       try
       {
          GpuProgram* pGpuProgram = new GpuProgram(*iter);
-         if(pGpuProgram != NULL)
+         if (pGpuProgram != NULL)
          {
             mGpuPrograms.push_back(pGpuProgram);
          }
       }
-      catch(AssertException& assertException)
+      catch (AssertException& assertException)
       {
          string assertMessage = assertException.getText();
          MessageResource msg(assertMessage, "app", "FED1A354-7CB4-4C61-848C-5F576ACC7034");
@@ -65,13 +75,15 @@ ImageFilter::ImageFilter(ImageFilterDescriptor *pDescriptor) :
 ImageFilter::~ImageFilter()
 {
    // delete gpu programs
-   for(vector<GpuProgram*>::iterator gpuProgram = mGpuPrograms.begin(); gpuProgram != mGpuPrograms.end(); ++gpuProgram)
+   for (vector<GpuProgram*>::iterator gpuProgram = mGpuPrograms.begin(); gpuProgram != mGpuPrograms.end(); ++gpuProgram)
    {
       delete *gpuProgram;
    }
    
    // delete color buffers
-   for(vector<ImageBuffer*>::iterator imageBuffer = mImageBuffers.begin(); imageBuffer != mImageBuffers.end(); ++imageBuffer)
+   for (vector<ImageBuffer*>::iterator imageBuffer = mImageBuffers.begin();
+      imageBuffer != mImageBuffers.end();
+      ++imageBuffer)
    {
       delete *imageBuffer;
    }
@@ -85,7 +97,7 @@ ImageFilterDescriptor::ImageProcessType ImageFilter::getFilterType() const
 bool ImageFilter::setImage(ColorBuffer *pInputColorBuffer)
 {
    bool success = true;
-   if(mpInputColorBuffer != pInputColorBuffer)
+   if (mpInputColorBuffer != pInputColorBuffer)
    {
       // set the input image texture id
       mpInputColorBuffer = pInputColorBuffer;
@@ -98,21 +110,23 @@ bool ImageFilter::setImage(ColorBuffer *pInputColorBuffer)
 
 ColorBuffer *ImageFilter::applyFilter()
 {
-   ImageBuffer *pImageBuffer = NULL;
+   ImageBuffer* pImageBuffer = NULL;
    if (mBuffers.empty() == false)
    {
       size_t colorBufferPos = 0;
 
-      for(vector<GpuProgram*>::iterator gpuProgramIter = mGpuPrograms.begin();
+      for (vector<GpuProgram*>::iterator gpuProgramIter = mGpuPrograms.begin();
           gpuProgramIter != mGpuPrograms.end(); ++gpuProgramIter)
       {
-         ColorBuffer *pRenderBuffer = mBuffers[colorBufferPos];
-         if(!mFreezeFlag || (pRenderBuffer != mBuffers.back()))
+         ColorBuffer* pRenderBuffer = mBuffers[colorBufferPos];
+         if (!mFreezeFlag || 
+            (mRunBackwards && (pRenderBuffer == mBuffers.front())) ||
+            (!mRunBackwards && (pRenderBuffer == mBuffers.back())))
          {
             try
             {
                pImageBuffer = getImageBuffer(pRenderBuffer);
-               if(pImageBuffer == NULL)
+               if (pImageBuffer == NULL)
                {
                   return NULL;
                }
@@ -160,13 +174,13 @@ ColorBuffer *ImageFilter::applyFilter()
                // disable and unbind GPU program
                (*gpuProgramIter)->disable();
             }
-            catch(AssertException& assertException)
+            catch (AssertException& assertException)
             {
                MessageResource msg(assertException.getText(), "app", "522B8F56-5D4F-4ECF-90FF-E04582FC1989");
             }
          }
          ++colorBufferPos;
-         if(colorBufferPos == mBuffers.size())
+         if (colorBufferPos == mBuffers.size())
          {
             colorBufferPos = 0;
          }
@@ -174,7 +188,7 @@ ColorBuffer *ImageFilter::applyFilter()
    }
 
    // switch back to main color buffer
-   if(pImageBuffer != NULL)
+   if (pImageBuffer != NULL)
    {
       pImageBuffer->drawToBuffer(NULL);
    }
@@ -187,15 +201,42 @@ void ImageFilter::resetBuffer()
 {
    // first color buffer in vector is always the buffer
    // with the filter results
-   if(mBuffers.size() >= 2)
+   if (mBuffers.size() >= 2)
    {
-      mBuffers.back()->clear();
+      if (mRunBackwards)
+      {
+         mBuffers.back()->clear();
+      }
+      else
+      {
+         mBuffers.front()->clear();
+      }
    }
 }
 
 void ImageFilter::freezeBuffer(bool toggle)
 {
    mFreezeFlag = toggle;
+}
+
+bool ImageFilter::isBufferFrozen() const
+{
+   return mFreezeFlag;
+}
+
+bool ImageFilter::isInitialized()
+{
+   return (mBuffers.empty() != true);
+}
+
+ImageFilterDescriptor* ImageFilter::getImageFilterDescriptor()
+{
+   return mpDescriptor;
+}
+
+ColorBuffer* ImageFilter::getResultsBuffer()
+{
+   return mpResultsBuffer;
 }
 
 void ImageFilter::render(unsigned int width, unsigned int height)
@@ -217,6 +258,16 @@ void ImageFilter::render(unsigned int width, unsigned int height)
    glEnd();
 }
 
+vector<GpuProgram*>& ImageFilter::getGpuPrograms()
+{
+   return mGpuPrograms;
+}
+
+vector<ImageBuffer*>& ImageFilter::getImageBuffers()
+{
+   return mImageBuffers;
+}
+
 ColorBuffer *ImageFilter::copyColorBuffer(ColorBuffer *pColorBuffer)
 {
    if (pColorBuffer == NULL)
@@ -236,28 +287,28 @@ ColorBuffer *ImageFilter::copyColorBuffer(ColorBuffer *pColorBuffer)
    unsigned int numChannels = ImageUtilities::getNumColorChannels(textureFormat);
 
    GLint internalFormat = GL_FLOAT_R32_NV;
-   if(numChannels == 2)
+   if (numChannels == 2)
    {
       internalFormat = GL_FLOAT_RG32_NV;
    }
-   else if(numChannels == 3)
+   else if (numChannels == 3)
    {
       internalFormat = GL_FLOAT_RGB32_NV;
    }
-   else if(numChannels == 4)
+   else if (numChannels == 4)
    {
       internalFormat = GL_FLOAT_RGBA32_NV;
    }
 
-   ColorBuffer *pNewColorBuffer = NULL;
-   if(glewGetExtension("GL_EXT_framebuffer_object"))
+   ColorBuffer* pNewColorBuffer = NULL;
+   if (glewGetExtension("GL_EXT_framebuffer_object"))
    {
       // allocate color buffer
       pNewColorBuffer = new ColorBuffer(textureTarget, internalFormat, width, height, 
                                             textureFormat, dataType, alpha);
    }
 #ifdef WIN_API
-   else if(wglewGetExtension("WGL_ARB_pixel_format") && wglewGetExtension("WGL_ARB_pbuffer") &&
+   else if (wglewGetExtension("WGL_ARB_pixel_format") && wglewGetExtension("WGL_ARB_pbuffer") &&
            wglewGetExtension("WGL_ARB_render_texture") && glewGetExtension("GL_NV_float_buffer"))
    {
       // allocate color buffer
@@ -265,7 +316,7 @@ ColorBuffer *ImageFilter::copyColorBuffer(ColorBuffer *pColorBuffer)
    }
 #endif
 
-   if(pNewColorBuffer != NULL)
+   if (pNewColorBuffer != NULL)
    {
       // clear color buffer by setting values to zero
       pNewColorBuffer->clear();
@@ -274,16 +325,16 @@ ColorBuffer *ImageFilter::copyColorBuffer(ColorBuffer *pColorBuffer)
    return pNewColorBuffer;
 }
 
-bool ImageFilter::populateTextureParameters(ColorBuffer *pInputColorBuffer)
+bool ImageFilter::populateTextureParameters(ColorBuffer* pInputColorBuffer)
 {
-   if(pInputColorBuffer == NULL)
+   if (pInputColorBuffer == NULL)
    {
       return false;
    }
 
 #if defined(CG_SUPPORTED)
-   CgContext *pCgContext = CgContext::instance();
-   if(pCgContext == NULL)
+   CgContext* pCgContext = CgContext::instance();
+   if (pCgContext == NULL)
    {
       return false;
    }
@@ -294,14 +345,13 @@ bool ImageFilter::populateTextureParameters(ColorBuffer *pInputColorBuffer)
    vector<GpuProgram*>::iterator gpuProgramIter = mGpuPrograms.begin();
    map<string, ColorBuffer*> colorBuffers;
 
-
    // put the input image parameter value into the GPU program descriptor parameter lists
-   while(gpuProgramIter != mGpuPrograms.end())
+   while (gpuProgramIter != mGpuPrograms.end())
    {
       GpuProgramDescriptor& gpuProgramDescriptor((*gpuProgramIter)->getGpuProgramDescriptor());
 
-      const DynamicObject *pParameters = gpuProgramDescriptor.getParameters();
-      if(pParameters == NULL)
+      const DynamicObject* pParameters = gpuProgramDescriptor.getParameters();
+      if (pParameters == NULL)
       {
          return false;
       }
@@ -312,25 +362,24 @@ bool ImageFilter::populateTextureParameters(ColorBuffer *pInputColorBuffer)
       vector<CGparameter> programParameters = 
          pCgContext->getParameters((*gpuProgramIter)->getProgramId());
       vector<CGparameter>::const_iterator progParameterIter = programParameters.begin();
-      while(progParameterIter != programParameters.end())
+      while (progParameterIter != programParameters.end())
       {
          parameterName = cgGetParameterName(*progParameterIter);
          parameterValue = pParameters->getAttribute(parameterName);
-         if(parameterValue.isValid())
+         if (parameterValue.isValid())
          {
             // get the type of the parameter
             CGtype cgParameterType = cgGetParameterNamedType(*progParameterIter);
-            if(cgParameterType == CG_SAMPLERRECT)
+            if (cgParameterType == CG_SAMPLERRECT)
             {
                // check to see if color buffer was already created
-               map<string, ColorBuffer*>::const_iterator colorBufferIter = 
-                  colorBuffers.find(parameterName);
-               if(colorBufferIter == colorBuffers.end())
+               map<string, ColorBuffer*>::const_iterator colorBufferIter = colorBuffers.find(parameterName);
+               if (colorBufferIter == colorBuffers.end())
                {
-                  if(colorBuffers.empty())
+                  if (colorBuffers.empty())
                   {
                      DataVariant value(pInputColorBuffer->getTextureObjectId());
-                     if(value.isValid())
+                     if (value.isValid())
                      {
                         gpuProgramDescriptor.setParameter(parameterName, value);
                      }
@@ -340,14 +389,14 @@ bool ImageFilter::populateTextureParameters(ColorBuffer *pInputColorBuffer)
                   }
                   else
                   {
-                     ColorBuffer *pColorBuffer = copyColorBuffer(pInputColorBuffer);
-                     if(pColorBuffer == NULL)
+                     ColorBuffer* pColorBuffer = copyColorBuffer(pInputColorBuffer);
+                     if (pColorBuffer == NULL)
                      {
                         return false;
                      }
 
                      success = attachToImageBuffer(pColorBuffer);
-                     if(success == false)
+                     if (success == false)
                      {
                         delete pColorBuffer;
                         pColorBuffer = NULL;
@@ -355,7 +404,7 @@ bool ImageFilter::populateTextureParameters(ColorBuffer *pInputColorBuffer)
                      }
 
                      DataVariant value(pColorBuffer->getTextureObjectId());
-                     if(value.isValid())
+                     if (value.isValid())
                      {
                         gpuProgramDescriptor.setParameter(parameterName, value);
                      }
@@ -368,7 +417,7 @@ bool ImageFilter::populateTextureParameters(ColorBuffer *pInputColorBuffer)
                else
                {
                   DataVariant value(colorBufferIter->second->getTextureObjectId());
-                  if(value.isValid())
+                  if (value.isValid())
                   {
                      gpuProgramDescriptor.setParameter(parameterName, value);
                   }
@@ -381,21 +430,21 @@ bool ImageFilter::populateTextureParameters(ColorBuffer *pInputColorBuffer)
 #endif
       ++gpuProgramIter;
    }
-      
+
    // get the number of off-screen color buffers
    // NOTE: There is one input color buffer.
    size_t numColorBuffers = colorBuffers.size() - 1;
-   if(numColorBuffers < mGpuPrograms.size())
+   if (numColorBuffers < mGpuPrograms.size())
    {
       // set which color buffer to render to first
-      ColorBuffer *pColorBuffer = copyColorBuffer(pInputColorBuffer);
-      if(pColorBuffer == NULL)
+      ColorBuffer* pColorBuffer = copyColorBuffer(pInputColorBuffer);
+      if (pColorBuffer == NULL)
       {
          return false;
       }
 
       success = attachToImageBuffer(pColorBuffer);
-      if(success)
+      if (success)
       {
          string resultsBufferName = "resultsBuffer";
          colorBuffers.insert(pair<const string, ColorBuffer*>(resultsBufferName, pColorBuffer));
@@ -411,19 +460,19 @@ bool ImageFilter::populateTextureParameters(ColorBuffer *pInputColorBuffer)
    }
    
    // check the color buffers vector
-   if(colorBuffers.empty())
+   if (colorBuffers.empty())
    {
       return false;
    }
 
    gpuProgramIter = mGpuPrograms.begin();
-   while(gpuProgramIter != mGpuPrograms.end())
+   while (gpuProgramIter != mGpuPrograms.end())
    {
       (*gpuProgramIter)->setColorBuffers(colorBuffers);
       ++gpuProgramIter;
    }
 
-   if(getFilterType() == ImageFilterDescriptor::FEEDBACK_FILTER)
+   if (getFilterType() == ImageFilterDescriptor::FEEDBACK_FILTER && mRunBackwards == true)
    {
       reverse(mBuffers.begin(), mBuffers.end());
 
@@ -442,26 +491,28 @@ bool ImageFilter::attachToImageBuffer(ColorBuffer *pColorBuffer)
    bool success = false;
 
    // try to attach the new color buffer to one of the image buffers in the vector
-   for(vector<ImageBuffer*>::iterator imageBufferIter = mImageBuffers.begin(); imageBufferIter != mImageBuffers.end() && !success;
-         ++imageBufferIter)
+   for (vector<ImageBuffer*>::iterator imageBufferIter = mImageBuffers.begin();
+      imageBufferIter != mImageBuffers.end() && !success;
+      ++imageBufferIter)
    {
       success = (*imageBufferIter)->attachBuffer(pColorBuffer);
    }
 
    // need to get another image buffer
-   if(!success)
+   if (!success)
    {
       // get an image buffer with available color buffer attachment 
       // points from GPU resources
       try
       {
-         ImageBuffer *pImageBuffer = Service<GpuResourceManager>()->allocateImageBuffer();
-         if(pImageBuffer == NULL)
+         ImageBuffer* pImageBuffer = Service<GpuResourceManager>()->allocateImageBuffer();
+         if (pImageBuffer == NULL)
          {
             return false;
          }
 
-         if(success = pImageBuffer->attachBuffer(pColorBuffer))
+         success = pImageBuffer->attachBuffer(pColorBuffer);
+         if (success)
          {
             mImageBuffers.push_back(pImageBuffer);
          }
@@ -470,7 +521,7 @@ bool ImageFilter::attachToImageBuffer(ColorBuffer *pColorBuffer)
             delete pImageBuffer;
          }
       }
-      catch(AssertException& assertException)
+      catch (AssertException& assertException)
       {
          string assertMessage = assertException.getText();
          MessageResource msg(assertMessage, "app", "2D08BEF0-9F7E-4C13-B3FD-012DC8B3070E");
@@ -483,9 +534,9 @@ bool ImageFilter::attachToImageBuffer(ColorBuffer *pColorBuffer)
 ImageBuffer* ImageFilter::getImageBuffer(ColorBuffer *pColorBuffer)
 {
    vector<ImageBuffer*>::iterator imageBufferIter = mImageBuffers.begin();
-   while(imageBufferIter != mImageBuffers.end())
+   while (imageBufferIter != mImageBuffers.end())
    {
-      if((*imageBufferIter)->isBufferAttached(pColorBuffer))
+      if ((*imageBufferIter)->isBufferAttached(pColorBuffer))
       {
          return *imageBufferIter;
       }

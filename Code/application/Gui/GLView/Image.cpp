@@ -32,30 +32,24 @@ vector<ColorType> Image::sDefaultColorMap;
 unsigned int Image::TileSet::sNextId = 0;
 
 Image::Image() :
-mpTiles(NULL),
-mAlpha(255),
-mInfo(0, DimensionDescriptor(), DimensionDescriptor(), DimensionDescriptor(), LINEAR, std::vector<double>(), std::vector<double>(), std::vector<double>(), sDefaultColorMap, COMPLEX_MAGNITUDE, GL_LUMINANCE, NULL, NULL, NULL)
-{
-   mNumTilesX = 0;
-   mNumTilesY = 0;
-   mInfo.mTileSizeX = 0;
-   mInfo.mTileSizeY = 0;
-   mInfo.mImageSizeX = 0;
-   mInfo.mImageSizeY = 0;
-   mInfo.mpExponentialMultipliers = NULL;
-   mInfo.mpLogarithmicMultipliers = NULL;
-   mInfo.mpEqualizationValues[0] = NULL;
-   mInfo.mpEqualizationValues[1] = NULL;
-   mInfo.mpEqualizationValues[2] = NULL;
-}
+   mInfo(0, DimensionDescriptor(), DimensionDescriptor(), DimensionDescriptor(), LINEAR, std::vector<double>(),
+      std::vector<double>(), std::vector<double>(), sDefaultColorMap, COMPLEX_MAGNITUDE, GL_LUMINANCE, NULL,
+      NULL, NULL),
+   mNumTilesX(0),
+   mNumTilesY(0),
+   mpTiles(NULL),
+   mAlpha(255)
+{}
 
 // Grayscale
-void Image::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsigned int imageSizeX, unsigned int imageSizeY,
-             unsigned int channels, GLenum format, EncodingType type, void *data, StretchType stretchType,
-             vector<double>& stretchPoints, RasterElement *pRasterElement, const std::vector<int> &badValues)
+void Image::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsigned int imageSizeX,
+                       unsigned int imageSizeY, unsigned int channels, GLenum format, EncodingType type, void* data,
+                       StretchType stretchType, vector<double>& stretchPoints, RasterElement* pRasterElement,
+                       const vector<int>& badValues)
 {
-   mInfo = ImageData(channels, channel, DimensionDescriptor(), DimensionDescriptor(), stretchType, stretchPoints, std::vector<double>(), std::vector<double>(), 
-      sDefaultColorMap, COMPLEX_MAGNITUDE, GL_LUMINANCE, pRasterElement, pRasterElement, pRasterElement, badValues);
+   mInfo = ImageData(channels, channel, DimensionDescriptor(), DimensionDescriptor(), stretchType, stretchPoints,
+      std::vector<double>(), std::vector<double>(), sDefaultColorMap, COMPLEX_MAGNITUDE, GL_LUMINANCE,
+      pRasterElement, pRasterElement, pRasterElement, badValues);
    mInfo.mTileSizeX = sizeX;
    mInfo.mTileSizeY = sizeY;
    mInfo.mImageSizeX = imageSizeX;
@@ -67,17 +61,17 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsign
    mInfo.mRawType[2] = type;
    mInfo.mFormat = format;
    mInfo.mpData = data;
-   if(mInfo.mpExponentialMultipliers != NULL)
+   if (mInfo.mpExponentialMultipliers != NULL)
    {
       delete mInfo.mpExponentialMultipliers;
       mInfo.mpExponentialMultipliers = NULL;
    }
-   if(mInfo.mpLogarithmicMultipliers != NULL)
+   if (mInfo.mpLogarithmicMultipliers != NULL)
    {
       delete mInfo.mpLogarithmicMultipliers;
       mInfo.mpLogarithmicMultipliers = NULL;
    }
-   for (int i=0; i<3; ++i)
+   for (int i = 0; i < 3; ++i)
    {
       if (mInfo.mpEqualizationValues[i] != NULL)
       {
@@ -90,13 +84,14 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsign
    createTiles();
 }
 
-void Image::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsigned int imageSizeX, unsigned int imageSizeY,
-             unsigned int channels, GLenum format, EncodingType type, ComplexComponent component, void *data,
-             StretchType stretchType, vector<double>& stretchPoints, RasterElement *pRasterElement,
-             const std::vector<int> &badValues)
+void Image::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsigned int imageSizeX,
+                       unsigned int imageSizeY, unsigned int channels, GLenum format, EncodingType type,
+                       ComplexComponent component, void* data, StretchType stretchType, vector<double>& stretchPoints,
+                       RasterElement* pRasterElement, const vector<int>& badValues)
 {
-   mInfo = ImageData(channels, channel, DimensionDescriptor(), DimensionDescriptor(), stretchType, stretchPoints, std::vector<double>(), std::vector<double>(), 
-      sDefaultColorMap, component, GL_LUMINANCE, pRasterElement, pRasterElement, pRasterElement, badValues);
+   mInfo = ImageData(channels, channel, DimensionDescriptor(), DimensionDescriptor(), stretchType, stretchPoints,
+      vector<double>(), vector<double>(), sDefaultColorMap, component, GL_LUMINANCE, pRasterElement, pRasterElement,
+      pRasterElement, badValues);
    mInfo.mTileSizeX = sizeX;
    mInfo.mTileSizeY = sizeY;
    mInfo.mImageSizeX = imageSizeX;
@@ -108,17 +103,17 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsign
    mInfo.mRawType[2] = type;
    mInfo.mFormat = format;
    mInfo.mpData = data;
-   if(mInfo.mpExponentialMultipliers != NULL)
+   if (mInfo.mpExponentialMultipliers != NULL)
    {
       delete mInfo.mpExponentialMultipliers;
       mInfo.mpExponentialMultipliers = NULL;
    }
-   if(mInfo.mpLogarithmicMultipliers != NULL)
+   if (mInfo.mpLogarithmicMultipliers != NULL)
    {
       delete mInfo.mpLogarithmicMultipliers;
       mInfo.mpLogarithmicMultipliers = NULL;
    }
-   for (int i=0; i<3; ++i)
+   for (int i = 0; i < 3; ++i)
    {
       if (mInfo.mpEqualizationValues[i] != NULL)
       {
@@ -132,13 +127,14 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsign
 }
 
 // Colormap
-void Image::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsigned int imageSizeX, unsigned int imageSizeY,
-             unsigned int channels, GLenum format, EncodingType type, void *data, StretchType stretchType,
-             vector<double>& stretchPoints, RasterElement *pRasterElement, const vector<ColorType>& colorMap,
-             const std::vector<int> &badValues)
+void Image::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsigned int imageSizeX,
+                       unsigned int imageSizeY, unsigned int channels, GLenum format, EncodingType type, void* data,
+                       StretchType stretchType, vector<double>& stretchPoints, RasterElement* pRasterElement,
+                       const vector<ColorType>& colorMap, const vector<int>& badValues)
 {
-   mInfo = ImageData(channels, channel, DimensionDescriptor(), DimensionDescriptor(), stretchType, stretchPoints, std::vector<double>(), std::vector<double>(), 
-      colorMap, COMPLEX_MAGNITUDE, GL_LUMINANCE, pRasterElement, pRasterElement, pRasterElement, badValues);
+   mInfo = ImageData(channels, channel, DimensionDescriptor(), DimensionDescriptor(), stretchType, stretchPoints,
+      vector<double>(), vector<double>(), colorMap, COMPLEX_MAGNITUDE, GL_LUMINANCE, pRasterElement, pRasterElement,
+      pRasterElement, badValues);
    mInfo.mTileSizeX = sizeX;
    mInfo.mTileSizeY = sizeY;
    mInfo.mImageSizeX = imageSizeX;
@@ -150,17 +146,17 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsign
    mInfo.mRawType[2] = type;
    mInfo.mFormat = format;
    mInfo.mpData = data;
-   if(mInfo.mpExponentialMultipliers != NULL)
+   if (mInfo.mpExponentialMultipliers != NULL)
    {
       delete mInfo.mpExponentialMultipliers;
       mInfo.mpExponentialMultipliers = NULL;
    }
-   if(mInfo.mpLogarithmicMultipliers != NULL)
+   if (mInfo.mpLogarithmicMultipliers != NULL)
    {
       delete mInfo.mpLogarithmicMultipliers;
       mInfo.mpLogarithmicMultipliers = NULL;
    }
-   for (int i=0; i<3; ++i)
+   for (int i = 0; i < 3; ++i)
    {
       if (mInfo.mpEqualizationValues[i] != NULL)
       {
@@ -172,13 +168,14 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsign
    createTiles();
 }
 
-void Image::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsigned int imageSizeX, unsigned int imageSizeY,
-             unsigned int channels, GLenum format, EncodingType type, ComplexComponent component, void *data,
-             StretchType stretchType, vector<double>& stretchPoints, RasterElement *pRasterElement,
-             const vector<ColorType>& colorMap, const std::vector<int> &badValues)
+void Image::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsigned int imageSizeX,
+                       unsigned int imageSizeY, unsigned int channels, GLenum format, EncodingType type,
+                       ComplexComponent component, void* data, StretchType stretchType, vector<double>& stretchPoints,
+                       RasterElement* pRasterElement, const vector<ColorType>& colorMap, const vector<int>& badValues)
 {
-   mInfo = ImageData(channels, channel, DimensionDescriptor(), DimensionDescriptor(), stretchType, stretchPoints, std::vector<double>(), std::vector<double>(), 
-      colorMap, component, GL_LUMINANCE, pRasterElement, pRasterElement, pRasterElement, badValues);
+   mInfo = ImageData(channels, channel, DimensionDescriptor(), DimensionDescriptor(), stretchType, stretchPoints,
+      vector<double>(), vector<double>(), colorMap, component, GL_LUMINANCE, pRasterElement, pRasterElement,
+      pRasterElement, badValues);
    mInfo.mTileSizeX = sizeX;
    mInfo.mTileSizeY = sizeY;
    mInfo.mImageSizeX = imageSizeX;
@@ -190,17 +187,17 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsign
    mInfo.mRawType[2] = type;
    mInfo.mFormat = format;
    mInfo.mpData = data;
-   if(mInfo.mpExponentialMultipliers != NULL)
+   if (mInfo.mpExponentialMultipliers != NULL)
    {
       delete mInfo.mpExponentialMultipliers;
       mInfo.mpExponentialMultipliers = NULL;
    }
-   if(mInfo.mpLogarithmicMultipliers != NULL)
+   if (mInfo.mpLogarithmicMultipliers != NULL)
    {
       delete mInfo.mpLogarithmicMultipliers;
       mInfo.mpLogarithmicMultipliers = NULL;
    }
-   for (int i=0; i<3; ++i)
+   for (int i = 0; i < 3; ++i)
    {
       if (mInfo.mpEqualizationValues[i] != NULL)
       {
@@ -213,13 +210,14 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsign
 }
 
 // RGB
-void Image::initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2, DimensionDescriptor band3,
-             unsigned int imageSizeX, unsigned int imageSizeY, unsigned int channels, GLenum format,
-             EncodingType type, void *data, StretchType stretchType, vector<double>& stretchPointsRed,
-             vector<double>& stretchPointsGreen, vector<double>& stretchPointsBlue,
-             RasterElement *pRasterElement)
+void Image::initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2,
+                       DimensionDescriptor band3, unsigned int imageSizeX, unsigned int imageSizeY,
+                       unsigned int channels, GLenum format, EncodingType type, void *data, StretchType stretchType,
+                       vector<double>& stretchPointsRed, vector<double>& stretchPointsGreen,
+                       vector<double>& stretchPointsBlue, RasterElement* pRasterElement)
 {
-   mInfo = ImageData(channels, band1, band2, band3, stretchType, stretchPointsRed, stretchPointsGreen, stretchPointsBlue, sDefaultColorMap, COMPLEX_MAGNITUDE, GL_RGB, pRasterElement, pRasterElement, pRasterElement);
+   mInfo = ImageData(channels, band1, band2, band3, stretchType, stretchPointsRed, stretchPointsGreen,
+      stretchPointsBlue, sDefaultColorMap, COMPLEX_MAGNITUDE, GL_RGB, pRasterElement, pRasterElement, pRasterElement);
    mInfo.mTileSizeX = sizeX;
    mInfo.mTileSizeY = sizeY;
    mInfo.mImageSizeX = imageSizeX;
@@ -231,17 +229,17 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor band1, Dimensio
    mInfo.mRawType[2] = type;
    mInfo.mFormat = format;
    mInfo.mpData = data;
-   if(mInfo.mpExponentialMultipliers != NULL)
+   if (mInfo.mpExponentialMultipliers != NULL)
    {
       delete mInfo.mpExponentialMultipliers;
       mInfo.mpExponentialMultipliers = NULL;
    }
-   if(mInfo.mpLogarithmicMultipliers != NULL)
+   if (mInfo.mpLogarithmicMultipliers != NULL)
    {
       delete mInfo.mpLogarithmicMultipliers;
       mInfo.mpLogarithmicMultipliers = NULL;
    }
-   for (int i=0; i<3; ++i)
+   for (int i = 0; i < 3; ++i)
    {
       if (mInfo.mpEqualizationValues[i] != NULL)
       {
@@ -253,13 +251,14 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor band1, Dimensio
    createTiles();
 }
 
-void Image::initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2, DimensionDescriptor band3,
-             unsigned int imageSizeX, unsigned int imageSizeY, unsigned int channels, GLenum format,
-             EncodingType type, ComplexComponent component, void *data, StretchType stretchType,
-             vector<double>& stretchPointsRed, vector<double>& stretchPointsGreen,
-             vector<double>& stretchPointsBlue, RasterElement *pRasterElement)
+void Image::initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2,
+                       DimensionDescriptor band3, unsigned int imageSizeX, unsigned int imageSizeY,
+                       unsigned int channels, GLenum format, EncodingType type, ComplexComponent component, void* data,
+                       StretchType stretchType, vector<double>& stretchPointsRed, vector<double>& stretchPointsGreen,
+                       vector<double>& stretchPointsBlue, RasterElement* pRasterElement)
 {
-   mInfo = ImageData(channels, band1, band2, band3, stretchType, stretchPointsRed, stretchPointsGreen, stretchPointsBlue, sDefaultColorMap, component, GL_RGB, pRasterElement, pRasterElement, pRasterElement);
+   mInfo = ImageData(channels, band1, band2, band3, stretchType, stretchPointsRed, stretchPointsGreen,
+      stretchPointsBlue, sDefaultColorMap, component, GL_RGB, pRasterElement, pRasterElement, pRasterElement);
    mInfo.mTileSizeX = sizeX;
    mInfo.mTileSizeY = sizeY;
    mInfo.mImageSizeX = imageSizeX;
@@ -271,17 +270,17 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor band1, Dimensio
    mInfo.mRawType[2] = type;
    mInfo.mFormat = format;
    mInfo.mpData = data;
-   if(mInfo.mpExponentialMultipliers != NULL)
+   if (mInfo.mpExponentialMultipliers != NULL)
    {
       delete mInfo.mpExponentialMultipliers;
       mInfo.mpExponentialMultipliers = NULL;
    }
-   if(mInfo.mpLogarithmicMultipliers != NULL)
+   if (mInfo.mpLogarithmicMultipliers != NULL)
    {
       delete mInfo.mpLogarithmicMultipliers;
       mInfo.mpLogarithmicMultipliers = NULL;
    }
-   for (int i=0; i<3; ++i)
+   for (int i = 0; i < 3; ++i)
    {
       if (mInfo.mpEqualizationValues[i] != NULL)
       {
@@ -294,14 +293,16 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor band1, Dimensio
 }
 
 // new initialize for different things in the channels
-void Image::initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2, DimensionDescriptor band3,
-      unsigned int imageSizeX, unsigned int imageSizeY, unsigned int channels, GLenum format,
-      EncodingType type1, EncodingType type2, EncodingType type3, ComplexComponent component,
-      void *data, StretchType stretchType, std::vector<double>& stretchPointsRed,
-      std::vector<double>& stretchPointsGreen, std::vector<double>& stretchPointsBlue,
-      RasterElement *pRasterElement1, RasterElement *pRasterElement2, RasterElement *pRasterElement3)
+void Image::initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2,
+                       DimensionDescriptor band3, unsigned int imageSizeX, unsigned int imageSizeY,
+                       unsigned int channels, GLenum format, EncodingType type1, EncodingType type2,
+                       EncodingType type3, ComplexComponent component, void* data, StretchType stretchType,
+                       vector<double>& stretchPointsRed, vector<double>& stretchPointsGreen,
+                       vector<double>& stretchPointsBlue, RasterElement* pRasterElement1,
+                       RasterElement* pRasterElement2, RasterElement* pRasterElement3)
 {
-   mInfo = ImageData(channels, band1, band2, band3, stretchType, stretchPointsRed, stretchPointsGreen, stretchPointsBlue, sDefaultColorMap, component, GL_RGB, pRasterElement1, pRasterElement2, pRasterElement3);
+   mInfo = ImageData(channels, band1, band2, band3, stretchType, stretchPointsRed, stretchPointsGreen,
+      stretchPointsBlue, sDefaultColorMap, component, GL_RGB, pRasterElement1, pRasterElement2, pRasterElement3);
    mInfo.mTileSizeX = sizeX;
    mInfo.mTileSizeY = sizeY;
    mInfo.mImageSizeX = imageSizeX;
@@ -313,17 +314,17 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor band1, Dimensio
    mInfo.mRawType[2] = type3;
    mInfo.mFormat = format;
    mInfo.mpData = data;
-   if(mInfo.mpExponentialMultipliers != NULL)
+   if (mInfo.mpExponentialMultipliers != NULL)
    {
       delete mInfo.mpExponentialMultipliers;
       mInfo.mpExponentialMultipliers = NULL;
    }
-   if(mInfo.mpLogarithmicMultipliers != NULL)
+   if (mInfo.mpLogarithmicMultipliers != NULL)
    {
       delete mInfo.mpLogarithmicMultipliers;
       mInfo.mpLogarithmicMultipliers = NULL;
    }
-   for (int i=0; i<3; ++i)
+   for (int i = 0; i < 3; ++i)
    {
       if (mInfo.mpEqualizationValues[i] != NULL)
       {
@@ -367,26 +368,25 @@ void Image::createTiles()
       return;
    }
 
-   int i, j;
-   for (i = 0; i < mNumTilesY; ++i)
+   for (int i = 0; i < mNumTilesY; ++i)
    {
-      for (j = 0; j < mNumTilesX; ++j)
+      for (int j = 0; j < mNumTilesX; ++j)
       {
          Tile* tile = createTile();
 
          tile->setTexFormat(mInfo.mFormat);
          tile->setTexSize(mInfo.mTileSizeX, mInfo.mTileSizeY);
-      
+
          int geomSizeX = mInfo.mTileSizeX;
          int geomSizeY = mInfo.mTileSizeY;
          if (j == (mNumTilesX - 1))
          {
-             geomSizeX = mInfo.mImageSizeX - ((mNumTilesX - 1) * mInfo.mTileSizeX);
+            geomSizeX = mInfo.mImageSizeX - ((mNumTilesX - 1) * mInfo.mTileSizeX);
          }
 
          if (i == (mNumTilesY - 1))
          {
-             geomSizeY = mInfo.mImageSizeY - ((mNumTilesY - 1) * mInfo.mTileSizeY);
+            geomSizeY = mInfo.mImageSizeY - ((mNumTilesY - 1) * mInfo.mTileSizeY);
          }
 
          tile->setGeomSize(geomSizeX, geomSizeY);
@@ -421,8 +421,8 @@ void Image::draw(GLint textureMode)
    // beginning at the origin moving into the (+,+) quadrant
    glMatrixMode(GL_MODELVIEW);
    glPushMatrix();
-   GLfloat centerXTrans = (((GLfloat) mInfo.mTileSizeX) / 2);
-   GLfloat centerYTrans = (((GLfloat) mInfo.mTileSizeY) / 2);
+   GLfloat centerXTrans = (static_cast<GLfloat>(mInfo.mTileSizeX) / 2);
+   GLfloat centerYTrans = (static_cast<GLfloat>(mInfo.mTileSizeY) / 2);
    glTranslatef(centerXTrans, centerYTrans, 0.0);
 
    glPushAttrib(GL_COLOR_BUFFER_BIT);
@@ -457,16 +457,22 @@ public:
    }
 
 private:
-   Tile *mpTile;
-   unsigned char *mpData;
+   Tile* mpTile;
+   unsigned char* mpData;
    int mZoomIndex;
 };
 
 class ComputeTextureFromTile : public mta::ThreadCommand
 {
 public:
-   ComputeTextureFromTile(Tile *pTile, unsigned char *pData, int zoomIndex) :
-      mpTile(pTile), mpData(pData), mZoomIndex(zoomIndex), mSuccess(false) {}
+   ComputeTextureFromTile(Tile* pTile, unsigned char* pData, int zoomIndex) :
+      mpTile(pTile),
+      mpData(pData),
+      mZoomIndex(zoomIndex),
+      mSuccess(false)
+   {
+   }
+
    void run()
    {
       if (mpTile != NULL)
@@ -478,11 +484,15 @@ public:
          }
       }
    }
-   bool getSuccess() { return mSuccess; }
+
+   bool getSuccess()
+   {
+      return mSuccess;
+   }
 
 private:
-   Tile *mpTile;
-   unsigned char *mpData;
+   Tile* mpTile;
+   unsigned char* mpData;
    int mZoomIndex;
    bool mSuccess;
 };
@@ -495,13 +505,18 @@ public:
       mTiles(tiles), mTileZoomIndices(tileZoomIndices), mInfo(info) {}
    vector<Tile*>& mTiles;
    vector<int>& mTileZoomIndices;
-   Image::ImageData &mInfo;
+   Image::ImageData& mInfo;
 };
+
 class TileOutput
 {
 public:
-   bool compileOverallResults(const vector<TileThread*>& threads) { return true; }
+   bool compileOverallResults(const vector<TileThread*>& threads)
+   {
+      return true;
+   }
 };
+
 class TileThread : public mta::AlgorithmThread
 {
 public:
@@ -519,7 +534,7 @@ public:
 private:
    vector<Tile*>& mTiles;
    vector<int>& mTileZoomIndices;
-   Image::ImageData &mInfo;
+   Image::ImageData& mInfo;
    Range mTileRange;
 
    // grayscale, channel specifies the band to display
@@ -531,14 +546,19 @@ private:
          return;
       }
 
-      scaleStruct scaleData;
+      ScaleStruct scaleData;
       Image::prepareScale(mInfo, mInfo.mKey.mStretchPoints1, scaleData, 0);
 
-      std::vector<int>::const_iterator badBegin=mInfo.mKey.mBadValues.begin(), badEnd=mInfo.mKey.mBadValues.end();
+      std::vector<int>::const_iterator badBegin = mInfo.mKey.mBadValues.begin();
+      std::vector<int>::const_iterator badEnd = mInfo.mKey.mBadValues.end();
 
       int bufSize = mInfo.mTileSizeX * mInfo.mTileSizeY * sizeof(unsigned char);
       bool hasBadValues = (badBegin != badEnd);
-      if (mInfo.mFormat == GL_LUMINANCE_ALPHA) bufSize *= 2;
+      if (mInfo.mFormat == GL_LUMINANCE_ALPHA)
+      {
+         bufSize *= 2;
+      }
+
       vector<unsigned char> pTexData(bufSize);
 
       bool bHas1BadValue = mInfo.mKey.mBadValues.size() == 1;
@@ -552,7 +572,7 @@ private:
 
       for (int tileId = mTileRange.mFirst; tileId <= mTileRange.mLast; ++tileId)
       {
-         Tile *pTile = mTiles[tileId];
+         Tile* pTile = mTiles[tileId];
 
          bool isComputed = false;
          if (pTile->hasHigherResTexture(mTileZoomIndices[tileId]))
@@ -569,9 +589,10 @@ private:
             unsigned int geomSizeX = pTile->getGeomSize().mX;
             unsigned int geomSizeY = pTile->getGeomSize().mY;
 
-            RasterElement *pRasterElement = mInfo.mKey.mpRasterElement[0];
+            RasterElement* pRasterElement = mInfo.mKey.mpRasterElement[0];
             VERIFYNRV(pRasterElement != NULL);
-            RasterDataDescriptor *pRasterDescriptor = dynamic_cast<RasterDataDescriptor*>(pRasterElement->getDataDescriptor());
+            RasterDataDescriptor* pRasterDescriptor =
+               dynamic_cast<RasterDataDescriptor*>(pRasterElement->getDataDescriptor());
             VERIFYNRV(pRasterDescriptor != NULL);
             VERIFYNRV(mInfo.mKey.mBand1.isValid());
             FactoryResource<DataRequest> pRequest;
@@ -592,13 +613,16 @@ private:
 
             vector<unsigned char>::iterator targetBase = pTexData.begin();
 
-            for (unsigned int y1 = 0; y1 < geomSizeY; y1+=reductionFactor, targetBase += mInfo.mTileSizeX/reductionFactor*(hasBadValues?2:1))
+            for (unsigned int y1 = 0;
+               y1 < geomSizeY;
+               y1 += reductionFactor, targetBase += mInfo.mTileSizeX / reductionFactor * (hasBadValues ? 2 : 1))
             {
                VERIFYNRV(da.isValid())
                T* source = static_cast<T*>(da->getColumn());
 
                vector<unsigned char>::iterator target = targetBase;
-               vector<unsigned char>::iterator targetStop = target + geomSizeX/reductionFactor*(hasBadValues?2:1);
+               vector<unsigned char>::iterator targetStop = target + geomSizeX / reductionFactor *
+                  (hasBadValues ? 2 : 1);
 
                for (; target < targetStop; ++target)
                {
@@ -664,10 +688,11 @@ private:
 
       int maxValue = (int) (mInfo.mKey.mColorMap.size());
 
-      scaleStruct scaleData;
+      ScaleStruct scaleData;
       Image::prepareScale(mInfo, mInfo.mKey.mStretchPoints1, scaleData, 0, maxValue-1);
 
-      std::vector<int>::const_iterator badBegin=mInfo.mKey.mBadValues.begin(), badEnd=mInfo.mKey.mBadValues.end();
+      std::vector<int>::const_iterator badBegin = mInfo.mKey.mBadValues.begin();
+      std::vector<int>::const_iterator badEnd = mInfo.mKey.mBadValues.end();
 
       bool hasBadValues = (badBegin != badEnd);
       int channels = (mInfo.mFormat == GL_RGBA ? 4 : 3);
@@ -685,7 +710,7 @@ private:
 
       for (int tileId = mTileRange.mFirst; tileId <= mTileRange.mLast; ++tileId)
       {
-         Tile *pTile = mTiles[tileId];
+         Tile* pTile = mTiles[tileId];
 
          bool isComputed = false;
          if (pTile->hasHigherResTexture(mTileZoomIndices[tileId]))
@@ -701,17 +726,18 @@ private:
             unsigned int posY = pTile->getPos().mY;
             unsigned int geomSizeX = pTile->getGeomSize().mX;
             unsigned int geomSizeY = pTile->getGeomSize().mY;
-            RasterElement *pRasterElement = mInfo.mKey.mpRasterElement[0];
+            RasterElement* pRasterElement = mInfo.mKey.mpRasterElement[0];
             VERIFYNRV(pRasterElement != NULL);
-            RasterDataDescriptor *pRasterDescriptor = dynamic_cast<RasterDataDescriptor*>(pRasterElement->getDataDescriptor());
+            RasterDataDescriptor* pRasterDescriptor =
+               dynamic_cast<RasterDataDescriptor*>(pRasterElement->getDataDescriptor());
             VERIFYNRV(pRasterDescriptor != NULL);
             VERIFYNRV(mInfo.mKey.mBand1.isValid());
             
             FactoryResource<DataRequest> pRequest;
             pRequest->setRows(pRasterDescriptor->getActiveRow(posY), 
-               pRasterDescriptor->getActiveRow(posY+geomSizeY-1), geomSizeY);
+               pRasterDescriptor->getActiveRow(posY + geomSizeY - 1), geomSizeY);
             pRequest->setColumns(pRasterDescriptor->getActiveColumn(posX), 
-               pRasterDescriptor->getActiveColumn(posX+geomSizeX-1), geomSizeX);
+               pRasterDescriptor->getActiveColumn(posX + geomSizeX - 1), geomSizeX);
             pRequest->setBands(mInfo.mKey.mBand1,
                mInfo.mKey.mBand1, 1);
 
@@ -724,11 +750,13 @@ private:
             int reductionFactor = Tile::computeReductionFactor(mTileZoomIndices[tileId]);
             vector<unsigned char>::iterator targetBase = pTexData.begin();
 
-            for (unsigned int y1 = 0; y1 < geomSizeY; y1+=reductionFactor, targetBase += channels*mInfo.mTileSizeX/reductionFactor)
+            for (unsigned int y1 = 0;
+               y1 < geomSizeY;
+               y1 += reductionFactor, targetBase += channels * mInfo.mTileSizeX / reductionFactor)
             {
                VERIFYNRV(da.isValid())
                vector<unsigned char>::iterator target = targetBase;
-               for (unsigned int x1 = 0; x1 < geomSizeX; x1+=reductionFactor)
+               for (unsigned int x1 = 0; x1 < geomSizeX; x1 += reductionFactor)
                {
                   T* source = static_cast<T*>(da->getColumn());
                   double dValue = ModelServices::getDataValue(*source, component);
@@ -795,23 +823,25 @@ private:
    template <class T>
    void createRgbTile(T*pData, std::vector<unsigned char> &pTexData, ComplexComponent component, 
       DataAccessor da, unsigned int posX, unsigned int posY, unsigned int geomSizeX, unsigned int geomSizeY, 
-      int reductionFactor, scaleStruct &scaleData, int offset)
+      int reductionFactor, ScaleStruct &scaleData, int offset)
    {
       T* source;
       vector<unsigned char>::iterator targetBase = pTexData.begin();
 
-      for (unsigned int y1 = 0; y1 < geomSizeY; y1+=reductionFactor, targetBase += 3*mInfo.mTileSizeX/reductionFactor)
+      for (unsigned int y1 = 0;
+         y1 < geomSizeY;
+         y1 += reductionFactor, targetBase += 3 * mInfo.mTileSizeX / reductionFactor)
       {
          VERIFYNRV(da.isValid());
          unsigned char *target = &*targetBase;
          //vector<unsigned char>::iterator target = targetBase;
          target += offset;
-         for (unsigned int x1 = 0; x1 < geomSizeX; x1+=reductionFactor)
+         for (unsigned int x1 = 0; x1 < geomSizeX; x1 += reductionFactor)
          {
             source = static_cast<T*>(da->getColumn());
             double dValue = ModelServices::getDataValue(*source, component);
             *target = Image::scale(dValue, scaleData, mInfo);
-            target+=3;
+            target += 3;
 
             da->nextColumn(reductionFactor);
          }
@@ -825,14 +855,16 @@ private:
    {
       vector<unsigned char>::iterator targetBase = pTexData.begin();
 
-      for (unsigned int y1 = 0; y1 < geomSizeY; y1+=reductionFactor, targetBase += 3*mInfo.mTileSizeX/reductionFactor)
+      for (unsigned int y1 = 0;
+         y1 < geomSizeY;
+         y1 += reductionFactor, targetBase += 3 * mInfo.mTileSizeX / reductionFactor)
       {
-         unsigned char *target = &*targetBase;
+         unsigned char* target = &*targetBase;
          target += offset;
-         for (unsigned int x1 = 0; x1 < geomSizeX; x1+=reductionFactor)
+         for (unsigned int x1 = 0; x1 < geomSizeX; x1 += reductionFactor)
          {
-            *target = 0; 
-            target+=3;
+            *target = 0;
+            target += 3;
          }
       }
    }
@@ -845,9 +877,9 @@ private:
          return;
       }
 
-      scaleStruct scaleDataRed;
-      scaleStruct scaleDataGreen;
-      scaleStruct scaleDataBlue;
+      ScaleStruct scaleDataRed;
+      ScaleStruct scaleDataGreen;
+      ScaleStruct scaleDataBlue;
 
       Image::prepareScale(mInfo, mInfo.mKey.mStretchPoints1, scaleDataRed, 0);
       Image::prepareScale(mInfo, mInfo.mKey.mStretchPoints2, scaleDataGreen, 1);
@@ -860,7 +892,7 @@ private:
 
       for (int tileId = mTileRange.mFirst; tileId <= mTileRange.mLast; ++tileId)
       {
-         Tile *pTile = mTiles[tileId];
+         Tile* pTile = mTiles[tileId];
 
          bool isComputed = false;
          if (pTile->hasHigherResTexture(mTileZoomIndices[tileId]))
@@ -878,24 +910,24 @@ private:
             unsigned int geomSizeY = pTile->getGeomSize().mY;
 
             // Create a data accessor for each band
-            bool haveRedData = false, haveBlueData = false, haveGreenData = false;
-            RasterElement *pRedRasterElement = mInfo.mKey.mpRasterElement[0];
+            RasterElement* pRedRasterElement = mInfo.mKey.mpRasterElement[0];
             DimensionDescriptor redBand = mInfo.mKey.mBand1;
-            haveRedData = (pRedRasterElement != NULL) && (redBand.isActiveNumberValid());
+            bool haveRedData = (pRedRasterElement != NULL) && (redBand.isActiveNumberValid());
 
-            RasterElement *pGreenRasterElement = mInfo.mKey.mpRasterElement[1];
+            RasterElement* pGreenRasterElement = mInfo.mKey.mpRasterElement[1];
             DimensionDescriptor greenBand = mInfo.mKey.mBand2;
-            haveGreenData = (pGreenRasterElement != NULL) && (greenBand.isActiveNumberValid());
+            bool haveGreenData = (pGreenRasterElement != NULL) && (greenBand.isActiveNumberValid());
 
-            RasterElement *pBlueRasterElement = mInfo.mKey.mpRasterElement[2];
+            RasterElement* pBlueRasterElement = mInfo.mKey.mpRasterElement[2];
             DimensionDescriptor blueBand = mInfo.mKey.mBand3;
-            haveBlueData = (pBlueRasterElement != NULL) && (blueBand.isActiveNumberValid());
+            bool haveBlueData = (pBlueRasterElement != NULL) && (blueBand.isActiveNumberValid());
 
             int reductionFactor = Tile::computeReductionFactor(mTileZoomIndices[tileId]);
 
             if (haveRedData)
             {
-               RasterDataDescriptor *pRedRasterDescriptor = dynamic_cast<RasterDataDescriptor*>(pRedRasterElement->getDataDescriptor());
+               RasterDataDescriptor* pRedRasterDescriptor =
+                  dynamic_cast<RasterDataDescriptor*>(pRedRasterElement->getDataDescriptor());
                VERIFYNRV(pRedRasterDescriptor != NULL);
                FactoryResource<DataRequest> pRedRequest;
                pRedRequest->setRows(pRedRasterDescriptor->getActiveRow(posY), 
@@ -909,7 +941,8 @@ private:
                {
                   return;
                }
-               switchOnComplexEncoding(encodingRed, createRgbTile, NULL, pTexData, component, daRed, posX, posY, geomSizeX, geomSizeY, reductionFactor, scaleDataRed, 0);
+               switchOnComplexEncoding(encodingRed, createRgbTile, NULL, pTexData, component, daRed, posX, posY,
+                  geomSizeX, geomSizeY, reductionFactor, scaleDataRed, 0);
             }
             else
             {
@@ -918,7 +951,8 @@ private:
 
             if (haveGreenData)
             {
-               RasterDataDescriptor *pGreenRasterDescriptor = dynamic_cast<RasterDataDescriptor*>(pGreenRasterElement->getDataDescriptor());
+               RasterDataDescriptor* pGreenRasterDescriptor =
+                  dynamic_cast<RasterDataDescriptor*>(pGreenRasterElement->getDataDescriptor());
                VERIFYNRV(pGreenRasterDescriptor != NULL);
                FactoryResource<DataRequest> pGreenRequest;
                pGreenRequest->setRows(pGreenRasterDescriptor->getActiveRow(posY), 
@@ -932,7 +966,8 @@ private:
                {
                   return;
                }
-               switchOnComplexEncoding(encodingGreen, createRgbTile, NULL, pTexData, component, daGreen, posX, posY, geomSizeX, geomSizeY, reductionFactor, scaleDataGreen, 1);
+               switchOnComplexEncoding(encodingGreen, createRgbTile, NULL, pTexData, component, daGreen, posX, posY,
+                  geomSizeX, geomSizeY, reductionFactor, scaleDataGreen, 1);
             }
             else
             {
@@ -941,7 +976,8 @@ private:
 
             if (haveBlueData)
             {
-               RasterDataDescriptor *pBlueRasterDescriptor = dynamic_cast<RasterDataDescriptor*>(pBlueRasterElement->getDataDescriptor());
+               RasterDataDescriptor* pBlueRasterDescriptor =
+                  dynamic_cast<RasterDataDescriptor*>(pBlueRasterElement->getDataDescriptor());
                VERIFYNRV(pBlueRasterDescriptor != NULL);
                FactoryResource<DataRequest> pBlueRequest;
                pBlueRequest->setRows(pBlueRasterDescriptor->getActiveRow(posY), 
@@ -955,7 +991,8 @@ private:
                {
                   return;
                }
-               switchOnComplexEncoding(encodingBlue, createRgbTile, NULL, pTexData, component, daBlue,  posX, posY, geomSizeX, geomSizeY, reductionFactor, scaleDataBlue, 2);
+               switchOnComplexEncoding(encodingBlue, createRgbTile, NULL, pTexData, component, daBlue, posX, posY,
+                  geomSizeX, geomSizeY, reductionFactor, scaleDataBlue, 2);
             }
             else
             {
@@ -1001,22 +1038,24 @@ void Image::updateTiles(vector<Tile*> &tilesToUpdate, vector<int> &tileZoomIndic
    TileOutput tileOutput;
 
    mta::StatusBarReporter barReporter("Generating Image", "app", "1BD64709-7C3B-4d54-8E85-ABCCA4B75B3B");
-   mta::StatusBarReporter *pReporter = NULL;
+   mta::StatusBarReporter* pReporter = NULL;
    if (tilesToUpdate.size() > 1)
    {
       pReporter = &barReporter;
    }
    unsigned int threadCount = ConfigurationSettings::getSettingThreadCount();
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Multi-threaded tile generation is not working on Solaris. This disables it until a real fix can be devised. (tclarke)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Multi-threaded tile generation is not working on " \
+   "Solaris. This disables it until a real fix can be devised. (tclarke)")
 #if defined(SOLARIS)
    threadCount = 1;
 #endif
-   mta::MultiThreadedAlgorithm<TileInput,TileOutput,TileThread> tilingAlgorithm
+   mta::MultiThreadedAlgorithm<TileInput, TileOutput, TileThread> tilingAlgorithm
       (threadCount, tileInput, tileOutput, pReporter);
    tilingAlgorithm.run();
 }
 
-bool Image::prepareScale(ImageData &info, std::vector<double> &stretchPoints, scaleStruct &data, unsigned int color, int maxValue)
+bool Image::prepareScale(ImageData& info, vector<double>& stretchPoints, ScaleStruct& data, unsigned int color,
+                         int maxValue)
 {
    if (info.mKey.mType == EXPONENTIAL && info.mpExponentialMultipliers == NULL)
    {
@@ -1025,7 +1064,7 @@ bool Image::prepareScale(ImageData &info, std::vector<double> &stretchPoints, sc
       info.mpExponentialMultipliers[0] = 1.0;
       for (i = 1; i <= maxValue; i++)
       {
-         info.mpExponentialMultipliers[i] = pow(10.0, (double) i / maxValue);
+         info.mpExponentialMultipliers[i] = pow(10.0, static_cast<double>(i) / maxValue);
          info.mpExponentialMultipliers[i] = (info.mpExponentialMultipliers[i] - 1.0) * maxValue / 9.0 / i;
       }
    }
@@ -1036,14 +1075,14 @@ bool Image::prepareScale(ImageData &info, std::vector<double> &stretchPoints, sc
       info.mpLogarithmicMultipliers[0] = 1.0;
       for (i = 1; i <= maxValue; i++)
       {
-         info.mpLogarithmicMultipliers[i] = maxValue * log10(1.0 + 9.0 * (double) i / maxValue) / i;
+         info.mpLogarithmicMultipliers[i] = maxValue * log10(1.0 + 9.0 * static_cast<double>(i) / maxValue) / i;
       }
    }
    if (info.mKey.mType == EQUALIZATION && color < 3)
    {
       Statistics* pStatistics = NULL;
 
-      RasterElement *pRaster = info.mKey.mpRasterElement[color];
+      RasterElement* pRaster = info.mKey.mpRasterElement[color];
       if (pRaster != NULL)
       {
          const RasterDataDescriptor* pDescriptor =
@@ -1051,7 +1090,18 @@ bool Image::prepareScale(ImageData &info, std::vector<double> &stretchPoints, sc
          if (pDescriptor != NULL)
          {
             DimensionDescriptor bandDim;
-            color == 0 ? bandDim = info.mKey.mBand1 : color == 1 ? bandDim = info.mKey.mBand2 : bandDim = info.mKey.mBand3;
+            if (color == 0)
+            {
+               bandDim = info.mKey.mBand1;
+            }
+            else if (color == 1)
+            {
+               bandDim = info.mKey.mBand2;
+            }
+            else
+            {
+               bandDim = info.mKey.mBand3;
+            }
 
             if (bandDim.isValid())
             {
@@ -1061,8 +1111,8 @@ bool Image::prepareScale(ImageData &info, std::vector<double> &stretchPoints, sc
       }
 
       VERIFY(pStatistics != NULL);
-      const unsigned int *pHistogram = NULL;
-      const double *pBinCenters = NULL;
+      const unsigned int* pHistogram = NULL;
+      const double* pBinCenters = NULL;
       pStatistics->getHistogram(pBinCenters, pHistogram);
       VERIFY(pBinCenters != NULL);
       VERIFY(pHistogram != NULL);
@@ -1087,7 +1137,7 @@ bool Image::prepareScale(ImageData &info, std::vector<double> &stretchPoints, sc
          int firstNonzeroBin = 0;
          int lastNonzeroBin = 0;
          {
-            for (int i=0; i<256; ++i)
+            for (int i = 0; i < 256; ++i)
             {
                count += pHistogram[i];
                counts[i] = count;
@@ -1108,10 +1158,14 @@ bool Image::prepareScale(ImageData &info, std::vector<double> &stretchPoints, sc
             count = 1;
          }
 
-         for (int i=0; i<=maxValue; ++i)
+         for (int i = 0; i <= maxValue; ++i)
          {
             int value = 0.5 + maxValue * counts[firstNonzeroBin+i*(lastNonzeroBin-firstNonzeroBin)/maxValue]/count;
-            if (stretchPoints[1] < stretchPoints[0]) value = maxValue-value;
+            if (stretchPoints[1] < stretchPoints[0])
+            {
+               value = maxValue-value;
+            }
+
             info.mpEqualizationValues[color][i] = value;
          }
       }
@@ -1126,9 +1180,8 @@ bool Image::prepareScale(ImageData &info, std::vector<double> &stretchPoints, sc
       case EXPONENTIAL:
       case LOGARITHMIC:
       {
-         double min, max;
-         min = stretchPoints[0];
-         max = stretchPoints[1];
+         double min = stretchPoints[0];
+         double max = stretchPoints[1];
          double range = max - min;
          data.offset = min;
          if (fabs(range) < ((maxValue+0.999) / numeric_limits<double>::max()))   // prevent divide-by-zero errors
@@ -1155,15 +1208,15 @@ void Image::setActiveTileSet(const ImageKey &key)
    unsigned int maxNumTileSets = getMaxNumTileSets();
    VERIFYNRV(maxNumTileSets != 0);
 
-   map<ImageKey,TileSet>::iterator it = mTileSets.find(key);
+   map<ImageKey, TileSet>::iterator it = mTileSets.find(key);
    if (it == mTileSets.end())
    {
       // delete oldest tileset if necessary
       if (mTileSets.size() > maxNumTileSets)
       {
-         map<ImageKey,TileSet>::iterator oldest = mTileSets.begin();
-         map<ImageKey,TileSet>::iterator pTileSet = mTileSets.begin();
-         for (pTileSet=mTileSets.begin(); pTileSet!=mTileSets.end(); ++pTileSet)
+         map<ImageKey, TileSet>::iterator oldest = mTileSets.begin();
+         map<ImageKey, TileSet>::iterator pTileSet = mTileSets.begin();
+         for (pTileSet = mTileSets.begin(); pTileSet != mTileSets.end(); ++pTileSet)
          {
             if ((*pTileSet).second.getId() < (*oldest).second.getId())
             {
@@ -1173,13 +1226,13 @@ void Image::setActiveTileSet(const ImageKey &key)
          mTileSets.erase(oldest);
       }
       TileSet tileSet;
-      mTileSets.insert(std::pair<const ImageKey,TileSet>(key,tileSet));
+      mTileSets.insert(std::pair<const ImageKey, TileSet>(key, tileSet));
       it = mTileSets.find(key);
       mpTiles = &((*it).second.getTiles());
    }
    else
    {
-      TileSet &tileSet = (*it).second;
+      TileSet& tileSet = (*it).second;
       mpTiles = &(tileSet.getTiles());
       tileSet.updateId();
    }
@@ -1220,7 +1273,7 @@ void Image::setAlpha(unsigned int alpha)
    map<ImageKey, TileSet>::iterator iter;
    for (iter = mTileSets.begin(); iter != mTileSets.end(); ++iter)
    {
-      vector<Tile*> &tiles = iter->second.getTiles();
+      vector<Tile*>& tiles = iter->second.getTiles();
 
       vector<Tile*>::iterator tileIter;
       for (tileIter = tiles.begin(); tileIter != tiles.end(); ++tileIter)
@@ -1234,12 +1287,17 @@ void Image::setAlpha(unsigned int alpha)
    }
 }
 
-Tile *Image::selectNearbyTile() const
+unsigned int Image::getAlpha() const
+{
+   return mAlpha;
+}
+
+Tile* Image::selectNearbyTile() const
 {
    int dist = 1000000;
-   Tile *pSelectedTile = NULL;
+   Tile* pSelectedTile = NULL;
    std::vector<Tile*>::const_iterator ppTile;
-   for (ppTile=mpTiles->begin(); ppTile!=mpTiles->end(); ++ppTile)
+   for (ppTile = mpTiles->begin(); ppTile != mpTiles->end(); ++ppTile)
    {
       VERIFYRV(*ppTile != NULL, NULL);
       if ((*ppTile)->isTextureReady(0) == false)
@@ -1259,9 +1317,12 @@ Tile *Image::selectNearbyTile() const
 
 bool Image::generateFullResTexture()
 {
-   if (mpTiles == NULL) return false;
+   if (mpTiles == NULL)
+   {
+      return false;
+   }
 
-   Tile *pTile = selectNearbyTile();
+   Tile* pTile = selectNearbyTile();
    if (pTile != NULL)
    {
       vector<Tile*> tileToUpdate;
@@ -1285,7 +1346,7 @@ void Image::generateAllFullResTextures()
    std::vector<Tile*>::const_iterator ppTile;
    vector<Tile*> tileToUpdate;
    vector<int> zoomIndex;
-   for (ppTile=mpTiles->begin(); ppTile!=mpTiles->end(); ++ppTile)
+   for (ppTile = mpTiles->begin(); ppTile != mpTiles->end(); ++ppTile)
    {
       VERIFYNRV(*ppTile != NULL);
       if ((*ppTile)->isTextureReady(0) == false)
@@ -1359,13 +1420,13 @@ vector<Tile*> Image::getTilesToDraw()
    // determine which tiles we need to draw to refresh the
    // glview. This ensures that we don't draw tiles that are
    // entirely outside the view area.
-   unsigned int ulVisStartColumn = 0;
-   unsigned int ulVisEndColumn = mInfo.mImageSizeX - 1;
-   unsigned int ulVisStartRow = 0;
-   unsigned int ulVisEndRow = mInfo.mImageSizeY - 1;
-   DrawUtil::restrictToViewport(ulVisStartColumn, ulVisStartRow, ulVisEndColumn, ulVisEndRow);
-   mDrawCenter.mX = (ulVisStartColumn+ulVisEndColumn)/2;
-   mDrawCenter.mY = (ulVisStartRow+ulVisEndRow)/2;
+   int visStartColumn = 0;
+   int visEndColumn = mInfo.mImageSizeX - 1;
+   int visStartRow = 0;
+   int visEndRow = mInfo.mImageSizeY - 1;
+   DrawUtil::restrictToViewport(visStartColumn, visStartRow, visEndColumn, visEndRow);
+   mDrawCenter.mX = (visStartColumn + visEndColumn) / 2;
+   mDrawCenter.mY = (visStartRow + visEndRow) / 2;
 
    vector<Tile*> tilesToDraw;
    tilesToDraw.reserve(numTiles);
@@ -1375,13 +1436,12 @@ vector<Tile*> Image::getTilesToDraw()
       Tile* pTile = mpTiles->at(ii);
       if (pTile != NULL)
       {
-         unsigned int left = (ii % mNumTilesX) * mInfo.mTileSizeX;
-         unsigned int right = left + mInfo.mTileSizeX;
-         unsigned int bottom = (ii / mNumTilesX) * mInfo.mTileSizeY;
-         unsigned int top = bottom + mInfo.mTileSizeY;
+         int left = (ii % mNumTilesX) * mInfo.mTileSizeX;
+         int right = left + mInfo.mTileSizeX;
+         int bottom = (ii / mNumTilesX) * mInfo.mTileSizeY;
+         int top = bottom + mInfo.mTileSizeY;
 
-         if ((left <= ulVisEndColumn) && (right >= ulVisStartColumn) &&
-            (bottom <= ulVisEndRow) && (top >= ulVisStartRow))
+         if ((left <= visEndColumn) && (right >= visStartColumn) && (bottom <= visEndRow) && (top >= visStartRow))
          {
             tilesToDraw.push_back(pTile);
          }

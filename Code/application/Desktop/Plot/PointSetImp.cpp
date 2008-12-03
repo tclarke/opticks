@@ -716,8 +716,7 @@ void PointSetImp::setPointColor(const QColor& clrSymbol)
    vector<Point*>::iterator iter = mPoints.begin();
    while (iter != mPoints.end())
    {
-      Point* pPoint = NULL;
-      pPoint = (Point*) (*iter);
+      Point* pPoint = *iter;
       if (pPoint != NULL)
       {
          pPoint->setColor(ColorType(clrSymbol.red(), clrSymbol.green(), clrSymbol.blue()));
@@ -833,15 +832,14 @@ bool PointSetImp::getInteractive()
 void PointSetImp::deleteSelectedPoints(bool filterVisible)
 {
    vector<Point*> newPoints;
-   for (vector<Point*>::iterator iter = mPoints.begin();
-      iter != mPoints.end(); ++iter)
+   for (vector<Point*>::iterator iter = mPoints.begin(); iter != mPoints.end(); ++iter)
    {
-      Point *pPoint = *iter;
+      Point* pPoint = *iter;
       if (NN(pPoint))
       {
          if (pPoint->isSelected() && (!filterVisible || pPoint->isVisible()))
          {
-            PointImp *pPointImp = dynamic_cast<PointImp*>(pPoint);
+            PointImp* pPointImp = dynamic_cast<PointImp*>(pPoint);
             if (NN(pPointImp))
             {
                delete pPointImp;
@@ -871,12 +869,11 @@ bool PointSetImp::toXml(XMLWriter* pXml) const
    pXml->addAttr("lineWidth", mLineWidth);
    pXml->addAttr("lineStyle", mLineStyle);
 
-   vector<Point*>::const_iterator it;
-   for (it=mPoints.begin(); it!=mPoints.end(); ++it)
+   for (vector<Point*>::const_iterator it = mPoints.begin(); it != mPoints.end(); ++it)
    {
       pXml->pushAddPoint(pXml->addElement("Point"));
       const PointImp* pPoint = dynamic_cast<PointImp*>(*it);
-      if (pPoint != NULL || !pPoint->toXml(pXml))
+      if (pPoint == NULL || !pPoint->toXml(pXml))
       {
          return false;
       }
@@ -891,29 +888,26 @@ bool PointSetImp::fromXml(DOMNode* pDocument, unsigned int version)
    {
       return false;
    }
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
-   mSymbols = StringUtilities::fromXmlString<bool>(
-      A(pElem->getAttribute(X("symbols"))));
-   mLine = StringUtilities::fromXmlString<bool>(
-      A(pElem->getAttribute(X("line"))));
-   ColorType color = StringUtilities::fromXmlString<ColorType>(
-      A(pElem->getAttribute(X("lineColor"))));
-   mLineColor = COLORTYPE_TO_QCOLOR(color);
-   mLineWidth = StringUtilities::fromXmlString<int>(
-      A(pElem->getAttribute(X("lineWidth"))));
-   mLineStyle = StringUtilities::fromXmlString<LineStyle>(
-      A(pElem->getAttribute(X("lineStyle"))));
 
-   for(DOMNode *pChld = pElem->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
+   DOMElement* pElem = static_cast<DOMElement*>(pDocument);
+   mSymbols = StringUtilities::fromXmlString<bool>(A(pElem->getAttribute(X("symbols"))));
+   mLine = StringUtilities::fromXmlString<bool>(A(pElem->getAttribute(X("line"))));
+   ColorType color = StringUtilities::fromXmlString<ColorType>(A(pElem->getAttribute(X("lineColor"))));
+   mLineColor = COLORTYPE_TO_QCOLOR(color);
+   mLineWidth = StringUtilities::fromXmlString<int>(A(pElem->getAttribute(X("lineWidth"))));
+   mLineStyle = StringUtilities::fromXmlString<LineStyle>(A(pElem->getAttribute(X("lineStyle"))));
+
+   for (DOMNode* pChld = pElem->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
    {
-      if(XMLString::equals(pChld->getNodeName(), X("Point")))
+      if (XMLString::equals(pChld->getNodeName(), X("Point")))
       {
-         PointImp *pPoint = dynamic_cast<PointImp*>(addPoint());
-         if(pPoint == NULL || !pPoint->fromXml(pChld, version))
+         PointImp* pPoint = dynamic_cast<PointImp*>(addPoint());
+         if (pPoint == NULL || !pPoint->fromXml(pChld, version))
          {
             return false;
          }
       }
    }
+
    return true;
 }

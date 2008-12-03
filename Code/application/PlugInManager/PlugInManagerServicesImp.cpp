@@ -38,10 +38,9 @@ PlugInManagerServicesImp* PlugInManagerServicesImp::instance()
 {
    if (spInstance == NULL)
    {
-      if(mDestroyed)
+      if (mDestroyed)
       {
-         throw std::logic_error("Attempting to use PlugInManagerServices after "
-            "destroying it.");
+         throw std::logic_error("Attempting to use PlugInManagerServices after destroying it.");
       }
       spInstance = new PlugInManagerServicesImp;
    }
@@ -53,8 +52,7 @@ void PlugInManagerServicesImp::destroy()
 {
    if (mDestroyed)
    {
-      throw std::logic_error("Attempting to destroy PlugInManagerServices after "
-         "destroying it.");
+      throw std::logic_error("Attempting to destroy PlugInManagerServices after destroying it.");
    }
    delete spInstance;
    spInstance = NULL;
@@ -137,8 +135,7 @@ ModuleDescriptor* PlugInManagerServicesImp::getModuleDescriptor(const string& mo
    vector<ModuleDescriptor*>::iterator iter = mModules.begin();
    while (iter != mModules.end())
    {
-      ModuleDescriptor* pModule = NULL;
-      pModule = *iter;
+      ModuleDescriptor* pModule = *iter;
       if (pModule != NULL)
       {
          string filename = pModule->getFileName();
@@ -154,7 +151,7 @@ ModuleDescriptor* PlugInManagerServicesImp::getModuleDescriptor(const string& mo
    return NULL;
 }
 
-ModuleDescriptor* PlugInManagerServicesImp::getModuleDescriptorByName(const std::string& moduleName)
+ModuleDescriptor* PlugInManagerServicesImp::getModuleDescriptorByName(const string& moduleName)
 {
    if (moduleName.empty() == true)
    {
@@ -184,15 +181,12 @@ const vector<ModuleDescriptor*>& PlugInManagerServicesImp::getModuleDescriptors(
    return mModules;
 }
 
-void PlugInManagerServicesImp::listPlugIns( bool showModules, bool showPlugIns, bool fullDetail )
+void PlugInManagerServicesImp::listPlugIns(bool showModules, bool showPlugIns, bool fullDetail)
 {
    vector<ModuleDescriptor*>::iterator iter = mModules.begin();
    while (iter != mModules.end())
    {
-      ModuleDescriptor* pModule = NULL;
-      pModule = *iter;
-      string message = "";
-
+      ModuleDescriptor* pModule = *iter;
       if (pModule != NULL)
       {
          if (showModules)
@@ -202,13 +196,13 @@ void PlugInManagerServicesImp::listPlugIns( bool showModules, bool showPlugIns, 
             {
                int position = filename.find_last_of("/")+1;
                //if ((position!=0) || (position!=filename.length()) )
-               filename.erase(0,filename.find_last_of("/")+1);
+               filename.erase(0, filename.find_last_of("/") + 1);
             }
             const unsigned int total = pModule->getNumPlugIns();
             const DateTime* pDate = pModule->getFileDate();
             string dateString;
             string format = "%Y-%m-%d, %H:%M:%S";  //"%d%b%Y %H:%M:%S";
-            if (pDate!=NULL) 
+            if (pDate != NULL)
             {
                dateString = pDate->getFormattedUtc(format);
             }
@@ -218,7 +212,11 @@ void PlugInManagerServicesImp::listPlugIns( bool showModules, bool showPlugIns, 
 
             cout << pModule->getName() << ", " << version << ", " << total << ", " 
                << dateString << ", " << size << ", ";
-            if (fullDetail) { cout << endl << "      " ; }
+            if (fullDetail)
+            {
+               cout << endl << "      " ;
+            }
+
             cout << filename << endl;
          } // if (listModules)
 
@@ -230,26 +228,28 @@ void PlugInManagerServicesImp::listPlugIns( bool showModules, bool showPlugIns, 
 
             while (plugin != plugins.end() )
             {
-               if (showModules) { cout << "   "; }
+               if (showModules)
+               {
+                  cout << "   ";
+               }
 
                PlugInDescriptorImp* pDescriptor = *plugin;
                message = pDescriptor->getName();
-               remove(message.begin(), message.end(),',');
+               remove(message.begin(), message.end(), ',');
                cout << message << + ", ";
 
                message = pDescriptor->getVersion();
-               remove(message.begin(), message.end(),',');
+               remove(message.begin(), message.end(), ',');
                cout << message << + ", ";
 
                message = pDescriptor->getType();
-               remove(message.begin(), message.end(),',');
+               remove(message.begin(), message.end(), ',');
                cout << message ;
 
                if (fullDetail) 
                {
                   message = pDescriptor->getCreator();
-                  //replace(message.begin(), message.end(),',', ' ');
-                  remove(message.begin(), message.end(),',');
+                  remove(message.begin(), message.end(), ',');
                   cout << ", " << message;
                }
                cout << endl;
@@ -259,8 +259,8 @@ void PlugInManagerServicesImp::listPlugIns( bool showModules, bool showPlugIns, 
          } // if (listPlugIns)
       }
 
-      iter++;   
-   } 
+      iter++;
+   }
 }
 
 Progress* PlugInManagerServicesImp::getProgress(PlugIn* pPlugIn)
@@ -324,7 +324,7 @@ void PlugInManagerServicesImp::buildPlugInList(const string& plugInPath)
       vector<PlugInDescriptorImp*>::iterator plugInIter = plugIns.begin();
       while (plugInIter != plugIns.end())
       {
-         mPlugIns.insert(pair<string,PlugInDescriptorImp*>((*plugInIter)->getName(), (*plugInIter)));
+         mPlugIns.insert(pair<string, PlugInDescriptorImp*>((*plugInIter)->getName(), (*plugInIter)));
          plugInIter++;
       }
       notify(SIGNAL_NAME(PlugInManagerServices, ModuleCreated), boost::any(pCoreModule));
@@ -357,8 +357,7 @@ void PlugInManagerServicesImp::buildPlugInList(const string& plugInPath)
    vector<ModuleDescriptor*>::iterator iter = mModules.begin();
    while (iter != mModules.end())
    {
-      ModuleDescriptor* pModule = NULL;
-      pModule = *iter;
+      ModuleDescriptor* pModule = *iter;
       if (pModule != NULL)
       {
          string moduleFilename = pModule->getFileName();
@@ -388,8 +387,7 @@ void PlugInManagerServicesImp::buildPlugInList(const string& plugInPath)
    vector<ModuleDescriptor*>::iterator removeIter = removedModules.begin();
    while (removeIter != removedModules.end())
    {
-      ModuleDescriptor* pModule = NULL;
-      pModule = *removeIter;
+      ModuleDescriptor* pModule = *removeIter;
       if (pModule != NULL)
       {
          removeModule(pModule, plugInIds);
@@ -439,8 +437,7 @@ void PlugInManagerServicesImp::buildPlugInList(const string& plugInPath)
          }
 
          // File date
-         DateTimeImp* pDateTime = NULL;
-         pDateTime = (DateTimeImp*) (pModule->getFileDate());
+         const DateTimeImp* pDateTime = static_cast<const DateTimeImp*>(pModule->getFileDate());
          if (pDateTime != NULL)
          {
             if (*pDateTime != fileDate)
@@ -520,10 +517,10 @@ void PlugInManagerServicesImp::clear()
 
          for (vector<PlugInDescriptorImp*>::iterator iter = plugIns.begin(); iter != plugIns.end(); ++iter)
          {
-            PlugInDescriptorImp *pPlugIn = *iter;
+            PlugInDescriptorImp* pPlugIn = *iter;
             if (pPlugIn != NULL)
             {
-               map<string,PlugInDescriptorImp*>::iterator masterIter = mPlugIns.find(pPlugIn->getName());
+               map<string, PlugInDescriptorImp*>::iterator masterIter = mPlugIns.find(pPlugIn->getName());
                if (masterIter!= mPlugIns.end())
                {
                   mPlugIns.erase(masterIter);
@@ -557,10 +554,11 @@ vector<PlugInDescriptor*> PlugInManagerServicesImp::getPlugInDescriptors(const s
    return plugIns;
 }
 
-vector<PlugIn*> PlugInManagerServicesImp::getPlugInInstances(const string &plugInName)
+vector<PlugIn*> PlugInManagerServicesImp::getPlugInInstances(const string& plugInName)
 {
    vector<PlugIn*> plugins;
-   map<string, PlugInDescriptorImp*>::iterator pFirst, pLast;
+   map<string, PlugInDescriptorImp*>::iterator pFirst;
+   map<string, PlugInDescriptorImp*>::iterator pLast;
    if (plugInName.empty())
    {
       pFirst = mPlugIns.begin();
@@ -575,9 +573,9 @@ vector<PlugIn*> PlugInManagerServicesImp::getPlugInInstances(const string &plugI
       }
    }
    map<string, PlugInDescriptorImp*>::iterator pCurrent;
-   for (pCurrent=pFirst; pCurrent!=pLast; ++pCurrent)
+   for (pCurrent = pFirst; pCurrent != pLast; ++pCurrent)
    {
-      if(pCurrent->second != NULL)
+      if (pCurrent->second != NULL)
       {
          vector<PlugIn*> plugInList = pCurrent->second->getPlugIns();
          copy(plugInList.begin(), plugInList.end(), back_inserter(plugins));
@@ -591,7 +589,7 @@ PlugIn* PlugInManagerServicesImp::createPlugIn(const string& plugInName)
    return createPlugInInstance(plugInName);
 }
 
-PlugIn* PlugInManagerServicesImp::createPlugInInstance(const string& plugInName, const string &id)
+PlugIn* PlugInManagerServicesImp::createPlugInInstance(const string& plugInName, const string& id)
 {
    if (plugInName.empty())
    {
@@ -762,14 +760,13 @@ bool PlugInManagerServicesImp::destroyPlugInArgList(PlugInArgList* pArgList)
       return false;
    }
 
-   int iCount = 0;
-   iCount = pArgList->getCount();
+   int iCount = pArgList->getCount();
    for (int i = 0; i < iCount; i++)
    {
       PlugInArg* pArg = NULL;
       if (pArgList->getArg(i, pArg) == true)
       {
-         delete (PlugInArgImp*) pArg;
+         delete static_cast<PlugInArgImp*>(pArg);
       }
       else
       {
@@ -777,7 +774,7 @@ bool PlugInManagerServicesImp::destroyPlugInArgList(PlugInArgList* pArgList)
       }
    }
 
-   delete (PlugInArgListImp*) pArgList;
+   delete static_cast<PlugInArgListImp*>(pArgList);
    return true;
 }
 
@@ -786,15 +783,14 @@ const vector<string>& PlugInManagerServicesImp::getArgTypes()
    return PlugInArgImp::getArgTypes();
 }
 
-ModuleDescriptor* PlugInManagerServicesImp::addModule(const string& moduleFilename, map<string, string> &plugInIds)
+ModuleDescriptor* PlugInManagerServicesImp::addModule(const string& moduleFilename, map<string, string>& plugInIds)
 {
    if (moduleFilename.empty() == true)
    {
       return NULL;
    }
 
-   bool bValid = false;
-   bValid = ModuleDescriptor::isModule(moduleFilename);
+   bool bValid = ModuleDescriptor::isModule(moduleFilename);
    if (bValid == false)
    {
       return NULL;
@@ -828,10 +824,10 @@ ModuleDescriptor* PlugInManagerServicesImp::addModule(const string& moduleFilena
 
       for (vector<PlugInDescriptorImp*>::iterator iter = plugIns.begin(); iter != plugIns.end(); ++iter)
       {
-         PlugInDescriptorImp *pPlugIn = *iter;
+         PlugInDescriptorImp* pPlugIn = *iter;
          if (pPlugIn != NULL)
          {
-            mPlugIns.insert(pair<string,PlugInDescriptorImp*>((*iter)->getName(), (*iter)));
+            mPlugIns.insert(pair<string, PlugInDescriptorImp*>((*iter)->getName(), (*iter)));
          }
       }
       notify(SIGNAL_NAME(PlugInManagerServices, ModuleCreated), boost::any(pModule));
@@ -850,8 +846,7 @@ bool PlugInManagerServicesImp::containsModule(ModuleDescriptor* pModule)
    vector<ModuleDescriptor*>::iterator iter = mModules.begin();
    while (iter != mModules.end())
    {
-      ModuleDescriptor* pCurrentModule = NULL;
-      pCurrentModule = *iter;
+      ModuleDescriptor* pCurrentModule = *iter;
       if (pCurrentModule == pModule)
       {
          return true;

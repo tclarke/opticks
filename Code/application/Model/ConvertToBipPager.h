@@ -41,9 +41,9 @@ public:
    int getSupportedRequestVersion() const;
 
 private:
-   ConvertToBipPager(void);
+   ConvertToBipPager();
 
-   RasterElement *mpRaster;
+   RasterElement* mpRaster;
    unsigned int mBytesPerElement;
 };
 

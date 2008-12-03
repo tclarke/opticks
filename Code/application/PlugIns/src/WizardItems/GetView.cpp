@@ -49,10 +49,10 @@ bool GetDataSet::getInputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
 
-   if(mbInteractive)
+   if (mbInteractive)
    {
       VERIFY(DesktopItems::getInputSpecification(pArgList) && (pArgList != NULL));
-      if(!pArgList->addArg<string>("Name"))
+      if (!pArgList->addArg<string>("Name"))
       {
          return false;
       }
@@ -65,7 +65,7 @@ bool GetDataSet::getOutputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
 
-   if(mbInteractive)
+   if (mbInteractive)
    {
       Service<PlugInManagerServices> pPlugInManager;
       VERIFY(pPlugInManager.get() != NULL);
@@ -106,7 +106,7 @@ bool GetDataSet::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    pStep->addProperty("Item", getName());
    mpStep = pStep.get();
 
-   if(!extractInputArgs(pInArgList))
+   if (!extractInputArgs(pInArgList))
    {
       reportError("Unable to extract input arguments.", "7ED6F0D1-09B0-40b7-BDE3-6294387218B0");
       return false;
@@ -114,11 +114,11 @@ bool GetDataSet::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 
    // Did the user specify a spatial data view?
    Service<DesktopServices> pDesktop;
-   WorkspaceWindow *pWindow = NULL;
-   string viewName;
-   if(pInArgList->getPlugInArgValue("Name", viewName) && !viewName.empty())
+   WorkspaceWindow* pWindow = NULL;
+   string windowName;
+   if (pInArgList->getPlugInArgValue("Name", windowName) && !windowName.empty())
    {
-      pWindow = static_cast<WorkspaceWindow*>(pDesktop->getWindow(viewName, SPATIAL_DATA_WINDOW));
+      pWindow = static_cast<WorkspaceWindow*>(pDesktop->getWindow(windowName, SPATIAL_DATA_WINDOW));
    }
    else
    {
@@ -127,12 +127,12 @@ bool GetDataSet::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    }
 
    SpatialDataView* pView = NULL;
-   if(pWindow != NULL)
+   if (pWindow != NULL)
    {
       pView = dynamic_cast<SpatialDataView*>(pWindow->getView());
    }
 
-   if(pView == NULL)
+   if (pView == NULL)
    {
       reportError("Could not get the data set view!", "88010049-E294-404e-83EC-B558EBD22F3D");
       return false;
@@ -142,12 +142,12 @@ bool GetDataSet::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    RasterElement* pRasterElement = NULL;
 
    LayerList* pLayerList = pView->getLayerList();
-   if(pLayerList != NULL)
+   if (pLayerList != NULL)
    {
       pRasterElement = pLayerList->getPrimaryRasterElement();
    }
 
-   if(pRasterElement == NULL)
+   if (pRasterElement == NULL)
    {
       string viewName = pView->getName();
       reportError("Could not get the data set from the current view - " + viewName,
@@ -156,12 +156,12 @@ bool GetDataSet::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    }
 
    // Set the output values
-   if(pOutArgList != NULL)
+   if (pOutArgList != NULL)
    {
       PlugInArg* pArg = NULL;
 
       // View
-      if(pOutArgList->getArg("View", pArg) && (pArg != NULL))
+      if (pOutArgList->getArg("View", pArg) && (pArg != NULL))
       {
          pArg->setActualValue(pView);
       }
@@ -172,7 +172,7 @@ bool GetDataSet::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
       }
 
       // Data set
-      if(pOutArgList->getArg("Data Set", pArg) && (pArg != NULL))
+      if (pOutArgList->getArg("Data Set", pArg) && (pArg != NULL))
       {
          pArg->setActualValue(pRasterElement);
       }
@@ -183,20 +183,20 @@ bool GetDataSet::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
       }
 
       // Filename
-      if(pOutArgList->getArg("Filename", pArg) && (pArg != NULL))
+      if (pOutArgList->getArg("Filename", pArg) && (pArg != NULL))
       {
          string filename = pRasterElement->getFilename();
 
          Filename* pFilename = NULL;
          Service<ApplicationServices> pApplication;
          VERIFY(pApplication.get() != NULL);
-         ObjectFactory *pObjFact = pApplication->getObjectFactory();
-         if(pObjFact != NULL)
+         ObjectFactory* pObjFact = pApplication->getObjectFactory();
+         if (pObjFact != NULL)
          {
             pFilename = reinterpret_cast<Filename*>(pObjFact->createObject("Filename"));
          }
 
-         if(pFilename != NULL)
+         if (pFilename != NULL)
          {
             pFilename->setFullPathAndName(filename);
             pArg->setActualValue(pFilename);

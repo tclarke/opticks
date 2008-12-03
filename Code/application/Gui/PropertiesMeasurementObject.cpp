@@ -178,7 +178,7 @@ bool PropertiesMeasurementObject::applyChanges()
             {
                pMeasObj->setEndPointsPrecision(mpDisplayWidget->getEndPointsPrecision());
             }
-        }
+         }
 
          // Line
          if (mLineStateModifier.isModified() == true)
@@ -316,7 +316,7 @@ int PropertiesMeasurementObject::getDistancePrecision(const std::list<GraphicObj
 {
    int precision(-1);
    list<GraphicObject*>::const_iterator it;
-   for (it=objects.begin(); it!=objects.end(); ++it)
+   for (it = objects.begin(); it != objects.end(); ++it)
    {
       MeasurementObjectImp* pCurrent = dynamic_cast<MeasurementObjectImp*>(*it);
       if (pCurrent != NULL)
@@ -342,7 +342,7 @@ int PropertiesMeasurementObject::getBearingPrecision(const std::list<GraphicObje
 {
    int precision(-1);
    list<GraphicObject*>::const_iterator it;
-   for (it=objects.begin(); it!=objects.end(); ++it)
+   for (it = objects.begin(); it != objects.end(); ++it)
    {
       MeasurementObjectImp* pCurrent = dynamic_cast<MeasurementObjectImp*>(*it);
       if (pCurrent != NULL)
@@ -368,7 +368,7 @@ int PropertiesMeasurementObject::getEndPointsPrecision(const std::list<GraphicOb
 {
    int precision(-1);
    list<GraphicObject*>::const_iterator it;
-   for (it=objects.begin(); it!=objects.end(); ++it)
+   for (it = objects.begin(); it != objects.end(); ++it)
    {
       MeasurementObjectImp* pCurrent = dynamic_cast<MeasurementObjectImp*>(*it);
       if (pCurrent != NULL)
@@ -389,4 +389,3 @@ int PropertiesMeasurementObject::getEndPointsPrecision(const std::list<GraphicOb
    }
    return precision;
 }
-

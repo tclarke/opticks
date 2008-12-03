@@ -13,11 +13,13 @@
 #include "RasterDataDescriptor.h"
 #include "RasterDataDescriptorImp.h"
 
-class RasterDataDescriptorAdapter : public RasterDataDescriptor, public RasterDataDescriptorImp RASTERDATADESCRIPTORADAPTEREXTENSION_CLASSES
+class RasterDataDescriptorAdapter : public RasterDataDescriptor, public RasterDataDescriptorImp
+   RASTERDATADESCRIPTORADAPTEREXTENSION_CLASSES
 {
 public:
    RasterDataDescriptorAdapter(const std::string& name, const std::string& type, DataElement* pParent);
-   RasterDataDescriptorAdapter(const std::string& name, const std::string& type, const std::vector<std::string>& parent);
+   RasterDataDescriptorAdapter(const std::string& name, const std::string& type,
+      const std::vector<std::string>& parent);
    ~RasterDataDescriptorAdapter();
 
    // TypeAwareObject

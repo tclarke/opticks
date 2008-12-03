@@ -25,11 +25,11 @@ ImageFilterDescriptorImp::ImageFilterDescriptorImp() :
 {
 }
 
-ImageFilterDescriptorImp::ImageFilterDescriptorImp(const ImageFilterDescriptorImp &filterDescriptor)
+ImageFilterDescriptorImp::ImageFilterDescriptorImp(const ImageFilterDescriptorImp& filterDescriptor) :
+   mName(filterDescriptor.mName),
+   mDescription(filterDescriptor.mDescription),
+   mType(filterDescriptor.mType)
 {
-   mName = filterDescriptor.mName;
-   mDescription = filterDescriptor.mDescription;
-   mType = filterDescriptor.mType;
    mGpuPrograms.resize(filterDescriptor.mGpuPrograms.size());
    transform(filterDescriptor.mGpuPrograms.begin(), filterDescriptor.mGpuPrograms.end(), mGpuPrograms.begin(),
       boost::bind(&GpuProgramDescriptor::copy, _1));
@@ -73,7 +73,7 @@ ImageFilterDescriptor::ImageProcessType ImageFilterDescriptorImp::getType() cons
 
 void ImageFilterDescriptorImp::clearImagePrograms()
 {
-   for(vector<GpuProgramDescriptor*>::iterator it = mGpuPrograms.begin(); it != mGpuPrograms.end(); ++it)
+   for (vector<GpuProgramDescriptor*>::iterator it = mGpuPrograms.begin(); it != mGpuPrograms.end(); ++it)
    {
       delete dynamic_cast<GpuProgramDescriptorImp*>(*it);
    }
@@ -111,7 +111,7 @@ bool ImageFilterDescriptorImp::addGpuProgram(GpuProgramDescriptor *pGpuDescripto
 void ImageFilterDescriptorImp::removeGpuProgram(const GpuProgramDescriptor& gpuDescriptor)
 {
    string programName = gpuDescriptor.getName();
-   for(vector<GpuProgramDescriptor*>::iterator gpuDescriptorIter = mGpuPrograms.begin();
+   for (vector<GpuProgramDescriptor*>::iterator gpuDescriptorIter = mGpuPrograms.begin();
          gpuDescriptorIter != mGpuPrograms.end(); ++gpuDescriptorIter)
    {
       if ((*gpuDescriptorIter)->getName() == programName)
@@ -126,7 +126,7 @@ void ImageFilterDescriptorImp::removeGpuProgram(const GpuProgramDescriptor& gpuD
 bool ImageFilterDescriptorImp::hasGpuProgram(const GpuProgramDescriptor& gpuDescriptor) const
 {
    string programName = gpuDescriptor.getName();
-   for(vector<GpuProgramDescriptor*>::const_iterator gpuDescriptorIter = mGpuPrograms.begin();
+   for (vector<GpuProgramDescriptor*>::const_iterator gpuDescriptorIter = mGpuPrograms.begin();
          gpuDescriptorIter != mGpuPrograms.end(); ++gpuDescriptorIter)
    {
       if ((*gpuDescriptorIter)->getName() == programName)

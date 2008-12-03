@@ -3,12 +3,14 @@ Files:
  - \ref Tutorial/Tutorial4.h "Tutorial/Tutorial4.h"
  - \ref Tutorial/Tutorial4.cpp "Tutorial/Tutorial4.cpp"
 
-This tutorial will build on \ref howto_tutorial4.
+This tutorial will build on \ref howto_tutorial3.
 We'll add an option to constrain processing to an AOI.
 
+If you would like to run this tutorial as you follow along with the code, see \ref RunningTutorial.
+If you would like to build and experiment with this tutorial as you follow along with the code, see \ref howto_buildtutorials.
+If you are running this tutorial in %Opticks, you will need to select "Tutorial 4" from the Tutorial toolbar to execute it.
+
 \dontinclude Tutorial/Tutorial4.cpp
-This tutorial includes Qt header files so don't forget to add the appropriate Qt property sheets if you are building this tutorial yourself.
-The build files distributed with the %Opticks SDK already include the Qt property sheets.
 
 \skip isBatch
 \until }
@@ -19,7 +21,8 @@ The plug-in only provides this argument when running in batch mode.
 \until }
 This extracts the AOI argument if the plug-in is being executed in batch mode.
 
-\skipline pAois
+\skip pModel
+\until pAois
 This code gets a list of all the AoiElements which are children of the RasterElement.
 When a type string is required, TypeConverter will generate the correct string given a data type.
 The guarantees a compile time check for a correct type.

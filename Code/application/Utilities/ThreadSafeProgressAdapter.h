@@ -7,15 +7,14 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef __THREADSAFEPROGRESSADAPTER_H
-#define __THREADSAFEPROGRESSADAPTER_H
+#ifndef THREADSAFEPROGRESSADAPTER_H
+#define THREADSAFEPROGRESSADAPTER_H
 
 #include "Progress.h"
 #include "ThreadSafeProgressImp.h"
 
-class ThreadSafeProgressAdapter : public Progress, public ThreadSafeProgressImp THREADSAFEPROGRESSADAPTEREXTENSION_CLASSES
+class ThreadSafeProgressAdapter : public Progress, public ThreadSafeProgressImp
+   THREADSAFEPROGRESSADAPTEREXTENSION_CLASSES
 {
 public:
    ThreadSafeProgressAdapter() {};
@@ -23,8 +22,8 @@ public:
 
    virtual const std::string& getObjectType() const
    {
-      static std::string type("ThreadSafeProgressAdapter");
-      return type;
+      static std::string sType("ThreadSafeProgressAdapter");
+      return sType;
    }
 
    virtual bool isKindOf(const std::string& className) const

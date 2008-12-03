@@ -40,8 +40,8 @@ MeasurementToolBar::MeasurementToolBar(const string& id, QWidget* parent) :
    mpEndPointsLabelAction(NULL),
    mpLocationUnits(NULL),
    mpDistanceUnits(NULL),
-   mpMeasurementsLayer(NULL),
-   mbToolbarEnabled(false)
+   mbToolbarEnabled(false),
+   mpMeasurementsLayer(NULL)
 {
    Icons* pIcons = Icons::instance();
    REQUIRE(pIcons != NULL);
@@ -132,8 +132,8 @@ MeasurementToolBar::MeasurementToolBar(const string& id, QWidget* parent) :
    VERIFYNR(connect(mpBearingLabelAction, SIGNAL(toggled(bool)), this, SLOT(setDrawBearingLabel(bool))));
    VERIFYNR(connect(mpDistanceLabelAction, SIGNAL(toggled(bool)), this, SLOT(setDrawDistanceLabel(bool))));
    VERIFYNR(connect(mpEndPointsLabelAction, SIGNAL(toggled(bool)), this, SLOT(setDrawEndPointsLabel(bool))));
-   VERIFYNR(connect(mpLocationUnits, SIGNAL(valueChanged(GeocoordType,DmsFormatType)), 
-      this, SLOT(setLocationUnit(GeocoordType,DmsFormatType))));
+   VERIFYNR(connect(mpLocationUnits, SIGNAL(valueChanged(GeocoordType, DmsFormatType)), 
+      this, SLOT(setLocationUnit(GeocoordType, DmsFormatType))));
    VERIFYNR(connect(mpDistanceUnits, SIGNAL(valueChanged(DistanceUnits)), 
       this, SLOT(setDistanceUnit(DistanceUnits))));
 
@@ -202,7 +202,7 @@ bool MeasurementToolBar::setMeasurementsLayer(Layer* pLayer)
          bool bShow = pView->isMeasurementsLayerShown();
          mpShowAction->setChecked(bShow);
 
-         LayerList *pLayerList = pView->getLayerList();
+         LayerList* pLayerList = pView->getLayerList();
          if (pLayerList != NULL)
          {
             RasterElement* pElement = pLayerList->getPrimaryRasterElement();
@@ -223,6 +223,11 @@ bool MeasurementToolBar::setMeasurementsLayer(Layer* pLayer)
       VERIFY(connect(mpMeasurementsLayer, SIGNAL(objectAdded(GraphicObject*)),
          this, SLOT(updateRaster())));
    }
+   else  
+   {
+      updateGeoreference();
+   }
+   
 
    return true;
 }
@@ -232,13 +237,13 @@ void MeasurementToolBar::measurementsLayerDeleted(Subject& subject, const string
    if (dynamic_cast<MeasurementLayerImp*>(&subject) == mpMeasurementsLayer)
    {
       setMeasurementsLayer(NULL);
+      setEnabled(false);
    }
 }
 
 void MeasurementToolBar::setDrawMode(bool on)
 {
-   GraphicLayerImp *pGraphic = dynamic_cast<GraphicLayerImp*>(
-      mpMeasurementsLayer);
+   GraphicLayerImp* pGraphic = dynamic_cast<GraphicLayerImp*>(mpMeasurementsLayer);
    if (pGraphic != NULL)
    {
       if (on)
@@ -351,36 +356,33 @@ bool MeasurementToolBar::isGeoreferenced() const
 
 void MeasurementToolBar::updateGeoreference()
 {
-   if (mpMeasurementsLayer != NULL)
+   DistanceUnits distance;
+   GeocoordType geocoord;
+   DmsFormatType dms;
+   if (mpMeasurementsLayer != NULL && isGeoreferenced())
    {
-      DistanceUnits distance;
-      GeocoordType geocoord;
-      DmsFormatType dms;
-      if (isGeoreferenced())
-      {
-         distance = mpMeasurementsLayer->getDistanceUnits();
-         mpMeasurementsLayer->getGeocoordTypes(geocoord, dms);
-         mpDistanceUnits->setEnabled(mbToolbarEnabled);
-         mpLocationUnits->setEnabled(mbToolbarEnabled);
-      }
-      else
-      {
-         distance = NO_DISTANCE_UNIT;
-         geocoord = GEOCOORD_GENERAL;
-         dms = DMS_FULL;
-         mpDistanceUnits->setEnabled(false);
-         mpLocationUnits->setEnabled(false);
-      }
-
-      // block buttons from sending to the MeasurementLayer. Prevent overriding non-georeferenced
-      // MeasurementLayer default distance and location units.
-      mpDistanceUnits->blockSignals(true);
-      mpLocationUnits->blockSignals(true);
-      mpDistanceUnits->setCurrentValue(distance);
-      mpLocationUnits->setCurrentValue(geocoord, dms);
-      mpDistanceUnits->blockSignals(false);
-      mpLocationUnits->blockSignals(false);
+      distance = mpMeasurementsLayer->getDistanceUnits();
+      mpMeasurementsLayer->getGeocoordTypes(geocoord, dms);
+      mpDistanceUnits->setEnabled(mbToolbarEnabled);
+      mpLocationUnits->setEnabled(mbToolbarEnabled);
    }
+   else
+   {
+      distance = NO_DISTANCE_UNIT;
+      geocoord = GEOCOORD_GENERAL;
+      dms = DMS_FULL;
+      mpDistanceUnits->setEnabled(false);
+      mpLocationUnits->setEnabled(false);
+   }
+
+   // block buttons from sending to the MeasurementLayer. Prevent overriding non-georeferenced
+   // MeasurementLayer default distance and location units.
+   mpDistanceUnits->blockSignals(true);
+   mpLocationUnits->blockSignals(true);
+   mpDistanceUnits->setCurrentValue(distance);
+   mpLocationUnits->setCurrentValue(geocoord, dms);
+   mpDistanceUnits->blockSignals(false);
+   mpLocationUnits->blockSignals(false);
 }
 
 void MeasurementToolBar::georeferenceModified(Subject &subject, const std::string &signal, 
@@ -401,11 +403,12 @@ void MeasurementToolBar::updateRaster()
       SpatialDataViewImp* pView = dynamic_cast<SpatialDataViewImp*> (mpMeasurementsLayer->getView());
       if (pView != NULL)
       {
-         LayerList *pLayerList = pView->getLayerList();
+         LayerList* pLayerList = pView->getLayerList();
          if (pLayerList != NULL)
          {
             RasterElement* pElement = pLayerList->getPrimaryRasterElement();
             mpRaster.reset(pElement);
+            updateGeoreference();
          }
       }
    }

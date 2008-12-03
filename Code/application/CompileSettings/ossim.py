@@ -13,7 +13,7 @@ def generate(env):
     if not path:
        SCons.Warnings.warn(OssimNotFound,"Could not detect Ossim")
     else:
-       env.AppendUnique(CXXFLAGS="-I%s/include -I%s/include/ossim" % (path,path),
+       env.AppendUnique(CXXFLAGS=["-I%s/include" % (path), "-I%s/include/ossim" % (path)],
                         LIBPATH=['%s/lib/%s' % (path,env["PLATFORM"])],
                         LIBS=["ossim"])
     path = os.environ.get('OPTICKSDEPENDENCIES',None)

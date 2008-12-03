@@ -233,7 +233,7 @@ Nitf::TreState Nitf::ExpltaParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID && totalFields != numFields)
    {
       reporter << "Total fields in the Dynamic Object(" <<
-         totalFields <<") did not match the number found(" << numFields << ") ";
+         totalFields << ") did not match the number found(" << numFields << ") ";
       status = INVALID;
    }
 
@@ -297,25 +297,25 @@ bool Nitf::ExpltaParser::fromDynamicObject(const DynamicObject& input, ostream& 
 
    try
    {
-      output <<   toString( dv_cast<int>(input.getAttribute     (EXPLTA::ANGLE_TO_NORTH)), 3);
-      output <<   toString( dv_cast<int>(input.getAttribute     (EXPLTA::SQUINT_ANGLE)), 3, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output << sizeString( dv_cast<string>(input.getAttribute  (EXPLTA::MODE)), 3);
-      output << sizeString( dv_cast<string>(input.getAttribute  (EXPLTA::RESERVED1)), 16);
-      output <<   toString( dv_cast<int>(input.getAttribute     (EXPLTA::GRAZE_ANG)), 2);
-      output <<   toString( dv_cast<int>(input.getAttribute     (EXPLTA::SLOPE_ANG)), 2);
-      output << sizeString( dv_cast<string>(input.getAttribute  (EXPLTA::POLAR)), 2);
-      output <<   toString( dv_cast<int>(input.getAttribute     (EXPLTA::NSAMP)), 5);
-      output <<   toString( dv_cast<int>(input.getAttribute     (EXPLTA::RESERVED2)), 1);
-      output <<   toString( dv_cast<int>(input.getAttribute     (EXPLTA::SEQ_NUM)), 1);
-      output << sizeString( dv_cast<string>(input.getAttribute  (EXPLTA::PRIME_ID)), 12);
-      output << sizeString( dv_cast<string>(input.getAttribute  (EXPLTA::PRIME_BE)), 15);
-      output <<   toString( dv_cast<int>(input.getAttribute     (EXPLTA::RESERVED3)), 1);
-      output <<   toString( dv_cast<int>(input.getAttribute     (EXPLTA::N_SEC)), 2);
-      output <<   toString( dv_cast<int>(input.getAttribute     (EXPLTA::IPR)), 2);
-      output <<   toString( dv_cast<int>(input.getAttribute     (EXPLTA::RESERVED4)), 2);
-      output << sizeString( dv_cast<string>(input.getAttribute  (EXPLTA::RESERVED5)), 2);
-      output <<   toString( dv_cast<int>(input.getAttribute     (EXPLTA::RESERVED6)), 5);
-      output << sizeString( dv_cast<string>(input.getAttribute  (EXPLTA::RESERVED7)), 8);
+      output << toString(dv_cast<int>(input.getAttribute(EXPLTA::ANGLE_TO_NORTH)), 3);
+      output << toString(dv_cast<int>(input.getAttribute(EXPLTA::SQUINT_ANGLE)), 3, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << sizeString(dv_cast<string>(input.getAttribute(EXPLTA::MODE)), 3);
+      output << sizeString(dv_cast<string>(input.getAttribute(EXPLTA::RESERVED1)), 16);
+      output << toString(dv_cast<int>(input.getAttribute(EXPLTA::GRAZE_ANG)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(EXPLTA::SLOPE_ANG)), 2);
+      output << sizeString(dv_cast<string>(input.getAttribute(EXPLTA::POLAR)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(EXPLTA::NSAMP)), 5);
+      output << toString(dv_cast<int>(input.getAttribute(EXPLTA::RESERVED2)), 1);
+      output << toString(dv_cast<int>(input.getAttribute(EXPLTA::SEQ_NUM)), 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(EXPLTA::PRIME_ID)), 12);
+      output << sizeString(dv_cast<string>(input.getAttribute(EXPLTA::PRIME_BE)), 15);
+      output << toString(dv_cast<int>(input.getAttribute(EXPLTA::RESERVED3)), 1);
+      output << toString(dv_cast<int>(input.getAttribute(EXPLTA::N_SEC)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(EXPLTA::IPR)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(EXPLTA::RESERVED4)), 2);
+      output << sizeString(dv_cast<string>(input.getAttribute(EXPLTA::RESERVED5)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(EXPLTA::RESERVED6)), 5);
+      output << sizeString(dv_cast<string>(input.getAttribute(EXPLTA::RESERVED7)), 8);
    }
    catch (const bad_cast&)
    {

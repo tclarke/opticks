@@ -91,6 +91,7 @@ BatchWizard* WizardUtilities::createBatchWizardFromWizard(WizardObject* pWizard,
    if (pBatchWizard != NULL)
    {
       pBatchWizard->setWizardFilename(wizardFilename);
+
       // Values
       vector<WizardItem*> wizItems = pWizard->getItems();
       for (unsigned int i = 0; i < wizItems.size(); i++)
@@ -184,10 +185,11 @@ void WizardUtilities::runWizard(WizardObject* pWizard)
    wizardExecutor->execute();
 }
 
-bool WizardUtilities::runBatchFiles(const vector<string> &wizardFiles, Progress *pProgress)
+bool WizardUtilities::runBatchFiles(const vector<string>& batchWizardFiles, Progress* pProgress)
 {
-   ExecutableResource batchWizardExecutor("Batch Wizard Executor", string(), pProgress,
-      Service<ApplicationServices>()->isBatch());
+   Service<ApplicationServices> pApp;
+
+   ExecutableResource batchWizardExecutor("Batch Wizard Executor", string(), pProgress, pApp->isBatch());
    if (batchWizardExecutor->getPlugIn() == NULL)
    {
       if (pProgress != NULL)
@@ -199,18 +201,20 @@ bool WizardUtilities::runBatchFiles(const vector<string> &wizardFiles, Progress 
       return false;
    }
 
-   unsigned int iCount = wizardFiles.size(); 
+   bool bOverallSuccess = true;
+
+   unsigned int iCount = batchWizardFiles.size();
 
    // Launch the batch wizard executor for each xml file
    for (unsigned int i = 0; i < iCount; ++i)
    {
-      string filename = wizardFiles[i];
+      string filename = batchWizardFiles[i];
       if (!filename.empty())
       {
          if (pProgress != NULL)
          {
             string message = "Processing batch file: " + filename;
-            pProgress->updateProgress(message, i * 100 / iCount, NORMAL);
+            pProgress->updateProgress(message, static_cast<int>(i) * 100 / iCount, NORMAL);
          }
 
          FactoryResource<Filename> pFilename;
@@ -222,13 +226,16 @@ bool WizardUtilities::runBatchFiles(const vector<string> &wizardFiles, Progress 
          {
             if (!bSuccess)
             {
-               pProgress->updateProgress("Batch file failed: " + filename, (i + 1) * 100 / iCount, WARNING);
+               pProgress->updateProgress("Batch file failed: " + filename,
+                  static_cast<int>(i + 1) * 100 / iCount, WARNING);
             }
             else
             {
-               pProgress->updateProgress("Batch file complete: " + filename, (i + 1) * 100 / iCount, NORMAL);
+               pProgress->updateProgress("Batch file complete: " + filename,
+                  static_cast<int>(i + 1) * 100 / iCount, NORMAL);
             }
          }
+         bOverallSuccess = bOverallSuccess && bSuccess;
       }
    }
 
@@ -238,5 +245,5 @@ bool WizardUtilities::runBatchFiles(const vector<string> &wizardFiles, Progress 
       pProgress->updateProgress(message, 100, NORMAL);
    }
 
-   return true;
+   return bOverallSuccess;
 }

@@ -508,11 +508,13 @@ class Filename;
  *  plug-in name for the Setting group name.
  *
  *  The configuration settings interface has been extended with addition of the new
- *  extension interface ConfigurationSettingsExt1. 
+ *  extension interface ConfigurationSettingsExt1 and ConfigurationSettingsExt2. 
  *
  *  This subclass of Subject will notify upon the following conditions:
  *  - The following methods are called: setSetting(), setSessionSetting,
  *    deleteUserSetting, deleteSessionSetting.
+ *
+ *  @see ConfigurationSettingsExt1, ConfigurationSettingsExt2
  */
 class ConfigurationSettings : public Subject
 {
@@ -528,13 +530,13 @@ public:
     */
    SIGNAL_METHOD(ConfigurationSettings, AboutToSave);
 
-   SETTING_PTR(ImportExportPath, FileLocations, Filename)
+   SETTING_PTR(ExportPath, FileLocations, Filename)
+   SETTING_PTR(ImportPath, FileLocations, Filename)
    SETTING_PTR(SaveOpenSessionPath, FileLocations, Filename)
    SETTING_PTR(InternalPath, FileLocations, Filename)
    SETTING(PathBookmarks, FileLocations, std::vector<Filename*>, std::vector<Filename*>())
    SETTING_PTR(MessageLogPath, FileLocations, Filename)
    SETTING(NumberOfMruFiles, General, unsigned int, 3)
-   SETTING_PTR(PlugInPath, FileLocations, Filename)
    SETTING_PTR(SupportFilesPath, FileLocations, Filename)
    SETTING(ShowStatusBarCubeValue, StatusBar, bool, true)
    SETTING(ShowStatusBarElevationValue, StatusBar, bool, true)
@@ -754,7 +756,7 @@ public:
 
    /**
     * Saves the given DynamicObject values into a .cfg file that could be put
-    * into the OPTICKS_HOME/DefaultSettings directory and be used as defaults
+    * into the AppHome/DefaultSettings directory and be used as defaults
     * by the application.
     *
     * @param pFilename
@@ -797,6 +799,8 @@ protected:
 *  @warning A pointer to this class can only be used to call methods contained
 *           in this extension class and cannot be used to call any methods in
 *           ConfigurationSettings or its subclasses.
+*
+*  @see ConfigurationSettings, ConfigurationSettingsExt2
 */
 class ConfigurationSettingsExt1
 {
@@ -815,10 +819,43 @@ public:
 
 protected:
    /**
-   * This will be cleaned up during application close.  Plug-ins do not
-   * need to destroy it.
-   */
+    * This will be cleaned up during application close.  Plug-ins do not
+    * need to destroy it.
+    */
    virtual ~ConfigurationSettingsExt1() {}
+};
+
+/**
+*  Extends capability of the ConfigurationSettings interface.
+*
+*  This class provides additional capability for the ConfigurationSettings interface class.
+*  A pointer to this class can be obtained by performing a dynamic cast on a
+*  pointer to ConfigurationSettings or any of its subclasses.
+*
+*  @warning A pointer to this class can only be used to call methods contained
+*           in this extension class and cannot be used to call any methods in
+*           ConfigurationSettings or its subclasses.
+*
+*  @see ConfigurationSettings, ConfigurationSettingsExt1
+*/
+class ConfigurationSettingsExt2
+{
+public:
+   /**
+    * Gets the plug-in path.  This is the directory
+    * where plug-ins must be placed if they
+    * are to be loaded by the application.
+    * 
+    * @return   The plug-in path.
+    */
+   virtual std::string getPlugInPath() const = 0;
+
+protected:
+   /**
+    * This will be cleaned up during application close.  Plug-ins do not
+    * need to destroy it.
+    */
+   virtual ~ConfigurationSettingsExt2() {}
 };
 
 #endif

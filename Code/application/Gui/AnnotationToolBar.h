@@ -43,13 +43,13 @@ public:
 
    Layer* getAnnotationLayer() const;
 
-signals:
-   void graphicObjectTypeChanged(GraphicObjectType type);
-   void snapToGridChanged(bool snap);
-
 public slots:
    bool setAnnotationLayer(Layer* pLayer);
    void setSelectionObject(GraphicObjectType eObject);
+
+signals:
+   void graphicObjectTypeChanged(GraphicObjectType type);
+   void snapToGridChanged(bool snap);
 
 protected:
    bool eventFilter(QObject* pObject, QEvent* pEvent);

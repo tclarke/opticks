@@ -11,8 +11,11 @@
 
 #include "ToolBarImp.h"
 #include "AppVerify.h"
+#include "ContextMenuAction.h"
+#include "ContextMenuActions.h"
 #include "DesktopServicesImp.h"
 #include "MenuBarImp.h"
+#include "ToolBar.h"
 
 XERCES_CPP_NAMESPACE_USE
 using namespace std;
@@ -22,9 +25,21 @@ ToolBarImp::ToolBarImp(const string& id, const string& name, QWidget* parent) :
    WindowImp(id, name),
    mpMenuBar(new MenuBarImp(QString::fromStdString(name), this))
 {
+   mpShowAction = new QAction("&Show", this);
+   mpShowAction->setAutoRepeat(false);
+   mpShowAction->setStatusTip("Shows the window");
+
+   mpHideAction = new QAction("&Hide", this);
+   mpHideAction->setAutoRepeat(false);
+   mpHideAction->setStatusTip("Hides the window");
+
    // Initialization
    setIconSize(QSize(16, 16));
    addWidget(mpMenuBar);
+   setContextMenuPolicy(Qt::DefaultContextMenu);
+
+   VERIFYNR(connect(mpShowAction, SIGNAL(triggered()), this, SLOT(show())));
+   VERIFYNR(connect(mpHideAction, SIGNAL(triggered()), this, SLOT(hide())));
 
    // Prevent the menu bar from stretching
    QLayout* pLayout = layout();
@@ -167,47 +182,32 @@ void ToolBarImp::showEvent(QShowEvent* pEvent)
 {
    QToolBar::showEvent(pEvent);
    emit visibilityChanged(true);
+   notify(SIGNAL_NAME(ToolBar, Shown));
 }
 
 void ToolBarImp::hideEvent(QHideEvent* pEvent)
 {
    QToolBar::hideEvent(pEvent);
    emit visibilityChanged(false);
+   notify(SIGNAL_NAME(ToolBar, Hidden));
 }
 
-
-bool ToolBarImp::toXml(XMLWriter* pXml) const
+list<ContextMenuAction> ToolBarImp::getContextMenuActions() const
 {
-   if (!WindowImp::toXml(pXml))
+   list<ContextMenuAction> menuActions = WindowImp::getContextMenuActions();
+   if (isVisible() == true)
    {
-      return false;
+      menuActions.push_back(ContextMenuAction(mpHideAction, APP_TOOLBAR_HIDE_ACTION));
+   }
+   else
+   {
+      menuActions.push_back(ContextMenuAction(mpShowAction, APP_TOOLBAR_SHOW_ACTION));
    }
 
-   pXml->addAttr("shown", isVisible());
-
-   return true;
+   return menuActions;
 }
 
-bool ToolBarImp::fromXml(DOMNode* pDocument, unsigned int version)
+bool ToolBarImp::isShown() const
 {
-   if (pDocument == NULL)
-   {
-      return false;
-   }
-
-   if (!WindowImp::fromXml(pDocument, version))
-   {
-      return false;
-   }
-
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
-   if (pElem == NULL)
-   {
-      return false;
-   }
-
-   bool shown = StringUtilities::fromXmlString<bool>(A(pElem->getAttribute(X("shown"))));
-   setVisible(shown);
-
-   return true;
+   return isVisible();
 }

@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef HDF5_IMPORTER_SHELL_H
-#define HDF5_IMPORTER_SHELL_H
+#ifndef HDF5IMPORTERSHELL_H
+#define HDF5IMPORTERSHELL_H
 
 #include "HdfImporterShell.h"
 

@@ -37,12 +37,12 @@ class GpuResourceManager;
 class ImageFilter
 {
 public:
-  /**
-   *  Constructor to the ImageFilter class.
-   *
-   *  @param   pDescriptor
-   *           Image Filter descriptor.
-   */
+   /**
+    *  Constructor to the ImageFilter class.
+    *
+    *  @param   pDescriptor
+    *           Image Filter descriptor.
+    */
    explicit ImageFilter(ImageFilterDescriptor *pDescriptor);
 
    /**
@@ -56,7 +56,7 @@ public:
 
    virtual void resetBuffer();
    virtual void freezeBuffer(bool toggle = true);
-   bool isBufferFrozen() const { return mFreezeFlag; }
+   bool isBufferFrozen() const;
 
    /**
     *  Returns whether or not the image filter has been initialized.
@@ -65,7 +65,7 @@ public:
     *           Returns true if image filter initialized or false 
     *           if image filter not initialized.
     */
-   bool isInitialized() { return (mBuffers.empty() != true); }
+   bool isInitialized();
 
    /**
     *  Applys the filter to the input image operator
@@ -73,45 +73,46 @@ public:
     *
     *  @return  The results of the image filtering algorithm.
     */
-   ColorBuffer *applyFilter();
+   ColorBuffer* applyFilter();
 
    /**
     *  Returns the ImageFilterDescriptor of the image filter.
     *
     *  @return  The ImageFilterDescriptor for the image filter.
     */
-   ImageFilterDescriptor *getImageFilterDescriptor() { return mpDescriptor; }
-   
+   ImageFilterDescriptor* getImageFilterDescriptor();
+
    /**
     *  Returns the color buffer which contains the results of the image filter.
     *
     *  @return  The ColorBuffer which contains the results of the image filter.
     */
-   ColorBuffer *getResultsBuffer() { return mpResultsBuffer; }
+   ColorBuffer* getResultsBuffer();
 
    /**
     *  Returns the image buffer from which the input ColorBuffer is attached.
     *
     *  @return  The ImageBuffer that has the input ColorBuffer.
     */
-   ImageBuffer* getImageBuffer(ColorBuffer *pColorBuffer);
+   ImageBuffer* getImageBuffer(ColorBuffer* pColorBuffer);
 
 protected:
    void render(unsigned int width, unsigned int height);
-   std::vector<GpuProgram*>& getGpuPrograms() { return mGpuPrograms; }
-   std::vector<ImageBuffer*>& getImageBuffers() { return mImageBuffers; }
-   ColorBuffer *copyColorBuffer(ColorBuffer *pColorBuffer);
-   bool populateTextureParameters(ColorBuffer *pColorBuffer);
-   bool attachToImageBuffer(ColorBuffer *pColorBuffer);
+   std::vector<GpuProgram*>& getGpuPrograms();
+   std::vector<ImageBuffer*>& getImageBuffers();
+   ColorBuffer* copyColorBuffer(ColorBuffer* pColorBuffer);
+   bool populateTextureParameters(ColorBuffer* pInputColorBuffer);
+   bool attachToImageBuffer(ColorBuffer* pColorBuffer);
 
 private: // member variables
-   ColorBuffer *mpInputColorBuffer;
+   ColorBuffer* mpInputColorBuffer;
    std::vector<ImageBuffer*> mImageBuffers;
    std::vector<ColorBuffer*> mBuffers;
-   ColorBuffer *mpResultsBuffer;
-   ImageFilterDescriptor *mpDescriptor;
+   ColorBuffer* mpResultsBuffer;
+   ImageFilterDescriptor* mpDescriptor;
    std::vector<GpuProgram*> mGpuPrograms;
    bool mFreezeFlag;
+   bool mRunBackwards;
 };
 
 #endif

@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef TIEPOINT_TOOLBAR_H
-#define TIEPOINT_TOOLBAR_H
+#ifndef TIEPOINTTOOLBAR_H
+#define TIEPOINTTOOLBAR_H
 
 #include <QtGui/QAction>
 

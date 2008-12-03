@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef TIEPOINT_UNDO_H
-#define TIEPOINT_UNDO_H
+#ifndef TIEPOINTLISTUNDO_H
+#define TIEPOINTLISTUNDO_H
 
 #include "TiePointList.h"
 #include "UndoAction.h"

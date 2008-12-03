@@ -12,6 +12,8 @@
 #include <QtGui/QLabel>
 #include <QtGui/QLayout>
 #include <QtGui/QLineEdit>
+#include <QtGui/QMessageBox>
+#include <QtGui/QMouseEvent>
 #include <QtGui/QPushButton>
 
 #include "AppVerify.h"
@@ -23,9 +25,9 @@
 #include "DesktopAPITestProperties.h"
 #include "DesktopServices.h"
 #include "Histogram.h"
-#include "IconImages.h"
 #include "LabeledSection.h"
 #include "LabeledSectionGroup.h"
+#include "MouseMode.h"
 #include "PlotSet.h"
 #include "PlotView.h"
 #include "PlotWindow.h"
@@ -37,6 +39,57 @@ using namespace std;
 #define APP_DESKTOPAPITESTGUI_FIRST_TEST_ACTION "APP_DESKTOPAPITESTGUI_FIRST_TEST_ACTION"
 #define APP_DESKTOPAPITESTGUI_SECOND_TEST_ACTION "APP_DESKTOPAPITESTGUI_SECOND_TEST_ACTION"
 #define APP_DESKTOPAPITESTGUI_THIRD_TEST_ACTION "APP_DESKTOPAPITESTGUI_THIRD_TEST_ACTION"
+
+namespace
+{
+const char* const OpenIcon[] = {
+   "16 16 5 1",
+   "# c #000000",
+   "c c #808000",
+   ". c #c0c0c0",
+   "b c #ffff00",
+   "a c #ffffff",
+   "................",
+   "..........###...",
+   ".........#...#.#",
+   "..............##",
+   "..###........###",
+   ".#aba#######....",
+   ".#babababab#....",
+   ".#ababababa#....",
+   ".#baba##########",
+   ".#aba#ccccccccc#",
+   ".#ba#ccccccccc#.",
+   ".#a#ccccccccc#..",
+   ".##ccccccccc#...",
+   ".###########....",
+   "................",
+   "................"};
+
+const char* const PrintIcon[] = {
+   "16 16 5 1",
+   "# c #000000",
+   "b c #808080",
+   ". c #c0c0c0",
+   "c c #ffff00",
+   "a c #ffffff",
+   "................",
+   ".....#########..",
+   "....#aaaaaaaa#..",
+   "....#a#####a#...",
+   "...#aaaaaaaa#...",
+   "...#a#####a####.",
+   "..#aaaaaaaa#.#.#",
+   ".##########.#.##",
+   "#..........#.#.#",
+   "#############..#",
+   "#......bbb..#.#.",
+   "#......ccc..###.",
+   "#############.#.",
+   ".#.........#.#..",
+   "..###########...",
+   "................"};
+};
 
 DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
    QDialog(pParent),
@@ -72,7 +125,11 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
    mpMouseModeCombo->addItem("Disable Pan");
    mpMouseModeCombo->addItem("Disable Zoom");
    mpMouseModeCombo->addItem("Activate Annotation");
+   mpMouseModeCombo->addItem("Add Custom Mode");
+   mpMouseModeCombo->addItem("Remove Custom Mode");
    QPushButton* pMouseModeApplyButton = new QPushButton("Apply", pPlotWidget);
+
+   mpMouseModeAction = new QAction("Custom Mode", this);
 
    QLabel* pMarginLabel = new QLabel("Margin Factor:", pPlotWidget);
    mpMarginEdit = new QLineEdit(pPlotWidget);
@@ -203,6 +260,12 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
          double marginFactor = pViewExt->getExtentsMargin();
          mpMarginEdit->setText(QString::number(marginFactor));
       }
+
+      QWidget* pViewWidget = pView->getWidget();
+      if (pViewWidget != NULL)
+      {
+         pViewWidget->installEventFilter(this);
+      }
    }
 
    Axis* pLeftAxis = mpPlotWidget->getAxis(AXIS_LEFT);
@@ -228,6 +291,7 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
    VERIFYNR(connect(mpClassificationEdit, SIGNAL(returnPressed()), this, SLOT(setClassificationText())));
    VERIFYNR(connect(pClassificationApplyButton, SIGNAL(clicked()), this, SLOT(setClassificationText())));
    VERIFYNR(connect(pMouseModeApplyButton, SIGNAL(clicked()), this, SLOT(enableMouseMode())));
+   VERIFYNR(connect(mpMouseModeAction, SIGNAL(triggered()), this, SLOT(setCustomMouseMode())));
    VERIFYNR(connect(mpMarginEdit, SIGNAL(editingFinished()), this, SLOT(setPlotMargin())));
    VERIFYNR(connect(pTextColorButton, SIGNAL(colorChanged(const QColor&)), this, SLOT(setTextColor(const QColor&))));
    VERIFYNR(connect(pTitleColorButton, SIGNAL(colorChanged(const QColor&)), this, SLOT(setTitleColor(const QColor&))));
@@ -261,6 +325,50 @@ bool DesktopAPITestGui::accept(SessionItem* pItem) const
    }
 
    return bAccept;
+}
+
+bool DesktopAPITestGui::eventFilter(QObject* pObject, QEvent* pEvent)
+{
+   if ((pObject != NULL) && (pEvent != NULL))
+   {
+      if (pEvent->type() == QEvent::MouseButtonPress)
+      {
+         QMouseEvent* pMouseEvent = static_cast<QMouseEvent*> (pEvent);
+         if (pMouseEvent->button() == Qt::LeftButton)
+         {
+            PlotView* pPlotView = mpPlotWidget->getPlot();
+            VERIFY(pPlotView != NULL);
+
+            MouseMode* pMouseMode = pPlotView->getCurrentMouseMode();
+            if (pMouseMode != NULL)
+            {
+               string modeName;
+               pMouseMode->getName(modeName);
+
+               if (modeName == "Custom Mode")
+               {
+                  QPoint ptMouse = pMouseEvent->pos();
+
+                  QWidget* pViewWidget = pPlotView->getWidget();
+                  if (pViewWidget != NULL)
+                  {
+                     int viewHeight = pViewWidget->height();
+                     ptMouse.setY(viewHeight - ptMouse.y());
+                  }
+
+                  LocationType pixelCoord;
+                  pPlotView->translateScreenToWorld(ptMouse.x(), ptMouse.y(), pixelCoord.mX, pixelCoord.mY);
+
+                  QString message;
+                  message.sprintf("Mouse pressed at (%g, %g)", pixelCoord.mX, pixelCoord.mY);
+                  QMessageBox::information(this, "Custom Mouse Mode", message);
+               }
+            }
+         }
+      }
+   }
+
+   return QDialog::eventFilter(pObject, pEvent);
 }
 
 void DesktopAPITestGui::updateContextMenu(Subject& subject, const string& signal, const boost::any& value)
@@ -383,7 +491,7 @@ void DesktopAPITestGui::addBrowseButton(bool bAdd)
    {
       if (mpOpenAction == NULL)
       {
-         QPixmap browsePixmap(IconImages::OpenIcon);
+         QPixmap browsePixmap(OpenIcon);
          browsePixmap.setMask(browsePixmap.createHeuristicMask());
          QIcon browseIcon(browsePixmap);
 
@@ -413,7 +521,7 @@ void DesktopAPITestGui::addPrintButton(bool bAdd)
    {
       if (mpPrintAction == NULL)
       {
-         QPixmap printPixmap(IconImages::PrintIcon);
+         QPixmap printPixmap(PrintIcon);
          printPixmap.setMask(printPixmap.createHeuristicMask());
          QIcon printIcon(printPixmap);
 
@@ -489,6 +597,41 @@ void DesktopAPITestGui::enableMouseMode()
       pPlotView->enableMouseMode(pAnnotationMode, true);
       pPlotView->setMouseMode("AnnotationMode");
    }
+   else if (text == "Add Custom Mode")
+   {
+      Service<DesktopServices> pDesktop;
+
+      MouseMode* pMouseMode = pDesktop->createMouseMode("Custom Mode", NULL, NULL, 0, 0, mpMouseModeAction);
+      if (pMouseMode != NULL)
+      {
+         pPlotView->addMouseMode(pMouseMode);
+      }
+   }
+   else if (text == "Remove Custom Mode")
+   {
+      MouseMode* pMouseMode = pPlotView->getMouseMode("Custom Mode");
+      if (pMouseMode != NULL)
+      {
+         pPlotView->removeMouseMode(pMouseMode);
+         mpMouseModeAction->setChecked(false);
+
+         Service<DesktopServices> pDesktop;
+         pDesktop->deleteMouseMode(pMouseMode);
+      }
+   }
+}
+
+void DesktopAPITestGui::setCustomMouseMode()
+{
+   if (mpPlotWidget.get() == NULL)
+   {
+      return;
+   }
+
+   PlotView* pPlotView = mpPlotWidget->getPlot();
+   VERIFYNRV(pPlotView != NULL);
+
+   pPlotView->setMouseMode("Custom Mode");
 }
 
 void DesktopAPITestGui::setClassificationText()

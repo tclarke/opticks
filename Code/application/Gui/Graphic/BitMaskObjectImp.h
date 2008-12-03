@@ -37,7 +37,7 @@ private:
    const BitMask *getMask() const;
 
    FactoryResource<BitMask> mpMask;
-   const BitMask *mpUnownedMask;
+   const BitMask* mpUnownedMask;
 };
 
 #define BITMASKOBJECTADAPTEREXTENSION_CLASSES \

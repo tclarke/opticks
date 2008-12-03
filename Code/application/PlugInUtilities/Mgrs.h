@@ -6,9 +6,6 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
- 
-
-
 
 #ifndef MGRS_H
 #define MGRS_H

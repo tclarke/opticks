@@ -14,13 +14,13 @@
 #include "DataAccessorImpl.h"
 #include "RasterDataDescriptor.h"
 
-ConvertToBipPager::ConvertToBipPager(RasterElement *pRaster): 
-   mpRaster(pRaster), mBytesPerElement(0)
+ConvertToBipPager::ConvertToBipPager(RasterElement* pRaster) :
+   mpRaster(pRaster),
+   mBytesPerElement(0)
 {
    if (mpRaster != NULL)
    {
-      const RasterDataDescriptor* pDd =
-         dynamic_cast<const RasterDataDescriptor*>(mpRaster->getDataDescriptor());
+      const RasterDataDescriptor* pDd = dynamic_cast<const RasterDataDescriptor*>(mpRaster->getDataDescriptor());
       if (pDd != NULL)
       {
          mBytesPerElement = pDd->getBytesPerElement();
@@ -28,14 +28,12 @@ ConvertToBipPager::ConvertToBipPager(RasterElement *pRaster):
    }
 }
 
-ConvertToBipPager::~ConvertToBipPager(void)
+ConvertToBipPager::~ConvertToBipPager()
 {
 }
 
-RasterPage *ConvertToBipPager::getPage(DataRequest *pOriginalRequest, 
-      DimensionDescriptor startRow,
-      DimensionDescriptor startColumn,
-      DimensionDescriptor startBand)
+RasterPage *ConvertToBipPager::getPage(DataRequest* pOriginalRequest, DimensionDescriptor startRow,
+                                       DimensionDescriptor startColumn, DimensionDescriptor startBand)
 {
    VERIFY(pOriginalRequest != NULL);
    VERIFY(mpRaster != NULL);
@@ -45,7 +43,7 @@ RasterPage *ConvertToBipPager::getPage(DataRequest *pOriginalRequest,
       return NULL;
    }
 
-   const RasterDataDescriptor *pDd = dynamic_cast<const RasterDataDescriptor*>(mpRaster->getDataDescriptor());
+   const RasterDataDescriptor* pDd = dynamic_cast<const RasterDataDescriptor*>(mpRaster->getDataDescriptor());
    VERIFY(pDd != NULL);
    InterleaveFormatType interleave = pDd->getInterleaveFormat();
    VERIFY(interleave == BIL || interleave == BSQ);
@@ -57,7 +55,7 @@ RasterPage *ConvertToBipPager::getPage(DataRequest *pOriginalRequest,
    unsigned int numRows = pDd->getRowCount();
    unsigned int numCols = pDd->getColumnCount();
    unsigned int numBands = pDd->getBandCount();
-   const std::vector<DimensionDescriptor> &bandVec = pDd->getBands();
+   const std::vector<DimensionDescriptor>& bandVec = pDd->getBands();
 
    if (startRow.getActiveNumber() >= numRows || stopRow.getActiveNumber() >= numRows ||
       startColumn.getActiveNumber() >= numCols || stopColumn.getActiveNumber() >= numCols ||
@@ -69,8 +67,7 @@ RasterPage *ConvertToBipPager::getPage(DataRequest *pOriginalRequest,
    unsigned int cols = stopColumn.getActiveNumber()-startColumn.getActiveNumber()+1;
    unsigned int rows = pOriginalRequest->getConcurrentRows();
    unsigned int bands = stopBand.getActiveNumber()-startBand.getActiveNumber()+1;
-   ConvertToBipPage *pPage = new ConvertToBipPage(rows,
-      cols, bands, mBytesPerElement);
+   ConvertToBipPage* pPage = new ConvertToBipPage(rows, cols, bands, mBytesPerElement);
 
    unsigned int i = 0;
    for (std::vector<DimensionDescriptor>::const_iterator iter = bandVec.begin();
@@ -84,7 +81,6 @@ RasterPage *ConvertToBipPager::getPage(DataRequest *pOriginalRequest,
       DataAccessor da = mpRaster->getDataAccessor(pRequest.release());
       for (unsigned int j = 0; j < rows; ++j)
       {
-
          if (da.isValid())
          {
             pPage->feed(j, i, da->getRow());
@@ -102,8 +98,7 @@ RasterPage *ConvertToBipPager::getPage(DataRequest *pOriginalRequest,
 
 void ConvertToBipPager::releasePage(RasterPage *pPage)
 {
-   ConvertToBipPage *pConvertPage = 
-      dynamic_cast<ConvertToBipPage*>(pPage);
+   ConvertToBipPage* pConvertPage = dynamic_cast<ConvertToBipPage*>(pPage);
    if (pConvertPage != NULL)
    {
       delete pConvertPage;

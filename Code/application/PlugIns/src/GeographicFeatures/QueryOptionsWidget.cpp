@@ -32,16 +32,16 @@ QueryOptionsWidget::QueryOptionsWidget(QWidget *parent) :
    LabeledSectionGroup(parent)
 {
    // Query
-   QWidget *pQuerySectionWidget = new QWidget(this);
-   QLabel *pQueryNameLabel = new QLabel("Name:", pQuerySectionWidget);
+   QWidget* pQuerySectionWidget = new QWidget(this);
+   QLabel* pQueryNameLabel = new QLabel("Name:", pQuerySectionWidget);
    mpQueryNameEdit = new QLineEdit(pQuerySectionWidget);
    mpQueryBuilderWidget = new QueryBuilderWidget(pQuerySectionWidget);
    
-   QScrollArea *pScrollArea = new QScrollArea(pQuerySectionWidget);
+   QScrollArea* pScrollArea = new QScrollArea(pQuerySectionWidget);
    pScrollArea->setWidgetResizable(true);
    pScrollArea->setWidget(mpQueryBuilderWidget);
 
-   QGridLayout *pQueryLayout = new QGridLayout(pQuerySectionWidget);
+   QGridLayout* pQueryLayout = new QGridLayout(pQuerySectionWidget);
    pQueryLayout->setMargin(0);
    pQueryLayout->setSpacing(5);
    pQueryLayout->addWidget(pQueryNameLabel, 0, 0);
@@ -63,17 +63,17 @@ QueryOptionsWidget::QueryOptionsWidget(QWidget *parent) :
    mpDisplayOptionsStack->addWidget(mpSymbolWidget);
    mpDisplayOptionsStack->addWidget(mpLineWidget);
    mpDisplayOptionsStack->addWidget(mpPolygonWidget);
-   
-   QBoxLayout *pPolygonLayout = new QHBoxLayout(mpPolygonWidget);
+
+   QBoxLayout* pPolygonLayout = new QHBoxLayout(mpPolygonWidget);
    pPolygonLayout->addWidget(mpPolygonLineWidget);
    pPolygonLayout->addWidget(mpPolygonFillWidget);
 
-   LabeledSection *pDisplaySection = new LabeledSection(mpDisplayOptionsStack, "Display", this);
+   LabeledSection* pDisplaySection = new LabeledSection(mpDisplayOptionsStack, "Display", this);
 
    // Fields
-   QWidget *pFieldsSectionWidget = new QWidget(this);
-   QLabel *pDisplayedFieldsLabel = new QLabel("Displayed:", this);
-   QLabel *pAvailableFieldsLabel = new QLabel("Available:", this);
+   QWidget* pFieldsSectionWidget = new QWidget(this);
+   QLabel* pDisplayedFieldsLabel = new QLabel("Displayed:", this);
+   QLabel* pAvailableFieldsLabel = new QLabel("Available:", this);
 
    mpFormatStringEdit = new QLineEdit(this);
 
@@ -93,14 +93,14 @@ QueryOptionsWidget::QueryOptionsWidget(QWidget *parent) :
    mpFieldList->setRootIsDecorated(false);
 
    QHeaderView* pHeader = mpFieldList->header();
-   if(pHeader != NULL)
+   if (pHeader != NULL)
    {
       pHeader->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
       pHeader->setStretchLastSection(true);
       pHeader->setSortIndicatorShown(true);
    }
 
-   QGridLayout *pFieldsLayout = new QGridLayout(pFieldsSectionWidget);
+   QGridLayout* pFieldsLayout = new QGridLayout(pFieldsSectionWidget);
    pFieldsLayout->setMargin(0);
    pFieldsLayout->setSpacing(5);
    pFieldsLayout->addWidget(pDisplayedFieldsLabel, 0, 0);
@@ -110,23 +110,23 @@ QueryOptionsWidget::QueryOptionsWidget(QWidget *parent) :
    pFieldsLayout->setRowStretch(1, 10);
    pFieldsLayout->setColumnStretch(1, 10);
 
-   LabeledSection *pFieldsSection = new LabeledSection(pFieldsSectionWidget, "Fields", this);
+   LabeledSection* pFieldsSection = new LabeledSection(pFieldsSectionWidget, "Fields", this);
 
    connect(mpFieldList, SIGNAL(itemClicked(QTreeWidgetItem*, int)), 
       this, SLOT(addItemToFormatString(QTreeWidgetItem*, int)));
 
    // File Info
-   QWidget *pFileInfoSectionWidget = new QWidget(this);
+   QWidget* pFileInfoSectionWidget = new QWidget(this);
    mpNumberFile = new QLabel("0 shapes in file", pFileInfoSectionWidget);
    mpShapeType = new QLabel("Shape type:", pFileInfoSectionWidget);
 
-   QHBoxLayout *pFileInfoLayout = new QHBoxLayout(pFileInfoSectionWidget);
+   QHBoxLayout* pFileInfoLayout = new QHBoxLayout(pFileInfoSectionWidget);
    pFileInfoLayout->setMargin(0);
    pFileInfoLayout->setSpacing(5);
    pFileInfoLayout->addWidget(mpNumberFile);
    pFileInfoLayout->addWidget(mpShapeType);
 
-   LabeledSection *pFileInfoSection = new LabeledSection(pFileInfoSectionWidget, "File info", this);
+   LabeledSection* pFileInfoSection = new LabeledSection(pFileInfoSectionWidget, "File info", this);
 
    // Layout
    addSection(mpQuerySection, 1000);
@@ -137,7 +137,7 @@ QueryOptionsWidget::QueryOptionsWidget(QWidget *parent) :
    setSizeHint(500, 350);
 }
 
-QueryOptionsWidget::~QueryOptionsWidget(void)
+QueryOptionsWidget::~QueryOptionsWidget()
 {
 }
 
@@ -175,7 +175,7 @@ QueryOptions QueryOptionsWidget::getDisplayOptions() const
    options.setFormatString(mpFormatStringEdit->text().toStdString());
    options.setQueryString(mpQueryBuilderWidget->getQuery());
 
-   QWidget *pCurrent = mpDisplayOptionsStack->currentWidget();
+   QWidget* pCurrent = mpDisplayOptionsStack->currentWidget();
 
    if (pCurrent == mpSymbolWidget)
    {
@@ -207,10 +207,10 @@ QueryOptions QueryOptionsWidget::getDisplayOptions() const
 
 void QueryOptionsWidget::setFeatureType(ArcProxyLib::FeatureType featureType)
 {
-   QWidget *pPropertyWidget = NULL;
+   QWidget* pPropertyWidget = NULL;
 
    QString shapeType = "Shape type: ";
-   switch(featureType)
+   switch (featureType)
    {
    case ArcProxyLib::MULTIPOINT:
       shapeType += "Multipoint";
@@ -257,7 +257,7 @@ void QueryOptionsWidget::setFeatureFields(const std::vector<std::string> &fields
    for (std::vector<std::string>::size_type i = 0; i < fields.size(); ++i)
    {
       QTreeWidgetItem* pItem = new QTreeWidgetItem(mpFieldList);
-      if(pItem != NULL)
+      if (pItem != NULL)
       {
          pItem->setText(0, QString::fromStdString(fields[i]));
          pItem->setText(1, QString::fromStdString(types[i]));
@@ -274,11 +274,11 @@ void QueryOptionsWidget::setFeatureFields(const std::vector<std::string> &fields
 void QueryOptionsWidget::setFeatureCount(unsigned int count)
 {
    QString numShapesText;
-   if(count == 0)
+   if (count == 0)
    {
       numShapesText = "No shapes in file";
    }
-   else if(count == 1)
+   else if (count == 1)
    {
       numShapesText = "1 shape in file";
    }

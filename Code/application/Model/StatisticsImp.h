@@ -23,7 +23,7 @@ class RasterElementImp;
 class StatisticsImp : public Statistics
 {
 public:
-   StatisticsImp(const RasterElementImp* pSensorData, DimensionDescriptor band);
+   StatisticsImp(const RasterElementImp* pRasterElement, DimensionDescriptor band);
    ~StatisticsImp();
 
    void setMin(double dMin);
@@ -93,10 +93,18 @@ private:
 class StatisticsInput
 {
 public:
-   StatisticsInput(const mta::Cube& cube, int bandToCalculate, const RasterElementImp* pRaster, ComplexComponent component,
-      int resolution=1, const std::vector<int> &badValues=std::vector<int>()) :
-      mCube(cube), mBandToCalculate(bandToCalculate), mpRasterElement(pRaster), mComplexComponent(component),
-      mResolution(resolution), mBadValues(badValues) {}
+   StatisticsInput(const mta::Cube& cube, int bandToCalculate, const RasterElementImp* pRaster,
+                   ComplexComponent component, int resolution = 1,
+                   const std::vector<int>& badValues = std::vector<int>()) :
+      mCube(cube),
+      mBandToCalculate(bandToCalculate),
+      mpRasterElement(pRaster),
+      mComplexComponent(component),
+      mResolution(resolution),
+      mBadValues(badValues)
+   {
+   }
+
    mta::Cube mCube;
    int mBandToCalculate;
    const RasterElementImp* mpRasterElement;
@@ -109,6 +117,8 @@ class StatisticsThread;
 class StatisticsOutput
 {
 public:
+   StatisticsOutput();
+
    double mMaximum;
    double mMinimum;
    double mAverage;
@@ -123,13 +133,13 @@ public:
 
    void run();
 
-   const mta::Cube& getCube() const { return mCube; }
-   double getMaximum() const { return mMaximum; }
-   double getMinimum() const { return mMinimum; }
-   double getSum() const { return mSum; }
-   double getSumSquared() const { return mSumSquared; }
-   int getResolution() const { return mResolution; }
-   unsigned int getCount() const { return mCount; }
+   const mta::Cube& getCube() const;
+   double getMaximum() const;
+   double getMinimum() const;
+   double getSum() const;
+   double getSumSquared() const;
+   int getResolution() const;
+   unsigned int getCount() const;
 
 protected:
    template<class T> void calculateStatistics(T* pData, ComplexComponent component);
@@ -168,12 +178,12 @@ public:
       mIsInteger(isInteger), mMaximum(maximum), mMinimum(minimum) {}
 
    bool compileOverallResults(const std::vector<HistogramThread*>& threads);
-   const double *getBinCenters() const { return mBinCenters; }
-   const unsigned int *getBinCounts() const { return mBinCounts; }
-   const double *getPercentiles() const { return mPercentiles; }
+   const double* getBinCenters() const;
+   const unsigned int* getBinCounts() const;
+   const double* getPercentiles() const;
 
 private:
-   void sumAllThreads(const std::vector<HistogramThread*>& threads, std::vector<unsigned int>& totalHistogram);
+   void sumAllThreads(const std::vector<HistogramThread*>& threads, std::vector<unsigned int>& totalBinCounts);
    void computeBinCenters();
    void computeResultHistogram(const std::vector<unsigned int>& totalHistogram);
    void computePercentiles(const std::vector<unsigned int>& totalHistogram);
@@ -193,10 +203,10 @@ public:
 
    void run();
 
-   const mta::Cube& getCube() const { return mCube; }
-   std::vector<unsigned int> &getBinCounts() { return mBinCounts; }
-   double getMaximum() const { return mMaximum; }
-   double getMinimum() const { return mMinimum; }
+   const mta::Cube& getCube() const;
+   std::vector<unsigned int>& getBinCounts();
+   double getMaximum() const;
+   double getMinimum() const;
 
 protected:
    template<class T> void calculateHistogram(T* pData, ComplexComponent component);

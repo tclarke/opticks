@@ -57,9 +57,8 @@ ImageAdjustWidget::ImageAdjustWidget(WorkspaceWindow* pWindow, QWidget* pParent)
    QWidget(pParent),
    mpPrimaryLayer(NULL),
    mpSecondaryLayer(NULL),
-   mpDesktopServices(Service<DesktopServices>().get(),
-                     SIGNAL_NAME(DesktopServices, WindowActivated),
-                     Slot(this, &ImageAdjustWidget::windowActivated))
+   mpDesktopServices(Service<DesktopServices>().get(), SIGNAL_NAME(DesktopServices, WindowActivated),
+      Slot(this, &ImageAdjustWidget::windowActivated))
 {
    setEnabled(false);
    mpTimer = new QTimer(this);
@@ -272,17 +271,14 @@ ImageAdjustWidget::ImageAdjustWidget(WorkspaceWindow* pWindow, QWidget* pParent)
 
 
    double maxRate = (mpFlickerMax->text().toDouble());
-   mpFlickerMax->setNum(int(maxRate));
+   mpFlickerMax->setNum(static_cast<int>(maxRate));
    maxRate = log(maxRate)*INTERVAL;
    mpFlickerSlider->setMaximum(maxRate);
 
    // mpLayerList initialization.
    setLayerList(pWindow);
-   mpLayerList.addSignal(SIGNAL_NAME(Subject, Modified),
-                         Slot(this, &ImageAdjustWidget::layerListChanged));
-
-   mpLayerList.addSignal(SIGNAL_NAME(Subject, Deleted),
-                         Slot(this, &ImageAdjustWidget::layerListChanged));
+   mpLayerList.addSignal(SIGNAL_NAME(Subject, Modified), Slot(this, &ImageAdjustWidget::layerListChanged));
+   mpLayerList.addSignal(SIGNAL_NAME(Subject, Deleted), Slot(this, &ImageAdjustWidget::layerListChanged));
 }
 
 ImageAdjustWidget::~ImageAdjustWidget()
@@ -345,12 +341,12 @@ double ImageAdjustWidget::computeFlickerRate(int position) const
    double fps = 0;
    if (position > 0)
    {
-      fps = exp(double(position)/INTERVAL)-1;
+      fps = exp(static_cast<double>(position)/INTERVAL)-1;
    }
 
    fps = (fps/(maxFrameRate-1))*maxFrameRate;
    // get 2 decimal places for fps meter
-   fps = int(fps*100)/double(100);
+   fps = static_cast<int>(fps*100)/static_cast<double>(100);
    return fps;
 }
 
@@ -378,7 +374,7 @@ void ImageAdjustWidget::shift(int value)
    stopFlicker();
    if (mpSecondaryLayer != NULL)
    {
-      const QSlider *pSender = static_cast<const QSlider*>(sender());
+      const QSlider* pSender = static_cast<const QSlider*>(sender());
       if (pSender == mpFlickerXSlider)
       {
          mpSecondaryLayer->setXOffset(value);
@@ -402,13 +398,13 @@ void ImageAdjustWidget::windowActivated(Subject& subject, const string& signal, 
    setLayerList(boost::any_cast<WorkspaceWindow*>(value));
 }
 
-void ImageAdjustWidget::layerListChanged(Subject &subject, const string &signal, const boost::any &value)
+void ImageAdjustWidget::layerListChanged(Subject& subject, const string& signal, const boost::any& value)
 {
    resetWidgets();
 }
 
 
-std::string ImageAdjustWidget::getLayerName(RasterLayer* pRasterLayer)
+string ImageAdjustWidget::getLayerName(RasterLayer* pRasterLayer)
 {
    if (pRasterLayer == NULL)
    {
@@ -432,8 +428,7 @@ DataElement* ImageAdjustWidget::getDataElement(RasterLayer* pRasterLayer)
    }
 }
 
-void ImageAdjustWidget::resetLabels(std::string layerName,
-                                    std::string cubeLayerName)
+void ImageAdjustWidget::resetLabels(string layerName, string cubeLayerName)
 {
    VERIFYNR(layerName.empty() == false);
    mpCurrentLayerLabel->setText(layerName.c_str());

@@ -55,8 +55,7 @@ void AnimationServicesImp::destroy()
 AnimationServicesImp::AnimationServicesImp() :
    mpExplorer(SIGNAL_NAME(SessionExplorer, AboutToShowSessionItemContextMenu),
       Slot(this, &AnimationServicesImp::updateContextMenu))
-{
-}
+{}
 
 AnimationServicesImp::~AnimationServicesImp()
 {
@@ -70,15 +69,15 @@ AnimationServicesImp::~AnimationServicesImp()
 void AnimationServicesImp::clear()
 {
    vector<AnimationController*> controllers(mControllers);
-   for_each(controllers.begin(), controllers.end(), 
-      boost::bind(&AnimationServicesImp::destroyAnimationController, this,  _1));
+   for_each(controllers.begin(), controllers.end(),
+      boost::bind(&AnimationServicesImp::destroyAnimationController, this, _1));
    mControllers.clear();
 }
 
 const string& AnimationServicesImp::getObjectType() const
 {
-   static string type("AnimationServicesImp");
-   return type;
+   static string sType("AnimationServicesImp");
+   return sType;
 }
 
 bool AnimationServicesImp::isKindOf(const string& className) const
@@ -91,9 +90,8 @@ bool AnimationServicesImp::isKindOf(const string& className) const
    return SubjectImp::isKindOf(className);
 }
 
-AnimationController* AnimationServicesImp::createAnimationController(const string& name,
-                                                                     FrameType frameType,
-                                                                     const std::string& id)
+AnimationController* AnimationServicesImp::createAnimationController(const string& name, FrameType frameType,
+                                                                     const string& id)
 {
    if (name.empty() == true)
    {
@@ -113,7 +111,6 @@ AnimationController* AnimationServicesImp::createAnimationController(const strin
    }
 
    // Create the controller
-   
    AnimationController* pController = new AnimationControllerAdapter(frameType,
       (id.empty()) ? SessionItemImp::generateUniqueId() : id);
    if (pController != NULL)

@@ -30,11 +30,11 @@ public:
    AspamViewer();
    ~AspamViewer();
 
-   bool getInputSpecification(PlugInArgList*& pInArgList);
-   bool getOutputSpecification(PlugInArgList*& pOutArgList);
-   bool execute(PlugInArgList *pInputArgList, PlugInArgList *pOutputArgList);
+   bool getInputSpecification(PlugInArgList*& pArgList);
+   bool getOutputSpecification(PlugInArgList*& pArgList);
+   bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
    QWidget* getWidget() const;
-   void sessionClosing(Subject &pSubject, const std::string &signal, const boost::any &data);
+   void sessionClosing(Subject& pSubject, const std::string& signal, const boost::any& data);
 
    /**
     *  This slot updates the viewer dialog when aspams are added or modified.
@@ -48,13 +48,13 @@ public:
     *  @param data
     *         Data associated with the signal.
     */
-   void updateAspams(Subject &subject, const std::string &signal, const boost::any &data);
+   void updateAspams(Subject& subject, const std::string& signal, const boost::any& data);
 
-   bool serialize(SessionItemSerializer &serializer) const;
-   bool deserialize(SessionItemDeserializer &deserializer);
+   bool serialize(SessionItemSerializer& serializer) const;
+   bool deserialize(SessionItemDeserializer& deserializer);
 
 private:
-   AspamViewerDialog *mpMainWindow;
+   AspamViewerDialog* mpMainWindow;
    Service<ModelServices> mpModelServices;
    AttachmentPtr<AspamManager> mpMgrAttachment;
    AttachmentPtr<ModelServices> mpModelAttachment;

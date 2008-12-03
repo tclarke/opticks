@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef THRESHOLDUNDO_H
-#define THRESHOLDUNDO_H
+#ifndef THRESHOLDLAYERUNDO_H
+#define THRESHOLDLAYERUNDO_H
 
 #include "ColorType.h"
 #include "LayerUndo.h"

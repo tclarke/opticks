@@ -97,7 +97,7 @@ QWidget *LabeledSection::getSectionWidget() const
 
 void LabeledSection::setSectionWidget(QWidget *pNewSectionWidget)
 {
-   QGridLayout *pLayout = dynamic_cast<QGridLayout*>(layout());
+   QGridLayout* pLayout = dynamic_cast<QGridLayout*>(layout());
    VERIFYNRV(pLayout != NULL);
 
    if (mpSectionWidget != NULL)

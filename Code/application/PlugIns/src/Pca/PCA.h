@@ -50,7 +50,7 @@ public:
 
 protected:
    void m_CalculateEigenValues();
-   bool extractInputArgs(PlugInArgList* pArgList);
+   bool extractInputArgs(const PlugInArgList* pArgList);
    bool m_CreatePCACube();
    bool m_ComputePCAwhole();
    bool m_ComputePCAaoi();
@@ -76,7 +76,7 @@ private:
    unsigned int m_NumRows;
    unsigned int m_NumColumns;
    unsigned int m_NumBands;
-   double **mp_MatrixValues;
+   double** mp_MatrixValues;
    QString m_ROIname;
    unsigned int m_NumComponentsToUse;
    Service<PlugInManagerServices> mpPlugInMgr;
@@ -90,9 +90,9 @@ private:
    RasterElement* mpRaster;
    RasterElement* mpPCARaster;
    RasterElement* mpSecondMomentMatrix;
-   Step *mpStep;
+   Step* mpStep;
 
-   enum CalcMethodTypeEnum {SECONDMOMENT,COVARIANCE,CORRCOEF};
+   enum CalcMethodTypeEnum { SECONDMOMENT, COVARIANCE, CORRCOEF };
 
    /**
     * @EnumWrapper PCA::CalcMethodTypeEnum.

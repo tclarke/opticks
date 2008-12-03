@@ -8,7 +8,7 @@
  */
 
 #ifndef AOIELEMENTADAPTER_H
-#define AOIELEMENTADATPER_H
+#define AOIELEMENTADAPTER_H
 
 #include "AoiElement.h"
 #include "AoiElementImp.h"

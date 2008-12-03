@@ -35,12 +35,8 @@ extern "C" int LINKAGE opticks_get_module_interface_version()
    return 1;
 }
 
-extern "C" bool LINKAGE get_name( char **pName, 
-                                  char **pVersion, 
-                                  char **pDescription,
-                                  unsigned int *pTotalPlugIns,
-                                  char **pValidationKey,
-                                  char **pModuleId)
+extern "C" bool LINKAGE get_name(char** pName, char** pVersion, char** pDescription, unsigned int* pTotalPlugIns,
+                                 char** pValidationKey, char** pModuleId)
 {
    if (pName == NULL || pVersion == NULL || pDescription == NULL || pTotalPlugIns == NULL ||
       pValidationKey == NULL || pModuleId == NULL)
@@ -57,22 +53,16 @@ extern "C" bool LINKAGE get_name( char **pName,
       *pModuleId != NULL);
 }
 
-extern "C" bool LINKAGE initialize( External *services )
+extern "C" bool LINKAGE initialize(External* pServices)
 {
-    ModuleManager *module = ModuleManager::instance();
+   ModuleManager* pModule = ModuleManager::instance();
+   if (pModule != NULL)
+   {
+      pModule->setService(pServices);
+      return true;
+   }
 
-    if (module) {
-
-       //
-       // Initialize Reference to various Services
-       //
-
-       module->setService( services ); 
-
-       return true;
-    }
-
-    return false;
+   return false;
 }
 
 extern "C" bool LINKAGE instantiate_interface(unsigned int plugInNumber, PlugIn** interfaceAddress)
@@ -90,5 +80,5 @@ extern "C" bool LINKAGE instantiate_interface(unsigned int plugInNumber, PlugIn*
 
 extern "C" bool LINKAGE destroy()
 {
-    return true;
+   return true;
 }

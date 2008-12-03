@@ -31,8 +31,8 @@ public:
    DataElement* copy(const std::string& name, DataElement* pParent) const;
 
    // base class obligations
-   bool toXml(XMLWriter* pXml) const;
-   bool fromXml(DOMNode* pDocument, unsigned int version);
+   bool toXml(XMLWriter* pWriter) const;
+   bool fromXml(DOMNode* pNode, unsigned int version);
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
 

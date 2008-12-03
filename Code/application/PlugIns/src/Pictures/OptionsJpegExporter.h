@@ -33,44 +33,44 @@ public:
 
    static const std::string& getName()
    {
-      static std::string var = "Jpeg Exporter Options";
-      return var;
+      static std::string sName = "Jpeg Exporter Options";
+      return sName;
    }
 
    static const std::string& getOptionName()
    {
-      static std::string var = "Export/Jpeg";
-      return var;
+      static std::string sOptionName = "Export/Jpeg";
+      return sOptionName;
    }
 
    static const std::string& getDescription()
    {
-      static std::string var = "Widget to display jpeg exporter related options";
-      return var;
+      static std::string sDescription = "Widget to display jpeg exporter related options";
+      return sDescription;
    }
 
    static const std::string& getShortDescription()
    {
-      static std::string var = "Widget to display jpeg exporter related options";
-      return var;
+      static std::string sShortDescription = "Widget to display jpeg exporter related options";
+      return sShortDescription;
    }
 
    static const std::string& getCreator()
    {
-      static std::string var = "Ball Aerospace & Technologies Corp.";
-      return var;
+      static std::string sCreator = "Ball Aerospace & Technologies Corp.";
+      return sCreator;
    }
 
    static const std::string& getCopyright()
    {
-      static std::string var = APP_COPYRIGHT_MSG;
-      return var;
+      static std::string sCopyright = APP_COPYRIGHT_MSG;
+      return sCopyright;
    }
 
    static const std::string& getVersion()
    {
-      static std::string var = APP_VERSION_NUMBER;
-      return var;
+      static std::string sVersion = APP_VERSION_NUMBER;
+      return sVersion;
    }
 
    static bool isProduction()
@@ -80,13 +80,13 @@ public:
 
    static const std::string& getDescriptorId()
    {
-      static std::string var = "{1A0EF762-2C18-44b4-8D71-6396AB6A40C2}";
-      return var;
+      static std::string sId = "{1A0EF762-2C18-44b4-8D71-6396AB6A40C2}";
+      return sId;
    }
 
 private:
    QCheckBox* mpSaveSettings;
-   QSlider *mpQualitySlider;
+   QSlider* mpQualitySlider;
 };
 
 #endif

@@ -72,8 +72,8 @@ public:
    static void getDataDescriptorTypes(std::vector<std::string>& classList);
    static bool isKindOfDataDescriptor(const std::string& className);
 
-   void setImporterName(const std::string &name) { mImporterName = name; }
-   std::string getImporterName() const { return mImporterName; }
+   void setImporterName(const std::string& name);
+   std::string getImporterName() const;
 
 private:
    void generateParentDesignator();

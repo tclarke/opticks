@@ -31,19 +31,18 @@ public:
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
 
-   ClassificationLayerImp &operator =(const ClassificationLayerImp &classificationLayer);
+   ClassificationLayerImp& operator =(const ClassificationLayerImp& classificationLayer);
 
    GraphicObject* addObject(const GraphicObjectType& objectType, LocationType point);
    bool removeObject(GraphicObject* pObject, bool bDelete);
    std::list<GraphicObject*> getObjects() const;
    std::list<GraphicObject*> getObjects(const GraphicObjectType& objectType) const;
-   GraphicObject* getObjectByName(const std::string &name) const { return NULL; }
+   GraphicObject* getObjectByName(const std::string& name) const;
    bool selectObject(GraphicObject* pObject);
    void selectAllObjects();
    bool isObjectSelected(GraphicObject* pObject) const;
    void getSelectedObjects(std::list<GraphicObject*>& selectedObjects) const;
-   void getSelectedObjects(const GraphicObjectType& objectType,
-      std::list<GraphicObject*>& selectedObjects) const;
+   void getSelectedObjects(const GraphicObjectType& objectType, std::list<GraphicObject*>& selectedObjects) const;
    unsigned int getNumSelectedObjects() const;
    unsigned int getNumSelectedObjects(const GraphicObjectType& objectType) const;
    bool deselectObject(GraphicObject* pObject);
@@ -98,8 +97,8 @@ protected slots:
 private:
    FontImp mClassificationFont;
    QColor mClassificationColor;
-   TextObjectImp *mpTopText;
-   TextObjectImp *mpBottomText;
+   TextObjectImp* mpTopText;
+   TextObjectImp* mpBottomText;
 };
 
 #define CLASSIFICATIONLAYERADAPTEREXTENSION_CLASSES \

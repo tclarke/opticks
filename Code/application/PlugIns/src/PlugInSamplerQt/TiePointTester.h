@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef TIE_POINT_TESTER_H
-#define TIE_POINT_TESTER_H
+#ifndef TIEPOINTTESTER_H
+#define TIEPOINTTESTER_H
 
 #include <math.h>
 
@@ -30,6 +30,14 @@ class TiePointTesterGuiImp;
  */
 class TiePointTester : public AlgorithmPlugIn
 {
+public:
+   TiePointTester();
+   ~TiePointTester();
+
+   // obligations from base class
+   bool hasAbort();
+   bool needToRunAlgorithm();
+
 private:
    // obligations from base class
    bool canRunBatch() const;
@@ -45,16 +53,8 @@ private:
 
    // data members
    Progress* mpProgress;
-   TiePointTesterAlgorithm *mpTesterAlg;
+   TiePointTesterAlgorithm* mpTesterAlg;
    TiePointTesterInputs mInputs;
-
-public:
-   TiePointTester();
-   ~TiePointTester();
-
-   // obligations from base class
-   bool hasAbort();
-   bool needToRunAlgorithm();
 };
 
 #endif

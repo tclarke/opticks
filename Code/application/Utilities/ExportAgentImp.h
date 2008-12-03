@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef EXPORT_AGENT_IMP_H
-#define EXPORT_AGENT_IMP_H
+#ifndef EXPORTAGENTIMP_H
+#define EXPORTAGENTIMP_H
 
 #include "ExecutableAgentImp.h"
 #include "TypesFile.h"
@@ -54,7 +54,7 @@ protected:
    void populateArgValues(PlugInArgList *pArgList);
 
 private:
-   SessionItem *mpItem;
+   SessionItem* mpItem;
    FileDescriptor* mpFileDescriptor;
 };
 

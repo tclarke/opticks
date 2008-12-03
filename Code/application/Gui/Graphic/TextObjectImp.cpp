@@ -7,15 +7,12 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <math.h>
-
 #include <QtGui/QImage>
 #include <QtGui/QPainter>
 
-#include "glCommon.h"
-#include "TextObjectImp.h"
 #include "DrawUtil.h"
 #include "Endian.h"
+#include "glCommon.h"
 #include "GraphicLayer.h"
 #include "GraphicLayerImp.h"
 #include "MipMappedTextures.h"
@@ -23,16 +20,23 @@
 #include "OrthographicView.h"
 #include "ProductView.h"
 #include "SpatialDataView.h"
+#include "TextObjectImp.h"
 #include "View.h"
 
-#include <vector>
+#include <math.h>
+
 #include <string>
+#include <vector>
 using namespace std;
 
 TextObjectImp::TextObjectImp(const string& id, GraphicObjectType type, GraphicLayer* pLayer,
                              LocationType pixelCoord) :
    RectangleObjectImp(id, type, pLayer, pixelCoord),
    mTextureId(0),
+   mTextureWidth(1),
+   mTextureHeight(1),
+   mDataWidth(0),
+   mDataHeight(0),
    mUpdateTexture(true),
    mUpdateBoundingBox(true)
 {
@@ -47,7 +51,7 @@ TextObjectImp::TextObjectImp(const string& id, GraphicObjectType type, GraphicLa
 
 TextObjectImp::~TextObjectImp()
 {
-   while(!mTextureIdStack.empty())
+   while (!mTextureIdStack.empty())
    {
       // this does not attempt to delete any textures
       // except the top level texture since the GLContext
@@ -97,14 +101,12 @@ void TextObjectImp::drawTexture() const
 
    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,   GL_LINEAR_MIPMAP_LINEAR);
+   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
    glEnable(GL_BLEND);
    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-   double maxS, maxT;
-
-   maxS = mDataWidth / (double) mTextureWidth;
-   maxT = mDataHeight / (double) mTextureHeight;
+   double maxS = mDataWidth / static_cast<double>(mTextureWidth);
+   double maxT = mDataHeight / static_cast<double>(mTextureHeight);
 
    ColorType color = getTextColor();
    glBegin(GL_QUADS);
@@ -188,10 +190,10 @@ void TextObjectImp::drawTexture() const
    glDisable(GL_TEXTURE_2D);
    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-   if(!mTextureIdStack.empty())
+   if (!mTextureIdStack.empty())
    {
-      TextObjectImp *pNonConst = const_cast<TextObjectImp*>(this);
-      if(mTextureId != 0)
+      TextObjectImp* pNonConst = const_cast<TextObjectImp*>(this);
+      if (mTextureId != 0)
       {
          glDeleteTextures(1, &mTextureId);
       }
@@ -202,11 +204,6 @@ void TextObjectImp::drawTexture() const
 
 void TextObjectImp::updateTexture()
 {
-   if (mUpdateTexture == false)
-   {
-      return;
-   }
-
    if (mTextureId != 0)
    {
       glDeleteTextures(1, &mTextureId);
@@ -261,23 +258,20 @@ void TextObjectImp::updateTexture()
    mDataWidth = iWidth;
    mDataHeight = iHeight;
 
-   mTextureWidth = pow(2.0, ceil(log10((double) iWidth) / log10(2.0))) + 0.5;
-   mTextureHeight = pow(2.0, ceil(log10((double) iHeight) / log10(2.0))) + 0.5;
+   mTextureWidth = pow(2.0, ceil(log10(static_cast<double>(iWidth)) / log10(2.0))) + 0.5;
+   mTextureHeight = pow(2.0, ceil(log10(static_cast<double>(iHeight)) / log10(2.0))) + 0.5;
 
    int bufSize = mTextureWidth * mTextureHeight;
    vector<unsigned int> texData(bufSize, 0);
 
-   unsigned int *target;
-
-   int i, j;
-   target = &texData[0];
-   for (j=0; j<iHeight; j++)
+   unsigned int* target = &texData[0];
+   for (int j = 0; j < iHeight; j++)
    {
       target = &texData[mTextureWidth * j];
-      for (i=0; i<iWidth; i++)
+      for (int i = 0; i < iWidth; i++)
       {
-         QRgb rgb = image.pixel(i,j);
-         if (image.pixel(i,j) != 0xffffffff)
+         QRgb rgb = image.pixel(i, j);
+         if (image.pixel(i, j) != 0xffffffff)
          {
             *target = 0xffffffff;
          }
@@ -298,11 +292,11 @@ void TextObjectImp::updateTexture()
 
    glEnable(GL_TEXTURE_2D);
    glBindTexture(GL_TEXTURE_2D, mTextureId);
-   glTexParameterf(GL_TEXTURE_2D,  GL_TEXTURE_WRAP_S, GL_CLAMP);
-   glTexParameterf(GL_TEXTURE_2D,  GL_TEXTURE_WRAP_T, GL_CLAMP);
+   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,   GL_LINEAR_MIPMAP_LINEAR);
-   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,   GL_LINEAR);
+   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
    gluBuild2DMipmaps(GL_TEXTURE_2D, 4, mTextureWidth, mTextureHeight, GL_RGBA, GL_UNSIGNED_BYTE, &texData[0]);
    glDisable(GL_TEXTURE_2D);
@@ -392,11 +386,6 @@ bool TextObjectImp::isKindOf(const string& className) const
 
 void TextObjectImp::updateBoundingBox()
 {
-   if (mUpdateBoundingBox == false)
-   {
-      return;
-   }
-
    // Get the width and height of the bounding box in screen pixels based on the scaled text image size
    int iWidth = 0;
    int iHeight = 0;
@@ -424,16 +413,11 @@ void TextObjectImp::updateBoundingBox()
    LocationType llCorner = getLlCorner();
    LocationType urCorner = getUrCorner();
 
-   // Use the lower left corner as the anchor and compute the data coordinate of the upper left corner
+   // Use the lower left corner as the anchor and compute the data coordinate of the upper right corner
    GraphicLayer* pLayer = getLayer();
    if (pLayer != NULL)
    {
-      // Determine if the scene is flipped
-      bool bHorizontalFlip = false;
-      bool bVerticalFlip = false;
-      pLayer->isFlipped(llCorner, urCorner, bHorizontalFlip, bVerticalFlip);
-
-      // Compute the upper left coordinate
+      // Compute the upper right coordinate
       PerspectiveView* pView = dynamic_cast<PerspectiveView*>(pLayer->getView());
       if (pView != NULL)
       {
@@ -441,26 +425,8 @@ void TextObjectImp::updateBoundingBox()
          double xScale = zoomFactor / pLayer->getXScaleFactor();
          double yScale = zoomFactor / pLayer->getYScaleFactor();
 
-         if ((bHorizontalFlip == false) && (bVerticalFlip == false))
-         {
-            urCorner.mX = llCorner.mX + (iWidth * xScale);
-            urCorner.mY = llCorner.mY + (iHeight * yScale);
-         }
-         else if ((bHorizontalFlip == true) && (bVerticalFlip == false))
-         {
-            urCorner.mX = llCorner.mX - (iWidth * xScale);
-            urCorner.mY = llCorner.mY + (iHeight * yScale);
-         }
-         else if ((bHorizontalFlip == true) && (bVerticalFlip == true))
-         {
-            urCorner.mX = llCorner.mX - (iWidth * xScale);
-            urCorner.mY = llCorner.mY - (iHeight * yScale);
-         }
-         else if ((bHorizontalFlip == false) && (bVerticalFlip == true))
-         {
-            urCorner.mX = llCorner.mX + (iWidth * xScale);
-            urCorner.mY = llCorner.mY - (iHeight * yScale);
-         }
+         urCorner.mX = llCorner.mX + (iWidth * xScale);
+         urCorner.mY = llCorner.mY + (iHeight * yScale);
       }
 
       if (dynamic_cast<OrthographicView*>(pLayer->getView()) != NULL)
@@ -468,23 +434,7 @@ void TextObjectImp::updateBoundingBox()
          double dScreenX = 0.0;
          double dScreenY = 0.0;
          pLayer->translateDataToScreen(llCorner.mX, llCorner.mY, dScreenX, dScreenY);
-
-         if ((bHorizontalFlip == false) && (bVerticalFlip == false))
-         {
-            pLayer->translateScreenToData(dScreenX + iWidth, dScreenY + iHeight, urCorner.mX, urCorner.mY);
-         }
-         else if ((bHorizontalFlip == true) && (bVerticalFlip == false))
-         {
-            pLayer->translateScreenToData(dScreenX - iWidth, dScreenY + iHeight, urCorner.mX, urCorner.mY);
-         }
-         else if ((bHorizontalFlip == true) && (bVerticalFlip == true))
-         {
-            pLayer->translateScreenToData(dScreenX - iWidth, dScreenY - iHeight, urCorner.mX, urCorner.mY);
-         }
-         else if ((bHorizontalFlip == false) && (bVerticalFlip == true))
-         {
-            pLayer->translateScreenToData(dScreenX + iWidth, dScreenY - iHeight, urCorner.mX, urCorner.mY);
-         }
+         pLayer->translateScreenToData(dScreenX + iWidth, dScreenY + iHeight, urCorner.mX, urCorner.mY);
       }
    }
    else
@@ -503,7 +453,7 @@ void TextObjectImp::updateBoundingBox()
 bool TextObjectImp::processMousePress(LocationType screenCoord, Qt::MouseButton button, Qt::MouseButtons buttons,
                                       Qt::KeyboardModifiers modifiers)
 {
-   GraphicLayerImp *pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
+   GraphicLayerImp* pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
    VERIFY(pLayer != NULL);
 
    bool bValidText = false;
@@ -524,7 +474,7 @@ bool TextObjectImp::processMouseMove(LocationType screenCoord, Qt::MouseButton b
                                      Qt::KeyboardModifiers modifiers)
 {
    // should never get here
-   GraphicLayerImp *pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
+   GraphicLayerImp* pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
    VERIFY(pLayer != NULL);
    pLayer->completeInsertion(false);
 
@@ -535,7 +485,7 @@ bool TextObjectImp::processMouseRelease(LocationType screenCoord, Qt::MouseButto
                                         Qt::KeyboardModifiers modifiers)
 {
    // should never get here
-   GraphicLayerImp *pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
+   GraphicLayerImp* pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
    VERIFY(pLayer != NULL);
    pLayer->completeInsertion(false);
 

@@ -41,6 +41,7 @@ public:
    void expandSessionItem(SessionItem* pItem);
    void collapseSessionItem(SessionItem* pItem);
    bool isSessionItemExpanded(SessionItem* pItem) const;
+   void initialize();
 
    void updateData(SessionItem* pItem);
 

@@ -17,15 +17,15 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(CODE_DIR)\Release\Toolkit\doc\html"
-			IntermediateDirectory="$(CODE_DIR)\Release\Toolkit\doc\html"
+			OutputDirectory="$(BuildDir)\$(PlatformName)\$(ConfigurationName)\$(ProjectName)"
+			IntermediateDirectory="$(BuildDir)\$(PlatformName)\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="0"
 			InheritedPropertySheets="..\CompileSettings\Macros.vsprops"
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="&quot;$(CODE_DIR)\build.py&quot; --build-doxygen"
-				ReBuildCommandLine="&quot;$(CODE_DIR)\build.py&quot; --build-doxygen"
+				BuildCommandLine="&quot;$(CODE_DIR)\build.py&quot; --build-doxygen=html -v"
+				ReBuildCommandLine="&quot;$(CODE_DIR)\build.py&quot; --build-doxygen=html -v"
 				CleanCommandLine=""
 				Output="$(CODE_DIR)\Release\Toolkit\doc\html\index.html"
 				PreprocessorDefinitions="WIN32;_DEBUG"
@@ -38,15 +38,15 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(CODE_DIR)\Release\Toolkit\doc\html"
-			IntermediateDirectory="$(CODE_DIR)\Release\Toolkit\doc\html"
+			OutputDirectory="$(BuildDir)\$(PlatformName)\$(ConfigurationName)\$(ProjectName)"
+			IntermediateDirectory="$(BuildDir)\$(PlatformName)\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="0"
 			InheritedPropertySheets="..\CompileSettings\Macros.vsprops"
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="&quot;$(CODE_DIR)\build.py&quot; --build-doxygen"
-				ReBuildCommandLine="&quot;$(CODE_DIR)\build.py&quot; --build-doxygen"
+				BuildCommandLine="&quot;$(CODE_DIR)\build.py&quot; --build-doxygen=html -v"
+				ReBuildCommandLine="&quot;$(CODE_DIR)\build.py&quot; --build-doxygen=html -v"
 				CleanCommandLine=""
 				Output="$(CODE_DIR)\Release\Toolkit\doc\html\index.html"
 				PreprocessorDefinitions="WIN32;NDEBUG"
@@ -69,11 +69,27 @@
 				>
 			</File>
 			<File
+				RelativePath=".\coordinate_systems.txt"
+				>
+			</File>
+			<File
 				RelativePath=".\howto_buildenvironment.txt"
 				>
 			</File>
 			<File
+				RelativePath=".\howto_buildtutorials.txt"
+				>
+			</File>
+			<File
+				RelativePath=".\howto_customdraganddrop.txt"
+				>
+			</File>
+			<File
 				RelativePath=".\howto_importer.txt"
+				>
+			</File>
+			<File
+				RelativePath=".\howto_sessionsave.txt"
 				>
 			</File>
 			<File
@@ -90,6 +106,10 @@
 			</File>
 			<File
 				RelativePath=".\howto_tutorial4.txt"
+				>
+			</File>
+			<File
+				RelativePath=".\howto_tutorial5.txt"
 				>
 			</File>
 			<File
@@ -133,11 +153,11 @@
 			Name="Doxygen Configuration"
 			>
 			<File
-				RelativePath="..\..\Release\Toolkit\doc\application.dox"
+				RelativePath=".\application.dox"
 				>
 			</File>
 			<File
-				RelativePath="..\..\Release\Toolkit\doc\trailer.txt"
+				RelativePath=".\trailer.html"
 				>
 			</File>
 		</Filter>
@@ -145,7 +165,7 @@
 			Name="Generated Doxygen"
 			>
 			<File
-				RelativePath="..\..\Release\Toolkit\doc\html\index.html"
+				RelativePath="$(OPTICKS_CODE_DIR)\Build\DoxygenOutput\html\index.html"
 				>
 			</File>
 		</Filter>

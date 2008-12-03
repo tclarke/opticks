@@ -11,8 +11,8 @@
 
 using namespace std;
 
-SessionExplorerAdapter::SessionExplorerAdapter(const string& id, QWidget* parent) :
-   SessionExplorerImp(id, "Session Explorer", parent)
+SessionExplorerAdapter::SessionExplorerAdapter(const string& id, QWidget* pParent) :
+   SessionExplorerImp(id, "Session Explorer", pParent)
 {
 }
 

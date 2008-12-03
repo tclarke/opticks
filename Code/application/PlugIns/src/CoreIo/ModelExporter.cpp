@@ -29,7 +29,8 @@ class AoiElement;
 class GcpList;
 class TiePointList;
 
-ModelExporter::ModelExporter(const std::string &dataElementSubclass) : mDataElementSubclass(dataElementSubclass)
+ModelExporter::ModelExporter(const string& dataElementSubclass) :
+   mDataElementSubclass(dataElementSubclass)
 {
    string userFriendlyName = mDataElementSubclass;
    string extensions;
@@ -75,7 +76,7 @@ bool ModelExporter::getInputSpecification(PlugInArgList*& pInArgList)
    pInArgList = mpPlugInManager->getPlugInArgList();
    VERIFY(pInArgList != NULL);
 
-   PlugInArg *pArg;
+   PlugInArg* pArg = NULL;
    VERIFY((pArg = mpPlugInManager->getPlugInArg()) != NULL);
    pArg->setName(ProgressArg());
    pArg->setType("Progress");
@@ -103,11 +104,11 @@ bool ModelExporter::getOutputSpecification(PlugInArgList*& pOutArgList)
    return true;
 }
 
-bool ModelExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
+bool ModelExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
-   Progress *pProgress = NULL;
-   FileDescriptor *pFileDescriptor = NULL;
-   DataElement *pElement = NULL;
+   Progress* pProgress = NULL;
+   FileDescriptor* pFileDescriptor = NULL;
+   DataElement* pElement = NULL;
 
    StepResource pStep("Export model element", "app", "2BF48AAB-4832-4694-8583-882A8D584E97");
 
@@ -119,9 +120,9 @@ bool ModelExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
       pMsg->addBooleanProperty("Progress Present", (pProgress != NULL));
 
       pFileDescriptor = pInArgList->getPlugInArgValue<FileDescriptor>(ExportDescriptorArg());
-      if(pFileDescriptor == NULL)
+      if (pFileDescriptor == NULL)
       {
-         if(pProgress != NULL)
+         if (pProgress != NULL)
          {
             pProgress->updateProgress("No file specified", 100, ERRORS);
          }
@@ -131,9 +132,9 @@ bool ModelExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
       pMsg->addProperty("Destination", pFileDescriptor->getFilename());
 
       pElement = pInArgList->getPlugInArgValueUnsafe<DataElement>(ExportItemArg());
-      if(pElement == NULL)
+      if (pElement == NULL)
       {
-         if(pProgress != NULL)
+         if (pProgress != NULL)
          {
             pProgress->updateProgress("No model element specified", 100, ERRORS);
          }
@@ -143,14 +144,14 @@ bool ModelExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
       pMsg->addProperty("Name", pElement->getName());
    }
 
-   if(pProgress != NULL)
+   if (pProgress != NULL)
    {
       pProgress->updateProgress("Open output file", 10, NORMAL);
    }
-   FILE *pFile = fopen(pFileDescriptor->getFilename().getFullPathAndName().c_str(), "w");
-   if(pFile == NULL)
+   FILE* pFile = fopen(pFileDescriptor->getFilename().getFullPathAndName().c_str(), "w");
+   if (pFile == NULL)
    {
-      if(pProgress != NULL)
+      if (pProgress != NULL)
       {
          pProgress->updateProgress("File can not be created", 100, ERRORS);
       }
@@ -158,18 +159,18 @@ bool ModelExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
       return false;
    }
 
-   DataDescriptor *pElementDescriptor = pElement->getDataDescriptor();
+   DataDescriptor* pElementDescriptor = pElement->getDataDescriptor();
    VERIFY(pElementDescriptor != NULL);
 
-   if(pProgress != NULL)
+   if (pProgress != NULL)
    {
       pProgress->updateProgress("Save element", 20, NORMAL);
    }
    string elementName = pElementDescriptor->getType();
    XMLWriter xml(elementName.c_str(), Service<MessageLogMgr>()->getLog());
-   if(!pElement->toXml(&xml))
+   if (!pElement->toXml(&xml))
    {
-      if(pProgress != NULL)
+      if (pProgress != NULL)
       {
          pProgress->updateProgress("Error saving model element", 100, ERRORS);
       }
@@ -182,7 +183,7 @@ bool ModelExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
    }
    fclose(pFile);
 
-   if(pProgress != NULL)
+   if (pProgress != NULL)
    {
       pProgress->updateProgress("Finished saving the model element", 100, NORMAL);
    }

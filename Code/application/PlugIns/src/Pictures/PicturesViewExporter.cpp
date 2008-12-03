@@ -48,7 +48,7 @@ bool PicturesViewExporter::getInputSpecification(PlugInArgList*& pArgList)
 
 bool PicturesViewExporter::extractInputArgs(const PlugInArgList* pInArgList)
 {
-   if(!PicturesExporter::extractInputArgs(pInArgList))
+   if (!PicturesExporter::extractInputArgs(pInArgList))
    {
       return false;
    }
@@ -60,14 +60,14 @@ bool PicturesViewExporter::extractInputArgs(const PlugInArgList* pInArgList)
 
 bool PicturesViewExporter::generateImage(QImage &image)
 {
-   View *pView = dynamic_cast<View*>(mpItem);
+   View* pView = dynamic_cast<View*>(mpItem);
    if (pView == NULL)
    {
       return false;
    }
 
    QSize imageSize = image.size();
-   if(imageSize == QSize())
+   if (imageSize == QSize())
    {
       pView->getCurrentImage(image);
 
@@ -123,33 +123,35 @@ bool PicturesViewExporter::generateImage(QImage &image)
    }
    else
    {
-      QSize subImageSize(512,512);
+      QSize subImageSize(512, 512);
       QPoint origin(0, imageSize.height() - subImageSize.height());
       QPainter painter(&image);
       int segment = 0;
-      View::SubImageIterator *pSubImage = pView->getSubImageIterator(imageSize, subImageSize);
-      int totalX, totalTiles;
+      View::SubImageIterator* pSubImage = pView->getSubImageIterator(imageSize, subImageSize);
+      int totalX;
+      int totalTiles;
       pSubImage->count(totalX, totalTiles);
       totalTiles *= totalX;
-      while(pSubImage->hasNext())
+      while (pSubImage->hasNext())
       {
          QImage subImage;
-         if(!pSubImage->next(subImage))
+         if (!pSubImage->next(subImage))
          {
             break;
          }
          painter.drawImage(origin, subImage);
          int newX = origin.x() + subImage.width();
          int newY = origin.y();
-         if(newX >= imageSize.width())
+         if (newX >= imageSize.width())
          {
             newY -= subImage.height();
             newX = 0;
          }
          origin = QPoint(newX, newY);
-         if(mpProgress != NULL)
+         if (mpProgress != NULL)
          {
-            int x, y;
+            int x;
+            int y;
             pSubImage->location(x, y);
             int tileNumber = y * totalX + x;
             QString msg = QString("Processing sub-image %1 of %2...").arg(y * totalX + x).arg(totalTiles);
@@ -157,7 +159,7 @@ bool PicturesViewExporter::generateImage(QImage &image)
          }
       }
       delete pSubImage;
-      if(mpProgress != NULL)
+      if (mpProgress != NULL)
       {
          mpProgress->updateProgress("Saving product...", 99, NORMAL);
       }

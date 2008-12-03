@@ -7,14 +7,14 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "MeasurementLayerAdapter.h"
 #include "AnnotationElement.h"
+#include "MeasurementLayerAdapter.h"
 
 using namespace std;
 
 MeasurementLayerAdapter::MeasurementLayerAdapter(const string& id, const string& layerName,
-                                                       AnnotationElement* pElement) :
-MeasurementLayerImp(id, layerName, pElement)
+                                                 AnnotationElement* pElement) :
+   MeasurementLayerImp(id, layerName, pElement)
 {
 }
 
@@ -25,8 +25,8 @@ MeasurementLayerAdapter::~MeasurementLayerAdapter()
 
 const string& MeasurementLayerAdapter::getObjectType() const
 {
-   static string type("MeasurementLayerAdapter");
-   return type;
+   static string sType("MeasurementLayerAdapter");
+   return sType;
 }
 
 bool MeasurementLayerAdapter::isKindOf(const string& className) const
@@ -51,7 +51,7 @@ Layer* MeasurementLayerAdapter::copy(const string& layerName, bool bCopyElement,
    // Get the annotation
    AnnotationElement* pAnnotation = NULL;
 
-   AnnotationElement* pCurrentAnnotation  = dynamic_cast<AnnotationElement*>(getDataElement());
+   AnnotationElement* pCurrentAnnotation = dynamic_cast<AnnotationElement*>(getDataElement());
    if (pCurrentAnnotation != NULL)
    {
       string elementName = name;

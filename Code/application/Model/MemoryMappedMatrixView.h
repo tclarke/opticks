@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef _MEMORYMAPPEDMATRIXVIEW
-#define _MEMORYMAPPEDMATRIXVIEW
+#ifndef MEMORYMAPPEDMATRIXVIEW_H
+#define MEMORYMAPPEDMATRIXVIEW_H
 
 #include "AppConfig.h"
 #include "TypesFile.h"
@@ -85,18 +83,15 @@ private:
    unsigned int mRequestedSegmentSize;
 
    unsigned int mGranularity;
-   unsigned int currentSegment;
 
    unsigned char* mpBlock;
    size_t mBlockSize;
 
-   int64_t mRequestedAddress;
    int64_t mAddressOffset;
    int64_t mAddress;
-   int64_t mTotalSize;
 
    int64_t mHeaderOffset;
    int64_t mFileSize;
 };
 
-#endif  // _MEMORYMAPPEDMATRIXVIEW
+#endif

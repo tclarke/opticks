@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef RASTERUNDO_H
-#define RASTERUNDO_H
+#ifndef RASTERLAYERUNDO_H
+#define RASTERLAYERUNDO_H
 
 #include "AttachmentPtr.h"
 #include "ColorMap.h"

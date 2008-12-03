@@ -95,11 +95,11 @@ BatchExportDlg::BatchExportDlg(ExporterResource& exporter, const vector<PlugInDe
          if (filters.empty() == false)
          {
             QString strFilters = QString::fromStdString(filters);
-            QStringList filters = strFilters.split(";;", QString::SkipEmptyParts);
+            QStringList filterList = strFilters.split(";;", QString::SkipEmptyParts);
 
-            for (int i = 0; i < filters.count(); ++i)
+            for (int i = 0; i < filterList.count(); ++i)
             {
-               QString strFilter = filters[i];
+               QString strFilter = filterList[i];
                if (strFilter.isEmpty() == false)
                {
                   QFileInfo filterInfo(strFilter);

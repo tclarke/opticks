@@ -19,8 +19,8 @@ using namespace std;
 
 GcpGui::GcpGui(int maxOrder, const vector<string>& gcpLists, RasterElement* pRasterElement, QWidget* pParent) :
    QWidget(pParent),
-   mpRasterElement(pRasterElement),
-   mMaxOrder(maxOrder)
+   mMaxOrder(maxOrder),
+   mpRasterElement(pRasterElement)
 {
    // Gcp list combo
    QLabel* pGcpListLabel = new QLabel("GCP List:", this);
@@ -69,7 +69,7 @@ GcpGui::GcpGui(int maxOrder, const vector<string>& gcpLists, RasterElement* pRas
    connect(mpOrderSpin, SIGNAL(valueChanged(int)), this, SLOT(validateOrder(int)));
 }
 
-GcpGui::~GcpGui(void)
+GcpGui::~GcpGui()
 {
 }
 
@@ -166,7 +166,7 @@ bool GcpGui::validateOrder(int iOrder)
    }
    else
    {
-      int iGcps = pGcpList->getSelectedPoints().size();
+      int iGcps = static_cast<int>(pGcpList->getSelectedPoints().size());
       strRequired.sprintf("%d GCPs required, %d present", iGcpsRequired, iGcps);
       if (iGcps < iGcpsRequired)
       {

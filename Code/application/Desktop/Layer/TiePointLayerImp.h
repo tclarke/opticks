@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef TIE_POINT_LAYER_IMP_H
-#define TIE_POINT_LAYER_IMP_H
+#ifndef TIEPOINTLAYERIMP_H
+#define TIEPOINTLAYERIMP_H
 
 #include <QtCore/QPoint>
 #include <QtGui/QColor>
@@ -49,8 +49,8 @@ public:
    void enableLabels(bool enabled);
    bool areLabelsEnabled() const;
 
-   bool isMission() const { return mIsMission; }
-   void setIsMission(bool isMission) { mIsMission = isMission; }
+   bool isMission() const;
+   void setIsMission(bool isMission);
 
    bool acceptsMouseEvents() const;
    QCursor getMouseCursor() const;

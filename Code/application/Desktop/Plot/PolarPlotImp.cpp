@@ -137,7 +137,7 @@ View* PolarPlotImp::copy(QGLContext* pDrawContext, QWidget* pParent) const
 
 bool PolarPlotImp::copy(View *pView) const
 {
-   PolarPlotImp *pViewImp = dynamic_cast<PolarPlotImp*>(pView);
+   PolarPlotImp* pViewImp = dynamic_cast<PolarPlotImp*>(pView);
    if (pViewImp != NULL)
    {
       UndoLock lock(pView);
@@ -203,36 +203,38 @@ void PolarPlotImp::setMinorGridlines(bool bShow)
 
 bool PolarPlotImp::toXml(XMLWriter* pXml) const
 {
-   if(!PlotViewImp::toXml(pXml))
+   if (!PlotViewImp::toXml(pXml))
    {
       return false;
    }
 
    pXml->pushAddPoint(pXml->addElement("gridLines"));
-   if(!mGridlines.toXml(pXml))
+   if (!mGridlines.toXml(pXml))
    {
       return false;
    }
-   pXml->popAddPoint();
 
+   pXml->popAddPoint();
    return true;
 }
 
 bool PolarPlotImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   if(!PlotViewImp::fromXml(pDocument, version))
+   if (!PlotViewImp::fromXml(pDocument, version))
    {
       return false;
    }
-   for(DOMNode *pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
+
+   for (DOMNode* pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
    {
-      if(XMLString::equals(pChld->getNodeName(), X("gridLines")))
+      if (XMLString::equals(pChld->getNodeName(), X("gridLines")))
       {
-         if(!mGridlines.fromXml(pChld, version))
+         if (!mGridlines.fromXml(pChld, version))
          {
             return false;
          }
       }
    }
+
    return true;
 }

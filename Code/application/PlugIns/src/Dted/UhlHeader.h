@@ -6,8 +6,6 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
- 
-
 
 #ifndef UHLHEADER_H
 #define UHLHEADER_H
@@ -15,26 +13,15 @@
 #include <stdio.h>
 
 // DL06242003: #define values for UHL Header
-const int UHL_SIZE                 = 3;
-const int UHL_SEC_CODE_SIZE        = 3;
-const int UHL_UNIQUE_REF_SIZE      = 12;
-const int UHL_RESERVED_SIZE        = 24;
-const int UHL_PROPER_TOTAL         = 56;
+const int UHL_SIZE = 3;
+const int UHL_SEC_CODE_SIZE = 3;
+const int UHL_UNIQUE_REF_SIZE = 12;
+const int UHL_RESERVED_SIZE = 24;
+const int UHL_PROPER_TOTAL = 56;
 
 // NOTE: YOU MUST DO A TRY .. CATCH(std::string) for the FILE* constructor
 class UhlHeader
 {
-   char mUhl[UHL_SIZE + 1];
-   char mOne;
-   float mLatitude, mLongitude; // note these will be read in as DDDMMSSH, and converted to FLOATS
-   float mLatInterval, mLongInterval; // note these are read as DDD.D and must be converted to FLOATS
-   int mAva; // note these will be read in as chars, but need be read
-   char mSec_code[UHL_SEC_CODE_SIZE + 1];
-   char mUnique_ref[UHL_UNIQUE_REF_SIZE + 1];
-   int mLatCount, mLongCount;
-   char mMultipleAccuracy; // will need to be converted to a BOOL eventually
-   char mReserved[UHL_RESERVED_SIZE + 1];
-
 public:
    /*
     * Public constructor - does nothing except initialize all values to 0
@@ -52,8 +39,21 @@ public:
    bool readHeader(FILE* pInputFile);
    int getLatCount();
    int getLongCount();
+
+private:
+   char mUhl[UHL_SIZE + 1];
+   char mOne;
+   float mLatitude;     // note these will be read in as DDDMMSSH, and converted to FLOATS
+   float mLongitude;    // note these will be read in as DDDMMSSH, and converted to FLOATS
+   float mLatInterval;  // note these are read as DDD.D and must be converted to FLOATS
+   float mLongInterval; // note these are read as DDD.D and must be converted to FLOATS
+   int mAva; // note these will be read in as chars, but need be read
+   char mSec_code[UHL_SEC_CODE_SIZE + 1];
+   char mUnique_ref[UHL_UNIQUE_REF_SIZE + 1];
+   int mLatCount;
+   int mLongCount;
+   char mMultipleAccuracy; // will need to be converted to a BOOL eventually
+   char mReserved[UHL_RESERVED_SIZE + 1];
 };
 
 #endif
-
- 

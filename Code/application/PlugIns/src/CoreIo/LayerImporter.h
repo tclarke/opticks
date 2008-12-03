@@ -14,7 +14,6 @@
 
 class DesktopServices;
 class PlugInManagerServices;
-class UtilityServices;
 
 /**
  *  Layer Importer
@@ -27,28 +26,16 @@ public:
    LayerImporter();
    ~LayerImporter();
 
-   bool setBatch()
-   {
-      mInteractive = false;
-      return true;
-   }
-   bool setInteractive()
-   {
-      mInteractive = true;
-      return true;
-   }
-   bool getInputSpecification(PlugInArgList *&pInArgList);
-   bool getOutputSpecification(PlugInArgList *&pOutArgList);
+   bool getInputSpecification(PlugInArgList*& pInArgList);
+   bool getOutputSpecification(PlugInArgList*& pOutArgList);
    std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename);
    unsigned char getFileAffinity(const std::string& filename);
-   bool execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList);
+   bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
 
 protected:
    std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename, bool reportErrors);
 
 private:
-   bool mInteractive;
-
    Service<DesktopServices> mpDesktop;
    Service<PlugInManagerServices> mpPlugInManager;
 };

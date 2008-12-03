@@ -68,21 +68,21 @@ bool DataElementGroupImp::insertElements(const std::vector<DataElement*>& elemen
          type = elements.front()->getObjectType();
       }
    }
-   for (ppElement=elements.begin(); ppElement!=elements.end(); ++ppElement)
+   for (ppElement = elements.begin(); ppElement != elements.end(); ++ppElement)
    {
       if (!NN(*ppElement) || (mEnforceUniformity && (*ppElement)->getObjectType() != type)) 
       {
          return false;
       }
    }
-   for (ppElement=elements.begin(); ppElement!=elements.end(); ++ppElement)
+   for (ppElement = elements.begin(); ppElement != elements.end(); ++ppElement)
    {
       (*ppElement)->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &DataElementGroupImp::elementDeleted));
       mElements.push_back(*ppElement);
    }
    if (!elements.empty())
    {
-      if (mNotificationEnabled)    
+      if (mNotificationEnabled)
       {
          notify(SIGNAL_NAME(Subject, Modified));
       }
@@ -107,7 +107,7 @@ const std::vector<DataElement*>& DataElementGroupImp::getElements() const
 
 bool DataElementGroupImp::removeElement(DataElement* pElement, bool bDelete)
 {
-   ModelServicesImp *pModel = ModelServicesImp::instance();
+   ModelServicesImp* pModel = ModelServicesImp::instance();
    vector<DataElement*>::iterator ppElement = find(mElements.begin(), mElements.end(), pElement);
    if (ppElement != mElements.end())
    {
@@ -120,16 +120,14 @@ bool DataElementGroupImp::removeElement(DataElement* pElement, bool bDelete)
          }
       }
       mElements.erase(ppElement);
-      if (mNotificationEnabled)    
+      if (mNotificationEnabled)
       {
          notify(SIGNAL_NAME(Subject, Modified));
       }
       return true;
    }
-   else
-   {
-      return false;
-   }
+
+   return false;
 }
 
 bool DataElementGroupImp::removeElements(const std::vector<DataElement*>& elements, bool bDelete)
@@ -143,9 +141,9 @@ bool DataElementGroupImp::removeElements(const std::vector<DataElement*>& elemen
    bool success(true);
    vector<DataElement*>::const_iterator ppElement;
    vector<DataElement*>::iterator ppRemoval;
-   ModelServicesImp *pModel = ModelServicesImp::instance();
+   ModelServicesImp* pModel = ModelServicesImp::instance();
 
-   for (ppElement=elements.begin(); ppElement!=elements.end(); ++ppElement)
+   for (ppElement = elements.begin(); ppElement != elements.end(); ++ppElement)
    {
       ppRemoval = find(mElements.begin(), mElements.end(), *ppElement);
       if (ppRemoval != mElements.end())
@@ -169,7 +167,7 @@ bool DataElementGroupImp::removeElements(const std::vector<DataElement*>& elemen
 
    if (modified)
    {
-      if (mNotificationEnabled)    
+      if (mNotificationEnabled)
       {
          notify(SIGNAL_NAME(Subject, Modified));
       }
@@ -185,9 +183,9 @@ void DataElementGroupImp::clear(bool bDelete)
       return;
    }
 
-   ModelServicesImp *pModel = ModelServicesImp::instance();
+   ModelServicesImp* pModel = ModelServicesImp::instance();
    vector<DataElement*>::iterator ppElement;
-   for (ppElement=mElements.begin(); ppElement!=mElements.end(); ++ppElement)
+   for (ppElement = mElements.begin(); ppElement != mElements.end(); ++ppElement)
    {
       if (NN(*ppElement))
       {
@@ -200,7 +198,7 @@ void DataElementGroupImp::clear(bool bDelete)
    }
 
    mElements.clear();
-   if (mNotificationEnabled)    
+   if (mNotificationEnabled)
    {
       notify(SIGNAL_NAME(Subject, Modified));
    }
@@ -209,7 +207,7 @@ void DataElementGroupImp::clear(bool bDelete)
 void DataElementGroupImp::elementDeleted(Subject &subject, const string &signal, const boost::any &data)
 {
    vector<DataElement*>::iterator ppElement;
-   for (ppElement=mElements.begin(); ppElement!=mElements.end(); ++ppElement)
+   for (ppElement = mElements.begin(); ppElement != mElements.end(); ++ppElement)
    {
       VERIFYNRV(*ppElement != NULL);
       if (*ppElement == &subject)
@@ -224,7 +222,7 @@ void DataElementGroupImp::elementDeleted(Subject &subject, const string &signal,
    }
 }
 
-DataElement* DataElementGroupImp::copy(const string& name, DataElement *pParent) const
+DataElement* DataElementGroupImp::copy(const string& name, DataElement* pParent) const
 {
    return NULL;
 }
@@ -262,12 +260,12 @@ bool DataElementGroupImp::isUniform() const
    if (mElements.size() > 1)
    {
       vector<DataElement*>::const_iterator ppElement = mElements.begin();
-      VERIFY(*ppElement!= NULL);
-      const string &type = (*ppElement)->getObjectType();
+      VERIFY(*ppElement != NULL);
+      const string& type = (*ppElement)->getObjectType();
       ++ppElement;
-      for (; ppElement!=mElements.end(); ++ppElement)
+      for (; ppElement != mElements.end(); ++ppElement)
       {
-         VERIFY(*ppElement!= NULL);
+         VERIFY(*ppElement != NULL);
          if ((*ppElement)->getObjectType() != type)
          {
             return false;
@@ -279,12 +277,12 @@ bool DataElementGroupImp::isUniform() const
 
 bool DataElementGroupImp::toXml(XMLWriter* pXml) const
 {
-   if(!DataElementImp::toXml(pXml))
+   if (!DataElementImp::toXml(pXml))
    {
       return false;
    }
    pXml->addAttr("enforceUniformity", mEnforceUniformity);
-   for(vector<DataElement*>::const_iterator it = mElements.begin(); it != mElements.end(); ++it)
+   for (vector<DataElement*>::const_iterator it = mElements.begin(); it != mElements.end(); ++it)
    {
       pXml->addAttr("id", (*it)->getId(), pXml->addElement("element"));
    }
@@ -293,19 +291,19 @@ bool DataElementGroupImp::toXml(XMLWriter* pXml) const
 
 bool DataElementGroupImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   if(pDocument == NULL)
+   if (pDocument == NULL)
    {
       return false;
    }
    mEnforceUniformity = StringUtilities::fromXmlString<bool>(
       A(static_cast<DOMElement*>(pDocument)->getAttribute(X("enforceUniformity"))));
-   for(DOMNode *pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
+   for (DOMNode *pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
    {
-      if(XMLString::equals(pChld->getNodeName(), X("element")))
+      if (XMLString::equals(pChld->getNodeName(), X("element")))
       {
-         DataElement *pElement = dynamic_cast<DataElement*>(
+         DataElement* pElement = dynamic_cast<DataElement*>(
             Service<SessionManager>()->getSessionItem(A(static_cast<DOMElement*>(pChld)->getAttribute(X("id")))));
-         if(pElement == NULL)
+         if (pElement == NULL)
          {
             return false;
          }
@@ -317,8 +315,8 @@ bool DataElementGroupImp::fromXml(DOMNode* pDocument, unsigned int version)
 
 const string& DataElementGroupImp::getObjectType() const
 {
-   static string type("DataElementGroupImp");
-   return type;
+   static string sType("DataElementGroupImp");
+   return sType;
 }
 
 bool DataElementGroupImp::isKindOf(const string& className) const

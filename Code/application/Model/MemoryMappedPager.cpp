@@ -45,11 +45,12 @@ MemoryMappedPager::MemoryMappedPager() :
    setShortDescription("Memory maps on disk data");
 }
 
-namespace {
+namespace
+{
    class MemoryMappedMatrixDeleter
    {
    public:
-      void operator()(MemoryMappedMatrix *pMatrix)
+      void operator()(MemoryMappedMatrix* pMatrix)
       {
          delete pMatrix;
       }
@@ -62,11 +63,10 @@ MemoryMappedPager::~MemoryMappedPager()
    //leased out via the getPage() method
    //but were not returned to us via the releasePage()
    //method
-   map<MemoryMappedPage*,MemoryMappedMatrix*>::iterator iterPages, endPages;
-   MemoryMappedPage* pCurPage;
-   MemoryMappedMatrix *pCurMatrix;
-   iterPages = mCurrentlyLeasedPages.begin();
-   endPages = mCurrentlyLeasedPages.end();
+   MemoryMappedPage* pCurPage = NULL;
+   MemoryMappedMatrix* pCurMatrix = NULL;
+   map<MemoryMappedPage*, MemoryMappedMatrix*>::iterator iterPages = mCurrentlyLeasedPages.begin();
+   map<MemoryMappedPage*, MemoryMappedMatrix*>::iterator endPages = mCurrentlyLeasedPages.end();
 
    while (iterPages != endPages)
    {
@@ -74,7 +74,7 @@ MemoryMappedPager::~MemoryMappedPager()
       pCurMatrix = iterPages->second;
       //destroy the memory mapped section of the file
       //associated with that Page
-      pCurMatrix->release( pCurPage->getMemoryMappedMatrixView() );
+      pCurMatrix->release(pCurPage->getMemoryMappedMatrixView());
 
       //delete the actual page that we allocated earlier
       //in the getPage() method.
@@ -150,10 +150,9 @@ bool MemoryMappedPager::getOutputSpecification(PlugInArgList *&argList)
    return true;
 }
 
-bool MemoryMappedPager::execute(PlugInArgList *pInputArgList, 
-                                         PlugInArgList *pOutputArgList)
+bool MemoryMappedPager::execute(PlugInArgList* pInputArgList, PlugInArgList* pOutputArgList)
 {
-   PlugInArg *pArg = NULL;
+   PlugInArg* pArg = NULL;
 
    VERIFY((mMatrices.empty()) && (mpDataDescriptor == NULL) && (pInputArgList != NULL));
 
@@ -161,9 +160,10 @@ bool MemoryMappedPager::execute(PlugInArgList *pInputArgList,
 
    //Get RasterElement argument or the data descriptor
    VERIFY(pInputArgList->getArg("Raster Element", pArg) && (pArg != NULL));
-   RasterElement *pRaster = pArg->getPlugInArgValue<RasterElement>();
+   RasterElement* pRaster = pArg->getPlugInArgValue<RasterElement>();
    VERIFY(pInputArgList->getArg("Data Descriptor", pArg) && (pArg != NULL));
-   const RasterDataDescriptor *pDescriptor = dynamic_cast<const RasterDataDescriptor*>(pArg->getPlugInArgValueUnsafe<DataDescriptor>());
+   const RasterDataDescriptor* pDescriptor =
+      dynamic_cast<const RasterDataDescriptor*>(pArg->getPlugInArgValueUnsafe<DataDescriptor>());
    VERIFY(pRaster != NULL || pDescriptor != NULL);
 
    //Get Filename argument
@@ -189,8 +189,8 @@ bool MemoryMappedPager::execute(PlugInArgList *pInputArgList,
    VERIFY(pUseDataDescriptor != NULL);
    mbUseDataDescriptor = *pUseDataDescriptor;
    //Done getting PlugIn Arguments
-   
-   if(pDescriptor == NULL)
+
+   if (pDescriptor == NULL)
    {
       pDescriptor = dynamic_cast<const RasterDataDescriptor*>(pRaster->getDataDescriptor());
    }
@@ -223,8 +223,7 @@ bool MemoryMappedPager::execute(PlugInArgList *pInputArgList,
          VERIFY(pFileDescriptor != NULL);
 
          EndianType srcEndian = pFileDescriptor->getEndian();
-         mSwapEndian = (srcEndian != Endian::getSystemEndian() 
-            && pDescriptor->getBytesPerElement() > 1);
+         mSwapEndian = (srcEndian != Endian::getSystemEndian() && pDescriptor->getBytesPerElement() > 1);
 
          const std::vector<const Filename*>& bandFiles = pFileDescriptor->getBandFiles();
          if (!mWritable && !bandFiles.empty())
@@ -235,10 +234,11 @@ bool MemoryMappedPager::execute(PlugInArgList *pInputArgList,
             for (vector<const Filename*>::const_iterator iter = bandFiles.begin();
                iter != bandFiles.end(); ++iter)
             {
-               const Filename *pFilename = *iter;
+               const Filename* pFilename = *iter;
                VERIFY(pFilename != NULL);
                mMatrices.push_back(new MemoryMappedMatrix(pFilename->getFullPathAndName(),
-                  pFileDescriptor->getHeaderBytes() + pFileDescriptor->getPrelineBytes() + pFileDescriptor->getPostbandBytes(),
+                  pFileDescriptor->getHeaderBytes() + pFileDescriptor->getPrelineBytes() +
+                     pFileDescriptor->getPrebandBytes(),
                   pFileDescriptor->getInterleaveFormat(),
                   pDescriptor->getBytesPerElement(),
                   pFileDescriptor->getRowCount(),
@@ -259,7 +259,8 @@ bool MemoryMappedPager::execute(PlugInArgList *pInputArgList,
             //  3) the accessor is for a single file, and is read-write.  getFullPathAndName()
             //     will return a temporary filename, which should be opened read-write (!isWritable() == false)
             mMatrices.push_back(new MemoryMappedMatrix(pFilename->getFullPathAndName(),
-               pFileDescriptor->getHeaderBytes() + pFileDescriptor->getPrelineBytes() + pFileDescriptor->getPrebandBytes(),
+               pFileDescriptor->getHeaderBytes() + pFileDescriptor->getPrelineBytes() +
+                  pFileDescriptor->getPrebandBytes(),
                pFileDescriptor->getInterleaveFormat(),
                pDescriptor->getBytesPerElement(),
                pFileDescriptor->getRowCount(),
@@ -280,10 +281,8 @@ bool MemoryMappedPager::execute(PlugInArgList *pInputArgList,
    return true;
 }
 
-RasterPage* MemoryMappedPager::getPage(DataRequest *pOriginalRequest, 
-      DimensionDescriptor startRow,
-      DimensionDescriptor startColumn,
-      DimensionDescriptor startBand)
+RasterPage* MemoryMappedPager::getPage(DataRequest* pOriginalRequest, DimensionDescriptor startRow,
+                                       DimensionDescriptor startColumn, DimensionDescriptor startBand)
 {
    //ensure only one thread enters this code at a time
    VERIFYRV((mpDataDescriptor != NULL) && (!mMatrices.empty()) && pOriginalRequest != NULL, NULL);
@@ -369,11 +368,11 @@ RasterPage* MemoryMappedPager::getPage(DataRequest *pOriginalRequest,
    unsigned int numRows = 0;
    //determine the size of the segment we need to memory map
    //depending on whether the interleave is BIP or BSQ
-   if((interleave == BIP) || (numBands == 1))
+   if ((interleave == BIP) || (numBands == 1))
    {
       rowSize = (numColumns * numBands * bytesPerElement + interlineBytes);
    }
-   else if(interleave == BSQ)
+   else if (interleave == BSQ)
    {
       rowSize = (numColumns * bytesPerElement + interlineBytes);
       if (mMatrices.size() != 1)
@@ -381,7 +380,7 @@ RasterPage* MemoryMappedPager::getPage(DataRequest *pOriginalRequest,
          VERIFY(pOriginalRequest->getStopBand().getActiveNumber() < mMatrices.size());
       }
    }
-   else if(interleave == BIL)
+   else if (interleave == BIL)
    {
       rowSize = numColumns * numBands * bytesPerElement;
    }
@@ -392,7 +391,7 @@ RasterPage* MemoryMappedPager::getPage(DataRequest *pOriginalRequest,
 
    //get the MemoryMappedMatrixView of a let segmentSize large
    MemoryMappedMatrixView* pView = NULL;
-   MemoryMappedMatrix *pMatrix = mMatrices.front();
+   MemoryMappedMatrix* pMatrix = mMatrices.front();
    if (mMatrices.size() > 1)
    {
       VERIFYRV(bandIndex < mMatrices.size(), NULL);
@@ -427,7 +426,7 @@ RasterPage* MemoryMappedPager::getPage(DataRequest *pOriginalRequest,
 
    if (mSwapEndian)
    {
-      EndianSwapPage *pEndianPage = new EndianSwapPage(pPage->getRawData(), mpDataDescriptor->getDataType(),
+      EndianSwapPage* pEndianPage = new EndianSwapPage(pPage->getRawData(), mpDataDescriptor->getDataType(),
                                                        numRows, numColumns, rowSize - interlineBytes, interlineBytes,
                                                        pPage->getMemoryMappedMatrixView()->getEndOfSegment());
 
@@ -459,7 +458,7 @@ void MemoryMappedPager::releasePage(RasterPage* pPage)
 
       map<MemoryMappedPage*, MemoryMappedMatrix*>::iterator foundIter;
       foundIter = mCurrentlyLeasedPages.find(pOurPage);
-      if(foundIter != mCurrentlyLeasedPages.end())
+      if (foundIter != mCurrentlyLeasedPages.end())
       {
          //we leased the page out from this instance,
          //so now we can release the resources used for it.

@@ -32,69 +32,68 @@
 using namespace std;
 
 MemoryMappedMatrixView::MemoryMappedMatrixView(HANDLE_TYPE handle, unsigned int headerOffset, size_t segmentSize,
-                   InterleaveFormatType interleave, unsigned int bytesPerElement,
-                   unsigned int rowNum, unsigned int columnNum, unsigned int bandNum,
-                   unsigned int interLineBytes, unsigned int interBandBytes, bool readOnly, 
-                   unsigned int granularity, int64_t fileSize)
+                                               InterleaveFormatType interleave, unsigned int bytesPerElement,
+                                               unsigned int rowNum, unsigned int columnNum, unsigned int bandNum,
+                                               unsigned int interLineBytes, unsigned int interBandBytes, bool readOnly,
+                                               unsigned int granularity, int64_t fileSize) :
+   mReadOnly(readOnly),
+   mHandle(handle),
+   mInterleave(interleave),
+   mBytesPerElement(bytesPerElement),
+   mRowNum(rowNum),
+   mColumnNum(columnNum),
+   mBandNum(bandNum),
+   mInterLineBytes(interLineBytes),
+   mInterBandBytes(interBandBytes),
+   mSegmentSize(0),
+   mRequestedSegmentSize(segmentSize),
+   mGranularity(granularity),
+   mpBlock(NULL),
+   mBlockSize(0),
+   mAddressOffset(0),
+   mAddress(0),
+   mHeaderOffset(headerOffset),
+   mFileSize(fileSize)
 {
-   mInterleave = interleave;
-   mBytesPerElement = bytesPerElement;
-   mRowNum = rowNum;
-   mColumnNum = columnNum;
-   mBandNum = bandNum;
-   mReadOnly = readOnly;
-   mGranularity = granularity;
-   mFileSize = fileSize;
-   mInterLineBytes = interLineBytes;
-   mInterBandBytes = interBandBytes;
-
-   if(mInterleave == BIP)
+   if (mInterleave == BIP)
    {
       mMinorSize = mBytesPerElement;
       mMiddleSize = mMinorSize * mBandNum;
       mMajorSize = mMiddleSize * mColumnNum + mInterLineBytes;
    }
-   else if(mInterleave == BSQ)
+   else if (mInterleave == BSQ)
    {
       mMinorSize = mBytesPerElement;
       mMiddleSize = mMinorSize * mColumnNum + mInterLineBytes;
       mMajorSize = mMiddleSize * mRowNum + mInterBandBytes;
    }
-   else if(mInterleave == BIL)
+   else if (mInterleave == BIL)
    {
       mMinorSize = mBytesPerElement;
       mMiddleSize = mMinorSize * mColumnNum;
       mMajorSize = mMiddleSize * mBandNum + mInterLineBytes;
    }
 
-   mAddressOffset = 0;
-   mHandle =  handle;
-   mHeaderOffset = headerOffset;
-
 #if defined(WIN_API)
    mAccessPermissions = FILE_MAP_READ | FILE_MAP_WRITE;
-   if(readOnly)
+   if (readOnly)
    {
       mAccessPermissions = FILE_MAP_READ;
    }
 #else
    mAccessPermissions = PROT_WRITE | PROT_READ;
-   if(readOnly)
+   if (readOnly)
    {
       mAccessPermissions = PROT_READ;
    }
 #endif
 
-   mSegmentSize = static_cast<unsigned int>(ensureGranularity(segmentSize));
-   mRequestedSegmentSize = segmentSize;
-   mBlockSize = 0;  
-   mpBlock = NULL;
-   mAddress = 0;
+   mSegmentSize = static_cast<unsigned int>(ensureGranularity(mRequestedSegmentSize));
 }
 
 MemoryMappedMatrixView::~MemoryMappedMatrixView()
 {
-   if(mpBlock != NULL)
+   if (mpBlock != NULL)
    {
 #if defined(WIN_API)
       UnmapViewOfFile(mpBlock);
@@ -124,21 +123,21 @@ unsigned char* MemoryMappedMatrixView::getSegment(unsigned int row, unsigned int
 {
    int64_t start = 0;
 
-   if(mInterleave == BIP)
+   if (mInterleave == BIP)
    {
       start = row * mMajorSize;
       start += column * mMiddleSize;
       start += band * mMinorSize;
       start += mHeaderOffset;
    }
-   else if(mInterleave == BSQ)
+   else if (mInterleave == BSQ)
    {
       start = band * mMajorSize;
       start += row * mMiddleSize;
       start += column * mMinorSize;
       start += mHeaderOffset;
    }
-   else if(mInterleave == BIL)
+   else if (mInterleave == BIL)
    {
       start = row * mMajorSize;
       start += band * mMiddleSize;
@@ -151,67 +150,52 @@ unsigned char* MemoryMappedMatrixView::getSegment(unsigned int row, unsigned int
 
 unsigned char* MemoryMappedMatrixView::getSegment(int64_t address)
 {
-   if(mpBlock != NULL)
+   if (mpBlock != NULL)
    {
 #if defined(WIN_API)
-     UnmapViewOfFile(mpBlock);
+      UnmapViewOfFile(mpBlock);
 #else
-     munmap(reinterpret_cast<char*>(mpBlock), mBlockSize);
+      munmap(reinterpret_cast<char*>(mpBlock), mBlockSize);
 #endif
    }
 
-   mRequestedAddress = address;
    mAddress = ensureGranularityLower(address);
-
    mAddressOffset = address - mAddress;
 
-   mBlockSize = static_cast<size_t>(calculateSize(mAddress,mAddressOffset));
-
-   if(mBlockSize == 0)
+   mBlockSize = static_cast<size_t>(calculateSize(mAddress, mAddressOffset));
+   if (mBlockSize == 0)
    {
       mpBlock = NULL;
       return NULL;
    }
 
 #if defined(WIN_API)
-   static const LONG64 MY_INT_MAX = static_cast<LONG64>(UINT_MAX)+1;
-   unsigned int addressHigh = (unsigned int) (mAddress / (MY_INT_MAX));
-   unsigned int addressLow = (unsigned int) (mAddress % (MY_INT_MAX));
+   static const LONG64 MY_INT_MAX = static_cast<LONG64>(UINT_MAX) + 1;
+   unsigned int addressHigh = static_cast<unsigned int>(mAddress / (MY_INT_MAX));
+   unsigned int addressLow = static_cast<unsigned int>(mAddress % (MY_INT_MAX));
 
-   mpBlock = static_cast<unsigned char*>(MapViewOfFile(mHandle,
-      mAccessPermissions,
-      addressHigh,
-      addressLow,
+   mpBlock = static_cast<unsigned char*>(MapViewOfFile(mHandle, mAccessPermissions, addressHigh, addressLow,
       mBlockSize));
-
-   if(mpBlock == NULL)
+   if (mpBlock == NULL)
    {
       int error = GetLastError();
-      LPVOID lpMsgBuf;
-      FormatMessage( 
-          FORMAT_MESSAGE_ALLOCATE_BUFFER | 
-          FORMAT_MESSAGE_FROM_SYSTEM | 
-          FORMAT_MESSAGE_IGNORE_INSERTS,
-          NULL,
-          GetLastError(),
-          MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-          (LPTSTR) &lpMsgBuf,
-          0,
-          NULL 
-      );
+      LPVOID lpMsgBuf = NULL;
+      FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+          NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
+          reinterpret_cast<LPSTR>(&lpMsgBuf), 0, NULL);
       LocalFree(lpMsgBuf);
       return NULL;
    }
 #else
-   mpBlock = reinterpret_cast<unsigned char*>(mmap(static_cast<caddr_t>(0),mBlockSize,
+   mpBlock = reinterpret_cast<unsigned char*>(mmap(static_cast<caddr_t>(0), mBlockSize,
                   mAccessPermissions, MAP_SHARED, mHandle, mAddress));
-   if(mpBlock == reinterpret_cast<void*>(-1))
+   if (mpBlock == reinterpret_cast<void*>(-1))
    {
       // FAILURE THROW AN EXCEPTION
       mpBlock = NULL;
       return NULL;
    }
-   if(mpBlock == NULL)
+   if (mpBlock == NULL)
    {
       return NULL;
    }
@@ -255,11 +239,11 @@ int64_t MemoryMappedMatrixView::calculateSize(int64_t address, int64_t offset)
    difference = mFileSize;
    difference -= address;
 
-   if(difference < 0)
+   if (difference < 0)
    {
       return 0;
    }
-   if(difference < (mRequestedSegmentSize + offset))
+   if (difference < (mRequestedSegmentSize + offset))
    {
       return difference;
    }

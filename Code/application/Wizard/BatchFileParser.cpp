@@ -15,15 +15,12 @@
 
 using namespace std;
 
-BatchFileParser::BatchFileParser()
-{
-   mCurrentWizard = 0;
+BatchFileParser::BatchFileParser() :
+   mpDocument(new QDomDocument()),
+   mCurrentWizard(0)
+{}
 
-   mpDocument = NULL;
-   mpDocument = new QDomDocument();
-}
-
-BatchFileParser::~BatchFileParser() 
+BatchFileParser::~BatchFileParser()
 {
    delete mpDocument;
 }
@@ -38,8 +35,7 @@ bool BatchFileParser::setFile(const string& filename)
 
    QFileInfo fileInfo(QString::fromStdString(filename));
 
-   bool bFile = false;
-   bFile = fileInfo.isFile();
+   bool bFile = fileInfo.isFile();
    if (bFile == false)
    {
       mErrorMessage = "The filename is not a valid file!";
@@ -55,8 +51,7 @@ bool BatchFileParser::setFile(const string& filename)
    // Loading the XML file
    QFile file(QString::fromStdString(filename));
 
-   bool bSuccess = false;
-   bSuccess = mpDocument->setContent(&file);
+   bool bSuccess = mpDocument->setContent(&file);
    if (bSuccess == false)
    {
       mErrorMessage = "The file: " + filename + " is not a valid XML file!";
@@ -71,12 +66,10 @@ void BatchFileParser::getFileSets(vector<BatchFileset*>& filesets) const
 {
    filesets.clear();
 
-   map<string, BatchFileset*>::const_iterator iter;
-   iter = mFilesets.begin();
+   map<string, BatchFileset*>::const_iterator iter = mFilesets.begin();
    while (iter != mFilesets.end())
    {
-      BatchFileset* pFileset = NULL;
-      pFileset = iter->second;
+      BatchFileset* pFileset = iter->second;
       if (pFileset != NULL)
       {
          filesets.push_back(pFileset);
@@ -112,12 +105,7 @@ BatchWizard* BatchFileParser::read()
       return NULL;
    }
 
-   BatchWizard* pBatchWizard = NULL;
-   pBatchWizard = new BatchWizard(); 
-   if (pBatchWizard == NULL)
-   {
-      return NULL;
-   }
+   BatchWizard* pBatchWizard = new BatchWizard();
 
    QDomNode wizardNode = wizardList.item(mCurrentWizard);
    QDomNamedNodeMap attrs = wizardNode.attributes();
@@ -232,73 +220,70 @@ bool BatchFileParser::parseFilesets()
 
    for (unsigned int node = 0; node < filesetList.length(); node++)
    {
-      BatchFileset* pFileset = NULL;
-      pFileset = new BatchFileset();
-      if (pFileset != NULL)
+      BatchFileset* pFileset = new BatchFileset();
+
+      QDomNamedNodeMap attributes = (filesetList.item(node)).attributes();
+      string filesetName = "";
+
+      // Name - required
+      QDomNode name = attributes.namedItem("name");
+      if (name.isNull() == false)
       {
-         QDomNamedNodeMap attributes = (filesetList.item(node)).attributes();
-         string filesetName = "";
-
-         // Name - required
-         QDomNode name = attributes.namedItem("name");
-         if (name.isNull() == false)
-         {
-            filesetName = name.nodeValue().toStdString();
-            pFileset->setName(filesetName);
-         }
-      
-         if (filesetName.empty() == true)
-         {
-            mErrorMessage = "One of the file sets does not have a name!";
-            return false;
-         }
-
-         // Directory - required and it MUST be the full path name 
-         QDomNode dir = attributes.namedItem("dir");
-         if (dir.isNull() == false)
-         {
-            pFileset->setDirectory(dir.nodeValue().toStdString());
-         }
-         else
-         {
-            mErrorMessage = "A directory was not found for the '" + filesetName + "' file set!";
-            return false;
-         }
-
-         // Parse the <include> and <exclude> tags
-         QDomNodeList cludes = (filesetList.item(node)).childNodes();
-
-         for (unsigned int x = 0; x < cludes.length(); x++)
-         {
-            // Include Tag
-            if (cludes.item(x).nodeName() == "include")
-            {
-               QDomNamedNodeMap  includeAttr = (cludes.item(x)).attributes();
-
-               // If a name and a value do exist then this is a singular input
-               if (includeAttr.namedItem("name").isNull() == false)
-               {                                 
-                  pFileset->addFilesetRequirement(BatchFileset::INCLUDE,
-                     includeAttr.namedItem("name").nodeValue().toStdString());
-               }
-            }
-
-            // Exclude Tag
-            else if (cludes.item(x).nodeName() == "exclude")
-            {
-               QDomNamedNodeMap  excludeAttr = (cludes.item(x)).attributes();
-               // If a name and a value do exist then this is a singular input
-
-               if (excludeAttr.namedItem("name").isNull() == false)
-               {
-                  pFileset->addFilesetRequirement(BatchFileset::EXCLUDE,
-                     excludeAttr.namedItem("name").nodeValue().toStdString());
-               }
-            }
-         }
-
-         mFilesets.insert(pair<string, BatchFileset*>(filesetName, pFileset));
+         filesetName = name.nodeValue().toStdString();
+         pFileset->setName(filesetName);
       }
+   
+      if (filesetName.empty() == true)
+      {
+         mErrorMessage = "One of the file sets does not have a name!";
+         return false;
+      }
+
+      // Directory - required and it MUST be the full path name 
+      QDomNode dir = attributes.namedItem("dir");
+      if (dir.isNull() == false)
+      {
+         pFileset->setDirectory(dir.nodeValue().toStdString());
+      }
+      else
+      {
+         mErrorMessage = "A directory was not found for the '" + filesetName + "' file set!";
+         return false;
+      }
+
+      // Parse the <include> and <exclude> tags
+      QDomNodeList cludes = (filesetList.item(node)).childNodes();
+
+      for (unsigned int x = 0; x < cludes.length(); x++)
+      {
+         // Include Tag
+         if (cludes.item(x).nodeName() == "include")
+         {
+            QDomNamedNodeMap  includeAttr = (cludes.item(x)).attributes();
+
+            // If a name and a value do exist then this is a singular input
+            if (includeAttr.namedItem("name").isNull() == false)
+            {                                 
+               pFileset->addFilesetRequirement(BatchFileset::INCLUDE,
+                  includeAttr.namedItem("name").nodeValue().toStdString());
+            }
+         }
+
+         // Exclude Tag
+         else if (cludes.item(x).nodeName() == "exclude")
+         {
+            QDomNamedNodeMap  excludeAttr = (cludes.item(x)).attributes();
+            // If a name and a value do exist then this is a singular input
+
+            if (excludeAttr.namedItem("name").isNull() == false)
+            {
+               pFileset->addFilesetRequirement(BatchFileset::EXCLUDE,
+                  excludeAttr.namedItem("name").nodeValue().toStdString());
+            }
+         }
+      }
+
+      mFilesets.insert(pair<string, BatchFileset*>(filesetName, pFileset));
    }
 
    return true;

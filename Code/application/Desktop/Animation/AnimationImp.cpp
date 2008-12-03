@@ -32,7 +32,7 @@ namespace
       {
       }
 
-      inline bool operator()(const AnimationFrame &lhs) const
+      inline bool operator()(const AnimationFrame& lhs) const
       {
          switch (mType)
          {
@@ -59,7 +59,7 @@ namespace
       {
       }
 
-      inline bool operator()(const AnimationFrame &lhs) const
+      inline bool operator()(const AnimationFrame& lhs) const
       {
          switch (mType)
          {
@@ -94,8 +94,8 @@ AnimationImp::~AnimationImp()
 
 const string& AnimationImp::getObjectType() const
 {
-   static string type = "AnimationImp";
-   return type;
+   static string sType = "AnimationImp";
+   return sType;
 }
 
 bool AnimationImp::isKindOf(const string& className) const
@@ -108,14 +108,14 @@ bool AnimationImp::isKindOf(const string& className) const
    return false;
 }
 
-bool AnimationImp::attach(const std::string &signal, const Slot &slot)
+bool AnimationImp::attach(const string& signal, const Slot& slot)
 {
    bool attached = SubjectImp::attach(signal, slot);
    emit objectAttached();
    return attached;
 }
 
-bool AnimationImp::detach(const std::string &signal, const Slot &slot)
+bool AnimationImp::detach(const string& signal, const Slot& slot)
 {
    bool detached = SubjectImp::detach(signal, slot);
    emit objectDetached();
@@ -321,9 +321,9 @@ double AnimationImp::getNextFrameValue(AnimationState direction, size_t offset) 
       frame = mCurrentFrameIter;
       while (frame != mFrames.begin() && offset > 0)
       {
-         double prevValue = getFrameValue (&*frame);
+         double prevValue = getFrameValue(&*frame);
          --frame;
-         double curValue = getFrameValue (&*frame);
+         double curValue = getFrameValue(&*frame);
          if (prevValue != curValue) // don't count duplicate frames
          {
             --offset;
@@ -336,7 +336,7 @@ double AnimationImp::getNextFrameValue(AnimationState direction, size_t offset) 
       }
    }
 
-   const AnimationFrame *pFrame = NULL;
+   const AnimationFrame* pFrame = NULL;
    if (frame != mFrames.end())
    {
       pFrame = &*frame;
@@ -352,20 +352,20 @@ QString AnimationImp::frameToQString(double value, FrameType frameType, unsigned
    {
       if (count > 0)
       {
-         frameString.sprintf("Frame: %d/%d", static_cast<unsigned int> (value + 1.0), count);
+         frameString.sprintf("Frame: %d/%d", static_cast<unsigned int>(value + 1.0), count);
       }
       else
       {
-         frameString.sprintf("Frame: %d", static_cast<unsigned int> (value + 1.0));
+         frameString.sprintf("Frame: %d", static_cast<unsigned int>(value + 1.0));
       }
    }
    else
    {
       double seconds = floor(value);
-      int milliseconds = static_cast<int> ((value - seconds) * 1000.0);
+      int milliseconds = static_cast<int>((value - seconds) * 1000.0);
 
       QDateTime dateTime;
-      dateTime.setTime_t(static_cast<unsigned int> (seconds));
+      dateTime.setTime_t(static_cast<unsigned int>(seconds));
       dateTime.setTime(dateTime.time().addMSecs(milliseconds));
       dateTime = dateTime.toUTC();
 
@@ -377,18 +377,17 @@ QString AnimationImp::frameToQString(double value, FrameType frameType, unsigned
 
 QString AnimationImp::frameToQString(const AnimationFrame* pFrame, FrameType frameType, unsigned int count)
 {
-  if (pFrame == NULL)
-  {
-     return QString();
-  }
-  else if (frameType == FRAME_ID)
-  {
-     return frameToQString(pFrame->mFrameNumber, frameType, count);
-  }
-  else
-  {
-     return frameToQString(pFrame->mTime, frameType, count);
-  }
+   if (pFrame == NULL)
+   {
+      return QString();
+   }
+
+   if (frameType == FRAME_ID)
+   {
+      return frameToQString(pFrame->mFrameNumber, frameType, count);
+   }
+
+   return frameToQString(pFrame->mTime, frameType, count);
 }
 
 QString AnimationImp::frameToQString(const AnimationFrame* pFrame, unsigned int count)
@@ -397,21 +396,20 @@ QString AnimationImp::frameToQString(const AnimationFrame* pFrame, unsigned int 
    {
       return QString();
    }
-   else if (pFrame->mTime < 0)
+
+   if (pFrame->mTime < 0)
    {
       return frameToQString(pFrame, FRAME_ID, count);
    }
-   else
-   {
-      return frameToQString(pFrame, FRAME_TIME, count);
-   }
+
+   return frameToQString(pFrame, FRAME_TIME, count);
 }
 
 bool AnimationImp::serialize(SessionItemSerializer& serializer) const
 {
    XMLWriter xml("Animation");
 
-   if(!SessionItemImp::toXml(&xml))
+   if (!SessionItemImp::toXml(&xml))
    {
       return false;
    }
@@ -438,7 +436,7 @@ bool AnimationImp::serialize(SessionItemSerializer& serializer) const
       }
 
    }
-   for(vector<AnimationFrame>::const_iterator frame = mFrames.begin(); frame != mFrames.end(); ++frame)
+   for (vector<AnimationFrame>::const_iterator frame = mFrames.begin(); frame != mFrames.end(); ++frame)
    {
       xml.pushAddPoint(xml.addElement("frame"));
       xml.addAttr("name", frame->mName);
@@ -450,73 +448,63 @@ bool AnimationImp::serialize(SessionItemSerializer& serializer) const
    return serializer.serialize(xml);
 }
 
-bool AnimationImp::deserialize(SessionItemDeserializer &deserializer)
+bool AnimationImp::deserialize(SessionItemDeserializer& deserializer)
 {
    XmlReader reader(NULL, false);
-   DOMElement *pRoot = deserializer.deserialize(reader, "Animation");
-   if(pRoot == NULL || !SessionItemImp::fromXml(pRoot, XmlBase::VERSION))
+   DOMElement* pRoot = deserializer.deserialize(reader, "Animation");
+   if (pRoot == NULL || !SessionItemImp::fromXml(pRoot, XmlBase::VERSION))
    {
       return false;
    }
-   mFrameType = StringUtilities::fromXmlString<FrameType>(
-      A(pRoot->getAttribute(X("frametype"))));
 
+   mFrameType = StringUtilities::fromXmlString<FrameType>(A(pRoot->getAttribute(X("frametype"))));
    VERIFY(mFrameType.isValid());
 
-   for(DOMNode *pNode = pRoot->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())
+   for (DOMNode* pNode = pRoot->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())
    {
-      if (XMLString::equals(pNode->getNodeName(),X("DisplayText")))
+      if (XMLString::equals(pNode->getNodeName(), X("DisplayText")))
       {
          setDisplayText(A(pNode->getTextContent()));
       }
-      else if (XMLString::equals(pNode->getNodeName(),X("frame")))
+      else if (XMLString::equals(pNode->getNodeName(), X("frame")))
       {
-         DOMElement *pElement(static_cast<DOMElement*>(pNode));
+         DOMElement* pElement(static_cast<DOMElement*>(pNode));
          string name = A(pElement->getAttribute(X("name")));
-         unsigned int number = StringUtilities::fromXmlString<unsigned int>(
-            A(pElement->getAttribute(X("number"))));
-         double time = StringUtilities::fromXmlString<double>(
-            A(pElement->getAttribute(X("time"))));
+         unsigned int number = StringUtilities::fromXmlString<unsigned int>(A(pElement->getAttribute(X("number"))));
+         double time = StringUtilities::fromXmlString<double>(A(pElement->getAttribute(X("time"))));
          mFrames.push_back(AnimationFrame(name, number, time));
       }
    }
 
    mCurrentFrameIter = mFrames.end();
-   switch(mFrameType)
+   switch (mFrameType)
    {
    case FRAME_ID:
+      if (pRoot->hasAttribute(X("currentFrameID")))
       {
-         unsigned int currentID(0);
-         if (pRoot->hasAttribute(X("currentFrameID")))
-         {
-            currentID = StringUtilities::fromXmlString<unsigned int>(
-               A(pRoot->getAttribute(X("currentFrameID"))));
-            setCurrentFrame(currentID);
-         }
-         else
-         {
-            setCurrentFrame(&mFrames.front());
-            VERIFY_MSG(false,"Problem occurred while restoring the current frame - Frame ID was not found");
-         }
-         break;
+         unsigned int currentID = StringUtilities::fromXmlString<unsigned int>(
+            A(pRoot->getAttribute(X("currentFrameID"))));
+         setCurrentFrame(currentID);
       }
+      else
+      {
+         setCurrentFrame(&mFrames.front());
+         VERIFY_MSG(false, "Problem occurred while restoring the current frame - Frame ID was not found");
+      }
+      break;
 
    case FRAME_TIME:
+      if (pRoot->hasAttribute(X("currentFrameTime")))
       {
-         double currentTime(0.0);
-         if (pRoot->hasAttribute(X("currentFrameTime")))
-         {
-            currentTime = StringUtilities::fromXmlString<double>(
-               A(pRoot->getAttribute(X("currentFrameTime"))));
-            setCurrentFrame(currentTime);
-         }
-         else
-         {
-            setCurrentFrame(&mFrames.front());
-            VERIFY_MSG(false,"Problem occurred while restoring the current frame - Frame Time was not found");
-         }
-         break;
+         double currentTime = StringUtilities::fromXmlString<double>(A(pRoot->getAttribute(X("currentFrameTime"))));
+         setCurrentFrame(currentTime);
       }
+      else
+      {
+         setCurrentFrame(&mFrames.front());
+         VERIFY_MSG(false, "Problem occurred while restoring the current frame - Frame Time was not found");
+      }
+      break;
 
    default:
       VERIFY_MSG(false, "Unsupported frame type - animation will not be loaded");

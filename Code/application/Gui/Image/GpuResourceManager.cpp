@@ -33,12 +33,7 @@ GpuResourceManager::~GpuResourceManager()
    {
       // deallocate texture memory for generated texture object id
       glDeleteTextures(1, &(*textureIter));
-
-      // remove texture object id from vector of texture object ids
-      mTextures.erase(textureIter);
-      break;
-     
-      textureIter++;
+      ++textureIter;
    }
 #endif
 }
@@ -56,7 +51,7 @@ PixelBufferObject *GpuResourceManager::getPixelBufferObject(int numBytes, GLenum
       {
          return new PixelBufferObject(numBytes, accessMode);
       }
-      catch(AssertException& assertException)
+      catch (AssertException& assertException)
       {
          string assertMessage = assertException.getText();
          MessageResource msg(assertMessage, "app", "D48723A5-E838-479F-BEA0-0FBF4D3A4E18");
@@ -69,7 +64,7 @@ PixelBufferObject *GpuResourceManager::getPixelBufferObject(int numBytes, GLenum
 
 ImageBuffer *GpuResourceManager::allocateImageBuffer()
 {
-   ImageBuffer *pImageBuffer = NULL;
+   ImageBuffer* pImageBuffer = NULL;
 #ifdef WIN_API
    if (glewGetExtension("GL_EXT_framebuffer_object"))
    {
@@ -115,7 +110,7 @@ GLuint GpuResourceManager::allocateTexture(GLenum textureTarget, GLint internalF
          glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
       }
 
-      switch(dataType)
+      switch (dataType)
       {
       case GL_UNSIGNED_BYTE:
          {

@@ -468,19 +468,19 @@ void PlotGroupImp::clear(bool bDelete)
 
 bool PlotGroupImp::toXml(XMLWriter* pXml) const
 {
-   if(!PlotObjectImp::toXml(pXml))
+   if (!PlotObjectImp::toXml(pXml))
    {
       return false;
    }
 
-   for(vector<PlotObject*>::const_iterator it = mObjects.begin(); it != mObjects.end(); ++it)
+   for (vector<PlotObject*>::const_iterator it = mObjects.begin(); it != mObjects.end(); ++it)
    {
-      PlotObjectImp *pObject = dynamic_cast<PlotObjectImp*>(*it);
-      if(pObject != NULL)
+      PlotObjectImp* pObject = dynamic_cast<PlotObjectImp*>(*it);
+      if (pObject != NULL)
       {
          pXml->pushAddPoint(pXml->addElement("PlotObject"));
          pXml->addAttr("type", (*it)->getType());
-         if(!pObject->toXml(pXml))
+         if (!pObject->toXml(pXml))
          {
             return false;
          }
@@ -492,18 +492,18 @@ bool PlotGroupImp::toXml(XMLWriter* pXml) const
 
 bool PlotGroupImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   if(pDocument == NULL || !PlotObjectImp::fromXml(pDocument, version))
+   if (pDocument == NULL || !PlotObjectImp::fromXml(pDocument, version))
    {
       return false;
    }
-   for(DOMNode *pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
+   for (DOMNode* pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
    {
-      if(XMLString::equals(pChld->getNodeName(), X("PlotObject")))
+      if (XMLString::equals(pChld->getNodeName(), X("PlotObject")))
       {
          PlotObjectType objectType = StringUtilities::fromXmlString<PlotObjectType>(
             A(static_cast<DOMElement*>(pChld)->getAttribute(X("type"))));
-         PlotObjectImp *pObject = dynamic_cast<PlotObjectImp*>(addObject(objectType));
-         if(pObject == NULL || !pObject->fromXml(pDocument, version))
+         PlotObjectImp* pObject = dynamic_cast<PlotObjectImp*>(addObject(objectType));
+         if (pObject == NULL || !pObject->fromXml(pDocument, version))
          {
             return false;
          }

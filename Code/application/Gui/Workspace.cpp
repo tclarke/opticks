@@ -27,21 +27,21 @@ void Workspace::resizeEvent(QResizeEvent * e)
    QWorkspace::resizeEvent(e);
    if (mbCustomTiling)
    {
-      QWidgetList Windows = windowList();
-      QWidget *pWidget = NULL;
+      QWidgetList windows = windowList();
+      QWidget* pWidget = NULL;
 
-      int NumViews = mTileWindows.size();
-      bool ListValid = (NumViews > 0);
-      for (int i=0; i<NumViews; i++)
+      int numViews = mTileWindows.size();
+      bool listValid = (numViews > 0);
+      for (int i = 0; i < numViews; i++)
       {
          pWidget = mTileWindows[i];
-         if (!Windows.contains(pWidget))
+         if (!windows.contains(pWidget))
          {
-            ListValid = false;
+            listValid = false;
          }
       }
 
-      if (ListValid)
+      if (listValid)
       {
          refreshCustomView();
       }
@@ -64,7 +64,7 @@ void Workspace::refreshCustomView()
       {
          QWidgetList workspaceWindows = windowList();
          numViews = workspaceWindows.size();
-         for (int i=0; i<numViews; ++i)
+         for (int i = 0; i < numViews; ++i)
          {
             mTileWindows.push_back(workspaceWindows.at(i));
          }
@@ -76,7 +76,7 @@ void Workspace::refreshCustomView()
       int colWidth;
       int leftOver;
 
-      switch(mTilingType)
+      switch (mTilingType)
       {
       case TILE_GRID:
          {
@@ -100,7 +100,7 @@ void Workspace::refreshCustomView()
                rowHeight = height();
                colWidth = width() / (halfViews+1);
                oddColWidth = width() - colWidth * halfViews;
-               QWidget* pWidget;
+               QWidget* pWidget = NULL;
                if (mMaxFirst)
                {
                   pWidget = mTileWindows.at(startAt++);
@@ -116,8 +116,8 @@ void Workspace::refreshCustomView()
             }
 
             rowHeight = height() / 2;
-            int leftOver = width() - oddColWidth - colWidth * halfViews;
-            
+            leftOver = width() - oddColWidth - colWidth * halfViews;
+
             int colPad(leftOver);
             if (leftOver > 0)
             {
@@ -129,7 +129,7 @@ void Workspace::refreshCustomView()
             }
 
             x = evenColStart;
-            for (int i=startAt; i<startAt+halfViews; ++i)
+            for (int i = startAt; i < startAt + halfViews; ++i)
             {
                if (colPad-- == 0)
                {
@@ -150,7 +150,7 @@ void Workspace::refreshCustomView()
             {
                colPad = -1;
             }
-            for (int i=startAt+halfViews; i<=runTo; ++i)
+            for (int i = startAt + halfViews; i <= runTo; ++i)
             {
                if (colPad-- == 0)
                {
@@ -172,7 +172,7 @@ void Workspace::refreshCustomView()
          }
          x = 0;
          y = 0;
-         for (int i=0; i<numViews ; ++i)
+         for (int i = 0; i < numViews ; ++i)
          {
             if (leftOver-- == 0)
             {
@@ -193,7 +193,7 @@ void Workspace::refreshCustomView()
          }
          x = 0;
          y = 0;
-         for (int i=0; i<numViews ; ++i)
+         for (int i = 0; i < numViews ; ++i)
          {
             if (leftOver-- == 0)
             {
@@ -235,13 +235,14 @@ void Workspace::tile(const TilingType eType)
 
    QWidgetList windows = windowList();
    int numWindows = windows.count();
-   if (numWindows < 2) {
+   if (numWindows < 2)
+   {
       QWorkspace::tile();
       return;
    }
 
    int leftOver(0);
-   switch(mTilingType)
+   switch (mTilingType)
    {
    case TILE_GRID:
       QWorkspace::tile();
@@ -256,7 +257,7 @@ void Workspace::tile(const TilingType eType)
          }
          int x = 0;
          QWidget* pWidget(NULL);
-         for (int i=0; i<numWindows; ++i) 
+         for (int i = 0; i < numWindows; ++i) 
          {
             pWidget = windows.at(i);
             if (pWidget != NULL)
@@ -281,7 +282,8 @@ void Workspace::tile(const TilingType eType)
          }
          int y = 0;
          QWidget* pWidget(NULL);
-         for (int i=0; i<numWindows; ++i) {
+         for (int i = 0; i < numWindows; ++i)
+         {
             pWidget = windows.at(i);
             if (pWidget != NULL)
             {
@@ -296,21 +298,20 @@ void Workspace::tile(const TilingType eType)
       }
       break;
    default:
-       break;
+      break;
    }
 }
 
-bool Workspace::tileWindows(const vector<WorkspaceWindow*>& windows, 
-                            bool maxFirst, const TilingType eType)
+bool Workspace::tileWindows(const vector<WorkspaceWindow*>& windows, bool maxFirst, const TilingType eType)
 {
-   mbCustomTiling  = false;
+   mbCustomTiling = false;
    mTilingType = eType;
    mTileWindows.clear();
 
    QWidgetList workspaceWindows = windowList();
-   for (unsigned int i = 0; i < windows.size(); i++)
+   for (vector<WorkspaceWindow*>::const_iterator iter = windows.begin(); iter != windows.end(); ++iter)
    {
-      WorkspaceWindowImp* pWindow = dynamic_cast<WorkspaceWindowImp*>(windows.at(i));
+      WorkspaceWindowImp* pWindow = dynamic_cast<WorkspaceWindowImp*>(*iter);
       if (pWindow != NULL)
       {
          if (workspaceWindows.contains(pWindow) == true)
@@ -325,7 +326,7 @@ bool Workspace::tileWindows(const vector<WorkspaceWindow*>& windows,
       return false;
    }
 
-   mbCustomTiling  = true;
+   mbCustomTiling = true;
    mMaxFirst = maxFirst;
    refreshCustomView();
 

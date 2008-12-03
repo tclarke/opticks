@@ -111,7 +111,7 @@ public:
     *  @param data
     *         Invalid
     */
-   void cleanupWidget(Subject &subject, const std::string &signal, const boost::any &data);
+   void cleanupWidget(Subject& subject, const std::string& signal, const boost::any& data);
 
 protected:
    /**

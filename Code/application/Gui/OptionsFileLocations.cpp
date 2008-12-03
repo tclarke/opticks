@@ -58,34 +58,30 @@ OptionsFileLocations::OptionsFileLocations() :
       pHeader->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
    }
    LabeledSection *pFileSection = new LabeledSection(mpFileTree, "Default File Locations", this);
-
-   mpBookmarkList = new CustomTreeWidget(this);
-   mpBookmarkList->setColumnCount(1);
-   mpBookmarkList->setRootIsDecorated(false);
-   mpBookmarkList->setGridlinesShown(Qt::Horizontal, true);
-   mpBookmarkList->header()->hide();
-   LabeledSection *pBookmarkSection = new LabeledSection(mpBookmarkList, "Path Bookmarks", this);
    
    // Dialog layout
    QVBoxLayout* pLayout = new QVBoxLayout(this);
    pLayout->setMargin(0);
    pLayout->setSpacing(10);
    pLayout->addWidget(pFileSection, 10);
-   pLayout->addWidget(pBookmarkSection, 10);
 
-   mFileLocations.push_back(pair<string,string>("Default Import/Export Path", ConfigurationSettings::getSettingImportExportPathKey()));
-   mFileLocations.push_back(pair<string,string>("Default Session Save/Open Path", ConfigurationSettings::getSettingSaveOpenSessionPathKey()));
+   mFileLocations.push_back(pair<string,string>("Default Export Path",
+      ConfigurationSettings::getSettingExportPathKey()));
+   mFileLocations.push_back(pair<string,string>("Default Import Path",
+      ConfigurationSettings::getSettingImportPathKey()));
+   mFileLocations.push_back(pair<string,string>("Default Session Save/Open Path",
+      ConfigurationSettings::getSettingSaveOpenSessionPathKey()));
    mFileLocations.push_back(pair<string,string>("Default Product Template", ProductView::getSettingTemplateFileKey()));
-   mFileLocations.push_back(pair<string,string>("Message Log Path", ConfigurationSettings::getSettingMessageLogPathKey()));
-   mFileLocations.push_back(pair<string,string>("Plug-In Path", ConfigurationSettings::getSettingPlugInPathKey()));
+   mFileLocations.push_back(pair<string,string>("Message Log Path",
+      ConfigurationSettings::getSettingMessageLogPathKey()));
    mFileLocations.push_back(pair<string,string>("Product Template Path", ProductView::getSettingTemplatePathKey()));
    mFileLocations.push_back(pair<string,string>("Temp Path", ConfigurationSettings::getSettingTempPathKey()));
-   mFileLocations.push_back(pair<string,string>("Support Files Path", ConfigurationSettings::getSettingSupportFilesPathKey()));
+   mFileLocations.push_back(pair<string,string>("Support Files Path",
+      ConfigurationSettings::getSettingSupportFilesPathKey()));
    mFileLocations.push_back(pair<string,string>("Wizard Path", ConfigurationSettings::getSettingWizardPathKey()));
 
    Service<ConfigurationSettings> pSettings;
-   for (vector<pair<string,string> >::iterator iter = mFileLocations.begin();
-        iter != mFileLocations.end(); ++iter)
+   for (vector<pair<string,string> >::iterator iter = mFileLocations.begin(); iter != mFileLocations.end(); ++iter)
    {
       const Filename* pFilename = dv_cast<Filename>(&pSettings->getSetting(iter->second));
       QString dir = "";
@@ -125,20 +121,6 @@ OptionsFileLocations::OptionsFileLocations() :
          mWizardPath = pFilename->getFullPathAndName();
       }
    }
-
-   vector<Filename*> pathBookmarks = Service<ConfigurationSettings>()->getSettingPathBookmarks();
-   for(vector<Filename*>::iterator pathBookmark = pathBookmarks.begin(); pathBookmark != pathBookmarks.end(); ++pathBookmark)
-   {
-      Filename *pPath = *pathBookmark;
-      if(pPath != NULL)
-      {
-         QTreeWidgetItem *pItem = new QTreeWidgetItem(mpBookmarkList);
-         pItem->setText(0, QString::fromStdString(pPath->getFullPathAndName()));
-         mpBookmarkList->setCellWidgetType(pItem, 0, CustomTreeWidget::BROWSE_DIR_EDIT);
-      }
-   }
-   addBookmark();
-   VERIFYNRV(connect(mpBookmarkList, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(addBookmark())));
 }
 
 void OptionsFileLocations::applyChanges()
@@ -153,7 +135,8 @@ void OptionsFileLocations::applyChanges()
          string type = pItem->text(0).toStdString();
          string confSettingsKey = "";
          for (vector<pair<string,string> >::iterator iter2 = mFileLocations.begin();
-              iter2 != mFileLocations.end(); ++iter2)
+            iter2 != mFileLocations.end();
+            ++iter2)
          {
             if (iter2->first == type)
             {
@@ -174,16 +157,6 @@ void OptionsFileLocations::applyChanges()
             {
                MessageLogMgrImp::instance()->setPath(location);
             }
-            else if (type == "Plug-In Path")
-            {
-               if (location != mPlugInPath)
-               {
-                  Service<DesktopServices> pDesktop;
-                  QMessageBox::information(pDesktop->getMainWidget(), APP_NAME, 
-                     "Currently loaded plug-ins will not be updated until a new session is started");
-
-               }
-            }
             else if (type == "Wizard Path")
             {
                Service<DesktopServices> pDesktop;
@@ -197,67 +170,8 @@ void OptionsFileLocations::applyChanges()
       }
       ++iter;
    }
-
-   vector<Filename*> pathBookmarks;
-   for(QTreeWidgetItemIterator iter(mpBookmarkList); *iter != NULL; ++iter)
-   {
-      QTreeWidgetItem *pItem = *iter;
-      QString pathName(pItem->text(0));
-      QDir path(pathName);
-      if(pathName != sBookmarkListSentinal && path.exists())
-      {
-         FactoryResource<Filename> bookmark;
-         if(bookmark.get() != NULL)
-         {
-            bookmark->setFullPathAndName(path.absolutePath().toStdString());
-            pathBookmarks.push_back(bookmark.release());
-         }
-      }
-   }
-   Service<ConfigurationSettings>()->setSettingPathBookmarks(pathBookmarks);
 }
 
 OptionsFileLocations::~OptionsFileLocations()
 {
-}
-
-void OptionsFileLocations::addBookmark()
-{
-   QTreeWidgetItem *pItem = NULL;
-   QList<QTreeWidgetItem*> items = mpBookmarkList->findItems(sBookmarkListSentinal, Qt::MatchExactly);
-   if(items.empty())
-   {
-      pItem = new QTreeWidgetItem(mpBookmarkList);
-   }
-   else
-   {
-      foreach(QTreeWidgetItem *pTmpItem, items)
-      {
-         if(pItem == NULL)
-         {
-            pItem = pTmpItem;
-         }
-         else
-         {
-            QTreeWidgetItem *pRemoveItem = mpBookmarkList->takeTopLevelItem(mpBookmarkList->indexOfTopLevelItem(pItem));
-            if(pRemoveItem == pItem)
-            {
-               pItem = NULL;
-            }
-            delete pRemoveItem;
-         }
-      }
-   }
-   if(pItem != NULL)
-   {
-      pItem->setText(0, sBookmarkListSentinal);
-      mpBookmarkList->setCellWidgetType(pItem, 0, CustomTreeWidget::BROWSE_DIR_EDIT);
-      mpBookmarkList->setCurrentItem(pItem);
-   }
-   // now remove empty sections
-   items = mpBookmarkList->findItems("", Qt::MatchExactly);
-   foreach(QTreeWidgetItem *pTmpItem, items)
-   {
-      delete pTmpItem;
-   }
 }

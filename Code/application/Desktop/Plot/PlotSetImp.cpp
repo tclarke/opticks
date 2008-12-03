@@ -462,7 +462,7 @@ QString PlotSetImp::renamePlot(PlotWidget* pPlot)
          // Do not change the name to that of an existing plot
          if (getPlot(strNewName) == NULL)
          {
-            bool bSuccess = renamePlot(pPlot, strNewName);
+            bSuccess = renamePlot(pPlot, strNewName);
             if (bSuccess == false)
             {
                return QString();
@@ -715,7 +715,7 @@ bool PlotSetImp::deserialize(SessionItemDeserializer &deserializer)
 
 bool PlotSetImp::toXml(XMLWriter* pXml) const
 {
-   if(!SessionItemImp::toXml(pXml))
+   if (pXml == NULL || !SessionItemImp::toXml(pXml))
    {
       return false;
    }
@@ -726,10 +726,15 @@ bool PlotSetImp::toXml(XMLWriter* pXml) const
       pXml->addAttr("plotWindowId", mpPlotWindow->getId());
    }
 
+   if (mpAssociatedView != NULL)
+   {
+      pXml->addAttr("associatedViewId", mpAssociatedView->getId());
+   }
+
    vector<PlotWidget*> widgets = getPlots();
    for (vector<PlotWidget*>::const_iterator it = widgets.begin(); it != widgets.end(); ++it)
    {
-      if(*it != NULL)
+      if (*it != NULL)
       {
          pXml->pushAddPoint(pXml->addElement("PlotWidget"));
          pXml->addAttr("id", (*it)->getId());
@@ -746,7 +751,7 @@ bool PlotSetImp::fromXml(DOMNode* pDocument, unsigned int version)
    {
       return false;
    }
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
+   DOMElement* pElem = static_cast<DOMElement*>(pDocument);
 
    if (pElem->hasAttribute(X("plotWindowId")))
    {
@@ -765,11 +770,18 @@ bool PlotSetImp::fromXml(DOMNode* pDocument, unsigned int version)
       }
    }
 
+   if (pElem->hasAttribute(X("associatedViewId")))
+   {
+      View* pView = dynamic_cast<View*>(
+         SessionManagerImp::instance()->getSessionItem(A(pElem->getAttribute(X("associatedViewId")))));
+      setAssociatedView(pView);
+   }
+
    for (DOMNode *pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
    {
       if (XMLString::equals(pChld->getNodeName(), X("PlotWidget")))
       {
-         PlotWidget *pWidget = dynamic_cast<PlotWidget*>(
+         PlotWidget* pWidget = dynamic_cast<PlotWidget*>(
             Service<SessionManager>()->getSessionItem(A(static_cast<DOMElement*>(pChld)->getAttribute(X("id")))));
          if (pWidget != NULL)
          {

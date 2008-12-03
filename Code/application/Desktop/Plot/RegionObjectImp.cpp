@@ -40,8 +40,7 @@ RegionObjectImp::RegionObjectImp(PlotViewImp* pPlot, bool bPrimary) :
 }
 
 RegionObjectImp::~RegionObjectImp()
-{
-}
+{}
 
 RegionObjectImp& RegionObjectImp::operator= (const RegionObjectImp& object)
 {
@@ -114,13 +113,17 @@ void RegionObjectImp::draw()
    PlotViewImp* pPlot = getPlot();
    VERIFYNRV(pPlot != NULL);
 
-   double worldMinX, worldMinY;
-   double worldMaxX, worldMaxY;
+   double worldMinX;
+   double worldMinY;
+   double worldMaxX;
+   double worldMaxY;
    pPlot->translateDataToWorld(mMinX, mMinY, worldMinX, worldMinY);
    pPlot->translateDataToWorld(mMaxX, mMaxY, worldMaxX, worldMaxY);
 
-   double screenMinX, screenMinY;
-   double screenMaxX, screenMaxY;
+   double screenMinX;
+   double screenMinY;
+   double screenMaxX;
+   double screenMaxY;
    pPlot->translateWorldToScreen(worldMinX, worldMinY, screenMinX, screenMinY);
    pPlot->translateWorldToScreen(worldMaxX, worldMaxY, screenMaxX, screenMaxY);
 
@@ -149,7 +152,7 @@ void RegionObjectImp::draw()
          glVertex2d(dCurrentX, worldMinY);
          glVertex2d(dCurrentX, worldMaxY);
          dCurrentX += dColorWidth;
-     }
+      }
    }
 
    glEnd();
@@ -310,7 +313,7 @@ void RegionObjectImp::setRegion(double dMinX, double dMinY, double dMaxX, double
 
       emit regionChanged(mMinX, mMinY, mMaxX, mMaxY);
       notify(SIGNAL_NAME(RegionObject, RegionChanged), boost::any(
-         boost::tuple<double,double,double,double>(mMinX, mMinY, mMaxX, mMaxY)));
+         boost::tuple<double, double, double, double>(mMinX, mMinY, mMaxX, mMaxY)));
    }
 }
 
@@ -424,10 +427,9 @@ bool RegionObjectImp::toXml(XMLWriter* pXml) const
    pXml->addAttr("transparency", mTransparency);
    pXml->addAttr("border", mBorder);
 
-   if (mColors.size() > 0)
+   if (mColors.empty() == false)
    {
-      vector<ColorType>::const_iterator it;
-      for (it=mColors.begin(); it!=mColors.end(); ++it)
+      for (vector<ColorType>::const_iterator it = mColors.begin(); it != mColors.end(); ++it)
       {
          ColorType color = *it;
          pXml->pushAddPoint(pXml->addElement("Color"));
@@ -455,40 +457,34 @@ bool RegionObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
       return false;
    }
 
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
+   DOMElement* pElem = static_cast<DOMElement*>(pDocument);
    if (pElem == NULL)
    {
       return false;
    }
 
-   double minX, minY, maxX, maxY;
+   double minX;
+   double minY;
+   double maxX;
+   double maxY;
    XmlReader::StrToQuadCoord(pElem->getAttribute(X("extents")), minX, minY, maxX, maxY);
    setRegion(minX, minY, maxX, maxY);
 
-   setTransparency(StringUtilities::fromXmlString<int>(
-      A(pElem->getAttribute(X("transparency")))));
-
-   setDrawBorder(StringUtilities::fromXmlString<bool>(
-      A(pElem->getAttribute(X("border")))));
+   setTransparency(StringUtilities::fromXmlString<int>(A(pElem->getAttribute(X("transparency")))));
+   setDrawBorder(StringUtilities::fromXmlString<bool>(A(pElem->getAttribute(X("border")))));
 
    vector<ColorType> colors;
-   for (DOMNode* pChld = pDocument->getFirstChild();
-        pChld != NULL;
-        pChld = pChld->getNextSibling())
+   for (DOMNode* pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
    {
       string name = A(pChld->getNodeName());
       if (name == "Color")
       {
          pElem = static_cast<DOMElement*>(pChld);
          ColorType ct;
-         ct.mAlpha = StringUtilities::fromXmlString<int>(
-                     A(pElem->getAttribute(X("alpha"))));
-         ct.mRed = StringUtilities::fromXmlString<int>(
-                     A(pElem->getAttribute(X("red"))));
-         ct.mGreen = StringUtilities::fromXmlString<int>(
-                     A(pElem->getAttribute(X("green"))));
-         ct.mBlue = StringUtilities::fromXmlString<int>(
-                     A(pElem->getAttribute(X("blue"))));
+         ct.mAlpha = StringUtilities::fromXmlString<int>(A(pElem->getAttribute(X("alpha"))));
+         ct.mRed = StringUtilities::fromXmlString<int>(A(pElem->getAttribute(X("red"))));
+         ct.mGreen = StringUtilities::fromXmlString<int>(A(pElem->getAttribute(X("green"))));
+         ct.mBlue = StringUtilities::fromXmlString<int>(A(pElem->getAttribute(X("blue"))));
          colors.push_back(ct);
       }
    }

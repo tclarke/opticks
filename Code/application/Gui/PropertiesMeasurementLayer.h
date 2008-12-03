@@ -54,6 +54,7 @@ private:
    MeasurementLayer* mpMeasurementLayer;
    std::map<QListWidgetItem*, GraphicObject*> mObjects;
    Modifier mPropertiesModifier;
+   Modifier mNameModifier;
 
    QListWidget* mpObjectsList;
    QStackedWidget* mpStack;

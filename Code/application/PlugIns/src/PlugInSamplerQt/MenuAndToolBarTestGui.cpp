@@ -22,16 +22,16 @@
 #include <QtGui/QPushButton>
 #include <QtGui/QWidgetAction>
 
-MenuAndToolBarTestGui::MenuAndToolBarTestGui( QWidget* pParent, const char* pName, bool modal )
-: QDialog(pParent)
+MenuAndToolBarTestGui::MenuAndToolBarTestGui(QWidget* pParent, const char* pName, bool modal) :
+   QDialog(pParent)
 {
    if (pName == NULL)
    {
       setObjectName( "MenuAndToolBarGui" );
    }
-   setModal( FALSE );
+   setModal(false);
 
-   QGridLayout *pLayout = new QGridLayout( this );
+   QGridLayout* pLayout = new QGridLayout( this );
 
    mpCancelButton = new QPushButton( "cancelButton", this );
    mpDisableOpenButton = new QPushButton( "disableOpenButton", this );
@@ -87,8 +87,8 @@ MenuAndToolBarTestGui::~MenuAndToolBarTestGui()
 
 void MenuAndToolBarTestGui::init()
 {
-   ToolBar *pToolboxBar = dynamic_cast<ToolBar*>( Service<DesktopServices>()->getWindow( "Toolbox", TOOLBAR ) );
-   if( pToolboxBar != NULL )
+   ToolBar* pToolboxBar = dynamic_cast<ToolBar*>(Service<DesktopServices>()->getWindow("Toolbox", TOOLBAR));
+   if (pToolboxBar != NULL)
    {
       mToolbarItems = pToolboxBar->getItems();
    }
@@ -96,29 +96,35 @@ void MenuAndToolBarTestGui::init()
 
 void MenuAndToolBarTestGui::disableFileOpenButton()
 {
-   ToolBar *pToolBar = dynamic_cast<ToolBar*>( Service<DesktopServices>()->getWindow( "Standard", TOOLBAR ) );
-   std::vector<QAction*> items = pToolBar->getItems();
-   items.at(1)->setEnabled( false );
+   ToolBar* pToolBar = dynamic_cast<ToolBar*>(Service<DesktopServices>()->getWindow("Standard", TOOLBAR));
+   if (pToolBar != NULL)
+   {
+      std::vector<QAction*> items = pToolBar->getItems();
+      items.at(1)->setEnabled(false);
+   }
 }
 
 void MenuAndToolBarTestGui::enableFileOpenButton()
 {
-   ToolBar *pToolBar = dynamic_cast<ToolBar*>( Service<DesktopServices>()->getWindow( "Standard", TOOLBAR ) );
-   std::vector<QAction*> items = pToolBar->getItems();
-   items.at(1)->setEnabled( true );
+   ToolBar* pToolBar = dynamic_cast<ToolBar*>(Service<DesktopServices>()->getWindow("Standard", TOOLBAR));
+   if (pToolBar != NULL)
+   {
+      std::vector<QAction*> items = pToolBar->getItems();
+      items.at(1)->setEnabled(true);
+   }
 }
 
 void MenuAndToolBarTestGui::addMenuItems()
 {
    // insert some test items into the menu
-   ToolBar *pTestBar = dynamic_cast<ToolBar*>( Service<DesktopServices>()->getWindow( "Tests", TOOLBAR ) );
-   if( pTestBar != NULL )
+   ToolBar* pTestBar = dynamic_cast<ToolBar*>(Service<DesktopServices>()->getWindow("Tests", TOOLBAR));
+   if ( pTestBar != NULL )
    {
-      MenuBar *pMenuBar = pTestBar->getMenuBar();
-      if( pMenuBar != NULL )
+      MenuBar* pMenuBar = pTestBar->getMenuBar();
+      if ( pMenuBar != NULL )
       {
-         QAction *pFirstItem = pMenuBar->getMenuItem( "Tests/Close Notification Test" );
-         QAction *pMouseModeItem = pMenuBar->getMenuItem( "Tests/MouseMode Test" );
+         QAction* pFirstItem = pMenuBar->getMenuItem( "Tests/Close Notification Test" );
+         QAction* pMouseModeItem = pMenuBar->getMenuItem( "Tests/MouseMode Test" );
 
          pMenuBar->addCommand( "Tests/Last Item in the Menu" );
          pMenuBar->addCommand( "Tests/After Message Log Test", pMouseModeItem );
@@ -130,66 +136,70 @@ void MenuAndToolBarTestGui::addMenuItems()
 void MenuAndToolBarTestGui::removeMenuItems()
 {
    // remove the test items from the menu
-   ToolBar *pTestBar = dynamic_cast<ToolBar*>( Service<DesktopServices>()->getWindow( "Tests", TOOLBAR ) );
-   if( pTestBar != NULL )
+   ToolBar* pTestBar = dynamic_cast<ToolBar*>(Service<DesktopServices>()->getWindow("Tests", TOOLBAR));
+   if ( pTestBar != NULL )
    {
-      MenuBar *pMenuBar = pTestBar->getMenuBar();
-      if( pMenuBar != NULL )
+      MenuBar* pMenuBar = pTestBar->getMenuBar();
+      if ( pMenuBar != NULL )
       {
-         QAction *pFirstItem = pMenuBar->getMenuItem( "Tests/Top of the Menu" );
-         QAction *pAfterMsgItem = pMenuBar->getMenuItem( "Tests/After Message Log Test" );
-         QAction *pLastItem = pMenuBar->getMenuItem( "Tests/Last Item in the Menu" );
+         QAction* pFirstItem = pMenuBar->getMenuItem("Tests/Top of the Menu");
+         QAction* pAfterMsgItem = pMenuBar->getMenuItem("Tests/After Message Log Test");
+         QAction* pLastItem = pMenuBar->getMenuItem("Tests/Last Item in the Menu");
 
-         pMenuBar->removeMenuItem( pFirstItem );
-         pMenuBar->removeMenuItem( pAfterMsgItem );
-         pMenuBar->removeMenuItem( pLastItem );
+         pMenuBar->removeMenuItem(pFirstItem);
+         pMenuBar->removeMenuItem(pAfterMsgItem);
+         pMenuBar->removeMenuItem(pLastItem);
       }
    }
 }
 
 void MenuAndToolBarTestGui::disableGeneralAlgorithmsMenuItems()
 {
-   ToolBar *pAlgorithmBar = dynamic_cast<ToolBar*>( Service<DesktopServices>()->getWindow( "General Algorithms", TOOLBAR ) );
-   if( pAlgorithmBar != NULL )
+   Service<DesktopServices> pDesktop;
+
+   ToolBar* pAlgorithmBar = dynamic_cast<ToolBar*>(pDesktop->getWindow("General Algorithms", TOOLBAR));
+   if ( pAlgorithmBar != NULL )
    {
-      MenuBar *pMenuBar = pAlgorithmBar->getMenuBar();
-      if( pMenuBar != NULL )
+      MenuBar* pMenuBar = pAlgorithmBar->getMenuBar();
+      if ( pMenuBar != NULL )
       {
-         QAction *pBandMath = pMenuBar->getMenuItem( "General Algorithms/Band Math" );
-         QAction *pDataFusion = pMenuBar->getMenuItem( "General Algorithms/Data &Fusion" );
-         QAction *pPCA = pMenuBar->getMenuItem( "General Algorithms/Principal Component Analysis" );
-         pBandMath->setEnabled( false );
-         pDataFusion->setEnabled( false );
-         pPCA->setEnabled( false );
+         QAction* pBandMath = pMenuBar->getMenuItem("General Algorithms/Band Math");
+         QAction* pDataFusion = pMenuBar->getMenuItem("General Algorithms/Data &Fusion");
+         QAction* pPCA = pMenuBar->getMenuItem("General Algorithms/Principal Component Analysis");
+         pBandMath->setEnabled(false);
+         pDataFusion->setEnabled(false);
+         pPCA->setEnabled(false);
       }
    }
 }
 
 void MenuAndToolBarTestGui::enableGeneralAlgorithmsMenuItems()
 {
-   ToolBar *pAlgorithmBar = dynamic_cast<ToolBar*>( Service<DesktopServices>()->getWindow( "General Algorithms", TOOLBAR ) );
-   if( pAlgorithmBar != NULL )
+   Service<DesktopServices> pDesktop;
+
+   ToolBar* pAlgorithmBar = dynamic_cast<ToolBar*>(pDesktop->getWindow("General Algorithms", TOOLBAR));
+   if ( pAlgorithmBar != NULL )
    {
-      MenuBar *pMenuBar = pAlgorithmBar->getMenuBar();
-      if( pMenuBar != NULL )
+      MenuBar* pMenuBar = pAlgorithmBar->getMenuBar();
+      if ( pMenuBar != NULL )
       {
-         QAction *pBandMath = pMenuBar->getMenuItem( "General Algorithms/Band Math" );
-         QAction *pDataFusion = pMenuBar->getMenuItem( "General Algorithms/Data &Fusion" );
-         QAction *pPCA = pMenuBar->getMenuItem( "General Algorithms/Principal Component Analysis" );
-         pBandMath->setEnabled( true );
-         pDataFusion->setEnabled( true );
-         pPCA->setEnabled( true );
+         QAction* pBandMath = pMenuBar->getMenuItem("General Algorithms/Band Math");
+         QAction* pDataFusion = pMenuBar->getMenuItem("General Algorithms/Data &Fusion");
+         QAction* pPCA = pMenuBar->getMenuItem("General Algorithms/Principal Component Analysis");
+         pBandMath->setEnabled(true);
+         pDataFusion->setEnabled(true);
+         pPCA->setEnabled(true);
       }
    }
 }
 
 void MenuAndToolBarTestGui::reorderToolboxToolbarButtons()
 {
-   ToolBar *pToolboxBar = dynamic_cast<ToolBar*>( Service<DesktopServices>()->getWindow( "Toolbox", TOOLBAR ) );
-   if( pToolboxBar != NULL )
+   ToolBar* pToolboxBar = dynamic_cast<ToolBar*>(Service<DesktopServices>()->getWindow("Toolbox", TOOLBAR));
+   if ( pToolboxBar != NULL )
    {
       std::vector<QAction*> tempItems = pToolboxBar->getItems();
-      for( unsigned int index = 0; index < tempItems.size(); index++ )
+      for ( unsigned int index = 0; index < tempItems.size(); index++ )
       {
          QAction* pAction = tempItems.at(index);
          if ((pAction != NULL) && (dynamic_cast<QWidgetAction*>(pAction) == NULL))
@@ -212,11 +222,11 @@ void MenuAndToolBarTestGui::reorderToolboxToolbarButtons()
 
 void MenuAndToolBarTestGui::resetToolboxToolbarButtons()
 {
-   ToolBar *pToolboxBar = dynamic_cast<ToolBar*>( Service<DesktopServices>()->getWindow( "Toolbox", TOOLBAR ) );
-   if( pToolboxBar != NULL )
+   ToolBar* pToolboxBar = dynamic_cast<ToolBar*>(Service<DesktopServices>()->getWindow("Toolbox", TOOLBAR));
+   if ( pToolboxBar != NULL )
    {
       std::vector<QAction*> tempItems = pToolboxBar->getItems();
-      for( unsigned int index = 0; index < tempItems.size(); index++ )
+      for ( unsigned int index = 0; index < tempItems.size(); index++ )
       {
          QAction* pAction = tempItems.at(index);
          if ((pAction != NULL) && (dynamic_cast<QWidgetAction*>(pAction) == NULL))

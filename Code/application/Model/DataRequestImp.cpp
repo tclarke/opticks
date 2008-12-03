@@ -233,7 +233,8 @@ unsigned int DataRequestImp::getConcurrentColumns() const
    return mConcurrentColumns;
 }
 
-void DataRequestImp::setColumns(DimensionDescriptor startColumn, DimensionDescriptor stopColumn, unsigned int concurrentColumns)
+void DataRequestImp::setColumns(DimensionDescriptor startColumn, DimensionDescriptor stopColumn,
+                                unsigned int concurrentColumns)
 {
    mStartColumn = startColumn;
    mStopColumn = stopColumn;

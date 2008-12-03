@@ -27,15 +27,16 @@ DataPlotterDlg::DataPlotterDlg(Signature &sig) :
    QDialog(NULL),
    mSig(sig),
    mpPlot(NULL),
+   mpPlotSet(NULL),
    mpPlotWindow(NULL)
 {
    // Axis Selectors
-   QLabel *pXlabel = new QLabel("X-Axis:", this);
+   QLabel* pXlabel = new QLabel("X-Axis:", this);
    mpXbox = new QComboBox(this);
    mpXbox->addItem("Band Number");
    mpXbox->addItem("Wavelength");
 
-   QLabel *pYlabel = new QLabel("Y-Axis:", this);
+   QLabel* pYlabel = new QLabel("Y-Axis:", this);
    mpYbox = new QComboBox(this);
    mpYbox->addItem("Radiance");
    mpYbox->addItem("Reflectance");
@@ -106,16 +107,16 @@ void DataPlotterDlg::newPlot()
 
    stringstream name;
    name << " Data Plotter Plot " << sCount;
-   PlotWidget *pPlot = mpPlotWindow->plotData(mSig, mpXbox->currentText().toStdString(), 
+   PlotWidget* pPlot = mpPlotWindow->plotData(mSig, mpXbox->currentText().toStdString(), 
       mpYbox->currentText().toStdString(), name.str());
-   if(pPlot == NULL)
+   if (pPlot == NULL)
    {
       pDesktop->deleteWindow(mpPlotWindow);
       return;
    }
    sCount++;
    mpPlot = pPlot;
-   PlotView *pPlotView = mpPlot->getPlot();
+   PlotView* pPlotView = mpPlot->getPlot();
    VERIFYNRV(pPlotView != NULL);
    pPlotView->zoomExtents();
    mpAddButton->setEnabled(true);
@@ -125,7 +126,7 @@ void DataPlotterDlg::addToPlot()
 {
    VERIFYNRV(mpPlot != NULL);
 
-   PlotView *pPlotView = mpPlot->getPlot();
+   PlotView* pPlotView = mpPlot->getPlot();
    VERIFYNRV(pPlotView != NULL);
 
    string plotName = pPlotView->getName();

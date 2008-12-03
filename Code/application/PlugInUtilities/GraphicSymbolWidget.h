@@ -46,9 +46,9 @@ private:
 
    QListWidgetItem *getSelectedItem() const;
 
-   QListWidget *mpSymbolList;
-   QLabel *mpSymbolPreview;
-   QSpinBox *mpSymbolSizeSpin;
+   QListWidget* mpSymbolList;
+   QLabel* mpSymbolPreview;
+   QSpinBox* mpSymbolSizeSpin;
 };
 
 #endif

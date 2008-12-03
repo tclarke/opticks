@@ -244,5 +244,5 @@ private:
    { \
       return impClass::getMenuLocation(); \
    } \
-   
+
 #endif

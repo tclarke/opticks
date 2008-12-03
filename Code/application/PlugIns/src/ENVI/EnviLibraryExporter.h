@@ -31,15 +31,15 @@ public:
 
    bool setBatch();
    bool setInteractive();
-   bool getInputSpecification(PlugInArgList*& pInArgList);
-   bool getOutputSpecification(PlugInArgList*& pOutArgList);
+   bool getInputSpecification(PlugInArgList*& pArgList);
+   bool getOutputSpecification(PlugInArgList*& pArgList);
    bool hasAbort();
    bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
    bool abort();
 
 protected:
    bool extractPlugInArgs(PlugInArgList* pArgList);
-   bool extractSignatures(SignatureSet &signatureSet, std::vector<Signature*>& signatures);
+   bool extractSignatures(SignatureSet& signatureSet, std::vector<Signature*>& signatures);
 
 private:
    bool mbAbort;
@@ -49,7 +49,7 @@ private:
    SignatureSet* mpSignatureSet;
    FileDescriptor* mpFileDescriptor;
 
-   Step *mpStep;
+   Step* mpStep;
 };
 
-#endif   // ENVILIBRARYEXPORTER_H
+#endif

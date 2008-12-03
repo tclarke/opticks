@@ -40,20 +40,20 @@ public slots:
    void updateWidgets();
 
 private:
-   QRadioButton *mpSdeButton;
-   QRadioButton *mpShpButton;
-   QCheckBox *mpUseArcCheck;
+   QRadioButton* mpSdeButton;
+   QRadioButton* mpShpButton;
+   QCheckBox* mpUseArcCheck;
 
-   QLineEdit *mpFilenameEdit;
-   QPushButton *mpSelectFileButton;
+   QLineEdit* mpFilenameEdit;
+   QPushButton* mpSelectFileButton;
 
-   QLineEdit *mpUserEdit;
-   QLineEdit *mpPasswordEdit;
-   QLineEdit *mpDatabaseEdit;
-   QLineEdit *mpServerEdit;
-   QLineEdit *mpInstanceEdit;
-   QLineEdit *mpVersionEdit;
-   QLineEdit *mpFeatureClassEdit;
+   QLineEdit* mpUserEdit;
+   QLineEdit* mpPasswordEdit;
+   QLineEdit* mpDatabaseEdit;
+   QLineEdit* mpServerEdit;
+   QLineEdit* mpInstanceEdit;
+   QLineEdit* mpVersionEdit;
+   QLineEdit* mpFeatureClassEdit;
 
    std::vector<QWidget*> mFileWidgets;
    std::vector<QWidget*> mDatabaseWidgets;

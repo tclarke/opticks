@@ -18,7 +18,7 @@
 #include <vector>
 using namespace std;
 
-CoreModuleDescriptor::CoreModuleDescriptor(const string& id, map<string, string> &plugInIds) :
+CoreModuleDescriptor::CoreModuleDescriptor(const string& id, map<string, string>& plugInIds) :
    ModuleDescriptor(id)
 {
    ModuleManager* pCore = ModuleManager::instance();
@@ -28,9 +28,7 @@ CoreModuleDescriptor::CoreModuleDescriptor(const string& id, map<string, string>
    mPlugInTotal = pCore->getTotalPlugIns();
    mValidationKey = pCore->getValidationKey();
    mFileName = "This module is built into the application and does not have a separate file.";
-   mFileDate.set(APP_RELEASE_DATE_YEAR,
-                 APP_RELEASE_DATE_MONTH,
-                 APP_RELEASE_DATE_DAY);
+   mFileDate.set(APP_RELEASE_DATE_YEAR, APP_RELEASE_DATE_MONTH, APP_RELEASE_DATE_DAY);
    initializePlugInInformation(plugInIds);
 }
 

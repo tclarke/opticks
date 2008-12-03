@@ -89,7 +89,7 @@ void RectangleObjectImp::drawVector(double zoomFactor) const
 #if defined(WIN_API)
       glEnable(GL_LINE_SMOOTH);
 #else
-      if(lineWidth == 1.0)
+      if (lineWidth == 1.0)
       {
          glEnable(GL_LINE_SMOOTH);
       }
@@ -289,7 +289,7 @@ RoundedRectangleObjectImp::RoundedRectangleObjectImp(const string& id, GraphicOb
 {
 }
 
-void RoundedRectangleObjectImp::draw (double zoomFactor) const
+void RoundedRectangleObjectImp::draw(double zoomFactor) const
 {
    LocationType llCorner = getLlCorner();
    LocationType urCorner = getUrCorner();
@@ -395,7 +395,7 @@ void RoundedRectangleObjectImp::draw (double zoomFactor) const
 #if defined(WIN_API)
          glEnable(GL_LINE_SMOOTH);
 #else
-         if(lineWidth == 1.0)
+         if (lineWidth == 1.0)
          {
             glEnable(GL_LINE_SMOOTH);
          }

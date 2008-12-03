@@ -61,10 +61,9 @@ DesktopServicesImp* DesktopServicesImp::instance()
 {
    if (spInstance == NULL)
    {
-      if(mDestroyed)
+      if (mDestroyed)
       {
-         throw std::logic_error("Attempting to use DesktopServices after "
-            "destroying it.");
+         throw std::logic_error("Attempting to use DesktopServices after destroying it.");
       }
       spInstance = new DesktopServicesImp();
    }
@@ -76,20 +75,18 @@ void DesktopServicesImp::destroy()
 {
    if (mDestroyed)
    {
-      throw std::logic_error("Attempting to destroy DesktopServices after "
-         "destroying it.");
+      throw std::logic_error("Attempting to destroy DesktopServices after destroying it.");
    }
    delete spInstance;
    spInstance = NULL;
    mDestroyed = true;
 }
 
-DesktopServicesImp::DesktopServicesImp() : mpGpuResourceManager(NULL),
-                                           mpImageFilterManager(NULL),
-                                           mDisplayMessageBox(true)
+DesktopServicesImp::DesktopServicesImp() :
+   mpGpuResourceManager(new GpuResourceManager()),
+   mpImageFilterManager(new ImageFilterManager()),
+   mDisplayMessageBox(true)
 {
-   mpGpuResourceManager = new GpuResourceManager;
-   mpImageFilterManager = new ImageFilterManager;
    ENSURE(mpGpuResourceManager != NULL);
    ENSURE(mpImageFilterManager != NULL);
 }
@@ -108,8 +105,8 @@ DesktopServicesImp::~DesktopServicesImp()
 
 const string& DesktopServicesImp::getObjectType() const
 {
-   static string type("DesktopServicesImp");
-   return type;
+   static string sType("DesktopServicesImp");
+   return sType;
 }
 
 bool DesktopServicesImp::isKindOf(const string& className) const
@@ -150,12 +147,12 @@ MenuBar* DesktopServicesImp::getMainMenuBar() const
    return pMenuBar;
 }
 
-GpuResourceManager *DesktopServicesImp::getGpuResourceManager() const
+GpuResourceManager* DesktopServicesImp::getGpuResourceManager() const
 {
    return mpGpuResourceManager;
 }
 
-ImageFilterManager *DesktopServicesImp::getImageFilterManager() const
+ImageFilterManager* DesktopServicesImp::getImageFilterManager() const
 {
    return mpImageFilterManager;
 }
@@ -500,7 +497,8 @@ bool DesktopServicesImp::isKindOfView(const string& className, const string& vie
    {
       bSuccess = SpatialDataViewImp::isKindOfView(viewName);
    }
-   else if ((className == "SignaturePlot") || (className == "SignaturePlotAdapter") || (className == "SignaturePlotImp"))
+   else if ((className == "SignaturePlot") || (className == "SignaturePlotAdapter") ||
+      (className == "SignaturePlotImp"))
    {
       bSuccess = SignaturePlotImp::isKindOfView(viewName);
    }
@@ -548,7 +546,8 @@ void DesktopServicesImp::getViewTypes(const string& className, vector<string>& c
    {
       SpatialDataViewImp::getViewTypes(classList);
    }
-   else if ((className == "SignaturePlot") || (className == "SignaturePlotAdapter") || (className == "SignaturePlotImp"))
+   else if ((className == "SignaturePlot") || (className == "SignaturePlotAdapter") ||
+      (className == "SignaturePlotImp"))
    {
       SignaturePlotImp::getViewTypes(classList);
    }
@@ -558,14 +557,16 @@ void DesktopServicesImp::getViewTypes(const string& className, vector<string>& c
    }
 }
 
-ProductWindow *DesktopServicesImp::deriveProduct(View *pView)
+ProductWindow* DesktopServicesImp::deriveProduct(View* pView)
 {
-   ProductWindow *pWindow = NULL;
+   ProductWindow* pWindow = NULL;
+
    ApplicationWindow* pAppWindow = static_cast<ApplicationWindow*>(getMainWidget());
-   if(pAppWindow != NULL)
+   if (pAppWindow != NULL)
    {
       pWindow = pAppWindow->deriveProduct(pView);
    }
+
    return pWindow;
 }
 
@@ -795,7 +796,7 @@ bool DesktopServicesImp::importFile(const string& importerSubtype, Progress* pPr
 
 bool DesktopServicesImp::exportSessionItem(SessionItem* pItem, FileDescriptor* pNewFileDescriptor, Progress* pProgress)
 {
-   ApplicationWindow *pAppWindow = static_cast<ApplicationWindow*>(getMainWidget());
+   ApplicationWindow* pAppWindow = static_cast<ApplicationWindow*>(getMainWidget());
    VERIFY(pAppWindow != NULL);
 
    return pAppWindow->exportSessionItem(pItem, pNewFileDescriptor, pProgress);
@@ -817,7 +818,7 @@ bool DesktopServicesImp::displayHelpHome() const
 
 bool DesktopServicesImp::displayHelp(const QUrl& url) const
 {
-   if(url.isEmpty() || !url.isValid())
+   if (url.isEmpty() || !url.isValid())
    {
       return false;
    }
@@ -875,9 +876,10 @@ void DesktopServicesImp::setStatusBarMessage(const string& messageText) const
 bool DesktopServicesImp::registerCallback(PlugInCallbackType eType, PlugInCallback* pCallback) const
 {
    bool rval(false);
-   BackgroundPluginWindow *pBpw(static_cast<BackgroundPluginWindow*>(
-                                    getWindow("Background Plug-In Window",DOCK_WINDOW)));
-   if(pBpw != NULL && eType == BACKGROUND_COMPLETE)
+
+   BackgroundPluginWindow* pBpw = static_cast<BackgroundPluginWindow*>(getWindow("Background Plug-In Window",
+      DOCK_WINDOW));
+   if (pBpw != NULL && eType == BACKGROUND_COMPLETE)
    {
       rval = pBpw->addCallback(pCallback);
    }
@@ -886,16 +888,16 @@ bool DesktopServicesImp::registerCallback(PlugInCallbackType eType, PlugInCallba
 
 void DesktopServicesImp::addBackgroundPlugIn(PlugIn* pPlugIn, Progress* pProgress) const
 {
-   BackgroundPluginWindow *pBpw(static_cast<BackgroundPluginWindow*>(
-                                    getWindow("Background Plug-In Window",DOCK_WINDOW)));
-   if(pBpw != NULL)
+   BackgroundPluginWindow* pBpw = static_cast<BackgroundPluginWindow*>(getWindow("Background Plug-In Window",
+      DOCK_WINDOW));
+   if (pBpw != NULL)
    {
       pBpw->addItem(pPlugIn, pProgress);
       pBpw->show();
    }
 }
 
-DockWindowAreaType DesktopServicesImp::getDockWindowArea(const DockWindow &dockWindow) const
+DockWindowAreaType DesktopServicesImp::getDockWindowArea(const DockWindow& dockWindow) const
 {
    // use the default initializer value (may be undefined)
    // since there is not "default" value. We should always
@@ -903,11 +905,11 @@ DockWindowAreaType DesktopServicesImp::getDockWindowArea(const DockWindow &dockW
    // bad things
    DockWindowAreaType area(DOCK_FLOATING);
 
-   QMainWindow *pMain = dynamic_cast<QMainWindow*>(getMainWidget());
-   const QDockWidget *pDockWidget = dynamic_cast<const QDockWidget*>(&dockWindow);
+   QMainWindow* pMain = dynamic_cast<QMainWindow*>(getMainWidget());
+   const QDockWidget* pDockWidget = dynamic_cast<const QDockWidget*>(&dockWindow);
    VERIFYRV((pMain != NULL) && (pDockWidget != NULL), area);
 
-   if(pDockWidget->isFloating())
+   if (pDockWidget->isFloating())
    {
       area = DOCK_FLOATING;
    }
@@ -916,7 +918,7 @@ DockWindowAreaType DesktopServicesImp::getDockWindowArea(const DockWindow &dockW
       // querying the area is a const operation but the function is not
       // declared const so this is a safe const_cast
       Qt::DockWidgetArea qtArea = pMain->dockWidgetArea(const_cast<QDockWidget*>(pDockWidget));
-      switch(qtArea)
+      switch (qtArea)
       {
          case Qt::LeftDockWidgetArea:
             area = DOCK_LEFT;
@@ -930,16 +932,17 @@ DockWindowAreaType DesktopServicesImp::getDockWindowArea(const DockWindow &dockW
          case Qt::BottomDockWidgetArea:
             area = DOCK_BOTTOM;
             break;
+         default:
+            break;
       }
    }
    return area;
 }
 
-bool DesktopServicesImp::setDockWindowArea(DockWindow *pDockWindow, 
-   DockWindowAreaType dockArea)
+bool DesktopServicesImp::setDockWindowArea(DockWindow* pDockWindow, DockWindowAreaType dockArea)
 {
    VERIFY(pDockWindow != NULL);
-   QDockWidget *pDockWidget = dynamic_cast<QDockWidget*>(pDockWindow);
+   QDockWidget* pDockWidget = dynamic_cast<QDockWidget*>(pDockWindow);
    VERIFY(pDockWidget != NULL);
 
    Qt::DockWidgetArea dock = Qt::AllDockWidgetAreas;
@@ -971,7 +974,8 @@ bool DesktopServicesImp::setDockWindowArea(DockWindow *pDockWindow,
    else
    {
       pDockWidget->setFloating(false);
-      QMainWindow *pMainWindow = dynamic_cast<QMainWindow*>(this->getMainWidget());
+
+      QMainWindow* pMainWindow = dynamic_cast<QMainWindow*>(this->getMainWidget());
       VERIFY(pMainWindow != NULL);
       pMainWindow->addDockWidget(dock, pDockWidget);
    }
@@ -979,8 +983,8 @@ bool DesktopServicesImp::setDockWindowArea(DockWindow *pDockWindow,
    return true;
 }
 
-int DesktopServicesImp::showMessageBox(const string &caption, const string &text, const string &button0,
-                                       const string &button1, const string &button2, int defaultButton,
+int DesktopServicesImp::showMessageBox(const string& caption, const string& text, const string& button0,
+                                       const string& button1, const string& button2, int defaultButton,
                                        int escapeButton) const
 {
    if (mDisplayMessageBox)
@@ -1020,13 +1024,13 @@ void DesktopServicesImp::useMessageBox(bool enable)
    mDisplayMessageBox = enable;
 }
 
-bool DesktopServicesImp::createProgressDialog(const string &caption, Progress *pProgress) const
+bool DesktopServicesImp::createProgressDialog(const string& caption, Progress* pProgress) const
 {
    bool success = false;
-   if(pProgress != NULL)
+   if (pProgress != NULL)
    {
       ProgressDlg* pProgressDlg = new ProgressDlg(QString::fromStdString(caption), getMainWidget());
-      if(pProgressDlg != NULL)
+      if (pProgressDlg != NULL)
       {
          pProgress->attach(SIGNAL_NAME(Subject, Modified), Slot(pProgressDlg, &ProgressDlg::progressUpdated));
          pProgress->attach(SIGNAL_NAME(Subject, Deleted), Slot(pProgressDlg, &ProgressDlg::progressDeleted));
@@ -1036,18 +1040,18 @@ bool DesktopServicesImp::createProgressDialog(const string &caption, Progress *p
    return success;
 }
 
-ProgressDlg* DesktopServicesImp::createProgressDialog(const string &caption, Progress *pProgress,
-                                                      QObject *pObject, const char *pSlot) const
+ProgressDlg* DesktopServicesImp::createProgressDialog(const string& caption, Progress* pProgress,
+                                                      QObject* pObject, const char* pSlot) const
 {
    ProgressDlg* pProgressDlg = NULL;
-   if(pProgress != NULL)
+   if (pProgress != NULL)
    {
       pProgressDlg = new ProgressDlg(QString::fromStdString(caption), getMainWidget());
-      if(pProgressDlg != NULL)
+      if (pProgressDlg != NULL)
       {
          pProgress->attach(SIGNAL_NAME(Subject, Modified), Slot(pProgressDlg, &ProgressDlg::progressUpdated));
          pProgress->attach(SIGNAL_NAME(Subject, Deleted), Slot(pProgressDlg, &ProgressDlg::progressDeleted));
-         if(pObject != NULL && pSlot != NULL)
+         if (pObject != NULL && pSlot != NULL)
          {
             pProgressDlg->enableAbort(true);
             QObject::connect(pProgressDlg, SIGNAL(aborted()), pObject, pSlot);
@@ -1057,20 +1061,20 @@ ProgressDlg* DesktopServicesImp::createProgressDialog(const string &caption, Pro
    return pProgressDlg;
 }
 
-const std::vector<std::string> &DesktopServicesImp::getAvailableSymbolNames() const
+const vector<string>& DesktopServicesImp::getAvailableSymbolNames() const
 {
-   static std::vector<std::string> empty;
+   static vector<string> sEmpty;
 
-   SymbolManager *pSymbolManager = SymbolManager::instance();
-   VERIFYRV(pSymbolManager != NULL, empty);
+   SymbolManager* pSymbolManager = SymbolManager::instance();
+   VERIFYRV(pSymbolManager != NULL, sEmpty);
    return pSymbolManager->getAvailableSymbolNames();
-} 
+}
 
-const QImage &DesktopServicesImp::getSymbolImage(const std::string &symbol) const
+const QImage& DesktopServicesImp::getSymbolImage(const string& symbol) const
 {
-   static QImage image;
+   static QImage sImage;
 
-   SymbolManager *pSymbolManager = SymbolManager::instance();
-   VERIFYRV(pSymbolManager != NULL, image);
+   SymbolManager* pSymbolManager = SymbolManager::instance();
+   VERIFYRV(pSymbolManager != NULL, sImage);
    return pSymbolManager->getSymbolImage(symbol);
 }

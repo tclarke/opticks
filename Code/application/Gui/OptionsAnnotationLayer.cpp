@@ -95,7 +95,8 @@ OptionsAnnotationLayer::OptionsAnnotationLayer() :
    pCommonPropLayout->addWidget(mpObjectFill, 7, 0, 1, 2, Qt::AlignLeft);
    pCommonPropLayout->addWidget(mpObjectBorder, 8, 0, 1, 2, Qt::AlignLeft);
    pCommonPropLayout->setColumnStretch(1, 10);
-   LabeledSection* pCommonPropertiesSection = new LabeledSection(pCommonPropertiesWidget, "Default Common Properties", this);
+   LabeledSection* pCommonPropertiesSection = new LabeledSection(pCommonPropertiesWidget,
+      "Default Common Properties", this);
 
    // Text Properties
    QLabel* pTextColorLabel = new QLabel("Font Color:", this);
@@ -170,7 +171,8 @@ OptionsAnnotationLayer::OptionsAnnotationLayer() :
    pTrianglePropLayout->addWidget(pApexLabel, 0, 0);
    pTrianglePropLayout->addWidget(mpApex, 0, 1, Qt::AlignLeft);
    pTrianglePropLayout->setColumnStretch(1, 10);
-   LabeledSection* pTrianglePropertiesSection = new LabeledSection(pTrianglePropertiesWidget, "Default Triangle Properties", this);
+   LabeledSection* pTrianglePropertiesSection = new LabeledSection(pTrianglePropertiesWidget,
+      "Default Triangle Properties", this);
 
    // Dialog layout
    QVBoxLayout* pLayout = new QVBoxLayout(this);
@@ -210,12 +212,12 @@ OptionsAnnotationLayer::OptionsAnnotationLayer() :
    int apexPercentage = apex * 100;
    mpApex->setValue(apexPercentage);
    double alpha = GraphicLayer::getSettingAlpha();
-   int opacity = int(alpha / 2.550f + 0.5f); 
+   int opacity = static_cast<int>(alpha / 2.550f + 0.5f); 
    mpAlpha->setValue(opacity);
 }
-   
+
 void OptionsAnnotationLayer::applyChanges()
-{  
+{
    GraphicLayer::setSettingTextColor(mpTextColor->getColorType());
    GraphicLayer::setSettingStartAngle(mpStartAngle->value());
    GraphicLayer::setSettingStopAngle(mpStopAngle->value());
@@ -236,7 +238,7 @@ void OptionsAnnotationLayer::applyChanges()
    int apexPercentage = mpApex->value();
    double apex = apexPercentage / 100.0;
    GraphicLayer::setSettingApex(apex);
-   int alpha = int(mpAlpha->value() * 2.55f + 0.5f);
+   int alpha = static_cast<int>(mpAlpha->value() * 2.55f + 0.5f);
    if (alpha < 0)
    {
       alpha = 0;

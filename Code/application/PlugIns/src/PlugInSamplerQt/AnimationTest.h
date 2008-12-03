@@ -29,7 +29,7 @@ public:
    AnimationTestPlugIn();
    ~AnimationTestPlugIn();
 
-   bool execute(PlugInArgList* pInputArgList, PlugInArgList* pOutputArgList);
+   bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
    bool abort();
 
 protected:

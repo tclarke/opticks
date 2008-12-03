@@ -6,8 +6,6 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
- 
-
 
 #ifndef ACCHEADER_H
 #define ACCHEADER_H
@@ -19,15 +17,15 @@ const int ACC_PROPER_TOTAL = 2700;
 
 class AccHeader
 {
-   char mAcc[ACC_SIZE]; // ACC
-   size_t mTotalHeaderSize;
-
 public:
    AccHeader();
+
    bool readHeader(FILE* pInputFile);
    size_t getTotalHeaderSize();
+
+private:
+   char mAcc[ACC_SIZE]; // ACC
+   size_t mTotalHeaderSize;
 };
 
 #endif
-
- 

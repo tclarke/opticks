@@ -16,6 +16,8 @@
 #include "AlgorithmShell.h"
 #include "DesktopServices.h"
 
+#define PLOT_MANAGER_NAME "Plot Manager"
+
 namespace boost
 {
    class any;

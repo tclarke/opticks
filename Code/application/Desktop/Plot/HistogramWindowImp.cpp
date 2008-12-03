@@ -38,15 +38,25 @@
 #include <vector>
 using namespace std;
 
-HistogramWindowImp::HistogramWindowImp(const string& id, const string& windowName, QWidget* parent) :
-   PlotWindowImp(id, windowName, parent),
+HistogramWindowImp::HistogramWindowImp(const string& id, const string& windowName, QWidget* pParent) :
+   PlotWindowImp(id, windowName, pParent),
    mpExplorer(Service<SessionExplorer>().get(), SIGNAL_NAME(SessionExplorer, AboutToShowSessionItemContextMenu),
       Slot(this, &HistogramWindowImp::updateContextMenu)),
    mDisplayModeChanging(false),
+   mpSyncAutoZoomAction(NULL),
    mUpdater(this)
 {
+   Service<DesktopServices> pDesktop;
+
+   mpSyncAutoZoomAction = new QAction("Synchronize Auto Zoom", this);
+   mpSyncAutoZoomAction->setAutoRepeat(false);
+   VERIFYNR(connect(mpSyncAutoZoomAction, SIGNAL(triggered()), this, SLOT(syncAutoZoom())));
+   pDesktop->initializeAction(mpSyncAutoZoomAction, "Histogram Plot");     // Use the plot context since the action
+                                                                           // will appear on the plot menu
+
    Icons* pIcons = Icons::instance();
    REQUIRE(pIcons != NULL);
+
    InfoBar* pInfoBar = getInfoBar();
    if (pInfoBar != NULL)
    {
@@ -68,7 +78,10 @@ void HistogramWindowImp::updateContextMenu(Subject& subject, const string& signa
       return;
    }
 
+   bool bAddActions = false;
    bool bRemoveActions = false;
+   PlotWidget* pActionWidget = NULL;
+
    if (dynamic_cast<SessionExplorer*>(&subject) != NULL)
    {
       // Make sure all of the selected session items for the menu are plot widgets
@@ -88,6 +101,12 @@ void HistogramWindowImp::updateContextMenu(Subject& subject, const string& signa
          {
             if (containsPlot(pPlot) == true)
             {
+               if (plots.size() == 1)
+               {
+                  bAddActions = true;
+                  pActionWidget = pPlot;
+               }
+
                HistogramPlotImp* pHistogramPlot = dynamic_cast<HistogramPlotImp*>(pPlot->getPlot());
                if (pHistogramPlot != NULL)
                {
@@ -113,6 +132,31 @@ void HistogramWindowImp::updateContextMenu(Subject& subject, const string& signa
          if (pPlotSet != NULL)
          {
             bRemoveActions = containsPlotSet(pPlotSet);
+         }
+      }
+   }
+   else
+   {
+      PlotWidget* pPlotWidget = dynamic_cast<PlotWidget*>(&subject);
+      if ((pPlotWidget != NULL) && (containsPlot(pPlotWidget) == true))
+      {
+         bAddActions = true;
+         pActionWidget = pPlotWidget;
+      }
+   }
+
+   // Add the sync zoom action
+   if ((bAddActions == true) && (pActionWidget != NULL))
+   {
+      HistogramPlotImp* pHistogramPlot = dynamic_cast<HistogramPlotImp*>(pActionWidget->getPlot());
+      if (pHistogramPlot != NULL)
+      {
+         RasterLayer* pLayer = dynamic_cast<RasterLayer*>(pHistogramPlot->getLayer());
+         if ((pLayer != NULL) && (pHistogramPlot->getRasterChannelType() != GRAY))
+         {
+            mpSyncAutoZoomAction->setData(QVariant::fromValue(dynamic_cast<SessionItem*>(pHistogramPlot)));
+            pMenu->addActionBefore(mpSyncAutoZoomAction, APP_HISTOGRAMPLOT_SYNCHRONIZE_AUTO_ZOOM_ACTION,
+               APP_HISTOGRAMPLOT_RASTER_MENUS_SEPARATOR_ACTION);
          }
       }
    }
@@ -176,9 +220,9 @@ PlotWidget* HistogramWindowImp::getPlot(Layer* pLayer) const
 
    // Iterate over all histogram plots on all plot sets to find the plot
    vector<PlotWidget*> plots = getPlots(HISTOGRAM_PLOT);
-   for (unsigned int i = 0; i < plots.size(); i++)
+   for (vector<PlotWidget*>::iterator iter = plots.begin(); iter != plots.end(); ++iter)
    {
-      PlotWidget* pPlot = plots[i];
+      PlotWidget* pPlot = *iter;
       if (pPlot != NULL)
       {
          HistogramPlotImp* pHistogramPlot = dynamic_cast<HistogramPlotImp*>(pPlot->getPlot());
@@ -221,9 +265,9 @@ PlotWidget* HistogramWindowImp::getPlot(RasterLayer* pLayer, RasterChannelType c
 
    // Iterate over all histogram plots on all plot sets to find the plot
    vector<PlotWidget*> plots = getPlots(HISTOGRAM_PLOT);
-   for (unsigned int i = 0; i < plots.size(); i++)
+   for (vector<PlotWidget*>::iterator iter = plots.begin(); iter != plots.end(); ++iter)
    {
-      PlotWidget* pPlot = plots[i];
+      PlotWidget* pPlot = *iter;
       if (pPlot != NULL)
       {
          HistogramPlotImp* pHistogramPlot = dynamic_cast<HistogramPlotImp*>(pPlot->getPlot());
@@ -385,6 +429,9 @@ PlotWidget* HistogramWindowImp::createPlot(RasterLayer* pLayer, RasterChannelTyp
       PlotWindowImp::setCurrentPlot(pPlot);
 
       // Connections
+      VERIFYNR(pPlot->attach(SIGNAL_NAME(PlotWidget, AboutToShowContextMenu),
+         Slot(this, &HistogramWindowImp::updateContextMenu)));
+
       RasterLayerImp* pLayerImp = dynamic_cast<RasterLayerImp*>(pLayer);
       if (pLayerImp != NULL)
       {
@@ -582,7 +629,10 @@ void HistogramWindowImp::deletePlot(RasterLayer* pLayer, RasterChannelType chann
       PlotSet* pPlotSet = pPlotWidget->getPlotSet();
       if (pPlotSet != NULL)
       {
-         RasterLayerImp *pRasterLayerImp = dynamic_cast<RasterLayerImp*>(pLayer);
+         pPlotWidget->detach(SIGNAL_NAME(PlotWidget, AboutToShowContextMenu),
+            Slot(this, &HistogramWindowImp::updateContextMenu));
+
+         RasterLayerImp* pRasterLayerImp = dynamic_cast<RasterLayerImp*>(pLayer);
          if (pRasterLayerImp != NULL)
          {
             disconnect(pRasterLayerImp, SIGNAL(displayModeChanged(const DisplayMode&)), this,
@@ -699,11 +749,11 @@ void HistogramWindowImp::activateLayer(PlotWidget* pPlot)
       if (activate)
       {
          // Don't activate the primary raster element
-         RasterElement *pElement = dynamic_cast<RasterElement*>(pLayer->getDataElement());
-         SpatialDataView *pView = dynamic_cast<SpatialDataView*>(pLayer->getView());
+         RasterElement* pElement = dynamic_cast<RasterElement*>(pLayer->getDataElement());
+         SpatialDataView* pView = dynamic_cast<SpatialDataView*>(pLayer->getView());
          if (pView != NULL && pElement != NULL)
          {
-            LayerList *pLayerList = pView->getLayerList();
+            LayerList* pLayerList = pView->getLayerList();
             if (pLayerList != NULL)
             {
                if (pLayerList->getPrimaryRasterElement() == pElement)
@@ -751,9 +801,9 @@ void HistogramWindowImp::activateLayer(PlotWidget* pPlot)
    emit plotActivated(pLayer, channel);
 }
 
-void HistogramWindowImp::showEvent(QShowEvent * pEvent)
+void HistogramWindowImp::showEvent(QShowEvent* pEvent)
 {
-   QWidget::showEvent(pEvent);
+   PlotWindowImp::showEvent(pEvent);
    mUpdater.update();
 }
 
@@ -850,7 +900,67 @@ void HistogramWindowImp::updatePlotInfo(RasterLayer* pLayer, RasterChannelType c
    }
 }
 
-HistogramWindowImp::HistogramUpdater::HistogramUpdater(HistogramWindowImp *pWindow) : mpWindow(pWindow)
+void HistogramWindowImp::syncAutoZoom()
+{
+   QAction* pAction = dynamic_cast<QAction*>(sender());
+   if (pAction == NULL)
+   {
+      return;
+   }
+
+   SessionItem* pItem = pAction->data().value<SessionItem*>();
+   HistogramPlotImp* pPlot = dynamic_cast<HistogramPlotImp*>(pItem);
+   VERIFYNRV(pPlot != NULL);
+
+   Layer* pLayer = pPlot->getLayer();
+   VERIFYNRV(pLayer != NULL);
+
+   RasterChannelType channel = pPlot->getRasterChannelType();
+   VERIFYNRV(channel != GRAY);
+
+   bool autoZoom = pPlot->isAutoZoomEnabled();
+   if (channel != RED)
+   {
+      PlotWidget* pPlotWidget = getPlot(pLayer, RED);
+      if (pPlotWidget != NULL)
+      {
+         HistogramPlotExt1* pRedPlot = dynamic_cast<HistogramPlotExt1*>(pPlotWidget->getPlot());
+         if (pRedPlot != NULL)
+         {
+            pRedPlot->enableAutoZoom(autoZoom);
+         }
+      }
+   }
+
+   if (channel != GREEN)
+   {
+      PlotWidget* pPlotWidget = getPlot(pLayer, GREEN);
+      if (pPlotWidget != NULL)
+      {
+         HistogramPlotExt1* pGreenPlot = dynamic_cast<HistogramPlotExt1*>(pPlotWidget->getPlot());
+         if (pGreenPlot != NULL)
+         {
+            pGreenPlot->enableAutoZoom(autoZoom);
+         }
+      }
+   }
+
+   if (channel != BLUE)
+   {
+      PlotWidget* pPlotWidget = getPlot(pLayer, BLUE);
+      if (pPlotWidget != NULL)
+      {
+         HistogramPlotExt1* pBluePlot = dynamic_cast<HistogramPlotExt1*>(pPlotWidget->getPlot());
+         if (pBluePlot != NULL)
+         {
+            pBluePlot->enableAutoZoom(autoZoom);
+         }
+      }
+   }
+}
+
+HistogramWindowImp::HistogramUpdater::HistogramUpdater(HistogramWindowImp* pWindow) :
+   mpWindow(pWindow)
 {
 }
 
@@ -865,32 +975,34 @@ void HistogramWindowImp::HistogramUpdater::update()
    mUpdatesPending.clear();
 }
 
-HistogramWindowImp::HistogramUpdater::UpdateMomento::UpdateMomento(HistogramWindowImp *pWindow, RasterLayer *pLayer, 
+HistogramWindowImp::HistogramUpdater::UpdateMomento::UpdateMomento(HistogramWindowImp* pWindow,
+                                                                   RasterLayer* pLayer,
                                                                    RasterChannelType channel) :
-   mpWindow(pWindow), mpRasterLayer(new AttachmentPtr<RasterLayer>(pLayer)), mChannel(channel)
+   mpWindow(pWindow),
+   mpRasterLayer(new AttachmentPtr<RasterLayer>(pLayer)),
+   mChannel(channel)
 {
 }
 
 void HistogramWindowImp::HistogramUpdater::UpdateMomento::update() const
 {
-   RasterLayer *pLayer = mpRasterLayer.get()==NULL?NULL:mpRasterLayer.get()->get();
+   RasterLayer* pLayer = mpRasterLayer.get() == NULL ? NULL : mpRasterLayer.get()->get();
    if (pLayer == NULL || mpWindow == NULL)
    {
       return;
    }
+
    mpWindow->updatePlotInfo(pLayer, mChannel);
 }
 
-bool HistogramWindowImp::HistogramUpdater::UpdateMomento::operator<(const UpdateMomento &rhs) const
+bool HistogramWindowImp::HistogramUpdater::UpdateMomento::operator<(const UpdateMomento& rhs) const
 {
-   RasterLayer *pLeftLayer = mpRasterLayer.get()==NULL?NULL:mpRasterLayer.get()->get();
-   RasterLayer *pRightLayer = rhs.mpRasterLayer.get()==NULL?NULL:rhs.mpRasterLayer.get()->get();
+   RasterLayer* pLeftLayer = mpRasterLayer.get() == NULL ? NULL : mpRasterLayer.get()->get();
+   RasterLayer* pRightLayer = rhs.mpRasterLayer.get() == NULL ? NULL : rhs.mpRasterLayer.get()->get();
    if (pLeftLayer == pRightLayer)
    {
       return this->mChannel < rhs.mChannel;
    }
-   else
-   {
-      return pLeftLayer < pRightLayer;
-   }
+
+   return pLeftLayer < pRightLayer;
 }

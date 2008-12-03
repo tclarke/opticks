@@ -31,17 +31,14 @@ public:
 class MessageAdapter : public Message, public MessageImp MESSAGEADAPTEREXTENSION_CLASSES
 {
 public:
-   MessageAdapter(const std::string &action,
-                  const std::string &component,
-                  const std::string &key,
-                  DateTime *timestamp=NULL,
-                  Step *pParent=NULL);
+   MessageAdapter(const std::string& action, const std::string& component, const std::string& key,
+      DateTime* timestamp = NULL, Step* pParent = NULL);
    virtual ~MessageAdapter();
 
    const std::string& getObjectType() const
    {
-      static std::string type("MessageAdapter");
-      return type;
+      static std::string sType("MessageAdapter");
+      return sType;
    }
 
    bool isKindOf(const std::string& className) const
@@ -60,17 +57,14 @@ public:
 class StepAdapter : public Step, public StepImp STEPADAPTEREXTENSION_CLASSES
 {
 public:
-   StepAdapter(const std::string &action,
-               const std::string &component,
-               const std::string &key,
-               DateTime *timestamp=NULL,
-               Step *pParent=NULL);
+   StepAdapter(const std::string& action, const std::string& component, const std::string& key,
+      DateTime* timestamp = NULL, Step* pParent = NULL);
    virtual ~StepAdapter();
 
    const std::string& getObjectType() const
    {
-      static std::string type("StepAdapter");
-      return type;
+      static std::string sType("StepAdapter");
+      return sType;
    }
 
    bool isKindOf(const std::string& className) const

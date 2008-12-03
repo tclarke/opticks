@@ -66,3 +66,8 @@ bool HdfPager::parseInputArgs(PlugInArgList* pIn)
    }
    return success;
 }
+
+const string& HdfPager::getHdfDatasetName() const
+{
+   return mHdfName;
+}

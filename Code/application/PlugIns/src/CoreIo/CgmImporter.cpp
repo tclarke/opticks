@@ -53,12 +53,12 @@ CgmImporter::~CgmImporter()
 {
 }
 
-bool CgmImporter::getInputSpecification(PlugInArgList *&pInArgList)
+bool CgmImporter::getInputSpecification(PlugInArgList*& pInArgList)
 {
    pInArgList = mpPlugInManager->getPlugInArgList();
    VERIFY(pInArgList != NULL);
 
-   PlugInArg *pArg;
+   PlugInArg* pArg = NULL;
    VERIFY((pArg = mpPlugInManager->getPlugInArg()) != NULL);
    pArg->setName(ProgressArg());
    pArg->setType("Progress");
@@ -74,7 +74,7 @@ bool CgmImporter::getInputSpecification(PlugInArgList *&pInArgList)
    return true;
 }
 
-bool CgmImporter::getOutputSpecification(PlugInArgList *&pOutArgList)
+bool CgmImporter::getOutputSpecification(PlugInArgList*& pOutArgList)
 {
    pOutArgList = NULL;
    return true;
@@ -83,7 +83,7 @@ bool CgmImporter::getOutputSpecification(PlugInArgList *&pOutArgList)
 vector<ImportDescriptor*> CgmImporter::getImportDescriptors(const string& filename)
 {
    vector<ImportDescriptor*> descriptors;
-   if(!filename.empty())
+   if (!filename.empty())
    {
       FactoryResource<Filename> pFullFilename;
       pFullFilename->setFullPathAndName(filename);
@@ -192,10 +192,10 @@ unsigned char CgmImporter::getFileAffinity(const std::string& filename)
    return Importer::CAN_NOT_LOAD;
 }
 
-bool CgmImporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
+bool CgmImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
-   Progress *pProgress = NULL;
-   DataElement *pElement = NULL;
+   Progress* pProgress = NULL;
+   DataElement* pElement = NULL;
    StepResource pStep("Import cgm element", "app", "8D5522FE-4A89-44cb-9735-6920A3BFC903");
 
    // get input arguments and log some useful info about them
@@ -206,9 +206,9 @@ bool CgmImporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
       pMsg->addBooleanProperty("Progress Present", (pProgress != NULL));
       
       pElement = pInArgList->getPlugInArgValue<DataElement>(ImportElementArg());
-      if(pElement == NULL)
+      if (pElement == NULL)
       {
-         if(pProgress != NULL)
+         if (pProgress != NULL)
          {
             pProgress->updateProgress("No data element", 0, ERRORS);
          }
@@ -217,20 +217,20 @@ bool CgmImporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
       }
       pMsg->addProperty("Element name", pElement->getName());
    }
-   if(pProgress != NULL)
+   if (pProgress != NULL)
    {
       pProgress->updateProgress((string("Read and parse file ") + pElement->getFilename()), 20, NORMAL);
    }
 
    // Create a new annotation layer
-   if(pProgress != NULL)
+   if (pProgress != NULL)
    {
       pProgress->updateProgress("Create a new layer", 30, NORMAL);
    }
-   AnnotationLayer *pLayer = NULL;
-   SpatialDataView *pView = NULL;
-   SpatialDataWindow *pWindow = dynamic_cast<SpatialDataWindow*>(mpDesktop->getCurrentWorkspaceWindow());
-   if(pWindow != NULL)
+   AnnotationLayer* pLayer = NULL;
+   SpatialDataView* pView = NULL;
+   SpatialDataWindow* pWindow = dynamic_cast<SpatialDataWindow*>(mpDesktop->getCurrentWorkspaceWindow());
+   if (pWindow != NULL)
    {
       pView = pWindow->getSpatialDataView();
    }
@@ -260,9 +260,9 @@ bool CgmImporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
    UndoGroup undoGroup(pView, "Import CGM");
 
    pLayer = dynamic_cast<AnnotationLayer*>(pView->createLayer(ANNOTATION, pElement));
-   if(pLayer == NULL)
+   if (pLayer == NULL)
    {
-      if(pProgress != NULL)
+      if (pProgress != NULL)
       {
          pProgress->updateProgress("Unable to create the layer", 0, ERRORS);
       }
@@ -271,14 +271,14 @@ bool CgmImporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
    }
 
    // add the CGM object
-   if(pProgress != NULL)
+   if (pProgress != NULL)
    {
       pProgress->updateProgress("Create the CGM object", 60, NORMAL);
    }
-   CgmObject *pCgmObject = dynamic_cast<CgmObject*>(pLayer->addObject(CGM_OBJECT));
-   if(pCgmObject == NULL)
+   CgmObject* pCgmObject = dynamic_cast<CgmObject*>(pLayer->addObject(CGM_OBJECT));
+   if (pCgmObject == NULL)
    {
-      if(pProgress != NULL)
+      if (pProgress != NULL)
       {
          pProgress->updateProgress("Unable to create the CGM object", 0, ERRORS);
       }
@@ -287,14 +287,14 @@ bool CgmImporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
    }
 
    // load the CGM file
-   if(pProgress != NULL)
+   if (pProgress != NULL)
    {
       pProgress->updateProgress("Load the CGM file", 90, NORMAL);
    }
    string fname = pElement->getDataDescriptor()->getFileDescriptor()->getFilename().getFullPathAndName();
-   if(!pCgmObject->deserializeCgm(fname))
+   if (!pCgmObject->deserializeCgm(fname))
    {
-      if(pProgress != NULL)
+      if (pProgress != NULL)
       {
          pProgress->updateProgress("Error loading the CGM element", 0, ERRORS);
       }
@@ -302,7 +302,7 @@ bool CgmImporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
       return false;
    }
 
-   if(pProgress != NULL)
+   if (pProgress != NULL)
    {
       pProgress->updateProgress("Successfully loaded the CGM file", 100, NORMAL);
    }

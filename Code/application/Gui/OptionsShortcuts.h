@@ -82,7 +82,7 @@ public:
 
 private:
    void shortcutsIntoGui(const DynamicObject* pCurObject, QTreeWidgetItem* pParent);
-   void shortcutsFromGui(QTreeWidgetItem* pParent, DynamicObject* pCurObject) const; 
+   void shortcutsFromGui(QTreeWidgetItem* pCurObject, DynamicObject* pParent) const;
 
    CustomTreeWidget* mpShortcutTree;
 };

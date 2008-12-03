@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef __OBJCTFCTIMP_H
-#define __OBJCTFCTIMP_H
+#ifndef OBJECTFACTORYIMP_H
+#define OBJECTFACTORYIMP_H
 
 #include "ObjectFactory.h"
 
@@ -47,4 +45,4 @@ private:
    static bool mDestroyed;
 };
 
-#endif   // __OBJCTFCTIMP_H
+#endif

@@ -11,24 +11,23 @@
 
 using namespace std;
 
-ProgressImp::ProgressImp()
+ProgressImp::ProgressImp() :
+   mPercentComplete(-1),
+   mGranularity(NORMAL),
+   mpPlugIn(NULL)
 {
-   mPercentComplete = -1;
-   mGranularity = NORMAL;
-   mpPlugIn = NULL;
-} 
+}
 
-ProgressImp::ProgressImp(string amProgressText, int amPercentComplete, ReportingLevel amGranularity)
+ProgressImp::ProgressImp(string amProgressText, int amPercentComplete, ReportingLevel amGranularity) :
+   mProgressText(amProgressText),
+   mPercentComplete(amPercentComplete),
+   mGranularity(amGranularity),
+   mpPlugIn(NULL)
 {
-   if (amPercentComplete > 100)
+   if (mPercentComplete > 100)
    {
-      amPercentComplete = 100;
+      mPercentComplete = 100;
    }
-
-   mProgressText = amProgressText.c_str();
-   mPercentComplete = amPercentComplete;
-   mGranularity = amGranularity;
-   mpPlugIn = NULL;
 }
 
 ProgressImp::~ProgressImp()
@@ -37,8 +36,8 @@ ProgressImp::~ProgressImp()
 
 const string& ProgressImp::getObjectType() const
 {
-   static string type = "ProgressImp";
-   return type;
+   static string sType = "ProgressImp";
+   return sType;
 }
 
 bool ProgressImp::isKindOf(const string& className) const

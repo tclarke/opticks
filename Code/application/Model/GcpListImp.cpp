@@ -26,24 +26,20 @@ using namespace std;
 
 GcpListImp::GcpListImp(const DataDescriptorImp& descriptor, const string& id) :
    DataElementImp(descriptor, id)
-{
-}
+{}
 
 GcpListImp::~GcpListImp()
-{
-}
+{}
 
 int GcpListImp::getCount() const
 {
-   int iCount = 0;
-   iCount = selected.size();
-
+   int iCount = mSelected.size();
    return iCount;
 }
 
 const list<GcpPoint>& GcpListImp::getSelectedPoints() const
 {
-   return selected;
+   return mSelected;
 }
 
 void GcpListImp::addPoints(const list<GcpPoint>& points)
@@ -52,13 +48,12 @@ void GcpListImp::addPoints(const list<GcpPoint>& points)
    pStep->addProperty("action", "addPoints");
    pStep->addProperty("name", string(getName()));
 
-   list<GcpPoint>::const_iterator it;
-   for (it=points.begin(); it!=points.end(); it++)
+   for (list<GcpPoint>::const_iterator it = points.begin(); it != points.end(); ++it)
    {
-      selected.push_back(*it);
+      mSelected.push_back(*it);
    }
-   notify(SIGNAL_NAME(GcpList, PointsAdded), boost::any(points));
 
+   notify(SIGNAL_NAME(GcpList, PointsAdded), boost::any(points));
    pStep->finalize(Message::Success);
 }
 
@@ -68,7 +63,7 @@ void GcpListImp::addPoint(const GcpPoint& point)
    pStep->addProperty("action", "addPoint");
    pStep->addProperty("name", string(getName()));
 
-   selected.push_back (point);
+   mSelected.push_back(point);
    notify(SIGNAL_NAME(GcpList, PointAdded), boost::any(point));
 
    pStep->finalize(Message::Success);
@@ -86,20 +81,24 @@ void GcpListImp::removePoints(const list<GcpPoint>& points)
    GcpPoint point;
    list<GcpPoint>::iterator it;
    list<GcpPoint>::const_iterator newit;
-   for (newit=points.begin(); newit!=points.end(); newit++)
+   for (newit = points.begin(); newit != points.end(); ++newit)
    {
-      for (it=selected.begin(); it!=selected.end(); it++)
+      for (it = mSelected.begin(); it != mSelected.end(); ++it)
+      {
          if (it->mCoordinate.mX == newit->mCoordinate.mX &&
              it->mCoordinate.mY == newit->mCoordinate.mY &&
              it->mPixel.mX == newit->mPixel.mX &&
              it->mPixel.mY == newit->mPixel.mY)
+         {
             break;
-//      it = find (selected.begin(), selected.end(), *newit);
-      if (it != selected.end())
+         }
+      }
+
+      if (it != mSelected.end())
       {
          point = *it;
-         selected.erase (it);
-         changed =  true;
+         mSelected.erase(it);
+         changed = true;
       }
    }
    if (changed) 
@@ -117,15 +116,20 @@ void GcpListImp::removePoint(const GcpPoint& point)
    pStep->addProperty("name", string(getName()));
 
    list<GcpPoint>::iterator it;
-   for (it=selected.begin(); it!=selected.end(); it++)
+   for (it = mSelected.begin(); it != mSelected.end(); ++it)
+   {
       if (it->mCoordinate.mX == point.mCoordinate.mX &&
           it->mCoordinate.mY == point.mCoordinate.mY &&
           it->mPixel.mX == point.mPixel.mX &&
           it->mPixel.mY == point.mPixel.mY)
+      {
          break;
-   if (it != selected.end())
+      }
+   }
+
+   if (it != mSelected.end())
    {
-      selected.erase(it);
+      mSelected.erase(it);
       notify(SIGNAL_NAME(GcpList, PointRemoved), boost::any(point));
    }
 
@@ -138,7 +142,7 @@ void GcpListImp::clearPoints()
    pStep->addProperty("action", "clearPoints");
    pStep->addProperty("name", string(getName()));
 
-   selected.clear();
+   mSelected.clear();
    notify(SIGNAL_NAME(GcpList, Cleared), boost::any());
 
    pStep->finalize(Message::Success);
@@ -151,7 +155,7 @@ DataElement* GcpListImp::copy(const string& name, DataElement* pParent) const
    GcpListImp* pGcpList = dynamic_cast<GcpListImp*>(pElement);
    if (pGcpList != NULL)
    {
-      pGcpList->selected = selected;
+      pGcpList->mSelected = mSelected;
    }
 
    return pElement;
@@ -159,16 +163,16 @@ DataElement* GcpListImp::copy(const string& name, DataElement* pParent) const
 
 bool GcpListImp::toXml(XMLWriter* pXml) const
 {
-   if(!DataElementImp::toXml(pXml))
+   if (!DataElementImp::toXml(pXml))
    {
       return false;
    }
-   return gcpsToXml(selected.begin(), selected.end(), pXml);
+   return gcpsToXml(mSelected.begin(), mSelected.end(), pXml);
 }
 
 bool GcpListImp::gcpsToXml(list<GcpPoint>::const_iterator first, list<GcpPoint>::const_iterator last, XMLWriter* pXml)
 {
-   for(list<GcpPoint>::const_iterator it = first; it != last; ++it)
+   for (list<GcpPoint>::const_iterator it = first; it != last; ++it)
    {
       pXml->pushAddPoint(pXml->addElement("gcpPoint"));
 
@@ -200,37 +204,33 @@ bool GcpListImp::gcpsToXml(list<GcpPoint>::const_iterator first, list<GcpPoint>:
 bool GcpListImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
    DataElementImp::fromXml(pDocument, version);
-   bool success = xmlToGcps(back_insert_iterator<list<GcpPoint> >(selected), pDocument, version);
+   bool success = xmlToGcps(back_insert_iterator<list<GcpPoint> >(mSelected), pDocument, version);
    notify(SIGNAL_NAME(Subject, Modified));
    return success;
 }
 
 bool GcpListImp::xmlToGcps(back_insert_iterator<list<GcpPoint> > first, DOMNode* pDoc, unsigned int version)
 {
-   for(DOMNode *pChld = pDoc->getFirstChild();
-                pChld != NULL;
-                pChld = pChld->getNextSibling())
+   for (DOMNode* pChld = pDoc->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
    {
-      if(XMLString::equals(pChld->getNodeName(), X("gcpPoint")))
+      if (XMLString::equals(pChld->getNodeName(), X("gcpPoint")))
       {
          GcpPoint point;
-         for(DOMNode *pGchld = pChld->getFirstChild();
-                      pGchld != NULL;
-                      pGchld = pGchld->getNextSibling())
+         for (DOMNode* pGchld = pChld->getFirstChild(); pGchld != NULL; pGchld = pGchld->getNextSibling())
          {
-            if(XMLString::equals(pGchld->getNodeName(), X("pixel")))
+            if (XMLString::equals(pGchld->getNodeName(), X("pixel")))
             {
-               DOMNode *pGgchld(pGchld->getFirstChild());
+               DOMNode* pGgchld(pGchld->getFirstChild());
                XmlReader::StrToLocation(pGgchld->getNodeValue(), point.mPixel);
             }
-            else if(XMLString::equals(pGchld->getNodeName(), X("coordinate")))
+            else if (XMLString::equals(pGchld->getNodeName(), X("coordinate")))
             {
-               DOMNode *pGgchld(pGchld->getFirstChild());
+               DOMNode* pGgchld(pGchld->getFirstChild());
                XmlReader::StrToLocation(pGgchld->getNodeValue(), point.mCoordinate);
             }
-            else if(XMLString::equals(pGchld->getNodeName(), X("rmsError")))
+            else if (XMLString::equals(pGchld->getNodeName(), X("rmsError")))
             {
-               DOMNode *pGgchld(pGchld->getFirstChild());
+               DOMNode* pGgchld(pGchld->getFirstChild());
                XmlReader::StrToLocation(pGgchld->getNodeValue(), point.mRmsError);
             }
          }
@@ -242,8 +242,8 @@ bool GcpListImp::xmlToGcps(back_insert_iterator<list<GcpPoint> > first, DOMNode*
 
 const string& GcpListImp::getObjectType() const
 {
-   static string type("GcpListImp");
-   return type;
+   static string sType("GcpListImp");
+   return sType;
 }
 
 bool GcpListImp::isKindOf(const string& className) const

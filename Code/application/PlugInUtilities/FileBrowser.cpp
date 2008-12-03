@@ -7,7 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QAbstractItemView>
 #include <QtGui/QApplication>
 #include <QtGui/QBitmap>
 #include <QtGui/QCompleter>
@@ -27,10 +26,12 @@ FileBrowser::FileBrowser(QWidget* pParent) :
    mExistingFile(true)
 {
    // Filename edit
+   QCompleter* pCompleter = new QCompleter(this);
+   QDirModel* pDirModel = new QDirModel(QStringList(), QDir::NoDotAndDotDot | QDir::AllDirs | QDir::AllEntries,
+      QDir::Name | QDir::DirsFirst, pCompleter);
+   pCompleter->setModel(pDirModel);
+
    mpFileEdit = new QLineEdit(this);
-   QCompleter *pCompleter = new QCompleter(this);
-   pCompleter->setModel(new QDirModel(QStringList(), QDir::NoDotAndDotDot | QDir::AllDirs | QDir::AllEntries,
-      QDir::Name | QDir::DirsFirst, pCompleter));
    mpFileEdit->setCompleter(pCompleter);
    mpFileEdit->installEventFilter(this);
 
@@ -41,6 +42,7 @@ FileBrowser::FileBrowser(QWidget* pParent) :
 
    mpBrowseButton = new QPushButton(icnBrowse, QString(), this);
    mpBrowseButton->setFixedWidth(27);
+   mpBrowseButton->installEventFilter(this);
 
    // Layout
    QHBoxLayout* pLayout = new QHBoxLayout(this);
@@ -168,24 +170,15 @@ bool FileBrowser::isBrowseExistingFile() const
 
 bool FileBrowser::eventFilter(QObject* pObject, QEvent* pEvent)
 {
-   if ((pObject != NULL) && (pEvent != NULL))
+   if (pEvent != NULL)
    {
-      if (pObject == mpFileEdit)
+      if (pEvent->type() == QEvent::FocusOut)
       {
-         if (pEvent->type() == QEvent::FocusOut)
+         QWidget* pFocusWidget = QApplication::focusWidget();
+         if ((pFocusWidget != mpFileEdit) && (pFocusWidget != mpBrowseButton))
          {
-            QCompleter* pCompleter = mpFileEdit->completer();
-            VERIFY(pCompleter != NULL);
-
-            QAbstractItemView* pCompleterView = pCompleter->popup();
-            VERIFY(pCompleterView != NULL);
-
-            QWidget* pFocusWidget = QApplication::focusWidget();
-            if ((pFocusWidget != mpBrowseButton) && (pFocusWidget != pCompleterView))
-            {
-               QFocusEvent* pFocusEvent = static_cast<QFocusEvent*>(pEvent);
-               QApplication::sendEvent(this, pFocusEvent);
-            }
+            QFocusEvent* pFocusEvent = static_cast<QFocusEvent*>(pEvent);
+            QApplication::sendEvent(this, pFocusEvent);
          }
       }
    }
@@ -195,6 +188,10 @@ bool FileBrowser::eventFilter(QObject* pObject, QEvent* pEvent)
 
 void FileBrowser::browse()
 {
+   // Remove the event filter on the browse button to prevent the focus
+   // out event from being sent when the browse dialog is invoked
+   mpBrowseButton->removeEventFilter(this);
+
    // Get the initial browse directory
    QString browseDirectory = getFilename();
    if (browseDirectory.isEmpty() == true)
@@ -219,4 +216,7 @@ void FileBrowser::browse()
       setFilename(filename);
       setFocus();
    }
+
+   // Reinstall the event filter
+   mpBrowseButton->installEventFilter(this);
 }

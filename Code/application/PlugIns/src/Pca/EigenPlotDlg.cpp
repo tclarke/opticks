@@ -131,7 +131,7 @@ int EigenPlotDlg::getNumComponents() const
 
 bool EigenPlotDlg::setEigenValues(double* yVals, int numVals)
 {
-   if(yVals == NULL)
+   if (yVals == NULL)
    {
       return false;
    }
@@ -139,12 +139,12 @@ bool EigenPlotDlg::setEigenValues(double* yVals, int numVals)
    mpComponentsSpin->setMaximum(numVals);
 
    double* xVals = new double[numVals];
-   for(int i = 0; i < numVals; ++i)
+   for (int i = 0; i < numVals; ++i)
    {
       xVals[i] = i + 1.0;
    }
 
-   if(mpCurve != NULL)
+   if (mpCurve != NULL)
    {
       mpCurve->detach();
       delete mpCurve;
@@ -163,15 +163,15 @@ bool EigenPlotDlg::setEigenValues(double* yVals, int numVals)
 
 bool EigenPlotDlg::eventFilter(QObject* pObject, QEvent* pEvent)
 {
-   if((pObject != NULL) && (pEvent != NULL))
+   if ((pObject != NULL) && (pEvent != NULL))
    {
-      if(pObject == mpPlot)
+      if (pObject == mpPlot)
       {
          QEvent::Type eventType = pEvent->type();
-         if((eventType == QEvent::MouseButtonPress) || (eventType == QEvent::MouseMove))
+         if ((eventType == QEvent::MouseButtonPress) || (eventType == QEvent::MouseMove))
          {
             QMouseEvent* pMouseEvent = static_cast<QMouseEvent*>(pEvent);
-            if(mpCurve != NULL)
+            if (mpCurve != NULL)
             {
                QPoint ptMouse = mpPlot->canvas()->mapFromGlobal(pMouseEvent->globalPos());
 

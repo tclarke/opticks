@@ -29,5 +29,5 @@ string InterpreterShell::getFileExtensions() const
 
 void InterpreterShell::setFileExtensions(const string& extensions)
 {
-   mExtensions = extensions.c_str();
+   mExtensions = extensions;
 }

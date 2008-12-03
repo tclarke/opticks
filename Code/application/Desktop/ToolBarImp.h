@@ -47,8 +47,9 @@ public:
    std::vector<QAction*> getItems() const;
    void removeItem(QAction* pAction);
 
-   bool toXml(XMLWriter* pXml) const;
-   bool fromXml(DOMNode* pDocument, unsigned int version);
+   std::list<ContextMenuAction> getContextMenuActions() const;
+
+   bool isShown() const;
 
 signals:
    void visibilityChanged(bool bVisible);
@@ -59,12 +60,15 @@ protected:
 
 private:
    MenuBarImp* mpMenuBar;
+   QAction* mpShowAction;
+   QAction* mpHideAction;
 
    WINDOWIMPDROP_METHODS(WindowImp);
 };
 
 #define TOOLBARADAPTEREXTENSION_CLASSES \
-   WINDOWADAPTEREXTENSION_CLASSES
+   WINDOWADAPTEREXTENSION_CLASSES \
+   , public ToolBarExt1
 
 #define TOOLBARADAPTER_METHODS(impClass) \
    WINDOWADAPTER_METHODS(impClass) \
@@ -95,6 +99,18 @@ private:
    void removeItem(QAction* pAction) \
    { \
       return impClass::removeItem(pAction); \
-   }
+   } \
+   void show() \
+   { \
+      impClass::show(); \
+   } \
+   void hide() \
+   { \
+      impClass::hide(); \
+   } \
+   bool isShown() const \
+   { \
+      return impClass::isShown(); \
+   }  
 
 #endif

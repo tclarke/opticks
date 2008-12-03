@@ -102,6 +102,25 @@ ImportDlg::ImportDlg(const QString& strPlugInSubtype, const QString& strInitialP
    setPlugInLabel("Importer");
    enableOptions(true);
 
+   // Set the initial directory
+   string directory;
+   const Filename* pWorkingDir = NULL;
+   Service<ConfigurationSettings> pSettings;
+   pWorkingDir = pSettings->getSetting(ConfigurationSettings::getSettingPluginWorkingDirectoryKey(strPlugInSubtype.toStdString())).getPointerToValue<Filename>();
+   if (pWorkingDir == NULL)
+   {
+      pWorkingDir = ConfigurationSettings::getSettingImportPath();
+   }
+   if (pWorkingDir != NULL)
+   {
+      directory = pWorkingDir->getFullPathAndName();
+   }
+
+   if(!directory.empty())
+   {
+      setDirectory(QString::fromStdString(directory));
+   }
+
    // If the auto importer is available, select it from the drop down
    if (strInitialPlugIn.isEmpty() == true)
    {
@@ -118,7 +137,9 @@ ImportDlg::ImportDlg(const QString& strPlugInSubtype, const QString& strInitialP
    updateFromImporter(getSelectedPlugIn());
 
    // Connections
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Change the currentChanged() signal to filesSelected() and remove the mFilename member when the filesSelected() signal is emitted when the selection changes. (Qt 4.3.1) (dsulgrov)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Change the currentChanged() signal to " \
+   "filesSelected() and remove the mFilename member when the filesSelected() signal is emitted when the " \
+   "selection changes. (Qt 4.3.1) (dsulgrov)")
    VERIFYNR(connect(this, SIGNAL(currentChanged(const QString&)), this, SLOT(updateFromFile(const QString&))));
    VERIFYNR(connect(this, SIGNAL(plugInSelected(const QString&)), this, SLOT(updateFromImporter(const QString&))));
    VERIFYNR(connect(this, SIGNAL(optionsClicked()), this, SLOT(invokeOptionsDialog())));
@@ -173,13 +194,16 @@ void ImportDlg::accept()
       // Invoke the Options dialog if no valid data sets are selected
       string errorMessage;
       if (ImportAgentImp::validateImportDescriptors(mDescriptors, dynamic_cast<Importer*>(mpImporter),
-         errorMessage) < mDescriptors.size())
+         errorMessage) == 0)
       {
          if (invokeOptionsDialog() == false)
          {
             return;
          }
 
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove this check when the import options dialog " \
+   "prevents clicking the OK button when one or more imported data sets is invalid, not just the selected " \
+   "data set (dsulgrov)")
          if (ImportAgentImp::validateImportDescriptors(mDescriptors, dynamic_cast<Importer*>(mpImporter),
             errorMessage) == 0)
          {

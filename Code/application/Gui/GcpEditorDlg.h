@@ -57,8 +57,8 @@ public:
     */
    ~GcpEditorDlg();
 
-   void elementModified(Subject &subject, const std::string &signal, const boost::any &data);
-   void attached(Subject &Subject, const std::string &signal, const Slot &slot);
+   void elementModified(Subject& subject, const std::string& signal, const boost::any& data);
+   void attached(Subject& subject, const std::string& signal, const Slot& slot);
 
 public slots:
    /**
@@ -193,10 +193,10 @@ protected slots:
     *  geocoordinate type is determined by the currently selected format, and the
     *  appropriate columns are displayed for the geocoordinate.
     *
-    *  @param   points
+    *  @param   gcps
     *           The list of GCPs to display in the tree widget.
     */
-   void updateGcpView(const std::list<GcpPoint>& points);
+   void updateGcpView(const std::list<GcpPoint>& gcps);
 
    /**
     *  Reformats the cell text after it has been edited.

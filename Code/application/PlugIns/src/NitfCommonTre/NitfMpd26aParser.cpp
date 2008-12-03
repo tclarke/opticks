@@ -216,7 +216,8 @@ bool Nitf::Mpd26aParser::toDynamicObject(istream& input, size_t numBytes, Dynami
    bool ok(true);
    bool success(true);
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Allow all blanks for classified fields since we do not have descriptions of them (dadkins)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Allow all blanks for classified fields " \
+   "since we do not have descriptions of them (dadkins)")
    readField<string>(input, output, success, MPD26A::FIELD1, 11, errorMessage, buf, true);
    readField<string>(input, output, success, MPD26A::FIELD2, 2, errorMessage, buf, true);
    readField<unsigned int>(input, output, success, MPD26A::FIELD3, 7, errorMessage, buf, true);
@@ -282,7 +283,8 @@ Nitf::TreState Nitf::Mpd26aParser::isTreValid(const DynamicObject& tre, ostream&
 
    testSet.clear();
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : FIELD1 should be an int64. Making it a char string for now. (lbeck)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : FIELD1 should be an int64.  " \
+   "Making it a char string for now. (lbeck)")
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
       &numFields, MPD26A::FIELD1, testSet, true, true, false));
 
@@ -422,7 +424,7 @@ Nitf::TreState Nitf::Mpd26aParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID && totalFields != numFields)
    {
       reporter << "Total fields in the Dynamic Object(" <<
-         totalFields <<") did not match the number found(" << numFields << ") ";
+         totalFields << ") did not match the number found(" << numFields << ") ";
       status = INVALID;
    }
 
@@ -447,51 +449,51 @@ bool Nitf::Mpd26aParser::fromDynamicObject(const DynamicObject& input, ostream& 
 
    try
    {
-      output << sizeString( dv_cast<string>(input.getAttribute (MPD26A::FIELD1)), 11);
-      output << sizeString( dv_cast<string>(input.getAttribute (MPD26A::FIELD2)), 2);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(MPD26A::FIELD3)), 7, -1);
-      output <<   toString( dv_cast<double>(input.getAttribute(MPD26A::FIELD4)), 10, 3);
-      output <<   toString( dv_cast<double>(input.getAttribute(MPD26A::FIELD5)), 6, 3);
-      output <<   toString( dv_cast<double>(input.getAttribute(MPD26A::FIELD6)), 9, 5);
-      output << sizeString( dv_cast<string>(input.getAttribute (MPD26A::FIELD7)), 3);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(MPD26A::FIELD8)), 1, -1);
-      output << sizeString( dv_cast<string>(input.getAttribute (MPD26A::FIELD9)), 1);
-      output <<   toString( dv_cast<double>(input.getAttribute(MPD26A::FIELD10)), 5, 1, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute(MPD26A::FIELD11)), 5, 1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(MPD26A::FIELD12)), 1, -1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(MPD26A::FIELD13)), 1, -1);
-      output <<   toString( dv_cast<unsigned int>(input.getAttribute(MPD26A::FIELD14)), 4, -1);
-      output <<   toString( dv_cast<int>(input.getAttribute(MPD26A::FIELD15)), 9, -1);
-      output <<   toString( dv_cast<int>(input.getAttribute(MPD26A::FIELD16)), 9, -1);
-      output <<   toString( dv_cast<int>(input.getAttribute(MPD26A::FIELD17)), 9, -1);
-      output <<   toString( dv_cast<double>(input.getAttribute(MPD26A::FIELD18)), 10, 3);
-      output <<   toString( dv_cast<int>(input.getAttribute(MPD26A::FIELD19)), 9, -1);
-      output <<   toString( dv_cast<int>(input.getAttribute(MPD26A::FIELD20)), 9, -1);
-      output <<   toString( dv_cast<int>(input.getAttribute(MPD26A::FIELD21)), 9, -1);
-      output <<   toString( dv_cast<int>(input.getAttribute(MPD26A::FIELD22)), 9, -1);
-      output <<   toString( dv_cast<int>(input.getAttribute(MPD26A::FIELD23)), 9, -1);
-      output <<   toString( dv_cast<int>(input.getAttribute(MPD26A::FIELD24)), 9, -1);
-      output <<   toString( dv_cast<int>(input.getAttribute(MPD26A::FIELD25)), 9, -1);
-      output <<   toString( dv_cast<int>(input.getAttribute(MPD26A::FIELD26)), 9, -1);
-      output <<   toString( dv_cast<int>(input.getAttribute(MPD26A::FIELD27)), 9, -1);
-      output <<   toString( dv_cast<int>(input.getAttribute(MPD26A::FIELD28)), 9, -1);
-      output <<   toString( dv_cast<int>(input.getAttribute(MPD26A::FIELD29)), 9, -1);
-      output <<   toString( dv_cast<int>(input.getAttribute(MPD26A::FIELD30)), 9, -1);
-      output <<   toString( dv_cast<int>(input.getAttribute(MPD26A::FIELD31)), 9, -1);
-      output <<   toString( dv_cast<int>(input.getAttribute(MPD26A::FIELD32)), 9, -1);
-      output <<   toString( dv_cast<int>(input.getAttribute(MPD26A::FIELD33)), 9, -1);
-      output <<   toString( dv_cast<int>(input.getAttribute(MPD26A::FIELD34)), 9, -1);
-      output <<   toString( dv_cast<int>(input.getAttribute(MPD26A::FIELD35)), 9, -1);
-      output <<   toString( dv_cast<int>(input.getAttribute(MPD26A::FIELD36)), 9, -1);
-      output <<   toString( dv_cast<int>(input.getAttribute(MPD26A::FIELD37)), 9, -1);
-      output <<   toString( dv_cast<int>(input.getAttribute(MPD26A::FIELD38)), 9, -1);
-      output <<   toString( dv_cast<int>(input.getAttribute(MPD26A::FIELD39)), 9, -1);
-      output <<   toString( dv_cast<int>(input.getAttribute(MPD26A::FIELD40)), 9, -1);
-      output <<   toString( dv_cast<int>(input.getAttribute(MPD26A::FIELD41)), 9, -1);
-      output <<   toString( dv_cast<int>(input.getAttribute(MPD26A::FIELD42)), 9, -1);
-      output <<   toString( dv_cast<int>(input.getAttribute(MPD26A::FIELD43)), 9, -1);
-      output <<   toString( dv_cast<int>(input.getAttribute(MPD26A::FIELD44)), 9, -1);
-      output <<   toString( dv_cast<int>(input.getAttribute(MPD26A::FIELD45)), 9, -1);
+      output << sizeString(dv_cast<string>(input.getAttribute(MPD26A::FIELD1)), 11);
+      output << sizeString(dv_cast<string>(input.getAttribute(MPD26A::FIELD2)), 2);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(MPD26A::FIELD3)), 7, -1);
+      output << toString(dv_cast<double>(input.getAttribute(MPD26A::FIELD4)), 10, 3);
+      output << toString(dv_cast<double>(input.getAttribute(MPD26A::FIELD5)), 6, 3);
+      output << toString(dv_cast<double>(input.getAttribute(MPD26A::FIELD6)), 9, 5);
+      output << sizeString(dv_cast<string>(input.getAttribute(MPD26A::FIELD7)), 3);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(MPD26A::FIELD8)), 1, -1);
+      output << sizeString(dv_cast<string>(input.getAttribute(MPD26A::FIELD9)), 1);
+      output << toString(dv_cast<double>(input.getAttribute(MPD26A::FIELD10)), 5, 1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(MPD26A::FIELD11)), 5, 1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(MPD26A::FIELD12)), 1, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(MPD26A::FIELD13)), 1, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(MPD26A::FIELD14)), 4, -1);
+      output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD15)), 9, -1);
+      output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD16)), 9, -1);
+      output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD17)), 9, -1);
+      output << toString(dv_cast<double>(input.getAttribute(MPD26A::FIELD18)), 10, 3);
+      output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD19)), 9, -1);
+      output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD20)), 9, -1);
+      output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD21)), 9, -1);
+      output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD22)), 9, -1);
+      output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD23)), 9, -1);
+      output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD24)), 9, -1);
+      output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD25)), 9, -1);
+      output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD26)), 9, -1);
+      output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD27)), 9, -1);
+      output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD28)), 9, -1);
+      output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD29)), 9, -1);
+      output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD30)), 9, -1);
+      output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD31)), 9, -1);
+      output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD32)), 9, -1);
+      output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD33)), 9, -1);
+      output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD34)), 9, -1);
+      output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD35)), 9, -1);
+      output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD36)), 9, -1);
+      output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD37)), 9, -1);
+      output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD38)), 9, -1);
+      output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD39)), 9, -1);
+      output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD40)), 9, -1);
+      output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD41)), 9, -1);
+      output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD42)), 9, -1);
+      output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD43)), 9, -1);
+      output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD44)), 9, -1);
+      output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD45)), 9, -1);
    }
    catch (const bad_cast&)
    {

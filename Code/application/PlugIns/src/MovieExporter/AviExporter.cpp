@@ -27,3 +27,16 @@ AVOutputFormat *AviExporter::getOutputFormat() const
 {
    return guess_format("avi", NULL, NULL);
 }
+
+boost::rational<int> AviExporter::convertToValidFrameRate(const boost::rational<int>& frameRate) const
+{
+   boost::rational<int> validFrameRate = MovieExporter::convertToValidFrameRate(frameRate);
+
+   // can't do simple validFrameRate > 31 since (63, 2) is valid but boost::rational > would return true
+   if (validFrameRate >= 32)
+   {
+      validFrameRate.assign(31, 1);
+   }
+
+   return validFrameRate;
+}

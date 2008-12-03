@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef HDF5_ATTRIBUTE_H
-#define HDF5_ATTRIBUTE_H
+#ifndef HDF5ATTRIBUTE_H
+#define HDF5ATTRIBUTE_H
 
 #include <string>
 
@@ -129,4 +127,4 @@ private:
    DataVariant mValue;
 };
 
-#endif   
+#endif

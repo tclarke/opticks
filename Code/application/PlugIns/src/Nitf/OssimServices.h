@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef OSSIM_SERVICES_H
-#define OSSIM_SERVICES_H
+#ifndef OSSIMSERVICES_H
+#define OSSIMSERVICES_H
 
 #include "AlgorithmShell.h"
 #include "AppVersion.h"

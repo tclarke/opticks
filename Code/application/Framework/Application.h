@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef APPLICATION_H__
-#define APPLICATION_H__
+#ifndef APPLICATION_H
+#define APPLICATION_H
 
 #include <string>
 
@@ -22,23 +22,23 @@ public:
 
    virtual int run(int argc, char** argv);      // Must be re-implemented in subclasses!
 
-   QCoreApplication &getQApp()
+   QCoreApplication& getQApp()
    {
       return mApplication;
    }
 
+   virtual void reportWarning(const std::string& warningMessage) const = 0;
+   virtual void reportError(const std::string& errorMessage) const = 0;
+
 protected:
-   Application(QCoreApplication &app);
+   Application(QCoreApplication& app);
 
    bool isXmlInitialized() const;
    bool generateXml();
    bool executeStartupBatchWizards(Progress* pProgress);
 
-   virtual void reportWarning(const std::string& warningMessage) const = 0;
-   virtual void reportError(const std::string& errorMessage) const = 0;
-
 private:
-   QCoreApplication &mApplication;
+   QCoreApplication& mApplication;
    bool mXmlInitialized;
 };
 

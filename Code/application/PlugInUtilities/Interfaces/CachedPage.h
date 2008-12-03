@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef CACHED_PAGE_H
-#define CACHED_PAGE_H
+#ifndef CACHEDPAGE_H
+#define CACHEDPAGE_H
 
 #include "DimensionDescriptor.h"
 #include "RasterPage.h"
@@ -118,7 +116,7 @@ public:
       unsigned int getInterlineBytes();
 
    private:
-      char *mpData;
+      char* mpData;
       DimensionDescriptor mStartRow;
       int mConcurrentRows;
       DimensionDescriptor mBand; // for BSQ

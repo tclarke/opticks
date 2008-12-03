@@ -26,31 +26,26 @@ namespace GeoTiffOnDisk
 
 class CacheUnit
 {
+public:
+   CacheUnit(const std::vector<unsigned int>& blockNumbers, size_t blockSize);
+   ~CacheUnit();
+
+   void get();
+   void release();
+   unsigned int references() const;
+   const std::vector<unsigned int>& blockNumbers() const;
+   size_t dataSize() const;
+   char* data() const;
+   bool isEmpty() const;
+   void setIsEmpty(bool v);
+
+private:
    unsigned int mReferenceCount;
    std::vector<unsigned int> mBlockNumbers;
    size_t mDataSize;
-   char *mpData;
+   char* mpData;
    Service<ModelServices> mpModelSvcs;
    bool mIsEmpty;
-
-public:
-   CacheUnit(const std::vector<unsigned int> &blockNumber, size_t blockSize);
-   ~CacheUnit();
-
-   void get()                       { mReferenceCount++; }
-   void release()                   
-   {
-      if(mReferenceCount > 0)
-      {
-         mReferenceCount--;
-      }
-   }
-   unsigned int references() const  { return mReferenceCount; }
-   const std::vector<unsigned int> &blockNumbers() const { return mBlockNumbers; }
-   size_t dataSize() const          { return mDataSize; }
-   char *data() const               { return mpData; }
-   bool isEmpty() const             { return mIsEmpty; }
-   void setIsEmpty(bool v)          { mIsEmpty = v; }
 };
 
 class Cache
@@ -62,12 +57,12 @@ public:
    Cache();
    ~Cache();
 
-   CacheUnit *getCacheUnit(unsigned int startBlock, unsigned int endBlock, size_t blockSize);
-   CacheUnit *getCacheUnit(std::vector<unsigned int> &blocks, size_t blockSize);
+   CacheUnit* getCacheUnit(unsigned int startBlock, unsigned int endBlock, size_t blockSize);
+   CacheUnit* getCacheUnit(std::vector<unsigned int>& blocks, size_t blockSize);
 
 private:
-   static bool Cache::CacheLocator(std::vector<unsigned int> blockNumbers, CacheUnit *pUnit);
-   static bool Cache::CacheCleaner(const CacheUnit *pUnit);
+   static bool Cache::CacheLocator(std::vector<unsigned int> blockNumbers, CacheUnit* pUnit);
+   static bool Cache::CacheCleaner(const CacheUnit* pUnit);
 
    cache_t mCache;
    const unsigned int mCacheSize;
@@ -83,27 +78,24 @@ public:
    ~GeoTiffPager();
 
    // Executable
-   virtual bool getInputSpecification(PlugInArgList *&pArgList);
-   virtual bool getOutputSpecification(PlugInArgList *&pArgList);
-   virtual bool execute(PlugInArgList *pInputArgList, 
-                        PlugInArgList *pOutputArgList);
+   virtual bool getInputSpecification(PlugInArgList*& pArgList);
+   virtual bool getOutputSpecification(PlugInArgList*& pArgList);
+   virtual bool execute(PlugInArgList* pInputArgList, PlugInArgList* pOutputArgList);
 
    //RasterPager methods
-   RasterPage* getPage(DataRequest *pOriginalRequest,
-      DimensionDescriptor startRow, 
-      DimensionDescriptor startColumn, 
-      DimensionDescriptor startBand);
-   void releasePage(RasterPage *pPage);
+   RasterPage* getPage(DataRequest* pOriginalRequest, DimensionDescriptor startRow,
+      DimensionDescriptor startColumn, DimensionDescriptor startBand);
+   void releasePage(RasterPage* pPage);
 
    int getSupportedRequestVersion() const;
 
 protected:
-   GeoTiffPage *getPage(tstrip_t startStrip, tstrip_t endStrip, tsize_t stripSize);
+   GeoTiffPage* getPage(tstrip_t startStrip, tstrip_t endStrip, tsize_t stripSize);
 
 private:
-   RasterElement *mpRaster;
-   TIFF *mpTiff;
-   Mutex *mpMutex;
+   RasterElement* mpRaster;
+   TIFF* mpTiff;
+   Mutex* mpMutex;
    Service<PlugInManagerServices> mpPluginSvcs;
    Service<ModelServices> mpModelSvcs;
    GeoTiffOnDisk::Cache mBlockCache;

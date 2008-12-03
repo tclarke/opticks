@@ -12,7 +12,8 @@
 
 namespace IconImages
 {
-   static const char* const AboutIcon[]={
+   static const char* const AboutIcon[] =
+   {
       "16 16 3 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -32,9 +33,11 @@ namespace IconImages
       "......#aa##.....",
       "......#aa##.....",
       ".......###......",
-      "................"};
+      "................"
+   };
 
-   static const char* const AdvanceBackwardIcon[]={
+   static const char* const AdvanceBackwardIcon[] =
+   {
       "8 16 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -53,10 +56,12 @@ namespace IconImages
       "........",
       "........",
       "........",
-      "........"};
+      "........"
+   };
 
-   static const char* const AdvanceForwardIcon[]={
-       "8 16 2 1",
+   static const char* const AdvanceForwardIcon[] =
+   {
+      "8 16 2 1",
       "# c #000000",
       ". c #ffffff",
       "........",
@@ -74,9 +79,11 @@ namespace IconImages
       "........",
       "........",
       "........",
-      "........"};
+      "........"
+   };
 
-   static const char* const AlignBottomIcon[]={
+   static const char* const AlignBottomIcon[] =
+   {
       "16 16 4 1",
       "# c #000000",
       "b c #000080",
@@ -97,9 +104,11 @@ namespace IconImages
       "..############..",
       "..############..",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const AlignCenterIcon[]={
+   static const char* const AlignCenterIcon[] =
+   {
       "16 16 3 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -119,9 +128,11 @@ namespace IconImages
       ".......##.......",
       ".......##.......",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const AlignLeftIcon[]={
+   static const char* const AlignLeftIcon[] =
+   {
       "16 16 4 1",
       "# c #000000",
       "b c #000080",
@@ -142,9 +153,11 @@ namespace IconImages
       "..##.bbbbbbb....",
       "..##..b.........",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const AlignMiddleIcon[]={
+   static const char* const AlignMiddleIcon[] =
+   {
       "16 16 3 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -164,9 +177,11 @@ namespace IconImages
       "........####....",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const AlignRightIcon[]={
+   static const char* const AlignRightIcon[] =
+   {
       "16 16 4 1",
       "# c #000000",
       "b c #000080",
@@ -187,9 +202,11 @@ namespace IconImages
       "....bbbbbbb.##..",
       ".........b..##..",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const AlignTopIcon[]={
+   static const char* const AlignTopIcon[] =
+   {
       "16 16 4 1",
       "# c #000000",
       "a c #000080",
@@ -210,9 +227,11 @@ namespace IconImages
       "......#bb#......",
       "......####......",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const AnimationIcon[]={
+   static const char* const AnimationIcon[] =
+   {
       "16 16 6 1",
       "# c #000000",
       "b c #808080",
@@ -235,9 +254,11 @@ namespace IconImages
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const AnnotationCursor[]={
+   static const char* const AnnotationCursor[] =
+   {
       "32 32 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -272,9 +293,11 @@ namespace IconImages
       "................................",
       "................................",
       "................................",
-      "................................"};
+      "................................"
+   };
 
-   static const char* const AnnotationIcon[]={
+   static const char* const AnnotationIcon[] =
+   {
       "16 16 4 1",
       "# c #000000",
       "b c #00ffff",
@@ -295,9 +318,11 @@ namespace IconImages
       "...#b####.......",
       "..#b####........",
       ".#####..........",
-      "................"};
+      "................"
+   };
 
-   static const char* const AnnotationLoadIcon[]={
+   static const char* const AnnotationLoadIcon[] =
+   {
       "16 16 6 1",
       "# c #000000",
       "b c #00ffff",
@@ -320,9 +345,11 @@ namespace IconImages
       "#####c#dddddd#..",
       "....##dddddd#...",
       "....########....",
-      "................"};
+      "................"
+   };
 
-   static const char* const AnnotationMask[]={
+   static const char* const AnnotationMask[] =
+   {
       "32 32 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -357,9 +384,11 @@ namespace IconImages
       "................................",
       "................................",
       "................................",
-      "................................"};
+      "................................"
+   };
 
-   static const char* const AnnotationNewIcon[]={
+   static const char* const AnnotationNewIcon[] =
+   {
       "16 16 4 1",
       "# c #000000",
       "b c #00ffff",
@@ -380,9 +409,11 @@ namespace IconImages
       "#aaaa####a#.....",
       "#aaaaaaaaa#.....",
       "###########.....",
-      "................"};
+      "................"
+   };
 
-   static const char* const AnnotationPropertiesIcon[]={
+   static const char* const AnnotationPropertiesIcon[] =
+   {
       "16 16 5 1",
       "a c #000000",
       "# c #000080",
@@ -404,9 +435,11 @@ namespace IconImages
       ".......acaaaa...",
       ".......acaaa....",
       "......acaaa.....",
-      ".....aaaa......."};
+      ".....aaaa......."
+   };
 
-   static const char* const AnnotationRenameIcon[]={
+   static const char* const AnnotationRenameIcon[] =
+   {
       "16 16 6 1",
       "b c #000000",
       "# c #000080",
@@ -429,9 +462,11 @@ namespace IconImages
       ".......bdbbbb...",
       ".......bdbbb....",
       "......bdbbb.....",
-      ".....bbbb......."};
+      ".....bbbb......."
+   };
 
-   static const char* const AnnotationSaveIcon[]={
+   static const char* const AnnotationSaveIcon[] =
+   {
       "16 16 5 1",
       "# c #000000",
       "b c #00ffff",
@@ -453,9 +488,11 @@ namespace IconImages
       "####..#cc#####c#",
       "......#cc###a#c#",
       ".......#########",
-      "................"};
+      "................"
+   };
 
-   static const char* const AoiColorIcon[]={
+   static const char* const AoiColorIcon[] =
+   {
       "16 16 10 1",
       "# c #000000",
       "b c #000080",
@@ -482,9 +519,11 @@ namespace IconImages
       ".gc....###......",
       ".ccchh.##.......",
       ".cchh..#........",
-      "................"};
+      "................"
+   };
 
-   static const char* const AoiCursor[]={
+   static const char* const AoiCursor[] =
+   {
       "32 32 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -519,9 +558,11 @@ namespace IconImages
       "................................",
       "................................",
       "................................",
-      "................................"};
+      "................................"
+   };
 
-   static const char* const AoiLoadIcon[]={
+   static const char* const AoiLoadIcon[] =
+   {
       "16 16 7 1",
       "# c #000000",
       "a c #800080",
@@ -545,9 +586,11 @@ namespace IconImages
       "#...#b#eeeeee#..",
       "....##eeeeee#...",
       "....########....",
-      "................"};
+      "................"
+   };
 
-   static const char* const AoiMask[]={
+   static const char* const AoiMask[] =
+   {
       "32 32 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -582,9 +625,11 @@ namespace IconImages
       "................................",
       "................................",
       "................................",
-      "................................"};
+      "................................"
+   };
 
-   static const char* const AoiNewIcon[]={
+   static const char* const AoiNewIcon[] =
+   {
       "16 16 6 1",
       "# c #000000",
       "a c #800080",
@@ -607,9 +652,11 @@ namespace IconImages
       "#bbbbbbb#b#.....",
       "#bbbbbbbbb#.....",
       "###########.....",
-      "................"};
+      "................"
+   };
 
-   static const char* const AoiPropertiesIcon[]={
+   static const char* const AoiPropertiesIcon[] =
+   {
       "16 16 7 1",
       "a c #000000",
       "# c #000080",
@@ -633,9 +680,11 @@ namespace IconImages
       ".........adea...",
       ".........aaa....",
       ".........aa.....",
-      ".........a......"};
+      ".........a......"
+   };
 
-   static const char* const AoiShowLabelsIcon[] = {
+   static const char* const AoiShowLabelsIcon[] =
+   {
       "16 16 2 1",
       " 	c #C0C0C0",
       ".	c #FFFFFF",
@@ -654,9 +703,11 @@ namespace IconImages
       "                ",
       "                ",
       "                ",
-      "                "};
- 
-   static const char* const AoiShowPointLabelsIcon[] = {
+      "                "
+   };
+
+   static const char* const AoiShowPointLabelsIcon[] =
+   {
       "16 16 2 1",
       " 	c #C0C0C0",
       ".	c #FFFFFF",
@@ -675,9 +726,11 @@ namespace IconImages
       "                ",
       "                ",
       "                ",
-      "                "};
+      "                "
+   };
 
-   static const char* const AoiAddAppendIcon[]={
+   static const char* const AoiAddAppendIcon[] =
+   {
       "16 16 4 1",
       " 	c None",
       ".	c #C0C0C0",
@@ -698,9 +751,11 @@ namespace IconImages
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const AoiAddReplaceIcon[]={
+   static const char* const AoiAddReplaceIcon[] =
+   {
       "16 16 4 1",
       " 	c None",
       ".	c #C0C0C0",
@@ -721,9 +776,11 @@ namespace IconImages
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const AoiAddNewIcon[]={
+   static const char* const AoiAddNewIcon[] =
+   {
       "16 16 4 1",
       " 	c None",
       ".	c #C0C0C0",
@@ -744,9 +801,11 @@ namespace IconImages
       "......@@.@@.@@@.",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const AoiRenameIcon[]={
+   static const char* const AoiRenameIcon[] =
+   {
       "16 16 6 1",
       "b c #000000",
       "# c #000080",
@@ -769,9 +828,11 @@ namespace IconImages
       ".........bdab...",
       ".........bbb....",
       ".........bb.....",
-      ".........b......"};
+      ".........b......"
+   };
 
-   static const char* const AoiSaveIcon[]={
+   static const char* const AoiSaveIcon[] =
+   {
       "16 16 7 1",
       "# c #000000",
       "a c #800080",
@@ -795,9 +856,11 @@ namespace IconImages
       ".....#dd#####d#.",
       ".....#dd###e#d#.",
       "......#########.",
-      "................"};
+      "................"
+   };
 
-   static const char* const AoiSpectraIcon[]={
+   static const char* const AoiSpectraIcon[] =
+   {
       "16 16 8 1",
       ". c #000000",
       "a c #000080",
@@ -822,9 +885,11 @@ namespace IconImages
       "............####",
       "#########..#####",
       "#########.######",
-      "################"};
+      "################"
+   };
 
-   static const char* const ArcIcon[]={
+   static const char* const ArcIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -843,9 +908,11 @@ namespace IconImages
       "..............#.",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const ArrowIcon[]={
+   static const char* const ArrowIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -864,9 +931,11 @@ namespace IconImages
       "............#...",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const AutoAnnotateIcon[]={
+   static const char* const AutoAnnotateIcon[] =
+   {
       "16 16 5 1",
       "# c #000000",
       "b c #000080",
@@ -888,9 +957,11 @@ namespace IconImages
       "baaaa####aaaab..",
       "baaaaaaaaaaaab..",
       "bbbbbbbbbbbbbb..",
-      "................"};
+      "................"
+   };
 
-   static const char* const BackgroundTaskIcon[] = {
+   static const char* const BackgroundTaskIcon[] =
+   {
       "16 16 15 1",
       " 	c None",
       ".	c #C0C0C0",
@@ -922,9 +993,11 @@ namespace IconImages
       "......*-=*&*-$..",
       "......---=='....",
       ".........''.....",
-      "................"};
+      "................"
+   };
 
-static const char* const BoldIcon[]={
+   static const char* const BoldIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -943,9 +1016,11 @@ static const char* const BoldIcon[]={
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const CascadeIcon[]={
+   static const char* const CascadeIcon[] =
+   {
       "16 16 4 1",
       "b c #000080",
       ". c #008080",
@@ -966,9 +1041,34 @@ static const char* const BoldIcon[]={
       "#####baaaaaaaab#",
       "#####baaaaaaaab#",
       "#####bbbbbbbbbb#",
-      "################"};
+      "################"
+   };
 
-   static const char* const CheckedIcon[]={
+   static const char* const ChangeDirectionIcon[] =
+   {
+      "16 16 2 1",
+      "# c #000000",
+      ". c #ffffff",
+      "................",
+      "................",
+      "................",
+      "......#..#......",
+      ".....##..##.....",
+      "....###..###....",
+      "...####..####...",
+      "..#####..#####..",
+      "...####..####...",
+      "....###..###....",
+      ".....##..##.....",
+      "......#..#......",
+      "................",
+      "................",
+      "................",
+      "................"
+   };
+
+   static const char* const CheckedIcon[] =
+   {
       "12 12 4 1",
       "# c #000000",
       ". c #808080",
@@ -985,9 +1085,11 @@ static const char* const BoldIcon[]={
       ".#bb###bbbba",
       ".#bbb#bbbbba",
       ".#bbbbbbbbba",
-      ".aaaaaaaaaaa"};
+      ".aaaaaaaaaaa"
+   };
 
-   static const char* const ChipImageIcon[] = {
+   static const char* const ChipImageIcon[] =
+   {
       "16 16 5 1",
       "# c #000000",
       "a c #008000",
@@ -1009,9 +1111,11 @@ static const char* const BoldIcon[]={
       "#aaaaaaaabca#...",
       "#a#aaa#aabca#...",
       "#aaaaaaaaabc#...",
-      "#############..."};
+      "#############..."
+   };
 
-   static const char* const CircleArcIcon[]={
+   static const char* const CircleArcIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -1030,9 +1134,11 @@ static const char* const BoldIcon[]={
       "..........#.....",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const CircleIcon[]={
+   static const char* const CircleIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -1051,9 +1157,11 @@ static const char* const BoldIcon[]={
       "......###.......",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char *ClockIcon[]={
+   static const char* ClockIcon[] =
+   {
       "16 16 6 1",
       ". c #000000",
       "# c #800000",
@@ -1076,9 +1184,11 @@ static const char* const BoldIcon[]={
       "...aa.b.bdaa....",
       ".....aaaaa......",
       "................",
-      "................"};
-      
-   static const char* const CloseIcon[]={
+      "................"
+   };
+
+   static const char* const CloseIcon[] =
+   {
       "16 16 6 1",
       "a c #000000",
       "# c #000080",
@@ -1101,9 +1211,11 @@ static const char* const BoldIcon[]={
       ".addddddddddda..",
       ".addddddddddda..",
       ".aaaaaaaaaaaaa..",
-      "................"};
+      "................"
+   };
 
-   static const char* const ColumnIcon[]={
+   static const char* const ColumnIcon[] =
+   {
       "16 16 3 1",
       "a c #000000",
       "# c #000080",
@@ -1123,9 +1235,11 @@ static const char* const BoldIcon[]={
       ".#..aa.aa.aa..#.",
       ".#............#.",
       ".##############.",
-      "................"};
+      "................"
+   };
 
-   static const char* const CopyIcon[]={
+   static const char* const CopyIcon[] =
+   {
       "16 16 4 1",
       "# c #000000",
       "b c #000080",
@@ -1146,9 +1260,11 @@ static const char* const BoldIcon[]={
       ".......baaaaaaab",
       ".......bbbbbbbbb",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const CutIcon[]={
+   static const char* const CutIcon[] =
+   {
       "16 16 3 1",
       "# c #000000",
       "a c #000080",
@@ -1168,9 +1284,11 @@ static const char* const BoldIcon[]={
       "...a..a.a..a....",
       "...a..a..aa.....",
       "....aa..........",
-      "................"};
+      "................"
+   };
 
-   static const char* const DataPropertiesIcon[]={
+   static const char* const DataPropertiesIcon[] =
+   {
       "16 16 5 1",
       "a c #000000",
       "# c #000080",
@@ -1192,9 +1310,11 @@ static const char* const BoldIcon[]={
       "abaabac####bb##c",
       "abbbbbb##bbbbb#.",
       "aaaaaaac######c.",
-      ".........####..."};
+      ".........####..."
+   };
 
-   static const char* const DecreaseIcon[]={
+   static const char* const DecreaseIcon[] =
+   {
       "16 16 3 1",
       "# c #000000",
       "a c #00ffff",
@@ -1214,9 +1334,11 @@ static const char* const BoldIcon[]={
       "......#a#.......",
       ".......#........",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const DeleteIcon[]={
+   static const char* const DeleteIcon[] =
+   {
       "16 16 3 1",
       "# c #800000",
       "a c #800080",
@@ -1236,9 +1358,11 @@ static const char* const BoldIcon[]={
       ".###............",
       "..#..........#..",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const DesktopIcon[]={
+   static const char* const DesktopIcon[] =
+   {
       "16 16 11 1",
       "f c #000000",
       "i c #000080",
@@ -1266,9 +1390,57 @@ static const char* const BoldIcon[]={
       "ch...fd......hcf",
       "cgh.........h.hf",
       "ccchdddddddhchhf",
-      "ffffffffffffffff"};
+      "ffffffffffffffff"
+   };
 
-   static const char* const DisplayModeIcon[]={
+   static const char* const DirectionBackwardIcon[] =
+   {
+      "16 16 2 1",
+      "# c #000000",
+      ". c #ffffff",
+      "................",
+      "................",
+      "................",
+      "......#..#......",
+      ".....##..##.....",
+      "....###..#.#....",
+      "...####..#..#...",
+      "..#####..#...#..",
+      "...####..#..#...",
+      "....###..#.#....",
+      ".....##..##.....",
+      "......#..#......",
+      "................",
+      "................",
+      "................",
+      "................"
+   };
+
+   static const char* const DirectionForwardIcon[] =
+   {
+      "16 16 2 1",
+      "# c #000000",
+      ". c #ffffff",
+      "................",
+      "................",
+      "................",
+      "......#..#......",
+      ".....##..##.....",
+      "....#.#..###....",
+      "...#..#..####...",
+      "..#...#..#####..",
+      "...#..#..####...",
+      "....#.#..###....",
+      ".....##..##.....",
+      "......#..#......",
+      "................",
+      "................",
+      "................",
+      "................"
+   };
+
+   static const char* const DisplayModeIcon[] =
+   {
       "16 16 7 1",
       "e c #000000",
       "# c #0000ff",
@@ -1292,9 +1464,11 @@ static const char* const BoldIcon[]={
       "..ab..eeeeeeee..",
       ".ab..eeeeeeeee..",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const DistributeHorizontallyIcon[]={
+   static const char* const DistributeHorizontallyIcon[] =
+   {
       "16 16 4 1",
       "# c #000000",
       "b c #808080",
@@ -1315,9 +1489,11 @@ static const char* const BoldIcon[]={
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const DistributeVerticallyIcon[]={
+   static const char* const DistributeVerticallyIcon[] =
+   {
       "16 16 4 1",
       "# c #000000",
       "b c #808080",
@@ -1338,9 +1514,11 @@ static const char* const BoldIcon[]={
       ".....######.....",
       ".....#aaaa#.....",
       ".....#aaaa#.....",
-      ".....######....."};
+      ".....######....."
+   };
 
-   static const char* const DrawPixelIcon[]={
+   static const char* const DrawPixelIcon[] =
+   {
       "16 16 5 1",
       "# c #000000",
       "a c #800080",
@@ -1362,9 +1540,11 @@ static const char* const BoldIcon[]={
       "....###.........",
       "....##..........",
       "....#...........",
-      "................"};
+      "................"
+   };
 
-   static const char* const EastArrowIcon[]={
+   static const char* const EastArrowIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -1383,9 +1563,11 @@ static const char* const BoldIcon[]={
       "....#######.....",
       "....##..........",
       "....#######.....",
-      "....#######....."};
+      "....#######....."
+   };
 
-   static const char* const EditIcon[]={
+   static const char* const EditIcon[] =
+   {
       "16 16 3 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -1405,9 +1587,11 @@ static const char* const BoldIcon[]={
       "...#...#aa#.....",
       "........#a#.....",
       "........##......",
-      "................"};
+      "................"
+   };
 
-   static const char* const EllipseIcon[]={
+   static const char* const EllipseIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -1426,9 +1610,11 @@ static const char* const BoldIcon[]={
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const EllipseMask[]={
+   static const char* const EllipseMask[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -1447,9 +1633,11 @@ static const char* const BoldIcon[]={
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const EraseAllIcon[]={
+   static const char* const EraseAllIcon[] =
+   {
       "16 16 4 1",
       "a c #000000",
       "# c #808080",
@@ -1470,9 +1658,11 @@ static const char* const BoldIcon[]={
       ".#aaaaaa#.......",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const EraseColumnIcon[]={
+   static const char* const EraseColumnIcon[] =
+   {
       "16 16 5 1",
       "b c #000000",
       ". c #000080",
@@ -1494,9 +1684,11 @@ static const char* const BoldIcon[]={
       "######b###bcb###",
       "#####b####bb####",
       "#####cbbbbb#####",
-      "################"};
+      "################"
+   };
 
-   static const char* const ErasePixelIcon[]={
+   static const char* const ErasePixelIcon[] =
+   {
       "16 16 6 1",
       "# c #000000",
       "a c #800080",
@@ -1519,9 +1711,11 @@ static const char* const BoldIcon[]={
       ".#...#...#c#....",
       "....#....##.....",
       "....c#####......",
-      "................"};
+      "................"
+   };
 
-   static const char* const ErasePolygonIcon[]={
+   static const char* const ErasePolygonIcon[] =
+   {
       "16 16 4 1",
       "# c #000000",
       "a c #808080",
@@ -1542,9 +1736,11 @@ static const char* const BoldIcon[]={
       ".......#bbb#a#..",
       "......#...#a#...",
       ".....#....##....",
-      ".....a#####....."};
+      ".....a#####....."
+   };
 
-   static const char* const EraseRectIcon[]={
+   static const char* const EraseRectIcon[] =
+   {
       "16 16 4 1",
       "# c #000000",
       "a c #808080",
@@ -1565,9 +1761,11 @@ static const char* const BoldIcon[]={
       ".....#....##....",
       ".....a#####.....",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const EraseRowIcon[]={
+   static const char* const EraseRowIcon[] =
+   {
       "16 16 5 1",
       "b c #000000",
       ". c #000080",
@@ -1589,9 +1787,11 @@ static const char* const BoldIcon[]={
       "######b###bcb###",
       "#####b####bb####",
       "#####cbbbbb#####",
-      "################"};
+      "################"
+   };
 
-   static const char* const FastForwardIcon[]={
+   static const char* const FastForwardIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -1610,9 +1810,11 @@ static const char* const BoldIcon[]={
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const FastRewindIcon[]={
+   static const char* const FastRewindIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -1631,9 +1833,11 @@ static const char* const BoldIcon[]={
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const FillColorIcon[]={
+   static const char* const FillColorIcon[] =
+   {
       "16 16 5 1",
       "a c #000000",
       "# c #808080",
@@ -1655,9 +1859,11 @@ static const char* const BoldIcon[]={
       "cccccccccccccccc",
       "cccccccccccccccc",
       "cccccccccccccccc",
-      "cccccccccccccccc"};
+      "cccccccccccccccc"
+   };
 
-   static const char* const FindIcon[]={
+   static const char* const FindIcon[] =
+   {
       "16 16 3 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -1677,9 +1883,11 @@ static const char* const BoldIcon[]={
       "#a###.....#a###.",
       "#####.....#####.",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const FindNextIcon[]={
+   static const char* const FindNextIcon[] =
+   {
       "16 16 4 1",
       "# c #000000",
       "b c #000080",
@@ -1700,9 +1908,11 @@ static const char* const BoldIcon[]={
       "...b.b.b.bbbbbb.",
       "............bb..",
       "............b...",
-      "................"};
+      "................"
+   };
 
-   static const char* const FlipHorizontallyIcon[]={
+   static const char* const FlipHorizontallyIcon[] =
+   {
       "16 16 3 1",
       "# c #000000",
       "a c #800080",
@@ -1722,9 +1932,11 @@ static const char* const BoldIcon[]={
       ".######..######.",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const FlipVerticallyIcon[]={
+   static const char* const FlipVerticallyIcon[] =
+   {
       "16 16 3 1",
       "# c #000000",
       "a c #800080",
@@ -1744,9 +1956,11 @@ static const char* const BoldIcon[]={
       ".......##aaa#...",
       ".........##a#...",
       "...........##...",
-      "................"};
+      "................"
+   };
 
-   static const char* const ForbiddenIcon[]={
+   static const char* const ForbiddenIcon[] =
+   {
       "18 18 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -1767,9 +1981,11 @@ static const char* const BoldIcon[]={
       "..###........###..",
       "...####....####...",
       "....##########....",
-      "......######......"};
+      "......######......"
+   };
 
-   static const char* const FreeRotateCursor[]={
+   static const char* const FreeRotateCursor[] =
+   {
       "32 32 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -1804,9 +2020,11 @@ static const char* const BoldIcon[]={
       "................................",
       "................................",
       "................................",
-      "................................"};
+      "................................"
+   };
 
-   static const char* const FreeRotateIcon[]={
+   static const char* const FreeRotateIcon[] =
+   {
       "16 16 4 1",
       "# c #000080",
       "b c #008000",
@@ -1827,9 +2045,11 @@ static const char* const BoldIcon[]={
       "..###.....###...",
       "...#########....",
       "....a#####a.....",
-      "................"};
+      "................"
+   };
 
-   static const char* const FreeRotateMask[]={
+   static const char* const FreeRotateMask[] =
+   {
       "32 32 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -1864,9 +2084,11 @@ static const char* const BoldIcon[]={
       "................................",
       "................................",
       "................................",
-      "................................"};
+      "................................"
+   };
 
-   static const char* const GcpBlankIcon[]={
+   static const char* const GcpBlankIcon[] =
+   {
       "17 17 3 1",
       "a c #000000",
       "# c #404040",
@@ -1887,9 +2109,11 @@ static const char* const BoldIcon[]={
       ".................",
       "...#.........#...",
       ".....#.....#.....",
-      "......##.##......"};
+      "......##.##......"
+   };
 
-   static const char* const GcpColorIcon[]={
+   static const char* const GcpColorIcon[] =
+   {
       "16 16 9 1",
       "a c #000000",
       "c c #000080",
@@ -1915,9 +2139,11 @@ static const char* const BoldIcon[]={
       ".ef...a.........",
       ".fffgg..........",
       ".ffgg...........",
-      "................"};
+      "................"
+   };
 
-   static const char* const GcpEditorIcon[]={
+   static const char* const GcpEditorIcon[] =
+   {
       "16 16 4 1",
       "a c #000000",
       "b c #008000",
@@ -1938,9 +2164,11 @@ static const char* const BoldIcon[]={
       "......a.........",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const GcpLoadIcon[]={
+   static const char* const GcpLoadIcon[] =
+   {
       "16 16 7 1",
       "# c #000000",
       "a c #008000",
@@ -1964,9 +2192,11 @@ static const char* const BoldIcon[]={
       "....#c#eeeeee#..",
       "....##eeeeee#...",
       "....########....",
-      "................"};
+      "................"
+   };
 
-   static const char* const GcpMarkerCursor[]={
+   static const char* const GcpMarkerCursor[] =
+   {
       "32 32 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -2001,9 +2231,11 @@ static const char* const BoldIcon[]={
       "................................",
       "................................",
       "................................",
-      "................................"};
+      "................................"
+   };
 
-   static const char* const GcpMarkerIcon[]={
+   static const char* const GcpMarkerIcon[] =
+   {
       "16 16 4 1",
       "# c #000000",
       "a c #008000",
@@ -2024,9 +2256,11 @@ static const char* const BoldIcon[]={
       "..####..........",
       "..##............",
       "..#.............",
-      "................"};
+      "................"
+   };
 
-   static const char* const GcpMarkerMask[]={
+   static const char* const GcpMarkerMask[] =
+   {
       "32 32 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -2061,9 +2295,11 @@ static const char* const BoldIcon[]={
       "................................",
       "................................",
       "................................",
-      "................................"};
+      "................................"
+   };
 
-   static const char* const GcpNewIcon[]={
+   static const char* const GcpNewIcon[] =
+   {
       "16 16 5 1",
       "# c #000000",
       "a c #008000",
@@ -2085,9 +2321,11 @@ static const char* const BoldIcon[]={
       "#bbbbbbbbb#.....",
       "#bbbbbbbbb#.....",
       "###########.....",
-      "................"};
+      "................"
+   };
 
-   static const char* const GcpPlusIcon[]={
+   static const char* const GcpPlusIcon[] =
+   {
       "17 17 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -2107,9 +2345,11 @@ static const char* const BoldIcon[]={
       "..#.....#.....#..",
       "...#....#....#...",
       "....##..#..##....",
-      "......#####......"};
+      "......#####......"
+   };
 
-   static const char* const GcpPropertiesIcon[]={
+   static const char* const GcpPropertiesIcon[] =
+   {
       "16 16 6 1",
       "a c #000000",
       "# c #000080",
@@ -2132,9 +2372,11 @@ static const char* const BoldIcon[]={
       ".......aaaccaa..",
       ".......aaaaa....",
       "......aaa.......",
-      "......a........."};
+      "......a........."
+   };
 
-   static const char* const GcpRenameIcon[]={
+   static const char* const GcpRenameIcon[] =
+   {
       "16 16 6 1",
       "b c #000000",
       "# c #000080",
@@ -2157,9 +2399,11 @@ static const char* const BoldIcon[]={
       ".......bbbccbb..",
       ".......bbbbb....",
       "......bbb.......",
-      "......b........."};
+      "......b........."
+   };
 
-   static const char* const GcpSaveIcon[]={
+   static const char* const GcpSaveIcon[] =
+   {
       "16 16 6 1",
       "# c #000000",
       "a c #008000",
@@ -2182,9 +2426,11 @@ static const char* const BoldIcon[]={
       "......#cc#####c#",
       "......#cc###d#c#",
       ".......#########",
-      "................"};
+      "................"
+   };
 
-   static const char* const GcpXIcon[]={
+   static const char* const GcpXIcon[] =
+   {
       "17 17 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -2204,9 +2450,11 @@ static const char* const BoldIcon[]={
       "..##.........##..",
       "...#.........#...",
       "....##.....##....",
-      "......#####......"};
+      "......#####......"
+   };
 
-   static const char* const GenerateIcon[]={
+   static const char* const GenerateIcon[] =
+   {
       "16 16 5 1",
       "# c #4d4d4d",
       "b c #ffffff",
@@ -2228,9 +2476,11 @@ static const char* const BoldIcon[]={
       ".#.............#",
       "..#############.",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const GroupIcon[]={
+   static const char* const GroupIcon[] =
+   {
       "16 16 3 1",
       ". c #000000",
       "a c #000080",
@@ -2250,9 +2500,11 @@ static const char* const BoldIcon[]={
       "#####a########a#",
       "...##a#######...",
       "...##aaaaaaaa...",
-      "...##########..."};
+      "...##########..."
+   };
 
-   static const char* const HelpTopicsIcon[]={
+   static const char* const HelpTopicsIcon[] =
+   {
       "16 16 7 1",
       "a c #000000",
       "# c #800080",
@@ -2276,9 +2528,11 @@ static const char* const BoldIcon[]={
       "...aa##bb.ea....",
       ".....aa##ea.....",
       ".......aaa......",
-      "................"};
+      "................"
+   };
 
-   static const char* const HideIcon[]={
+   static const char* const HideIcon[] =
+   {
       "6 5 2 1",
       ". c #000000",
       "# c #c0c0c0",
@@ -2286,9 +2540,11 @@ static const char* const BoldIcon[]={
       "#....#",
       "##..##",
       "#....#",
-      "..##.."};
+      "..##.."
+   };
 
-   static const char* const HideLayersIcon[]={
+   static const char* const HideLayersIcon[] =
+   {
       "16 16 3 1",
       ". c #000000",
       "a c #c0c0c0",
@@ -2308,9 +2564,11 @@ static const char* const BoldIcon[]={
       "####.aaaaaaaa.##",
       "#####.aaaaaaaa.#",
       "######..........",
-      "################"};
+      "################"
+   };
 
-   static const char* const HistogramWindowIcon[]={
+   static const char* const HistogramWindowIcon[] =
+   {
       "16 16 3 1",
       ". c #000000",
       "a c #000080",
@@ -2330,9 +2588,11 @@ static const char* const BoldIcon[]={
       ".#a#a#a#a#a#a#a#",
       ".#a#a#a#a#a#a#a#",
       ".#a#a#a#a#a#a#a#",
-      "................"};
+      "................"
+   };
 
-   static const char* const HistogramWindowMask[]={
+   static const char* const HistogramWindowMask[] =
+   {
       "16 16 2 1",
       ". c #000000",
       "# c #ffffff",
@@ -2351,9 +2611,11 @@ static const char* const BoldIcon[]={
       ".#.#.#.#.#.#.#.#",
       ".#.#.#.#.#.#.#.#",
       ".#.#.#.#.#.#.#.#",
-      "................"};
+      "................"
+   };
 
-   static const char* const HorizontalExpandIcon[]={
+   static const char* const HorizontalExpandIcon[] =
+   {
       "3 5 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -2361,9 +2623,11 @@ static const char* const BoldIcon[]={
       ".##",
       "###",
       ".##",
-      "..#"};
+      "..#"
+   };
 
-   static const char* const IncreaseIcon[]={
+   static const char* const IncreaseIcon[] =
+   {
       "16 16 3 1",
       "# c #000000",
       "a c #00ffff",
@@ -2383,9 +2647,11 @@ static const char* const BoldIcon[]={
       "....#aaaaa#.....",
       "....#######.....",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const InsertGLViewIcon[]={
+   static const char* const InsertGLViewIcon[] =
+   {
       "16 16 6 1",
       "# c #000000",
       "d c #008000",
@@ -2408,9 +2674,11 @@ static const char* const BoldIcon[]={
       ".##d.#.#.d.#....",
       ".#dddd#.d#d#....",
       ".#d.##ddd##.....",
-      ".###..###......."};
+      ".###..###......."
+   };
 
-   static const char* const InsertPictureIcon[]={
+   static const char* const InsertPictureIcon[] =
+   {
       "16 16 5 1",
       ". c #000000",
       "c c #808080",
@@ -2432,9 +2700,11 @@ static const char* const BoldIcon[]={
       "####.b.ccc.##.a.",
       "####..cc.cc.##..",
       "####.cccc.cc.##.",
-      "####............"};
+      "####............"
+   };
 
-   static const char* const InsertPictureMask[]={
+   static const char* const InsertPictureMask[] =
+   {
       "16 16 2 1",
       ". c #000000",
       "# c #ffffff",
@@ -2453,9 +2723,11 @@ static const char* const BoldIcon[]={
       "####............",
       "####............",
       "####............",
-      "####............"};
+      "####............"
+   };
 
-   static const char* const ItalicsIcon[]={
+   static const char* const ItalicsIcon[] =
+   {
       "16 16 3 1",
       "# c #000000",
       "a c #808080",
@@ -2475,9 +2747,11 @@ static const char* const BoldIcon[]={
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const LatLonInsertIcon[]={
+   static const char* const LatLonInsertIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -2496,9 +2770,11 @@ static const char* const BoldIcon[]={
       "..##..#.#.......",
       "..#...#..#......",
       ".......#.#......",
-      ".......##......."};
+      ".......##......."
+   };
 
-   static const char* const LayersIcon[]={
+   static const char* const LayersIcon[] =
+   {
       "16 16 5 1",
       ". c #000000",
       "b c #00ff00",
@@ -2520,9 +2796,11 @@ static const char* const BoldIcon[]={
       "####.cccccccc.##",
       "#####.cccccccc.#",
       "######..........",
-      "################"};
+      "################"
+   };
 
-   static const char* const LayerPropertiesIcon[]={
+   static const char* const LayerPropertiesIcon[] =
+   {
       "16 16 6 1",
       "a c #000000",
       "# c #000080",
@@ -2545,9 +2823,11 @@ static const char* const BoldIcon[]={
       "abaabaaddaaaaaaa",
       "abbbbbbaddddda..",
       "aaaaaaaaaddddda.",
-      ".........aaaaaaa"};
+      ".........aaaaaaa"
+   };
 
-   static const char* const LineColorIcon[]={
+   static const char* const LineColorIcon[] =
+   {
       "16 16 6 1",
       "# c #000000",
       "d c #0000ff",
@@ -2570,9 +2850,11 @@ static const char* const BoldIcon[]={
       "dddddddddddddddd",
       "dddddddddddddddd",
       "dddddddddddddddd",
-      "dddddddddddddddd"};
+      "dddddddddddddddd"
+   };
 
-   static const char* const LineColorMask[]={
+   static const char* const LineColorMask[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -2591,9 +2873,11 @@ static const char* const BoldIcon[]={
       "################",
       "################",
       "################",
-      "################"};
+      "################"
+   };
 
-   static const char* const LineIcon[]={
+   static const char* const LineIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -2612,9 +2896,11 @@ static const char* const BoldIcon[]={
       "............#...",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const HLineIcon[]={
+   static const char* const HLineIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -2633,9 +2919,11 @@ static const char* const BoldIcon[]={
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const VLineIcon[]={
+   static const char* const VLineIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -2654,9 +2942,11 @@ static const char* const BoldIcon[]={
       ".......#........",
       ".......#........",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const LineWidthIcon[]={
+   static const char* const LineWidthIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -2675,9 +2965,11 @@ static const char* const BoldIcon[]={
       "################",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const LinkIcon[]={
+   static const char* const LinkIcon[] =
+   {
       "16 16 4 1",
       "# c #000000",
       "b c #808080",
@@ -2698,9 +2990,11 @@ static const char* const BoldIcon[]={
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const MajorHorizontalGridlinesIcon[]={
+   static const char* const MajorHorizontalGridlinesIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -2719,9 +3013,11 @@ static const char* const BoldIcon[]={
       ".##############.",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const MajorVerticalGridlinesIcon[]={
+   static const char* const MajorVerticalGridlinesIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -2740,9 +3036,11 @@ static const char* const BoldIcon[]={
       "..##.##.##.##...",
       "..##.##.##.##...",
       "..##.##.##.##...",
-      "................"};
+      "................"
+   };
 
-   static const char* const MeasurementColorIcon[]={
+   static const char* const MeasurementColorIcon[] =
+   {
       "16 16 10 1",
       "# c #000000",
       "b c #000080",
@@ -2769,9 +3067,11 @@ static const char* const BoldIcon[]={
       "#gaaaa#...#.####",
       ".aaahh....#...##",
       ".aahh.....#.##..",
-      "..........#.####"};
+      "..........#.####"
+   };
 
-   static const char* const MeasurementCursor[]={
+   static const char* const MeasurementCursor[] =
+   {
       "32 32 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -2806,9 +3106,11 @@ static const char* const BoldIcon[]={
       "................................",
       "................................",
       "................................",
-      "................................"};
+      "................................"
+   };
 
-   static const char* const MeasurementDecDegIcon[]={
+   static const char* const MeasurementDecDegIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -2827,9 +3129,11 @@ static const char* const BoldIcon[]={
       "#...#.###..#####",
       "#..#..#....#...#",
       "###...####.#####",
-      "................"};
+      "................"
+   };
 
-   static const char* const MeasurementDecMinIcon[]={
+   static const char* const MeasurementDecMinIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -2848,9 +3152,11 @@ static const char* const BoldIcon[]={
       "#.....#.#.#..#.#",
       "#.....#.#.#..#.#",
       "#.....#.#.#...##",
-      "................"};
+      "................"
+   };
 
-   static const char* const MeasurementDistanceUnitsIcon[]={
+   static const char* const MeasurementDistanceUnitsIcon[] =
+   {
        "16 16 3 1",
        "# c #000000",
        ". c #c0c0c0",
@@ -2870,9 +3176,11 @@ static const char* const BoldIcon[]={
        ".aaaaa#...#.####",
        "..aaa#....#...##",
        "....#.....#.##..",
-       "..........#.####"};
+       "..........#.####"
+   };
 
-   static const char* const MeasurementDmsIcon[]={
+   static const char* const MeasurementDmsIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -2891,9 +3199,11 @@ static const char* const BoldIcon[]={
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const MeasurementFootIcon[]={
+   static const char* const MeasurementFootIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -2912,9 +3222,11 @@ static const char* const BoldIcon[]={
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const MeasurementKmIcon[]={
+   static const char* const MeasurementKmIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -2933,9 +3245,11 @@ static const char* const BoldIcon[]={
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const MeasurementDistanceLabelOnOffIcon[]={
+   static const char* const MeasurementDistanceLabelOnOffIcon[] =
+   {
       "16 16 4 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -2956,9 +3270,11 @@ static const char* const BoldIcon[]={
       ".aaaaa#.....bbb.",
       "..aaa#.........b",
       "....#......bbbb.",
-      "................"};
+      "................"
+   };
 
-   static const char* const MeasurementBearingLabelOnOffIcon[]={
+   static const char* const MeasurementBearingLabelOnOffIcon[] =
+   {
       "16 16 4 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -2979,9 +3295,11 @@ static const char* const BoldIcon[]={
       ".aaaaa#....b.bbb",
       "..aaa#.....b...b",
       "....#.......bbb.",
-      "................"};
+      "................"
+   };
 
-   static const char* const MeasurementEndPtsLabelOnOffIcon[]={
+   static const char* const MeasurementEndPtsLabelOnOffIcon[] =
+   {
       "16 16 4 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -3002,9 +3320,11 @@ static const char* const BoldIcon[]={
       ".aaaaa#....b...b",
       "..aaa#.....b...b",
       "....#......bbbb.",
-      "................"};
+      "................"
+   };
 
-   static const char* const MeasurementLocationUnitsIcon[]={
+   static const char* const MeasurementLocationUnitsIcon[] =
+   {
       "16 16 3 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -3024,9 +3344,11 @@ static const char* const BoldIcon[]={
       ".aaaaa#...#.####",
       "..aaa#....#...##",
       "....#.....#.##..",
-      "..........#.####"};
+      "..........#.####"
+   };
 
-   static const char* const MeasurementMarkerIcon[]={
+   static const char* const MeasurementMarkerIcon[] =
+   {
       "16 16 3 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -3046,9 +3368,11 @@ static const char* const BoldIcon[]={
       ".aaaaa#...#.####",
       "..aaa#....#...##",
       "....#.....#.##..",
-      "..........#.####"};
+      "..........#.####"
+   };
 
-   static const char* const MeasurementMask[]={
+   static const char* const MeasurementMask[] =
+   {
       "32 32 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -3083,9 +3407,11 @@ static const char* const BoldIcon[]={
       "................................",
       "................................",
       "................................",
-      "................................"};
+      "................................"
+   };
 
-   static const char* const MeasurementMeterIcon[]={
+   static const char* const MeasurementMeterIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -3104,9 +3430,11 @@ static const char* const BoldIcon[]={
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const MeasurementMgrsIcon[]={
+   static const char* const MeasurementMgrsIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -3125,9 +3453,11 @@ static const char* const BoldIcon[]={
       ".#...#....... #.",
       ".#...#....####..",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const MeasurementNautMileIcon[]={
+   static const char* const MeasurementNautMileIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -3146,9 +3476,11 @@ static const char* const BoldIcon[]={
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const MeasurementNoDistUnitIcon[]={
+   static const char* const MeasurementNoDistUnitIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -3167,9 +3499,11 @@ static const char* const BoldIcon[]={
       "................",
       ".......#........",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const MeasurementNoLocUnitIcon[]={
+   static const char* const MeasurementNoLocUnitIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -3188,9 +3522,11 @@ static const char* const BoldIcon[]={
       "................",
       ".......#........",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const MeasurementStatMileIcon[]={
+   static const char* const MeasurementStatMileIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -3209,9 +3545,11 @@ static const char* const BoldIcon[]={
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const MeasurementStyleIcon[]={
+   static const char* const MeasurementStyleIcon[] =
+   {
       "16 16 3 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -3231,9 +3569,11 @@ static const char* const BoldIcon[]={
       ".aaaaa#...#.####",
       "..aaa#....#...##",
       "....#.....#.##..",
-      "..........#.####"};
+      "..........#.####"
+   };
 
-   static const char* const MeasurementUtmIcon[]={
+   static const char* const MeasurementUtmIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -3252,9 +3592,11 @@ static const char* const BoldIcon[]={
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const MeasurementYardIcon[]={
+   static const char* const MeasurementYardIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -3273,9 +3615,11 @@ static const char* const BoldIcon[]={
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const MinorHorizontalGridlinesIcon[]={
+   static const char* const MinorHorizontalGridlinesIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -3294,9 +3638,11 @@ static const char* const BoldIcon[]={
       ".##############.",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const MinorVerticalGridlinesIcon[]={
+   static const char* const MinorVerticalGridlinesIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -3315,9 +3661,11 @@ static const char* const BoldIcon[]={
       "..#.#.#.#.#.#...",
       "..#.#.#.#.#.#...",
       "..#.#.#.#.#.#...",
-      "................"};
+      "................"
+   };
 
-   static const char* const MergeIcon[]={
+   static const char* const MergeIcon[] =
+   {
       "17 18 4 1",
       "a c #000000",
       "b c #808000",
@@ -3340,9 +3688,11 @@ static const char* const BoldIcon[]={
       ".....#a###a#.....",
       "......#a#a#......",
       ".......#a#.......",
-      "........#........"};
+      "........#........"
+   };
 
-   static const char* const MessageLogWindowIcon[]={
+   static const char* const MessageLogWindowIcon[] =
+   {
       "16 16 4 1",
       "# c #000000",
       "b c #808080",
@@ -3363,9 +3713,11 @@ static const char* const BoldIcon[]={
       "#bbbbbbb#bbbbbb#",
       ".#######.######.",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const ModuleIcon[]={
+   static const char* const ModuleIcon[] =
+   {
       "16 16 8 1",
       "f c #008080",
       "e c #00ffff",
@@ -3390,9 +3742,11 @@ static const char* const BoldIcon[]={
       ".......ddfeeef..",
       "..........fef...",
       "...........f....",
-      "................"};
+      "................"
+   };
 
-   static const char* const ModuleMask[]={
+   static const char* const ModuleMask[] =
+   {
       "16 16 2 1",
       ". c #000000",
       "# c #ffffff",
@@ -3411,9 +3765,11 @@ static const char* const BoldIcon[]={
       "#######.......##",
       "##########...###",
       "###########.####",
-      "################"};
+      "################"
+   };
 
-   static const char* const NewIcon[]={
+   static const char* const NewIcon[] =
+   {
       "16 16 3 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -3433,9 +3789,11 @@ static const char* const BoldIcon[]={
       "..#aaaaaaaaa#...",
       "..###########...",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char *NoClockIcon[]={
+   static const char* NoClockIcon[] =
+   {
       "16 16 6 1",
       "# c #000000",
       "a c #800000",
@@ -3458,9 +3816,11 @@ static const char* const BoldIcon[]={
       "#....#b#bd....##",
       "..###.....###...",
       ".#############..",
-      ".##############."};
+      ".##############."
+   };
 
-   static const char* const NorthArrowIcon[]={
+   static const char* const NorthArrowIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -3479,9 +3839,11 @@ static const char* const BoldIcon[]={
       "....##.##.##....",
       "....##..####....",
       "....##...###....",
-      "....##....##...."};
+      "....##....##...."
+   };
 
-   static const char* const NudgeDownIcon[]={
+   static const char* const NudgeDownIcon[] =
+   {
       "16 16 5 1",
       "# c #000000",
       "a c #000080",
@@ -3503,9 +3865,11 @@ static const char* const BoldIcon[]={
       "...#ccccccc#....",
       "...#########....",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const NudgeLeftIcon[]={
+   static const char* const NudgeLeftIcon[] =
+   {
       "16 16 5 1",
       "# c #000000",
       "b c #000080",
@@ -3527,9 +3891,11 @@ static const char* const BoldIcon[]={
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const NudgeRightIcon[]={
+   static const char* const NudgeRightIcon[] =
+   {
       "16 16 5 1",
       "# c #000000",
       "b c #000080",
@@ -3551,9 +3917,11 @@ static const char* const BoldIcon[]={
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const NudgeUpIcon[]={
+   static const char* const NudgeUpIcon[] =
+   {
       "16 16 5 1",
       "# c #000000",
       "b c #000080",
@@ -3575,9 +3943,11 @@ static const char* const BoldIcon[]={
       "...#...b...#....",
       "................",
       "...#.#.#.#.#....",
-      "................"};
+      "................"
+   };
 
-   static const char* const OpenIcon[]={
+   static const char* const OpenIcon[] =
+   {
       "16 16 5 1",
       "# c #000000",
       "c c #808000",
@@ -3599,9 +3969,11 @@ static const char* const BoldIcon[]={
       ".##ccccccccc#...",
       ".###########....",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const OpenSigIcon[]={
+   static const char* const OpenSigIcon[] =
+   {
       "16 16 8 1",
       ". c #000000",
       "a c #000080",
@@ -3626,9 +3998,11 @@ static const char* const BoldIcon[]={
       ".....d.ffffff.##",
       "####..ffffff.###",
       "####........####",
-      "################"};
+      "################"
+   };
 
-   static const char* const OverviewWindowIcon[]={
+   static const char* const OverviewWindowIcon[] =
+   {
       "16 16 5 1",
       "b c #000000",
       "# c #000080",
@@ -3650,9 +4024,11 @@ static const char* const BoldIcon[]={
       "caaaaaaaaaac....",
       "caaaaaaaaaac....",
       "cccccccccccc....",
-      "................"};
+      "................"
+   };
 
-   static const char* const PageSetupIcon[]={
+   static const char* const PageSetupIcon[] =
+   {
       "16 16 4 1",
       "# c #000080",
       "a c #808080",
@@ -3673,9 +4049,11 @@ static const char* const BoldIcon[]={
       "###############.",
       ".....#####......",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const PanIcon[]={
+   static const char* const PanIcon[] =
+   {
       "16 16 5 1",
       "# c #000000",
       "b c #000080",
@@ -3697,9 +4075,11 @@ static const char* const BoldIcon[]={
       ".....#aaaaaa#...",
       "....bbbbbbbbbb..",
       ".....bccccccb...",
-      "................"};
+      "................"
+   };
 
-   static const char* const PasteIcon[]={
+   static const char* const PasteIcon[] =
+   {
       "16 16 7 1",
       "# c #000000",
       "d c #000080",
@@ -3723,9 +4103,11 @@ static const char* const BoldIcon[]={
       ".#cbcbcdeddddded",
       "..#####deeeeeeed",
       ".......ddddddddd",
-      "................"};
+      "................"
+   };
 
-   static const char* const PauseIcon[]={
+   static const char* const PauseIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -3744,9 +4126,11 @@ static const char* const BoldIcon[]={
       ".....##..##.....",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const PlayBounceIcon[]={
+   static const char* const PlayBounceIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -3765,9 +4149,11 @@ static const char* const BoldIcon[]={
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const PlayForwardIcon[]={
+   static const char* const PlayForwardIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -3786,9 +4172,11 @@ static const char* const BoldIcon[]={
       "...##...........",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const PlayOnceIcon[]={
+   static const char* const PlayOnceIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -3807,9 +4195,11 @@ static const char* const BoldIcon[]={
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const PlayRepeatIcon[]={
+   static const char* const PlayRepeatIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -3828,9 +4218,11 @@ static const char* const BoldIcon[]={
       "...#########....",
       "....##..........",
       ".....#..........",
-      "................"};
+      "................"
+   };
       
-   static const char* const PixelSpectrumIcon[]={
+   static const char* const PixelSpectrumIcon[] =
+   {
       "16 16 6 1",
       ". c #000000",
       "a c #000080",
@@ -3853,9 +4245,11 @@ static const char* const BoldIcon[]={
       "............c..#",
       "#######.###.cc.#",
       "############.c.#",
-      "############..##"};
+      "############..##"
+   };
 
-   static const char* const PixelSpectrumMask[]={
+   static const char* const PixelSpectrumMask[] =
+   {
       "16 16 2 1",
       ". c #000000",
       "# c #ffffff",
@@ -3874,9 +4268,11 @@ static const char* const BoldIcon[]={
       "...............#",
       "#######.###....#",
       "############...#",
-      "############..##"};
+      "############..##"
+   };
 
-   static const char* const PlugInIcon[]={
+   static const char* const PlugInIcon[] =
+   {
       "16 16 6 1",
       "a c #000000",
       "b c #808000",
@@ -3899,9 +4295,11 @@ static const char* const BoldIcon[]={
       "......#.a.......",
       "......#.a.......",
       "......#.a.......",
-      "................"};
+      "................"
+   };
 
-   static const char* const PointIcon[]={
+   static const char* const PointIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -3920,9 +4318,11 @@ static const char* const BoldIcon[]={
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const PolygonIcon[]={
+   static const char* const PolygonIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -3941,9 +4341,11 @@ static const char* const BoldIcon[]={
       ".#.........##...",
       ".#############..",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const PolygonMask[]={
+   static const char* const PolygonMask[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -3962,9 +4364,11 @@ static const char* const BoldIcon[]={
       ".#.........##...",
       ".#############..",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const PolylineIcon[]={
+   static const char* const PolylineIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -3983,9 +4387,11 @@ static const char* const BoldIcon[]={
       "............#...",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const PopFrontIcon[]={
+   static const char* const PopFrontIcon[] =
+   {
       "16 16 5 1",
       "# c #000000",
       "a c #808080",
@@ -4007,9 +4413,11 @@ static const char* const BoldIcon[]={
       ".........#aaaaa#",
       ".........#aaaaa#",
       ".........#######",
-      "................"};
+      "................"
+   };
 
-   static const char* const PrintIcon[]={
+   static const char* const PrintIcon[] =
+   {
       "16 16 5 1",
       "# c #000000",
       "b c #808080",
@@ -4031,9 +4439,11 @@ static const char* const BoldIcon[]={
       "#############.#.",
       ".#.........#.#..",
       "..###########...",
-      "................"};
+      "................"
+   };
 
-   static const char* const PrintPreviewIcon[]={
+   static const char* const PrintPreviewIcon[] =
+   {
       "16 16 5 1",
       ". c #000000",
       "c c #00ffff",
@@ -4055,9 +4465,11 @@ static const char* const BoldIcon[]={
       ".aaaaaaa....b..#",
       ".aaaaaaaaaa.#...",
       "............##..",
-      "################"};
+      "################"
+   };
 
-   static const char* const PropertiesIcon[]={
+   static const char* const PropertiesIcon[] =
+   {
       "16 16 4 1",
       "# c #000000",
       "a c #000080",
@@ -4078,9 +4490,37 @@ static const char* const BoldIcon[]={
       "#b##b#####b#....",
       "#bbbbbbbbbb#....",
       "############....",
-      "................"};
+      "................"
+   };
 
-   static const char* const PushBackIcon[]={
+   static const char* const PseudocolorLayerIcon[] =
+   {
+      "16 16 5 1",
+      " 	c None",
+      ".	c #0000FF",
+      "+	c #00FF00",
+      "@	c #FFFF00",
+      "#	c #FF0000",
+      "                ",
+      "                ",
+      "  ......++++++  ",
+      "  ......++++++  ",
+      "  ......++++++  ",
+      "  ...++++++@@@  ",
+      "  ...++++++@@@  ",
+      "  ...++++++@@@  ",
+      "  ++++++@@@@@@  ",
+      "  ++++++@@@@@@  ",
+      "  ++++++@@@@@@  ",
+      "  +++@@@@@@###  ",
+      "  +++@@@@@@###  ",
+      "  +++@@@@@@###  ",
+      "                ",
+      "                "
+   };
+
+   static const char* const PushBackIcon[] =
+   {
       "16 16 5 1",
       "# c #000000",
       "a c #808080",
@@ -4102,9 +4542,36 @@ static const char* const BoldIcon[]={
       ".........#aaaaa#",
       ".........#aaaaa#",
       ".........#######",
-      "................"};
+      "................"
+   };
 
-   static const char* const RectangleIcon[]={
+   static const char* const RasterLayerIcon[] =
+   {
+      "16 16 4 1",
+      " 	c None",
+      ".	c #6E6E6E",
+      "+	c #353535",
+      "@	c #FFFFFF",
+      "                ",
+      " .......+++++++ ",
+      " ...@@..++++@++ ",
+      " ..@..@.+++@@++ ",
+      " ....@..++@+@++ ",
+      " ...@...++@@@++ ",
+      " ..@@@@.++++@++ ",
+      " .......+++++++ ",
+      " +++++++....... ",
+      " ++@@@@+....@.. ",
+      " ++++@++...@@.. ",
+      " +++@+++....@.. ",
+      " +++@+++....@.. ",
+      " +++@+++....@.. ",
+      " +++++++....... ",
+      "                "
+   };
+
+   static const char* const RectangleIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -4123,9 +4590,11 @@ static const char* const BoldIcon[]={
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const RectangleMask[]={
+   static const char* const RectangleMask[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -4144,9 +4613,11 @@ static const char* const BoldIcon[]={
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const RedoIcon[]={
+   static const char* const RedoIcon[] =
+   {
       "16 16 3 1",
       "a c #000080",
       "# c #808080",
@@ -4166,9 +4637,11 @@ static const char* const BoldIcon[]={
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const RefreshIcon[]={
+   static const char* const RefreshIcon[] =
+   {
       "16 16 4 1",
       "# c #000000",
       "b c #008000",
@@ -4189,9 +4662,11 @@ static const char* const BoldIcon[]={
       ".#aaaabbaaaaa#..",
       ".#aaaaabaaaaa#..",
       ".#aaaaaaaaaaa#..",
-      ".#############.."};
+      ".#############.."
+   };
 
-   static const char* const ResetOrientationIcon[]={
+   static const char* const ResetOrientationIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -4210,9 +4685,11 @@ static const char* const BoldIcon[]={
       "....#.....#.....",
       "....#######.....",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const ResetStretchIcon[]={
+   static const char* const ResetStretchIcon[] =
+   {
       "16 16 7 1",
       "a c #000000",
       "# c #000080",
@@ -4236,9 +4713,11 @@ static const char* const BoldIcon[]={
       "....aabe..a.aa..",
       "....aebabaeba...",
       "....aeaaeeaa....",
-      "....aa..aa......"};
+      "....aa..aa......"
+   };
 
-   static const char* const RotateByIcon[]={
+   static const char* const RotateByIcon[] =
+   {
       "16 16 4 1",
       "# c #000000",
       "a c #000080",
@@ -4259,9 +4738,11 @@ static const char* const BoldIcon[]={
       "..####........#.",
       "......####....#.",
       "..........####.#",
-      "..............##"};
+      "..............##"
+   };
 
-   static const char* const RotateLeftIcon[]={
+   static const char* const RotateLeftIcon[] =
+   {
       "16 16 4 1",
       "a c #000000",
       "# c #000080",
@@ -4282,9 +4763,11 @@ static const char* const BoldIcon[]={
       "abbbba.a.....aa.",
       "aaaaaa.aaaaaaaaa",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const RotateRightIcon[]={
+   static const char* const RotateRightIcon[] =
+   {
       "16 16 4 1",
       "a c #000000",
       "# c #000080",
@@ -4305,9 +4788,11 @@ static const char* const BoldIcon[]={
       ".aa.....a.abbbba",
       "aaaaaaaaa.aaaaaa",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const RoundedRectangleIcon[]={
+   static const char* const RoundedRectangleIcon[] =
+   {
       "16 16 3 1",
       "a c #000000",
       "# c #808080",
@@ -4327,9 +4812,11 @@ static const char* const BoldIcon[]={
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const RoundedRectangleMask[]={
+   static const char* const RoundedRectangleMask[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -4348,9 +4835,11 @@ static const char* const BoldIcon[]={
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const RowIcon[]={
+   static const char* const RowIcon[] =
+   {
       "16 16 3 1",
       "a c #000000",
       "# c #000080",
@@ -4370,9 +4859,11 @@ static const char* const BoldIcon[]={
       ".#.aaaaaaaaaa.#.",
       ".#............#.",
       ".##############.",
-      "................"};
+      "................"
+   };
 
-   static const char* const SaveIcon[]={
+   static const char* const SaveIcon[] =
+   {
       "16 16 3 1",
       "# c #000000",
       "a c #808000",
@@ -4392,9 +4883,11 @@ static const char* const BoldIcon[]={
       ".#aa######..#a#.",
       ".#aa######..#a#.",
       "..#############.",
-      "................"};
+      "................"
+   };
 
-   static const char* const SaveHistogramIcon[]={
+   static const char* const SaveHistogramIcon[] =
+   {
       "16 16 5 1",
       ". c #000000",
       "a c #000080",
@@ -4416,9 +4909,11 @@ static const char* const BoldIcon[]={
       ".#a#a#.bbbbbbbb.",
       ".......bb.....b.",
       "######.bb...c.b.",
-      "#######........."};
+      "#######........."
+   };
 
-   static const char* const SaveHistogramMask[]={
+   static const char* const SaveHistogramMask[] =
+   {
       "16 16 2 1",
       ". c #000000",
       "# c #ffffff",
@@ -4437,9 +4932,11 @@ static const char* const BoldIcon[]={
       ".#.#.#..........",
       "................",
       "######..........",
-      "#######........."};
+      "#######........."
+   };
 
-   static const char* const SaveSigIcon[]={
+   static const char* const SaveSigIcon[] =
+   {
       "16 16 7 1",
       ". c #000000",
       "a c #000080",
@@ -4463,9 +4960,11 @@ static const char* const BoldIcon[]={
       ".......dd.....d.",
       "######.dd...e.d.",
       "#######.........",
-      "################"};
+      "################"
+   };
 
-   static const char* const ScaleBarIcon[]={
+   static const char* const ScaleBarIcon[] =
+   {
       "16 16 3 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -4485,9 +4984,11 @@ static const char* const BoldIcon[]={
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const ScriptIcon[]={
+   static const char* const ScriptIcon[] =
+   {
       "16 16 6 1",
       "# c #000000",
       "d c #808000",
@@ -4510,9 +5011,11 @@ static const char* const BoldIcon[]={
       "..#ca#cdcdcdcd#.",
       "...###########..",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const SemiCheckedIcon[]={
+   static const char* const SemiCheckedIcon[] =
+   {
       "12 12 4 1",
       "# c #000000",
       ". c #808080",
@@ -4529,9 +5032,11 @@ static const char* const BoldIcon[]={
       ".#ba...ababa",
       ".#aba.ababaa",
       ".#bababababa",
-      ".aaaaaaaaaaa"};
+      ".aaaaaaaaaaa"
+   };
 
-   static const char* const SessionExplorerIcon[]={
+   static const char* const SessionExplorerIcon[] =
+   {
       "16 16 5 1",
       "a c #000000",
       "# c #000080",
@@ -4553,9 +5058,11 @@ static const char* const BoldIcon[]={
       ".aabbcaa#......#",
       "...aaa.#########",
       "........###.....",
-      ".........##....."};
+      ".........##....."
+   };
 
-   static const char* const ShadowColorIcon[]={
+   static const char* const ShadowColorIcon[] =
+   {
       "16 16 4 1",
       "# c #000000",
       "a c #008080",
@@ -4576,9 +5083,11 @@ static const char* const BoldIcon[]={
       "################",
       "################",
       "################",
-      "################"};
+      "################"
+   };
 
-   static const char* const ShadowIcon[]={
+   static const char* const ShadowIcon[] =
+   {
       "16 16 4 1",
       "# c #000000",
       "a c #008080",
@@ -4599,9 +5108,11 @@ static const char* const BoldIcon[]={
       "...#b#b#b#b#b#..",
       "...b#b#b#b#b#b..",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const ShapeIcon[]={
+   static const char* const ShapeIcon[] =
+   {
       "16 16 5 1",
       "# c #000000",
       "c c #0000ff",
@@ -4623,9 +5134,11 @@ static const char* const BoldIcon[]={
       "...###ccccc#....",
       ".....#ccccc#....",
       ".....#######....",
-      "................"};
+      "................"
+   };
 
-   static const char* const ShortcutBarIcon[]={
+   static const char* const ShortcutBarIcon[] =
+   {
       "16 16 5 1",
       "# c #000000",
       "c c #800080",
@@ -4647,9 +5160,11 @@ static const char* const BoldIcon[]={
       ".#a..........b#.",
       ".#bbbbbbbbbbbb#.",
       ".##############.",
-      "................"};
+      "................"
+   };
 
-   static const char* const ShowLayersIcon[]={
+   static const char* const ShowLayersIcon[] =
+   {
       "16 16 2 1",
       ". c #000000",
       "# c #ffffff",
@@ -4668,9 +5183,11 @@ static const char* const BoldIcon[]={
       "####.########.##",
       "#####.########.#",
       "######..........",
-      "################"};
+      "################"
+   };
 
-   static const char* const SignatureWindowIcon[]={
+   static const char* const SignatureWindowIcon[] =
+   {
       "16 16 5 1",
       ". c #000000",
       "a c #000080",
@@ -4692,9 +5209,11 @@ static const char* const BoldIcon[]={
       ".#b###b##b######",
       ".#b####bb#######",
       ".###############",
-      "................"};
+      "................"
+   };
 
-   static const char* const SignatureWindowMask[]={
+   static const char* const SignatureWindowMask[] =
+   {
       "16 16 2 1",
       ". c #000000",
       "# c #ffffff",
@@ -4713,9 +5232,34 @@ static const char* const BoldIcon[]={
       ".#.###.##.######",
       ".#.####..#######",
       ".###############",
-      "................"};
+      "................"
+   };
 
-   static const char* const SnapGridIcon[]={
+   static const char* const SlowDownIcon[] =
+   {
+      "16 16 2 1",
+      "# c #000000",
+      ". c #ffffff",
+      "................",
+      "................",
+      "................",
+      "................",
+      "................",
+      "................",
+      "................",
+      "...##########...",
+      "...##########...",
+      "................",
+      "................",
+      "................",
+      "................",
+      "................",
+      "................",
+      "................"
+   };
+
+   static const char* const SnapGridIcon[] =
+   {
       "16 16 4 1",
       "a c #000000",
       "# c #808080",
@@ -4736,9 +5280,11 @@ static const char* const BoldIcon[]={
       "...#.......#....",
       "...#.......#....",
       "...#.......#....",
-      "................"};
+      "................"
+   };
 
-   static const char* const SnapObjectIcon[]={
+   static const char* const SnapObjectIcon[] =
+   {
       "16 16 4 1",
       "# c #000000",
       "a c #008080",
@@ -4759,9 +5305,11 @@ static const char* const BoldIcon[]={
       "..#########.....",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const SpectralDataIcon[]={
+   static const char* const SpectralDataIcon[] =
+   {
       "16 16 6 1",
       ". c #000000",
       "d c #008000",
@@ -4784,9 +5332,34 @@ static const char* const BoldIcon[]={
       ".dddd.ad.d.#####",
       ".da..ddd..######",
       "...##...########",
-      "################"};
+      "################"
+   };
 
-   static const char* const SplitHorizontallyIcon[]={
+   static const char* const SpeedUpIcon[] =
+   {
+      "16 16 2 1",
+      "# c #000000",
+      ". c #ffffff",
+      "................",
+      "................",
+      "................",
+      "................",
+      ".......##.......",
+      ".......##.......",
+      ".......##.......",
+      "...##########...",
+      "...##########...",
+      ".......##.......",
+      ".......##.......",
+      ".......##.......",
+      "................",
+      "................",
+      "................",
+      "................"
+   };
+
+   static const char* const SplitHorizontallyIcon[] =
+   {
       "16 16 4 1",
       "# c #000080",
       "b c #808080",
@@ -4807,9 +5380,11 @@ static const char* const BoldIcon[]={
       ".#aaaaaaaaaaa#..",
       ".#############..",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const SplitVerticallyIcon[]={
+   static const char* const SplitVerticallyIcon[] =
+   {
       "16 16 4 1",
       "# c #000080",
       "b c #808080",
@@ -4830,9 +5405,11 @@ static const char* const BoldIcon[]={
       ".#aaaaabbaaaaa#.",
       ".##############.",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const StopIcon[]={
+   static const char* const StopIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -4851,9 +5428,11 @@ static const char* const BoldIcon[]={
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const TextBoxIcon[]={
+   static const char* const TextBoxIcon[] =
+   {
       "16 16 4 1",
       ". c #000000",
       "b c #808080",
@@ -4874,9 +5453,11 @@ static const char* const BoldIcon[]={
       ".a...........a.b",
       ".aaaaaaaaaaaaa.b",
       "...............b",
-      "#bbbbbbbbbbbbbbb"};
+      "#bbbbbbbbbbbbbbb"
+   };
 
-   static const char* const TextColorIcon[]={
+   static const char* const TextColorIcon[] =
+   {
       "16 16 4 1",
       "# c #000080",
       "a c #808080",
@@ -4897,9 +5478,35 @@ static const char* const BoldIcon[]={
       "bbbbbbbbbbbbbbbb",
       "bbbbbbbbbbbbbbbb",
       "bbbbbbbbbbbbbbbb",
-      "bbbbbbbbbbbbbbbb"};
+      "bbbbbbbbbbbbbbbb"
+   };
 
-   static const char* const TiePointColorIcon[]={
+   static const char* const ThresholdLayerIcon[] =
+   {
+      "16 16 3 1",
+      " 	c None",
+      ".	c #000000",
+      "+	c #808080",
+      "                ",
+      "        ...     ",
+      "        ..+     ",
+      "        +++     ",
+      "       ++++     ",
+      "     ++++++     ",
+      "    +++++++     ",
+      "        ...     ",
+      "        ...     ",
+      "    +++++++     ",
+      "     ++++++     ",
+      "       ++++     ",
+      "        +++     ",
+      "        ..+     ",
+      "        ...     ",
+      "                "
+   };
+
+   static const char* const TiePointColorIcon[] =
+   {
       "16 16 9 1",
       "a c #000000",
       "c c #000080",
@@ -4925,9 +5532,11 @@ static const char* const BoldIcon[]={
       ".ef...a.........",
       ".fffgg..........",
       ".ffgg...........",
-      "................"};
+      "................"
+   };
 
-   static const char* const TiePointEditorIcon[]={
+   static const char* const TiePointEditorIcon[] =
+   {
       "16 16 4 1",
       "a c #000000",
       "b c #008000",
@@ -4948,9 +5557,11 @@ static const char* const BoldIcon[]={
       "......a.........",
       "......a.........",
       ".....a..........",
-      "................"};
+      "................"
+   };
 
-   static const char* const TiePointMarkerCursor[]={
+   static const char* const TiePointMarkerCursor[] =
+   {
       "32 32 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -4985,9 +5596,11 @@ static const char* const BoldIcon[]={
       "................................",
       "................................",
       "................................",
-      "................................"};
+      "................................"
+   };
 
-   static const char* const TiePointLabelsIcon[]={
+   static const char* const TiePointLabelsIcon[] =
+   {
       "16 16 9 1",
       "a c #000000",
       "c c #000080",
@@ -5013,9 +5626,11 @@ static const char* const BoldIcon[]={
       ".a.a.a.a........",
       ".aa...aa........",
       ".aaaaaaa........",
-      "................"};
+      "................"
+   };
 
-   static const char* const TiePointMarkerIcon[]={
+   static const char* const TiePointMarkerIcon[] =
+   {
       "16 16 4 1",
       "# c #000000",
       "a c #008000",
@@ -5036,9 +5651,11 @@ static const char* const BoldIcon[]={
       "..a.............",
       "..a.............",
       ".a..............",
-      "................"};
+      "................"
+   };
 
-   static const char* const TiePointMarkerMask[]={
+   static const char* const TiePointMarkerMask[] =
+   {
       "32 32 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -5073,9 +5690,11 @@ static const char* const BoldIcon[]={
       "................................",
       "................................",
       "................................",
-      "................................"};
+      "................................"
+   };
 
-   static const char* const TileIcon[]={
+   static const char* const TileIcon[] =
+   {
       "16 16 3 1",
       "# c #000080",
       ". c #c0c0c0",
@@ -5095,9 +5714,11 @@ static const char* const BoldIcon[]={
       ".#aaaaaaaaaaa#..",
       ".#############..",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const TileHorizIcon[]={
+   static const char* const TileHorizIcon[] =
+   {
       "16 16 4 1",
       "# c #000080",
       "b c #808080",
@@ -5118,9 +5739,11 @@ static const char* const BoldIcon[]={
       ".#aaaaa##aaaaa#.",
       ".##############.",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const TileVertIcon[]={
+   static const char* const TileVertIcon[] =
+   {
       "16 16 4 1",
       "# c #000080",
       "b c #808080",
@@ -5141,9 +5764,11 @@ static const char* const BoldIcon[]={
       ".#aaaaaaaaaaa#..",
       ".#############..",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const ToggleAllIcon[]={
+   static const char* const ToggleAllIcon[] =
+   {
       "16 16 4 1",
       "b c #000000",
       "# c #808080",
@@ -5164,9 +5789,11 @@ static const char* const BoldIcon[]={
       ".....#....#b....",
       ".....#####bb....",
       ".....#bbbbbb....",
-      "................"};
+      "................"
+   };
 
-   static const char* const TogglePixelIcon[]={
+   static const char* const TogglePixelIcon[] =
+   {
       "16 16 6 1",
       "# c #000000",
       "a c #800080",
@@ -5189,9 +5816,11 @@ static const char* const BoldIcon[]={
       "........c..c#cc.",
       "........ccc##...",
       "........c####...",
-      "................"};
+      "................"
+   };
 
-   static const char* const TogglePolygonIcon[]={
+   static const char* const TogglePolygonIcon[] =
+   {
       "16 16 4 1",
       "# c #000000",
       "a c #808080",
@@ -5212,9 +5841,11 @@ static const char* const BoldIcon[]={
       ".........a..a#aa",
       ".........a..a#aa",
       ".........aaa##..",
-      ".........a####.."};
+      ".........a####.."
+   };
 
-   static const char* const ToggleRectIcon[]={
+   static const char* const ToggleRectIcon[] =
+   {
       "16 16 4 1",
       ". c #000000",
       "a c #808080",
@@ -5235,9 +5866,11 @@ static const char* const BoldIcon[]={
       "#########a##a.aa",
       "#########aaa..##",
       "#########a....##",
-      "################"};
+      "################"
+   };
 
-   static const char* const TriangleIcon[]={
+   static const char* const TriangleIcon[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -5256,9 +5889,11 @@ static const char* const BoldIcon[]={
       ".#############..",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const TriangleMask[]={
+   static const char* const TriangleMask[] =
+   {
       "16 16 2 1",
       "# c #000000",
       ". c #ffffff",
@@ -5277,9 +5912,11 @@ static const char* const BoldIcon[]={
       ".#############..",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const UncheckedIcon[]={
+   static const char* const UncheckedIcon[] =
+   {
       "12 12 4 1",
       "# c #000000",
       ". c #808080",
@@ -5296,9 +5933,11 @@ static const char* const BoldIcon[]={
       ".#bbbbbbbbba",
       ".#bbbbbbbbba",
       ".#bbbbbbbbba",
-      ".aaaaaaaaaaa"};
+      ".aaaaaaaaaaa"
+   };
 
-   static const char* const UnderlineIcon[]={
+   static const char* const UnderlineIcon[] =
+   {
       "16 16 3 1",
       "# c #000000",
       "a c #808080",
@@ -5318,9 +5957,11 @@ static const char* const BoldIcon[]={
       "................",
       "...#########....",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const UndoIcon[]={
+   static const char* const UndoIcon[] =
+   {
       "16 16 3 1",
       "# c #000080",
       "a c #808080",
@@ -5340,9 +5981,11 @@ static const char* const BoldIcon[]={
       "................",
       "................",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const UngroupIcon[]={
+   static const char* const UngroupIcon[] =
+   {
       "16 16 3 1",
       ". c #000000",
       "a c #000080",
@@ -5362,9 +6005,11 @@ static const char* const BoldIcon[]={
       "#####a########a#",
       "####...######...",
       "####...aaaaaa...",
-      "####...######..."};
+      "####...######..."
+   };
 
-   static const char* const ValueEditIcon[]={
+   static const char* const ValueEditIcon[] =
+   {
       "16 16 6 1",
       ". c #000000",
       "c c #0000ff",
@@ -5387,9 +6032,11 @@ static const char* const BoldIcon[]={
       "#####.baaabb.###",
       "######.aaba.####",
       "#######.aa.#####",
-      "########..######"};
+      "########..######"
+   };
 
-   static const char* const ValueItemIcon[]={
+   static const char* const ValueItemIcon[] =
+   {
       "16 16 5 1",
       "a c #000000",
       "# c #0000ff",
@@ -5411,17 +6058,21 @@ static const char* const BoldIcon[]={
       "....abcbcbca....",
       ".....abccba.....",
       "......acba......",
-      ".......aa......."};
+      ".......aa......."
+   };
 
-   static const char* const VerticalExpandIcon[]={
+   static const char* const VerticalExpandIcon[] =
+   {
       "5 3 2 1",
       "# c #000000",
       ". c #c0c0c0",
       "..#..",
       ".###.",
-      "#####"};
+      "#####"
+   };
 
-   static const char* const WhatsThisIcon[]={
+   static const char* const WhatsThisIcon[] =
+   {
       "16 16 4 1",
       "# c #000000",
       "a c #000080",
@@ -5442,9 +6093,11 @@ static const char* const BoldIcon[]={
       ".....##...aaa...",
       "......##........",
       "......##........",
-      "................"};
+      "................"
+   };
 
-   static const char* const WindowListIcon[]={
+   static const char* const WindowListIcon[] =
+   {
       "16 16 4 1",
       "b c #000000",
       "# c #000080",
@@ -5465,9 +6118,11 @@ static const char* const BoldIcon[]={
       ".#aaaaaaaaaaaa#.",
       ".##############.",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const WizardBuilderIcon[]={
+   static const char* const WizardBuilderIcon[] =
+   {
       "16 16 5 1",
       "b c #000000",
       "a c #800000",
@@ -5489,9 +6144,11 @@ static const char* const BoldIcon[]={
       "...........bbb..",
       "............bbb.",
       ".............bbb",
-      "................"};
+      "................"
+   };
 
-   static const char* const WorkbookModeIcon[]={
+   static const char* const WorkbookModeIcon[] =
+   {
       "16 16 3 1",
       "# c #000080",
       ". c #c0c0c0",
@@ -5511,9 +6168,11 @@ static const char* const BoldIcon[]={
       ".#aaaaaaaaaaaa#.",
       ".##############.",
       "................",
-      "................"};
+      "................"
+   };
 
-   static const char* const ZoomAndPanToPointIcon[]={
+   static const char* const ZoomAndPanToPointIcon[] =
+   {
       "16 16 5 1",
       "# c #000000",
       "c c #000080",
@@ -5535,9 +6194,11 @@ static const char* const BoldIcon[]={
       "...........ccc..",
       "............ccc.",
       ".............cc.",
-      "................"};
+      "................"
+   };
 
-   static const char* const ZoomInCursor[]={
+   static const char* const ZoomInCursor[] =
+   {
       "32 32 2 1",
       ". c #000000",
       "# c #ffffff",
@@ -5572,9 +6233,11 @@ static const char* const BoldIcon[]={
       "################################",
       "################################",
       "################################",
-      "################################"};
+      "################################"
+   };
 
-   static const char* const ZoomInIcon[]={
+   static const char* const ZoomInIcon[] =
+   {
       "16 16 5 1",
       "# c #000000",
       "c c #000080",
@@ -5596,9 +6259,11 @@ static const char* const BoldIcon[]={
       "...........ccc..",
       "............ccc.",
       ".............cc.",
-      "................"};
+      "................"
+   };
 
-   static const char* const ZoomInMask[]={
+   static const char* const ZoomInMask[] =
+   {
       "32 32 2 1",
       ". c #000000",
       "# c #ffffff",
@@ -5633,9 +6298,11 @@ static const char* const BoldIcon[]={
       "################################",
       "################################",
       "################################",
-      "################################"};
+      "################################"
+   };
 
-   static const char* const ZoomOutCursor[]={
+   static const char* const ZoomOutCursor[] =
+   {
       "32 32 2 1",
       ". c #000000",
       "# c #ffffff",
@@ -5670,9 +6337,11 @@ static const char* const BoldIcon[]={
       "################################",
       "################################",
       "################################",
-      "################################"};
+      "################################"
+   };
 
-   static const char* const ZoomOutIcon[]={
+   static const char* const ZoomOutIcon[] =
+   {
       "16 16 5 1",
       "# c #000000",
       "c c #000080",
@@ -5694,9 +6363,11 @@ static const char* const BoldIcon[]={
       "...........ccc..",
       "............ccc.",
       ".............cc.",
-      "................"};
+      "................"
+   };
 
-   static const char* const ZoomOutMask[]={
+   static const char* const ZoomOutMask[] =
+   {
       "32 32 2 1",
       ". c #000000",
       "# c #ffffff",
@@ -5731,9 +6402,11 @@ static const char* const BoldIcon[]={
       "################################",
       "################################",
       "################################",
-      "################################"};
+      "################################"
+   };
 
-   static const char* const ZoomPointInIcon[]={
+   static const char* const ZoomPointInIcon[] =
+   {
       "16 16 3 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -5753,9 +6426,11 @@ static const char* const BoldIcon[]={
       "..##..#a#.......",
       "..#...#aa#......",
       ".......#a#......",
-      ".......##......."};
+      ".......##......."
+   };
 
-   static const char* const ZoomPointOutIcon[]={
+   static const char* const ZoomPointOutIcon[] =
+   {
       "16 16 3 1",
       "# c #000000",
       ". c #c0c0c0",
@@ -5775,9 +6450,11 @@ static const char* const BoldIcon[]={
       "..##..#a#.......",
       "..#...#aa#......",
       ".......#a#......",
-      ".......##......."};
+      ".......##......."
+   };
 
-   static const char* const ZoomRectCursor[]={
+   static const char* const ZoomRectCursor[] =
+   {
       "32 32 2 1",
       ". c #000000",
       "# c #ffffff",
@@ -5812,9 +6489,11 @@ static const char* const BoldIcon[]={
       "################################",
       "################################",
       "################################",
-      "################################"};
+      "################################"
+   };
 
-   static const char* const ZoomRectIcon[]={
+   static const char* const ZoomRectIcon[] =
+   {
       "16 16 5 1",
       "# c #000000",
       "c c #000080",
@@ -5836,9 +6515,11 @@ static const char* const BoldIcon[]={
       "............ccc.",
       ".............ccc",
       "..............cc",
-      "................"};
+      "................"
+   };
 
-   static const char* const ZoomRectMask[]={
+   static const char* const ZoomRectMask[] =
+   {
       "32 32 2 1",
       ". c #000000",
       "# c #ffffff",
@@ -5873,9 +6554,11 @@ static const char* const BoldIcon[]={
       "################################",
       "################################",
       "################################",
-      "################################"};
+      "################################"
+   };
 
-   static const char* const ZoomRedoIcon[]={
+   static const char* const ZoomRedoIcon[] =
+   {
       "16 16 5 1",
       "# c #000080",
       "a c #808080",
@@ -5897,9 +6580,11 @@ static const char* const BoldIcon[]={
       ".c...b.cc.......",
       "..c..bcccc......",
       "...ccc...ccc....",
-      "...........cc..."};
+      "...........cc..."
+   };
 
-   static const char* const ZoomToFitIcon[]={
+   static const char* const ZoomToFitIcon[] =
+   {
       "16 16 4 1",
       "# c #000000",
       "a c #000080",
@@ -5920,9 +6605,11 @@ static const char* const BoldIcon[]={
       "............aaa.",
       ".............aaa",
       "..............aa",
-      "................"};
+      "................"
+   };
 
-   static const char* const ZoomUndoIcon[]={
+   static const char* const ZoomUndoIcon[] =
+   {
       "16 16 5 1",
       "# c #000080",
       "a c #808080",
@@ -5944,8 +6631,8 @@ static const char* const BoldIcon[]={
       ".......cc.b...c.",
       "......ccccb..c..",
       "....ccc...ccc...",
-      "...cc..........."};
-
+      "...cc..........."
+   };
 }
 
-#endif   // ICONIMAGES_H
+#endif

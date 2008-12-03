@@ -65,13 +65,23 @@ ShapeFileImporter::ShapeFileImporter() :
    addDependencyCopyright("shapelib",
       "Copyright (c) 1999, Frank Warmerdam<br>"
       "<br>"
-      "This software is available under the following \"MIT Style\" license, or at the option of the licensee under the LGPL (see LICENSE.LGPL). This option is discussed in more detail in shapelib.html.<br>"
+      "This software is available under the following \"MIT Style\" license, or at the option of the licensee "
+      "under the LGPL (see LICENSE.LGPL). This option is discussed in more detail in shapelib.html.<br>"
       "<br>"
-      "Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:<br>"
+      "Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated "
+      "documentation files (the \"Software\"), to deal in the Software without restriction, including without "
+      "limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of "
+      "the Software, and to permit persons to whom the Software is furnished to do so, subject to the following "
+      "conditions:<br>"
       "<br>"
-      "The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.<br>"
+      "The above copyright notice and this permission notice shall be included in all copies or substantial "
+      "portions of the Software.<br>"
       "<br>"
-      "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.<br>");
+      "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT "
+      "LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO "
+      "EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN "
+      "AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE "
+      "OR OTHER DEALINGS IN THE SOFTWARE.<br>");
 }
 
 ShapeFileImporter::~ShapeFileImporter()
@@ -175,19 +185,19 @@ bool ShapeFileImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
    pStep->addProperty("name", getName());
 
    mpProgress = pInArgList->getPlugInArgValue<Progress>(ProgressArg());
-   Progress *pProgress = mpProgress;
+   Progress* pProgress = mpProgress;
 
    // interactive
 
    SpatialDataView* pView = pInArgList->getPlugInArgValue<SpatialDataView>(ViewArg());
-   RasterElement *pRaster = NULL;
+   RasterElement* pRaster = NULL;
 
    FAIL_IF(pView == NULL, "Could not find view to insert into.", return false);
 
-   AnnotationElement *pAnno = pInArgList->getPlugInArgValue<AnnotationElement>(ImportElementArg());
+   AnnotationElement* pAnno = pInArgList->getPlugInArgValue<AnnotationElement>(ImportElementArg());
    FAIL_IF(pAnno == NULL, "Could not find created element.", return false);
 
-   AnnotationLayer *pAnnotationLayer = NULL;
+   AnnotationLayer* pAnnotationLayer = NULL;
    const LayerList* pLayerList = pView->getLayerList();
    FAIL_IF(pLayerList == NULL, "Could not find layer list.", return false);
 
@@ -196,7 +206,7 @@ bool ShapeFileImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
    FAIL_IF(pRaster == NULL, "No data cube could be found.", return false);
    FAIL_IF(!pRaster->isGeoreferenced(), "No georeference could be found.", return false)
 
-   const DataDescriptor *pDescriptor = pAnno->getDataDescriptor();
+   const DataDescriptor* pDescriptor = pAnno->getDataDescriptor();
    FAIL_IF(pDescriptor == NULL, "The descriptor is invalid.", return false);
 
    createFeatureClassIfNeeded(pDescriptor);
@@ -211,7 +221,7 @@ bool ShapeFileImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
       mpOptionsWidget->applyChanges();
    }
 
-   const ArcProxyLib::ConnectionParameters &connect = mpFeatureClass->getConnectionParameters();
+   const ArcProxyLib::ConnectionParameters& connect = mpFeatureClass->getConnectionParameters();
    pStep->addProperty("connectionParameters", connect.toString());
 
    vector<ArcProxyLib::ConnectionType> availableConnections = getAvailableConnectionTypes();
@@ -230,7 +240,7 @@ bool ShapeFileImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
    string layerName = mpFeatureClass->getLayerName();
 
    pAnnotationLayer = static_cast<AnnotationLayer*>(pLayerList->getLayer(ANNOTATION, pAnno, layerName));
-   if(pAnnotationLayer == NULL)
+   if (pAnnotationLayer == NULL)
    {
       pAnnotationLayer = static_cast<AnnotationLayer*>(pView->createLayer(ANNOTATION, pAnno, layerName));
    }
@@ -247,7 +257,11 @@ bool ShapeFileImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
 
    if (!mpFeatureClass->open(mMessageText) || !mpFeatureClass->update(mpProgress, mMessageText))
    {
-      if(mpProgress) mpProgress->updateProgress("Error: " + mMessageText, 0, ERRORS);
+      if (mpProgress)
+      {
+         mpProgress->updateProgress("Error: " + mMessageText, 0, ERRORS);
+      }
+
       pStep->finalize(Message::Failure, mMessageText);
       return false;
    }
@@ -278,7 +292,7 @@ QWidget *ShapeFileImporter::getImportOptionsWidget(DataDescriptor *pDescriptor)
    mpOptionsWidget->initialize(mpFeatureClass.get());
    mpOptionsWidget->setAvailableConnectionTypes(getAvailableConnectionTypes());
 
-   QLayout *pLayout = mpOptionsWidget->layout();
+   QLayout* pLayout = mpOptionsWidget->layout();
    if (pLayout != NULL)
    {
       pLayout->setMargin(10);
@@ -308,17 +322,26 @@ void ShapeFileImporter::createFeatureClassIfNeeded(const DataDescriptor *pDescri
       if (types.empty())
       {
          mMessageText = "Cannot find a valid connection type.";
-         if(mpProgress) mpProgress->updateProgress(mMessageText, 0, ERRORS);
-         if(mpStep) mpStep->finalize(Message::Failure, mMessageText);
+         if (mpProgress)
+         {
+            mpProgress->updateProgress(mMessageText, 0, ERRORS);
+         }
+
+         if (mpStep)
+         {
+            mpStep->finalize(Message::Failure, mMessageText);
+         }
+
          return;
       }
 
       VERIFYNRV(pDescriptor != NULL);
-      const FileDescriptor *pFileDescriptor = pDescriptor->getFileDescriptor();
+      const FileDescriptor* pFileDescriptor = pDescriptor->getFileDescriptor();
       VERIFYNRV(pFileDescriptor != NULL);
-      const Filename &filename = pFileDescriptor->getFilename();
+      const Filename& filename = pFileDescriptor->getFilename();
 
-      mpFeatureClass.reset(new FeatureClass);
+      FeatureClass* pFeatureClass = new FeatureClass();
+      mpFeatureClass.reset(pFeatureClass);
 
       ArcProxyLib::ConnectionParameters connect = mpFeatureClass->getConnectionParameters();
       connect.setDatabase(filename.getPath());
@@ -334,7 +357,7 @@ std::vector<ArcProxyLib::ConnectionType> ShapeFileImporter::getAvailableConnecti
 {
    vector<ArcProxyLib::ConnectionType> types;
 
-   FeatureProxyConnector *pProxy = FeatureProxyConnector::instance();
+   FeatureProxyConnector* pProxy = FeatureProxyConnector::instance();
    VERIFYRV(pProxy != NULL, types);
 
    types = pProxy->getAvailableConnectionTypes();

@@ -31,7 +31,8 @@ class QPushButton;
 class BackgroundPluginItem : public QListWidgetItem
 {
 public:
-   BackgroundPluginItem(const QString& plugInId, Progress* pProgress, PlugIn* pPlugIn, QListWidget* pItem = NULL);
+   BackgroundPluginItem(const QString& strPlugInName, Progress* pProgress, PlugIn* pPlugIn,
+      QListWidget* pListWidget = NULL);
    ~BackgroundPluginItem();
 
    void setData(int role, const QVariant& value);
@@ -127,7 +128,7 @@ public: // API
     *  @return TRUE for success
     *          FALSE otherwise
     */
-    bool addCallback(PlugInCallback *callback);
+   bool addCallback(PlugInCallback* callback);
 
 public slots:
    /**
@@ -191,12 +192,12 @@ protected: // custom events
    void customEvent(QEvent* pEvent);
 
 private:
-   QListWidget *mpStatusList;
-   QPushButton *mpDismissButton;
-   QPushButton *mpAbortButton;
+   QListWidget* mpStatusList;
+   QPushButton* mpDismissButton;
+   QPushButton* mpAbortButton;
 
-friend ModifiedEvent;
-friend CallbackEvent;
+   friend ModifiedEvent;
+   friend CallbackEvent;
 };
 
-#endif // BACKGROUNDPLUGINWINDOW_H
+#endif

@@ -22,7 +22,7 @@ public:
 
    bool setProperty(const GraphicProperty* pProperty);
    void draw(double zoomFactor) const;
-   void moveHandle(int handle, LocationType pixel, bool bMaintainAspect = false);
+   void moveHandle(int handle, LocationType point, bool bMaintainAspect = false);
    void updateHandles();
    bool hit(LocationType pixelCoord) const;
 

@@ -31,7 +31,7 @@ public:
    void updateHandles();
    bool hit(LocationType pixelCoord) const;
 
-   bool processMousePress(LocationType screenCoord, Qt::MouseButton button,Qt::MouseButtons buttons,
+   bool processMousePress(LocationType screenCoord, Qt::MouseButton button, Qt::MouseButtons buttons,
       Qt::KeyboardModifiers modifiers);
 
    LocationType getLocation(double dAngle) const;

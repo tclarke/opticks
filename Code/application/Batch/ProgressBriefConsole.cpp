@@ -7,19 +7,17 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#include <iostream>
 #include "ProgressBriefConsole.h"
 
+#include <iostream>
 using namespace std;
 
-ProgressBriefConsole::ProgressBriefConsole()
+ProgressBriefConsole::ProgressBriefConsole() :
+   mCounter(0)
 {
-   mCounter = 0;
 }
 
-ProgressBriefConsole::~ProgressBriefConsole() 
+ProgressBriefConsole::~ProgressBriefConsole()
 {
    cout << endl;
 }
@@ -53,17 +51,19 @@ void ProgressBriefConsole::updateProgress(const std::string& text, int percent, 
 
    switch (mCounter)
    {
-      case 0: 
+      case 0:
          cout << "\rProcessing -";
          break;
-      case 10: 
+      case 10:
          cout << "\rProcessing \\";
          break;
-      case 20: 
+      case 20:
          cout << "\rProcessing |";
          break;
-      case 30: 
+      case 30:
          cout << "\rProcessing /";
+         break;
+      default:
          break;
    }
 
@@ -83,8 +83,8 @@ void ProgressBriefConsole::getProgress(string& text, int& percent, ReportingLeve
 
 const string& ProgressBriefConsole::getObjectType() const
 {
-   static string type("ProgressBriefConsole");
-   return type;
+   static string sType("ProgressBriefConsole");
+   return sType;
 }
 
 bool ProgressBriefConsole::isKindOf(const string& className) const

@@ -8,27 +8,22 @@
  */
 
 #include "AnimationController.h"
-#include "AppVersion.h"
 #include "AppConfig.h"
 #include "AppVerify.h"
-#include "DataDescriptor.h"
-#include "DesktopServices.h"
+#include "AppVersion.h"
 #include "FileDescriptor.h"
-#include "MessageLogResource.h"
 #include "MovieExporter.h"
 #include "OptionsMovieExporter.h"
-#include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
-#include "SpatialDataView.h"
+#include "Progress.h"
 #include "StringUtilities.h"
-#include "UtilityServices.h" 
+#include "View.h"
 
-#include <boost/rational.hpp>
 #include <QtCore/QString>
-#include <QtGui/QApplication>
-#include <QtGui/QComboBox>
 #include <QtGui/QImage>
+
+#include <sstream>
 #include <string>
 #include <vector>
 #include <stdio.h>
@@ -43,17 +38,37 @@ Motion_Est_ID StringUtilities::fromXmlString<Motion_Est_ID>(string value, bool* 
    {
       *pError = false;
    }
-   if(value == "Zero")        return ME_ZERO;
-   else if(value == "PHODS")  return ME_PHODS;
-   else if(value == "Log")    return ME_LOG;
-   else if(value == "X1")     return ME_X1;
-   else if(value == "EPZS")   return ME_EPZS;
-   else if(value == "FULL")   return ME_FULL;
+
+   if (value == "Zero")
+   {
+      return ME_ZERO;
+   }
+   else if (value == "PHODS")
+   {
+      return ME_PHODS;
+   }
+   else if (value == "Log")
+   {
+      return ME_LOG;
+   }
+   else if (value == "X1")
+   {
+      return ME_X1;
+   }
+   else if (value == "EPZS")
+   {
+      return ME_EPZS;
+   }
+   else if (value == "FULL")
+   {
+      return ME_FULL;
+   }
 
    if (pError != NULL)
    {
       *pError = true;
    }
+
    return Motion_Est_ID();
 }
 
@@ -63,9 +78,9 @@ namespace
    QString logBuffer;
 };
 
-extern "C" static void av_log_callback(void *pPtr, int level, const char *pFmt, va_list vl)
+extern "C" static void av_log_callback(void* pPtr, int level, const char* pFmt, va_list vl)
 {
-   if(level > av_log_level)
+   if (level > av_log_level)
    {
       return;
    }
@@ -73,8 +88,7 @@ extern "C" static void av_log_callback(void *pPtr, int level, const char *pFmt, 
 }
 
 MovieExporter::MovieExporter() :
-   mIsBatch(true),
-   mAbort(false),
+   mpProgress(NULL),
    mpStep(NULL),
    mpPicture(NULL),
    mpVideoOutbuf(NULL),
@@ -91,6 +105,7 @@ MovieExporter::MovieExporter() :
    setSubtype(TypeConverter::toString<View>());
    setDescriptorId("{99F399A8-B003-4fdc-99A0-F45261144FF4}");
    allowMultipleInstances(true);
+   setAbortSupported(true);
 }
 
 MovieExporter::~MovieExporter()
@@ -99,51 +114,22 @@ MovieExporter::~MovieExporter()
 
 bool MovieExporter::getInputSpecification(PlugInArgList*& pInArgList)
 {
-   pInArgList = mpPlugInManager->getPlugInArgList();
+   Service<PlugInManagerServices> pPlugInManager;
+   pInArgList = pPlugInManager->getPlugInArgList();
+
    VERIFY(pInArgList != NULL);
-
-   PlugInArg *pArg;
-   VERIFY((pArg = mpPlugInManager->getPlugInArg()) != NULL);
-   pArg->setName(ProgressArg());
-   pArg->setType("Progress");
-   pArg->setDefaultValue(NULL);
-   pInArgList->addArg(*pArg);
-
-   VERIFY((pArg = mpPlugInManager->getPlugInArg()) != NULL);
-   pArg->setName(ExportDescriptorArg());
-   pArg->setType("FileDescriptor");
-   pInArgList->addArg(*pArg);
-
-   VERIFY((pArg = mpPlugInManager->getPlugInArg()) != NULL);
-   pArg->setName(ExportItemArg());
-   pArg->setType("View");
-   pInArgList->addArg(*pArg);
-
-   VERIFY((pArg = mpPlugInManager->getPlugInArg()) != NULL);
-   pArg->setName("Resolution X");
-   pArg->setType("unsigned int");
-   pInArgList->addArg(*pArg);
-
-   VERIFY((pArg = mpPlugInManager->getPlugInArg()) != NULL);
-   pArg->setName("Resolution Y");
-   pArg->setType("unsigned int");
-   pInArgList->addArg(*pArg);
-
-   VERIFY((pArg = mpPlugInManager->getPlugInArg()) != NULL);
-   pArg->setName("Framerate Numerator");
-   pArg->setType("int");
-   pInArgList->addArg(*pArg);
-
-   VERIFY((pArg = mpPlugInManager->getPlugInArg()) != NULL);
-   pArg->setName("Framerate Denominator");
-   pArg->setType("int");
-   pInArgList->addArg(*pArg);
-
-   VERIFY((pArg = mpPlugInManager->getPlugInArg()) != NULL);
-   pArg->setName("Bitrate");
-   pArg->setType("unsigned int");
-   pArg->setDefaultValue(&sDefaultBitrate);
-   pInArgList->addArg(*pArg);
+   VERIFY(pInArgList->addArg<Progress>(ProgressArg(), NULL));
+   VERIFY(pInArgList->addArg<FileDescriptor>(ExportDescriptorArg()));
+   VERIFY(pInArgList->addArg<View>(ExportItemArg()));
+   VERIFY(pInArgList->addArg<unsigned int>("Resolution X"));
+   VERIFY(pInArgList->addArg<unsigned int>("Resolution Y"));
+   VERIFY(pInArgList->addArg<int>("Framerate Numerator"));
+   VERIFY(pInArgList->addArg<int>("Framerate Denominator"));
+   VERIFY(pInArgList->addArg<unsigned int>("Bitrate"));
+   string description("Time for time-based animations. "
+      "1-based frame number for frame-based animations, i.e., first frame is 1.");
+   VERIFY(pInArgList->addArg<double>("Start Export", description));
+   VERIFY(pInArgList->addArg<double>("Stop Export", description));
 
    return true;
 }
@@ -154,17 +140,17 @@ bool MovieExporter::getOutputSpecification(PlugInArgList*& pOutArgList)
    return true;
 }
 
-void MovieExporter::log_error(const string &msg)
+void MovieExporter::log_error(const string& msg)
 {
-   if(!logBuffer.isEmpty())
+   if (!logBuffer.isEmpty())
    {
       MessageResource pMsg("Detailed Message", "app", "E526E292-0713-41E6-92C1-4C9A2FA9C776");
       pMsg->addProperty("Message", logBuffer.toStdString());
    }
-   if(mpProgress != NULL)
+   if (mpProgress != NULL)
    {
       string progressMessage = msg;
-      if(!logBuffer.isEmpty())
+      if (!logBuffer.isEmpty())
       {
          progressMessage += "\n";
          progressMessage += logBuffer.toStdString();
@@ -175,22 +161,24 @@ void MovieExporter::log_error(const string &msg)
    logBuffer.clear();
 }
 
-bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
+bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
-   if(mpOptionWidget.get() != NULL)
+   if (mpOptionWidget.get() != NULL)
    {
       mpOptionWidget->applyChanges();
    }
 
-   FileDescriptor *pFileDescriptor = NULL;
+   FileDescriptor* pFileDescriptor(NULL);
    string filename;
-   View *pView = NULL;
-   AnimationController *pController = NULL;
-   AVOutputFormat *pOutFormat = NULL;
-   unsigned int resolutionX = 0;
-   unsigned int resolutionY = 0;
+   View* pView(NULL);
+   AnimationController* pController(NULL);
+   AVOutputFormat* pOutFormat(NULL);
+   unsigned int resolutionX(0);
+   unsigned int resolutionY(0);
    rational<int> framerate(0);
-   unsigned int bitrate = 0;
+   unsigned int bitrate(0);
+   double startExport(0.0);
+   double stopExport(0.0);
 
    mpProgress = NULL;
    mpStep = StepResource("Export movie", "app", "2233BFC9-9C51-4e31-A8C5-2512925CBE6D");
@@ -203,7 +191,7 @@ bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
       pMsg->addBooleanProperty("Progress Present", (mpProgress != NULL));
 
       pFileDescriptor = pInArgList->getPlugInArgValue<FileDescriptor>(ExportDescriptorArg());
-      if(pFileDescriptor == NULL)
+      if (pFileDescriptor == NULL)
       {
          log_error("No file specified");
          return false;
@@ -212,59 +200,84 @@ bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
       filename = pFileDescriptor->getFilename().getFullPathAndName();
 
       pView = pInArgList->getPlugInArgValue<View>(ExportItemArg());
-      if(pView == NULL)
+      if (pView == NULL)
       {
          log_error("No view specified");
          return false;
       }
 
       pController = pView->getAnimationController();
-      if(pController == NULL)
+      if (pController == NULL)
       {
          log_error("No animation controller specified");
          return false;
       }
       pMsg->addProperty("Animation Controller Name", pController->getName());
 
-      if((pOutFormat = getOutputFormat()) == NULL)
+      pOutFormat = getOutputFormat();
+      if (pOutFormat == NULL)
       {
          log_error("Can't determine output format or format not supported.");
          return false;
       }
       pMsg->addProperty("Format", pOutFormat->long_name);
 
-      if(!pInArgList->getPlugInArgValue("Resolution X", resolutionX) ||
+      bool resolutionFromInputArgs(false);
+      if (!pInArgList->getPlugInArgValue("Resolution X", resolutionX) ||
          !pInArgList->getPlugInArgValue("Resolution Y", resolutionY))
       {
-         if(mpOptionWidget.get() != NULL)
+         if (mpOptionWidget.get() != NULL)
          {
             mpOptionWidget->getResolution(resolutionX, resolutionY);
          }
-         else
+      }
+      else
+      {
+         resolutionFromInputArgs = true;
+      }
+
+      if (resolutionX == 0 || resolutionY == 0)
+      {
+         QWidget* pWidget = pView->getWidget();
+         if (pWidget != NULL)
          {
-            resolutionX = OptionsMovieExporter::getSettingWidth();
-            resolutionY = OptionsMovieExporter::getSettingHeight();
-         }
-         if(resolutionX == 0 || resolutionY == 0)
-         {
-            QWidget *pWidget = pView->getWidget();
             resolutionX = pWidget->width();
             resolutionY = pWidget->height();
+            resolutionFromInputArgs = false;
+         }
+         else
+         {
+            log_error("Can't determine output resolution.");
+            return false;
          }
       }
-      if((resolutionX % 2) != 0 || (resolutionY % 2) != 0)
+
+      if (resolutionFromInputArgs && ((resolutionX % 2) != 0 || (resolutionY % 2) != 0))
       {
-         log_error("Resolution must be a multiple of 2");
+         stringstream msg;
+         msg << "The export resolution must be even numbers. The input arguments were X resolution of "
+             << resolutionX << " and Y resolution of " << resolutionY << ".";
+         log_error(msg.str());
          return false;
       }
+
+      if ((resolutionX % 2) != 0)
+      {
+         ++resolutionX;
+      }
+      if ((resolutionY % 2) != 0)
+      {
+         ++resolutionY;
+      }
+
       pMsg->addProperty("Resolution", QString("%1 x %2").arg(resolutionX).arg(resolutionY).toStdString());
 
-      int framerateNum, framerateDen;
+      int framerateNum;
+      int framerateDen;
       // first, get the framerate from the arg list
       // next, try the option widget
       // next, get from the animation controller
-      // finally, default to the config settings
-      if(pInArgList->getPlugInArgValue("Framerate Numerator", framerateNum) &&
+      if (pInArgList->getPlugInArgValue("Framerate Numerator", framerateNum) &&
          pInArgList->getPlugInArgValue("Framerate Denominator", framerateDen))
       {
          try
@@ -276,40 +289,45 @@ bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
             // Do nothing; the code below handles this case
          }
       }
-      if(framerate == 0)
+      if (framerate == 0)
       {
-         if(mpOptionWidget.get() != NULL)
+         if (mpOptionWidget.get() != NULL)
          {
             framerate = mpOptionWidget->getFramerate();
          }
-         if(framerate == 0)
+         else
          {
-            framerate = pController->getMinimumFrameRate();
-         }
-         if(framerate == 0)
-         {
-            try
-            {
-               framerate.assign(OptionsMovieExporter::getSettingFramerateNum(),
-                  OptionsMovieExporter::getSettingFramerateDen());
-            }
-            catch (const boost::bad_rational&)
-            {
-               // Do nothing; the code below handles this case
-            }
-         }
-         if(framerate == 0)
-         {
-            log_error("No framerate specified");
-            return false;
+            framerate = pController->getMinimumFrameRate() * pController->getIntervalMultiplier();
          }
       }
+
+      if (framerate == 0)
+      {
+         log_error("No framerate specified");
+         return false;
+      }
+
+      // Validate the framerate
+      boost::rational<int> validFrameRate = convertToValidFrameRate(framerate);
+      if (validFrameRate != framerate)
+      {
+         QString msg = QString("The selected animation frame rate (%1/%2 fps) can not be represented in the "
+                               "selected movie format. A frame rate of %3/%4 fps is being used instead.")
+                              .arg(framerate.numerator())
+                              .arg(framerate.denominator())
+                              .arg(validFrameRate.numerator())
+                              .arg(validFrameRate.denominator());
+         mpProgress->updateProgress(msg.toStdString(), 0, WARNING);
+
+         framerate = validFrameRate;
+      }
+
       pMsg->addProperty("Framerate",
          QString("%1/%2").arg(framerate.numerator()).arg(framerate.denominator()).toStdString());
 
-      if(!pInArgList->getPlugInArgValue("Bitrate", bitrate))
+      if (!pInArgList->getPlugInArgValue("Bitrate", bitrate))
       {
-         if(mpOptionWidget.get() != NULL)
+         if (mpOptionWidget.get() != NULL)
          {
             bitrate = mpOptionWidget->getBitrate();
          }
@@ -319,18 +337,48 @@ bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
          }
       }
       pMsg->addProperty("Bitrate", QString::number(bitrate).toStdString());
+
+      FrameType eType = pController->getFrameType();
+      if (!pInArgList->getPlugInArgValue("Start Export", startExport))
+      {
+         if (mpOptionWidget.get() != NULL)
+         {
+            startExport = mpOptionWidget->getStart();
+         }
+         else
+         {
+            startExport = pController->getStartFrame();
+         }
+      }
+
+      if (!pInArgList->getPlugInArgValue("Stop Export", stopExport))
+      {
+         if (mpOptionWidget.get() != NULL)
+         {
+            stopExport = mpOptionWidget->getStop();
+         }
+         else
+         {
+            stopExport = pController->getStopFrame();
+         }
+      }
+      string valueType("Time");
+      if (eType == FRAME_ID)
+      {
+         valueType = "Frame";
+         --startExport;   // frame id type uses 1-number of frames so subtract 1 for looping
+         --stopExport;
+      }
+
+      pMsg->addProperty("Start "+valueType, QString::number(startExport).toStdString());
+      pMsg->addProperty("Stop "+valueType, QString::number(stopExport).toStdString());
    }
 
-   AVFormatContext *pFormat = av_alloc_format_context();
-   VERIFY(pFormat);
-   pFormat->oformat = pOutFormat;
+   AvFormatContextResource pFormat(pOutFormat);
+   VERIFY(pFormat != NULL);
    snprintf(pFormat->filename, sizeof(pFormat->filename), "%s", filename.c_str());
-   AVStream *pVideoStream = NULL;
-   if(pOutFormat->video_codec != CODEC_ID_NONE)
-   {
-      pVideoStream = add_video_stream(pFormat, pOutFormat->video_codec);
-   }
-   if(pVideoStream == NULL)
+   AvStreamResource pVideoStream(pFormat, pOutFormat->video_codec);
+   if (pVideoStream == NULL)
    {
       log_error("Unable to create video stream.");
       return false;
@@ -340,8 +388,8 @@ bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
     * allow changing of:
     *    dia_size/
     */
-   AVCodecContext *pCodecContext = pVideoStream->codec;
-   if(!setAvCodecOptions(pCodecContext, pInArgList))
+   AVCodecContext* pCodecContext = pVideoStream->codec;
+   if (!setAvCodecOptions(pCodecContext))
    {
       log_error("Unable to initialize CODEC options");
       return false;
@@ -356,17 +404,17 @@ bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
    pCodecContext->time_base.num = framerate.denominator();
    pCodecContext->time_base.den = framerate.numerator();
 
-   if(av_set_parameters(pFormat, NULL) < 0)
+   if (av_set_parameters(pFormat, NULL) < 0)
    {
       log_error("Invalid output format parameters.");
       return false;
    }
-   if(!open_video(pFormat, pVideoStream))
+   if (!open_video(pFormat, pVideoStream))
    {
       log_error("Unable to open video.");
       return false;
    }
-   if(url_fopen(&pFormat->pb, filename.c_str(), URL_WRONLY) < 0)
+   if (url_fopen(&pFormat->pb, filename.c_str(), URL_WRONLY) < 0)
    {
       log_error("Could not open the output file.");
       return false;
@@ -374,35 +422,56 @@ bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
    av_write_header(pFormat);
 
    // calculate time interval
-   if((framerate < pController->getMinimumFrameRate()) && (mpProgress != NULL))
+   double frameSpeed = pController->getIntervalMultiplier();
+   if ((framerate < pController->getMinimumFrameRate() * frameSpeed) && (mpProgress != NULL))
    {
-      mpProgress->updateProgress("The selected output framerate may not\n"
-                                 "encode all the frames in the movie. Frames\n"
-                                 "may be dropped.", 0, WARNING);
+      mpProgress->updateProgress("The selected output frame rate may not encode all the frames in the movie.  "
+                                 "Frames may be dropped.", 0, WARNING);
    }
-   double interval = rational_cast<double>(1 / framerate);
+
+   double interval = rational_cast<double>(frameSpeed / framerate);
 
    // export the frames
-   AVFrame *pTmpPicture = alloc_picture(PIX_FMT_RGBA32, pCodecContext->width, pCodecContext->height);
+   AVFrame* pTmpPicture = alloc_picture(PIX_FMT_RGBA32, pCodecContext->width, pCodecContext->height);
    QImage image(pTmpPicture->data[0], pCodecContext->width, pCodecContext->height, QImage::Format_ARGB32);
-   for(double video_pts = pController->getStartFrame(); video_pts <= pController->getStopFrame();
-       video_pts += interval)
+   FrameType eType = pController->getFrameType();
+
+   // For frame id based animation, each band of the data set fills one second of animation. 
+   // If the requested frame rate for export is 15 fps, then each band is replicated 15 times. The execution
+   // loop uses a pseudo time value, video_pts, to walk through the animation. The interval between 
+   // exported frames is the inverse of the frame rate, e.g., for 15 fps the interval is 0.06667.
+   // To fully export the last requested frame, we need to add just under an extra pseudo second to
+   // the end time - stopExport. If we added a full extra second, we would export one video frame of the band past
+   // the last requested frame - could cause crash if the last request frame was the last band.
+   if (eType == FRAME_ID)
    {
-      if(mAbort)
+      stopExport += 0.99;
+   }
+
+   for (double video_pts = startExport; video_pts <= stopExport; video_pts += interval)
+   {
+      if (isAborted() == true)
       {
-         if(mpProgress != NULL)
+         // reset resources to close output file so it can be deleted
+         pVideoStream = AvStreamResource();
+         pFormat = AvFormatContextResource(NULL);
+         mpPicture = NULL;
+         mpVideoOutbuf = NULL;
+         remove(filename.c_str());
+
+         if (mpProgress != NULL)
          {
             mpProgress->updateProgress("Export aborted", 0, ABORT);
          }
          mpStep->finalize(Message::Abort);
          return false;
       }
+
       // generate the next frame
       pController->setCurrentFrame(video_pts);
-      if(mpProgress != NULL)
+      if (mpProgress != NULL)
       {
-         double progressValue = (video_pts - pController->getStartFrame()) /
-                                (pController->getStopFrame() - pController->getStartFrame()) * 100.0;
+         double progressValue = (video_pts - startExport) / (stopExport - startExport) * 100.0;
          mpProgress->updateProgress("Saving movie", static_cast<int>(progressValue), NORMAL);
       }
       pView->getCurrentImage(image);
@@ -412,29 +481,27 @@ bool MovieExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
          PIX_FMT_RGBA32,
          pCodecContext->width,
          pCodecContext->height);
-      if(!write_video_frame(pFormat, pVideoStream))
+      if (!write_video_frame(pFormat, pVideoStream))
       {
+         // reset resources to close output file so it can be deleted
+         pVideoStream = AvStreamResource();
+         pFormat = AvFormatContextResource(NULL);
+         mpPicture = NULL;
+         mpVideoOutbuf = NULL;
+         remove(filename.c_str());
          string msg = "Can't write frame.";
          log_error(msg.c_str());
          return false;
       }
    }
-   for(int frame = 0; frame < pCodecContext->delay; frame++)
+   for (int frame = 0; frame < pCodecContext->delay; ++frame)
    {
       write_video_frame(pFormat, pVideoStream);
    }
+
    av_write_trailer(pFormat);
-   close_video(pFormat, pVideoStream);
 
-   for(int i = 0; i < pFormat->nb_streams; i++)
-   {
-      av_freep(&pFormat->streams[i]->codec);
-      av_freep(&pFormat->streams[i]);
-   }
-   url_fclose(&pFormat->pb);
-   av_free(pFormat);
-
-   if(mpProgress != NULL)
+   if (mpProgress != NULL)
    {
       mpProgress->updateProgress("Finished saving movie", 100, NORMAL);
    }
@@ -446,113 +513,72 @@ ValidationResultType MovieExporter::validate(const PlugInArgList* pArgList, stri
 {
    /* validate some arguments */
    ValidationResultType result = ExporterShell::validate(pArgList, errorMessage);
-   if(result != VALIDATE_SUCCESS)
+   if (result != VALIDATE_SUCCESS)
    {
       return result;
    }
-   View *pView = pArgList->getPlugInArgValue<View>(ExportItemArg());
-   if(pView == NULL)
+   View* pView = pArgList->getPlugInArgValue<View>(ExportItemArg());
+   if (pView == NULL)
    {
       errorMessage = "No view specified. Nothing to export.";
       return VALIDATE_FAILURE;
    }
-   AnimationController *pController = pView->getAnimationController();
-   if(pController == NULL)
+   AnimationController* pController = pView->getAnimationController();
+   if (pController == NULL)
    {
       errorMessage = "No animation is associated with this view. Nothing to export.";
       return VALIDATE_FAILURE;
    }
 
    /* validate the framerate */
-   AVOutputFormat *pOutFormat = getOutputFormat();
-   VERIFYRV(pOutFormat, VALIDATE_FAILURE);
-   AVCodec *pCodec = avcodec_find_encoder(pOutFormat->video_codec);
-   VERIFYRV(pCodec, VALIDATE_FAILURE);
-   if(pCodec->supported_framerates != NULL)
+   boost::rational<int> expectedFrameRate;
+
+   // first, get the framerate from the arg list
+   // next, try the option widget
+   // next, get from the animation controller
+   // finally, default to the config settings
+   int framerateNum;
+   int framerateDen;
+   if (pArgList->getPlugInArgValue("Framerate Numerator", framerateNum) &&
+      pArgList->getPlugInArgValue("Framerate Denominator", framerateDen))
    {
-      boost::rational<int> actualFrameRate;
-      boost::rational<int> expectedFrameRate;
+      expectedFrameRate.assign(framerateNum, framerateDen);
+   }
+   if (expectedFrameRate == 0)
+   {
+      if (mpOptionWidget.get() != NULL)
+      {
+         expectedFrameRate = mpOptionWidget->getFramerate();
+      }
+      if (expectedFrameRate == 0)
+      {
+         expectedFrameRate = pController->getMinimumFrameRate() * pController->getIntervalMultiplier();
+      }
+      if (expectedFrameRate == 0)
+      {
+         errorMessage = "No framerate specified";
+         return VALIDATE_FAILURE;
+      }
+   }
 
-      // first, get the framerate from the arg list
-      // next, try the option widget
-      // next, get from the animation controller
-      // finally, default to the config settings
-      int framerateNum, framerateDen;
-      if(pArgList->getPlugInArgValue("Framerate Numerator", framerateNum) &&
-         pArgList->getPlugInArgValue("Framerate Denominator", framerateDen))
+   boost::rational<int> actualFrameRate = convertToValidFrameRate(expectedFrameRate);
+   if (actualFrameRate != 0)
+   {
+      if (actualFrameRate < pController->getMinimumFrameRate() * pController->getIntervalMultiplier())
       {
-         expectedFrameRate.assign(framerateNum, framerateDen);
-      }
-      if(expectedFrameRate == 0)
-      {
-         if(mpOptionWidget.get() != NULL)
-         {
-            expectedFrameRate = mpOptionWidget->getFramerate();
-         }
-         if(expectedFrameRate == 0)
-         {
-            expectedFrameRate = pController->getMinimumFrameRate();
-         }
-         if(expectedFrameRate == 0)
-         {
-            try
-            {
-               expectedFrameRate.assign(OptionsMovieExporter::getSettingFramerateNum(),
-                  OptionsMovieExporter::getSettingFramerateDen());
-            }
-            catch (const boost::bad_rational&)
-            {
-               // Do nothing; the code below handles this case
-            }
-         }
-         if(expectedFrameRate == 0)
-         {
-            errorMessage = "No framerate specified";
-            return VALIDATE_FAILURE;
-         }
-      }
-
-      try
-      {
-         for(int idx = 0;; idx++)
-         {
-            boost::rational<int> frameRate(pCodec->supported_framerates[idx].num,
-                                           pCodec->supported_framerates[idx].den);
-            if(frameRate == 0)
-            {
-               break;
-            }
-            if((frameRate == expectedFrameRate) || // the expected FR matches a valid FR
-               (actualFrameRate == 0) ||           // we havn't saved a FR so pick something valid
-               // the diff between the expected and current FR is closer than the stored FR
-               ((frameRate - expectedFrameRate) < (actualFrameRate - expectedFrameRate)) ||
-               // the current FR is greater than the expected and the stored is less than the expected
-               ((actualFrameRate - expectedFrameRate) < 0 && (frameRate - expectedFrameRate) > 0))
-            {
-               actualFrameRate = frameRate;
-            }
-         }
-      }
-      catch(const boost::bad_rational&)
-      {
-         // intentionally left blank
-      }
-      if(actualFrameRate < pController->getMinimumFrameRate())
-      {
-         errorMessage = "The selected output framerate may not encode all the frames in the movie. "
+         errorMessage = "The selected output frame rate may not encode all the frames in the movie.  "
                         "Frames may be dropped.";
          result = VALIDATE_INFO;
       }
-      if(actualFrameRate != expectedFrameRate)
+      if (actualFrameRate != expectedFrameRate)
       {
-         QString msg = QString("The frame rate attached to the animation (%1/%2 fps) can not be\n"
-                               "represented in the selected movie format. %3/%4 fps is being used instead.\n"
-                               "The frame rate stored in the file may be changed using the options dialog.")
-                              .arg(expectedFrameRate.numerator())
-                              .arg(expectedFrameRate.denominator())
-                              .arg(actualFrameRate.numerator())
-                              .arg(actualFrameRate.denominator());
-         if(!errorMessage.empty())
+         QString msg = QString("The selected animation frame rate (%1/%2 fps) can not be represented in the "
+            "selected movie format. A frame rate of %3/%4 fps is being used instead.")
+            .arg(expectedFrameRate.numerator())
+            .arg(expectedFrameRate.denominator())
+            .arg(actualFrameRate.numerator())
+            .arg(actualFrameRate.denominator());
+         if (!errorMessage.empty())
          {
             errorMessage += "\n\n";
          }
@@ -560,64 +586,91 @@ ValidationResultType MovieExporter::validate(const PlugInArgList* pArgList, stri
          result = VALIDATE_INFO;
       }
    }
+
    return result;
 }
 
-QWidget *MovieExporter::getExportOptionsWidget(const PlugInArgList *pInArgList)
+QWidget* MovieExporter::getExportOptionsWidget(const PlugInArgList* pInArgList)
 {
-   if(mpOptionWidget.get() == NULL)
+   if (mpOptionWidget.get() == NULL)
    {
-      mpOptionWidget = auto_ptr<OptionsMovieExporter>(new OptionsMovieExporter());
+      OptionsMovieExporter* pOptionWidget = new OptionsMovieExporter();
+      mpOptionWidget = auto_ptr<OptionsMovieExporter>(pOptionWidget);
       VERIFYRV(mpOptionWidget.get() != NULL, NULL);
       mpOptionWidget->setPromptUserToSaveSettings(true);
 
-      View *pView = pInArgList->getPlugInArgValue<View>(ExportItemArg());
-      if(pView != NULL)
-      {
-         QWidget *pWidget = pView->getWidget();
-         mpOptionWidget->setResolution(pWidget->width(), pWidget->height());
-
-         AnimationController *pController = pView->getAnimationController();
-         if(pController != NULL)
-         {
-            rational<int> frameRate = pController->getMinimumFrameRate();
-            mpOptionWidget->setFramerate(frameRate);
-         }
-      }
-
-      AVOutputFormat *pOutFormat = getOutputFormat();
+      AVOutputFormat* pOutFormat = getOutputFormat();
       VERIFYRV(pOutFormat, NULL);
-      AVCodec *pCodec = avcodec_find_encoder(pOutFormat->video_codec);
+      AVCodec* pCodec = avcodec_find_encoder(pOutFormat->video_codec);
       VERIFYRV(pCodec, NULL);
-      if(pCodec->supported_framerates != NULL)
+      if (pCodec->supported_framerates != NULL)
       {
          vector<boost::rational<int> > frameRates;
          try
          {
-            for(int idx = 0;; idx++)
+            for (int idx = 0; ; ++idx)
             {
                boost::rational<int> frameRate(pCodec->supported_framerates[idx].num,
                   pCodec->supported_framerates[idx].den);
-               if(frameRate == 0)
+               if (frameRate == 0)
                {
                   break;
                }
+
                frameRates.push_back(frameRate);
             }
          }
-         catch(const boost::bad_rational&)
+         catch (const boost::bad_rational&)
          {
             // intentionally left blank
          }
+
          mpOptionWidget->setFramerates(frameRates);
       }
+
+      View* pView = pInArgList->getPlugInArgValue<View>(ExportItemArg());
+      if (pView != NULL)
+      {
+         QWidget* pWidget = pView->getWidget();
+         if (pWidget != NULL)
+         {
+            mpOptionWidget->setResolution(pWidget->width(), pWidget->height());
+         }
+
+         AnimationController* pController = pView->getAnimationController();
+         if (pController != NULL)
+         {
+            // Frame type
+            FrameType eType = pController->getFrameType();
+            mpOptionWidget->setFrameType(eType);
+
+            // Start and stop values
+            double start = pController->getStartFrame();
+            double stop = pController->getStopFrame();
+            if (eType == FRAME_ID) // values are frame numbers so add 1 so first frame is 1 and not 0
+            {
+               ++start;
+               ++stop;
+            }
+
+            mpOptionWidget->setRange(start, stop);
+            mpOptionWidget->setStart(start);
+            mpOptionWidget->setStop(stop);
+
+            // Frame rate
+            rational<int> frameRate = pController->getMinimumFrameRate() * pController->getIntervalMultiplier();
+            frameRate = convertToValidFrameRate(frameRate);
+            mpOptionWidget->setFramerate(frameRate);
+         }
+      }
    }
+
    return mpOptionWidget.get();
 }
 
-bool MovieExporter::setAvCodecOptions(AVCodecContext *pContext, PlugInArgList *pInArgList)
+bool MovieExporter::setAvCodecOptions(AVCodecContext* pContext)
 {
-   if(pContext == NULL || pInArgList == NULL)
+   if (pContext == NULL)
    {
       return false;
    }
@@ -633,10 +686,10 @@ bool MovieExporter::setAvCodecOptions(AVCodecContext *pContext, PlugInArgList *p
    pContext->b_quant_offset = OptionsMovieExporter::getSettingBQuantOffset();
    pContext->dia_size = OptionsMovieExporter::getSettingDiaSize();
    int newFlags = OptionsMovieExporter::getSettingFlags();
-   if(mpOptionWidget.get() != NULL)
+   if (mpOptionWidget.get() != NULL)
    {
       meMethod = mpOptionWidget->getMeMethod();
-      pContext->gop_size= mpOptionWidget->getGopSize();
+      pContext->gop_size = mpOptionWidget->getGopSize();
       pContext->qcompress = mpOptionWidget->getQCompress();
       pContext->qblur = mpOptionWidget->getQBlur();
       pContext->qmin = mpOptionWidget->getQMinimum();
@@ -650,7 +703,7 @@ bool MovieExporter::setAvCodecOptions(AVCodecContext *pContext, PlugInArgList *p
    }
    pContext->me_method = StringUtilities::fromXmlString<Motion_Est_ID>(meMethod);
    pContext->flags |= newFlags;
-   if(pContext->flags & CODEC_FLAG_TRELLIS_QUANT)
+   if (pContext->flags & CODEC_FLAG_TRELLIS_QUANT)
    {
       pContext->trellis = 1;
    }
@@ -662,67 +715,37 @@ bool MovieExporter::setAvCodecOptions(AVCodecContext *pContext, PlugInArgList *p
    return true;
 }
 
-AVStream *MovieExporter::add_video_stream(AVFormatContext *pFormat, CodecID codec_id)
-{
-   AVStream *pVideoStream = av_new_stream(pFormat, 0);
-   VERIFYRV(pVideoStream, NULL);
-
-   AVCodecContext *pCodecContext = pVideoStream->codec;
-   pCodecContext->codec_id = codec_id;
-   pCodecContext->codec_type = CODEC_TYPE_VIDEO;
-
-   pCodecContext->gop_size = 12; /* emit one intra frame every twelve frames at most */
-   pCodecContext->pix_fmt = PIX_FMT_YUV420P;
-   if(pFormat->oformat->flags & AVFMT_GLOBALHEADER)
-   {
-      pCodecContext->flags |= CODEC_FLAG_GLOBAL_HEADER;
-   }
-   if(pCodecContext->codec_id == CODEC_ID_MPEG1VIDEO)
-   {
-      /* needed to avoid using macroblocks in which some coeffs overflow
-      this doesnt happen with normal video, it just happens here as the
-      motion of the chroma plane doesnt match the luma plane */
-      pCodecContext->mb_decision=2;
-   }
-   // some formats want stream headers to be seperate
-   string format = pFormat->oformat->name;
-   if(format == "mp4" || format == "mov" || format == "3gp")
-   {
-      pCodecContext->flags |= CODEC_FLAG_GLOBAL_HEADER;
-   }
-
-   return pVideoStream;
-}
-
-bool MovieExporter::open_video(AVFormatContext *pFormat, AVStream *pVideoStream)
+bool MovieExporter::open_video(AVFormatContext* pFormat, AVStream* pVideoStream)
 {
    VERIFY(pFormat && pVideoStream);
-   AVCodecContext *pCodecContext = pVideoStream->codec;
-   AVCodec *pCodec = avcodec_find_encoder(pCodecContext->codec_id);
-   if(pCodec == NULL)
+   AVCodecContext* pCodecContext = pVideoStream->codec;
+   AVCodec* pCodec = avcodec_find_encoder(pCodecContext->codec_id);
+   if (pCodec == NULL)
    {
       return false;
    }
 
-   if((pCodec = avcodec_find_encoder(pCodecContext->codec_id)) == NULL)
+   pCodec = avcodec_find_encoder(pCodecContext->codec_id);
+   if (pCodec == NULL)
    {
       return false;
    }
 
-   if(avcodec_open(pCodecContext, pCodec) < 0)
+   if (avcodec_open(pCodecContext, pCodec) < 0)
    {
       return false;
    }
 
    mpVideoOutbuf = NULL;
-   if(!(pFormat->oformat->flags & AVFMT_RAWPICTURE))
+   if (!(pFormat->oformat->flags & AVFMT_RAWPICTURE))
    {
       mVideoOutbufSize = 200000;
       mpVideoOutbuf = reinterpret_cast<uint8_t*>(malloc(mVideoOutbufSize));
    }
 
    /* allocate the encoded raw picture */
-   if((mpPicture = alloc_picture(pCodecContext->pix_fmt, pCodecContext->width, pCodecContext->height)) == NULL)
+   mpPicture = alloc_picture(pCodecContext->pix_fmt, pCodecContext->width, pCodecContext->height);
+   if (mpPicture == NULL)
    {
       return false;
    }
@@ -730,13 +753,13 @@ bool MovieExporter::open_video(AVFormatContext *pFormat, AVStream *pVideoStream)
    return true;
 }
 
-AVFrame *MovieExporter::alloc_picture(int pixFmt, int width, int height)
+AVFrame* MovieExporter::alloc_picture(int pixFmt, int width, int height)
 {
-   AVFrame *pPicture = avcodec_alloc_frame();
+   AVFrame* pPicture = avcodec_alloc_frame();
    VERIFYRV(pPicture, NULL);
    int size = avpicture_get_size(pixFmt, width, height);
-   uint8_t *pPictureBuf = reinterpret_cast<uint8_t*>(malloc(size));
-   if(pPictureBuf == NULL)
+   uint8_t* pPictureBuf = reinterpret_cast<uint8_t*>(malloc(size));
+   if (pPictureBuf == NULL)
    {
       av_free(pPicture);
       return NULL;
@@ -745,17 +768,17 @@ AVFrame *MovieExporter::alloc_picture(int pixFmt, int width, int height)
    return pPicture;
 }
 
-bool MovieExporter::write_video_frame(AVFormatContext *pFormat, AVStream *pVideoStream)
+bool MovieExporter::write_video_frame(AVFormatContext* pFormat, AVStream* pVideoStream)
 {
    VERIFY(pFormat && pVideoStream);
    int out_size = 0;
    int ret = 0;
-   AVCodecContext *pCodecContext = pVideoStream->codec;
+   AVCodecContext* pCodecContext = pVideoStream->codec;
 
-   if(pFormat->oformat->flags & AVFMT_RAWPICTURE)
+   if (pFormat->oformat->flags & AVFMT_RAWPICTURE)
    {
       /* raw video case. The API will change slightly in the near
-      futur for that */
+      future for that */
       AVPacket pkt;
       av_init_packet(&pkt);
 
@@ -771,13 +794,13 @@ bool MovieExporter::write_video_frame(AVFormatContext *pFormat, AVStream *pVideo
       /* encode the image */
       out_size = avcodec_encode_video(pCodecContext, mpVideoOutbuf, mVideoOutbufSize, mpPicture);
       /* if zero size, it means the image was buffered */
-      if(out_size > 0)
+      if (out_size > 0)
       {
          AVPacket pkt;
          av_init_packet(&pkt);
 
-         pkt.pts= av_rescale_q(pCodecContext->coded_frame->pts, pCodecContext->time_base, pVideoStream->time_base);
-         if(pCodecContext->coded_frame->key_frame)
+         pkt.pts = av_rescale_q(pCodecContext->coded_frame->pts, pCodecContext->time_base, pVideoStream->time_base);
+         if (pCodecContext->coded_frame->key_frame)
          {
             pkt.flags |= PKT_FLAG_KEY;
          }
@@ -793,18 +816,55 @@ bool MovieExporter::write_video_frame(AVFormatContext *pFormat, AVStream *pVideo
          ret = 0;
       }
    }
-   if(ret != 0)
+   if (ret != 0)
    {
       return false;
    }
-   mFrameCount++;
+   ++mFrameCount;
    return true;
 }
 
-void MovieExporter::close_video(AVFormatContext *pFormat, AVStream *pVideoStream)
+boost::rational<int> MovieExporter::convertToValidFrameRate(const boost::rational<int>& frameRate) const
 {
-   VERIFYNRV(pFormat && pVideoStream);
-   avcodec_close(pVideoStream->codec);
-   mpPicture = NULL;
-   mpVideoOutbuf = NULL;
+   boost::rational<int> validFrameRate;
+   try
+   {
+      AVOutputFormat* pOutFormat = getOutputFormat();
+      VERIFY(pOutFormat != NULL);
+      AVCodec* pCodec = avcodec_find_encoder(pOutFormat->video_codec);
+      VERIFY(pCodec != NULL);
+
+      if (pCodec->supported_framerates != NULL)
+      {
+         for (int idx = 0; ; ++idx)
+         {
+            boost::rational<int> supportedFrameRate(pCodec->supported_framerates[idx].num,
+                                                    pCodec->supported_framerates[idx].den);
+            if (supportedFrameRate == 0)
+            {
+               break;
+            }
+
+            if ((supportedFrameRate == frameRate) || // The frame rate matches a supported frame rate
+               (validFrameRate == 0) ||              // A valid frame rate has not yet been set
+               // The difference between supported FR and the FR is closer than the valid FR difference
+               ((supportedFrameRate - frameRate) < (validFrameRate - frameRate)) ||
+               // The supported FR is greater than the FR and the valid FR is less than the FR
+               ((validFrameRate - frameRate) < 0 && (supportedFrameRate - frameRate) > 0))
+            {
+               validFrameRate = supportedFrameRate;
+            }
+         }
+      }
+      else
+      {
+         validFrameRate = frameRate;
+      }
+   }
+   catch (const boost::bad_rational&)
+   {
+      // Intentionally left blank
+   }
+
+   return validFrameRate;
 }

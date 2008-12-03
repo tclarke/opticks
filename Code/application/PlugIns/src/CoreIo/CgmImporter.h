@@ -31,11 +31,11 @@ public:
    CgmImporter();
    ~CgmImporter();
 
-   bool getInputSpecification(PlugInArgList *&pInArgList);
-   bool getOutputSpecification(PlugInArgList *&pOutArgList);
+   bool getInputSpecification(PlugInArgList*& pInArgList);
+   bool getOutputSpecification(PlugInArgList*& pOutArgList);
    std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename);
    unsigned char getFileAffinity(const std::string& filename);
-   bool execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList);
+   bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
 
 private:
    Service<DesktopServices> mpDesktop;

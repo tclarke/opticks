@@ -6,20 +6,20 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
-#include "AppVersion.h"
-#include "MessageLogTest.h"
+
 #include "DesktopServices.h"
 #include "DockWindow.h"
 #include "MessageLog.h"
 #include "MessageLogMgr.h"
+#include "MessageLogTest.h"
 #include "Service.h"
 #include "UtilityServices.h"
 
 MessageLogTestPlugin::MessageLogTestPlugin()
 {
-   setCreator("Ball Aerospace & Technologies Corp.");
-   setCopyright("Copyright (c) 2007 BATC");
-   setVersion(APP_VERSION_NUMBER);
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setProductionStatus(false);
    setName("Message Log Test");
    setShortDescription( "MessageLogTest" );
@@ -32,36 +32,38 @@ MessageLogTestPlugin::~MessageLogTestPlugin()
 {
 }
 
-bool MessageLogTestPlugin::getInputSpecification( PlugInArgList * &pArgList )
+bool MessageLogTestPlugin::getInputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
    return true;
 }
 
-bool MessageLogTestPlugin::getOutputSpecification( PlugInArgList * &pArgList )
+bool MessageLogTestPlugin::getOutputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
    return true;
 }
 
-bool MessageLogTestPlugin::execute( PlugInArgList* inputArgList, PlugInArgList* outputArgList )
+bool MessageLogTestPlugin::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
    Service<DesktopServices> pDesktop;
    Service<UtilityServices> pUtility;
 
-   DockWindow *pWindow = dynamic_cast<DockWindow*>( pDesktop->getWindow( "Message Log Window", DOCK_WINDOW ) );
+   DockWindow* pWindow = dynamic_cast<DockWindow*>(pDesktop->getWindow("Message Log Window", DOCK_WINDOW));
    pWindow->show();
 
-   MessageLogMgr *pMgr = pUtility->getMessageLog();
-   if( pMgr != NULL )
+   MessageLogMgr* pMgr = pUtility->getMessageLog();
+   if (pMgr != NULL)
    {
-      MessageLog *pLog = pMgr->getLog( "Message Log Test Plugin" );
-      if( pLog != NULL )
+      MessageLog* pLog = pMgr->getLog("Message Log Test Plugin");
+      if (pLog != NULL)
       {
-         pLog->createMessage( "Added new test Message. Key and Component provided.", "Message Log Test Plugin", "message1", true, false );
-         pLog->createMessage( "This should be yellow. No Key or Component provided.", "", "", true, false );
-         pLog->createStep( "Added new test Step. Key and Component provided.", "Message Log Test Plugin", "step1", false );
-         pLog->createStep( "This should be yellow. No Key or Component provided.", "", "", false );
+         pLog->createMessage("Added new test Message. Key and Component provided.", "Message Log Test Plugin",
+            "message1", true, false);
+         pLog->createMessage("This should be yellow. No Key or Component provided.", "", "", true, false);
+         pLog->createStep("Added new test Step. Key and Component provided.", "Message Log Test Plugin", "step1",
+            false);
+         pLog->createStep("This should be yellow. No Key or Component provided.", "", "", false);
       }
    }
 

@@ -10,10 +10,7 @@
 #include <QtCore/QDir>
 #include <QtCore/QStringList>
 
-#include <algorithm>
-
 #include "AppConfig.h"
-
 #include "ColorMap.h"
 #include "ConfigurationSettingsImp.h"
 #include "DateTimeImp.h"
@@ -25,8 +22,6 @@
 #include "UtilityServicesImp.h"
 #include "xmlreader.h"
 
-
-
 #if defined(WIN_API)
 #include <direct.h>
 #include <windows.h>
@@ -35,11 +30,8 @@
 #include <sys/resource.h>
 #endif
 
+#include <algorithm>
 using namespace std;
-
-#include "ExportAgentAdapter.h"
-#include "ImportAgentAdapter.h"
-#include "ExecutableAgentAdapter.h"
 
 struct SecurityFieldValue
 {
@@ -54,7 +46,7 @@ UtilityServicesImp* UtilityServicesImp::instance()
 {
    if (spInstance == NULL)
    {
-      if(mDestroyed)
+      if (mDestroyed)
       {
          throw std::logic_error("Attempting to use UtilityServices after "
             "destroying it.");
@@ -67,7 +59,7 @@ UtilityServicesImp* UtilityServicesImp::instance()
 
 void UtilityServicesImp::destroy()
 {
-   if(mDestroyed)
+   if (mDestroyed)
    {
       throw std::logic_error("Attempting to destroy UtilityServices after "
          "destroying it.");
@@ -80,7 +72,7 @@ void UtilityServicesImp::destroy()
 DateTime* UtilityServicesImp::getDateTime()
 {
    DateTimeImp* pDt = new DateTimeImp;
-   mDts.insert(pair<DateTime*,DateTimeImp*> ((DateTime*) pDt, pDt));
+   mDts.insert(pair<DateTime*, DateTimeImp*>(static_cast<DateTime*>(pDt), pDt));
    return pDt;
 }
 
@@ -88,7 +80,7 @@ void UtilityServicesImp::destroyDateTime(DateTime* dt)
 {
    map<DateTime*, DateTimeImp*>::iterator itr;
    itr = mDts.find(dt);
-   if (itr != mDts.begin() )
+   if (itr != mDts.begin())
    {
       delete itr->second;
       mDts.erase(itr);
@@ -97,23 +89,22 @@ void UtilityServicesImp::destroyDateTime(DateTime* dt)
 
 Progress* UtilityServicesImp::getProgress(bool threadSafe)
 {
-   if(threadSafe)
+   if (threadSafe)
    {
       ThreadSafeProgressAdapter* pDt = new ThreadSafeProgressAdapter;
-      mProgs.insert(pair<Progress*,ProgressImp*> ((Progress*)pDt, pDt));
+      mProgs.insert(pair<Progress*, ProgressImp*>(static_cast<Progress*>(pDt), pDt));
       return pDt;
    }
    // else
    ProgressAdapter* pDt = new ProgressAdapter;
-   mProgs.insert(pair<Progress*,ProgressImp*> ((Progress*) pDt, pDt));
+   mProgs.insert(pair<Progress*, ProgressImp*>(static_cast<Progress*>(pDt), pDt));
    return pDt;
 }
 
-void UtilityServicesImp::destroyProgress(Progress* mx)
+void UtilityServicesImp::destroyProgress(Progress* pProgress)
 {
-   map<Progress*, ProgressImp*>::iterator itr;
-   itr = mProgs.find(mx);
-   if (itr != mProgs.begin() && itr != mProgs.end())
+   map<Progress*, ProgressImp*>::iterator itr = mProgs.find(pProgress);
+   if (itr != mProgs.end())
    {
       delete itr->second;
       mProgs.erase(itr);
@@ -122,17 +113,16 @@ void UtilityServicesImp::destroyProgress(Progress* mx)
 
 MessageLogMgr *UtilityServicesImp::getMessageLog() const
 {
-   MessageLogMgr *pMessageLogMgr = NULL;
-   pMessageLogMgr = MessageLogMgrImp::instance();
+   MessageLogMgr* pMessageLogMgr = MessageLogMgrImp::instance();
    return pMessageLogMgr;
 }
 
 unsigned int UtilityServicesImp::getNumProcessors() const
 {
 #if defined(WIN_API)
-    SYSTEM_INFO SystemInfo;
-    GetSystemInfo(&SystemInfo);
-    return SystemInfo.dwNumberOfProcessors;
+   SYSTEM_INFO systemInfo;
+   GetSystemInfo(&systemInfo);
+   return systemInfo.dwNumberOfProcessors;
 #else
    return sysconf(_SC_NPROCESSORS_CONF);
 #endif
@@ -148,9 +138,9 @@ std::string UtilityServicesImp::getDefaultClassification() const
       //is non-empty in production code, that is a big problem.
       return mClassificationOverride;
    }
-   static string classificationText = "";
 
-   if (classificationText.empty() == true)
+   static string sClassificationText = "";
+   if (sClassificationText.empty() == true)
    {
       const Filename* pSupportFilesPath = ConfigurationSettings::getSettingSupportFilesPath();
       string filename;
@@ -158,7 +148,7 @@ std::string UtilityServicesImp::getDefaultClassification() const
       {
          filename = pSupportFilesPath->getFullPathAndName();
       }
-      if(!filename.empty())
+      if (!filename.empty())
       {
          filename += "/SecurityMarkings/ClassificationLevels.txt";
       }
@@ -182,12 +172,12 @@ std::string UtilityServicesImp::getDefaultClassification() const
             }
          }
 
-         classificationText = buffer;
+         sClassificationText = buffer;
          fclose(classFile);
       }
    }
 
-   return classificationText;
+   return sClassificationText;
 }
 
 void UtilityServicesImp::overrideDefaultClassification(const std::string& newClassification)
@@ -195,57 +185,55 @@ void UtilityServicesImp::overrideDefaultClassification(const std::string& newCla
    mClassificationOverride = newClassification;
 }
 
-ColorType UtilityServicesImp::getAutoColor( int color_index ) const
+ColorType UtilityServicesImp::getAutoColor(int color_index) const
 {
-   static bool bFirstTime = true;
-   static ColorMap colormap;
+   static bool sFirstTime = true;
+   static ColorMap sColormap;
    ColorType color;
 
    //first time we call this function, attempt to read in the color table
-   if (bFirstTime)
+   if (sFirstTime)
    {
-      bFirstTime = false;
+      sFirstTime = false;
       string filename = "autocolor.clu";
       try
       {
          string fullPath;
          const Filename* pSupportFilesPath = ConfigurationSettings::getSettingSupportFilesPath();
-         if(pSupportFilesPath != NULL)
+         if (pSupportFilesPath != NULL)
          {
             fullPath = pSupportFilesPath->getFullPathAndName() + SLASH + "ColorTables" + SLASH + filename;
          }
          ColorMap cm(fullPath);
-         colormap = cm;
+         sColormap = cm;
       }
-      catch(std::exception &exc)// bad color map file
+      catch (std::exception &exc)// bad color map file
       {
-         MessageLogMgr *pLogMgr = getMessageLog();
-
+         MessageLogMgr* pLogMgr = getMessageLog();
          if (pLogMgr != NULL)
          {
             Service<SessionManager> pSessionManager;
-            MessageLog *pLog(pLogMgr->getLog(
-                              pSessionManager->getName()));
-            if(pLog != NULL)
+            MessageLog* pLog(pLogMgr->getLog(pSessionManager->getName()));
+            if (pLog != NULL)
             {
-               Message *msg(pLog->createMessage("Exception", "app", "35E9D938-E536-4aa2-82F2-FB10E71D1DD1"));
-               msg->addProperty("message",exc.what());
+               Message* msg(pLog->createMessage("Exception", "app", "35E9D938-E536-4aa2-82F2-FB10E71D1DD1"));
+               msg->addProperty("message", exc.what());
                msg->finalize();
             }
          }
          std::vector<ColorType> table;
          const string& name = "Auto Colors";
-         table.push_back(ColorType(255,0,0));
+         table.push_back(ColorType(255, 0, 0));
 
          ColorMap cm(name, table);
-         colormap = cm;
+         sColormap = cm;
       }
    }
 
-   int size = colormap.getTable().size();
+   int size = sColormap.getTable().size();
    int index = color_index%size;
 
-   color = colormap[index];
+   color = sColormap[index];
    return color;
 }
 
@@ -255,48 +243,45 @@ size_t UtilityServicesImp::getMaxMemoryBlockSize()
    //this is the best we can do on Solaris
    return UtilityServicesImp::getAvailableVirtualMemory();
 #elif defined(WIN_API)
-   // Get maximum address range from system info.
+   // Get maximum address range from system info
    SYSTEM_INFO systemInfo;
    GetSystemInfo(&systemInfo);
-   char* maxAddress = (char*)systemInfo.lpMaximumApplicationAddress;
+   char* pMaxAddress = reinterpret_cast<char*>(systemInfo.lpMaximumApplicationAddress);
 
-   //
-   // Walk process addresses.
-   //
-
-   char*  pMemory = NULL;
+   // Walk process addresses
+   char* pMemory = NULL;
    MEMORY_BASIC_INFORMATION memoryInfo;
-   char*  baseAddress = 0;
    size_t regionSize = 0;
 
-   while (pMemory < maxAddress)	{
+   while (pMemory < pMaxAddress)
+   {
+      size_t ret = VirtualQuery(pMemory, &memoryInfo, sizeof(MEMORY_BASIC_INFORMATION));
 
-      size_t ret = VirtualQuery( pMemory, &memoryInfo, sizeof (MEMORY_BASIC_INFORMATION));
-
-      // Check to make sure we didn't fail.
-      if (ret!=sizeof(MEMORY_BASIC_INFORMATION)) {
-         pMemory = maxAddress; // Quit walking the process
+      // Check to make sure we didn't fail
+      if (ret != sizeof(MEMORY_BASIC_INFORMATION))
+      {
+         pMemory = pMaxAddress; // Quit walking the process
          continue;
       }
 
-      // Determine if this block of memory is free and larger than the saved block. 
-
-      if ((memoryInfo.State==MEM_FREE) && (memoryInfo.RegionSize>regionSize)) {
-         baseAddress = static_cast<char*>(memoryInfo.BaseAddress);
+      // Determine if this block of memory is free and larger than the saved block
+      if ((memoryInfo.State == MEM_FREE) && (memoryInfo.RegionSize > regionSize))
+      {
          regionSize = memoryInfo.RegionSize;
       }
-	   // Increment to next region of memory.
-      pMemory = (char*)((char*)memoryInfo.BaseAddress + memoryInfo.RegionSize);  
-	}
+
+      // Increment to next region of memory
+      pMemory = reinterpret_cast<char*>(memoryInfo.BaseAddress) + memoryInfo.RegionSize;
+   }
+
    return regionSize;
 #endif
 }
 
-
 bool UtilityServicesImp::loadSecurityMarkings(const string &strFilename)
 {
    Service<MessageLogMgr> pMsgLog;
-   MessageLog *pLog = pMsgLog->getLog();
+   MessageLog* pLog = pMsgLog->getLog();
 
    QDir xmldir(QString::fromStdString(strFilename));
    if (!xmldir.exists())
@@ -308,7 +293,7 @@ bool UtilityServicesImp::loadSecurityMarkings(const string &strFilename)
    secExtensions.append("*.sec");
 
    XmlReader read(pLog, true);
-   multimap<unsigned short,QString> dir;
+   multimap<unsigned short, QString> dir;
 
 
    QFileInfoList secFiles = xmldir.entryInfoList(secExtensions, QDir::Files, QDir::Name);
@@ -323,14 +308,14 @@ bool UtilityServicesImp::loadSecurityMarkings(const string &strFilename)
          unsigned int loadOrder = loadOrderStr.toUInt(&success);
          if (success)
          {
-            dir.insert(pair<unsigned short,QString>(loadOrder,(*secIter).absoluteFilePath()));
-         }         
+            dir.insert(pair<unsigned short, QString>(loadOrder, (*secIter).absoluteFilePath()));
+         }
       }
    }
 
-   multimap<unsigned short,SecurityFieldValue> markingValues;
+   multimap<unsigned short, SecurityFieldValue> markingValues;
 
-   for (multimap<unsigned short,QString>::iterator iter = dir.begin(); iter != dir.end(); ++iter)
+   for (multimap<unsigned short, QString>::iterator iter = dir.begin(); iter != dir.end(); ++iter)
    {
       XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *pDocument = NULL;
       pDocument = read.parse((*iter).second.toStdString());
@@ -349,7 +334,7 @@ bool UtilityServicesImp::loadSecurityMarkings(const string &strFilename)
       }
 
       XERCES_CPP_NAMESPACE_QUALIFIER DOMNodeList* pChild = pRoot->getChildNodes();
-      for (unsigned int i = 0;i < pChild->getLength(); ++i)
+      for (unsigned int i = 0; i < pChild->getLength(); ++i)
       {
          XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pNode = pChild->item(i);
 
@@ -359,19 +344,21 @@ bool UtilityServicesImp::loadSecurityMarkings(const string &strFilename)
             continue;
          }
 
-         XERCES_CPP_NAMESPACE_QUALIFIER DOMElement* pElement = static_cast<XERCES_CPP_NAMESPACE_QUALIFIER DOMElement*>(pNode);
+         XERCES_CPP_NAMESPACE_QUALIFIER DOMElement* pElement =
+            static_cast<XERCES_CPP_NAMESPACE_QUALIFIER DOMElement*>(pNode);
          if (pElement != NULL)
-         {            
+         {
             SecurityFieldValue marking;
             marking.mType = A(pElement->getTagName());
             marking.mName = A(pElement->getAttribute(X("data")));
             int value = StringUtilities::fromXmlString<int>(A(pElement->getAttribute(X("priority"))));
-            markingValues.insert(pair<unsigned short,SecurityFieldValue>(value, marking));
+            markingValues.insert(pair<unsigned short, SecurityFieldValue>(value, marking));
          }
       }
    }
 
-   for (multimap<unsigned short,SecurityFieldValue>::iterator iter = markingValues.begin(); iter != markingValues.end(); ++iter)
+   multimap<unsigned short, SecurityFieldValue>::iterator iter;
+   for (iter = markingValues.begin(); iter != markingValues.end(); ++iter)
    {
       if ((*iter).second.mType == "CountryCode")
       {
@@ -387,7 +374,7 @@ bool UtilityServicesImp::loadSecurityMarkings(const string &strFilename)
       }
       else if ((*iter).second.mType == "FileReleasing")
       {
-          mFileReleasing.push_back((*iter).second.mName);
+         mFileReleasing.push_back((*iter).second.mName);
       }
       else if ((*iter).second.mType == "DeclassificationExemption")
       {
@@ -408,16 +395,19 @@ bool UtilityServicesImp::loadSecurityMarkings(const string &strFilename)
       else if ((*iter).second.mType == "FileControl")
       {
          mFileControl.push_back((*iter).second.mName);
-      }      
+      }
    }
 
    mCountryCodes.erase(unique(mCountryCodes.begin(), mCountryCodes.end()), mCountryCodes.end());  
    mCodeword.erase(unique(mCodeword.begin(), mCodeword.end()), mCodeword.end());
    mSystems.erase(unique(mSystems.begin(), mSystems.end()), mSystems.end());
    mFileReleasing.erase(unique(mFileReleasing.begin(), mFileReleasing.end()), mFileReleasing.end());
-   mDeclassificationExemption.erase(unique(mDeclassificationExemption.begin(), mDeclassificationExemption.end()), mDeclassificationExemption.end());
-   mClassificationReason.erase(unique(mClassificationReason.begin(), mClassificationReason.end()), mClassificationReason.end());
-   mDeclassificationType.erase(unique(mDeclassificationType.begin(), mDeclassificationType.end()), mDeclassificationType.end());
+   mDeclassificationExemption.erase(unique(mDeclassificationExemption.begin(), mDeclassificationExemption.end()),
+      mDeclassificationExemption.end());
+   mClassificationReason.erase(unique(mClassificationReason.begin(), mClassificationReason.end()),
+      mClassificationReason.end());
+   mDeclassificationType.erase(unique(mDeclassificationType.begin(), mDeclassificationType.end()),
+      mDeclassificationType.end());
    mFileDowngrade.erase(unique(mFileDowngrade.begin(), mFileDowngrade.end()), mFileDowngrade.end());
    mFileControl.erase(unique(mFileControl.begin(), mFileControl.end()), mFileControl.end());
 
@@ -479,31 +469,31 @@ size_t UtilityServicesImp::getTotalPhysicalMemory()
    total = pages * pageSize;
 #elif defined(WIN_API)
    MEMORYSTATUSEX stat;
-   stat.dwLength = sizeof (stat);
-   GlobalMemoryStatusEx (&stat);
+   stat.dwLength = sizeof(stat);
+   GlobalMemoryStatusEx(&stat);
    total = static_cast<size_t>(stat.ullTotalPhys);
 #endif
    return total;
 }
 
 size_t UtilityServicesImp::getAvailableVirtualMemory()
-{ 
+{
    size_t total = 0;
 
 #if defined(UNIX_API)
    struct rlimit64 totMem;
-   unsigned long rlim_ret = getrlimit64(RLIMIT_VMEM,&totMem);
+   unsigned long rlim_ret = getrlimit64(RLIMIT_VMEM, &totMem);
    total = totMem.rlim_max;
 #elif defined(WIN_API)
    MEMORYSTATUSEX stat;
-   stat.dwLength = sizeof (stat);
-   GlobalMemoryStatusEx (&stat);
+   stat.dwLength = sizeof(stat);
+   GlobalMemoryStatusEx(&stat);
    total = static_cast<size_t>(stat.ullAvailVirtual);
 #endif
    return total;
 }
 
-uint64_t UtilityServicesImp::getAvailableDiskSpace( string path )
+uint64_t UtilityServicesImp::getAvailableDiskSpace(string path)
 {
    return 0;
 }

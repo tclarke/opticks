@@ -17,6 +17,7 @@
 #include <string>
 
 class IceWriter;
+class OptionsIceExporter;
 class PlugInArgList;
 class Progress;
 class RasterElement;
@@ -31,9 +32,10 @@ public:
    bool abort();
    bool getInputSpecification(PlugInArgList*& pArgList);
    bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
+   QWidget* getExportOptionsWidget(const PlugInArgList* pInArgList);
 
 protected:
-   Progress *mpProgress;
+   Progress* mpProgress;
 
    virtual void parseInputArgs(PlugInArgList* pInArgList);
    virtual void getOutputCubeAndFileDescriptor(RasterElement*& pOutputCube,
@@ -41,12 +43,13 @@ protected:
    virtual void finishWriting(IceWriter& writer);
    void abortIfNecessary();
 
-   static std::string outputCubePath() { return "/Datasets/Cube1"; }
+   static std::string outputCubePath();
 
 private:
    Service<PlugInManagerServices> mpPlugInMgr;
    IceWriter* mpWriter;
    const IceUtilities::FileType mFileType;
+   std::auto_ptr<OptionsIceExporter> mpOptionsWidget;
 };
 
 #endif

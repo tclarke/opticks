@@ -34,11 +34,11 @@ OptionsTiffExporter::OptionsTiffExporter() :
    mpSaveSettings = new QCheckBox("Save Settings", pPackBitsLayoutWidget);
    mpSaveSettings->hide();
 
-   QGridLayout *pLayout = new QGridLayout(pPackBitsLayoutWidget);
+   QGridLayout* pLayout = new QGridLayout(pPackBitsLayoutWidget);
    pLayout->setMargin(0);
    pLayout->setSpacing(5);
    pLayout->addWidget(pRowsPerStripLabel, 0, 0);
-   pLayout->addWidget(mpRowsPerStrip, 0 ,1);
+   pLayout->addWidget(mpRowsPerStrip, 0, 1);
    pLayout->addWidget(mpPackBits, 1, 1);
    pLayout->addWidget(mpSaveSettings, 2, 1);
    pLayout->setColumnStretch(2, 10);

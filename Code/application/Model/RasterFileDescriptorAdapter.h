@@ -13,7 +13,8 @@
 #include "RasterFileDescriptor.h"
 #include "RasterFileDescriptorImp.h"
 
-class RasterFileDescriptorAdapter : public RasterFileDescriptor, public RasterFileDescriptorImp RASTERFILEDESCRIPTORADAPTEREXTENSION_CLASSES
+class RasterFileDescriptorAdapter : public RasterFileDescriptor, public RasterFileDescriptorImp
+   RASTERFILEDESCRIPTORADAPTEREXTENSION_CLASSES
 {
 public:
    RasterFileDescriptorAdapter();

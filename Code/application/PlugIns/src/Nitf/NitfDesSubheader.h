@@ -23,7 +23,7 @@ namespace Nitf
    class DesSubheader : public Header
    {
    public:
-      DesSubheader(const std::string &fileVersion, const unsigned int& index);
+      DesSubheader(const std::string &fileVersion, unsigned int index);
 
       bool importMetadata(const ossimPropertyInterface *pHeader, 
          RasterDataDescriptor *pDescriptor);

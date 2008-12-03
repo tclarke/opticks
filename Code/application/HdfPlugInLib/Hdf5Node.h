@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef HDF5_NODE_H
-#define HDF5_NODE_H
+#ifndef HDF5NODE_H
+#define HDF5NODE_H
 
 class Hdf5File;
 

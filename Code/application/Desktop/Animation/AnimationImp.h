@@ -32,8 +32,8 @@ public:
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
-   bool attach(const std::string &signal, const Slot &slot);
-   bool detach(const std::string &signal, const Slot &slot);
+   bool attach(const std::string& signal, const Slot& slot);
+   bool detach(const std::string& signal, const Slot& slot);
 
    void setName(const std::string& name);
 
@@ -52,12 +52,12 @@ public:
    double getStopValue() const;
 
    double getNextFrameValue(AnimationState direction, size_t offset = 1) const;
-   static QString frameToQString(double frameValue, FrameType frameType, unsigned int count = 0);
+   static QString frameToQString(double value, FrameType frameType, unsigned int count = 0);
    static QString frameToQString(const AnimationFrame* pFrame, FrameType frameType, unsigned int count = 0);
    static QString frameToQString(const AnimationFrame* pFrame, unsigned int count = 0);
 
    bool serialize(SessionItemSerializer& serializer) const;
-   bool deserialize(SessionItemDeserializer &deserializer);
+   bool deserialize(SessionItemDeserializer& deserializer);
 
 signals:
    void renamed(const QString& strName);
@@ -125,8 +125,7 @@ private:
    { \
       return impClass::getStopValue(); \
    } \
-   double getNextFrameValue(AnimationState direction, \
-      size_t offset = 1) const \
+   double getNextFrameValue(AnimationState direction, size_t offset = 1) const \
    { \
       return impClass::getNextFrameValue(direction, offset); \
    }

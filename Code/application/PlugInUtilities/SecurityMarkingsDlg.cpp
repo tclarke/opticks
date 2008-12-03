@@ -28,7 +28,6 @@
 #include "PlugInManagerServices.h"
 #include "StringUtilities.h"
 #include "UtilityServices.h"
-#include "UtilityServicesImp.h"
 
 #include <string>
 
@@ -38,14 +37,14 @@ namespace
 {
    string trimString(string text)
    {
-      unsigned int i, j;
-      const char *pText = text.c_str();
+      const char* pText = text.c_str();
 
       if (text.size() == 0)
       {
          return text;
       }
 
+      unsigned int i;
       for (i = 0; i < text.size(); i++)
       {
          if (!isspace(pText[i]))
@@ -54,6 +53,7 @@ namespace
          }
       }
 
+      unsigned int j;
       for (j = text.size() - 1; j > 0; j--)
       {
          if (!isspace(pText[j]))
@@ -124,7 +124,7 @@ SecurityMarkingsDlg::SecurityMarkingsDlg(QWidget* parent, const QString& strInit
    mpClassLevelCombo->setEditable(false);
 
    // Favorites
-   QLabel *pFavoritesLabel = new QLabel("Favorites:", this);
+   QLabel* pFavoritesLabel = new QLabel("Favorites:", this);
    mpFavoritesCombo = new QComboBox(this);
    mpFavoritesCombo->setEditable(false);
 
@@ -276,8 +276,8 @@ SecurityMarkingsDlg::SecurityMarkingsDlg(QWidget* parent, const QString& strInit
    // Buttons
    QPushButton* pOkButton = new QPushButton("&OK", this);
    QPushButton* pCancelButton = new QPushButton("&Cancel", this);
-   QPushButton *pAddToFavoritesButton = new QPushButton("Add to favorites", this);
-   QPushButton *pRemoveFromFavoritesButton = new QPushButton("Remove from favorites", this);
+   QPushButton* pAddToFavoritesButton = new QPushButton("Add to favorites", this);
+   QPushButton* pRemoveFromFavoritesButton = new QPushButton("Remove from favorites", this);
 
    QHBoxLayout* pButtonLayout = new QHBoxLayout();
    pButtonLayout->setMargin(0);
@@ -392,9 +392,13 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
       populateListFromFile(mpClassLevelCombo, strDefaultDir + "ClassificationLevels.txt", false);
    }
 
+   UtilityServicesExt1* pUtilExt1 = dynamic_cast<UtilityServicesExt1*>(Service<UtilityServices>().get());
+
+   VERIFYNRV(pUtilExt1 != NULL);
+
    if ((pWidget == NULL) || (pWidget == mpCodewordList))
    {
-      vector<string> codewords = UtilityServicesImp::instance()->getCodewords();
+      vector<string> codewords = pUtilExt1->getCodewords();
       mpCodewordList->clear();
       for (vector<string>::iterator iter = codewords.begin(); iter != codewords.end(); ++iter)
       {
@@ -403,7 +407,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
    }
    if ((pWidget == NULL) || (pWidget == mpSystemList))
    {
-      vector<string> systems = UtilityServicesImp::instance()->getSystems();
+      vector<string> systems = pUtilExt1->getSystems();
       mpSystemList->clear();
       for (vector<string>::iterator iter = systems.begin(); iter != systems.end(); ++iter)
       {
@@ -412,7 +416,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
    }
    if ((pWidget == NULL) || (pWidget == mpCountryCodeList))
    {
-      vector<string> countryCodes = UtilityServicesImp::instance()->getCountryCodes();
+      vector<string> countryCodes = pUtilExt1->getCountryCodes();
       mpCountryCodeList->clear();
       for (vector<string>::iterator iter = countryCodes.begin(); iter != countryCodes.end(); ++iter)
       {
@@ -421,7 +425,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
    }
    if ((pWidget == NULL) || (pWidget == mpFileReleasingList))
    {
-      vector<string> fileReleasing = UtilityServicesImp::instance()->getFileReleasing();
+      vector<string> fileReleasing = pUtilExt1->getFileReleasing();
       mpFileReleasingList->clear();
       for (vector<string>::iterator iter = fileReleasing.begin(); iter != fileReleasing.end(); ++iter)
       {
@@ -430,7 +434,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
    }
    if ((pWidget == NULL) || (pWidget == mpExemptionList))
    {
-      vector<string> exemption = UtilityServicesImp::instance()->getDeclassificationExemptions();
+      vector<string> exemption = pUtilExt1->getDeclassificationExemptions();
       mpExemptionList->clear();
       for (vector<string>::iterator iter = exemption.begin(); iter != exemption.end(); ++iter)
       {
@@ -439,7 +443,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
    }
    if ((pWidget == NULL) || (pWidget == mpClassReasonCombo))
    {
-      vector<string> classReason = UtilityServicesImp::instance()->getClassificationReasons();
+      vector<string> classReason = pUtilExt1->getClassificationReasons();
       mpClassReasonCombo->clear();
       for (vector<string>::iterator iter = classReason.begin(); iter != classReason.end(); ++iter)
       {
@@ -448,7 +452,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
    }
    if ((pWidget == NULL) || (pWidget == mpDeclassTypeCombo))
    {
-      vector<string> declassType = UtilityServicesImp::instance()->getDeclassificationTypes();
+      vector<string> declassType = pUtilExt1->getDeclassificationTypes();
       mpDeclassTypeCombo->clear();
       for (vector<string>::iterator iter = declassType.begin(); iter != declassType.end(); ++iter)
       {
@@ -457,7 +461,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
    }
    if ((pWidget == NULL) || (pWidget == mpFileDowngradeCombo))
    {
-      vector<string> fileDowngrade = UtilityServicesImp::instance()->getFileDowngrades();
+      vector<string> fileDowngrade = pUtilExt1->getFileDowngrades();
       mpFileDowngradeCombo->clear();
       for (vector<string>::iterator iter = fileDowngrade.begin(); iter != fileDowngrade.end(); ++iter)
       {
@@ -466,7 +470,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
    }
    if ((pWidget == NULL) || (pWidget == mpFileControlCombo))
    {
-      vector<string> fileControl = UtilityServicesImp::instance()->getFileControls();
+      vector<string> fileControl = pUtilExt1->getFileControls();
       mpFileControlCombo->clear();
       for (vector<string>::iterator iter = fileControl.begin(); iter != fileControl.end(); ++iter)
       {
@@ -788,7 +792,7 @@ QString SecurityMarkingsDlg::getListString(QListWidget* pListWidget, const QStri
    QList<QListWidgetItem*> selectedItems = pListWidget->selectedItems();
    for (int j = 0; j < pListWidget->count(); ++j)
    {
-      QListWidgetItem *pItem = pListWidget->item(j);
+      QListWidgetItem* pItem = pListWidget->item(j);
       if (pItem->isSelected())
       {
          if (pItem != NULL)
@@ -831,7 +835,7 @@ void SecurityMarkingsDlg::selectListFromString(QListWidget* pListWidget, const Q
       return;
    }
 
-   const char *ptr = StringUtilities::escapedToken(strText.toStdString());
+   const char* ptr = StringUtilities::escapedToken(strText.toStdString());
 
    // setSelected() below will signal to SecurityMarkingsDlg::updateMarkings(),
    // which indirectly calls selectListFromString.  Block the signal to prevent this.
@@ -1043,7 +1047,7 @@ void SecurityMarkingsDlg::removeFavoriteItem()
 
 void SecurityMarkingsDlg::favoriteSelected()
 {
-   Classification *pClass = mlstFavorites[mpFavoritesCombo->currentIndex()];
+   Classification* pClass = mlstFavorites[mpFavoritesCombo->currentIndex()];
    importFromClassification(pClass);
    updateMarkings();
 }
@@ -1070,7 +1074,7 @@ bool SecurityMarkingsDlg::serializeFavorites()
       string releasability = mlstFavorites[i]->getFileReleasing();
       string countries = mlstFavorites[i]->getCountryCode();
       string exemption = mlstFavorites[i]->getDeclassificationExemption();
-      const DateTime *pDeclassificationDate = mlstFavorites[i]->getDeclassificationDate();
+      const DateTime* pDeclassificationDate = mlstFavorites[i]->getDeclassificationDate();
 
       string classText;
       mlstFavorites[i]->getClassificationText(classText);
@@ -1094,7 +1098,7 @@ bool SecurityMarkingsDlg::serializeFavorites()
 
 bool SecurityMarkingsDlg::deserializeFavorites()
 {
-   const DynamicObject *pFavorites = SecurityMarkingsDlg::getSettingFavorites();
+   const DynamicObject* pFavorites = SecurityMarkingsDlg::getSettingFavorites();
    if (pFavorites == NULL)
    {
       return false;
@@ -1106,7 +1110,7 @@ bool SecurityMarkingsDlg::deserializeFavorites()
    pFavorites->getAttributeNames(previews);
    for (unsigned int i = 0; i < previews.size(); ++i)
    {
-      const DataVariant &var = pFavorites->getAttribute(previews[i]);
+      const DataVariant& var = pFavorites->getAttribute(previews[i]);
       const DynamicObject* pFavDynObj = dv_cast<DynamicObject>(&var);
       if (pFavDynObj == NULL)
       {

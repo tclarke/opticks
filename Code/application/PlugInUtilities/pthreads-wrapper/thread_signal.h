@@ -6,20 +6,18 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
- 
 
-
-#ifndef _THREAD_SIGNAL_DOT_H
-#define _THREAD_SIGNAL_DOT_H
+#ifndef THREAD_SIGNAL_H
+#define THREAD_SIGNAL_H
 
 class ThreadSignal
 {
    public:
-      virtual bool ThreadSignalCreate () = 0; 
-      virtual bool ThreadSignalInit () = 0;
-      virtual bool ThreadSignalDestroy () = 0;
-      virtual bool ThreadSignalWait (void *) = 0;
-      virtual bool ThreadSignalActivate () = 0;
+      virtual bool ThreadSignalCreate() = 0;
+      virtual bool ThreadSignalInit() = 0;
+      virtual bool ThreadSignalDestroy() = 0;
+      virtual bool ThreadSignalWait(void *) = 0;
+      virtual bool ThreadSignalActivate() = 0;
 };
 
 #endif

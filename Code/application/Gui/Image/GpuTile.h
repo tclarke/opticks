@@ -38,7 +38,7 @@ public:
    void resetFilter(ImageFilterDescriptor *pDescriptor);
    void freezeFilter(ImageFilterDescriptor *pDescriptor, bool toggle = true);
    bool getFilterFreezeFlag(ImageFilterDescriptor *pDescriptor) const;
-   unsigned int readFilterBuffer(GLint xCoord, GLint yCoord, GLsizei width, GLsizei height, GLvoid *pValues);
+   unsigned int readFilterBuffer(GLint xCoord, GLint yCoord, GLsizei width, GLsizei height, GLvoid* pPixels);
 
    bool isTextureReady(unsigned int index) const;
 
@@ -50,9 +50,9 @@ protected:
    void applyFilters();
 
 private:
-   ImageLoader *mpImageLoader;
-   ImageLoader *mpImageReader;
-   ColorBuffer *mpOutputColorBuffer;
+   ImageLoader* mpImageLoader;
+   ImageLoader* mpImageReader;
+   ColorBuffer* mpOutputColorBuffer;
 
    bool mbInitialized;
 

@@ -46,25 +46,25 @@ using namespace mta;
    Loop
 */
 
-struct progressFunctor : public ThreadCommand
+struct ProgressFunctor : public ThreadCommand
 {
-   progressFunctor(int *pProgressValue, int percent) : 
+   ProgressFunctor(int *pProgressValue, int percent) : 
       mpProgressValue(pProgressValue), mPercent(percent) {}
    void run()
    {
       *mpProgressValue = mPercent;
    }
 private:
-   int *mpProgressValue;
+   int* mpProgressValue;
    int mPercent;
 };
-struct completionFunctor : public progressFunctor
+struct CompletionFunctor : public ProgressFunctor
 {
-   completionFunctor(int *pProgressValue) : progressFunctor(pProgressValue, 100) {}
+   CompletionFunctor(int *pProgressValue) : ProgressFunctor(pProgressValue, 100) {}
 };
-struct errorFunctor : public ThreadCommand
+struct ErrorFunctor : public ThreadCommand
 {
-   errorFunctor(std::string errorText, std::string& errorMessage, Result *pResult) : 
+   ErrorFunctor(std::string errorText, std::string& errorMessage, Result *pResult) : 
       mErrorText(errorText), mMessage(errorMessage), mpResult(pResult) {}
    void run()
    {
@@ -74,18 +74,18 @@ struct errorFunctor : public ThreadCommand
 private:
    std::string mErrorText;
    std::string& mMessage;
-   Result *mpResult;
+   Result* mpResult;
 };
-struct workFunctor : public ThreadCommand
+struct WorkFunctor : public ThreadCommand
 {
-   workFunctor(ThreadCommand*&pCommand, ThreadCommand& command) : 
+   WorkFunctor(ThreadCommand*&pCommand, ThreadCommand& command) : 
       mpCommand(pCommand), mCommand(command) {}
    void run()
    {
       mpCommand = &mCommand;
    }
 private:
-   ThreadCommand*&mpCommand;
+   ThreadCommand*& mpCommand;
    ThreadCommand& mCommand;
 };
 
@@ -115,26 +115,40 @@ Result MultiThreadReporter::reportProgress(int threadIndex, int percentDone)
    Result result = SUCCESS;
    if (percentDone != mThreadProgress[threadIndex])
    {
-      result = signalMainThread(progressFunctor(&mThreadProgress[threadIndex], percentDone), THREAD_PROGRESS);
+      result = signalMainThread(ProgressFunctor(&mThreadProgress[threadIndex], percentDone), THREAD_PROGRESS);
    }
    return result;
 }
 
 Result MultiThreadReporter::reportError(std::string errorText)
 {
-   return signalMainThread(errorFunctor(errorText, mErrorMessage, mpResult), THREAD_ERROR);
+   return signalMainThread(ErrorFunctor(errorText, mErrorMessage, mpResult), THREAD_ERROR);
 }
 
 Result MultiThreadReporter::reportCompletion(int threadIndex)
 {
-   return signalMainThread(completionFunctor(&mThreadProgress[threadIndex]), THREAD_COMPLETE);
+   return signalMainThread(CompletionFunctor(&mThreadProgress[threadIndex]), THREAD_COMPLETE);
 }
 
 void MultiThreadReporter::runInMainThread(ThreadCommand &command)
 {
-   Result result = SUCCESS;
-   result = signalMainThread(workFunctor(mpThreadCommand, command), THREAD_WORK);
+   Result result = signalMainThread(WorkFunctor(mpThreadCommand, command), THREAD_WORK);
    mpThreadCommand = NULL;
+}
+
+void MultiThreadReporter::setReportType(ReportType type)
+{
+   mReportType = type;
+}
+
+unsigned int MultiThreadReporter::getReportType() const
+{
+   return mReportType;
+}
+
+ThreadCommand* MultiThreadReporter::getThreadCommand()
+{
+   return mpThreadCommand;
 }
 
 int MultiThreadReporter::getProgress() const 
@@ -161,15 +175,23 @@ Result MultiThreadReporter::signalMainThread(ThreadCommand& reportStatus, Report
    MutexLock lock(mSignalMutex);
 
    Result currentResult = SUCCESS;
-   if (mpResult != NULL) { currentResult = *mpResult; }
+   if (mpResult != NULL)
+   {
+      currentResult = *mpResult;
+   }
+
    if (currentResult == SUCCESS)
    {
       {
-         MutexLock lock(mReporterMutex);
+         MutexLock reporterLock(mReporterMutex);
          reportStatus.run();
       }
       mReportType |= type;
-      if (mpResult != NULL) { currentResult = *mpResult; }
+      if (mpResult != NULL)
+      {
+         currentResult = *mpResult;
+      }
+
       { // scope the lock
          // ensures that the main thread is in its ThreadSignalWait
          mMutexA.MutexLock();
@@ -231,8 +253,8 @@ AlgorithmThread::Range AlgorithmThread::getThreadRange(int threadCount, int data
    }
    else
    {
-      int countPerThread = (int)ceil((double)dataSize / (double)threadCount);
-      range.mFirst = mThreadIndex*countPerThread;
+      int countPerThread = static_cast<int>(ceil(static_cast<double>(dataSize) / static_cast<double>(threadCount)));
+      range.mFirst = mThreadIndex * countPerThread;
       range.mLast = range.mFirst + countPerThread - 1;
       if (range.mLast >= dataSize)
       {
@@ -248,6 +270,16 @@ AlgorithmThread::Range AlgorithmThread::getThreadRange(int threadCount, int data
       }
    }
    return range;
+}
+
+int AlgorithmThread::getThreadIndex() const
+{
+   return mThreadIndex;
+}
+
+ThreadReporter& AlgorithmThread::getReporter() const
+{
+   return mReporter;
 }
 
 void AlgorithmThread::runInMainThread(ThreadCommand &command)
@@ -272,7 +304,7 @@ void AlgorithmThread::waitForAlgorithmLoop()
 
 void ProgressObjectReporter::reportError(const std::string &text)
 {
-   if(mpProgress != NULL)
+   if (mpProgress != NULL)
    {
       mpProgress->updateProgress(text, 0, ERRORS);
    }
@@ -280,7 +312,7 @@ void ProgressObjectReporter::reportError(const std::string &text)
 
 void ProgressObjectReporter::reportProgress(int percent)
 {
-   if(mpProgress)
+   if (mpProgress)
    {
       mpProgress->updateProgress(mMessage, percent, NORMAL);
    }
@@ -307,26 +339,80 @@ void MultiPhaseProgressReporter::setCurrentPhase(int phase)
    mCurrentPhase = mCurrentPhase <= 0 ? 0 : mCurrentPhase;
 }
 
+int MultiPhaseProgressReporter::getCurrentPhase() const
+{
+   return mCurrentPhase;
+}
+
 int MultiPhaseProgressReporter::convertPhaseProgressToTotalProgress(int phaseProgress)
 {
    int totalProgress = 0;
-   int i;
-   for (i=0; i<mCurrentPhase; ++i)
+   for (int i = 0; i < mCurrentPhase; ++i)
    {
       totalProgress += mPhaseWeights[i];
    }
-   totalProgress += (phaseProgress*mPhaseWeights[mCurrentPhase])/100;
+
+   totalProgress += (phaseProgress * mPhaseWeights[mCurrentPhase]) / 100;
    return totalProgress;
 }
 
-Cube::Cube(void *pData, EncodingType type, int rowCount, int columnCount, int bandCount) :
-   mpData(pData), mType(type), mRowCount(rowCount), mColumnCount(columnCount), 
-   mBandCount(bandCount), mPixelSize(computePixelSize(bandCount,type)), mScaleFromStandard(1.0)
-   {}
-Cube::Cube(const Cube &cube) :
-   mpData(cube.mpData), mType(cube.mType), mRowCount(cube.mRowCount), mColumnCount(cube.mColumnCount),
-   mBandCount(cube.mBandCount), mPixelSize(cube.mPixelSize), mScaleFromStandard(cube.mScaleFromStandard)
-   {}
+Cube::Cube(void* pData, EncodingType type, int rowCount, int columnCount, int bandCount) :
+   mpData(pData),
+   mType(type),
+   mRowCount(rowCount),
+   mColumnCount(columnCount),
+   mBandCount(bandCount),
+   mPixelSize(computePixelSize(bandCount,type)),
+   mScaleFromStandard(1.0)
+{
+}
+
+Cube::Cube(const Cube& cube) :
+   mpData(cube.mpData),
+   mType(cube.mType),
+   mRowCount(cube.mRowCount),
+   mColumnCount(cube.mColumnCount),
+   mBandCount(cube.mBandCount),
+   mPixelSize(cube.mPixelSize),
+   mScaleFromStandard(cube.mScaleFromStandard)
+{
+}
+
+const void* Cube::getData() const
+{
+   return mpData;
+}
+
+EncodingType Cube::getType() const
+{
+   return mType;
+}
+
+int Cube::getRowCount() const
+{
+   return mRowCount;
+}
+
+int Cube::getColumnCount() const
+{
+   return mColumnCount;
+}
+
+int Cube::getBandCount() const
+{
+   return mBandCount;
+}
+
+void* Cube::getPixel(int row, int col) const
+{
+   return ((unsigned char*)mpData) + (mColumnCount * row + col) * mPixelSize;
+}
+
+double Cube::getScaleFromStandard() const
+{
+   return mScaleFromStandard;
+}
+
 int Cube::computePixelSize(int bandCount, EncodingType type)
 {
    int elementSize = 0;

@@ -7,11 +7,9 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "AppVersion.h"
-#include "Scriptor.h"
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
-#include "PlugInManagerServices.h"
+#include "Scriptor.h"
 #include "SessionItemSerializer.h"
 
 using namespace std;
@@ -20,8 +18,9 @@ Scriptor::Scriptor()
 {
    // Initialization
    setName("Sample Scriptor");
-   setCreator("Ball Aerospace & Technologies Corp.");
-   setCopyright(APP_COPYRIGHT);
+   setCreator("Opticks Community");
+   setVersion("Sample");
+   setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setDescription("Provides command line utilities to execute IDL commands.");
    setFileExtensions("Sample Scripting Files (*.scr)");
    setProductionStatus(false);
@@ -110,8 +109,7 @@ bool Scriptor::getOutputSpecification(PlugInArgList*& pArgList)
 
 bool Scriptor::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
-   bool bSuccess = false;
-   bSuccess = extractInputArgs(pInArgList);
+   bool bSuccess = extractInputArgs(pInArgList);
    if (bSuccess == false)
    {
       return false;
@@ -164,7 +162,6 @@ bool Scriptor::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    {
       PlugInArg* pArg = NULL;
 
-      bool bSuccess = false;
       bSuccess = pOutArgList->getArg(OutputTextArg(), pArg);
       if ((bSuccess == true) && (pArg != NULL))
       {
@@ -244,6 +241,11 @@ bool Scriptor::getTypeDescription(const string& type, string& description) const
    return false;
 }
 
+bool Scriptor::isBackground() const
+{
+   return false;
+}
+
 bool Scriptor::extractInputArgs(PlugInArgList* pArgList)
 {
    if (pArgList == NULL)
@@ -256,14 +258,12 @@ bool Scriptor::extractInputArgs(PlugInArgList* pArgList)
    // Command
    mCommand.erase();
 
-   bool bSuccess = false;
-   bSuccess = pArgList->getArg(CommandArg(), pArg);
+   bool bSuccess = pArgList->getArg(CommandArg(), pArg);
    if ((bSuccess == true) && (pArg != NULL))
    {
       if (pArg->isActualSet() == true)
       {
-         string* pCommand = NULL;
-         pCommand = (string*) (pArg->getActualValue());
+         string* pCommand = reinterpret_cast<string*>(pArg->getActualValue());
          if (pCommand != NULL)
          {
             mCommand = *pCommand;

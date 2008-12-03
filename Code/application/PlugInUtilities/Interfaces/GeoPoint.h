@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #ifndef GEOPOINT_H
 #define GEOPOINT_H
 
@@ -127,8 +125,7 @@ public:
     *
     *  @see     DmsFormatType, getValue()
     */
-   std::string getValueText(DmsFormatType format = DMS_FULL,
-                            int precision = -1) const;
+   std::string getValueText(DmsFormatType format = DMS_FULL, int precision = -1) const;
 
    /**
     *  Sets the type and value to that of another DMS point.
@@ -138,7 +135,7 @@ public:
     *
     *  @return  A reference to this DMS point, whose type and value have changed.
     */
-   DmsPoint& operator =(const DmsPoint &original);
+   DmsPoint& operator =(const DmsPoint& original);
 
    /**
     *  Compares two DMS points.
@@ -149,7 +146,7 @@ public:
     *  @return  Returns true if the type and value of the given point are identical
     *           to the type and value of this point; otherwise returns false.
     */
-   bool operator ==(const DmsPoint &rhs);
+   bool operator ==(const DmsPoint& rhs) const;
 
 private:
    DmsType mType;
@@ -252,8 +249,7 @@ public:
     *
     *  @see     DmsFormatType, getCoordinates(), getLatitudeText(), getLongitudeText()
     */
-   std::string getText(DmsFormatType format = DMS_FULL,
-                       int precision = -1) const;
+   std::string getText(DmsFormatType format = DMS_FULL, int precision = -1) const;
 
    /**
     *  Returns the latitude value in a given text format.
@@ -268,8 +264,7 @@ public:
     *
     *  @see     DmsFormatType, getText(), getLongitudeText()
     */
-   std::string getLatitudeText(DmsFormatType format = DMS_FULL,
-                               int precision = -1) const;
+   std::string getLatitudeText(DmsFormatType format = DMS_FULL, int precision = -1) const;
 
    /**
     *  Returns the longitude value in a given text format.
@@ -284,8 +279,7 @@ public:
     *
     *  @see     DmsFormatType, getText(), getLatitudeText()
     */
-   std::string getLongitudeText(DmsFormatType format = DMS_FULL,
-                                int precision = -1) const;
+   std::string getLongitudeText(DmsFormatType format = DMS_FULL, int precision = -1) const;
 
    /**
     *  Sets the latitude and longitude values to that of another latitude/longitude
@@ -297,7 +291,7 @@ public:
     *  @return  A reference to this latitude/longitude point, whose values have
     *           changed.
     */
-   LatLonPoint& operator =(const LatLonPoint &original);
+   LatLonPoint& operator =(const LatLonPoint& original);
 
    /**
     *  Compares two latitude/longitude points.
@@ -309,7 +303,7 @@ public:
     *  @return  Returns true if the values of the given point are identical to the
     *           values of this point; otherwise returns false.
     */
-   bool operator ==(const LatLonPoint &rhs);
+   bool operator ==(const LatLonPoint& rhs) const;
 
 private:
    DmsPoint mLatitude;

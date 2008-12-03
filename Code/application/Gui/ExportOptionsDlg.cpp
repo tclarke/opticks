@@ -28,7 +28,8 @@
 
 using namespace std;
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Make cancel work for custom exporter options widgets. (kstreith)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Make cancel work for custom exporter options widgets. " \
+   "(kstreith)")
 
 ExportOptionsDlg::ExportOptionsDlg(ExporterResource& pExporter, QWidget* pParent) :
    QDialog(pParent),
@@ -49,15 +50,17 @@ ExportOptionsDlg::ExportOptionsDlg(ExporterResource& pExporter, QWidget* pParent
       pRasterOrgDataDescriptor = dynamic_cast<RasterDataDescriptor*>(pRasterElement->getDataDescriptor());
       if (pRasterOrgDataDescriptor != NULL)
       {
-         //we are creating a file descriptor for export from the original cube, because the SubsetWidget
-         //uses DimensionDescriptor::operator= compare's to determine selection which dictate that on-disk, original and active
-         //numbers need to be identical, this guarantees that DimensionDescriptors will compare correctly.
-         pRasterWholeCubeFileDescriptor = dynamic_cast<RasterFileDescriptor*>(RasterUtilities::generateFileDescriptorForExport(pRasterOrgDataDescriptor, "foobar"));
+         // we are creating a file descriptor for export from the original cube, because the SubsetWidget
+         // uses DimensionDescriptor::operator= compare's to determine selection which dictate that on-disk,
+         // original and active numbers need to be identical, this guarantees that DimensionDescriptors will
+         // compare correctly.
+         pRasterWholeCubeFileDescriptor = dynamic_cast<RasterFileDescriptor*>(
+            RasterUtilities::generateFileDescriptorForExport(pRasterOrgDataDescriptor, "foobar"));
       }
    }
    RasterFileDescriptor* pRasterFileDescriptor = dynamic_cast<RasterFileDescriptor*>(mpExporter->getFileDescriptor());
-   if ( (pRasterFileDescriptor != NULL) && (pRasterWholeCubeFileDescriptor != NULL) &&
-        (pRasterOrgDataDescriptor != NULL) )
+   if ((pRasterFileDescriptor != NULL) && (pRasterWholeCubeFileDescriptor != NULL) &&
+      (pRasterOrgDataDescriptor != NULL))
    {
       mpSubsetPage = new SubsetWidget();
       mpSubsetPage->setExportMode(true);
@@ -263,8 +266,7 @@ private:
 void ExportOptionsDlg::accept()
 {
    // Update the user's subset changes in the file descriptor
-   RasterFileDescriptor* pRasterFileDescriptor = dynamic_cast<RasterFileDescriptor*>(
-      mpExporter->getFileDescriptor());
+   RasterFileDescriptor* pRasterFileDescriptor = dynamic_cast<RasterFileDescriptor*>(mpExporter->getFileDescriptor());
    if ((pRasterFileDescriptor != NULL) && (mpSubsetPage != NULL))
    {
       // Rows

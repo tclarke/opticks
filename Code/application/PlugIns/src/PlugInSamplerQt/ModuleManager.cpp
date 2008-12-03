@@ -33,36 +33,20 @@
 #include "SampleGeoref.h"
 #include "TiePointTester.h"
 
-// This is necessary since one of the PlugIns is Windows specific.
-#if defined(WIN_API)
-#include "WindowsControl.h"
-#endif
-
-//
-// These static variables are used to describe the Module.  Set
-// these according to how you want the Module configured.
-//
-const char *ModuleManager::mspName = "Plug-In Sampler Qt";
-const char *ModuleManager::mspVersion = "1.0";
-const char *ModuleManager::mspDescription = "Sample plug-ins that test various components "
-   "in the published interfaces.";
-const char *ModuleManager::mspValidationKey = "none";
-const char *ModuleManager::mspUniqueId = "{5A464B36-8FAB-4168-9234-B1C341CE2999}";
+const char* ModuleManager::mspName = "Plug-In Sampler Qt";
+const char* ModuleManager::mspVersion = "1.0";
+const char* ModuleManager::mspDescription = "Sample plug-ins that test various components in the published interfaces.";
+const char* ModuleManager::mspValidationKey = "none";
+const char* ModuleManager::mspUniqueId = "{5A464B36-8FAB-4168-9234-B1C341CE2999}";
 
 unsigned int ModuleManager::getTotalPlugIns()
 {
-// This is necessary since one of the PlugIns is Windows specific.
-#if defined(WIN_API)
-   return 22;
-#else
    return 21;
-#endif
 }
 
 PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
 {
    PlugIn* pPlugIn = NULL;
-
    switch (plugInNumber)
    {
       case 0:
@@ -148,15 +132,6 @@ PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
       case 20:
          pPlugIn = new AnimationTimingTestPlugIn();
          break;
-
-      // This is necessary since one of the PlugIns is Windows specific.
-      // When adding new PlugIns make sure WindowsControl is the last one in
-      // the switch statement
-      #if defined(WIN_API)
-      case 21:
-         pPlugIn = new WindowsControl();
-         break;
-      #endif
 
       default:
          break;

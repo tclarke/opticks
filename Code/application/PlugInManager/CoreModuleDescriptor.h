@@ -15,13 +15,13 @@
 class CoreModuleDescriptor : public ModuleDescriptor
 {
 public:
-   CoreModuleDescriptor(const std::string& id, std::map<std::string, std::string> &plugInIds);
+   CoreModuleDescriptor(const std::string& id, std::map<std::string, std::string>& plugInIds);
    ~CoreModuleDescriptor();
 
    virtual bool load();
    virtual void unload();
    virtual PlugIn* createInterface(unsigned int plugInNumber);
-   virtual PlugIn* createInterface(PlugInDescriptorImp* plugIn);
+   virtual PlugIn* createInterface(PlugInDescriptorImp* pDescriptor);
    virtual const bool isValidatedModule() const;
    virtual bool isLoaded() const;
 };

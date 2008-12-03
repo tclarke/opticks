@@ -7,16 +7,14 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #include "ClassificationAdapter.h"
 
 using namespace std;
 
 const string& ClassificationAdapter::getObjectType() const
 {
-   static string type("ClassificationAdapter");
-   return type;
+   static string sType("ClassificationAdapter");
+   return sType;
 }
 
 bool ClassificationAdapter::isKindOf(const string& className) const

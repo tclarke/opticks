@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef OBJECT_RESOURCE_H
-#define OBJECT_RESOURCE_H
+#ifndef OBJECTRESOURCE_H
+#define OBJECTRESOURCE_H
 
 #include <string>
 
@@ -117,8 +117,15 @@ template<class T>
 class FactoryResource : public Resource<T,FactoryObject>
 {
 public:
-   explicit FactoryResource() : Resource<T,FactoryObject>(TypeConverter::toString<T>()) {}
-   explicit FactoryResource<T>(T *pObject) : Resource<T, FactoryObject>(pObject, Args(TypeConverter::toString<T>())) {}
+   explicit FactoryResource() :
+      Resource<T, FactoryObject>(TypeConverter::toString<T>())
+   {
+   }
+
+   explicit FactoryResource<T>(T* pObject) :
+      Resource<T, FactoryObject>(pObject, Args(TypeConverter::toString<T>()))
+   {
+   }
 };
 
 /**
@@ -141,10 +148,12 @@ public:
    class Args
    {
    public:
-      DataDescriptor *mpDescriptor;
-      std::string mName;
-      std::string mType;
-      DataElement* mpParent;
+      Args() :
+         mpDescriptor(NULL),
+         mpParent(NULL)
+      {
+      }
+
       Args(std::string name, std::string type, DataElement* pParent = NULL) :
          mpDescriptor(NULL),
          mName(name),
@@ -153,17 +162,22 @@ public:
       {
       }
 
-      Args(DataDescriptor *pDescriptor) :
+      Args(DataDescriptor* pDescriptor) :
          mpDescriptor(pDescriptor),
          mpParent(NULL)
       {
       }
-      Args() {}
+
+      DataDescriptor* mpDescriptor;
+      std::string mName;
+      std::string mType;
+      DataElement* mpParent;
    };
-   void *obtainResource(const Args &args) const
+
+   void* obtainResource(const Args& args) const
    {
       Service<ModelServices> pModel;
-      DataDescriptor *pDescriptor = args.mpDescriptor;
+      DataDescriptor* pDescriptor = args.mpDescriptor;
       if (pDescriptor == NULL)
       {
          pDescriptor = pModel->createDataDescriptor(args.mName.c_str(), args.mType.c_str(),
@@ -209,8 +223,10 @@ template<class T>
 class ModelResource : public Resource<T,ModelObject>
 {
 public:
-   explicit ModelResource(std::string name, DataElement* pParent = NULL,
-      std::string type = std::string()) : Resource<T,ModelObject>(Args(name, type.empty() ? TypeConverter::toString<T>() : type, pParent)) {}
+   explicit ModelResource(std::string name, DataElement* pParent = NULL, std::string type = std::string()) :
+      Resource<T, ModelObject>(Args(name, type.empty() ? TypeConverter::toString<T>() : type, pParent))
+   {
+   }
 
    /**
     * Create a ModelResource for the given descriptor.
@@ -220,7 +236,10 @@ public:
     *        ModelResource takes ownership of this object.  It is not
     *        safe to dereference pDescriptor after creating the ModelResource.
     */
-   explicit ModelResource(DataDescriptor *pDescriptor) : Resource<T, ModelObject>(Args(pDescriptor)) {}
+   explicit ModelResource(DataDescriptor *pDescriptor) :
+      Resource<T, ModelObject>(Args(pDescriptor))
+   {
+   }
 
    /**
     * Create a ModelResource which owns the provided element and will
@@ -228,7 +247,10 @@ public:
     *
     * @param pElement the element that will be owned by this resource.
     */
-   explicit ModelResource(T* pElement) : Resource<T, ModelObject>(pElement, Args()) {}
+   explicit ModelResource(T* pElement) :
+      Resource<T, ModelObject>(pElement, Args())
+   {
+   }
 };
 
 class DataDescriptor;
@@ -258,12 +280,15 @@ template<class T>
 class DataDescriptorResource : public Resource<T,DataDescriptorObject>
 {
 public:
-   explicit DataDescriptorResource(std::string name,
-                                   std::string dataDescriptorType,
-                                   DataElement* pParent = NULL)
-      : Resource<T,DataDescriptorObject>(Args(name, dataDescriptorType, pParent)) {}
+   explicit DataDescriptorResource(std::string name, std::string dataDescriptorType, DataElement* pParent = NULL) :
+      Resource<T, DataDescriptorObject>(Args(name, dataDescriptorType, pParent))
+   {
+   }
 
-   explicit DataDescriptorResource(T *pDescriptor) : Resource<T, DataDescriptorObject>(Args(pDescriptor)) {}
+   explicit DataDescriptorResource(T* pDescriptor) :
+      Resource<T, DataDescriptorObject>(Args(pDescriptor))
+   {
+   }
 };
 
 class ImportDescriptorObject
@@ -272,13 +297,14 @@ public:
    class Args
    {
    public:
-      ImportDescriptor *mpDescriptor;
-      DataDescriptor *mpDataDescriptor;
-      std::string mName;
-      std::string mType;
-      DataElement* mpParent;
-      std::vector<std::string> mParent;
-      bool mImported;
+      Args() :
+         mpDescriptor(NULL),
+         mpDataDescriptor(NULL),
+         mpParent(NULL),
+         mImported(false)
+      {
+      }
+
       Args(std::string name, std::string type, DataElement* pParent, bool imported) :
          mpDescriptor(NULL),
          mpDataDescriptor(NULL),
@@ -289,7 +315,7 @@ public:
       {
       }
 
-      Args(std::string name, std::string type, const std::vector<std::string> &parent, bool imported) :
+      Args(std::string name, std::string type, const std::vector<std::string>& parent, bool imported) :
          mpDescriptor(NULL),
          mpDataDescriptor(NULL),
          mName(name),
@@ -300,20 +326,29 @@ public:
       {
       }
 
-      Args(ImportDescriptor *pDescriptor) :
+      Args(ImportDescriptor* pDescriptor) :
          mpDescriptor(pDescriptor),
          mpDataDescriptor(NULL),
-         mpParent(NULL)
+         mpParent(NULL),
+         mImported(false)
       {
       }
-      Args(DataDescriptor *pDescriptor, bool imported) :
+
+      Args(DataDescriptor* pDescriptor, bool imported) :
          mpDescriptor(NULL),
          mpDataDescriptor(pDescriptor),
          mpParent(NULL),
          mImported(imported)
       {
       }
-      Args() {}
+
+      ImportDescriptor* mpDescriptor;
+      DataDescriptor* mpDataDescriptor;
+      std::string mName;
+      std::string mType;
+      DataElement* mpParent;
+      std::vector<std::string> mParent;
+      bool mImported;
    };
 
    void *obtainResource(const Args &args) const
@@ -344,20 +379,27 @@ public:
 class ImportDescriptorResource : public Resource<ImportDescriptor,ImportDescriptorObject>
 {
 public:
-   explicit ImportDescriptorResource(std::string name,
-                                   std::string dataDescriptorType,
-                                   DataElement* pParent = NULL,
-                                   bool imported = true)
-      : Resource<ImportDescriptor,ImportDescriptorObject>(Args(name, dataDescriptorType, pParent, imported)) {}
-   explicit ImportDescriptorResource(std::string name,
-                                   std::string dataDescriptorType,
-                                   const std::vector<std::string> &parent,
-                                   bool imported = true)
-      : Resource<ImportDescriptor,ImportDescriptorObject>(Args(name, dataDescriptorType, parent, imported)) {}
+   explicit ImportDescriptorResource(std::string name, std::string dataDescriptorType, DataElement* pParent = NULL,
+                                     bool imported = true) :
+      Resource<ImportDescriptor, ImportDescriptorObject>(Args(name, dataDescriptorType, pParent, imported))
+   {
+   }
 
-   explicit ImportDescriptorResource(ImportDescriptor *pDescriptor) : Resource<ImportDescriptor, ImportDescriptorObject>(Args(pDescriptor)) {}
-   explicit ImportDescriptorResource(DataDescriptor *pDescriptor, bool imported = true) :
-                  Resource<ImportDescriptor, ImportDescriptorObject>(Args(pDescriptor, imported)) {}
+   explicit ImportDescriptorResource(std::string name, std::string dataDescriptorType,
+                                     const std::vector<std::string>& parent, bool imported = true) :
+      Resource<ImportDescriptor, ImportDescriptorObject>(Args(name, dataDescriptorType, parent, imported))
+   {
+   }
+
+   explicit ImportDescriptorResource(ImportDescriptor* pDescriptor) :
+      Resource<ImportDescriptor, ImportDescriptorObject>(Args(pDescriptor))
+   {
+   }
+
+   explicit ImportDescriptorResource(DataDescriptor* pDescriptor, bool imported = true) :
+      Resource<ImportDescriptor, ImportDescriptorObject>(Args(pDescriptor, imported))
+   {
+   }
 };
 
 /**
@@ -366,12 +408,17 @@ public:
  * This is an implementation detail of the ObjectArray class. It is used 
  * for passing the size parameter required by new[].
  */
-class ObjectArrayArgs 
+class ObjectArrayArgs
 {
 public:
+   ObjectArrayArgs(int size) :
+      mSize(size)
+   {
+   }
+
    int mSize;
-   ObjectArrayArgs(int size) : mSize(size) {}
 };
+
 /**
  * The %ObjectArray is a trait object for use with the %Resource template. 
  *
@@ -388,13 +435,21 @@ public:
    T *obtainResource(const Args &args) const 
    {
       if (args.mSize != 0)
-         return new T[args.mSize]; 
-      else
-         return NULL;
+      {
+         return new T[args.mSize];
+      }
+
+      return NULL;
    }
-   void releaseResource(const Args &args, T *pObject) const { delete[] pObject; }
+
+   void releaseResource(const Args& args, T* pObject) const
+   {
+      delete[] pObject;
+   }
 };
+
 typedef ObjectArrayArgs ArrayArgs;
+
 /**
  *  This is a %Resource class that wraps an array of objects on the local heap.
  *
@@ -420,11 +475,19 @@ typedef ObjectArrayArgs ArrayArgs;
  *  @see ObjectFactory
  */
 template<class T>
-class ArrayResource : public Resource<T, ObjectArray<T> > 
+class ArrayResource : public Resource<T, ObjectArray<T> >
 {
 public:
-   explicit ArrayResource(const Args &args) : Resource<T,ObjectArray<T> >(args) {}
-   explicit ArrayResource(int size) : Resource<T,ObjectArray<T> >(Args(size)) {}
+   explicit ArrayResource(const Args& args) :
+      Resource<T, ObjectArray<T> >(args)
+   {
+   }
+
+   explicit ArrayResource(int size) :
+      Resource<T, ObjectArray<T> >(Args(size))
+   {
+   }
+
    /**
     *  Constructs the %Resource object based on an existing heap array. 
     *
@@ -436,7 +499,11 @@ public:
     *  @param   args
     *           The arguments that would have been provided to the obtainResource method of the ArrayObject class.
     */
-   ArrayResource(T* pObject, const Args &args) : Resource<T,ObjectArray<T> >(pObject, args) {}
+   ArrayResource(T* pObject, const Args& args) :
+      Resource<T, ObjectArray<T> >(pObject, args)
+   {
+   }
+
    /**
     *  Constructs the %Resource object based on an existing heap array. 
     *
@@ -448,16 +515,26 @@ public:
     *  @param   size
     *           The number of objects in the array.
     */
-   ArrayResource(T* pObject, int size) : Resource<T,ObjectArray<T> >(pObject, Args(size)) {}
-   ArrayResource(const Resource<T,ObjectArray<T> > &source) : Resource<T,ObjectArray<T> >(source) {}
+   ArrayResource(T* pObject, int size) :
+      Resource<T, ObjectArray<T> >(pObject, Args(size))
+   {
+   }
+
+   ArrayResource(const Resource<T, ObjectArray<T> >& source) :
+      Resource<T, ObjectArray<T> >(source)
+   {
+   }
+
    /**
-    *  Returns the number of objects contained in the underlying array.
-    *
     *  Returns the number of objects contained in the underlying array.
     *
     *  @return   The number of objects contained in the underlying array.
     */
-   int size() const { return getArgs().mSize; }
+   int size() const
+   {
+      return getArgs().mSize;
+   }
+
    /**
     *  Returns a reference to the indexed object.
     *
@@ -471,9 +548,13 @@ public:
     *
     *  @return   A reference to the underlying indexed object.
     */
-   T &at(int index) const
+   T& at(int index) const
    {
-      if (index >= size()) throw std::exception("Range Error in ArrayResource");
+      if (index >= size())
+      {
+         throw std::exception("Range Error in ArrayResource");
+      }
+
       return operator[](index);
    }
 };

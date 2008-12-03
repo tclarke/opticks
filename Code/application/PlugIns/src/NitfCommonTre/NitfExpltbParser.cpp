@@ -264,7 +264,7 @@ Nitf::TreState Nitf::ExpltbParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID && totalFields != numFields)
    {
       reporter << "Total fields in the Dynamic Object(" <<
-         totalFields <<") did not match the number found(" << numFields << ") ";
+         totalFields << ") did not match the number found(" << numFields << ") ";
       status = INVALID;
    }
 
@@ -290,24 +290,24 @@ bool Nitf::ExpltbParser::fromDynamicObject(const DynamicObject& input, ostream& 
 
    try
    {
-      output <<   toString( dv_cast<double>(input.getAttribute (EXPLTB::ANGLE_TO_NORTH)), 7, 3);
-      output <<   toString( dv_cast<double>(input.getAttribute (EXPLTB::ANGLE_TO_NORTH_ACCY)), 6, 3);
-      output <<   toString( dv_cast<double>(input.getAttribute (EXPLTB::SQUINT_ANGLE)), 7, 3, ZERO_FILL, POS_SIGN_TRUE);
-      output <<   toString( dv_cast<double>(input.getAttribute (EXPLTB::SQUINT_ANGLE_ACCY)), 6, 3);
-      output << sizeString( dv_cast<string>(input.getAttribute (EXPLTB::MODE)), 3);
-      output << sizeString( dv_cast<string>(input.getAttribute (EXPLTB::RESERVED1)), 16);
-      output <<   toString( dv_cast<double>(input.getAttribute (EXPLTB::GRAZE_ANG)), 5, 2);
-      output <<   toString( dv_cast<double>(input.getAttribute (EXPLTB::GRAZE_ANG_ACCY)), 5, 2);
-      output <<   toString( dv_cast<double>(input.getAttribute (EXPLTB::SLOPE_ANG)), 5, 2);
-      output << sizeString( dv_cast<string>(input.getAttribute (EXPLTB::POLAR)), 2);
-      output <<   toString( dv_cast<int>(input.getAttribute    (EXPLTB::NSAMP)), 5);
-      output <<   toString( dv_cast<int>(input.getAttribute    (EXPLTB::RESERVED2)), 1);
-      output <<   toString( dv_cast<int>(input.getAttribute    (EXPLTB::SEQ_NUM)), 1);
-      output << sizeString( dv_cast<string>(input.getAttribute (EXPLTB::PRIME_ID)), 12);
-      output << sizeString( dv_cast<string>(input.getAttribute (EXPLTB::PRIME_BE)), 15);
-      output <<   toString( dv_cast<int>(input.getAttribute    (EXPLTB::RESERVED3)), 1);
-      output <<   toString( dv_cast<int>(input.getAttribute    (EXPLTB::N_SEC)), 2);
-      output <<   toString( dv_cast<int>(input.getAttribute    (EXPLTB::IPR)), 2);
+      output << toString(dv_cast<double>(input.getAttribute(EXPLTB::ANGLE_TO_NORTH)), 7, 3);
+      output << toString(dv_cast<double>(input.getAttribute(EXPLTB::ANGLE_TO_NORTH_ACCY)), 6, 3);
+      output << toString(dv_cast<double>(input.getAttribute(EXPLTB::SQUINT_ANGLE)), 7, 3, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(EXPLTB::SQUINT_ANGLE_ACCY)), 6, 3);
+      output << sizeString(dv_cast<string>(input.getAttribute(EXPLTB::MODE)), 3);
+      output << sizeString(dv_cast<string>(input.getAttribute(EXPLTB::RESERVED1)), 16);
+      output << toString(dv_cast<double>(input.getAttribute(EXPLTB::GRAZE_ANG)), 5, 2);
+      output << toString(dv_cast<double>(input.getAttribute(EXPLTB::GRAZE_ANG_ACCY)), 5, 2);
+      output << toString(dv_cast<double>(input.getAttribute(EXPLTB::SLOPE_ANG)), 5, 2);
+      output << sizeString(dv_cast<string>(input.getAttribute(EXPLTB::POLAR)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(EXPLTB::NSAMP)), 5);
+      output << toString(dv_cast<int>(input.getAttribute(EXPLTB::RESERVED2)), 1);
+      output << toString(dv_cast<int>(input.getAttribute(EXPLTB::SEQ_NUM)), 1);
+      output << sizeString(dv_cast<string>(input.getAttribute(EXPLTB::PRIME_ID)), 12);
+      output << sizeString(dv_cast<string>(input.getAttribute(EXPLTB::PRIME_BE)), 15);
+      output << toString(dv_cast<int>(input.getAttribute(EXPLTB::RESERVED3)), 1);
+      output << toString(dv_cast<int>(input.getAttribute(EXPLTB::N_SEC)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(EXPLTB::IPR)), 2);
    }
    catch (const bad_cast&)
    {

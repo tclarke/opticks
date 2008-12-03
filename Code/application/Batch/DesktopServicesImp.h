@@ -55,7 +55,7 @@ public:
     *  @return A pointer to the GpuResourceManager or NULL if
     *          the application is in batch mode.
     */
-   virtual GpuResourceManager *getGpuResourceManager() const;
+   virtual GpuResourceManager* getGpuResourceManager() const;
 
    /**
     *  Returns the singleton which manages GPU image filters.
@@ -63,7 +63,7 @@ public:
     *  @return A pointer to the ImageFilterManager or NULL if
     *          the application is in batch mode.
     */
-   virtual ImageFilterManager *getImageFilterManager() const;
+   virtual ImageFilterManager* getImageFilterManager() const;
 
    /**
     * Non-functional desktop services
@@ -90,15 +90,15 @@ public:
    View* getCurrentWorkspaceWindowView() const;
    void cascadeWorkspaceWindows();
    void tileWorkspaceWindows(TilingType eType = TILE_GRID);
-   bool tileWorkspaceWindows(const std::vector<WorkspaceWindow*>& windows, 
-                             bool maxFirst = true, TilingType eType = TILE_GRID);
+   bool tileWorkspaceWindows(const std::vector<WorkspaceWindow*>& windows, bool maxFirst = true,
+      TilingType eType = TILE_GRID);
 
    View* createView(const std::string& viewName, ViewType viewType, QWidget* pParent = 0);
    PlotView* createPlot(const std::string& plotName, PlotType plotType, QWidget* pParent = 0);
    void getViewTypes(const std::string& className, std::vector<std::string>& classList);
    void deleteView(View* pView);
    bool isKindOfView(const std::string& className, const std::string& viewName);
-   ProductWindow *deriveProduct(View *pView);
+   ProductWindow* deriveProduct(View* pView);
 
    PlotWidget* createPlotWidget(const std::string& plotName, PlotType plotType, QWidget* pParent = 0);
    void deletePlotWidget(PlotWidget* pPlot);
@@ -135,25 +135,23 @@ public:
       bool bEmitSignal = true) const;
    void setStatusBarMessage(const std::string& messageText) const;
    void useMessageBox(bool enable);
-   int showMessageBox(const std::string &caption, const std::string &text, 
-      const std::string &button0=std::string(), const std::string &button1=std::string(), 
-      const std::string &button2=std::string(), int defaultButton=0, 
-      int escapeButton=-1) const;
+   int showMessageBox(const std::string& caption, const std::string& text, const std::string& button0 = std::string(),
+      const std::string& button1 = std::string(), const std::string& button2 = std::string(), int defaultButton = 0,
+      int escapeButton = -1) const;
 
-   virtual bool createProgressDialog(const std::string &caption, Progress *pProgress) const;
-   ProgressDlg* createProgressDialog(const std::string &caption, Progress *pProgress,
-      QObject *pObject, const char *pSlot) const;
+   virtual bool createProgressDialog(const std::string& caption, Progress* pProgress) const;
+   ProgressDlg* createProgressDialog(const std::string& caption, Progress* pProgress,
+      QObject* pObject, const char* pSlot) const;
 
    void addBackgroundPlugIn(PlugIn* pPlugIn, Progress* pProgress) const;
-   virtual bool registerCallback(PlugInCallbackType eType, PlugInCallback *callback) const;
+   virtual bool registerCallback(PlugInCallbackType eType, PlugInCallback* pCallback) const;
 
-   DockWindowAreaType getDockWindowArea(const DockWindow &dockWindow) const;
-   bool setDockWindowArea(DockWindow *pDockWindow, 
-      DockWindowAreaType dockArea);
+   DockWindowAreaType getDockWindowArea(const DockWindow& dockWindow) const;
+   bool setDockWindowArea(DockWindow* pDockWindow, DockWindowAreaType dockArea);
 
-   const std::vector<std::string> &getAvailableSymbolNames() const;
-   const QImage &getSymbolImage(const std::string &symbol) const;
-   
+   const std::vector<std::string>& getAvailableSymbolNames() const;
+   const QImage& getSymbolImage(const std::string& symbol) const;
+
 protected:
    /**
     *  Constructs the desktop services object and initializes the services arg lists
@@ -170,4 +168,4 @@ private:
    static bool mDestroyed;
 };
 
-#endif   // DESKTOPSERVICESIMP_H
+#endif

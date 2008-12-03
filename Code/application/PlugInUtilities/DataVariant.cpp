@@ -65,8 +65,8 @@ std::string DataVariant::toXmlString(Status* pStatus) const
 
 DataVariant::Status DataVariant::fromXmlString(const std::string &type, const std::string &text)
 {
-   DataValueWrapper *pOldWrapper = mpValue;
-   DataValueWrapper *pNewWrapper = Service<DataVariantFactory>()->createWrapper(NULL, type);
+   DataValueWrapper* pOldWrapper = mpValue;
+   DataValueWrapper* pNewWrapper = Service<DataVariantFactory>()->createWrapper(NULL, type);
    if (pNewWrapper == NULL)
    {
       return DataVariant::NOT_SUPPORTED;
@@ -95,8 +95,8 @@ std::string DataVariant::toDisplayString(Status* pStatus) const
 
 DataVariant::Status DataVariant::fromDisplayString(const std::string &type, const std::string &text)
 {
-   DataValueWrapper *pOldWrapper = mpValue;
-   DataValueWrapper *pNewWrapper = Service<DataVariantFactory>()->createWrapper(NULL, type);
+   DataValueWrapper* pOldWrapper = mpValue;
+   DataValueWrapper* pNewWrapper = Service<DataVariantFactory>()->createWrapper(NULL, type);
    if (pNewWrapper == NULL)
    {
       return DataVariant::NOT_SUPPORTED;
@@ -121,9 +121,9 @@ bool DataVariant::toXml(XMLWriter* pWriter) const
 
 bool DataVariant::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   DataValueWrapper *pOldWrapper = mpValue;
+   DataValueWrapper* pOldWrapper = mpValue;
 
-   DataValueWrapper *pNewWrapper = Service<DataVariantFactory>()->createWrapper(pDocument, version);
+   DataValueWrapper* pNewWrapper = Service<DataVariantFactory>()->createWrapper(pDocument, version);
    if (pNewWrapper == NULL)
    {
       return false;

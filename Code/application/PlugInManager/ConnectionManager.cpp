@@ -47,9 +47,9 @@ bool ConnectionManager::mDestroyed = false;
 */
 ConnectionManager* ConnectionManager::instance() 
 {
-   if (spInstance==NULL) 
+   if (spInstance == NULL)
    {
-      if(mDestroyed)
+      if (mDestroyed)
       {
          throw std::logic_error("Attempting to use ConnectionManager after "
             "destroying it.");
@@ -81,17 +81,18 @@ void ConnectionManager::destroy()
 *  @param  manager  The connection manager instance created from the
 *                   main applicaiton.
 */
-void ConnectionManager::mapConnection( ConnectionManager* pManager ) 
+void ConnectionManager::mapConnection(ConnectionManager* pManager)
 {
    if (mDestroyed)
    {
-      throw std::logic_error("Attempting to use ConnectionManager after "
-         "destroying it.");
+      throw std::logic_error("Attempting to use ConnectionManager after destroying it.");
    }
-   if ((spInstance!=NULL) && (spInstance!=pManager)) 
+
+   if ((spInstance != NULL) && (spInstance != pManager))
    {
       delete spInstance;
    }
+
    spInstance = pManager;
 }
 
@@ -113,23 +114,22 @@ void ConnectionManager::mapConnection( ConnectionManager* pManager )
 *
 *  @return TRUE is the interface is supported
 */
-bool ConnectionManager::queryInterface( const char *interfaceName,
-                                       void** interfaceAddress ) 
+bool ConnectionManager::queryInterface(const char* interfaceName, void** interfaceAddress)
 {
    string name = interfaceName;
    *interfaceAddress = NULL;
 
-   if (name=="ModelServices2") 
+   if (name == "ModelServices2")
    {
       *interfaceAddress = static_cast<ModelServices*>(ModelServicesImp::instance());
    }
 
-   if (name=="PlugInManagerServices2") 
+   if (name == "PlugInManagerServices2")
    {
       *interfaceAddress = static_cast<PlugInManagerServices*>(PlugInManagerServicesImp::instance());
    }
 
-   if (name=="UtilityServices2") 
+   if (name == "UtilityServices2")
    {
       *interfaceAddress = static_cast<UtilityServices*>(UtilityServicesImp::instance());
    }
@@ -139,17 +139,17 @@ bool ConnectionManager::queryInterface( const char *interfaceName,
       *interfaceAddress = static_cast<AnimationServices*>(AnimationServicesImp::instance());
    }
 
-   if (name=="DesktopServices2") 
+   if (name == "DesktopServices2")
    {
       *interfaceAddress = static_cast<DesktopServices*>(DesktopServicesImp::instance());
    }
 
-   if (name=="ApplicationServices2") 
+   if (name == "ApplicationServices2")
    {
       *interfaceAddress = static_cast<ApplicationServices*>(ApplicationServicesImp::instance());
    }
 
-   if (*interfaceAddress!=NULL) 
+   if (*interfaceAddress != NULL)
    {
       return true;
    }

@@ -7,10 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#include "DateTimeImp.h"
 #include "AppConfig.h"
+#include "DateTimeImp.h"
 #include "TimeStruct.h"
 
 #include <locale>
@@ -19,10 +17,10 @@
 
 using namespace std;
 
-DateTimeImp::DateTimeImp()
+DateTimeImp::DateTimeImp() :
+   mTime(0),
+   mOnlyDateIsValid(false)
 {
-   mTime = 0;
-   mOnlyDateIsValid = false;
 }
 
 DateTimeImp::DateTimeImp(const DateTimeImp& rhs)
@@ -30,14 +28,15 @@ DateTimeImp::DateTimeImp(const DateTimeImp& rhs)
    *this = rhs;
 }
 
-DateTimeImp::DateTimeImp(const time_t &fromTime)
+DateTimeImp::DateTimeImp(const time_t& fromTime) :
+   mTime(static_cast<unsigned int>(fromTime) + TimeStruct::TimeScaleOffset),
+   mOnlyDateIsValid(false)
 {
-   mTime = static_cast<unsigned int>(fromTime) + TimeStruct::TimeScaleOffset;
-   mOnlyDateIsValid = false;
 }
 
-DateTimeImp::DateTimeImp(const string &fromTime) :
-      mTime(0), mOnlyDateIsValid(false)
+DateTimeImp::DateTimeImp(const string& fromTime) :
+   mTime(0),
+   mOnlyDateIsValid(false)
 {
    set(fromTime);
 }
@@ -59,13 +58,21 @@ DateTimeImp& DateTimeImp::operator =(const DateTimeImp& rhs)
 
 bool DateTimeImp::operator ==(const DateTimeImp& rhs) const
 {
-   if (mOnlyDateIsValid != rhs.mOnlyDateIsValid) { return false; }
+   if (mOnlyDateIsValid != rhs.mOnlyDateIsValid)
+   {
+      return false;
+   }
+
    return (difftime(mTime, rhs.mTime) == 0.0);
 }
 
 bool DateTimeImp::operator !=(const DateTimeImp& rhs) const
 {
-   if (mOnlyDateIsValid != rhs.mOnlyDateIsValid) { return true; }
+   if (mOnlyDateIsValid != rhs.mOnlyDateIsValid)
+   {
+      return true;
+   }
+
    return (difftime(mTime, rhs.mTime) != 0.0);
 }
 
@@ -132,21 +139,21 @@ void DateTimeImp::setStructured(time_t fromTime)
 void DateTimeImp::setToCurrentTime()
 {
    time_t lTime = mTime;
-   time((time_t*) &lTime);
+   time(&lTime);
 
    mTime = static_cast<unsigned int>(lTime + TimeStruct::TimeScaleOffset);
    mOnlyDateIsValid = false;
 }
 
 bool DateTimeImp::set(unsigned short year, unsigned short month, unsigned short day,
-                      unsigned short hour, unsigned short min, unsigned short sec)
+                      unsigned short hour, unsigned short min, unsigned short second)
 {
-   static unsigned char monthDays[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
+   static unsigned char sMonthDays[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
    mTime = 0;
 
    // Check for invalid dates
    if (year < 1900 || month < 1 || month > 12 || day < 1 || day > 31 ||
-       hour > 23 || min > 59 || sec > 59)
+       hour > 23 || min > 59 || second > 59)
    {
       return false;
    }
@@ -170,7 +177,7 @@ bool DateTimeImp::set(unsigned short year, unsigned short month, unsigned short 
    }
    else
    {
-      if (day > monthDays[month - 1])
+      if (day > sMonthDays[month - 1])
       {
          return false;
       }
@@ -178,12 +185,12 @@ bool DateTimeImp::set(unsigned short year, unsigned short month, unsigned short 
 
    struct tm tStruct;
    tStruct.tm_year = year - 1900;
-   tStruct.tm_mon  = month - 1;
+   tStruct.tm_mon = month - 1;
    tStruct.tm_mday = day;
    tStruct.tm_hour = hour;
-   tStruct.tm_min  = min;
-   tStruct.tm_sec  = sec;
-   tStruct.tm_isdst= 0;
+   tStruct.tm_min = min;
+   tStruct.tm_sec = second;
+   tStruct.tm_isdst = 0;
    tStruct.tm_wday = 0;
    tStruct.tm_yday = 0;
 
@@ -206,7 +213,12 @@ bool DateTimeImp::set(unsigned short year, unsigned short month, unsigned short 
 bool DateTimeImp::set(const std::string &fromTime)
 {
    stringstream ft(fromTime);
-   unsigned int year, month, day, hour, min, sec;
+   unsigned int year;
+   unsigned int month;
+   unsigned int day;
+   unsigned int hour;
+   unsigned int min;
+   unsigned int sec;
    char dummy;
    ft >> year >> dummy
       >> month >> dummy
@@ -256,14 +268,14 @@ bool DateTimeImp::isValid() const
 
 int DateTimeImp::getMonth(const string& month)
 {
-   static const char* const shortMonthNames[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+   static const char* const sShortMonthNames[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun",
       "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
-   static const char* const longMonthNames[] = { "January", "February", "March", "April", "May", "June",
+   static const char* const sLongMonthNames[] = { "January", "February", "March", "April", "May", "June",
       "July", "August", "September", "October", "November", "December" };
 
    for (int i = 0; i < 12; i++)
    {
-      if ((month == shortMonthNames[i]) || (month == longMonthNames[i]))
+      if ((month == sShortMonthNames[i]) || (month == sLongMonthNames[i]))
       {
          return i + 1;
       }
@@ -274,13 +286,13 @@ int DateTimeImp::getMonth(const string& month)
 
 int DateTimeImp::getDay(const string& day)
 {
-   static const char* const shortDayNames[] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
-   static const char* const longDayNames[] = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
+   static const char* const sShortDayNames[] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
+   static const char* const sLongDayNames[] = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
       "Friday", "Saturday" };
 
    for (int i = 0; i < 7; i++)
    {
-      if ((day == shortDayNames[i]) || (day == longDayNames[i]))
+      if ((day == sShortDayNames[i]) || (day == sLongDayNames[i]))
       {
          return i + 1;
       }

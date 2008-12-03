@@ -96,13 +96,12 @@ void CurveCollectionImp::draw()
       return;
    }
 
-   for (unsigned int i = 0; i < mCurves.size(); i++)
+   for (vector<Curve*>::iterator iter = mCurves.begin(); iter != mCurves.end(); ++iter)
    {
-      Curve* pCurve = NULL;
-      pCurve = mCurves.at(i);
+      CurveImp* pCurve = dynamic_cast<CurveImp*>(*iter);
       if (pCurve != NULL)
       {
-         ((CurveAdapter*) pCurve)->draw();
+         pCurve->draw();
       }
    }
 }
@@ -115,14 +114,12 @@ Curve* CurveCollectionImp::addCurve()
       return NULL;
    }
 
-   bool bPrimary = false;
-   bPrimary = isPrimary();
+   bool bPrimary = isPrimary();
 
-   Curve* pCurve = NULL;
-   pCurve = new CurveAdapter(pPlot, bPrimary);
+   Curve* pCurve = new CurveAdapter(pPlot, bPrimary);
    if (pCurve != NULL)
    {
-      ((CurveAdapter*) pCurve)->CurveImp::setColor(mColor);
+      pCurve->setColor(QCOLOR_TO_COLORTYPE(mColor));
       pCurve->setLineWidth(mLineWidth);
       pCurve->setLineStyle(mLineStyle);
       insertCurve(pCurve);
@@ -178,21 +175,17 @@ bool CurveCollectionImp::deleteCurve(Curve* pCurve)
       return false;
    }
 
-   vector<Curve*>::iterator iter = mCurves.begin();
-   while (iter != mCurves.end())
+   for (vector<Curve*>::iterator iter = mCurves.begin(); iter != mCurves.end(); ++iter)
    {
-      Curve* pCurrentCurve = NULL;
-      pCurrentCurve = *iter;
+      Curve* pCurrentCurve = *iter;
       if (pCurrentCurve == pCurve)
       {
          mCurves.erase(iter);
          emit curveDeleted(pCurve);
          notify(SIGNAL_NAME(CurveCollection, CurveDeleted), boost::any(pCurve));
-         delete (CurveAdapter*) pCurrentCurve;
+         delete dynamic_cast<CurveImp*>(pCurve);
          return true;
       }
-
-      ++iter;
    }
 
    return false;
@@ -231,15 +224,12 @@ LineStyle CurveCollectionImp::getLineStyle() const
 
 bool CurveCollectionImp::hit(LocationType point) const
 {
-   unsigned int numCurves = mCurves.size();
-   for (unsigned int i = 0; i < numCurves; i++)
+   for (vector<Curve*>::const_iterator iter = mCurves.begin(); iter != mCurves.end(); ++iter)
    {
-      Curve* pCurve = NULL;
-      pCurve = mCurves.at(i);
+      CurveImp* pCurve = dynamic_cast<CurveImp*>(*iter);
       if (pCurve != NULL)
       {
-         bool bHit = false;
-         bHit = ((CurveAdapter*) pCurve)->hit(point);
+         bool bHit = pCurve->hit(point);
          if (bHit == true)
          {
             return true;
@@ -401,14 +391,12 @@ void CurveCollectionImp::setColor(const QColor& clrCurve)
    {
       mColor = clrCurve;
 
-      unsigned int numCurves = mCurves.size();
-      for (unsigned int i = 0; i < numCurves; i++)
+      for (vector<Curve*>::iterator iter = mCurves.begin(); iter != mCurves.end(); ++iter)
       {
-         Curve* pCurve = NULL;
-         pCurve = mCurves.at(i);
+         CurveImp* pCurve = dynamic_cast<CurveImp*>(*iter);
          if (pCurve != NULL)
          {
-            ((CurveAdapter*) pCurve)->CurveImp::setColor(mColor);
+            pCurve->setColor(mColor);
          }
       }
 
@@ -466,18 +454,18 @@ void CurveCollectionImp::setLineStyle(LineStyle eStyle)
 
 bool CurveCollectionImp::toXml(XMLWriter* pXml) const
 {
-   if(!PlotObjectImp::toXml(pXml))
+   if (!PlotObjectImp::toXml(pXml))
    {
       return false;
    }
    pXml->addAttr("color", QCOLOR_TO_COLORTYPE(mColor));
    pXml->addAttr("lineWidth", mLineWidth);
    pXml->addAttr("lineStyle", mLineStyle);
-   for(vector<Curve*>::const_iterator it = mCurves.begin(); it != mCurves.end(); ++it)
+   for (vector<Curve*>::const_iterator it = mCurves.begin(); it != mCurves.end(); ++it)
    {
       const CurveImp* pCurve = dynamic_cast<CurveImp*>(*it);
       pXml->pushAddPoint(pXml->addElement("Curve"));
-      if(pCurve != NULL || !pCurve->toXml(pXml))
+      if (pCurve == NULL || !pCurve->toXml(pXml))
       {
          return false;
       }
@@ -488,24 +476,21 @@ bool CurveCollectionImp::toXml(XMLWriter* pXml) const
 
 bool CurveCollectionImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   if(pDocument == NULL || !PlotObjectImp::fromXml(pDocument, version))
+   if (pDocument == NULL || !PlotObjectImp::fromXml(pDocument, version))
    {
       return false;
    }
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
-   ColorType color = StringUtilities::fromXmlString<ColorType>(
-      A(pElem->getAttribute(X("color"))));
+   DOMElement* pElem = static_cast<DOMElement*>(pDocument);
+   ColorType color = StringUtilities::fromXmlString<ColorType>(A(pElem->getAttribute(X("color"))));
    mColor = COLORTYPE_TO_QCOLOR(color);
-   mLineWidth = StringUtilities::fromXmlString<int>(
-      A(pElem->getAttribute(X("lineWidth"))));
-   mLineStyle = StringUtilities::fromXmlString<LineStyle>(
-      A(pElem->getAttribute(X("lineStyle"))));
-   for(DOMNode *pChld = pElem->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
+   mLineWidth = StringUtilities::fromXmlString<int>(A(pElem->getAttribute(X("lineWidth"))));
+   mLineStyle = StringUtilities::fromXmlString<LineStyle>(A(pElem->getAttribute(X("lineStyle"))));
+   for (DOMNode* pChld = pElem->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
    {
-      if(XMLString::equals(pChld->getNodeName(), X("Curve")))
+      if (XMLString::equals(pChld->getNodeName(), X("Curve")))
       {
-         CurveImp *pCurve = dynamic_cast<CurveImp*>(addCurve());
-         if(pCurve == NULL || !pCurve->fromXml(pChld, version))
+         CurveImp* pCurve = dynamic_cast<CurveImp*>(addCurve());
+         if (pCurve == NULL || !pCurve->fromXml(pChld, version))
          {
             return false;
          }

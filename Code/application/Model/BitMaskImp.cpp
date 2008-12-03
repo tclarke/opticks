@@ -7,14 +7,15 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "BitMaskImp.h"
 #include "AppVerify.h"
+#include "BitMaskImp.h"
+#include "XercesIncludes.h"
 #include "xmlreader.h"
+
+#include <limits>
 #include <memory.h>
 #include <stdlib.h>
 #include <sstream>
-
-#include "XercesIncludes.h"
 
 #if !defined(__SUNPRO_CC) || __SUNPRO_CC > 0x550
 # include <boost/crc.hpp>
@@ -27,47 +28,39 @@ XERCES_CPP_NAMESPACE_USE
 // The number of bits in a int. Note that the code does assume 32 bits
 // in places. This is only done where assuming 32 bits allows divide to be
 // replaced with >> and the mod operator (%) with &.
-#define LONG_BITS   (8*sizeof(int))
+#define LONG_BITS   (8 * sizeof(int))
 
-static inline int countBits (unsigned int v);
-static inline bool regionsOverlap (int r1x1, int r1y1, int r1x2, int r1y2,
-                           int r2x1, int r2y1, int r2x2, int r2y2);
-
-#ifndef min
-#define min(x,y) ((x)<(y)?(x):(y))
-#endif
-
-#ifndef max
-#define max(x,y) ((x)>(y)?(x):(y))
-#endif
-
-#ifndef NULL
-#define NULL 0
-#endif
+static inline int countBits(unsigned int v);
+static inline bool regionsOverlap(int r1x1, int r1y1, int r1x2, int r1y2,
+                                  int r2x1, int r2y1, int r2x2, int r2y2);
 
 /**
  *  Default Constructor.
  *
  *  Creates an empty BitMask.
  */
-BitMaskImp::BitMaskImp ()
-{
-   mx1 = my1 = mx2 = my2 = 0;
-   mbbx1 = mbby1 = mbbx2 = mbby2 = 0;
-
-   mxSize = mySize = 0;
-   mSize = 0;
-   mCount = 0;
-
-   mOutside = false;
-
-   mMask = NULL;
-
-   mBuffer = NULL;
-   mBufferX1 = mBufferY1 = 0;
-   mBufferX2 = mBufferY2 = 0;
-   mBufferNeedsUpdated = true;
-}
+BitMaskImp::BitMaskImp() :
+   mx1(0),
+   my1(0),
+   mx2(0),
+   my2(0),
+   mbbx1(0),
+   mbby1(0),
+   mbbx2(0),
+   mbby2(0),
+   mxSize(0),
+   mySize(0),
+   mSize(0),
+   mCount(0),
+   mOutside(false),
+   mpMask(NULL),
+   mpBuffer(NULL),
+   mBufferX1(0),
+   mBufferY1(0),
+   mBufferX2(0),
+   mBufferY2(0),
+   mBufferNeedsUpdated(true)
+{}
 
 /**
  *  Copy Constructor.
@@ -78,68 +71,70 @@ BitMaskImp::BitMaskImp ()
  *  @param  rhs
  *          "Right Hand Side". The mask to copy from.
  */
-BitMaskImp::BitMaskImp (const BitMaskImp &rhs)
+BitMaskImp::BitMaskImp(const BitMaskImp& rhs) :
+   mx1(rhs.mx1),
+   my1(rhs.my1),
+   mx2(rhs.mx2),
+   my2(rhs.my2),
+   mbbx1(rhs.mbbx1),
+   mbby1(rhs.mbby1),
+   mbbx2(rhs.mbbx2),
+   mbby2(rhs.mbby2),
+   mxSize(rhs.mxSize),
+   mySize(rhs.mySize),
+   mSize(rhs.mSize),
+   mCount(rhs.mCount),
+   mOutside(rhs.mOutside),
+   mpMask(NULL),
+   mpBuffer(NULL),
+   mBufferX1(0),
+   mBufferY1(0),
+   mBufferX2(0),
+   mBufferY2(0),
+   mBufferNeedsUpdated(true)
 {
-   int i;
-
-   mx1 = rhs.mx1;
-   my1 = rhs.my1;
-   mx2 = rhs.mx2;
-   my2 = rhs.my2;
-
-   mbbx1 = rhs.mbbx1;
-   mbby1 = rhs.mbby1;
-   mbbx2 = rhs.mbbx2;
-   mbby2 = rhs.mbby2;
-
-   mxSize = rhs.mxSize;
-   mySize = rhs.mySize;
-   mSize = rhs.mSize;
-
-   mCount = rhs.mCount;
-   
-   mOutside = rhs.mOutside;
-
-   mBuffer = NULL;
-
-   if (rhs.mMask)
+   if (rhs.mpMask)
    {
-      mMask = new unsigned int* [mySize];
-      mMask[0] = new (nothrow) unsigned int [mSize];
-      if (mMask[0] == NULL)
+      mpMask = new unsigned int*[mySize];
+      mpMask[0] = new (nothrow) unsigned int[mSize];
+      if (mpMask[0] == NULL)
       {
-         delete[] mMask;
-         mMask = NULL;
+         delete [] mpMask;
+         mpMask = NULL;
          throw bad_alloc();
       }
 
-      memcpy (mMask[0], rhs.mMask[0], mSize*sizeof (unsigned int));
+      memcpy(mpMask[0], rhs.mpMask[0], mSize * sizeof(unsigned int));
 
-      for (i=1; i<=my2-my1; i++) mMask[i] = mMask[i-1]+mxSize;
+      for (int i = 1; i <= my2 - my1; ++i)
+      {
+         mpMask[i] = mpMask[i - 1] + mxSize;
+      }
    }
-   else
-      mMask = NULL;
-   mBufferNeedsUpdated = true;
 }
 
-BitMaskImp::BitMaskImp (const bool **pRegion, int x1, int y1, int x2, int y2)
+BitMaskImp::BitMaskImp(const bool** pRegion, int x1, int y1, int x2, int y2) :
+   mx1(0),
+   my1(0),
+   mx2(0),
+   my2(0),
+   mbbx1(0),
+   mbby1(0),
+   mbbx2(0),
+   mbby2(0),
+   mxSize(0),
+   mySize(0),
+   mSize(0),
+   mCount(0),
+   mOutside(false),
+   mpMask(NULL),
+   mpBuffer(NULL),
+   mBufferX1(0),
+   mBufferY1(0),
+   mBufferX2(0),
+   mBufferY2(0),
+   mBufferNeedsUpdated(true)
 {
-   mx1 = my1 = mx2 = my2 = 0;
-   mbbx1 = mbby1 = mbbx2 = mbby2 = 0;
-
-   mxSize = mySize = 0;
-   mSize = 0;
-   mCount = 0;
-
-   mOutside = false;
-
-   mMask = NULL;
-
-   mBuffer = NULL;
-   mBufferX1 = mBufferY1 = 0;
-   mBufferX2 = mBufferY2 = 0;
-   mBufferNeedsUpdated = true;
-
    if (pRegion == NULL)
    {
       setRegion(x1, y1, x2, y2, DRAW);
@@ -147,17 +142,17 @@ BitMaskImp::BitMaskImp (const bool **pRegion, int x1, int y1, int x2, int y2)
    else
    {
       growToInclude(x1, y1, x2, y2, mOutside);
-      int offset = mx1-x1;
-      for (int row=y1; row<=y2; ++row)
+      int offset = mx1 - x1;
+      for (int row = y1; row <= y2; ++row)
       {
-         const bool *pBuffer = &pRegion[row-y1][offset];
-         const bool *pSafeLow = pRegion[row-y1];
-         const bool *pSafeHigh = &pRegion[row-y1][x2-x1+1];
-         unsigned int *pRow = mMask[row-y1];
-         const bool *pStop = pSafeLow + 32;
-         for (int col=mx1; col <= x2; col+=32, pStop+=32)
+         const bool* pBuffer = &pRegion[row - y1][offset];
+         const bool* pSafeLow = pRegion[row - y1];
+         const bool* pSafeHigh = &pRegion[row - y1][x2 - x1 + 1];
+         unsigned int* pRow = mpMask[row - y1];
+         const bool* pStop = pSafeLow + 32;
+         for (int col = mx1; col <= x2; col += 32, pStop += 32)
          {
-            unsigned int values=0;
+            unsigned int values = 0;
             unsigned int mask = 0x80000000;
 
             pStop = min(pStop, pSafeHigh);
@@ -168,7 +163,7 @@ BitMaskImp::BitMaskImp (const bool **pRegion, int x1, int y1, int x2, int y2)
                mask >>= 1;
             }
 
-            for (; pBuffer<pStop; ++pBuffer)
+            for (; pBuffer < pStop; ++pBuffer)
             {
                if (*pBuffer)
                {
@@ -189,18 +184,18 @@ BitMaskImp::BitMaskImp (const bool **pRegion, int x1, int y1, int x2, int y2)
  *
  *  Frees the memory stored by the mask
  */
-BitMaskImp::~BitMaskImp ()
+BitMaskImp::~BitMaskImp()
 {
-   if (mMask)
+   if (mpMask)
    {
-      delete [] mMask[0];
-      delete [] mMask;
+      delete [] mpMask[0];
+      delete [] mpMask;
    }
 
-   if (mBuffer)
+   if (mpBuffer)
    {
-      delete [] mBuffer[0];
-      delete [] mBuffer;
+      delete [] mpBuffer[0];
+      delete [] mpBuffer;
    }
 }
 
@@ -213,19 +208,17 @@ BitMaskImp::~BitMaskImp ()
  *  @param  rhs
  *          "Right Hand Side". The mask to copy from.
  */
-BitMaskImp & BitMaskImp::operator= (const BitMaskImp &rhs)
+BitMaskImp& BitMaskImp::operator=(const BitMaskImp& rhs)
 {
-   if (rhs.mMask != this->mMask)
+   if (rhs.mpMask != mpMask)
    {
-      int i;
-
-      if (mMask)
+      if (mpMask)
       {
-         delete [] mMask[0];
-         delete [] mMask;
-         mMask = NULL;
+         delete [] mpMask[0];
+         delete [] mpMask;
+         mpMask = NULL;
       }
-      
+
       mx1 = rhs.mx1;
       my1 = rhs.my1;
       mx2 = rhs.mx2;
@@ -242,24 +235,40 @@ BitMaskImp & BitMaskImp::operator= (const BitMaskImp &rhs)
 
       mCount = rhs.mCount;
 
-      if (rhs.mMask)
+      if (rhs.mpMask)
       {
-         mMask = new unsigned int* [my2-my1+1];
-         mMask[0] = new (nothrow) unsigned int [mSize];
-         if (mMask[0] == NULL)
+         mpMask = new unsigned int*[my2 - my1 + 1];
+         mpMask[0] = new (nothrow) unsigned int[mSize];
+         if (mpMask[0] == NULL)
          {
-            delete[] mMask;
-            mMask = NULL;
+            delete[] mpMask;
+            mpMask = NULL;
             throw bad_alloc();
          }
 
-         memcpy (mMask[0], rhs.mMask[0], mSize*sizeof (unsigned int));
+         memcpy(mpMask[0], rhs.mpMask[0], mSize * sizeof(unsigned int));
 
-         for (i=1; i<=my2-my1; i++) mMask[i] = mMask[i-1]+mxSize;
+         for (int i = 1; i <= my2 - my1; ++i)
+         {
+            mpMask[i] = mpMask[i - 1] + mxSize;
+         }
       }
       else
-         mMask = NULL;
+      {
+         mpMask = NULL;
+      }
 
+      if (mpBuffer != NULL)
+      {
+         delete [] mpBuffer[0];
+         delete [] mpBuffer;
+         mpBuffer = NULL;
+      }
+
+      mBufferX1 = 0;
+      mBufferY1 = 0;
+      mBufferX2 = 0;
+      mBufferY2 = 0;
       mBufferNeedsUpdated = true;
    }
 
@@ -278,11 +287,12 @@ BitMaskImp & BitMaskImp::operator= (const BitMaskImp &rhs)
  *  @param  rhs
  *          "Right Hand Side". The mask to merge from.
  */
-void BitMaskImp::operator|= (const BitMaskImp &rhs)
+void BitMaskImp::operator|=(const BitMaskImp& rhs)
 {
-   int x, y;
-
-   if (this == &rhs) return;   // OR'ing with self
+   if (this == &rhs)
+   {
+      return;   // OR'ing with self
+   }
 
    if (mCount == 0)
    {
@@ -311,21 +321,26 @@ void BitMaskImp::operator|= (const BitMaskImp &rhs)
    bool overlap = regionsOverlap (mx1, my1, mx2, my2, rhs.mx1, rhs.my1, rhs.mx2, rhs.my2);
    if (!overlap && (mOutside && rhs.mOutside))
    {
-      if (mMask)
+      if (mpMask)
       {
-         delete [] mMask[0];
-         delete [] mMask;
-         mMask = NULL;
+         delete [] mpMask[0];
+         delete [] mpMask;
+         mpMask = NULL;
       }
 
-      mx1 = my1 = mx2 = my2 = 0;
-      mxSize = mySize = mSize = mCount = 0;
-
+      mx1 = 0;
+      my1 = 0;
+      mx2 = 0;
+      my2 = 0;
+      mxSize = 0;
+      mySize = 0;
+      mSize = 0;
+      mCount = 0;
       mOutside = true;
 
       return;
    }
-   else 
+   else
    {
       if (!overlap && mOutside)
       {
@@ -340,32 +355,34 @@ void BitMaskImp::operator|= (const BitMaskImp &rhs)
          }
          else
          {
-            unsigned int **lrhsMask = rhs.mMask;
-            unsigned int **lMask;
+            unsigned int** lrhsMask = rhs.mpMask;
+            unsigned int** lMask = NULL;
 
-            growToInclude (rhs.mx1, rhs.my1, rhs.mx2, rhs.my2, mOutside | rhs.mOutside);
+            growToInclude(rhs.mx1, rhs.my1, rhs.mx2, rhs.my2, mOutside | rhs.mOutside);
 
-            int xOffset = (rhs.mx1-mx1)/LONG_BITS;
+            int xOffset = (rhs.mx1 - mx1) / LONG_BITS;
 
-            lMask = mMask+rhs.my1-my1;
-            for (y = rhs.my1; y<=rhs.my2; y++)
+            lMask = mpMask + rhs.my1 - my1;
+            for (int y = rhs.my1; y <= rhs.my2; ++y)
             {
-               for (x=0; x<rhs.mxSize; x++)
-                  (*lMask)[x+xOffset] |= (*lrhsMask)[x];
+               for (int x = 0; x < rhs.mxSize; ++x)
+               {
+                  (*lMask)[x + xOffset] |= (*lrhsMask)[x];
+               }
 
                lrhsMask++;
                lMask++;
             }
 
-            mCount = computeCount ();
-            mx1 = min (mx1, rhs.mx1);
-            mx2 = max (mx2, rhs.mx2);
-            my1 = min (my1, rhs.my1);
-            my2 = max (my2, rhs.my2);
-            mbbx1 = min (mbbx1, rhs.mbbx1);
-            mbbx2 = max (mbbx2, rhs.mbbx2);
-            mbby1 = min (mbby1, rhs.mbby1);
-            mbby2 = max (mbby2, rhs.mbby2);
+            mCount = computeCount();
+            mx1 = min(mx1, rhs.mx1);
+            mx2 = max(mx2, rhs.mx2);
+            my1 = min(my1, rhs.my1);
+            my2 = max(my2, rhs.my2);
+            mbbx1 = min(mbbx1, rhs.mbbx1);
+            mbbx2 = max(mbbx2, rhs.mbbx2);
+            mbby1 = min(mbby1, rhs.mbby1);
+            mbby2 = max(mbby2, rhs.mbby2);
          }
       }
    }
@@ -380,13 +397,11 @@ void BitMaskImp::operator|= (const BitMaskImp &rhs)
  *  @param  rhs
  *          "Right Hand Side". The mask to merge from.
  */
-void BitMaskImp::operator^= (const BitMaskImp &rhs)
+void BitMaskImp::operator^=(const BitMaskImp& rhs)
 {
-   int x, y;
-
    if (this == &rhs) // XOR'ing with self
    {
-      clear ();
+      clear();
       mOutside = false;
       return;
    }
@@ -400,7 +415,7 @@ void BitMaskImp::operator^= (const BitMaskImp &rhs)
       else   // full mask XOR'ed with anything is that mask inverted
       {
          *this = rhs;
-         this->invert ();
+         invert();
       }
       mBufferNeedsUpdated = true;
       return;
@@ -414,68 +429,32 @@ void BitMaskImp::operator^= (const BitMaskImp &rhs)
       else   // XOR'ing with a solid mask
       {
          *this = rhs;
-         this->invert ();
+         invert();
       }
       mBufferNeedsUpdated = true;
       return;
    }
-/*
-   bool overlap = regionsOverlap (mx1, my1, mx2, my2, rhs.mx1, rhs.my1, rhs.mx2, rhs.my2);
-   if (!overlap && (mOutside && rhs.mOutside))
+
+   unsigned int** lrhsMask = rhs.mpMask;
+   unsigned int** lMask = NULL;
+
+   growToInclude(rhs.mx1, rhs.my1, rhs.mx2, rhs.my2, mOutside ^ rhs.mOutside);
+
+   int xOffset = (rhs.mx1 - mx1) / LONG_BITS;
+
+   lMask = mpMask + rhs.my1 - my1;
+   for (int y = rhs.my1; y <= rhs.my2; ++y)
    {
-      if (mMask)
+      for (int x = 0; x < rhs.mxSize; ++x)
       {
-         delete [] mMask[0];
-         delete [] mMask;
-         mMask = NULL;
+         (*lMask)[x + xOffset] ^= (*lrhsMask)[x];
       }
 
-      mx1 = my1 = mx2 = my2 = 0;
-      mxSize = mySize = mSize = mCount = 0;
-
-      mOutside = true;
-
-      return;
+      lrhsMask++;
+      lMask++;
    }
-   else 
-   {
-      if (!overlap && mOutside)
-      {
-         return;
-      }
-      else
-      {
-         if (!overlap && rhs.mOutside)
-         {
-            *this = rhs;
-            return;
-         }
-         else
-         {
-*/
-            unsigned int **lrhsMask = rhs.mMask;
-            unsigned int **lMask;
 
-            growToInclude (rhs.mx1, rhs.my1, rhs.mx2, rhs.my2, mOutside ^ rhs.mOutside);
-
-            int xOffset = (rhs.mx1-mx1)/LONG_BITS;
-
-            lMask = mMask+rhs.my1-my1;
-            for (y = rhs.my1; y<=rhs.my2; y++)
-            {
-               for (x=0; x<rhs.mxSize; x++)
-                  (*lMask)[x+xOffset] ^= (*lrhsMask)[x];
-
-               lrhsMask++;
-               lMask++;
-            }
-
-            mCount = computeCount ();
-/*
-         }
-      }
-   }
-*/
+   mCount = computeCount();
    mBufferNeedsUpdated = true;
 }
 
@@ -490,11 +469,15 @@ void BitMaskImp::operator^= (const BitMaskImp &rhs)
  *  @param  rhs
  *          "Right Hand Side". The mask to merge from.
  */
-void BitMaskImp::operator&= (const BitMaskImp &rhs)
+void BitMaskImp::operator&=(const BitMaskImp& rhs)
 {
-   int x, y;
+   int x;
+   int y;
 
-   if (this == &rhs) return;   // AND'ing with self
+   if (this == &rhs)
+   {
+      return;   // AND'ing with self
+   }
 
    if (mCount == 0)
    {
@@ -524,68 +507,72 @@ void BitMaskImp::operator&= (const BitMaskImp &rhs)
    bool overlap = regionsOverlap (mx1, my1, mx2, my2, rhs.mx1, rhs.my1, rhs.mx2, rhs.my2);
    if (overlap || (mOutside && rhs.mOutside))
    {
-      unsigned int **lrhsMask;
-      unsigned int **lMask;
-//      unsigned int fill = 0xff * rhs.mOutside;
+      unsigned int** lrhsMask = NULL;
+      unsigned int** lMask = NULL;
       unsigned int fill = 0xffffffff * rhs.mOutside;
 
       growToInclude (rhs.mx1, rhs.my1, rhs.mx2, rhs.my2, mOutside & rhs.mOutside);
 
-      int xOffset = (rhs.mx1-mx1)/LONG_BITS;
+      int xOffset = (rhs.mx1 - mx1) / LONG_BITS;
 
-      int size = mxSize*sizeof (unsigned int);
-      for (y=my1; y<rhs.my1; y++)   // rows at the bottom with no overlap
+      int size = mxSize * sizeof(unsigned int);
+      for (y = my1; y < rhs.my1; ++y)   // rows at the bottom with no overlap
       {
-//         memset (mMask[y-my1], fill, size);
-         for (x=0; x<mxSize; x++)
-            mMask[y-my1][x] &= fill;
+         for (x = 0; x < mxSize; ++x)
+         {
+            mpMask[y - my1][x] &= fill;
+         }
       }
 
       if (mx1 < rhs.mx1)   // cols at the left with no overlap
       {
-         size = xOffset*sizeof (unsigned int);
-         lMask = mMask + rhs.my1 - my1;
-         for (y=rhs.my1; y<=rhs.my2; y++)
+         size = xOffset * sizeof(unsigned int);
+         lMask = mpMask + rhs.my1 - my1;
+         for (y = rhs.my1; y <= rhs.my2; ++y)
          {
-//            memset (*lMask++, fill, size);
-            for (x=0; x<xOffset; x++)
+            for (x = 0; x < xOffset; ++x)
+            {
                (*lMask)[x] &= fill;
+            }
+
             lMask++;
          }
       }
       
       if (mx2 > rhs.mx2)   // cols at the right with no overlap
       {
-         size = (mx2-rhs.mx2)/LONG_BITS*sizeof(unsigned int);
-         int pos = (rhs.mx2+1-mx1)/LONG_BITS;
-         lMask = mMask + rhs.my1 - my1;
-         for (y=rhs.my1; y<=rhs.my2; y++, lMask++)
+         size = (mx2 - rhs.mx2) / LONG_BITS * sizeof(unsigned int);
+         int pos = (rhs.mx2 + 1 - mx1) / LONG_BITS;
+         lMask = mpMask + rhs.my1 - my1;
+         for (y = rhs.my1; y <= rhs.my2; ++y, ++lMask)
          {
-//            memset (&(*lMask)[pos], fill, size);
-            for (x = 0; x < (int) (size / sizeof(unsigned int)); x++)
+            for (x = 0; x < static_cast<int>(size / sizeof(unsigned int)); ++x)
             {
                (&(*lMask)[pos])[x] &= fill;
             }
          }
       }
-      
-      for (y=rhs.my1; y<=rhs.my2; y++)   // overlap area
+
+      for (y = rhs.my1; y <= rhs.my2; ++y)   // overlap area
       {
-         lMask = &mMask[y-my1];
-         lrhsMask = &rhs.mMask[y-rhs.my1];
-         for (x=0; x<rhs.mxSize; x++)
+         lMask = &mpMask[y - my1];
+         lrhsMask = &rhs.mpMask[y - rhs.my1];
+         for (x = 0; x < rhs.mxSize; ++x)
+         {
             (*lMask)[x+xOffset] &= (*lrhsMask)[x];
+         }
       }
 
-      size = mxSize*sizeof (unsigned int);
-      for (; y<=my2; y++)   // rows at the top with no overlap
+      size = mxSize * sizeof(unsigned int);
+      for ( ; y <= my2; ++y)   // rows at the top with no overlap
       {
-//         memset (mMask[y-my1], fill, size);
-         for (x=0; x<mxSize; x++)
-            mMask[y-my1][x] &= fill;
+         for (x = 0; x < mxSize; ++x)
+         {
+            mpMask[y-my1][x] &= fill;
+         }
       }
 
-      mCount = computeCount ();
+      mCount = computeCount();
    }
    else // no overlap && one/both region(s) is/are 0 outside
    {
@@ -593,16 +580,21 @@ void BitMaskImp::operator&= (const BitMaskImp &rhs)
       {
          if (!rhs.mOutside)   // no overlap && both Outsides == false
          {
-            if (mMask)
+            if (mpMask)
             {
-               delete [] mMask[0];
-               delete [] mMask;
-               mMask = NULL;
+               delete [] mpMask[0];
+               delete [] mpMask;
+               mpMask = NULL;
             }
 
-            mx1 = my1 = mx2 = my2 = 0;
-            mxSize = mySize = mSize = mCount = 0;
-
+            mx1 = 0;
+            my1 = 0;
+            mx2 = 0;
+            my2 = 0;
+            mxSize = 0;
+            mySize = 0;
+            mSize = 0;
+            mCount = 0;
             mOutside = false;
          }
          return;
@@ -628,33 +620,30 @@ void BitMaskImp::operator&= (const BitMaskImp &rhs)
  *         true if the two masks are identical in content
  *         false otherwise
  */
-bool BitMaskImp::operator== (const BitMaskImp &rhs) const
+bool BitMaskImp::operator==(const BitMaskImp& rhs) const
 {
-   bool result = false;
-
    if (mOutside == rhs.mOutside)
    {
-      int left, right, bottom, top;
-      int x, y;
+      int left = min(mx1, rhs.mx1);
+      int right = max(mx2, rhs.mx2);
+      int bottom = min(my1, rhs.my1);
+      int top = max(my2, rhs.my2);
 
-      left = min (mx1, rhs.mx1);
-      right = max (mx2, rhs.mx2);
-      bottom = min (my1, rhs.my1);
-      top = max (my2, rhs.my2);
-
-      for (x=left; x<=right; x+=32)
+      for (int x = left; x <= right; x += 32)
       {
-         for (y=bottom; y<=top; y++)
+         for (int y = bottom; y <= top; ++y)
          {
-            if (getPixels (x, y) != rhs.getPixels (x, y))
+            if (getPixels(x, y) != rhs.getPixels(x, y))
+            {
                return false;
+            }
          }
       }
 
-      result = true;
+      return true;
    }
 
-   return result;
+   return false;
 }
 
 /**
@@ -662,7 +651,7 @@ bool BitMaskImp::operator== (const BitMaskImp &rhs) const
  *
  *  Re-initializes a bitmask to have no bits set
  */
-void BitMaskImp::clear ()
+void BitMaskImp::clear()
 {
    BitMaskImp temp;
    *this = temp;
@@ -679,9 +668,9 @@ void BitMaskImp::clear ()
  *  @param  rhs
  *          "Right Hand Side". The mask to merge from.
  */
-void BitMaskImp::merge (const BitMask &rhs)
+void BitMaskImp::merge(const BitMask& rhs)
 {
-   *this |= *((BitMaskImp*)&rhs);
+   *this |= *(dynamic_cast<const BitMaskImp*>(&rhs));
 }
 
 /**
@@ -692,9 +681,9 @@ void BitMaskImp::merge (const BitMask &rhs)
  *  @param  rhs
  *          "Right Hand Side". The mask to merge from.
  */
-void BitMaskImp::toggle (const BitMask &rhs)
+void BitMaskImp::toggle(const BitMask& rhs)
 {
-   *this ^= *((BitMaskImp*)&rhs);
+   *this ^= *(dynamic_cast<const BitMaskImp*>(&rhs));
 }
 
 /**
@@ -708,9 +697,9 @@ void BitMaskImp::toggle (const BitMask &rhs)
  *  @param  rhs
  *          "Right Hand Side". The mask to merge from.
  */
-void BitMaskImp::intersect (const BitMask &rhs)
+void BitMaskImp::intersect(const BitMask& rhs)
 {
-   *this &= *((BitMaskImp*)&rhs);
+   *this &= *(dynamic_cast<const BitMaskImp*>(&rhs));
 }
 
 /**
@@ -725,9 +714,9 @@ void BitMaskImp::intersect (const BitMask &rhs)
  *         true if the two masks are identical in content
  *         false otherwise
  */
-bool BitMaskImp::compare (const BitMask &rhs) const
+bool BitMaskImp::compare(const BitMask& rhs) const
 {
-   return *this == *((BitMaskImp*)&rhs);
+   return *this == *(dynamic_cast<const BitMaskImp*>(&rhs));
 }
 
 /**
@@ -737,24 +726,24 @@ bool BitMaskImp::compare (const BitMask &rhs) const
  *  become 1's. It uses the ~ operator internally to perform the
  *  inversion operation
  */
-void BitMaskImp::invert ()
+void BitMaskImp::invert()
 {
-   int j;
    int index = 0;
-
-   for (j=0; j<mSize; j++, index++)
-      (*mMask)[index] = ~(*mMask)[index];
+   for (int j = 0; j < mSize; ++j, ++index)
+   {
+      (*mpMask)[index] = ~(*mpMask)[index];
+   }
 
    if (mSize != 0)
    {
-      mCount = (mbbx2-mbbx1+1) * (mbby2-mbby1+1) - mCount;
+      mCount = (mbbx2 - mbbx1 + 1) * (mbby2 - mbby1 + 1) - mCount;
    }
 
    mOutside = !mOutside;
    mBufferNeedsUpdated = true;
 }
 
-void BitMaskImp::setRegion (int x1, int y1, int x2, int y2, ModeType op)
+void BitMaskImp::setRegion(int x1, int y1, int x2, int y2, ModeType op)
 {
    if (x1 > x2)
    {
@@ -775,40 +764,48 @@ void BitMaskImp::setRegion (int x1, int y1, int x2, int y2, ModeType op)
    // mask is not empty, we setregion on a new mask and merge the
    // two...this is a quick operation so there should be no noticable
    // loss of performance
-   if(getCount() > 0)
+   if (getCount() > 0)
    {
       BitMaskImp tmp;
-      tmp.setRegion(x1,y1,x2,y2,op);
+      tmp.setRegion(x1, y1, x2, y2, op);
       merge(tmp);
       return;
    }
    int i;
-   int x, y;
-   int inX1, inX2;
-   int leftX, rightX;
+   int x;
+   int y;
+   int leftX;
+   int rightX;
    unsigned int mask = 0;
-   unsigned int leftMask = 0xffffffff, rightMask = 0xffffffff;
+   unsigned int leftMask = 0xffffffff;
+   unsigned int rightMask = 0xffffffff;
 
-   inX1 = x1;
-   inX2 = x2;
+   int inX1 = x1;
+   int inX2 = x2;
 
-   if (x1>mx2 || x2<mx1 || y1>my2 || y2<my1 || mMask == NULL)
+   if (x1 > mx2 || x2 < mx1 || y1 > my2 || y2 < my1 || mpMask == NULL)
    {
-      if ((op==DRAW && mOutside==true) || (op==ERASE && mOutside==false))
+      if ((op == DRAW && mOutside == true) || (op == ERASE && mOutside == false))
+      {
          return;
-      else 
-         growToInclude (x1, y1, x2, y2, mOutside);
+      }
+
+      growToInclude(x1, y1, x2, y2, mOutside);
    }
 
-   leftX  = 32*(x1/32);
-   rightX = 32*(x2/32 + 1) - 1;
+   leftX = 32 * (x1 / 32);
+   rightX = 32 * (x2 / 32 + 1) - 1;
 
-   for (i=0; i<x1-leftX; i++)
-      leftMask>>=1;
+   for (i = 0; i < x1 - leftX; ++i)
+   {
+      leftMask >>= 1;
+   }
    leftMask ^= -1;
 
-   for (i=0; i<rightX-x2; i++)
-      rightMask<<=1;
+   for (i = 0; i < rightX - x2; ++i)
+   {
+      rightMask <<= 1;
+   }
    rightMask ^= -1;
 
    switch (op)
@@ -823,50 +820,54 @@ void BitMaskImp::setRegion (int x1, int y1, int x2, int y2, ModeType op)
       leftMask ^= -1;
       rightMask ^= -1;
 
-      for (y=y1; y<=y2; y++)
+      for (y = y1; y <= y2; ++y)
       {
-         if (leftX == rightX-31)
+         if (leftX == rightX - 31)
          {
-            setPixels (leftX, y, leftMask & rightMask);
+            setPixels(leftX, y, leftMask & rightMask);
          }
          else
          {
-            if (rightX-31 > leftX+32)
+            if (rightX - 31 > leftX + 32)
             {
-               setPixels (leftX, y, leftMask);
-               for (x=leftX+32; x<rightX-31; x+=32)
-                  setPixels (x, y, mask);
-               setPixels (rightX-31, y, rightMask);
+               setPixels(leftX, y, leftMask);
+               for (x = leftX + 32; x < rightX - 31; x += 32)
+               {
+                  setPixels(x, y, mask);
+               }
+               setPixels(rightX - 31, y, rightMask);
             }
             else
             {
-               setPixels (leftX, y, leftMask);
-               setPixels (rightX-31, y, rightMask);
+               setPixels(leftX, y, leftMask);
+               setPixels(rightX - 31, y, rightMask);
             }
          }
       }
       break;
    case TOGGLE:
       mask ^= -1;
-      for (y=y1; y<=y2; y++)
+      for (y = y1; y <= y2; ++y)
       {
-         if (leftX == rightX-31)
+         if (leftX == rightX - 31)
          {
-            setPixels (leftX, y, getPixels (leftX, y) ^ leftMask & rightMask);
+            setPixels(leftX, y, getPixels(leftX, y) ^ leftMask & rightMask);
          }
          else
          {
-            if (rightX-31 > leftX+32)
+            if (rightX - 31 > leftX + 32)
             {
-               setPixels (leftX, y, getPixels (leftX, y) ^ leftMask);
-               for (x=leftX+32; x<rightX-31; x+=32)
-                  setPixels (x, y, getPixels (leftX, y) ^ mask);
-               setPixels (rightX-31, y, rightMask);
+               setPixels(leftX, y, getPixels(leftX, y) ^ leftMask);
+               for (x = leftX + 32; x < rightX - 31; x += 32)
+               {
+                  setPixels(x, y, getPixels(leftX, y) ^ mask);
+               }
+               setPixels(rightX - 31, y, rightMask);
             }
             else
             {
-               setPixels (leftX, y, getPixels (leftX, y) ^ leftMask);
-               setPixels (rightX-31, y, getPixels (leftX, y) ^ rightMask);
+               setPixels(leftX, y, getPixels(leftX, y) ^ leftMask);
+               setPixels(rightX - 31, y, getPixels(leftX, y) ^ rightMask);
             }
          }
       }
@@ -892,27 +893,26 @@ void BitMaskImp::setRegion (int x1, int y1, int x2, int y2, ModeType op)
  *            for all bits in the masks.
  *         false otherwise
  */
-bool BitMaskImp::isSubsetOf (const BitMask &source) const
+bool BitMaskImp::isSubsetOf(const BitMask& source) const
 {
-   const BitMaskImp &sourceImp = (const BitMaskImp &)source;
+   const BitMaskImp& sourceImp = dynamic_cast<const BitMaskImp&>(source);
    bool result = false;
 
    if (!mOutside || (mOutside && sourceImp.mOutside))
    {
-      int left, right, bottom, top;
-      int x, y;
+      int left = min(mx1, sourceImp.mx1);
+      int right = max(mx2, sourceImp.mx2);
+      int bottom = min(my1, sourceImp.my1);
+      int top = max(my2, sourceImp.my2);
 
-      left = min (mx1, sourceImp.mx1);
-      right = max (mx2, sourceImp.mx2);
-      bottom = min (my1, sourceImp.my1);
-      top = max (my2, sourceImp.my2);
-
-      for (x=left; x<=right; x+=32)
+      for (int x = left; x <= right; x += 32)
       {
-         for (y=bottom; y<=top; y++)
+         for (int y = bottom; y <= top; ++y)
          {
-            if (((~getPixels (x, y)) | sourceImp.getPixels (x,y)) != 0xffffffff)
+            if (((~getPixels(x, y)) | sourceImp.getPixels(x, y)) != 0xffffffff)
+            {
                return false;
+            }
          }
       }
 
@@ -935,36 +935,35 @@ bool BitMaskImp::isSubsetOf (const BitMask &source) const
  *          A flag indicating whether or not to set pixel to 1 or not. 
  *         True means set the pixel to 1, false means set to 0.
  */
-void BitMaskImp::setPixel (int x, int y, bool value)
+void BitMaskImp::setPixel(int x, int y, bool value)
 {
-   int longIndex, longShift;
-   unsigned int longMask;
-   unsigned int *pMaskValue;
-   bool isSet;
-
-   if (x>mx2 || x<mx1 || y>my2 || y<my1 || mMask == NULL)
+   if (x > mx2 || x < mx1 || y > my2 || y < my1 || mpMask == NULL)
    {
-      if (value == mOutside) 
+      if (value == mOutside)
+      {
          return;
-      else 
-         growToInclude (x, y, x, y, mOutside);
+      }
+      else
+      {
+         growToInclude(x, y, x, y, mOutside);
+      }
    }
 
    if (value != mOutside)
    {
-      mbbx1 = min (mbbx1, x);
-      mbbx2 = max (mbbx2, x);
+      mbbx1 = min(mbbx1, x);
+      mbbx2 = max(mbbx2, x);
    }
 
    x -= mx1;
    y -= my1;
 
-   longIndex = x >> 5; // divide by 32
-   longShift = x & 0x1f;   // mod 32
-   longMask = 0x80000000 >> longShift;
+   int longIndex = x >> 5; // divide by 32
+   int longShift = x & 0x1f;   // mod 32
+   unsigned int longMask = 0x80000000 >> longShift;
 
-   pMaskValue = &mMask[y][longIndex];
-   isSet = (*pMaskValue & longMask) != 0;
+   unsigned int* pMaskValue = &mpMask[y][longIndex];
+   bool isSet = (*pMaskValue & longMask) != 0;
    if (value == true)
    {
       if (!isSet)
@@ -999,21 +998,21 @@ void BitMaskImp::setPixel (int x, int y, bool value)
  *  @return
  *         the value of the pixel specified
  */
-bool BitMaskImp::getPixel (int x, int y) const
+bool BitMaskImp::getPixel(int x, int y) const
 {
-   int longIndex, longShift;
-   unsigned int longMask;
-
-   if (x>mbbx2 || x<mbbx1 || y>mbby2 || y<mbby1 || mMask == NULL) return mOutside;
+   if (x > mbbx2 || x < mbbx1 || y > mbby2 || y < mbby1 || mpMask == NULL)
+   {
+      return mOutside;
+   }
 
    x -= mx1;
    y -= my1;
 
-   longIndex = x >> 5; // divide by 32
-   longShift = x & 0x1f;   // mod 32
-   longMask = 0x80000000 >> longShift;
+   int longIndex = x >> 5; // divide by 32
+   int longShift = x & 0x1f;   // mod 32
+   unsigned int longMask = 0x80000000 >> longShift;
 
-   return ((mMask[y][longIndex] & longMask) != 0);
+   return ((mpMask[y][longIndex] & longMask) != 0);
 }
 
 /**
@@ -1029,21 +1028,22 @@ bool BitMaskImp::getPixel (int x, int y) const
  *  @return
  *         the 32 bits specified, packed into an unsigned int
  */
-unsigned int BitMaskImp::getPixels (int x, int y) const
+unsigned int BitMaskImp::getPixels(int x, int y) const
 {
-   unsigned int values = 0;
-
-   if (x>mx2 || x<mx1 || y>my2 || y<my1 || mMask == NULL) 
+   if (x > mx2 || x < mx1 || y > my2 || y < my1 || mpMask == NULL)
+   {
       return mOutside * 0xffffffff;
+   }
 
    x -= mx1;
    y -= my1;
 
    if (x & 0x1f)
-      x -= (x&0x1f);
+   {
+      x -= (x & 0x1f);
+   }
 
-   values = mMask[y][x/LONG_BITS];
-
+   unsigned int values = mpMask[y][x / LONG_BITS];
    return values;
 }
 
@@ -1060,26 +1060,23 @@ unsigned int BitMaskImp::getPixels (int x, int y) const
  *         An unsigned int containing the states for 32 bits, packed
  *         into an unsigned int
  */
-void BitMaskImp::setPixels (int x, int y, unsigned int values)
+void BitMaskImp::setPixels(int x, int y, unsigned int values)
 {
-   unsigned int *pMaskValues;
-
-   if (x>mx2 || x<mx1 || y>my2 || y<my1 || mMask == NULL)
+   if (x > mx2 || x < mx1 || y > my2 || y < my1 || mpMask == NULL)
    {
-      if (values == mOutside*0xffffffff) 
-         return;
-      else 
+      if (values == mOutside * 0xffffffff)
       {
-         int rdx;
-         rdx = x - x&0x1f;
-         growToInclude (x, y, x+31, y, mOutside);
+         return;
       }
+
+      int rdx = x - x & 0x1f;
+      growToInclude(x, y, x + 31, y, mOutside);
    }
 
    x -= mx1;
    y -= my1;
 
-   pMaskValues = &mMask[y][x/LONG_BITS];
+   unsigned int* pMaskValues = &mpMask[y][x / LONG_BITS];
 
    mCount += countBits (values) - countBits (*pMaskValues);
 
@@ -1087,7 +1084,7 @@ void BitMaskImp::setPixels (int x, int y, unsigned int values)
    mBufferNeedsUpdated = true;
 }
 
-void BitMaskImp::getBoundingBox (int &x1, int &y1, int &x2, int &y2) const
+void BitMaskImp::getBoundingBox(int& x1, int& y1, int& x2, int& y2) const
 {
    x1 = mbbx1;
    y1 = mbby1;
@@ -1100,16 +1097,16 @@ bool BitMaskImp::isOutsideSelected() const
    return mOutside;
 }
 
-void BitMaskImp::clipBoundingBox (int x1, int y1, int x2, int y2)
+void BitMaskImp::clipBoundingBox(int x1, int y1, int x2, int y2)
 {
    bool bOutside = mOutside;
 
    BitMaskImp maskCopy(*this);
    clear();
 
-   for (int i = y1; i <= y2; i++)
+   for (int i = y1; i <= y2; ++i)
    {
-      for (int j = x1; j <= x2; j++)
+      for (int j = x1; j <= x2; ++j)
       {
          bool bSelected = maskCopy.getPixel(j, i);
          setPixel(j, i, bSelected);
@@ -1127,7 +1124,7 @@ void BitMaskImp::clipBoundingBox (int x1, int y1, int x2, int y2)
  *  @return
  *         the number of bits that are set in the mask
  */
-int BitMaskImp::getCount () const
+int BitMaskImp::getCount() const
 {
    return mCount;
 }
@@ -1148,19 +1145,20 @@ int BitMaskImp::getCount () const
  *  @return
  *         a 2D array of bools representing the region specified
  */
-const bool **BitMaskImp::getRegion (int x1, int y1, int x2, int y2)
+const bool** BitMaskImp::getRegion(int x1, int y1, int x2, int y2)
 {
-   int i, j, k;
-   int xSize, ySize, totalSize;
-   int left, right;
-   unsigned int values, mask;
-   int offset;
-   bool *pBuffer, *pSafe;
+   int i;
+   int j;
+   int k;
+   unsigned int values;
+   unsigned int mask;
+   bool* pBuffer = NULL;
+   bool* pSafe = NULL;
 
    if ((mBufferNeedsUpdated == false) && (x1 == mBufferX1) && (y1 == mBufferY1) &&
-      (x2 == mBufferX2) && (y2 == mBufferY2) && (mBuffer != NULL))
+      (x2 == mBufferX2) && (y2 == mBufferY2) && (mpBuffer != NULL))
    {
-      return (const bool**) mBuffer;
+      return const_cast<const bool**>(mpBuffer);
    }
 
    mBufferX1 = x1;
@@ -1168,51 +1166,56 @@ const bool **BitMaskImp::getRegion (int x1, int y1, int x2, int y2)
    mBufferX2 = x2;
    mBufferY2 = y2;
 
-   offset = x1 & 0x1f;
+   int offset = x1 & 0x1f;
 
-   if (mBuffer)
+   if (mpBuffer)
    {
-      delete [] mBuffer[0];
-      delete [] mBuffer;
+      delete [] mpBuffer[0];
+      delete [] mpBuffer;
    }
 
-   left = x1 - (x1 & 0x1f);
-   right = x2 - (x2 & 0x1f) + 31; 
+   int left = x1 - (x1 & 0x1f);
+   int right = x2 - (x2 & 0x1f) + 31;
 
-   xSize = right-left+1;
-   ySize = y2-y1+1;
-   totalSize = xSize * ySize;
+   int xSize = right - left + 1;
+   int ySize = y2 - y1 + 1;
+   int totalSize = xSize * ySize;
 
-   mBuffer = new bool * [ySize];
-   mBuffer[0] = new (nothrow) bool [totalSize];
-   if (mBuffer[0] == NULL)
+   mpBuffer = new bool*[ySize];
+   mpBuffer[0] = new (nothrow) bool[totalSize];
+   if (mpBuffer[0] == NULL)
    {
-      delete[] mBuffer;
-      mBuffer = NULL;
+      delete[] mpBuffer;
+      mpBuffer = NULL;
       throw bad_alloc();
    }
 
-   for (i=1; i<ySize; i++) mBuffer[i] = mBuffer[i-1]+xSize;
-
-   for (i=y1; i<=y2; i++)
+   for (i = 1; i < ySize; ++i)
    {
-      pBuffer = &mBuffer[i-y1][-offset];
-      pSafe = mBuffer[i-y1];
-      for (j=left; j<=right; j+=32)
+      mpBuffer[i] = mpBuffer[i - 1] + xSize;
+   }
+
+   for (i = y1; i <= y2; ++i)
+   {
+      pBuffer = &mpBuffer[i - y1][-offset];
+      pSafe = mpBuffer[i - y1];
+      for (j = left; j <= right; j += 32)
       {
          values = getPixels (j, i);
          mask = 0x80000000;
-         for (k=0; k<32; k++, pBuffer++)
+         for (k = 0; k < 32; ++k, ++pBuffer)
          {
-            if (pBuffer>=pSafe)
-                  *pBuffer = ((values & mask) != 0);
+            if (pBuffer >= pSafe)
+            {
+               *pBuffer = ((values & mask) != 0);
+            }
             mask >>= 1;
          }
       }
    }
 
    mBufferNeedsUpdated = false;
-   return (const bool **)mBuffer;
+   return const_cast<const bool**>(mpBuffer);
 }
 
 /**
@@ -1223,24 +1226,23 @@ const bool **BitMaskImp::getRegion (int x1, int y1, int x2, int y2)
  *  @return
  *         the number of set bits in the mask
  */
-int BitMaskImp::computeCount () const
+int BitMaskImp::computeCount() const
 {
-   unsigned int *rowMask;
-   int i, j;
+   unsigned int* pRowMask = NULL;
    int count = 0;
 
-   for (i=0; i<mySize; i++)
+   for (int i = 0; i < mySize; ++i)
    {
-      rowMask = mMask[i];
-      for (j=0; j<mxSize; j++)
+      pRowMask = mpMask[i];
+      for (int j = 0; j < mxSize; ++j)
       {
-         if (rowMask[j] == 0xffffffff)
+         if (pRowMask[j] == 0xffffffff)
          {
             count += LONG_BITS;
          }
          else
          {
-            count += countBits (rowMask[j]);
+            count += countBits(pRowMask[j]);
          }
       }
    }
@@ -1262,65 +1264,80 @@ int BitMaskImp::computeCount () const
  *   @param   fill
  *         The value to fill newly allocated bits with.
  */
-void BitMaskImp::growToInclude (int x1, int y1, int x2, int y2, bool fill)
+void BitMaskImp::growToInclude(int x1, int y1, int x2, int y2, bool fill)
 {
    int i;
-   int leftExtra, rightExtra;
-   int topExtra, bottomExtra;
-   unsigned int **lMask;
-   int inX1, inX2, inY1, inY2;
+   int leftExtra;
+   int rightExtra;
+   int topExtra;
+   int bottomExtra;
+   unsigned int** lMask = NULL;
 
-   inX1 = x1;
-   inY1 = y1;
-   inX2 = x2;
-   inY2 = y2;
+   int inX1 = x1;
+   int inY1 = y1;
+   int inX2 = x2;
+   int inY2 = y2;
 
    x1 -= (x1 & 0x1f);
-   x2 = x2 - (x2 & 0x1f)+31;
+   x2 = x2 - (x2 & 0x1f) + 31;
 
-   if (mx1>x1)
+   if (mx1 > x1)
+   {
       leftExtra = (mx1 - x1) / LONG_BITS;
+   }
    else
+   {
       leftExtra = 0;
+   }
 
-   if (x2>mx2)
+   if (x2 > mx2)
+   {
       rightExtra = (x2 - mx2) / LONG_BITS;
+   }
    else
+   {
       rightExtra = 0;
+   }
 
-   if (my1>y1)
+   if (my1 > y1)
+   {
       bottomExtra = my1 - y1;
+   }
    else
+   {
       bottomExtra = 0;
+   }
 
-   if (y2>my2)
+   if (y2 > my2)
+   {
       topExtra = y2 - my2;
+   }
    else
+   {
       topExtra = 0;
+   }
 
-   if (leftExtra <= 0 && rightExtra <= 0 &&
-      bottomExtra <= 0 && topExtra <= 0 && 
-      mMask != NULL)
+   if (leftExtra <= 0 && rightExtra <= 0 && bottomExtra <= 0 && topExtra <= 0 && mpMask != NULL)
    {
       mOutside = fill;
       return;
    }
 
-   int newx1, newx2;
-   int newy1, newy2;
+   int newx1;
+   int newx2;
+   int newy1;
+   int newy2;
 
-   int newxSize, newySize, newSize;
-
-   if (mMask != NULL)
+   if (mpMask != NULL)
    {
-      newx1 = min (mx1, x1);
-      newx2 = max (mx2, x2);
-      newy1 = min (my1, y1);
-      newy2 = max (my2, y2);
-      mbbx1 = min (mbbx1, inX1);
-      mbbx2 = max (mbbx2, inX2);
-      mbby1 = min (mbby1, inY1);
-      mbby2 = max (mbby2, inY2);
+      newx1 = min(mx1, x1);
+      newx2 = max(mx2, x2);
+      newy1 = min(my1, y1);
+      newy2 = max(my2, y2);
+      mbbx1 = min(mbbx1, inX1);
+      mbbx2 = max(mbbx2, inX2);
+      mbby1 = min(mbby1, inY1);
+      mbby2 = max(mbby2, inY2);
    }
    else
    {
@@ -1334,35 +1351,39 @@ void BitMaskImp::growToInclude (int x1, int y1, int x2, int y2, bool fill)
       mbby2 = inY2;
    }
 
-   newxSize = (newx2 - newx1 + 1) / LONG_BITS;
-   newySize = newy2 - newy1 + 1;
-   newSize = newxSize * newySize;
+   int newxSize = (newx2 - newx1 + 1) / LONG_BITS;
+   int newySize = newy2 - newy1 + 1;
+   int newSize = newxSize * newySize;
 
-   lMask = new unsigned int * [newySize];
-   lMask[0] = new (nothrow) unsigned int [newSize];
+   lMask = new unsigned int*[newySize];
+   lMask[0] = new (nothrow) unsigned int[newSize];
    if (lMask[0] == NULL)
    {
-      delete[] lMask;
+      delete [] lMask;
       lMask = NULL;
       throw bad_alloc();
    }
-   for (i=1; i<newySize; i++) lMask[i] = lMask[i-1]+newxSize;
 
-   memset (lMask[0], fill * 0xff, newSize * sizeof (unsigned int));
-
-   bottomExtra = max (bottomExtra, 0);
-   for (i=0; i<mySize; i++)
+   for (i = 1; i < newySize; ++i)
    {
-      memcpy (&lMask[bottomExtra+i][leftExtra], mMask[i], mxSize * sizeof (unsigned int));
+      lMask[i] = lMask[i - 1] + newxSize;
    }
 
-   if (mMask)
+   memset(lMask[0], fill * 0xff, newSize * sizeof(unsigned int));
+
+   bottomExtra = max(bottomExtra, 0);
+   for (i = 0; i < mySize; ++i)
    {
-      delete [] mMask[0];
-      delete [] mMask;
+      memcpy(&lMask[bottomExtra + i][leftExtra], mpMask[i], mxSize * sizeof(unsigned int));
    }
 
-   mMask = lMask;
+   if (mpMask)
+   {
+      delete [] mpMask[0];
+      delete [] mpMask;
+   }
+
+   mpMask = lMask;
 
    mx1 = newx1;
    my1 = newy1;
@@ -1377,8 +1398,8 @@ void BitMaskImp::growToInclude (int x1, int y1, int x2, int y2, bool fill)
 
    if (fill)
    {
-      mCount += (topExtra+bottomExtra) * newxSize * LONG_BITS;
-      mCount += (leftExtra+rightExtra) * LONG_BITS;
+      mCount += (topExtra + bottomExtra) * newxSize * LONG_BITS;
+      mCount += (leftExtra + rightExtra) * LONG_BITS;
    }
 }
 
@@ -1394,14 +1415,16 @@ void BitMaskImp::growToInclude (int x1, int y1, int x2, int y2, bool fill)
  *  @return
  *         the number of bits set.
  */
-static inline int countBits (unsigned int v)
+static inline int countBits(unsigned int v)
 {
-   int i;
    int count = 0;
-
-   for (i=0; i<LONG_BITS; i++)
+   for (int i = 0; i < LONG_BITS; ++i)
    {
-      if (v & 0x1) count++;
+      if (v & 0x1)
+      {
+         count++;
+      }
+
       v >>= 1;
    }
 
@@ -1426,181 +1449,208 @@ static inline int countBits (unsigned int v)
  *         true if the regions share any pixels
  *         false otherwise
  */
-static inline bool regionsOverlap (int r1x1, int r1y1, int r1x2, int r1y2,
-                           int r2x1, int r2y1, int r2x2, int r2y2)
+static inline bool regionsOverlap(int r1x1, int r1y1, int r1x2, int r1y2,
+                                  int r2x1, int r2y1, int r2x2, int r2y2)
 {
    return
-      r1x1>r2x2 ? false:   // r1 entirely to the right of r2
-      r1x2<r2x1 ? false:   // r1 entirely to the left of r2
-      r1y1>r2y2 ? false:   // r1 entirely above r2
-      r1y2<r2y1 ? false:   // r1 entirely below r2
+      r1x1 > r2x2 ? false:   // r1 entirely to the right of r2
+      r1x2 < r2x1 ? false:   // r1 entirely to the left of r2
+      r1y1 > r2y2 ? false:   // r1 entirely above r2
+      r1y2 < r2y1 ? false:   // r1 entirely below r2
       true;            // else, they overlap
 }
 
 bool BitMaskImp::toXml(XMLWriter* xml) const
 {
-    stringstream buf;
-    DOMElement *rectElmnt(xml->addElement("rectangle"));
-    buf << mx1 << " " << my1 << " " << mx2 << " " << my2;
-    xml->addText(buf.str().c_str(),rectElmnt);
+   stringstream buf;
+   DOMElement* rectElmnt(xml->addElement("rectangle"));
+   buf << mx1 << " " << my1 << " " << mx2 << " " << my2;
+   xml->addText(buf.str().c_str(), rectElmnt);
 
-    buf.str("");
-    DOMElement *bbElmnt(xml->addElement("boundingBox"));
-    buf << mbbx1 << " " << mbby1 << " " << mbbx2 << " " << mbby2;
-    xml->addText(buf.str().c_str(),bbElmnt);
+   buf.str("");
+   DOMElement* bbElmnt(xml->addElement("boundingBox"));
+   buf << mbbx1 << " " << mbby1 << " " << mbbx2 << " " << mbby2;
+   xml->addText(buf.str().c_str(), bbElmnt);
 
-    buf.str("");
-    DOMElement *sizeElmnt(xml->addElement("size"));
-    buf << mxSize << " " << mySize << " " << mCount;
-    xml->addText(buf.str().c_str(),sizeElmnt);
+   buf.str("");
+   DOMElement* sizeElmnt(xml->addElement("size"));
+   buf << mxSize << " " << mySize << " " << mCount;
+   xml->addText(buf.str().c_str(), sizeElmnt);
 
-    xml->addAttr("outside", (mOutside) ? "true" : "false");
-
-#if !defined(__SUNPRO_CC) || __SUNPRO_CC > 0x550
-    boost::crc_ccitt_type crc;
-#endif
-    if (mMask != NULL)
-    {
-       int numBytes((mxSize * sizeof(unsigned int)) * mySize);
-       XMLByte *bytes(new XMLByte[numBytes]);
-       int bytesIndex(0);
-       unsigned int tmp;
-       for(int i=0; i < mSize; i++)
-       {
-          tmp = mMask[0][i];
-          for(int j=0; j < sizeof(tmp); j++)
-          {
-             bytes[bytesIndex] = (tmp >> (8 * j)) & 0xff;
-#if !defined(__SUNPRO_CC) || __SUNPRO_CC > 0x550
-             crc(bytes[bytesIndex]);
-#endif
-             bytesIndex++;
-          }
-       }
-
-       unsigned int outlen;
-       XMLByte *b64repr(Base64::encode(bytes, numBytes,&outlen));
-       xml->pushAddPoint(xml->addElement("mask"));
-       xml->addText(reinterpret_cast<char *>(b64repr));
-       xml->popAddPoint();
+   xml->addAttr("outside", (mOutside) ? "true" : "false");
 
 #if !defined(__SUNPRO_CC) || __SUNPRO_CC > 0x550
-       stringstream crcString;
-       crcString << "ccitt:" << crc();
-       xml->addAttr("ecc", crcString.str());
+   boost::crc_ccitt_type crc;
+#endif
+   if (mpMask != NULL)
+   {
+      int numBytes((mxSize * sizeof(unsigned int)) * mySize);
+      XMLByte* bytes(new XMLByte[numBytes]);
+      int bytesIndex(0);
+      unsigned int tmp;
+      for (int i = 0; i < mSize; ++i)
+      {
+         tmp = mpMask[0][i];
+         for (int j = 0; j < sizeof(tmp); ++j)
+         {
+            bytes[bytesIndex] = (tmp >> (8 * j)) & 0xff;
+#if !defined(__SUNPRO_CC) || __SUNPRO_CC > 0x550
+            crc(bytes[bytesIndex]);
+#endif
+            bytesIndex++;
+         }
+      }
+
+      unsigned int outlen;
+      XMLByte* b64repr(Base64::encode(bytes, numBytes, &outlen));
+      xml->pushAddPoint(xml->addElement("mask"));
+      xml->addText(reinterpret_cast<char*>(b64repr));
+      xml->popAddPoint();
+
+#if !defined(__SUNPRO_CC) || __SUNPRO_CC > 0x550
+      stringstream crcString;
+      crcString << "ccitt:" << crc();
+      xml->addAttr("ecc", crcString.str());
 #endif
 
-       XMLString::release(&b64repr);
-       delete bytes;
-    }
+      XMLString::release(&b64repr);
+      delete [] bytes;
+   }
 
-    return true;
+   return true;
 }
 
 bool BitMaskImp::fromXml(DOMNode* document, unsigned int version)
 {
-   string outsideVal(A(static_cast<DOMElement *>(document)->getAttribute(X("outside"))));
+   string outsideVal(A(static_cast<DOMElement*>(document)->getAttribute(X("outside"))));
 #if !defined(__SUNPRO_CC) || __SUNPRO_CC > 0x550
-   string crcString(A(static_cast<DOMElement *>(document)->getAttribute(X("ecc"))));
+   string crcString(A(static_cast<DOMElement*>(document)->getAttribute(X("ecc"))));
 #endif
-   if(outsideVal == "1" || outsideVal == "t" || outsideVal == "true")
-      mOutside = true;
-   else
-      mOutside = false;
-
-   for(DOMNode *chld = document->getFirstChild();
-                chld != NULL;
-                chld = chld->getNextSibling())
+   if (outsideVal == "1" || outsideVal == "t" || outsideVal == "true")
    {
-      if(XMLString::equals(chld->getNodeName(),X("rectangle")))
+      mOutside = true;
+   }
+   else
+   {
+      mOutside = false;
+   }
+
+   for (DOMNode* pChld = document->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
+   {
+      if (XMLString::equals(pChld->getNodeName(), X("rectangle")))
       {
-         DOMNode *gchld(chld->getFirstChild());
-         double a,b,c,d;
-         XmlReader::StrToQuadCoord(gchld->getNodeValue(), a, b, c, d);
-         mx1=static_cast<int>(a); my1=static_cast<int>(b); mx2=static_cast<int>(c); my2=static_cast<int>(d);
+         DOMNode* pGchld(pChld->getFirstChild());
+         double a;
+         double b;
+         double c;
+         double d;
+         XmlReader::StrToQuadCoord(pGchld->getNodeValue(), a, b, c, d);
+         mx1 = static_cast<int>(a);
+         my1 = static_cast<int>(b);
+         mx2 = static_cast<int>(c);
+         my2 = static_cast<int>(d);
       }
-      else if(XMLString::equals(chld->getNodeName(),X("boundingBox")))
+      else if (XMLString::equals(pChld->getNodeName(), X("boundingBox")))
       {
-         DOMNode *gchld(chld->getFirstChild());
-         double a,b,c,d;
-         XmlReader::StrToQuadCoord(gchld->getNodeValue(), a, b, c, d);
-         mbbx1=static_cast<int>(a); mbby1=static_cast<int>(b); mbbx2=static_cast<int>(c); mbby2=static_cast<int>(d);
+         DOMNode* pGchld(pChld->getFirstChild());
+         double a;
+         double b;
+         double c;
+         double d;
+         XmlReader::StrToQuadCoord(pGchld->getNodeValue(), a, b, c, d);
+         mbbx1 = static_cast<int>(a);
+         mbby1 = static_cast<int>(b);
+         mbbx2 = static_cast<int>(c);
+         mbby2 = static_cast<int>(d);
       }
-      else if(XMLString::equals(chld->getNodeName(),X("size")))
+      else if (XMLString::equals(pChld->getNodeName(), X("size")))
       {
          // we only need to read 3 coords by StrToQuadCoord still works well
          // as it handles cases where there are fewer than four coords (defaults them to 0.0)
          // so we just pass in a dummy that never actually gets read
-         DOMNode *gchld(chld->getFirstChild());
-         double a,b,c,dummy;
-         XmlReader::StrToQuadCoord(gchld->getNodeValue(), a, b, c, dummy);
-         mxSize = static_cast<int>(a); mySize = static_cast<int>(b); mCount = static_cast<int>(c);
+         DOMNode* pGchld(pChld->getFirstChild());
+         double a;
+         double b;
+         double c;
+         double dummy;
+         XmlReader::StrToQuadCoord(pGchld->getNodeValue(), a, b, c, dummy);
+         mxSize = static_cast<int>(a);
+         mySize = static_cast<int>(b);
+         mCount = static_cast<int>(c);
          mSize = mxSize * mySize;
       }
-      else if(XMLString::equals(chld->getNodeName(),X("mask")))
+      else if (XMLString::equals(pChld->getNodeName(), X("mask")))
       {
          unsigned int dlen;
-         DOMNode *gchld(chld->getFirstChild());
-         const XMLCh *b64(gchld->getNodeValue());
-         XMLByte *bytes(Base64::decode((const XMLByte *)A(b64), &dlen));
+         DOMNode* pGchld(pChld->getFirstChild());
+         const XMLCh* b64(pGchld->getNodeValue());
+         XMLByte* bytes(Base64::decode((const XMLByte*)A(b64), &dlen));
 
-         mMask = new (nothrow) unsigned int* [mySize];
-         if (mMask == NULL)
-            throw XmlReader::DomParseException("Can't create a new unsigned int array", chld);
-         mMask[0] = new (nothrow) unsigned int [mSize];
-         if (mMask[0] == NULL) 
+         mpMask = new (nothrow) unsigned int*[mySize];
+         if (mpMask == NULL)
          {
-            delete [] mMask;
-            mMask = NULL;
-            throw XmlReader::DomParseException("Can't create a new unsigned int array", chld);
+            throw XmlReader::DomParseException("Can't create a new unsigned int array", pChld);
          }
-         int i;
-         for (i=1; i<mySize; i++) mMask[i] = mMask[i-1]+mxSize;
+
+         mpMask[0] = new (nothrow) unsigned int[mSize];
+         if (mpMask[0] == NULL)
+         {
+            delete [] mpMask;
+            mpMask = NULL;
+            throw XmlReader::DomParseException("Can't create a new unsigned int array", pChld);
+         }
+
+         for (int i = 1; i < mySize; ++i)
+         {
+            mpMask[i] = mpMask[i - 1] + mxSize;
+         }
 
 #if !defined(__SUNPRO_CC) || __SUNPRO_CC > 0x550
-          boost::crc_ccitt_type crc;
+         boost::crc_ccitt_type crc;
 #endif
-          int bytesIndex(0);
-          unsigned int tmp;
-          for(int i=0; i < mSize; i++)
-          {
-             tmp = 0;
-             for(int j=0; j < sizeof(tmp); j++)
-             {
-                tmp |= bytes[bytesIndex] << (8 * j);
+         int bytesIndex(0);
+         unsigned int tmp;
+         for (int i = 0; i < mSize; ++i)
+         {
+            tmp = 0;
+            for (int j = 0; j < sizeof(tmp); ++j)
+            {
+               tmp |= bytes[bytesIndex] << (8 * j);
 #if !defined(__SUNPRO_CC) || __SUNPRO_CC > 0x550
-                crc(bytes[bytesIndex]);
+               crc(bytes[bytesIndex]);
 #endif
-                bytesIndex++;
-             }
-             mMask[0][i] = tmp;
-          }
+               bytesIndex++;
+            }
+            mpMask[0][i] = tmp;
+         }
 
 #if !defined(__SUNPRO_CC) || __SUNPRO_CC > 0x550
-          if(crcString.find("ccitt:") != string::npos)
-          {
-             XmlReader::StringStreamAssigner<boost::crc_ccitt_type::value_type> parser;
-             boost::crc_ccitt_type::value_type storedCrc(parser(crcString.substr(crcString.find(":")+1).c_str()));
-             VERIFYRV_MSG(crc() == storedCrc, false, "Bitmask checksum failure!");
-          }
+         if (crcString.find("ccitt:") != string::npos)
+         {
+            XmlReader::StringStreamAssigner<boost::crc_ccitt_type::value_type> parser;
+            boost::crc_ccitt_type::value_type storedCrc(parser(crcString.substr(crcString.find(":") + 1).c_str()));
+            VERIFYRV_MSG(crc() == storedCrc, false, "Bitmask checksum failure!");
+         }
 #endif
-          XMLString::release(&bytes);
+         XMLString::release(&bytes);
       }
-    }
+   }
 
-    return true;
+   return true;
 }
 
-void BitMaskImp::getMinimalBoundingBox(int &x1, int &y1, int &x2, int &y2) const
+void BitMaskImp::getMinimalBoundingBox(int& x1, int& y1, int& x2, int& y2) const
 {
-   x1 = y1 = INT_MAX;
-   x2 = y2 = INT_MIN;
+   x1 = numeric_limits<int>::max();
+   y1 = numeric_limits<int>::max();
+   x2 = numeric_limits<int>::min();
+   y2 = numeric_limits<int>::min();
 
    for (int y = my1; y <= my2; ++y)
    {
-      for (int x = mx1; x < mx2 && x < x1; x+=LONG_BITS)
+      for (int x = mx1; x < mx2 && x < x1; x += LONG_BITS)
       {
-         unsigned long val = mMask[(y-my1)][(x-mx1)/LONG_BITS];
+         unsigned long val = mpMask[(y - my1)][(x - mx1) / LONG_BITS];
          if (val != 0x00000000)
          {
             int i = 0;
@@ -1608,7 +1658,7 @@ void BitMaskImp::getMinimalBoundingBox(int &x1, int &y1, int &x2, int &y2) const
             {
                if (val & 0x80000000)
                {
-                  x1 = min(x1, x+i);
+                  x1 = min(x1, x + i);
                   y1 = min(y1, y);
                   break;
                }
@@ -1621,9 +1671,9 @@ void BitMaskImp::getMinimalBoundingBox(int &x1, int &y1, int &x2, int &y2) const
 
    for (int y = my2; y >= my1; --y)
    {
-      for (int x = mx2; x > mx1 && x > x2; x-=LONG_BITS)
+      for (int x = mx2; x > mx1 && x > x2; x -= LONG_BITS)
       {
-         unsigned long val = mMask[y-my1][(x-mx1)/LONG_BITS];
+         unsigned long val = mpMask[y - my1][(x - mx1) / LONG_BITS];
          if (val != 0x00000000)
          {
             int i = 0;
@@ -1631,7 +1681,7 @@ void BitMaskImp::getMinimalBoundingBox(int &x1, int &y1, int &x2, int &y2) const
             {
                if (val & 0x00000001)
                {
-                  x2 = max(x2, x-i);
+                  x2 = max(x2, x - i);
                   y2 = max(y2, y);
                   break;
                }
@@ -1644,19 +1694,19 @@ void BitMaskImp::getMinimalBoundingBox(int &x1, int &y1, int &x2, int &y2) const
 
    // set to defaults if nothing was found.
    // If any of these are triggered, the box is probably empty of any actual points.
-   if (x1 == INT_MAX)
+   if (x1 == numeric_limits<int>::max())
    {
       x1 = 0;
    }
-   if (y1 == INT_MAX)
+   if (y1 == numeric_limits<int>::max())
    {
       y1 = 0;
    }
-   if (x2 == INT_MIN)
+   if (x2 == numeric_limits<int>::min())
    {
       x2 = 0;
    }
-   if (y2 == INT_MIN)
+   if (y2 == numeric_limits<int>::min())
    {
       y2 = 0;
    }

@@ -30,7 +30,7 @@ class Progress;
  *  You cannot call instantiate() twice on the same instance
  *  or a std::logic_error will be thrown.
  *
- *  @see        ExecutableAgentExt1, ExecutableResource, Executable
+ *  @see         ExecutableAgentExt1, ExecutableAgentExt2, ExecutableResource, Executable
  */
 class ExecutableAgent
 {
@@ -380,19 +380,71 @@ protected:
 /**
  *  Extends capability of the ExecutableAgent interface.
  *
+ *  This class provides additional capability for the ExecutableAgent interface
+ *  class.  A pointer to this class can be obtained by performing a dynamic
+ *  cast on a pointer to ExecutableAgent or any of its subclasses.
+ *
+ *  @warning A pointer to this class can only be used to call methods contained
+ *           in this extension class and cannot be used to call any methods in
+ *           ExecutableAgent or its subclasses.
+ */
+class ExecutableAgentExt2
+{
+public:
+   /**
+   *   Sets whether the input argument list will be automatically or manually 
+   *   populated. If the input argument list is already populated, calling this function will not 
+   *   clear the list.
+   *
+   *   If this function is not called, the input argument list will be automatically
+   *   populated.
+   *
+   *   @param   bAutoArg
+   *            Set this parameter to \c true to automatically populate an input argument 
+   *            list or set it to \c false to populate the input argument list manually. 
+   */
+   virtual void setAutoArg(bool bAutoArg) = 0;
+
+   /**
+   *   Gets whether the input argument list will be automatically or manually 
+   *   populated.
+   *
+   *   @return  Returns \c true if the input argument list is automatically populated
+   *            or \c false if the input argument list is populated manually. 
+   */
+   virtual bool getAutoArg() const = 0;
+protected:
+   /**
+    *  This object should be destroyed by calling ObjectFactory::destroyObject().
+    */
+   virtual ~ExecutableAgentExt2() {}
+};
+
+/**
+ *  Extends capability of the ExecutableAgent interface.
+ *
  *  This class provides a means by which the ExecutableAgent interface is
  *  extended without breaking binary compatibility.  Instances of
  *  ExecutableResource can use the methods in all interface extension classes
  *  inherited by this common interface without having to first cast to the
  *  extension class.
- *
- *  \cond INTERNAL
- *  @warning All new extension classes must be added at the end of the
- *           derivation list.
- *  \endcond
  */
 class ExecutableAgentCommon : public ExecutableAgent, public ExecutableAgentExt1
 {
 };
+
+/**
+ *  Extends capability of the ExecutableAgent interface.
+ *
+ *  This class provides a means by which the ExecutableAgent interface is
+ *  extended without breaking binary compatibility.  Instances of
+ *  ExecutableResource can use the methods in all interface extension classes
+ *  inherited by this common interface without having to first cast to the
+ *  extension class.
+ */
+class ExecutableAgentCommon1 : public ExecutableAgent, public ExecutableAgentExt1, public ExecutableAgentExt2
+{
+};
+
 
 #endif

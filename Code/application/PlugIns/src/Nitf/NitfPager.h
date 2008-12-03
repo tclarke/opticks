@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef NITF_PAGER_H
-#define NITF_PAGER_H
+#ifndef NITFPAGER_H
+#define NITFPAGER_H
 
 #include "CachedPager.h"
 #include "NitfResource.h"
@@ -49,7 +49,7 @@ namespace Nitf
    private:
       int mSegment; // 1-based segment number
       Nitf::OssimImageHandlerResource mpImageHandler;
-      Step *mpStep;
+      Step* mpStep;
    };
 }
 

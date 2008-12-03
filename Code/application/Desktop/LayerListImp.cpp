@@ -290,7 +290,7 @@ Layer* LayerListImp::newLayer(const LayerType& layerType, DataElement* pElement,
          xFactor = pDescriptor->getXPixelSize();
       }
 
-      const RasterElement *pRasterElement = dynamic_cast<const RasterElement*>(pElement);
+      const RasterElement* pRasterElement = dynamic_cast<const RasterElement*>(pElement);
       if (pRasterElement != NULL && mpRasterElement.get() != pRasterElement)
       {
          pDescriptor = dynamic_cast<const RasterDataDescriptor*>(pRasterElement->getDataDescriptor());

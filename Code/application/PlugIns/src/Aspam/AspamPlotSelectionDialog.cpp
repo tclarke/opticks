@@ -20,8 +20,8 @@ namespace
 const int sMarginSize = 10;
 };
 
-AspamPlotSelectionDialog::AspamPlotSelectionDialog(QStringList &choices, QWidget *pParent) :
-                  QDialog(pParent)
+AspamPlotSelectionDialog::AspamPlotSelectionDialog(QStringList& choices, QWidget* pParent) :
+   QDialog(pParent)
 {
    setObjectName("Selection Dialog");
    setWindowTitle("Aspam Plot Parameter Selection");
@@ -29,8 +29,8 @@ AspamPlotSelectionDialog::AspamPlotSelectionDialog(QStringList &choices, QWidget
 
    setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
 
-   QLabel *pPrimaryLabel = new QLabel("Choose the primary axis.", this);
-   QLabel *pPlotNameLabel = new QLabel("Add to plot", this);
+   QLabel* pPrimaryLabel = new QLabel("Choose the primary axis.", this);
+   QLabel* pPlotNameLabel = new QLabel("Add to plot", this);
 
    mpPrimary = new QComboBox(this);
    mpPrimary->addItems(choices);
@@ -38,12 +38,12 @@ AspamPlotSelectionDialog::AspamPlotSelectionDialog(QStringList &choices, QWidget
    mpPlotName = new QComboBox(this);
    mpPlotName->addItem("New Plot");
 
-   QPushButton *pOk = new QPushButton("Ok", this);
+   QPushButton* pOk = new QPushButton("Ok", this);
    pOk->setDefault(true);
-   QPushButton *pCancel = new QPushButton("Cancel", this);
+   QPushButton* pCancel = new QPushButton("Cancel", this);
 
    // Layout
-   QGridLayout *pTopLayout = new QGridLayout(this);
+   QGridLayout* pTopLayout = new QGridLayout(this);
    pTopLayout->setMargin(sMarginSize);
    pTopLayout->setSpacing(sMarginSize);
    pTopLayout->addWidget(pPrimaryLabel, 0, 0);
@@ -51,7 +51,7 @@ AspamPlotSelectionDialog::AspamPlotSelectionDialog(QStringList &choices, QWidget
    pTopLayout->addWidget(pPlotNameLabel, 2, 0);
    pTopLayout->addWidget(mpPlotName, 2, 1);
 
-   QHBoxLayout *pButtonLayout = new QHBoxLayout;
+   QHBoxLayout* pButtonLayout = new QHBoxLayout;
    pTopLayout->addLayout(pButtonLayout, 3, 0, 1, 2);
    pButtonLayout->addStretch(1);
    pButtonLayout->addWidget(pOk, 0);
@@ -59,6 +59,10 @@ AspamPlotSelectionDialog::AspamPlotSelectionDialog(QStringList &choices, QWidget
 
    connect(pOk, SIGNAL(clicked()), this, SLOT(accept()));
    connect(pCancel, SIGNAL(clicked()), this, SLOT(reject()));
+}
+
+AspamPlotSelectionDialog::~AspamPlotSelectionDialog()
+{
 }
 
 QString AspamPlotSelectionDialog::getPrimaryAxis() const
@@ -71,14 +75,14 @@ QString AspamPlotSelectionDialog::getPlotName() const
    return mpPlotName->currentText();
 }
 
-void AspamPlotSelectionDialog::setPlotNames(const QStringList &names, const QString &selected)
+void AspamPlotSelectionDialog::setPlotNames(const QStringList& names, const QString& selected)
 {
    mpPlotName->clear();
    mpPlotName->addItem("New Plot");
    mpPlotName->addItems(names);
-   for(int i = 0; i < mpPlotName->count(); i++)
+   for (int i = 0; i < mpPlotName->count(); i++)
    {
-      if(mpPlotName->itemText(i) == selected)
+      if (mpPlotName->itemText(i) == selected)
       {
          mpPlotName->setCurrentIndex(i);
          break;

@@ -84,10 +84,10 @@
  */
 template<class T>
 RasterElement* poly_2D(T* pDummy, RasterElement* pRasterElement,
-                     const Vector<double> &KX, const Vector<double>& KY, 
+                     const Vector<double>& KX, const Vector<double>& KY, 
                      unsigned int dimX, unsigned int dimY,
                      unsigned int xoff, unsigned int yoff, int zoomFactor,
-                     ProgressTracker &progressTracker, bool inMemory = true)
+                     ProgressTracker& progressTracker, bool inMemory = true)
 {
    double x1 = 0, y1 = 0;
    double x_prime = 0, y_prime = 0;
@@ -122,8 +122,8 @@ RasterElement* poly_2D(T* pDummy, RasterElement* pRasterElement,
 
    string msg = "Warping image...";
 
-   RasterDataDescriptor *pNewDescriptor = RasterUtilities::generateRasterDataDescriptor("SecondaryPrime", pRasterElement,
-      dimY, dimX, 1, BSQ, pOrigDescriptor->getDataType(), inMemory ? IN_MEMORY : ON_DISK); 
+   RasterDataDescriptor* pNewDescriptor = RasterUtilities::generateRasterDataDescriptor("SecondaryPrime",
+      pRasterElement, dimY, dimX, 1, BSQ, pOrigDescriptor->getDataType(), inMemory ? IN_MEMORY : ON_DISK);
    pNewDescriptor->setClassification(pOrigDescriptor->getClassification());
    pNewDescriptor->setUnits(pOrigDescriptor->getUnits());
 
@@ -153,7 +153,7 @@ RasterElement* poly_2D(T* pDummy, RasterElement* pRasterElement,
       }
 
       T* results = (T*) rmda->getRow();
-      for(unsigned int x = 0; x < dimX; ++x) // for every column in s'
+      for (unsigned int x = 0; x < dimX; ++x) // for every column in s'
       {
          /* Let xoff = offset of ROI in primary image
             x2=x+xoff;
@@ -201,36 +201,36 @@ RasterElement* poly_2D(T* pDummy, RasterElement* pRasterElement,
 
             // the "out of bounds case" above guarnatees that the toPixel() operations will succeed
 
-            originalData->toPixel((int)y1,(int)x1);
+            originalData->toPixel(static_cast<int>(y1), static_cast<int>(x1));
             const T minXminY = *reinterpret_cast<T*>(originalData->getColumn());
 
-            originalData->toPixel((int)y1,(int)x2);
-            const T maxXminY  = *reinterpret_cast<T*>(originalData->getColumn());
+            originalData->toPixel(static_cast<int>(y1), static_cast<int>(x2));
+            const T maxXminY = *reinterpret_cast<T*>(originalData->getColumn());
 
-            originalData->toPixel((int)y2,(int)x1);
+            originalData->toPixel(static_cast<int>(y2), static_cast<int>(x1));
             const T minXmaxY = *reinterpret_cast<T*>(originalData->getColumn());
             
-            originalData->toPixel((int)y2,(int)x2);
+            originalData->toPixel(static_cast<int>(y2), static_cast<int>(x2));
             const T maxXmaxY = *reinterpret_cast<T*>(originalData->getColumn());
 
-            results[x] = static_cast<T>((minXminY * ((1.0-u) * (1.0-v))
-                                       + maxXminY * (u * (1.0-v))
-                                       + minXmaxY * ((1.0-u) * v)
+            results[x] = static_cast<T>((minXminY * ((1.0 - u) * (1.0 - v))
+                                       + maxXminY * (u * (1.0 - v))
+                                       + minXmaxY * ((1.0 - u) * v)
                                        + maxXmaxY * (u * v)));
          }
       }
       rmda->nextRow();
       // report 1 row's worth of progress
-      int workDone = int(rowProgress*(y+1));
+      int workDone = static_cast<int>(rowProgress * (y + 1));
       progressTracker.report(msg.c_str(), workDone, NORMAL);
    }
 
-   if ((badValues/(dimX*dimY)) > THRESHOLD) 
+   if ((badValues / (dimX * dimY)) > THRESHOLD) 
    {
       string txt = "Warning: Too many values in the primary data set are not in the secondary data set! "
          "Possible causes: you selected a region in the primary image that is not in the secondary image, "
          "or the georeferencing is bad!";
-      progressTracker.report(txt.c_str(), 99, WARNING, true);
+      progressTracker.report(txt, 99, WARNING, true);
    }
 
    Statistics* pStatistics = pNewRaster->getStatistics();

@@ -10,6 +10,7 @@
 #ifndef ANIMATIONCONTROLLER_H
 #define ANIMATIONCONTROLLER_H
 
+#include "ConfigurationSettings.h"
 #include "SessionItem.h"
 #include "Subject.h"
 #include "TypesFile.h"
@@ -62,6 +63,8 @@ class Animation;
 class AnimationController : public SessionItem, public Subject
 {
 public:
+   SETTING(FrameSpeedSelection, AnimationController, double, 0)
+   SETTING(AnimationCycleSelection, AnimationController, AnimationCycle, PLAY_ONCE)
    /**
     *  Emitted with boost::any<std::string> when the controller is renamed.
     *
@@ -76,10 +79,9 @@ public:
    SIGNAL_METHOD(AnimationController, AnimationAdded)
 
    /**
-    *  Emitted with boost::any<const AnimationFrame*> when the current frame
-    *  changes.
+    *  Emitted with boost::any<double> when the current frame changes.
     *
-    *  @see     AnimationFrame
+    *  @see getCurrentFrame()
     */
    SIGNAL_METHOD(AnimationController, FrameChanged)
 

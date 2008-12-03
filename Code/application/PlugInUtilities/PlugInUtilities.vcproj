@@ -1900,10 +1900,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\rotate.h"
-				>
-			</File>
-			<File
 				RelativePath=".\SearchDlg.h"
 				>
 				<FileConfiguration
@@ -1990,10 +1986,6 @@
 						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
 					/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\setArg.h"
-				>
 			</File>
 			<File
 				RelativePath=".\StretchTypeComboBox.h"
@@ -3453,10 +3445,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\rotate.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\SearchDlg.cpp"
 				>
 			</File>
@@ -3470,10 +3458,6 @@
 			</File>
 			<File
 				RelativePath=".\Service.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\setArg.cpp"
 				>
 			</File>
 			<File

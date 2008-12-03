@@ -7,18 +7,15 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#include <iostream>
 #include "ProgressConsole.h"
 
+#include <iostream>
 using namespace std;
 
-ProgressConsole::ProgressConsole()
+ProgressConsole::ProgressConsole() :
+   mPercentDone(0),
+   mReportLevel(NORMAL)
 {
-   mMessage = "";
-   mPercentDone = 0;
-   mReportLevel = NORMAL;
 }
 
 ProgressConsole::~ProgressConsole()
@@ -37,7 +34,10 @@ void ProgressConsole::updateProgress(const string& text, int percent, ReportingL
       same = true;
    }
 
-   if ((same) && (percent == mPercentDone)) return;
+   if ((same) && (percent == mPercentDone))
+   {
+      return;
+   }
 
    if ((percent < 0) || (percent > 100) || (status == ERRORS) || (status == ABORT) || (status == WARNING))
    {
@@ -112,8 +112,8 @@ void ProgressConsole::getProgress(string& text, int& percent, ReportingLevel& st
 
 const string& ProgressConsole::getObjectType() const
 {
-   static string type("ProgressConsole");
-   return type;
+   static string sType("ProgressConsole");
+   return sType;
 }
 
 bool ProgressConsole::isKindOf(const string& className) const

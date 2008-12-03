@@ -34,8 +34,8 @@ public:
 
    std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename);
    unsigned char getFileAffinity(const std::string& filename);
-   bool getInputSpecification(PlugInArgList*& pInArgList);
-   bool getOutputSpecification(PlugInArgList*& pOutArgList);
+   bool getInputSpecification(PlugInArgList*& pArgList);
+   bool getOutputSpecification(PlugInArgList*& pArgList);
    bool hasAbort();
    bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
    bool abort();
@@ -50,7 +50,7 @@ private:
    bool mbAbort;
    Service<PlugInManagerServices> mpPlugInManager;
    Service<ModelServices> mpModel;
-   Step *mpStep;
+   Step* mpStep;
 
    Progress* mpProgress;
    SignatureLibrary* mpSignatureLibrary;

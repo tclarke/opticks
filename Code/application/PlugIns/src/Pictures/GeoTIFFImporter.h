@@ -14,6 +14,7 @@
 
 #include <vector>
 
+class OptionsTiffImporter;
 class RasterDataDescriptor;
 
 class GeoTIFFImporter : public RasterElementImporterShell
@@ -25,11 +26,18 @@ public:
    std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename);
    unsigned char getFileAffinity(const std::string& filename);
    bool validateDefaultOnDiskReadOnly(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
+   bool execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList);
+
+   QWidget *getImportOptionsWidget(DataDescriptor *pDescriptor);
 
    bool createRasterPager(RasterElement *pRasterElement) const;
 
 protected:
    bool populateDataDescriptor(RasterDataDescriptor* pDescriptor);
+   void loadIsdMetadata(DataDescriptor *pDescriptor);
+
+private:
+   std::auto_ptr<OptionsTiffImporter> mImportOptionsWidget;
 };
 
 #endif

@@ -37,7 +37,8 @@ AutoImporter::AutoImporter() :
    mbInteractive(false),
    mpProgress(NULL),
    mpElement(NULL),
-   mpPlugIn(NULL)
+   mpPlugIn(NULL),
+   mFileAffinity(Importer::CAN_NOT_LOAD)
 {
    setName("Auto Importer");
    setCreator("Ball Aerospace & Technologies Corp.");
@@ -61,25 +62,32 @@ AutoImporter::~AutoImporter()
 class FindDescriptor
 {
 public:
-   FindDescriptor(std::string name) : mName(name) {}
-   bool operator()(PlugInDescriptor* pDescriptor)
+   FindDescriptor(string name) :
+      mName(name)
+   {
+   }
+
+   bool operator()(const PlugInDescriptor* pDescriptor)
    {
       return (pDescriptor != NULL && pDescriptor->getName() == mName);
    }
-   std::string mName;
+
+   string mName;
 };
 
-std::string AutoImporter::getDefaultExtensions() const
+string AutoImporter::getDefaultExtensions() const
 {
-   static string defaultExtensions = "";
-   if (defaultExtensions.empty() == true)
+   static string sDefaultExtensions = "";
+   if (sDefaultExtensions.empty() == true)
    {
       vector<string> extensions;
 
-      vector<PlugInDescriptor*> importerPlugIns = mpPlugInManager->getPlugInDescriptors(PlugInManagerServices::ImporterType());
-      
+      vector<PlugInDescriptor*> importerPlugIns =
+         mpPlugInManager->getPlugInDescriptors(PlugInManagerServices::ImporterType());
+
       //remove self from list of importers
-      vector<PlugInDescriptor*>::iterator newEnd = remove_if(importerPlugIns.begin(), importerPlugIns.end(), FindDescriptor(getName()));
+      vector<PlugInDescriptor*>::iterator newEnd =
+         remove_if(importerPlugIns.begin(), importerPlugIns.end(), FindDescriptor(getName()));
       importerPlugIns.erase(newEnd, importerPlugIns.end());
 
       for (vector<PlugInDescriptor*>::iterator iter = importerPlugIns.begin();
@@ -95,61 +103,61 @@ std::string AutoImporter::getDefaultExtensions() const
          vector<string> filterList;
          while (filters.empty() == false)
          {
-            int iPos = filters.find(";;");
-            if (iPos == string::npos)
+            string::size_type pos = filters.find(";;");
+            if (pos == string::npos)
             {
                filterList.push_back(filters);
                filters.erase();
             }
             else
             {
-               string currentFilter = filters.substr(0, iPos);
+               string currentFilter = filters.substr(0, pos);
                filterList.push_back(currentFilter);
 
-               filters = filters.substr(iPos + 2);
+               filters = filters.substr(pos + 2);
             }
          }
 
-         for (vector<string>::size_type i = 0; i < filterList.size(); ++i)
+         for (vector<string>::iterator filterIter = filterList.begin(); filterIter != filterList.end(); ++filterIter)
          {
-            string currentFilters = filterList[i];
+            string currentFilters = *filterIter;
             if (currentFilters.empty() == false)
             {
                // Add the file filters
-               if (defaultExtensions.empty() == false)
+               if (sDefaultExtensions.empty() == false)
                {
-                  defaultExtensions += ";;";
+                  sDefaultExtensions += ";;";
                }
 
-               defaultExtensions += currentFilters;
+               sDefaultExtensions += currentFilters;
 
                // Extract the individual extensions for the all files filter
-               int iStartPos = currentFilters.find("(");
-               if (iStartPos != string::npos)
+               string::size_type startPos = currentFilters.find("(");
+               if (startPos != string::npos)
                {
-                  iStartPos++;
+                  startPos++;
 
-                  int iEndPos = currentFilters.rfind(")");
-                  if (iEndPos == string::npos)
+                  string::size_type endPos = currentFilters.rfind(")");
+                  if (endPos == string::npos)
                   {
-                     iEndPos = currentFilters.length() - 1;
+                     endPos = currentFilters.length() - 1;
                   }
 
-                  currentFilters = currentFilters.substr(iStartPos, iEndPos - iStartPos);
+                  currentFilters = currentFilters.substr(startPos, endPos - startPos);
                }
 
                string extension;
 
-               int iPos = currentFilters.find(" ");
-               if (iPos == string::npos)
+               string::size_type pos = currentFilters.find(" ");
+               if (pos == string::npos)
                {
                   extension = currentFilters;
                   currentFilters.erase();
                }
                else
                {
-                  extension = currentFilters.substr(0, iPos);
-                  currentFilters = currentFilters.substr(iPos + 1, currentFilters.length() - iPos);
+                  extension = currentFilters.substr(0, pos);
+                  currentFilters = currentFilters.substr(pos + 1, currentFilters.length() - pos);
                }
 
                while (extension.empty() == false)
@@ -162,9 +170,10 @@ std::string AutoImporter::getDefaultExtensions() const
                   }
                   else
                   {
-                     for(vector<string>::size_type i = 0; i < extensions.size(); i++)
+                     for (vector<string>::iterator extensionIter = extensions.begin();
+                        extensionIter != extensions.end(); ++extensionIter)
                      {
-                        string currentExtension = extensions[i];
+                        string currentExtension = *extensionIter;
                         if (currentExtension == extension)
                         {
                            bContains = true;
@@ -177,16 +186,16 @@ std::string AutoImporter::getDefaultExtensions() const
                      extensions.push_back(extension);
                   }
 
-                  iPos = currentFilters.find(" ");
-                  if (iPos == string::npos)
+                  pos = currentFilters.find(" ");
+                  if (pos == string::npos)
                   {
                      extension = currentFilters;
                      currentFilters.erase();
                   }
                   else
                   {
-                     extension = currentFilters.substr(0, iPos);
-                     currentFilters = currentFilters.substr(iPos + 1, currentFilters.length() - iPos);
+                     extension = currentFilters.substr(0, pos);
+                     currentFilters = currentFilters.substr(pos + 1, currentFilters.length() - pos);
                   }
                }
             }
@@ -195,9 +204,9 @@ std::string AutoImporter::getDefaultExtensions() const
 
       // Create the all files filter
       string allFilesFilter;
-      for (vector<string>::size_type i = 0; i < extensions.size(); ++i)
+      for (vector<string>::iterator iter = extensions.begin(); iter != extensions.end(); ++iter)
       {
-         string extension = extensions[i];
+         string extension = *iter;
          if (extension.empty() == false)
          {
             if (allFilesFilter.empty() == false)
@@ -215,15 +224,15 @@ std::string AutoImporter::getDefaultExtensions() const
       }
 
       // Add the all files filter to the importer filters
-      if (defaultExtensions.empty() == false)
+      if (sDefaultExtensions.empty() == false)
       {
-         defaultExtensions.insert(0, ";;");
+         sDefaultExtensions.insert(0, ";;");
       }
 
-      defaultExtensions.insert(0, allFilesFilter);
+      sDefaultExtensions.insert(0, allFilesFilter);
    }
 
-   return defaultExtensions;
+   return sDefaultExtensions;
 }
 
 bool AutoImporter::isProcessingLocationSupported(ProcessingLocation location) const
@@ -252,13 +261,14 @@ vector<ImportDescriptor*> AutoImporter::getImportDescriptors(const string& filen
    return descriptors;
 }
 
-unsigned char AutoImporter::getFileAffinity(const std::string& filename)
+unsigned char AutoImporter::getFileAffinity(const string& filename)
 {
    Importer* pImporter = dynamic_cast<Importer*>(findImporter(filename));
    if (pImporter != NULL)
    {
-      return mFileAffinity;      
+      return mFileAffinity;
    }
+
    return Importer::CAN_NOT_LOAD;
 }
 
@@ -489,7 +499,7 @@ bool AutoImporter::abort()
    return false;
 }
 
-bool AutoImporter::extractPlugInArgs(PlugInArgList* pArgList)
+bool AutoImporter::extractPlugInArgs(const PlugInArgList* pArgList)
 {
    if (pArgList == NULL)
    {
@@ -616,7 +626,8 @@ PlugIn* AutoImporter::findImporter(const string& filename)
    vector<PlugInDescriptor*> importers = mpPlugInManager->getPlugInDescriptors(PlugInManagerServices::ImporterType());
 
    //remove self from list of importers
-   vector<PlugInDescriptor*>::iterator newEnd = remove_if(importers.begin(), importers.end(), FindDescriptor(getName()));
+   vector<PlugInDescriptor*>::iterator newEnd =
+      remove_if(importers.begin(), importers.end(), FindDescriptor(getName()));
    importers.erase(newEnd, importers.end());
 
    list<PlugInDescriptor*> remainingImporters;
@@ -644,7 +655,8 @@ PlugIn* AutoImporter::findImporter(const string& filename)
                maxFileAffinity = fileAffinity;
                foundImporter = pImporterRes;
             }
-            list<PlugInDescriptor*>::iterator removeIter = find(remainingImporters.begin(), remainingImporters.end(), pDescriptor);
+            list<PlugInDescriptor*>::iterator removeIter =
+               find(remainingImporters.begin(), remainingImporters.end(), pDescriptor);
             if (removeIter != remainingImporters.end())
             {
                remainingImporters.erase(removeIter);

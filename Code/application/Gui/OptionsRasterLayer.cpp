@@ -38,9 +38,9 @@ OptionsRasterLayer::OptionsRasterLayer() :
    QLabel* pComplexComponentLabel = new QLabel("Complex Component:", this);
    mpComplexComponent = new ComplexComponentComboBox(this);
 
-   mpUseGpuImage = new QCheckBox("Enable Dynamic Texture Generation", this);   // Do not have an option to select an
-                                                                               // initial image filter until required
-                                                                               // to do so
+   mpUseGpuImage = new QCheckBox("Enable Dynamic Texture Generation", this);  // Do not have an option to select an
+                                                                              // initial image filter until required
+                                                                              // to do so
 
    mpFastContrast = new QCheckBox("Fast Contrast", this);
    

@@ -138,7 +138,7 @@ bool PlotObjectImp::toXml(XMLWriter* pXml) const
    pXml->addAttr("name", getObjectName().toStdString());
    pXml->addAttr("type", getType());
    pXml->addAttr("visible", isVisible());
-   if(isPrimary())
+   if (isPrimary())
    {
       pXml->addAttr("primary", true);
    }
@@ -152,13 +152,12 @@ bool PlotObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
    {
       return false;
    }
-   DOMElement *pElem = static_cast<DOMElement*>(pDocument);
+   DOMElement* pElem = static_cast<DOMElement*>(pDocument);
 
    setObjectName(A(pElem->getAttribute(X("name"))));
-   setVisible(StringUtilities::fromXmlString<bool>(
-      A(pElem->getAttribute(X("visible")))));
-   setSelected(StringUtilities::fromXmlString<bool>(
-      A(pElem->getAttribute(X("selected")))));
+   setVisible(StringUtilities::fromXmlString<bool>(A(pElem->getAttribute(X("visible")))));
+   setSelected(StringUtilities::fromXmlString<bool>(A(pElem->getAttribute(X("selected")))));
    mbPrimary = pElem->hasAttribute(X("primary"));
+
    return true;
 }

@@ -60,8 +60,10 @@ protected:
 private:
    static QBitmap* sBitmap;
    GLuint mTextureId;
-   int mTextureWidth, mTextureHeight;
-   int mDataWidth, mDataHeight;
+   int mTextureWidth;
+   int mTextureHeight;
+   int mDataWidth;
+   int mDataHeight;
    bool mUpdateTexture;
    bool mUpdateBoundingBox;
    std::stack<GLuint> mTextureIdStack;

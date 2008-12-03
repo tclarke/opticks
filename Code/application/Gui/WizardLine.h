@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #ifndef WIZARDLINE_H
 #define WIZARDLINE_H
 

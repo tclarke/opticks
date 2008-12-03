@@ -11,6 +11,7 @@
 #include "IceExporterShell.h"
 #include "IceUtilities.h"
 #include "IceWriter.h"
+#include "OptionsIceExporter.h"
 #include "PlugInArgList.h"
 #include "Progress.h"
 #include "RasterDataDescriptor.h"
@@ -20,9 +21,9 @@
 using namespace std;
 
 IceExporterShell::IceExporterShell(IceUtilities::FileType fileType) :
-   mFileType(fileType),
    mpProgress(NULL),
-   mpWriter(NULL)
+   mpWriter(NULL),
+   mFileType(fileType)
 {
 }
 
@@ -65,12 +66,8 @@ bool IceExporterShell::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
       ICEVERIFY_MSG(pOutputCube != NULL, "No Raster Element specified.");
       ICEVERIFY_MSG(pOutputFileDescriptor != NULL, "No Raster File Descriptor specified.");
 
-      // Check that the RasterElement is exportable
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Make BIL export work (kstreith)")
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Possibly make interleave conversions on export work (kstreith)")
       RasterDataDescriptor* pRasterDescriptor = dynamic_cast<RasterDataDescriptor*>(pOutputCube->getDataDescriptor());
       ICEVERIFY_MSG(pRasterDescriptor != NULL, "Raster Element is invalid.");
-      ICEVERIFY_MSG(pRasterDescriptor->getInterleaveFormat() != BIL, "BIL formatted cubes cannot be exported.");
 
       // Open the file for writing
       filename = pOutputFileDescriptor->getFilename().getFullPathAndName();
@@ -79,6 +76,22 @@ bool IceExporterShell::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
 
       IceWriter writer(*fileResource, mFileType);
       mpWriter = &writer;
+      if (mpOptionsWidget.get() != NULL)
+      {
+         writer.setChunkSize(mpOptionsWidget->getChunkSize() * 1024 * 1024);
+         writer.setCompressionType(mpOptionsWidget->getCompressionType());
+         writer.setGzipCompressionLevel(mpOptionsWidget->getGzipCompressionLevel());
+      }
+      if ((pRasterDescriptor->getDataType() == INT4SCOMPLEX || pRasterDescriptor->getDataType() == FLT8COMPLEX)
+       && (writer.getCompressionType() == GZIP || writer.getCompressionType() == SHUFFLE_AND_GZIP))
+      {
+         std::string msgtxt = "Compression not supported with complex data types, data will not be compressed.";
+         MessageResource msg(msgtxt, "app", "{7B050EE4-D025-43b2-AD8F-DF8E28FA8551}");
+         if (mpProgress != NULL)
+         {
+            mpProgress->updateProgress(msgtxt, 1, WARNING);
+         }
+      }
 
       writer.writeFileHeader();
       abortIfNecessary();
@@ -141,6 +154,17 @@ bool IceExporterShell::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
    return true;
 }
 
+QWidget* IceExporterShell::getExportOptionsWidget(const PlugInArgList*)
+{
+   if (mpOptionsWidget.get() == NULL)
+   {
+      mpOptionsWidget.reset(new OptionsIceExporter());
+      mpOptionsWidget->setSaveSettings(false);
+   }
+
+   return mpOptionsWidget.get();
+}
+
 void IceExporterShell::parseInputArgs(PlugInArgList* pInArgList)
 {
    ICEVERIFY_MSG(pInArgList != NULL, "Invalid argument list specified.");
@@ -157,4 +181,9 @@ void IceExporterShell::abortIfNecessary()
    {
       throw IceAbortException();
    }
+}
+
+string IceExporterShell::outputCubePath()
+{
+   return "/Datasets/Cube1";
 }

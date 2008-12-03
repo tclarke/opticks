@@ -144,7 +144,8 @@ OptionsMeasurementLayer::OptionsMeasurementLayer()
    pDisplayPropLayout->addWidget(pDisLabel, 3, 2, Qt::AlignRight);
    pDisplayPropLayout->addWidget(mpDistanceUnits, 3, 3);
    pDisplayPropLayout->setColumnStretch(4, 10);
-   LabeledSection* pDisplayPropertiesSection = new LabeledSection(pDisplayPropertiesWidget, "Default Display Properties", this);
+   LabeledSection* pDisplayPropertiesSection = new LabeledSection(pDisplayPropertiesWidget,
+      "Default Display Properties", this);
 
    // Dialog layout
    QVBoxLayout* pLayout = new QVBoxLayout(this);
