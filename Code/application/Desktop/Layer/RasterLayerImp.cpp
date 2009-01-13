@@ -2809,6 +2809,11 @@ void RasterLayerImp::generateImage()
    }
 #endif
 
+   // When the underlying raster data changes but does not cause a
+   // statistics change (raw stretch is used) the Tile texture data
+   // is not updated. This forces all the Tiles in the Image to
+   // update.
+   pImage->forceRegen();
    setImage(pImage);
 }
 

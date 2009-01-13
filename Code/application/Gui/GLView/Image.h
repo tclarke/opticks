@@ -569,6 +569,8 @@ public:
       mpTiles->push_back (tile);
    }
 
+   void forceRegen();
+
    void draw(GLint textureMode);
 
    void setAlpha(unsigned int alpha); // 0-255
@@ -637,6 +639,7 @@ private:
    int mNumTilesY;
    std::map<ImageKey, TileSet> mTileSets;
    std::vector<Tile*>* mpTiles;
+   std::vector<Tile*> mForceRegen;
    unsigned int mAlpha;
    LocationType mDrawCenter;
 
