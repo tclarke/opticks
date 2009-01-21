@@ -70,7 +70,8 @@ namespace
 
 }
 
-Nitf::BandsbParser::BandsbParser()
+Nitf::BandsbParser::BandsbParser() :
+   mWavelengthsInInverseCentimeters(false)
 {
    setName("BANDSB");
    setDescriptorId("{9A2CC336-E28D-4284-9CEC-896FC92F14DD}");
@@ -1272,7 +1273,6 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
    string &errorMessage) const
 {
    // BANDSB NITF data is always Big Endian
-
    vector<char> buf;             // Input buffer
    vector<unsigned char> bufUC;  // buffer for array of unsigned char
    vector<unsigned int>  bufInt; // buffer for array of int
@@ -1414,6 +1414,10 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
       bitTest(existmask, 22) || bitTest(existmask, 21) || bitTest(existmask, 20) || bitTest(existmask, 19)))
    {
       readField<string>(input, output, success, BANDSB::WAVE_LENGTH_UNIT, 1, errorMessage, buf);
+      if (buf[0] == 'W')
+      {
+         mWavelengthsInInverseCentimeters = true;
+      }
    }
 
    for (unsigned int bandNum = 0; bandNum < count; ++bandNum)
@@ -1457,6 +1461,7 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
       {
          fieldName = BANDSB::CWAVE + bandNumStr;
          readField<double>(input, output, success, fieldName, 7, errorMessage, buf);
+         mCenterWavelengths.push_back(boost::lexical_cast<double>(&buf[0]));
       }
 
       // b23 signals the FWHM and WAVE_LENGTH_UNIT fields.
@@ -1464,6 +1469,7 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
       {
          fieldName = BANDSB::FWHM + bandNumStr;
          readField<double>(input, output, success, fieldName, 7, errorMessage, buf);
+         mFwhms.push_back(boost::lexical_cast<double>(&buf[0]));
       }
 
       // b22 signals the FWHM_UNC and WAVE_LENGTH_UNIT field.
@@ -1492,9 +1498,11 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
       {
          fieldName = BANDSB::LBOUND + bandNumStr;
          readField<double>(input, output, success, fieldName, 7, errorMessage, buf);
+         mStartWavelengths.push_back(boost::lexical_cast<double>(&buf[0]));
 
          fieldName = BANDSB::UBOUND + bandNumStr;
          readField<double>(input, output, success, fieldName, 7, errorMessage, buf);
+         mEndWavelengths.push_back(boost::lexical_cast<double>(&buf[0]));
       }
 
       // b18 signals the SCALE FACTORn, and ADDITIVE FACTORn fields.
@@ -3779,4 +3787,11 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
    }
 
    return REPLACE;
+}
+
+bool Nitf::BandsbParser::importMetadata(const DynamicObject& tre,
+   RasterDataDescriptor& descriptor, string& errorMessage) const
+{
+   return updateSpecialMetadata(descriptor.getMetadata(), mCenterWavelengths,
+      mStartWavelengths, mEndWavelengths, mFwhms, mWavelengthsInInverseCentimeters);
 }
