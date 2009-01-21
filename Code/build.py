@@ -325,6 +325,7 @@ class Builder:
             if self.verbosity > 1:
                 print "Done creating opticks.dep file"
 
+        commonutils.create_qt_conf(bin_path, self.verbosity)
         return bin_path
 
 class WindowsBuilder(Builder):

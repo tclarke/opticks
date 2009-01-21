@@ -48,7 +48,7 @@ If you are using the commercial licensed edition of Qt, you will need to build Q
 You can find more details about this on the opticks website at https://opticks.ballforge.net/servlets/ProjectProcess?tab=5 .
 </li>
 <li>
-If you are using the open-source edition of Qt, you can download a pre-built binary provided by the %Opticks project from https://opticks.ballforge.net/files/documents/8/112/Qt-4.3.4-opensource.zip .
+If you are using the open-source edition of Qt, you can download a pre-built binary provided by the %Opticks project from https://opticks.ballforge.net/files/documents/8/224/Qt-4.3.4-opensource-fixed-libqjpeg.zip .
 </li>
 <li>Once you have downloaded this .zip, please rename the file to Qt-4.3.4.zip and place it in SDK_HOME/Dependencies/packages/ folder.</li>
 <li>

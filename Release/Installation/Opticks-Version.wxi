@@ -37,6 +37,7 @@
    <?define C__hdf5dll_DependencyGuid = "933138cb-3d61-49f3-8a2b-e9230a3395fc" ?>
    <?define C__ossim_DependencyGuid = "49398134-7f67-452b-9256-881b718207de" ?>
    <?define C__pthreadVC2_DependencyGuid = "034337fb-95d3-4042-a235-57c70c924b24" ?>
+   <?define C__QtConfGuid = "f2d63688-f295-4594-9ce4-dd5e8537c163" ?>
    <?define C__Qt3Support4_DependencyGuid = "7b31acd5-edfe-45e8-bfd2-76ab65eb4793" ?>
    <?define C__QtCore4_DependencyGuid = "740de2e7-187e-4b46-bffc-6b1c6ed8df07" ?>
    <?define C__QtGui4_DependencyGuid = "dfa44f7b-727e-4a46-b74e-ed533d081257" ?>
@@ -136,6 +137,7 @@
    <?define C__hdf5dll_DependencyGuid = "8470a159-3dce-49e7-b090-b81a92f3198d" ?>
    <?define C__ossim_DependencyGuid = "58ba9bb9-6033-4e3a-9ab0-6a774511b6ad" ?>
    <?define C__pthreadVC2_DependencyGuid = "65cca655-f9e1-41db-a905-c473af72b450" ?>
+   <?define C__QtConfGuid = "e33fcc7b-b144-4b44-9977-8ce2da2f717a" ?>
    <?define C__Qt3Support4_DependencyGuid = "c01b25e5-2184-46a7-8398-c0e9c4f40ee1" ?>
    <?define C__QtCore4_DependencyGuid = "9b3aa9be-6b00-4ae7-84ea-aff482e1f359" ?>
    <?define C__QtGui4_DependencyGuid = "90a327e2-9377-4011-92b4-6034088dc3ad" ?>
