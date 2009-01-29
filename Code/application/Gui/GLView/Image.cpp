@@ -397,21 +397,6 @@ void Image::createTiles()
    }
 }
 
-void Image::forceRegen()
-{
-   mForceRegen.clear();
-   if (mpTiles != NULL)
-   {
-      for (std::vector<Tile*>::iterator tile = mpTiles->begin(); tile != mpTiles->end(); ++tile)
-      {
-         if (*tile != NULL)
-         {
-            mForceRegen.push_back(*tile);
-         }
-      }
-   }
-}
-
 void Image::draw(GLint textureMode)
 {
    setActiveTileSet(mInfo.mKey);
@@ -1482,15 +1467,10 @@ vector<Tile*> Image::getTilesToUpdate(const vector<Tile*>& tilesToDraw, vector<i
       Tile* pTile = *iter;
       if (pTile != NULL)
       {
-         std::vector<Tile*>::iterator force = std::find(mForceRegen.begin(), mForceRegen.end(), pTile);
-         if (force != mForceRegen.end() || pTile->isTextureReady() == false)
+         if (pTile->isTextureReady() == false)
          {
             tilesToUpdate.push_back(pTile);
             tileZoomIndices.push_back(pTile->getTextureIndex());
-         }
-         if (force != mForceRegen.end())
-         {
-            mForceRegen.erase(force);
          }
       }
    }
