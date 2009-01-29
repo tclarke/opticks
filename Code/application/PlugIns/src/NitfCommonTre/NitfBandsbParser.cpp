@@ -22,6 +22,7 @@
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "RasterFileDescriptor.h"
+#include "SpecialMetadata.h"
 
 #include <set>
 #include <sstream>
@@ -2220,7 +2221,7 @@ Nitf::TreState Nitf::BandsbParser::isTreValid(const DynamicObject& tre, ostream&
       // b17 signals the START_TIMEn.
       if (status != INVALID && bitTest(existmask, 17))
       {
-         // Just check that the field exists. Assume the DateTime class will contain a vaild data/time
+         // Just check that the field exists. Assume the DateTime class will contain a valid date/time
          fieldName = BANDSB::START_TIME + bandNumStr;
 
          if (tre.getAttribute(fieldName).getPointerToValue<DateTime>() == NULL)
@@ -2912,22 +2913,23 @@ bool Nitf::BandsbParser::fromDynamicObject(const DynamicObject& input, ostream& 
          // b17 signals the START_TIMEn.
          if (bitTest(existmask, 17))
          {
-
-            fieldName = BANDSB::START_TIME_FRAC + bandNumStr;
-            const double* frac = dv_cast<double>(&input.getAttribute(fieldName));
-
+            string YYMMDDhhmmssSSS("------------.---");
             fieldName = BANDSB::START_TIME + bandNumStr;
-
             const DateTime* pStartDtg = dv_cast<DateTime>(&input.getAttribute(fieldName));
-            if (pStartDtg == NULL)
+            if (pStartDtg != NULL)
             {
-               return false;
+               fieldName = BANDSB::START_TIME_FRAC + bandNumStr;
+               const double* pFrac = dv_cast<double>(&input.getAttribute(fieldName));
+               if (pFrac != NULL)
+               {
+                  // put date in form YYMMDDhhmmss.sss for this TAG    see: strftime() for format info
+                  string fracStr = toString<double>(*pFrac, 5);
+                  fracStr = fracStr.substr(1);                    // trim off leading zero
+
+                  YYMMDDhhmmssSSS = pStartDtg->getFormattedUtc("%y%m%d%H%M%S") + fracStr;
+               }
             }
 
-            // put date in form YYMMDDhhmmss.sss for this TAG    see: strftime() for format info
-            string fracStr = toString<double>(*frac, 5);
-            fracStr = fracStr.substr(1);                    // trim off leading zero
-            string YYMMDDhhmmssSSS = pStartDtg->getFormattedUtc("%y%m%d%H%M%S") + fracStr;
             output << sizeString(YYMMDDhhmmssSSS, 16);
          }
 
@@ -3250,25 +3252,73 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
    try
    {
       const DataVariant& nitfMetadata = pMetadata->getAttribute(Nitf::NITF_METADATA);
-      const DynamicObject* pExistingBandsb = getTagHandle(dv_cast<DynamicObject>(nitfMetadata), "BANDSB", FindFirst());
-      if (!pExistingBandsb)
+      const DynamicObject* pExistingBandsb = NULL;
+      if (nitfMetadata.isValid() == true)
       {
-         return UNCHANGED;
+         pExistingBandsb = getTagHandle(dv_cast<DynamicObject>(nitfMetadata), "BANDSB", FindFirst());
       }
 
       const vector<DimensionDescriptor>& exportBands = exportDescriptor.getBands();
-
       VERIFYRV(!exportBands.empty(), REMOVE);
-
-      unsigned int origCount = dv_cast<unsigned int>
-         (pExistingBandsb->getAttribute(BANDSB::COUNT));      // COUNT == the number of bands in the original cube
       unsigned int newCount = exportBands.size();
 
-      // If there is no change in the number of bands then there is no
-      // change in the BANDSB tag so us the old one.
-      if (origCount == newCount)
+      const string centerWavelengthsPath[] = {SPECIAL_METADATA_NAME, BAND_METADATA_NAME,
+         CENTER_WAVELENGTHS_METADATA_NAME, END_METADATA_NAME};
+      const string startWavelengthsPath[] = {SPECIAL_METADATA_NAME, BAND_METADATA_NAME,
+         START_WAVELENGTHS_METADATA_NAME, END_METADATA_NAME};
+      const string endWavelengthsPath[] = {SPECIAL_METADATA_NAME, BAND_METADATA_NAME,
+         END_WAVELENGTHS_METADATA_NAME, END_METADATA_NAME};
+
+      vector<double> centerWavelengths;
+      const DataVariant& dvCenterWavelengths = pMetadata->getAttributeByPath(centerWavelengthsPath);
+      dvCenterWavelengths.getValue(centerWavelengths);
+
+      vector<double> startWavelengths;
+      const DataVariant& dvStartWavelengths = pMetadata->getAttributeByPath(startWavelengthsPath);
+      dvStartWavelengths.getValue(startWavelengths);
+
+      vector<double> endWavelengths;
+      const DataVariant& dvEndWavelengths = pMetadata->getAttributeByPath(endWavelengthsPath);
+      dvEndWavelengths.getValue(endWavelengths);
+
+      unsigned int existMask = 0;
+      if (centerWavelengths.size() >= newCount)
       {
-         return UNCHANGED;
+         existMask |= (0x01 << 24);
+      }
+
+      vector<double> fwhms;
+      if (startWavelengths.size() >= newCount && startWavelengths.size() == endWavelengths.size())
+      {
+         for (vector<double>::const_iterator startIter = startWavelengths.begin(), endIter = endWavelengths.begin();
+            startIter != startWavelengths.end() && endIter != endWavelengths.end();
+            ++startIter, ++endIter)
+         {
+            fwhms.push_back(*endIter - *startIter);
+         }
+
+         existMask |= ((0x01 << 19) | (0x01 << 23));
+      }
+
+      if (pExistingBandsb == NULL)
+      {
+         if (existMask == 0)
+         {
+            return REMOVE;
+         }
+
+         tre.setAttribute(BANDSB::RADIOMETRIC_QUANTITY, string());
+         tre.setAttribute(BANDSB::RADIOMETRIC_QUANTITY_UNIT, string());
+         tre.setAttribute(BANDSB::SCALE_FACTOR, static_cast<float>(1));
+         tre.setAttribute(BANDSB::ADDITIVE_FACTOR, static_cast<float>(0));
+         tre.setAttribute(BANDSB::ROW_GSD_UNIT, string());
+         tre.setAttribute(BANDSB::COL_GSD_UNITS, string());
+         tre.setAttribute(BANDSB::SPT_RESP_UNIT_ROW, string());
+         tre.setAttribute(BANDSB::SPT_RESP_UNIT_COL, string());
+         tre.setAttribute(BANDSB::DATA_FLD_1, vector<unsigned char>(48, 0));
+         tre.setAttribute(BANDSB::EXISTENCE_MASK, existMask);
+         tre.setAttribute(BANDSB::WAVE_LENGTH_UNIT, string("U"));
+         pExistingBandsb = &tre;
       }
 
       tre.setAttribute(BANDSB::COUNT, newCount);
@@ -3324,11 +3374,16 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
 
       // A bit set to zero signals that a conditional field is not present in this
       // extension. A bit set to the value one indicates the inclusion of the conditional field.
-      unsigned int existmask = dv_cast<unsigned int>(pExistingBandsb->getAttribute(BANDSB::EXISTENCE_MASK));
-      tre.setAttribute(BANDSB::EXISTENCE_MASK, existmask);
+      existMask |= dv_cast<unsigned int>(pExistingBandsb->getAttribute(BANDSB::EXISTENCE_MASK));
+      if (fwhms.empty() == false)
+      {
+         existMask &= ~(0x01 << 22);
+      }
+
+      tre.setAttribute(BANDSB::EXISTENCE_MASK, existMask);
 
       // b31 signals the RADIOMETRIC ADJUSTMENT SURFACE and ATMOSPHERIC ADJUSTMENT ALTITUDE fields.
-      if (bitTest(existmask, 31))
+      if (bitTest(existMask, 31))
       {
          tre.setAttribute(BANDSB::RADIOMETRIC_ADJUSTMENT_SURFACE,
             pExistingBandsb->getAttribute(BANDSB::RADIOMETRIC_ADJUSTMENT_SURFACE));
@@ -3337,13 +3392,13 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
       }
 
       // b30 signals the DIAMETER field.
-      if (bitTest(existmask, 30))
+      if (bitTest(existMask, 30))
       {
          tre.setAttribute(BANDSB::DIAMETER, pExistingBandsb->getAttribute(BANDSB::DIAMETER));
       }
 
       // b29 signals the DATA_FLD_2 field.
-      if (bitTest(existmask, 29))
+      if (bitTest(existMask, 29))
       {
          tre.setAttribute(BANDSB::DATA_FLD_2, pExistingBandsb->getAttribute(BANDSB::DATA_FLD_2));
       }
@@ -3354,8 +3409,8 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
       // b21 signals the NOM_WAVEn and WAVE_LENGTH_UNIT fields.
       // b20 signals the NOM_WAVE_UNCn field and WAVE_LENGTH_UNIT fields.
       // b19 signals the LBOUNDn, UBOUNDn and WAVE_LENGTH_UNIT fields.
-      if (bitTest(existmask, 24) || bitTest(existmask, 23) || bitTest(existmask, 22)
-         || bitTest(existmask, 21) || bitTest(existmask, 20) || bitTest(existmask, 19))
+      if (bitTest(existMask, 24) || bitTest(existMask, 23) || bitTest(existMask, 22)
+         || bitTest(existMask, 21) || bitTest(existMask, 20) || bitTest(existMask, 19))
       {
          tre.setAttribute(BANDSB::WAVE_LENGTH_UNIT, pExistingBandsb->getAttribute(BANDSB::WAVE_LENGTH_UNIT));
       }
@@ -3383,7 +3438,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
          string origFieldName;
 
          // b28 flags the BANDIDn field.
-         if (bitTest(existmask, 28))
+         if (bitTest(existMask, 28))
          {
             fieldName = BANDSB::BANDID + bandStr;
             origFieldName = BANDSB::BANDID + origBandStr;
@@ -3391,7 +3446,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
          }
 
          // b27 signals the BAD_BANDn field.
-         if (bitTest(existmask, 27))
+         if (bitTest(existMask, 27))
          {
             fieldName = BANDSB::BAD_BAND + bandStr;
             origFieldName = BANDSB::BAD_BAND + origBandStr;
@@ -3399,7 +3454,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
          }
 
          // b26 signals the NIIRSn field.
-         if (bitTest(existmask, 26))
+         if (bitTest(existMask, 26))
          {
             fieldName = BANDSB::NIIRS + bandStr;
             origFieldName = BANDSB::NIIRS + origBandStr;
@@ -3407,31 +3462,45 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
          }
 
          // b25 signals the FOCAL_LENn field.
-         if (bitTest(existmask, 25))
+         if (bitTest(existMask, 25))
          {
             fieldName = BANDSB::FOCAL_LEN + bandStr;
             origFieldName = BANDSB::FOCAL_LEN + origBandStr;
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
 
-            // b24 signals the CWAVE and WAVE_LENGTH_UNIT fields.
-         if (bitTest(existmask, 24))
+         // b24 signals the CWAVE and WAVE_LENGTH_UNIT fields.
+         if (bitTest(existMask, 24))
          {
             fieldName = BANDSB::CWAVE + bandStr;
-            origFieldName = BANDSB::CWAVE + origBandStr;
-            tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
+            if (centerWavelengths.size() > origBandNum)
+            {
+               tre.setAttribute(fieldName, centerWavelengths[origBandNum]);
+            }
+            else
+            {
+               origFieldName = BANDSB::CWAVE + origBandStr;
+               tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
+            }
          }
 
          // b23 signals the FWHM and WAVE_LENGTH_UNIT fields.
-         if (bitTest(existmask, 23))
+         if (bitTest(existMask, 23))
          {
             fieldName = BANDSB::FWHM + bandStr;
-            origFieldName = BANDSB::FWHM + origBandStr;
-            tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
+            if (fwhms.size() > origBandNum)
+            {
+               tre.setAttribute(fieldName, fwhms[origBandNum]);
+            }
+            else
+            {
+               origFieldName = BANDSB::FWHM + origBandStr;
+               tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
+            }
          }
 
          // b22 signals the FWHM_UNC and WAVE_LENGTH_UNIT field.
-         if (bitTest(existmask, 22))
+         if (bitTest(existMask, 22))
          {
             fieldName = BANDSB::FWHM_UNC + bandStr;
             origFieldName = BANDSB::FWHM_UNC + origBandStr;
@@ -3439,7 +3508,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
          }
 
          // b21 signals the NOM_WAVEn and WAVE_LENGTH_UNIT fields.
-         if (bitTest(existmask, 21))
+         if (bitTest(existMask, 21))
          {
             fieldName = BANDSB::NOM_WAVE + bandStr;
             origFieldName = BANDSB::NOM_WAVE + origBandStr;
@@ -3447,7 +3516,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
          }
 
          // b20 signals the NOM_WAVE_UNCn field and WAVE_LENGTH_UNIT fields.
-         if (bitTest(existmask, 20))
+         if (bitTest(existMask, 20))
          {
             fieldName = BANDSB::NOM_WAVE_UNC + bandStr;
             origFieldName = BANDSB::NOM_WAVE_UNC + origBandStr;
@@ -3455,19 +3524,33 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
          }
 
          // b19 signals the LBOUNDn, UBOUNDn and WAVE_LENGTH_UNIT fields.
-         if (bitTest(existmask, 19))
+         if (bitTest(existMask, 19))
          {
             fieldName = BANDSB::LBOUND + bandStr;
-            origFieldName = BANDSB::LBOUND + origBandStr;
-            tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
+            if (startWavelengths.size() > origBandNum)
+            {
+               tre.setAttribute(fieldName, startWavelengths[origBandNum]);
+            }
+            else
+            {
+               origFieldName = BANDSB::LBOUND + origBandStr;
+               tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
+            }
 
             fieldName = BANDSB::UBOUND + bandStr;
-            origFieldName = BANDSB::UBOUND + origBandStr;
-            tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
+            if (endWavelengths.size() > origBandNum)
+            {
+               tre.setAttribute(fieldName, endWavelengths[origBandNum]);
+            }
+            else
+            {
+               origFieldName = BANDSB::UBOUND + origBandStr;
+               tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
+            }
          }
 
          // b18 signals the SCALE FACTORn, and ADDITIVE FACTORn fields.
-         if (bitTest(existmask, 18))
+         if (bitTest(existMask, 18))
          {
             fieldName = BANDSB::SCALE_FACTOR + bandStr;
             origFieldName = BANDSB::SCALE_FACTOR + origBandStr;
@@ -3479,7 +3562,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
          }
 
          // b17 signals the START_TIMEn.
-         if (bitTest(existmask, 17))
+         if (bitTest(existMask, 17))
          {
             fieldName = BANDSB::START_TIME_FRAC + bandStr;
             origFieldName = BANDSB::START_TIME_FRAC + origBandStr;
@@ -3491,7 +3574,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
          }
 
          // b16 signals the INT_TIMEn field.
-         if (bitTest(existmask, 16))
+         if (bitTest(existMask, 16))
          {
             fieldName = BANDSB::INT_TIME + bandStr;
             origFieldName = BANDSB::INT_TIME + origBandStr;
@@ -3499,7 +3582,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
          }
 
          // b15 signals the CALDRK and CALIBRATION SENSITIVITYn fields.
-         if (bitTest(existmask, 15))
+         if (bitTest(existMask, 15))
          {
             fieldName = BANDSB::CALDRK + bandStr;
             origFieldName = BANDSB::CALDRK + origBandStr;
@@ -3511,7 +3594,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
          }
 
          // b14 signals the ROW_GSDn and ROW_GSD_UNITSn, COL_GSDn, COL_GSD_UNITSn fields.
-         if (bitTest(existmask, 14))
+         if (bitTest(existMask, 14))
          {
             fieldName = BANDSB::ROW_GSD + bandStr;
             origFieldName = BANDSB::ROW_GSD + origBandStr;
@@ -3519,7 +3602,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
          }
 
          // b13 signals the ROW_GSD_UNCn and COL_GSD_UNCn fields. (If b13 is set to 1 then b14 must be set.)
-         if (bitTest(existmask, 13))
+         if (bitTest(existMask, 13))
          {
             fieldName = BANDSB::ROW_GSD_UNC + bandStr;
             origFieldName = BANDSB::ROW_GSD_UNC + origBandStr;
@@ -3527,7 +3610,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
          }
 
          // b14 signals the ROW_GSDn and ROW_GSD_UNITSn, COL_GSDn, COL_GSD_UNITSn fields.
-         if (bitTest(existmask, 14))
+         if (bitTest(existMask, 14))
          {
             fieldName = BANDSB::ROW_GSD_UNIT + bandStr;
             origFieldName = BANDSB::ROW_GSD_UNIT + origBandStr;
@@ -3539,7 +3622,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
          }
 
          // b13 signals the ROW_GSD_UNCn and COL_GSD_UNCn fields. (If b13 is set to 1 then b14 must be set.)
-         if (bitTest(existmask, 13))
+         if (bitTest(existMask, 13))
          {
             fieldName = BANDSB::COL_GSD_UNC + bandStr;
             origFieldName = BANDSB::COL_GSD_UNC + origBandStr;
@@ -3547,7 +3630,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
          }
 
          // b14 signals the ROW_GSDn and ROW_GSD_UNITSn, COL_GSDn, COL_GSD_UNITSn fields.
-         if (bitTest(existmask, 14))
+         if (bitTest(existMask, 14))
          {
             fieldName = BANDSB::COL_GSD_UNIT + bandStr;
             origFieldName = BANDSB::COL_GSD_UNIT + origBandStr;
@@ -3555,7 +3638,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
          }
 
          // b12 signals the BKNOISEn and SCNNOISEn fields.
-         if (bitTest(existmask, 12))
+         if (bitTest(existMask, 12))
          {
             fieldName = BANDSB::BKNOISE + bandStr;
             origFieldName = BANDSB::BKNOISE + origBandStr;
@@ -3568,7 +3651,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
 
          // b11 signals the SPT_RESP_FUNCTION_ROWn, SPT_RESP_UNIT_ROWn,
          // SPT_RESP_FUNCTION_COLn, SPT_RESP_UNIT_COLn fields.
-         if (bitTest(existmask, 11))
+         if (bitTest(existMask, 11))
          {
             fieldName = BANDSB::SPT_RESP_FUNCTION_ROW + bandStr;
             origFieldName = BANDSB::SPT_RESP_FUNCTION_ROW + origBandStr;
@@ -3576,7 +3659,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
          }
 
          // b10 signals the SPT_RESP_UNC_ROWn and SPT_RESP_UNC_COLn fields. (If b10 is set to 1 then b11 must be set.)
-         if (bitTest(existmask, 10))
+         if (bitTest(existMask, 10))
          {
             fieldName = BANDSB::SPT_RESPUNC_ROW + bandStr;
             origFieldName = BANDSB::SPT_RESPUNC_ROW + origBandStr;
@@ -3585,7 +3668,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
 
          // b11 signals the SPT_RESP_FUNCTION_ROWn, SPT_RESP_UNIT_ROWn,
          // SPT_RESP_FUNCTION_COLn, SPT_RESP_UNIT_COLn fields.
-         if (bitTest(existmask, 11))
+         if (bitTest(existMask, 11))
          {
             fieldName = BANDSB::SPT_RESP_UNIT_ROW + bandStr;
             origFieldName = BANDSB::SPT_RESP_UNIT_ROW + origBandStr;
@@ -3597,7 +3680,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
          }
 
          // b10 signals the SPT_RESP_UNC_ROWn and SPT_RESP_UNC_COLn fields. (If b10 is set to 1 then b11 must be set.)
-         if (bitTest(existmask, 10))
+         if (bitTest(existMask, 10))
          {
             fieldName = BANDSB::SPT_RESPUNC_COL + bandStr;
             origFieldName = BANDSB::SPT_RESPUNC_COL + origBandStr;
@@ -3606,7 +3689,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
 
          // b11 signals the SPT_RESP_FUNCTION_ROWn, SPT_RESP_UNIT_ROWn,
          // SPT_RESP_FUNCTION_COLn, SPT_RESP_UNIT_COLn fields.
-         if (bitTest(existmask, 11))
+         if (bitTest(existMask, 11))
          {
             fieldName = BANDSB::SPT_RESP_UNIT_COL + bandStr;
             origFieldName = BANDSB::SPT_RESP_UNIT_COL + origBandStr;
@@ -3614,7 +3697,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
          }
 
          // b9 signals the DATA_FLD_3n field.
-         if (bitTest(existmask, 9))
+         if (bitTest(existMask, 9))
          {
             fieldName = BANDSB::DATA_FLD_3 + bandStr;
             origFieldName = BANDSB::DATA_FLD_3 + origBandStr;
@@ -3622,7 +3705,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
          }
 
          // b8 signals the DATA_FLD_4n field.
-         if (bitTest(existmask, 8))
+         if (bitTest(existMask, 8))
          {
             fieldName = BANDSB::DATA_FLD_4 + bandStr;
             origFieldName = BANDSB::DATA_FLD_4 + origBandStr;
@@ -3630,7 +3713,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
          }
 
          // b7 signals the DATA_FLD_5n field.
-         if (bitTest(existmask, 7))
+         if (bitTest(existMask, 7))
          {
             fieldName = BANDSB::DATA_FLD_5 + bandStr;
             origFieldName = BANDSB::DATA_FLD_5 + origBandStr;
@@ -3638,7 +3721,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
          }
 
          // b6 signals the DATA_FLD_6n field.
-         if (bitTest(existmask, 6))
+         if (bitTest(existMask, 6))
          {
             fieldName = BANDSB::DATA_FLD_6 + bandStr;
             origFieldName = BANDSB::DATA_FLD_6 + origBandStr;
@@ -3652,7 +3735,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
       unsigned int num_aux_c = 0;
 
       // b0 = signals the NUM_AUX_B and NUM_AUX_C fields.
-      if (bitTest(existmask, 0))
+      if (bitTest(existMask, 0))
       {
          num_aux_b = dv_cast<unsigned int>(pExistingBandsb->getAttribute(BANDSB::NUM_AUX_B));
          tre.setAttribute(BANDSB::NUM_AUX_B, num_aux_b);
