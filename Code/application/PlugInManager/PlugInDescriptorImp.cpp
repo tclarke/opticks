@@ -7,6 +7,7 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtCore/QBuffer>
 #include <QtGui/QIcon>
 
 #include "PlugInDescriptorImp.h"
@@ -81,7 +82,9 @@ PlugInDescriptorImp::PlugInDescriptorImp(const string& id, PlugIn* pPlugIn) :
          mExecuteOnStartup = pExecutable->isExecutedOnStartup();
          mDestroyAfterExecute = pExecutable->isDestroyedAfterExecute();
          mMenuLocations = pExecutable->getMenuLocations();
-         mpMenuIcon = pExecutable->getMenuIcon();
+
+         setupMenuIcon(QPixmap(pExecutable->getMenuIcon()));
+
          mAbort = pExecutable->hasAbort();
          mWizardSupport = pExecutable->hasWizardSupport();
 
@@ -157,6 +160,7 @@ PlugInDescriptorImp::~PlugInDescriptorImp()
          pManager->destroyPlugInArgList(mpInteractiveOutArgList);
       }
 
+      delete [] mpMenuIcon;
       destroyPlugIns();
    }
    catch (...)
@@ -267,7 +271,7 @@ const vector<string>& PlugInDescriptorImp::getMenuLocations() const
 
 const char** PlugInDescriptorImp::getMenuIcon() const
 {
-   return mpMenuIcon;
+   return const_cast<const char**>(mpMenuIcon);
 }
 
 bool PlugInDescriptorImp::hasAbort() const
@@ -508,4 +512,37 @@ bool PlugInDescriptorImp::serialize(SessionItemSerializer& serializer) const
 bool PlugInDescriptorImp::deserialize(SessionItemDeserializer& deserializer)
 {
    return true;
+}
+
+void PlugInDescriptorImp::setupMenuIcon(const QPixmap& menuIcon)
+{
+   if (menuIcon.isNull() == false)
+   {
+      // Save the QPixmap data into a buffer in a XPM format.
+      QByteArray byte;
+      QBuffer buffer(&byte);
+      buffer.open(QIODevice::ReadWrite);
+      menuIcon.save(&buffer, "XPM");
+
+      // Remove the white spaces in the byte array.
+      byte = byte.simplified();
+
+      // Remove both the header infomation from the beginning of the 
+      // byte array(the first 34 bytes in the array) and the }; from the end
+      // (the last 3 bytes).
+      byte.remove(0, 34);
+      byte.remove(byte.size() - 3, 3);
+
+      // Use the QString split method to sparate the data in the byte array.
+      QString byteString = byte;
+      QStringList xpmArray = byteString.split("\", \"");
+
+      // Take the resulting QStringList and deep copy the data to mpMenuIcon.
+      mpMenuIcon = new char*[xpmArray.size()];
+      for (int i = 0; i < xpmArray.size(); ++i)
+      {
+         mpMenuIcon[i] = new char[xpmArray[i].size()];
+         strcpy(mpMenuIcon[i], xpmArray[i].toAscii());
+      }
+   }
 }

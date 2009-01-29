@@ -248,7 +248,11 @@ protected:
 
    /**
     *  Sets an optional icon for a menu command or toolbar button from which
-    *  the plug-in is executed.
+    *  the plug-in is executed. 
+    *
+    *  Since it assumes that the XPM is declared local to the plug-in,
+    *  ExecutableShell does not have ownership over the the pointer.
+    *  Because of this, the subclass must do its own memory management for the icon. 
     *
     *  @param   pIcon
     *           The icon in XPM format.

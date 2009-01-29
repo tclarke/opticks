@@ -158,7 +158,7 @@ public:
 
    /**
     *  Returns the icon for a menu command or toolbar button from which the
-    *  plug-in is executed.
+    *  plug-in is executed. The returned icon is owned by the Executable class.
     *
     *  @return  The icon.
     */

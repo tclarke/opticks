@@ -164,6 +164,19 @@ public:
 private:
    void destroyPlugIns();
 
+   /**
+    *  This method does a deep copy by using a QPixmap to prevent memory leaks 
+    *  from happening. In order to convert the pixel data in a QPixmap to a XPM format, 
+    *  the data will have to be saved in a QByteArray. However, the QByteArray will contain 
+    *  extra infomation that is not needed in a XPM pixmap and must be removed. Since a 
+    *  QByteArray is basically a string, the pixel data will have to be separated 
+    *  into a array of strings so they can be deep copied to mpMenuIcon.
+    *
+    *  @param menuIcon
+    *         The QPixmap that the method will use to do a deep copy.
+    */
+   void setupMenuIcon(const QPixmap& menuIcon);
+
    std::string mModuleName;
    std::string mModuleFilename;
    unsigned int mPlugInNumber;
@@ -183,7 +196,7 @@ private:
    bool mExecuteOnStartup;
    bool mDestroyAfterExecute;
    std::vector<std::string> mMenuLocations;
-   const char** mpMenuIcon;
+   char** mpMenuIcon;
    bool mAbort;
    bool mWizardSupport;
    bool mBatchSupport;
