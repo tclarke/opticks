@@ -18,10 +18,14 @@
 
 #define PLOT_MANAGER_NAME "Plot Manager"
 
+/**
+ *  \cond INTERNAL
+ */
 namespace boost
 {
    class any;
 }
+/// \endcond
 
 class PlotManager : public QObject, public AlgorithmShell
 {
