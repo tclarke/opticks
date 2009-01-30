@@ -10,6 +10,7 @@
 #include <QtCore/QBuffer>
 #include <QtGui/QIcon>
 
+#include "ApplicationServices.h"
 #include "PlugInDescriptorImp.h"
 #include "Executable.h"
 #include "Exporter.h"
@@ -21,6 +22,7 @@
 #include "PlugInManagerServices.h"
 #include "ProgressAdapter.h"
 #include "PropertiesPlugInDescriptor.h"
+#include "Service.h"
 #include "SessionItemDeserializer.h"
 #include "SessionItemSerializer.h"
 #include "SessionManager.h"
@@ -83,7 +85,10 @@ PlugInDescriptorImp::PlugInDescriptorImp(const string& id, PlugIn* pPlugIn) :
          mDestroyAfterExecute = pExecutable->isDestroyedAfterExecute();
          mMenuLocations = pExecutable->getMenuLocations();
 
-         setupMenuIcon(QPixmap(pExecutable->getMenuIcon()));
+         if (Service<ApplicationServices>()->isInteractive())
+         {
+            setupMenuIcon(QPixmap(pExecutable->getMenuIcon()));
+         }
 
          mAbort = pExecutable->hasAbort();
          mWizardSupport = pExecutable->hasWizardSupport();
