@@ -546,7 +546,7 @@ void PlugInDescriptorImp::setupMenuIcon(const QPixmap& menuIcon)
       mpMenuIcon = new char*[xpmArray.size()];
       for (int i = 0; i < xpmArray.size(); ++i)
       {
-         mpMenuIcon[i] = new char[xpmArray[i].size()];
+         mpMenuIcon[i] = new char[xpmArray[i].size() + 1];
          strcpy(mpMenuIcon[i], xpmArray[i].toAscii());
       }
    }
