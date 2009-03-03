@@ -8,11 +8,15 @@
  */
 
 #include "AppVerify.h"
+#include "DataAccessor.h"
+#include "DataAccessorImpl.h"
+#include "DataRequest.h"
 #include "DataVariant.h"
 #include "DimensionDescriptor.h"
 #include "DynamicObject.h"
 #include "Endian.h"
 #include "ObjectResource.h"
+#include "Progress.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "RasterFileDescriptor.h"
@@ -34,6 +38,67 @@ namespace
    const double GreenTolerance = 0.04;
    const double RedCenter = 0.65;
    const double RedTolerance = 0.04;
+
+   void calculateNewPoints(Opticks::PixelLocation point0,
+                           Opticks::PixelLocation point1,
+                           std::vector<Opticks::PixelLocation>& endPoints)
+   {
+      bool steep = abs(point1.mY - point0.mY) > abs(point1.mX - point0.mX);
+      if (steep)
+      {
+         int tmp;
+         tmp = point0.mX;
+         point0.mX = point0.mY;
+         point0.mY = tmp;
+         tmp = point1.mX;
+         point1.mX = point1.mY;
+         point1.mY = tmp;
+      }
+      bool swapped = (point0.mX > point1.mX);
+      if (swapped)
+      {
+         Opticks::PixelLocation tmp(point0);
+         point0 = point1;
+         point1 = tmp;
+      }
+      int deltax = point1.mX - point0.mX;
+      int deltay = abs(point1.mY - point0.mY);
+      int error = deltax / 2;
+      int ystep = (point0.mY < point1.mY) ? 1 : -1;
+      int y = point0.mY;
+      for (int x = point0.mX; x <= point1.mX; ++x)
+      {
+         endPoints.push_back(steep ? Opticks::PixelLocation(y, x) : Opticks::PixelLocation(x, y));
+         error -= deltay;
+         if (error < 0)
+         {
+            y += ystep;
+            error += deltax;
+         }
+      }
+      if (swapped)
+      {
+         std::reverse(endPoints.begin(), endPoints.end());
+      }
+   }
+
+   template<typename T>
+   void setPixel(T* pPixel, int defaultValue, unsigned int numValues)
+   {
+      memset(pPixel, defaultValue, sizeof(T) * numValues);
+   }
+
+   template<>
+   void setPixel<IntegerComplex>(IntegerComplex* pPixel, int defaultValue, unsigned int numValues)
+   {
+      memset(pPixel, defaultValue, sizeof(IntegerComplex) * numValues);
+   }
+
+   template<>
+   void setPixel<FloatComplex>(FloatComplex* pPixel, int defaultValue, unsigned int numValues)
+   {
+      memset(pPixel, defaultValue, sizeof(FloatComplex) * numValues);
+   }
 }
 
 vector<DimensionDescriptor> RasterUtilities::generateDimensionVector(unsigned int count,
@@ -1066,4 +1131,213 @@ int64_t RasterUtilities::calculateFileSize(const RasterFileDescriptor* pDescript
    }
 
    return fileSize;
+}
+
+bool RasterUtilities::rotate(RasterElement* pDst, const RasterElement* pSrc, double angle, int defaultValue,
+                             RasterUtilities::InterpolationType interp, Progress* pProgress, bool* pAbort)
+{
+   if (pDst == NULL || pSrc == NULL)
+   {
+      if (pProgress != NULL)
+      {
+         pProgress->updateProgress("Invalid cube", 0, ERRORS);
+      }
+      return false;
+   }
+   const RasterDataDescriptor* pSrcDesc = static_cast<const RasterDataDescriptor*>(pSrc->getDataDescriptor());
+   RasterDataDescriptor* pDstDesc = static_cast<RasterDataDescriptor*>(pDst->getDataDescriptor());
+   std::vector<int> bvalues = pDstDesc->getBadValues();
+   if (std::find(bvalues.begin(), bvalues.end(), defaultValue) == bvalues.end())
+   {
+      bvalues.push_back(defaultValue);
+      pDstDesc->setBadValues(bvalues);
+   }
+   unsigned int numRows = pSrcDesc->getRowCount();
+   unsigned int numCols = pSrcDesc->getColumnCount();
+   unsigned int numBands = pSrcDesc->getBandCount();
+   bool isBip = (pSrcDesc->getInterleaveFormat() == BIP);
+
+   if (numRows != pDstDesc->getRowCount() ||
+       numCols != pDstDesc->getColumnCount() ||
+       numBands != pDstDesc->getBandCount() ||
+       isBip != (pDstDesc->getInterleaveFormat() == BIP))
+   {
+      if (pProgress != NULL)
+      {
+         pProgress->updateProgress("Desitnation cube is not compatible with source cube.", 0, ERRORS);
+      }
+      return false;
+   }
+
+   // calculate the rotation of the four corners
+   int x1 = numCols / 2;
+   int y1 = numRows / 2;
+   int x0 = -(static_cast<int>(numCols) - x1 - 1);
+   int y0 = -(static_cast<int>(numRows) - y1 - 1);
+   Opticks::PixelLocation ul(x0, y0);
+   Opticks::PixelLocation ur(x1, y0);
+   Opticks::PixelLocation ll(x0, y1);
+   Opticks::PixelLocation lr(x1, y1);
+   double cosA = cos(angle);
+   double sinA = sin(angle);
+   Opticks::PixelLocation ulPrime(static_cast<int>(ul.mX * cosA - ul.mY * sinA + 0.5),
+      static_cast<int>(ul.mX * sinA + ul.mY * cosA + 0.5));
+   Opticks::PixelLocation urPrime(static_cast<int>(ur.mX * cosA - ur.mY * sinA + 0.5),
+      static_cast<int>(ur.mX * sinA + ur.mY * cosA + 0.5));
+   Opticks::PixelLocation llPrime(static_cast<int>(ll.mX * cosA - ll.mY * sinA + 0.5),
+      static_cast<int>(ll.mX * sinA + ll.mY * cosA + 0.5));
+   Opticks::PixelLocation lrPrime(static_cast<int>(lr.mX * cosA - lr.mY * sinA + 0.5),
+      static_cast<int>(lr.mX * sinA + lr.mY * cosA + 0.5));
+
+   // use Bresenham's to calculate the start and end coordinates of each row
+   std::vector<Opticks::PixelLocation> newRowStartPre;
+   calculateNewPoints(ulPrime, llPrime, newRowStartPre);
+   std::vector<Opticks::PixelLocation> newRowEndPre;
+   calculateNewPoints(urPrime, lrPrime, newRowEndPre);
+
+   // interpolate so we have the proper number of points
+   std::vector<Opticks::PixelLocation> newRowStart;
+   std::vector<Opticks::PixelLocation> newRowEnd;
+   newRowStart.reserve(numRows);
+   newRowEnd.reserve(numRows);
+   double startMult = newRowStartPre.size() / static_cast<double>(numRows);
+   double endMult = newRowEndPre.size() / static_cast<double>(numRows);
+   for (unsigned int row = 0; row < numRows; row++)
+   {
+      if (pProgress != NULL)
+      {
+         pProgress->updateProgress("Calculating row shifts.", row * 100 / numRows, NORMAL);
+      }
+      switch(interp)
+      {
+      case NEAREST_NEIGHBOR:
+         {
+            unsigned int preStartRow = static_cast<int>(startMult * row + 0.5);
+            unsigned int preEndRow = static_cast<int>(endMult * row + 0.5);
+            newRowStart.push_back(newRowStartPre[preStartRow]);
+            newRowEnd.push_back(newRowEndPre[preEndRow]);
+            break;
+         }
+      case BILINEAR:
+      case BICUBIC:
+      default:
+         if (pProgress != NULL)
+         {
+            pProgress->updateProgress("Invalid or unsupported interpolation method.", 0, ERRORS);
+         }
+         return false;
+      }
+   }
+   if (newRowStart.size() != numRows || newRowEnd.size() != numRows)
+   {
+      if (pProgress != NULL)
+      {
+         pProgress->updateProgress("Error calculating new row positions.", 0, ERRORS);
+      }
+      return false;
+   }
+
+   unsigned int outBandLoop = isBip ? 1 : numBands;
+   unsigned int inBandLoop = isBip ? numBands : 1;
+   for (unsigned int outBand = 0; outBand < outBandLoop; outBand++)
+   {
+      FactoryResource<DataRequest> pSrcRequest;
+      FactoryResource<DataRequest> pDstRequest;
+      VERIFY(pSrcRequest.get() && pDstRequest.get());
+      pSrcRequest->setRows(DimensionDescriptor(), DimensionDescriptor(), 1);
+      pDstRequest->setRows(DimensionDescriptor(), DimensionDescriptor(), 1);
+      pSrcRequest->setColumns(DimensionDescriptor(), DimensionDescriptor(), numCols);
+      pDstRequest->setColumns(DimensionDescriptor(), DimensionDescriptor(), numCols);
+      if (!isBip)
+      {
+         pSrcRequest->setBands(pSrcDesc->getActiveBand(outBand), pSrcDesc->getActiveBand(outBand), 1);
+         pDstRequest->setBands(pDstDesc->getActiveBand(outBand), pDstDesc->getActiveBand(outBand), 1);
+      }
+      pDstRequest->setWritable(true);
+
+      DataAccessor pSrcAcc = pSrc->getDataAccessor(pSrcRequest.release());
+      DataAccessor pDstAcc = pDst->getDataAccessor(pDstRequest.release());
+      for (unsigned int row = 0; row < numRows; row++)
+      {
+         if (pProgress != NULL)
+         {
+            pProgress->updateProgress("Warping rows.", row * 100 / numRows, NORMAL);
+         }
+         if (pAbort != NULL && *pAbort)
+         {
+            if (pProgress != NULL)
+            {
+               pProgress->updateProgress("Aborted by user.", 0, ABORT);
+            }
+            return false;
+         }
+         if (!pDstAcc.isValid())
+         {
+            if (pProgress != NULL)
+            {
+               pProgress->updateProgress("Error copying data.", 0, ERRORS);
+            }
+            return false;
+         }
+         // initialize the row...this is faster than checking validity at each
+         // pixel and setting the default value at that pixel
+         switchOnComplexEncoding(pDstDesc->getDataType(), setPixel,
+            pDstAcc->getRow(), defaultValue, inBandLoop*numCols);
+
+         // use Bresenham's to calculate the column coordinates
+         std::vector<Opticks::PixelLocation> newColPre;
+         calculateNewPoints(newRowStart[row], newRowEnd[row], newColPre);
+         // interpolate so we have the proper number of points
+         double mult = newColPre.size() / static_cast<double>(numCols);
+         for (unsigned int col = 0; col < numCols; col++)
+         {
+            if (!pDstAcc.isValid())
+            {
+               if (pProgress != NULL)
+               {
+                  pProgress->updateProgress("Error copying data.", 0, ERRORS);
+               }
+               return false;
+            }
+            Opticks::PixelLocation sourcePixel;
+            switch(interp)
+            {
+            case NEAREST_NEIGHBOR:
+               {
+                  unsigned int preCol = static_cast<int>(mult * col + 0.5);
+                  sourcePixel = newColPre[preCol];
+                  break;
+               }
+            case BILINEAR:
+            case BICUBIC:
+            default:
+               if (pProgress != NULL)
+               {
+                  pProgress->updateProgress("Invalid or unsupported interpolation method.", 0, ERRORS);
+               }
+               return false;
+            }
+            sourcePixel -= Opticks::PixelLocation(x0, y0);
+            if (sourcePixel.mX >= 0 && sourcePixel.mX < static_cast<int>(numCols) &&
+                sourcePixel.mY >= 0 && sourcePixel.mY < static_cast<int>(numRows))
+            {
+               pSrcAcc->toPixel(sourcePixel.mY, sourcePixel.mX);
+               if (!pSrcAcc.isValid())
+               {
+                  if (pProgress != NULL)
+                  {
+                     pProgress->updateProgress("Error reading source cube.", 0, ERRORS);
+                  }
+                  return false;
+               }
+               memcpy(pDstAcc->getColumn(), pSrcAcc->getColumn(), pDstDesc->getBytesPerElement() * inBandLoop);
+            }
+            pDstAcc->nextColumn();
+         }
+         pDstAcc->nextRow();
+      }
+   }
+   pDst->updateData();
+
+   return true;
 }
