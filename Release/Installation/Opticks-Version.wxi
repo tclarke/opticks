@@ -35,8 +35,10 @@
    <?define C__gdal_DependencyGuid = "c27cf1d9-1b93-4020-98c9-b98eec317988" ?>
    <?define C__glew32_DependencyGuid = "a19ad2ea-6c28-4b12-99be-d605ed821625" ?>
    <?define C__hdf5dll_DependencyGuid = "73c1d912-c131-4cad-906a-5f8106fe5037" ?>
+   <?define C__libexpat_DependencyGuid = "7b8255ee-66e4-41b4-a41d-7e54ea60fc29" ?>
    <?define C__ossim_DependencyGuid = "4c606bc3-2ce9-4342-a521-4f5aa4006777" ?>
    <?define C__pthreadVC2_DependencyGuid = "ac753bcd-0ef6-47ee-8d0b-28b7a55f9ee8" ?>
+   <?define C__raptor_DependencyGuid = "9f95c4e1-d5de-4b87-abb3-7ef91f6e3655" ?>
    <?define C__QtConfGuid = "b5a80a1f-af29-4b10-9144-6e253769693e" ?>
    <?define C__Qt3Support4_DependencyGuid = "36a96e13-1642-43d0-8a32-8bf90aea22f4" ?>
    <?define C__QtCore4_DependencyGuid = "046c4501-c245-454e-9aa1-c05e17d57e6b" ?>
@@ -69,6 +71,7 @@
    <?define C__VC80_OpenMP_For_PlugIns_Guid = "7e3d6a22-ef4c-4392-9968-75fcb6633c04" ?>
    <?define C__VC80_CRT_For_ArcProxy_Guid = "f1b43b84-db95-47b7-b98b-71588f974557" ?>
    <?define C__TemplatesGuid = "073ad876-3f6a-4bd4-854a-ab297ef22495" ?>
+   <?define C__AutoInstallGuid = "ddfa4eec-64d9-4c24-8dbf-52ac459c0f47" ?>
 
    <?define C__Help_layers_Guid = "b8c3eaf2-13c7-4f63-8832-3a7fd0b8402d" ?>
    <?define C__Help_general_algorithms_Guid = "794ab4b8-eb7c-4e2e-97b2-8bccddbdf516" ?>
@@ -140,8 +143,10 @@
    <?define C__gdal_DependencyGuid = "92cd3e31-7845-49ee-8b27-9c4a56409330" ?>
    <?define C__glew32_DependencyGuid = "7e50d024-fdd9-42ca-a78f-caf788862593" ?>
    <?define C__hdf5dll_DependencyGuid = "548e2390-2d02-4b6c-a9fd-ea5ab0134af2" ?>
+   <?define C__libexpat_DependencyGuid = "7b8255ee-66e4-41b4-a41d-7e54ea60fc29" ?>
    <?define C__ossim_DependencyGuid = "38cda513-6826-4807-bc0e-33f9167221c6" ?>
    <?define C__pthreadVC2_DependencyGuid = "947603ee-11fd-4c96-a56e-1f65f87393c6" ?>
+   <?define C__raptor_DependencyGuid = "9f95c4e1-d5de-4b87-abb3-7ef91f6e3655" ?>
    <?define C__QtConfGuid = "cf69223c-390c-4c90-8de7-c35dbf001eb4" ?>
    <?define C__Qt3Support4_DependencyGuid = "91530c0d-5338-40a4-86f4-d1fdda3e754a" ?>
    <?define C__QtCore4_DependencyGuid = "4f964e16-723e-45cd-b4b9-737459793967" ?>
@@ -174,6 +179,7 @@
    <?define C__VC80_OpenMP_For_PlugIns_Guid = "d82ceb89-886e-493d-8994-76fb8c06aff0" ?>
    <?define C__VC80_CRT_For_ArcProxy_Guid = "dd322f47-32e9-4959-add7-64098492423d" ?>
    <?define C__TemplatesGuid = "3eb690a2-9536-447d-980c-98b5ec15a4bd" ?>
+   <?define C__AutoInstallGuid = "c119019b-1003-4365-a4ae-a9758c5a8543" ?>
 
    <?define C__Help_layers_Guid = "a0e99501-50c1-4d61-88b8-9240516db011" ?>
    <?define C__Help_general_algorithms_Guid = "b9dd8cc5-53ab-412f-ac2f-8a980959cd0d" ?>

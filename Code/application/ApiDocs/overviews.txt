@@ -38,4 +38,5 @@
 - \subpage stringutilitiesmacros
 - \subpage multithreadedhowto
 - \subpage EnumWrapperHowTo
+- \subpage howto_writeinstaller
 */

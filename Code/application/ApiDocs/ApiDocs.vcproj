@@ -65,6 +65,18 @@
 			Name="Documentation"
 			>
 			<File
+				RelativePath=".\aeb.html"
+				>
+			</File>
+			<File
+				RelativePath=".\aeb.txt"
+				>
+			</File>
+			<File
+				RelativePath=".\aebl.html"
+				>
+			</File>
+			<File
 				RelativePath=".\contextmenus.txt"
 				>
 			</File>
@@ -126,6 +138,10 @@
 			</File>
 			<File
 				RelativePath=".\plugintutorial2.txt"
+				>
+			</File>
+			<File
+				RelativePath=".\howto_writeinstaller.txt"
 				>
 			</File>
 			<File
