@@ -951,11 +951,11 @@ void OptionsMovieExporter::setFrameType(FrameType eType)
       mpStartLabel->setText("Start Time");
       mpStart->setToolTip("Time of first frame to export");
       mpStart->setSingleStep(0.001);
-      mpStart->setDecimals(3);
+      mpStart->setDecimals(10);
       mpStopLabel->setText("Stop Time");
       mpStop->setToolTip("Time of last frame to export");
       mpStop->setSingleStep(0.001);
-      mpStop->setDecimals(3);
+      mpStop->setDecimals(10);
       break;
    default:
       break;
