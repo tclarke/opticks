@@ -258,7 +258,7 @@ namespace Nitf
    /**
     * Combination typecast and endian swap.
     *
-    * @paran pBuffer
+    * @param pBuffer
     *        Buffer containing non-swapped data
     * @param sourceEndian
     *        The endianness of the data in the buffer
