@@ -9,6 +9,10 @@
 		Value="$(OPTICKSDEPENDENCIES)\Boost"
 	/>
 	<UserMacro
+		Name="CFITSIO"
+		Value="$(OPTICKSDEPENDENCIES)\cfitsio"
+	/>
+	<UserMacro
 		Name="XERCES"
 		Value="$(OPTICKSDEPENDENCIES)\Xerces"
 	/>
@@ -115,5 +119,9 @@
 	<UserMacro
 		Name="RAPTOR"
 		Value="$(OPTICKSDEPENDENCIES)\raptor"
+	/>
+	<UserMacro
+		Name="OPENJPEG"
+		Value="$(OPTICKSDEPENDENCIES)\OpenJpeg"
 	/>
 </VisualStudioPropertySheet>

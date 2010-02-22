@@ -7,6 +7,11 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+// PBuffers are only supported on Windows. Should be fine
+// since most (all?) newer video cards support FBOs which
+// are preferred.
+#include "AppConfig.h"
+#if defined(WIN_API)
 #include "ColorBuffer.h"
 #include "AppConfig.h"
 #include "AppVerify.h"
@@ -75,7 +80,6 @@ bool ImagePBuffer::createPixelBuffer(ColorBuffer *pColorBuffer)
 
    GLenum textureFormat = pColorBuffer->getTextureFormat();
 
-#if defined(WIN_API)
    // Get the current openGL device and rendering contexts
    mOSDeviceContext = wglGetCurrentDC();
    mOSRenderContext = wglGetCurrentContext();
@@ -161,13 +165,11 @@ bool ImagePBuffer::createPixelBuffer(ColorBuffer *pColorBuffer)
 
    // Switch back to the device and rendering contexts used to create the pbuffer
    wglMakeCurrent(mOSDeviceContext, mOSRenderContext);
-#endif
    return true;
 }
 
 void ImagePBuffer::destroyPixelBuffer()
 {
-#if defined(WIN_API)
    // Get the current openGL device and rendering contexts
    HDC currentDeviceContext = wglGetCurrentDC();
    HGLRC currentRenderContext = wglGetCurrentContext();
@@ -189,7 +191,6 @@ void ImagePBuffer::destroyPixelBuffer()
 
    // switch back to current context
    wglMakeCurrent(currentDeviceContext, currentRenderContext);
-#endif
 }
 
 bool ImagePBuffer::attachBuffer(ColorBuffer *pColorBuffer)
@@ -216,7 +217,6 @@ bool ImagePBuffer::attachBuffer(ColorBuffer *pColorBuffer)
 
    if (success)
    {
-#if defined(WIN_API)
       // Get the current openGL device and rendering contexts
       HDC currentDeviceContext = wglGetCurrentDC();
       HGLRC currentRenderContext = wglGetCurrentContext();
@@ -243,7 +243,6 @@ bool ImagePBuffer::attachBuffer(ColorBuffer *pColorBuffer)
          // switch back to current context
          wglMakeCurrent(currentDeviceContext, currentRenderContext);
       }
-#endif
    }
 
    if (success)
@@ -371,3 +370,4 @@ GLenum ImagePBuffer::getNextColorBufferId() const
 {
    return (mNextBuffer + 1);
 }
+#endif

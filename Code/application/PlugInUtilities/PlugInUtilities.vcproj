@@ -20,7 +20,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\CompileSettings\32bitSettings.vsprops;..\CompileSettings\pthreads.vsprops;..\CompileSettings\ehs.vsprops;..\CompileSettings\Qt.vsprops;..\CompileSettings\Xerces.vsprops;..\CompileSettings\ApplicationCommonSettings.vsprops;..\CompileSettings\AllCommonSettings-Debug-32bit.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\Qt-Debug.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\Ossim-Debug.vsprops;..\CompileSettings\raptor.vsprops"
+			InheritedPropertySheets="..\CompileSettings\32bitSettings.vsprops;..\CompileSettings\pthreads.vsprops;..\CompileSettings\ehs.vsprops;..\CompileSettings\Qt.vsprops;..\CompileSettings\Xerces.vsprops;..\CompileSettings\ApplicationCommonSettings.vsprops;..\CompileSettings\AllCommonSettings-Debug-32bit.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\Qt-Debug.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\Ossim-Debug.vsprops;..\CompileSettings\raptor.vsprops;..\CompileSettings\glew-debug.vsprops;..\CompileSettings\Cg.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -80,7 +80,7 @@
 		<Configuration
 			Name="Debug|x64"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\CompileSettings\pthreads.vsprops;..\CompileSettings\ehs.vsprops;..\CompileSettings\Qt.vsprops;..\CompileSettings\Xerces.vsprops;..\CompileSettings\ApplicationCommonSettings.vsprops;..\CompileSettings\AllCommonSettings-Debug-64bit.vsprops;..\CompileSettings\64bitSettings.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\Qt-Debug.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\Ossim-Debug.vsprops;..\CompileSettings\raptor.vsprops"
+			InheritedPropertySheets="..\CompileSettings\pthreads.vsprops;..\CompileSettings\ehs.vsprops;..\CompileSettings\Qt.vsprops;..\CompileSettings\Xerces.vsprops;..\CompileSettings\ApplicationCommonSettings.vsprops;..\CompileSettings\AllCommonSettings-Debug-64bit.vsprops;..\CompileSettings\64bitSettings.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\Qt-Debug.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\Ossim-Debug.vsprops;..\CompileSettings\raptor.vsprops;..\CompileSettings\glew-debug.vsprops;..\CompileSettings\Cg.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -141,7 +141,7 @@
 		<Configuration
 			Name="Release|Win32"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\CompileSettings\32bitSettings.vsprops;..\CompileSettings\ehs.vsprops;..\CompileSettings\pthreads.vsprops;..\CompileSettings\Qt.vsprops;..\CompileSettings\Xerces.vsprops;..\CompileSettings\ApplicationCommonSettings.vsprops;..\CompileSettings\AllCommonSettings-Release-32bit.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\Qt-Release.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\Ossim-Release.vsprops;..\CompileSettings\raptor.vsprops"
+			InheritedPropertySheets="..\CompileSettings\32bitSettings.vsprops;..\CompileSettings\ehs.vsprops;..\CompileSettings\pthreads.vsprops;..\CompileSettings\Qt.vsprops;..\CompileSettings\Xerces.vsprops;..\CompileSettings\ApplicationCommonSettings.vsprops;..\CompileSettings\AllCommonSettings-Release-32bit.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\Qt-Release.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\Ossim-Release.vsprops;..\CompileSettings\raptor.vsprops;..\CompileSettings\glew-release.vsprops;..\CompileSettings\Cg.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -201,7 +201,7 @@
 		<Configuration
 			Name="Release|x64"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\CompileSettings\pthreads.vsprops;..\CompileSettings\ehs.vsprops;..\CompileSettings\Qt.vsprops;..\CompileSettings\Xerces.vsprops;..\CompileSettings\ApplicationCommonSettings.vsprops;..\CompileSettings\AllCommonSettings-Release-64bit.vsprops;..\CompileSettings\64bitSettings.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\Qt-Release.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\Ossim-Release.vsprops;..\CompileSettings\raptor.vsprops"
+			InheritedPropertySheets="..\CompileSettings\pthreads.vsprops;..\CompileSettings\ehs.vsprops;..\CompileSettings\Qt.vsprops;..\CompileSettings\Xerces.vsprops;..\CompileSettings\ApplicationCommonSettings.vsprops;..\CompileSettings\AllCommonSettings-Release-64bit.vsprops;..\CompileSettings\64bitSettings.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\Qt-Release.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\Ossim-Release.vsprops;..\CompileSettings\raptor.vsprops;..\CompileSettings\glew-release.vsprops;..\CompileSettings\Cg.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -582,6 +582,10 @@
 						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\FilterWidget.h"
+				>
 			</File>
 			<File
 				RelativePath=".\FloatingLabel.h"
@@ -1164,6 +1168,50 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\GraphicUnitsWidget.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing $(InputName).h..."
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
+						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing $(InputName).h..."
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
+						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing $(InputName).h..."
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
+						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing $(InputName).h..."
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
+						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\GraphicViewWidget.h"
 				>
 				<FileConfiguration
@@ -1208,10 +1256,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\IconImages.h"
-				>
-			</File>
-			<File
 				RelativePath=".\ImageResolutionWidget.h"
 				>
 				<FileConfiguration
@@ -1220,7 +1264,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Moc&apos;ing $(InputName).h..."
-						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;"
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
 						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
 					/>
 				</FileConfiguration>
@@ -1230,7 +1274,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Moc&apos;ing $(InputName).h..."
-						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;"
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
 						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
 					/>
 				</FileConfiguration>
@@ -1240,7 +1284,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Moc&apos;ing $(InputName).h..."
-						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;"
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
 						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
 					/>
 				</FileConfiguration>
@@ -1250,7 +1294,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Moc&apos;ing $(InputName).h..."
-						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;"
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
 						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
 					/>
 				</FileConfiguration>
@@ -1436,10 +1480,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\mathVector.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Mgrs.h"
 				>
 			</File>
@@ -1457,50 +1497,6 @@
 			</File>
 			<File
 				RelativePath=".\NameTypeValueDlg.h"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Moc&apos;ing $(InputName).h..."
-						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
-						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|x64"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Moc&apos;ing $(InputName).h..."
-						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
-						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Moc&apos;ing $(InputName).h..."
-						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
-						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Moc&apos;ing $(InputName).h..."
-						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
-						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\NameValueDlg.h"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -1948,6 +1944,50 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\SignatureFilterDlg.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing $(InputName).h..."
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
+						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing $(InputName).h..."
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
+						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing $(InputName).h..."
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
+						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing $(InputName).h..."
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
+						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\StretchTypeComboBox.h"
 				>
 				<FileConfiguration
@@ -2045,18 +2085,6 @@
 			</File>
 			<File
 				RelativePath=".\SystemServicesImp.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TestDataPath.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TimeStruct.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ValueRange.h"
 				>
 			</File>
 		</Filter>
@@ -2168,6 +2196,10 @@
 				>
 			</File>
 			<File
+				RelativePath="$(BuildDir)\Moc\$(ProjectName)\moc_GraphicUnitsWidget.cpp"
+				>
+			</File>
+			<File
 				RelativePath="$(BuildDir)\Moc\$(ProjectName)\moc_GraphicViewWidget.cpp"
 				>
 			</File>
@@ -2220,10 +2252,6 @@
 				>
 			</File>
 			<File
-				RelativePath="$(BuildDir)\Moc\$(ProjectName)\moc_NameValueDlg.cpp"
-				>
-			</File>
-			<File
 				RelativePath="$(BuildDir)\Moc\$(ProjectName)\moc_PanLimitTypeComboBox.cpp"
 				>
 			</File>
@@ -2261,6 +2289,10 @@
 			</File>
 			<File
 				RelativePath="$(BuildDir)\Moc\$(ProjectName)\moc_SelectionGrid.cpp"
+				>
+			</File>
+			<File
+				RelativePath="$(BuildDir)\Moc\$(ProjectName)\moc_SignatureFilterDlg.cpp"
 				>
 			</File>
 			<File
@@ -2440,6 +2472,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Interfaces\BitMaskIterator.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Interfaces\CachedPage.h"
 				>
 			</File>
@@ -2609,6 +2645,10 @@
 			</File>
 			<File
 				RelativePath=".\Interfaces\GlContextSave.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Interfaces\GlTextureResource.h"
 				>
 			</File>
 			<File
@@ -3140,6 +3180,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Interfaces\TestUtilities.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Interfaces\TimeUtilities.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Interfaces\TypeConverter.h"
 				>
 			</File>
@@ -3285,6 +3333,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\BitMaskIterator.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\CachedPage.cpp"
 				>
 			</File>
@@ -3385,6 +3437,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FilterWidget.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\FloatingLabel.cpp"
 				>
 			</File>
@@ -3446,6 +3502,10 @@
 			</File>
 			<File
 				RelativePath=".\GraphicTriangleWidget.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GraphicUnitsWidget.cpp"
 				>
 			</File>
 			<File
@@ -3521,10 +3581,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\NameValueDlg.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\PageCache.cpp"
 				>
 			</File>
@@ -3589,6 +3645,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SignatureFilterDlg.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\SignaturePropertiesDlg.cpp"
 				>
 			</File>
@@ -3645,7 +3705,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\TimeStruct.cpp"
+				RelativePath=".\TestUtilities.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\TimeUtilities.cpp"
 				>
 			</File>
 			<File

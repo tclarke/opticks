@@ -50,12 +50,14 @@
 #include "PseudocolorLayerAdapter.h"
 #include "RasterLayerAdapter.h"
 #include "RasterDataDescriptor.h"
+#include "ScriptingWindow.h"
 #include "SessionInfoItem.h"
 #include "SessionItem.h"
 #include "SessionItemDeserializerImp.h"
 #include "SessionItemImp.h"
 #include "SessionItemSerializerImp.h"
 #include "SessionManagerImp.h"
+#include "SessionResource.h"
 #include "SignaturePlotAdapter.h"
 #include "SpatialDataViewAdapter.h"
 #include "SpatialDataViewImp.h"
@@ -81,6 +83,8 @@
 #include <errno.h>
 #include <QtCore/QDir>
 #include <QtCore/QFileInfo>
+#include <QtCore/QString>
+#include <QtCore/QStringList>
 #include <QtCore/QUuid>
 #include <QtGui/QWidget>
 
@@ -162,6 +166,7 @@ bool SessionManagerImp::isKindOf(const string& className) const
 
 void SessionManagerImp::close()
 {
+   SessionSaveLock lock;
    notify(SIGNAL_NAME(SessionManager, Closed));
 
    AnimationServicesImp::instance()->clear();
@@ -638,8 +643,21 @@ void SessionManagerImp::deleteObsoleteFiles(const string &dir, const vector<Inde
 
 void SessionManagerImp::destroyFailedSessionItem(const string &type, SessionItem* pItem)
 {
-   VERIFYNRV(pItem != NULL);
-   mItems.erase(mItems.find(pItem->getId()));
+   if (pItem == NULL)
+   {
+      return;
+   }
+
+   map<string, SessionItem*>::iterator iter = mItems.find(pItem->getId());
+   if (iter != mItems.end())
+   {
+      mItems.erase(iter);
+   }
+
+   if (type.empty() == true)
+   {
+      return;
+   }
 
    map<string, DestroyerProc> destroyers;
    destroyers["PlotWidget"] = &SessionManagerImp::destroyPlotWidget;
@@ -999,6 +1017,7 @@ SessionItem* SessionManagerImp::IndexFileItem::getSessionItem() const
 
 void SessionManagerImp::newSession()
 {
+   SessionSaveLock lock;
    close();
    mName = SessionItemImp::generateUniqueId();
    MessageLogMgrImp::instance()->getLog(mName); //force the session log to be created.
@@ -1006,6 +1025,15 @@ void SessionManagerImp::newSession()
    VERIFYNRV(pAppWindow != NULL);
    pAppWindow->registerPlugIns();
    pAppWindow->updateWizardCommands();
+
+   Service<DesktopServices> pDesktop;
+
+   ScriptingWindow* pScriptingWindow = dynamic_cast<ScriptingWindow*>(pDesktop->getWindow("Scripting Window",
+      DOCK_WINDOW));
+   if (pScriptingWindow != NULL)
+   {
+      pScriptingWindow->updateInterpreters();
+   }
 
    PlugInManagerServicesImp* pManager = PlugInManagerServicesImp::instance();
    if (pManager != NULL)
@@ -1018,7 +1046,7 @@ void SessionManagerImp::newSession()
 
 bool SessionManagerImp::open(const string &filename, Progress *pProgress)
 {
-   bool success = true;
+   SessionSaveLock lock;
    string name = mName;
    try
    {
@@ -1027,6 +1055,18 @@ bool SessionManagerImp::open(const string &filename, Progress *pProgress)
          return false;
       }
       mRestoreSessionPath = filename + "Dir";
+
+      QDir sessionDir(QString::fromStdString(mRestoreSessionPath));
+      if (sessionDir.exists() == false)
+      {
+         if (pProgress != NULL)
+         {
+            pProgress->updateProgress("The '" + mRestoreSessionPath +
+               "' session directory does not exist.  The session will not be loaded.", 0, ERRORS);
+         }
+
+         return false;
+      }
 
       if (pProgress)
       {
@@ -1068,7 +1108,6 @@ bool SessionManagerImp::open(const string &filename, Progress *pProgress)
    }
    catch (SessionManagerImp::Failure &e)
    {
-      success = false;
       mIsSaveLoad = false;
       if (pProgress)
       {
@@ -1077,9 +1116,10 @@ bool SessionManagerImp::open(const string &filename, Progress *pProgress)
       mName = name;
       Service<DesktopServices>()->showMessageBox("Session Load Failure", "The session load failed: \n" + e.mMessage, 
          "Ok");
+      return false;
    }
    notify(SIGNAL_NAME(SessionManager, SessionRestored));
-   return success;
+   return true;
 }
 
 void SessionManagerImp::populateItemMap(const vector<IndexFileItem> &items)
@@ -1226,7 +1266,7 @@ SessionManagerImp::serialize(const string& filename, Progress* pProgress)
    vector<IndexFileItem> successItems;
    QFileInfo fileInfo(filename.c_str());
    string sessionDirPath = fileInfo.absoluteDir().absolutePath().toStdString() + "/" +
-      fileInfo.baseName().toStdString() + ".sessionDir";
+      fileInfo.completeBaseName().toStdString() + ".sessionDir";
    QDir sessionDir(QString::fromStdString(sessionDirPath));
    if (sessionDir.exists() == false)
    {
@@ -1235,14 +1275,21 @@ SessionManagerImp::serialize(const string& filename, Progress* pProgress)
          status = FAILURE;
       }
    }
+
    if (status != FAILURE)
    {
       mIsSaveLoad = true;
       deleteObsoleteFiles(sessionDirPath, items);
 
       SessionItemSerializerImp sis(getPathForItem(sessionDirPath, ModelServicesImp::instance()));
-      ModelServicesImp::instance()->serialize(sis);
+      if (ModelServicesImp::instance()->serialize(sis) == false)
+      {
+         status = FAILURE;
+      }
+   }
 
+   if (status != FAILURE)
+   {
       int count = items.size();
       int i = 0;
       for (vector<IndexFileItem>::iterator ppItem = items.begin();
@@ -1251,6 +1298,15 @@ SessionManagerImp::serialize(const string& filename, Progress* pProgress)
       {
          SessionItem* pItem = ppItem->getSessionItem();
          LOG_IF(pItem == NULL, continue);
+
+         // check for session items that should not be saved
+         SessionItemExt1* pItemExt1 = dynamic_cast<SessionItemExt1*>(pItem);
+         if (pItemExt1 != NULL && pItemExt1->isValidSessionSaveItem() == false)
+         {
+            // don't serialize this item
+            continue;
+         }
+
          string filePath = getPathForItem(sessionDirPath, *ppItem);
          if (pProgress)
          {
@@ -1275,7 +1331,6 @@ SessionManagerImp::serialize(const string& filename, Progress* pProgress)
             successItems.push_back(*ppItem);
          }
       }
-      mIsSaveLoad = false;
 
       if (successItems.size() == 0 || writeIndexFile(filename, successItems) == false)
       {
@@ -1288,6 +1343,19 @@ SessionManagerImp::serialize(const string& filename, Progress* pProgress)
       }
    }
 
+   if (status == FAILURE)
+   {
+      remove(filename.c_str());
+      QStringList files(sessionDir.entryList());
+      foreach(QString file, files)
+      {
+         sessionDir.remove(file);
+      }
+
+      sessionDir.rmdir(sessionDir.absolutePath());
+   }
+
+   mIsSaveLoad = false;
    return make_pair(status, failedItems);
 }
 

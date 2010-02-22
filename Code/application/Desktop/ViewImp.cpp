@@ -23,7 +23,6 @@
 #include "FontImp.h"
 #include "GeocoordLinkFunctor.h"
 #include "glCommon.h"
-#include "Icons.h"
 #include "ImageResolutionWidget.h"
 #include "MouseModeImp.h"
 #include "PropertiesView.h"
@@ -110,6 +109,11 @@ ViewImp::ViewImp(const string& id, const string& viewName, QGLContext* drawConte
 
 ViewImp::~ViewImp()
 {
+   // Clear the undo stack so that undo objects with pointers to this object
+   // have a chance to be deleted gracefully while it is still valid.
+   // e.g.: Any objects with a GlTextureResource need the QGLContext* to still be valid.
+   clearUndo();
+
    // Detach all linked views
    vector<pair<View*, LinkType> >::iterator iter;
    for (iter = mLinkedViews.begin(); iter != mLinkedViews.end(); ++iter)
@@ -593,9 +597,7 @@ bool ViewImp::isCrossHairEnabled() const
 
 void ViewImp::draw()
 {
-   GlContextSave contextSave;
-
-   makeCurrent();
+   GlContextSave contextSave(this);
    drawContents();
    drawCrossHair();
    drawSelectionBox();
@@ -652,8 +654,7 @@ bool ViewImp::getCurrentImage(QImage &image)
          zoomToBox(ll, ur);
       }
 
-      GlContextSave contextSave;
-      makeCurrent();
+      GlContextSave contextSave(this);
       QGLFramebufferObject fbo(iWidth, iHeight, QGLFramebufferObject::CombinedDepthStencil);
       fbo.bind();
       drawImage(iWidth, iHeight);
@@ -704,8 +705,7 @@ bool ViewImp::getCurrentImage(QImage &image)
          zoomToBox(ll, ur);
       }
 
-      GlContextSave contextSave;
-      makeCurrent();
+      GlContextSave contextSave(this);
 
       // Draw the current image in the back buffer
       glDrawBuffer(GL_BACK);
@@ -1580,28 +1580,47 @@ void ViewImp::drawClassification()
    {
       // Check if the release is a production release
       Service<ConfigurationSettings> pConfigSettings;
+      QFontMetrics fontMetrics(mClassificationFont);
 
       // Calculate the screen width and height of the release info
-      QString strReleaseText =
-         QString::fromStdString(StringUtilities::toDisplayString(pConfigSettings->getReleaseType()));
-
-      QFontMetrics fontMetrics(mClassificationFont);
-      if (!strReleaseText.isEmpty())
+      QStringList strRelease(QString::fromStdString(
+         StringUtilities::toDisplayString(pConfigSettings->getReleaseType())));
+      ConfigurationSettingsExt1* pConfigSettingsExt1 =
+         dynamic_cast<ConfigurationSettingsExt1*>(pConfigSettings.get());
+      if (pConfigSettingsExt1 != NULL)
       {
-         int iReleaseWidth = fontMetrics.width(strReleaseText);
-         int iReleaseHeight = fontMetrics.ascent();
+         QString strReleaseDescription = QString::fromStdString(pConfigSettingsExt1->getReleaseDescription());
+         if (strReleaseDescription.isEmpty() == false)
+         {
+            strRelease << strReleaseDescription.split('\n');
+         }
+      }
 
-         // Release markings - Qt has an upper left origin, so there
-         // is no need to offset the y-coordinate by the view height
-         qglColor(Qt::black);
-         int screenX = (iWidth / 2) - (iReleaseWidth / 2) + shadowOffset;
-         int screenY = topMargin + iClassificationHeight + shadowOffset + topMargin + iReleaseHeight + shadowOffset;
-         renderText(screenX, screenY, strReleaseText, mClassificationFont);
+      int iTotalReleaseHeight = 0;
+      for (QList<QString>::const_iterator iter = strRelease.begin(); iter != strRelease.end(); ++iter)
+      {
+         const QString& strReleaseText = *iter;
 
-         qglColor(mClassificationColor);
-         screenX = (iWidth / 2) - (iReleaseWidth / 2);
-         screenY = topMargin + iClassificationHeight + shadowOffset + topMargin + iReleaseHeight;
-         renderText(screenX, screenY, strReleaseText, mClassificationFont);
+         if (!strReleaseText.isEmpty())
+         {
+            int iReleaseWidth = fontMetrics.width(strReleaseText);
+            int iReleaseHeight = fontMetrics.ascent();
+
+            // Release markings - Qt has an upper left origin, so there
+            // is no need to offset the y-coordinate by the view height
+            qglColor(Qt::black);
+            int screenX = (iWidth / 2) - (iReleaseWidth / 2) + shadowOffset;
+            int screenY = topMargin + iClassificationHeight + shadowOffset +
+               topMargin + iReleaseHeight + shadowOffset + iTotalReleaseHeight;
+            renderText(screenX, screenY, strReleaseText, mClassificationFont);
+
+            qglColor(mClassificationColor);
+            screenX = (iWidth / 2) - (iReleaseWidth / 2);
+            screenY = topMargin + iClassificationHeight + shadowOffset +
+               topMargin + iReleaseHeight + iTotalReleaseHeight;
+            renderText(screenX, screenY, strReleaseText, mClassificationFont);
+            iTotalReleaseHeight += iReleaseHeight + topMargin;
+         }
       }
 
       if (pConfigSettings->isProductionRelease() == false)

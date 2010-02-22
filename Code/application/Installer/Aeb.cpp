@@ -15,6 +15,7 @@
 #include "InstallerServices.h"
 #include "ProductView.h"
 
+#include <QtCore/QCoreApplication>
 #include <QtCore/QDir>
 #include <QtCore/QUrl>
 
@@ -58,7 +59,7 @@ bool Aeb::meetsRequirements(std::string& errMsg) const
 {
    Service<InstallerServices> iservices;
    // validate requires
-   for (std::multimap<AebRequirement, AebRequirement>::const_iterator req = mRequires.begin(); req != mRequires.end(); ++req)
+   for (std::vector<std::pair<AebRequirement, AebRequirement> >::const_iterator req = mRequires.begin(); req != mRequires.end(); ++req)
    {
       // first is the target application...if the is the target application and the extension requirement is valid
       if (!req->second.isValid() || (req->first.isValid() &&
@@ -70,8 +71,18 @@ bool Aeb::meetsRequirements(std::string& errMsg) const
       const Aeb* pExt = iservices->getAeb(req->second.getId());
       if (pExt == NULL || !pExt->validate())
       {
-         errMsg = "A required extension [" + static_cast<std::string>(req->second.getId()) + "] is not installed.";
-         return false;
+         const Aeb* pPendingExt = iservices->getPendingAebInstall(req->second.getId());
+         if (pPendingExt == NULL || !pPendingExt->validate())
+         {
+            errMsg = "A required extension [" + static_cast<std::string>(req->second.getId()) + "] is not installed.";
+            return false;
+         }
+         else if (!req->second.meets(pPendingExt->getVersion()))
+         {
+            errMsg = "A required extension [" + pPendingExt->getName() +
+               "] is scheduled for install but does not meet the version requirements. [" + pPendingExt->getVersion().toString() + "]";
+            return false;
+         }
       }
       else if (!req->second.meets(pExt->getVersion()))
       {
@@ -81,7 +92,7 @@ bool Aeb::meetsRequirements(std::string& errMsg) const
       }
    }
    // validate incompatibles
-   for (std::multimap<AebRequirement, AebRequirement>::const_iterator inc = mIncompatibles.begin(); inc != mIncompatibles.end(); ++inc)
+   for (std::vector<std::pair<AebRequirement, AebRequirement> >::const_iterator inc = mIncompatibles.begin(); inc != mIncompatibles.end(); ++inc)
    {
       // first is the target application...if the is the target application and the extension requirement is valid
       if (!inc->second.isValid() || (inc->first.isValid() &&
@@ -107,7 +118,7 @@ bool Aeb::isIncompatible(const Aeb& extension) const
       return false;
    }
    // validate incompatibles
-   for (std::multimap<AebRequirement, AebRequirement>::const_iterator inc = mIncompatibles.begin(); inc != mIncompatibles.end(); ++inc)
+   for (std::vector<std::pair<AebRequirement, AebRequirement> >::const_iterator inc = mIncompatibles.begin(); inc != mIncompatibles.end(); ++inc)
    {
       // first is the target application...if the is the target application and the extension requirement is valid
       if (!inc->second.isValid() || (inc->first.isValid() &&
@@ -116,7 +127,7 @@ bool Aeb::isIncompatible(const Aeb& extension) const
          continue;
       }
       // if the incompatible extension is present and meets the version requirements then fail
-      if (inc->second.meets(extension.getVersion()))
+      if (inc->second.getId() == extension.getId() && inc->second.meets(extension.getVersion()))
       {
           return true;
       }
@@ -135,12 +146,12 @@ AebId Aeb::getId() const
 }
 
 AebVersion Aeb::getVersion() const
-{ 
+{
    return mVersion;
 }
 
 std::string Aeb::getName() const
-{ 
+{
    return mName;
 }
 
@@ -159,7 +170,7 @@ const std::vector<std::string>& Aeb::getDevelopers() const
    return mDevelopers;
 }
 
-const std::vector<std::string>& Aeb::getTranslators() const 
+const std::vector<std::string>& Aeb::getTranslators() const
 {
    return mTranslators;
 }
@@ -171,57 +182,57 @@ const std::vector<std::string>& Aeb::getContributors() const
 
 std::string Aeb::getHomepageURL() const
 {
-   return mHomepageURL; 
+   return mHomepageURL;
 }
 
-std::string Aeb::getIconURL() const 
+std::string Aeb::getIconURL() const
 {
    return mIconURL;
 }
 
 std::vector<std::string> Aeb::getLicenseURLs() const
 {
-   return mLicenseURLs; 
+   return mLicenseURLs;
 }
 
-bool Aeb::isHidden() const 
+bool Aeb::isHidden() const
 {
-   return mHidden; 
+   return mHidden;
 }
 
 const std::vector<AebPlatform>& Aeb::getPlatforms() const
 {
-   return mPlatforms; 
+   return mPlatforms;
 }
 
-const std::multimap<AebRequirement, AebRequirement>& Aeb::getRequires() const 
+const std::vector<std::pair<AebRequirement, AebRequirement> >& Aeb::getRequires() const
 {
-   return mRequires; 
+   return mRequires;
 }
 
-const std::multimap<AebRequirement, AebRequirement>& Aeb::getIncompatibles() const 
+const std::vector<std::pair<AebRequirement, AebRequirement> >& Aeb::getIncompatibles() const
 {
-   return mIncompatibles; 
+   return mIncompatibles;
 }
 
 std::string Aeb::getUpdateURL() const
 {
-   return mUpdateURL; 
+   return mUpdateURL;
 }
 
 std::string Aeb::getUpdateKey() const
 {
-   return mUpdateKey; 
+   return mUpdateKey;
 }
 
 std::vector<std::string> Aeb::getSplashScreenURLs() const
-{ 
-   return mSplashScreenURLs; 
+{
+   return mSplashScreenURLs;
 }
 
-std::map<std::string, std::string> Aeb::getHelpEntries() const 
+std::map<std::string, std::string> Aeb::getHelpEntries() const
 {
-   return mHelpEntries; 
+   return mHelpEntries;
 }
 
 QPixmap Aeb::getIcon() const
@@ -262,7 +273,11 @@ void Aeb::getContentDestinations(const QList<const AebEntry*>& sources, QList<QS
 
       QString top = parts.takeFirst();
       QDir dest;
-      if (top == "Bin" || top == "Doc" || top == "Help" || top == "DefaultSettings")
+      if (top == "Bin")
+      {
+         dest = QDir(QCoreApplication::applicationDirPath());
+      }
+      else if (top == "Doc" || top == "Help" || top == "DefaultSettings")
       {
          dest = appHomePath;
          dest.setPath(dest.absoluteFilePath(top));

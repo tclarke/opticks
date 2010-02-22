@@ -180,7 +180,7 @@ string join(const vector<string> &source, const string &separator)
    string rval;
    for(vector<string>::const_iterator it = source.begin(); it != source.end(); ++it)
    {
-      if(it != source.begin())
+      if (it != source.begin())
       {
          rval += separator;
       }
@@ -250,7 +250,7 @@ string expandVariables(const string& originalString,
                      if (value != NULL)
                      {
                         replacementString = value;
-                        if(replacementString.size() > 2 && replacementString[0] == '"' &&
+                        if (replacementString.size() > 2 && replacementString[0] == '"' &&
                            replacementString[replacementString.size() - 1] == '"')
                         {
                            replacementString = replacementString.substr(1, replacementString.size() - 2);
@@ -418,6 +418,7 @@ STRINGSTREAM_MAPPING_FROM_XML_STRING_VEC(bool)
 
 STRINGSTREAM_MAPPING_CAST(char, short)
 STRINGSTREAM_MAPPING_CAST(unsigned char, unsigned short)
+STRINGSTREAM_MAPPING_CAST(signed char, short)
 STRINGSTREAM_MAPPING(short)
 STRINGSTREAM_MAPPING(unsigned short)
 STRINGSTREAM_MAPPING(int)
@@ -784,6 +785,12 @@ ADD_ENUM_MAPPING(TEXTURE_LINEAR, "Linear", "Linear")
 ADD_ENUM_MAPPING(TEXTURE_NEAREST_NEIGHBOR, "NearestNeighbor", "NearestNeighbor")
 END_ENUM_MAPPING()
 
+BEGIN_ENUM_MAPPING(UnitSystem)
+ADD_ENUM_MAPPING(UNIT_KM, "meters/kilometers", "m-km")
+ADD_ENUM_MAPPING(UNIT_KFT, "feet/kilofeet", "f-kft")
+ADD_ENUM_MAPPING(UNIT_MI, "feet/miles", "f-mi")
+END_ENUM_MAPPING()
+
 BEGIN_ENUM_MAPPING(UnitType)
 ADD_ENUM_MAPPING(RADIANCE, "Radiance", "Radiance")
 ADD_ENUM_MAPPING(REFLECTANCE, "Reflectance", "Reflectance")
@@ -795,6 +802,12 @@ ADD_ENUM_MAPPING(TRANSMITTANCE, "Transmittance", "Transmittance")
 ADD_ENUM_MAPPING(ABSORPTANCE, "Absorptance", "Absorptance")
 ADD_ENUM_MAPPING(ABSORBANCE, "Absorbance", "Absorbance")
 ADD_ENUM_MAPPING(DISTANCE, "Distance", "Distance")
+END_ENUM_MAPPING()
+
+BEGIN_ENUM_MAPPING(ViewType)
+ADD_ENUM_MAPPING(SPATIAL_DATA_VIEW, "Spatial Data View", "Spatial Data View")
+ADD_ENUM_MAPPING(PRODUCT_VIEW, "Product View", "Product View")
+ADD_ENUM_MAPPING(PLOT_VIEW, "Plot View", "Plot View")
 END_ENUM_MAPPING()
 
 BEGIN_ENUM_MAPPING(WindowSizeType)
@@ -825,6 +838,7 @@ ADD_ENUM_MAPPING(RT_DEMO, "", "demo")
 ADD_ENUM_MAPPING(RT_TRAINING, "", "training")
 ADD_ENUM_MAPPING(RT_TEST, "", "testing")
 ADD_ENUM_MAPPING(RT_PROTO, "", "prototype")
+ADD_ENUM_MAPPING(RT_RD, "", "rd")
 END_ENUM_MAPPING()
 
 template<>
@@ -839,7 +853,7 @@ string toDisplayString(const ReleaseType& val, bool* pError)
    case RT_NORMAL:
       {
          Service<ConfigurationSettings> pConfigSettings;
-         if(!pConfigSettings->isProductionRelease())
+         if (!pConfigSettings->isProductionRelease())
          {
             return "Developer Release";
          }
@@ -849,6 +863,7 @@ string toDisplayString(const ReleaseType& val, bool* pError)
    case RT_TRAINING: return "Training Mode";
    case RT_TEST: return "Testing Mode";
    case RT_PROTO: return "Prototype Product";
+   case RT_RD: return "R&D Mode";
    default: break;
    }
    if (pError != NULL)
@@ -865,25 +880,29 @@ ReleaseType fromDisplayString<ReleaseType>(string value, bool* pError)
    {
       *pError = false;
    }
-   if((value == "Developer Release") || value.empty())
+   if ((value == "Developer Release") || value.empty())
    {
       return RT_NORMAL;
    }
-   else if(value == "Demonstration Mode")
+   else if (value == "Demonstration Mode")
    {
       return RT_DEMO;
    }
-   else if(value == "Training Mode")
+   else if (value == "Training Mode")
    {
       return RT_TRAINING;
    }
-   else if(value == "Testing Mode")
+   else if (value == "Testing Mode")
    {
       return RT_TEST;
    }
-   else if(value == "Prototype Product")
+   else if (value == "Prototype Product")
    {
       return RT_PROTO;
+   }
+   else if (value == "R&D Mode")
+   {
+      return RT_RD;
    }
    if (pError != NULL)
    {
@@ -1069,7 +1088,7 @@ LocationType fromXmlString<LocationType>(string value, bool* pError)
    }
    stringstream parser(value);
    parser >> parsedValue.mX;
-   if(!parser.fail())
+   if (!parser.fail())
    {
       parser >> parsedValue.mY;
       if (!parser.fail())

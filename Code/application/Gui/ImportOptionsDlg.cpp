@@ -18,7 +18,6 @@
 #include "DataVariant.h"
 #include "DynamicObject.h"
 #include "FileDescriptorWidget.h"
-#include "Icons.h"
 #include "ImportDescriptorImp.h"
 #include "Importer.h"
 #include "ImportOptionsDlg.h"
@@ -711,25 +710,26 @@ bool ImportOptionsDlg::validateDataset(DataDescriptor* pDescriptor, QString& val
       QTreeWidgetItem* pItem = iter->second;
       if (pItem != NULL)
       {
-         disconnect(mpDatasetTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
+         bool disconnected = disconnect(mpDatasetTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
             SLOT(datasetItemChanged(QTreeWidgetItem*)));
-
-         Icons* pIcons = Icons::instance();
-         VERIFY(pIcons != NULL);
 
          if (validDataset == true)
          {
-            pItem->setIcon(0, QIcon(pIcons->mOk));
+            pItem->setIcon(0, QIcon(":/icons/Ok"));
          }
          else
          {
-            pItem->setIcon(0, QIcon(pIcons->mCritical));
+            pItem->setIcon(0, QIcon(":/icons/Critical"));
          }
 
          pItem->setData(0, Qt::UserRole, QVariant(validDataset));
 
-         VERIFYNR(connect(mpDatasetTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
-            SLOT(datasetItemChanged(QTreeWidgetItem*))));
+         if (disconnected)
+         {
+            //only connect, if the signal was originally connected
+            VERIFYNR(connect(mpDatasetTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
+               SLOT(datasetItemChanged(QTreeWidgetItem*))));
+         }
       }
    }
 
@@ -749,9 +749,14 @@ void ImportOptionsDlg::selectCurrentDatasetItem()
       QTreeWidgetItem* pItem = iter->second;
       if (pItem != NULL)
       {
-         disconnect(mpDatasetTree, SIGNAL(itemSelectionChanged()), this, SLOT(updateEditDataset()));
+         bool disconnected = disconnect(mpDatasetTree, SIGNAL(itemSelectionChanged()),
+            this, SLOT(updateEditDataset()));
          mpDatasetTree->setCurrentItem(pItem);     // Also selects the item
-         VERIFYNR(connect(mpDatasetTree, SIGNAL(itemSelectionChanged()), this, SLOT(updateEditDataset())));
+         if (disconnected)
+         {
+            //only connect, if the signal was originally connected
+            VERIFYNR(connect(mpDatasetTree, SIGNAL(itemSelectionChanged()), this, SLOT(updateEditDataset())));
+         }
       }
    }
 }
@@ -826,6 +831,27 @@ void ImportOptionsDlg::validateEditDataset()
    mpValidationLabel->setText(validationMessage);
 }
 
+namespace
+{
+   void recursivelySetChildren(QTreeWidgetItem* pItem, int column, Qt::CheckState newState)
+   {
+      if (pItem == NULL)
+      {
+         return;
+      }
+      for (int i = 0; i < pItem->childCount(); ++i)
+      {
+         QTreeWidgetItem* pChild = pItem->child(i);
+         if (pChild == NULL)
+         {
+            continue;
+         }
+         pChild->setCheckState(column, newState);
+         recursivelySetChildren(pChild, column, newState);
+      }
+   }
+};
+
 void ImportOptionsDlg::enforceSelections(QTreeWidgetItem* pItem)
 {
    if (pItem == NULL)
@@ -833,39 +859,57 @@ void ImportOptionsDlg::enforceSelections(QTreeWidgetItem* pItem)
       return;
    }
 
-   // Update the children
-   Qt::CheckState itemCheck = pItem->checkState(0);
-   if (itemCheck != Qt::PartiallyChecked)
+   if (pItem->parent() == NULL && pItem->checkState(0) == Qt::Checked)
    {
-      for (int i = 0; i < pItem->childCount(); ++i)
-      {
-         QTreeWidgetItem* pChild = pItem->child(i);
-         if (pChild != NULL)
-         {
-            pChild->setCheckState(0, itemCheck);
-         }
-      }
+      //for top-level items (files), if it becomes checked, then check
+      //all items under the file.
+      recursivelySetChildren(pItem, 0, Qt::Checked);
+      return;
    }
 
-   // Update the parent
-   QTreeWidgetItem* pParent = pItem->parent();
-   if (pParent != NULL)
+   // uncheck all children below this one that was unchecked recursively
+   if (pItem->checkState(0) == Qt::Unchecked)
    {
-      for (int i = 0; i < pParent->childCount(); ++i)
+      recursivelySetChildren(pItem, 0, Qt::Unchecked);
+
+      //look for a dataset directly under a file that just became unchecked
+      QTreeWidgetItem* pParent = pItem->parent();
+      if (pParent != NULL)
       {
-         QTreeWidgetItem* pSibling = pParent->child(i);
-         if (pSibling != NULL)
+         QTreeWidgetItem* pGrandParent = pParent->parent();
+         if (pGrandParent == NULL)
          {
-            Qt::CheckState currentCheck = pSibling->checkState(0);
-            if (currentCheck != itemCheck)
+            //let's determine if the siblings are unchecked, if so, we should
+            //uncheck the file.
+            bool uncheckParent = true;
+            for (int i = 0; i < pParent->childCount(); ++i)
             {
-               itemCheck = Qt::PartiallyChecked;
-               break;
+               QTreeWidgetItem* pSibling = pParent->child(i);
+               if (pSibling == NULL)
+               {
+                  continue;
+               }
+               if (pSibling->checkState(0) != Qt::Unchecked)
+               {
+                  uncheckParent = false;
+                  break;
+               }
+            }
+            if (uncheckParent)
+            {
+               pParent->setCheckState(0, Qt::Unchecked);
             }
          }
       }
-
-      pParent->setCheckState(0, itemCheck);
+   }
+   else
+   {
+      // if becoming checked or partially checked, then force all ancestors to be checked.
+      QTreeWidgetItem* pWorkingItem = pItem;
+      for (; pWorkingItem != NULL; pWorkingItem = pWorkingItem->parent())
+      {
+         pWorkingItem->setCheckState(0, Qt::Checked);
+      }
    }
 }
 

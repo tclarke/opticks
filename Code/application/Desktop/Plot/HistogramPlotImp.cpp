@@ -17,7 +17,6 @@
 #include <QtGui/QMouseEvent>
 #include <QtGui/QWidgetAction>
 
-#include "AppAssert.h"
 #include "AppVerify.h"
 #include "AppVersion.h"
 #include "BandBadValuesDlg.h"
@@ -31,7 +30,6 @@
 #include "HistogramAdapter.h"
 #include "HistogramPlotImp.h"
 #include "HistogramPlotAdapter.h"
-#include "Icons.h"
 #include "LocatorAdapter.h"
 #include "MouseMode.h"
 #include "PropertiesHistogramPlot.h"
@@ -320,10 +318,7 @@ HistogramPlotImp::HistogramPlotImp(const string& id, const string& viewName, QGL
    }
 
    // Save histogram action
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
-
-   mpSaveAction = new QAction(pIcons->mSaveHistogram, "&Save...", this);
+   mpSaveAction = new QAction(QIcon(":/icons/SaveHistogram"), "&Save...", this);
    mpSaveAction->setAutoRepeat(false);
    mpSaveAction->setShortcut(QKeySequence("Ctrl+S"));
    VERIFYNR(connect(mpSaveAction, SIGNAL(triggered()), this, SLOT(saveHistogram())));
@@ -2834,7 +2829,7 @@ void HistogramPlotImp::detached(Subject& subject, const string& signal, const Sl
 }
 
 #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove QListWidget subclass when QListWidget " \
-   "defines an appropriate size hint! (Qt 4.5.0) (dsulgrov)")
+   "defines an appropriate size hint! (Qt 4.5.2) (dsulgrov)")
 QSize HistogramPlotImp::MenuListWidget::sizeHint() const
 {
    int iWidth = sizeHintForColumn(0) + 25;   // Add 25 to provide room for the scroll bar
@@ -3001,7 +2996,6 @@ bool HistogramPlotImp::fromXml(DOMNode* pDocument, unsigned int version)
       }
    }
 
-   draw();
    return true;
 }
 

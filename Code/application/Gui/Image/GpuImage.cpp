@@ -11,6 +11,7 @@
 #include "CgContext.h"
 #include "ColorBuffer.h"
 #include "glCommon.h"
+#include "GpuResourceManager.h"
 #include "GpuTile.h"
 #include "ImageFilter.h"
 #include "ImageUtilities.h"
@@ -49,12 +50,6 @@ GpuImage::GpuImage() :
 
 GpuImage::~GpuImage()
 {
-   // Delete the colormap texture
-   if (mColormapTexture != 0)
-   {
-      glDeleteTextures(1, &mColormapTexture);
-   }
-
    // Unload and destroy Cg programs
    CgContext* pCgContext = CgContext::instance();
    if (pCgContext != NULL)
@@ -278,18 +273,18 @@ In getFromSource(In src)
 class GpuTileProcessor
 {
 public:
-   GpuTileProcessor(const vector<GpuTile*>& tiles, vector<int>& tileZoomIndices, const Image::ImageData& info) :
+   GpuTileProcessor(const vector<GpuTile*>& tiles,
+      vector<unsigned int>& tileZoomIndices, const Image::ImageData& info) :
       mTiles(tiles),
       mTileZoomIndices(tileZoomIndices),
       mInfo(info)
-      {
-      }
+   {}
 
    void run();
 
 private:
    const vector<GpuTile*>& mTiles;
-   vector<int>& mTileZoomIndices;
+   vector<unsigned int>& mTileZoomIndices;
    const Image::ImageData& mInfo;
 
    template <typename In, typename Out>
@@ -455,10 +450,10 @@ private:
       std::vector<int>::const_iterator badEnd = mInfo.mKey.mBadValues.end();
       bool bBadValues = (badBegin != badEnd);
 
-      vector<Out>::iterator targetBase = texData.begin();
+      typename vector<Out>::iterator targetBase = texData.begin();
       for (unsigned int y1 = 0; y1 < tileSizeY; y1++, targetBase += (mInfo.mTileSizeX * totalChannels))
       {
-         vector<Out>::iterator target = targetBase;
+         typename vector<Out>::iterator target = targetBase;
          target += (currentChannel - 1);     // Subtract one since currentChannel is a one-based value
 
          for (unsigned int x1 = 0; x1 < tileSizeX; x1++)
@@ -710,7 +705,7 @@ private:
    }
 };    // End of GpuTileProcessor class declaration
 
-void GpuImage::updateTiles(vector<Tile*>& tilesToUpdate, vector<int>& tileZoomIndices)
+void GpuImage::updateTiles(vector<Tile*>& tilesToUpdate, vector<unsigned int>& tileZoomIndices)
 {
    vector<GpuTile*> tiles;
    for (unsigned int i = 0; i < tilesToUpdate.size(); ++i)
@@ -784,58 +779,57 @@ void GpuImage::initializeFilter(ImageFilterDescriptor *pDescriptor)
 {
    VERIFYNRV(pDescriptor != NULL);
 
-   const vector<Tile*>* pTiles = getActiveTiles();
-   if (pTiles == NULL)
+   const map<ImageKey, TileSet>& tileSets = getTileSets();
+   for (map<ImageKey, TileSet>::const_iterator iter = tileSets.begin(); iter != tileSets.end(); ++iter)
    {
-      return;
-   }
+      const vector<Tile*>& tiles = iter->second.getTiles();
 
-   unsigned int numTiles = pTiles->size();
-   vector<int> tileZoomIndices;
-   vector<Tile*> tilesToUpdate;
+      unsigned int numTiles = tiles.size();
+      vector<unsigned int> tileZoomIndices;
+      vector<Tile*> tilesToUpdate;
 
-   tileZoomIndices.reserve(numTiles);
-   tilesToUpdate.reserve(numTiles);
+      tileZoomIndices.reserve(numTiles);
+      tilesToUpdate.reserve(numTiles);
 
-   vector<Tile*>::const_iterator iter;
-   for (iter = pTiles->begin(); iter != pTiles->end(); ++iter)
-   {
-      GpuTile* pTile = dynamic_cast<GpuTile*>(*iter);
-      if (pTile != NULL)
+      for (vector<Tile*>::const_iterator tileIter = tiles.begin(); tileIter != tiles.end(); ++tileIter)
       {
-         pTile->createFilter(pDescriptor);
-         tilesToUpdate.push_back(pTile);
-         tileZoomIndices.push_back(pTile->getTextureIndex());
-      }
-   }
-
-   updateTiles(tilesToUpdate, tileZoomIndices);
-
-   // Initialize tile filters
-   if (pDescriptor->getType() == ImageFilterDescriptor::FEEDBACK_FILTER)
-   {
-      // number of iterations to use to initialize the feedback buffer
-      // filters can override this value through the gic file
-      unsigned int numInitFrames = 20;
-
-      const unsigned int* pInitFrames = dv_cast<unsigned int>(&pDescriptor->getParameter("initializationIterations"));
-      if (pInitFrames != NULL)
-      {
-         numInitFrames = *pInitFrames;
-      }
-
-      for (unsigned int j = 0; j < tilesToUpdate.size(); ++j)
-      {
-         GpuTile* pGpuTile = static_cast<GpuTile*>(tilesToUpdate[j]);
-         bool freeze = pGpuTile->getFilterFreezeFlag(pDescriptor);
-         pGpuTile->freezeFilter(pDescriptor, false);
-         for (unsigned int i = 0; i < numInitFrames; ++i)
+         GpuTile* pTile = dynamic_cast<GpuTile*>(*tileIter);
+         if (pTile != NULL)
          {
-            // Apply the filter repeatedly on the current frame on each tile
-            // to initialize the feedback buffer. This all happens in the GPU.
-            pGpuTile->applyFilters();
+            pTile->createFilter(pDescriptor);
+            tilesToUpdate.push_back(pTile);
+            tileZoomIndices.push_back(pTile->getTextureIndex());
          }
-         pGpuTile->freezeFilter(pDescriptor, freeze);
+      }
+
+      updateTiles(tilesToUpdate, tileZoomIndices);
+
+      // Initialize tile filters
+      if (pDescriptor->getType() == ImageFilterDescriptor::FEEDBACK_FILTER)
+      {
+         // number of iterations to use to initialize the feedback buffer
+         // filters can override this value through the gic file
+         unsigned int numInitFrames = 20;
+
+         const unsigned int* pInitFrames = dv_cast<unsigned int>(&pDescriptor->getParameter("initializationIterations"));
+         if (pInitFrames != NULL)
+         {
+            numInitFrames = *pInitFrames;
+         }
+
+         for (unsigned int j = 0; j < tilesToUpdate.size(); ++j)
+         {
+            GpuTile* pGpuTile = static_cast<GpuTile*>(tilesToUpdate[j]);
+            bool freeze = pGpuTile->getFilterFreezeFlag(pDescriptor);
+            pGpuTile->freezeFilter(pDescriptor, false);
+            for (unsigned int i = 0; i < numInitFrames; ++i)
+            {
+               // Apply the filter repeatedly on the current frame on each tile
+               // to initialize the feedback buffer. This all happens in the GPU.
+               pGpuTile->applyFilters();
+            }
+            pGpuTile->freezeFilter(pDescriptor, freeze);
+         }
       }
    }
 
@@ -906,21 +900,21 @@ void GpuImage::resetFilter(ImageFilterDescriptor *pDescriptor)
       return;
    }
 
-   const vector<Tile*>* pTiles = getActiveTiles();
-   if (pTiles == NULL)
+   const map<ImageKey, TileSet>& tileSets = getTileSets();
+   for (map<ImageKey, TileSet>::const_iterator iter = tileSets.begin(); iter != tileSets.end(); ++iter)
    {
-      return;
-   }
+      const vector<Tile*>& tiles = iter->second.getTiles();
 
-   vector<Tile*>::const_iterator tileIter = pTiles->begin();
-   while (tileIter != pTiles->end())
-   {
-      GpuTile* pTile = dynamic_cast<GpuTile*>(*tileIter);
-      if (pTile != NULL)
+      vector<Tile*>::const_iterator tileIter = tiles.begin();
+      while (tileIter != tiles.end())
       {
-         pTile->resetFilter(pDescriptor);
+         GpuTile* pTile = dynamic_cast<GpuTile*>(*tileIter);
+         if (pTile != NULL)
+         {
+            pTile->resetFilter(pDescriptor);
+         }
+         ++tileIter;
       }
-      ++tileIter;
    }
 
    initializeFilter(pDescriptor);
@@ -933,21 +927,21 @@ void GpuImage::freezeFilter(ImageFilterDescriptor *pDescriptor, bool toggle)
       return;
    }
 
-   const vector<Tile*>* pTiles = getActiveTiles();
-   if (pTiles == NULL)
+   const map<ImageKey, TileSet>& tileSets = getTileSets();
+   for (map<ImageKey, TileSet>::const_iterator iter = tileSets.begin(); iter != tileSets.end(); ++iter)
    {
-      return;
-   }
+      const vector<Tile*>& tiles = iter->second.getTiles();
 
-   vector<Tile*>::const_iterator tileIter = pTiles->begin();
-   while (tileIter != pTiles->end())
-   {
-      GpuTile* pTile = dynamic_cast<GpuTile*>(*tileIter);
-      if (pTile != NULL)
+      vector<Tile*>::const_iterator tileIter = tiles.begin();
+      while (tileIter != tiles.end())
       {
-         pTile->freezeFilter(pDescriptor, toggle);
+         GpuTile* pTile = dynamic_cast<GpuTile*>(*tileIter);
+         if (pTile != NULL)
+         {
+            pTile->freezeFilter(pDescriptor, toggle);
+         }
+         ++tileIter;
       }
-      ++tileIter;
    }
 }
 
@@ -958,18 +952,17 @@ void GpuImage::disableFilter(ImageFilterDescriptor *pDescriptor)
       return;
    }
 
-   const vector<Tile*>* pTiles = getActiveTiles();
-   if (pTiles == NULL)
+   const map<ImageKey, TileSet>& tileSets = getTileSets();
+   for (map<ImageKey, TileSet>::const_iterator iter = tileSets.begin(); iter != tileSets.end(); ++iter)
    {
-      return;
-   }
-
-   for (vector<Tile*>::const_iterator iter = pTiles->begin(); iter != pTiles->end(); ++iter)
-   {
-      GpuTile* pTile = dynamic_cast<GpuTile*>(*iter);
-      if (pTile != NULL)
+      const vector<Tile*>& tiles = iter->second.getTiles();
+      for (vector<Tile*>::const_iterator tileIter = tiles.begin(); tileIter != tiles.end(); ++tileIter)
       {
-         pTile->destroyFilter(pDescriptor);
+         GpuTile* pTile = dynamic_cast<GpuTile*>(*tileIter);
+         if (pTile != NULL)
+         {
+            pTile->destroyFilter(pDescriptor);
+         }
       }
    }
 }
@@ -1037,14 +1030,7 @@ void GpuImage::initializeColormap(const vector<ColorType>& colorMap)
       }
    }
 
-   // Update the colormap texture
-   if (mColormapTexture != 0)
-   {
-      glDeleteTextures(1, &mColormapTexture);
-   }
-
    unsigned int numColors = colorMap.size();
-
    vector<unsigned char> colors(numColors * 4);
    for (unsigned int i = 0, textureIndex = 0; i < numColors; ++i)
    {
@@ -1055,16 +1041,13 @@ void GpuImage::initializeColormap(const vector<ColorType>& colorMap)
       colors[textureIndex++] = color.mAlpha;
    }
 
-   glGenTextures(1, &mColormapTexture);
-   if (mColormapTexture != 0)
+   mColormapTexture = GlTextureResource(1);
+   if (static_cast<GLuint>(mColormapTexture) != 0)
    {
-      glBindTexture(GL_TEXTURE_RECTANGLE_NV, mColormapTexture);
-      glTexParameterf(GL_TEXTURE_RECTANGLE_NV, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-      glTexParameterf(GL_TEXTURE_RECTANGLE_NV, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-      glTexParameterf(GL_TEXTURE_RECTANGLE_NV, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-      glTexParameterf(GL_TEXTURE_RECTANGLE_NV, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      glBindTexture(GL_TEXTURE_RECTANGLE_ARB, mColormapTexture);
       glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-      glTexImage2D(GL_TEXTURE_RECTANGLE_NV, 0, GL_RGBA, numColors, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &colors[0]);   
+      glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA, numColors, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &colors[0]);
+      glBindTexture(GL_TEXTURE_RECTANGLE_ARB, 0);
    }
 }
 
@@ -1155,7 +1138,7 @@ Tile* GpuImage::createTile() const
    return (new GpuTile());
 }
 
-void GpuImage::drawTiles(const vector<Tile*>& tiles, GLint textureMode)
+void GpuImage::drawTiles(const vector<Tile*>& tiles, GLfloat textureMode)
 {
    if (tiles.empty() == true)
    {
@@ -1205,8 +1188,8 @@ void GpuImage::setCgParameterValues()
             else if (strcmp(pParameterName, "numColors") == 0)
             {
                GLint numColors = 0;
-               glBindTexture(GL_TEXTURE_RECTANGLE_NV, mColormapTexture);
-               glGetTexLevelParameteriv(GL_TEXTURE_RECTANGLE_NV, 0, GL_TEXTURE_WIDTH, &numColors);
+               glBindTexture(GL_TEXTURE_RECTANGLE_ARB, mColormapTexture);
+               glGetTexLevelParameteriv(GL_TEXTURE_RECTANGLE_ARB, 0, GL_TEXTURE_WIDTH, &numColors);
 
                cgGLSetParameter1f(mCgParameters.at(i), static_cast<float>(numColors));
             }
@@ -1348,7 +1331,7 @@ unsigned int GpuImage::getMaxNumTileSets() const
    return 3;
 }
 
-vector<Tile*> GpuImage::getTilesToUpdate(const vector<Tile*>& tilesToDraw, vector<int>& tileZoomIndices)
+vector<Tile*> GpuImage::getTilesToUpdate(const vector<Tile*>& tilesToDraw, vector<unsigned int>& tileZoomIndices)
 {
    const Image::ImageData imageInfo = Image::getImageData();
 
@@ -1555,40 +1538,41 @@ unsigned int GpuImage::readTiles(double xCoord, double yCoord, GLsizei width, GL
       }
 
       // get scale factor
-      float scaleFactor = 1.0f/3.0f;
+      float gpuFactor = Service<GpuResourceManager>()->getGpuScalingFactor();
+      float scaleFactor = 1.0f / gpuFactor;
       float offset = 0.0;
       switch (mInfo.mRawType[0])
       {
       case INT1SBYTE:
-         scaleFactor = getScale<signed char>() / 3.0f;
+         scaleFactor = getScale<signed char>() / gpuFactor;
          offset = static_cast<float>(getOffset<signed char>());
          break;
       case INT1UBYTE:
-         scaleFactor = getScale<unsigned char>() / 3.0f;
+         scaleFactor = getScale<unsigned char>() / gpuFactor;
          offset = static_cast<float>(getOffset<unsigned char>());
          break;
       case INT2SBYTES:
-         scaleFactor = getScale<signed short>() / 3.0f;
+         scaleFactor = getScale<signed short>() / gpuFactor;
          offset = static_cast<float>(getOffset<signed short>());
          break;
       case INT2UBYTES:
-         scaleFactor = getScale<unsigned short>() / 3.0f;
+         scaleFactor = getScale<unsigned short>() / gpuFactor;
          offset = static_cast<float>(getOffset<unsigned short>());
          break;
       case INT4SBYTES:
-         scaleFactor = getScale<signed int>() / 3.0f;
+         scaleFactor = getScale<signed int>() / gpuFactor;
          offset = static_cast<float>(getOffset<signed int>());
          break;
       case INT4UBYTES:
-         scaleFactor = getScale<unsigned int>() / 3.0f;
+         scaleFactor = getScale<unsigned int>() / gpuFactor;
          offset = static_cast<float>(getOffset<unsigned int>());
          break;
       case FLT4BYTES:
-         scaleFactor = getScale<float>() / 3.0f;
+         scaleFactor = getScale<float>() / gpuFactor;
          offset = static_cast<float>(getOffset<float>());
          break;
       case FLT8BYTES:
-         scaleFactor = getScale<double>() / 3.0f;
+         scaleFactor = getScale<double>() / gpuFactor;
          offset = static_cast<float>(getOffset<double>());
          break;
       default:

@@ -246,6 +246,12 @@ bool Nitf::NitfExporter::execute(PlugInArgList *pInParam, PlugInArgList *pOutPar
             // Set the band representations. Note that this only supports single-image export.
             pImageHeader->setNumberOfBands(numBands);
 
+            // Set bits per pixel to 0 to force calculation later in ossimNitfWriter.
+            // This is done in order to have the capability to export NITF images that
+            // have changed data types since being imported or to export result data
+            // that copied metadata from the source where the source happened to be NITF.
+            pImageHeader->setBitsPerPixel(0);
+
             mpRasterLayer = dynamic_cast<RasterLayer*>(pLayerList->getLayer(RASTER, mpRaster));
             VERIFY(mpRasterLayer != NULL);
 
@@ -537,15 +543,6 @@ ValidationResultType Nitf::NitfExporter::validate(const PlugInArgList* pArgList,
       // If unable to obtain the widget, then this should be running in batch mode
       VERIFYRV(isBatch() == true, VALIDATE_FAILURE);
 
-      // Query "Classification Must Be Valid" to determine whether or not the classification markings should be checked
-      bool classificationMustBeValid;
-      VERIFYRV(pArgList->getPlugInArgValue<bool>("Classification Must Be Valid",
-         classificationMustBeValid) == true, VALIDATE_FAILURE);
-      if (classificationMustBeValid == false)
-      {
-         return VALIDATE_SUCCESS;
-      }
-
       const RasterElement* pRasterElement = pArgList->getPlugInArgValue<RasterElement>(ExportItemArg());
       if (pRasterElement == NULL)
       {
@@ -558,6 +555,15 @@ ValidationResultType Nitf::NitfExporter::validate(const PlugInArgList* pArgList,
       {
          errorMessage = "Unable to obtain the Data Descriptor.";
          return VALIDATE_FAILURE;
+      }
+
+      // Query "Classification Must Be Valid" to determine whether or not the classification markings should be checked
+      bool classificationMustBeValid;
+      VERIFYRV(pArgList->getPlugInArgValue<bool>("Classification Must Be Valid",
+         classificationMustBeValid) == true, VALIDATE_FAILURE);
+      if (classificationMustBeValid == false)
+      {
+         return VALIDATE_SUCCESS;
       }
 
       const Classification* pClassification = pDataDescriptor->getClassification();

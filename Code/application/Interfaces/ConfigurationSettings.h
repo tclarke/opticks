@@ -489,7 +489,7 @@ class Filename;
  * will be persisted between runs of the application.
  *
  * The configuration settings allow data values to be stored per-user and
- * during a application run.  Settings which are saved per-user and persist
+ * during an application run.  Settings which are saved per-user and persist
  * between application runs are called per-user settings.  Settings which
  * only exist during one application run are called per-session settings.
  *
@@ -516,6 +516,8 @@ class Filename;
  * This subclass of Subject will notify upon the following conditions:
  * - The following methods are called: setSetting(), setSessionSetting,
  *   deleteUserSetting, deleteSessionSetting.
+ *
+ * @see ConfigurationSettingsExt1
  */
 class ConfigurationSettings : public Subject
 {
@@ -550,8 +552,11 @@ public:
    SETTING(ThreadCount, Edit, unsigned int, 1)
    SETTING(UndoBufferSize, Edit, unsigned int, 10)
    SETTING_PTR(WizardPath, FileLocations, Filename)
+   SETTING_PTR(TextEditor, FileLocations, Filename)
+   SETTING(TextEditorArguments, FileLocations, std::string, std::string())
    SETTING_PTR(JvmLoaderLibraryPath, FileLocations, Filename)
    CUSTOM_SETTING_PTR(PluginWorkingDirectory, FileLocations, Filename)
+   SETTING(AlternateMouseWheelZoom, Edit, bool, true)
 
    /**
     * Gets the root directory for the main application.
@@ -925,6 +930,35 @@ protected:
     * need to destroy it.
     */
    virtual ~ConfigurationSettings() {}
+};
+
+/**
+ * Extends capability of the ConfigurationSettings interface.
+ *
+ * This class provides additional capability for the ConfigurationSettings interface
+ * class.  A pointer to this class can be obtained by performing a dynamic cast
+ * on a pointer to ConfigurationSettings.
+ *
+ * @warning A pointer to this class can only be used to call methods contained
+ *          in this extension class and cannot be used to call any methods in
+ *          ConfigurationSettings.
+ */
+class ConfigurationSettingsExt1
+{
+public:
+   /**
+    * Gets the release description.
+    *
+    * @return  A string describing the release.
+    */
+   virtual std::string getReleaseDescription() const = 0;
+
+protected:
+   /**
+    * This will be cleaned up during application close.  Plug-ins do not
+    * need to destroy it.
+    */
+   virtual ~ConfigurationSettingsExt1() {}
 };
 
 #endif

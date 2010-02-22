@@ -39,7 +39,6 @@
 #include "SpatialDataView.h"
 #include "SpecialMetadata.h"
 #include "StringUtilities.h"
-#include "TestDataPath.h"
 #include "TypesFile.h"
 
 #include <ossim/base/ossimConstants.h>
@@ -147,6 +146,12 @@ vector<ImportDescriptor*> Nitf::NitfImporter::getImportDescriptors(const string 
 
       pDd->setInterleaveFormat(BSQ);
       pDd->setDataType(appDataType);
+      RasterDataDescriptorExt1* pDescriptorExt1 = dynamic_cast<RasterDataDescriptorExt1*>(pDd);
+      if (pDescriptorExt1 != NULL)
+      {
+         pDescriptorExt1->setValidDataTypes(vector<EncodingType>(1, appDataType));
+      }
+
       pDd->setProcessingLocation(IN_MEMORY);
 
       RasterFileDescriptor* pFd = dynamic_cast<RasterFileDescriptor*>(
@@ -332,7 +337,13 @@ bool Nitf::NitfImporter::createRasterPager(RasterElement *pRaster) const
    FileDescriptor* pFd = pDd->getFileDescriptor();
    VERIFY(pFd != NULL);
 
-   stringstream imageNameStream(pFd->getDatasetLocation().substr(1));
+   const string& datasetLocation = pFd->getDatasetLocation();
+   if (datasetLocation.empty() == true)
+   {
+      return false;
+   }
+
+   stringstream imageNameStream(datasetLocation.substr(1));
    int imageSegment;
    imageNameStream >> imageSegment;
 

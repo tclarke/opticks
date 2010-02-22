@@ -14,6 +14,7 @@
 #include "DataAccessor.h"
 #include "DataAccessorImpl.h"
 #include "DataRequest.h"
+#include "DesktopServices.h"
 #include "FileImageObject.h"
 #include "FlattenAnnotationLayer.h"
 #include "GraphicElement.h"
@@ -32,6 +33,7 @@
 #include "Undo.h"
 
 #include <QtGui/QImage>
+#include <QtGui/QMessageBox>
 
 REGISTER_PLUGIN_BASIC(OpticksAnnotationImagePalette, FlattenAnnotationLayer);
 
@@ -207,10 +209,21 @@ bool FlattenAnnotationLayer::execute(PlugInArgList* pInArgList, PlugInArgList* p
       channels.push_back(blueInfo);
    }
 
+   if (isBatch() == false)
+   {
+      Service<DesktopServices> pDesktop;
+
+      int clickedButton = QMessageBox::question(pDesktop->getMainWidget(), QString::fromStdString(getName()),
+         "This action will clear the undo history.  Do you wish to continue?", QMessageBox::Yes | QMessageBox::No);
+      if (clickedButton == QMessageBox::No)
+      {
+         return false;
+      }
+   }
+
    UndoLock undo(pView);
    std::list<GraphicObject*> objects;
    pAnnotationLayer->getObjects(FILE_IMAGE_OBJECT, objects);
-   bool isGeocentric = static_cast<GraphicElement*>(pAnnotationLayer->getDataElement())->getGeocentric();
    float curProgress = 0.0;
    float progressInc = 99.0  / (objects.empty() ? 1 : objects.size());
    for (std::list<GraphicObject*>::iterator object = objects.begin(); object != objects.end(); ++object)
@@ -232,23 +245,33 @@ bool FlattenAnnotationLayer::execute(PlugInArgList* pInArgList, PlugInArgList* p
       }
       LocationType llCorner = (*object)->getLlCorner();
       LocationType urCorner = (*object)->getUrCorner();
-      // check the data origin
+
+      if (llCorner.mX > urCorner.mX)
+      {
+         double temp = llCorner.mX;
+         llCorner.mX = urCorner.mX;
+         urCorner.mX = temp;
+      }
+
+      if (llCorner.mY > urCorner.mY)
+      {
+         double temp = llCorner.mY;
+         llCorner.mY = urCorner.mY;
+         urCorner.mY = temp;
+      }
+
+      // Check if the bounding box is flipped relative to the screen origin
       bool horizontalFlip(false);
       bool verticalFlip(false);
       pRasterLayer->isFlipped(llCorner, urCorner, horizontalFlip, verticalFlip);
-      if (isGeocentric)
-      {
-         std::vector<LocationType> geos, pixels;
-         geos.push_back(llCorner);
-         geos.push_back(urCorner);
-         pRaster->convertGeocoordsToPixels(geos);
-         llCorner = pixels[0];
-         urCorner = pixels[1];
-      }
-      int startRow = static_cast<int>(std::min(llCorner.mY, urCorner.mY));
-      int startCol = static_cast<int>(std::min(llCorner.mX, urCorner.mX));
-      int endRow = static_cast<int>(std::max(llCorner.mY, urCorner.mY) + 0.5);
-      int endCol = static_cast<int>(std::max(llCorner.mX, urCorner.mX) + 0.5);
+
+      // Account for the difference between screen origin (upper left) and OpenGL origin (lower left)
+      verticalFlip = !verticalFlip;
+
+      int startRow = static_cast<int>(llCorner.mY);
+      int startCol = static_cast<int>(llCorner.mX);
+      int endRow = static_cast<int>(urCorner.mY + 0.5);
+      int endCol = static_cast<int>(urCorner.mX + 0.5);
       if (horizontalFlip || verticalFlip)
       {
          imageData = imageData.mirrored(horizontalFlip, verticalFlip);
@@ -298,6 +321,8 @@ bool FlattenAnnotationLayer::execute(PlugInArgList* pInArgList, PlugInArgList* p
    {
       pView->deleteLayer(pAnnotationLayer);
    }
+
+   pView->clearUndo();
    pRaster->updateData();
 
    progress.report("Flatten complete.", 100, NORMAL);

@@ -33,7 +33,6 @@
 #include "DesktopServices.h"
 #include "FloatingLabel.h"
 #include "GridlinesImp.h"
-#include "Icons.h"
 #include "Legend.h"
 #include "Locator.h"
 #include "LocatorImp.h"
@@ -76,12 +75,10 @@ PlotWidgetImp::PlotWidgetImp(const string& id, const string& plotName, PlotType 
    mOrganizationPosition(TOP_RIGHT_BOTTOM_LEFT)
 {
    // Context menu actions
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
    Service<DesktopServices> pDesktop;
    string shortcutContext = "Plot";
 
-   mpPrintAction = new QAction(pIcons->mPrint, "&Print...", this);
+   mpPrintAction = new QAction(QIcon(":/icons/Print"), "&Print...", this);
    mpPrintAction->setAutoRepeat(false);
    mpPrintAction->setShortcut(QKeySequence("Ctrl+P"));
    mpPrintAction->setStatusTip("Sends the displayed area of the current plot to the printer");
@@ -447,7 +444,6 @@ bool PlotWidgetImp::getCurrentImage(QImage& image)
    // Get the pixmap for the plot view
    int iWidth = image.width();
    int iHeight = image.height();
-   mpPlot->temporaryGlContextChange();
    QPixmap pixPlotView = mpPlot->renderPixmap(iWidth, iHeight);
 
    // Restore the original plot view display list
@@ -1133,6 +1129,21 @@ void PlotWidgetImp::setLabelText(const QString& strClassification, const QString
    strTopCenterText.append(QString::fromStdString(
       StringUtilities::toDisplayString(pConfigSettings->getReleaseType())));
 
+   ConfigurationSettingsExt1* pConfigSettingsExt1 = dynamic_cast<ConfigurationSettingsExt1*>(pConfigSettings.get());
+   if (pConfigSettingsExt1 != NULL)
+   {
+      QString strReleaseDescription = QString::fromStdString(pConfigSettingsExt1->getReleaseDescription());
+      if (strReleaseDescription.isEmpty() == false)
+      {
+         if (strTopCenterText.isEmpty() == false)
+         {
+            strTopCenterText.append("\n");
+         }
+
+         strTopCenterText.append(strReleaseDescription);
+      }
+   }
+
    if (pConfigSettings->isProductionRelease() == false)
    {
       // Bottom text
@@ -1363,8 +1374,8 @@ bool PlotWidgetImp::toXml(XMLWriter* pXml) const
    pXml->addAttr("name", getName());
    pXml->addAttr("displayName", getDisplayName());
    pXml->addAttr("displayText", getDisplayText());
+   pXml->addAttr("title", getTitle().toStdString());
    pXml->addAttr("type", getObjectType());
-
    pXml->addAttr("legendShown", isLegendShown());
    pXml->addAttr("classificationPosition", mClassificationPosition);
    pXml->addAttr("organizationPosition", mClassificationPosition);
@@ -1383,8 +1394,14 @@ bool PlotWidgetImp::toXml(XMLWriter* pXml) const
       pXml->addAttr("AnnotationToolbarId", mpAnnotationToolBar->getId());
    }
 
+   pXml->pushAddPoint(pXml->addElement("TitleFont"));
+   if (!mTitleFont.toXml(pXml))
+   {
+      return false;
+   }
+   pXml->popAddPoint();
+
    pXml->pushAddPoint(pXml->addElement("ClassificationFont"));
-   // no foul if font not stored - just keep defaults
    if (!mClassificationFont.toXml(pXml))
    {
       return false;
@@ -1392,7 +1409,6 @@ bool PlotWidgetImp::toXml(XMLWriter* pXml) const
    pXml->popAddPoint();
 
    pXml->pushAddPoint(pXml->addElement("OrganizationFont"));
-   // no foul if font not stored - just keep defaults
    if (!mOrganizationFont.toXml(pXml))
    {
       return false;
@@ -1432,6 +1448,7 @@ bool PlotWidgetImp::fromXml(DOMNode* pDocument, unsigned int version)
    setName(A(pElem->getAttribute(X("name"))));
    setDisplayName(A(pElem->getAttribute(X("displayName"))));
    setDisplayText(A(pElem->getAttribute(X("displayText"))));
+   setTitle(QString::fromStdString(A(pElem->getAttribute(X("title")))));
 
    PlotSet* pPlotSet = dynamic_cast<PlotSet*>(
       SessionManagerImp::instance()->getSessionItem(A(pElem->getAttribute(X("plotSetId")))));
@@ -1457,7 +1474,14 @@ bool PlotWidgetImp::fromXml(DOMNode* pDocument, unsigned int version)
 
    for (DOMNode* pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
    {
-      if (XMLString::equals(pChld->getNodeName(), X("ClassificationFont")))
+      if (XMLString::equals(pChld->getNodeName(), X("TitleFont")))
+      {
+         if (!mTitleFont.fromXml(pChld, version))
+         {
+            return false;
+         }
+      }
+      else if (XMLString::equals(pChld->getNodeName(), X("ClassificationFont")))
       {
          if (!mClassificationFont.fromXml(pChld, version))
          {
@@ -1485,6 +1509,11 @@ bool PlotWidgetImp::fromXml(DOMNode* pDocument, unsigned int version)
             return false;
          }
       }
+   }
+
+   if ((mpAnnotationToolBar->getAnnotationLayer() != NULL) && (mpAnnotationToolBar->isEnabled() == false))
+   {
+      mpAnnotationToolBar->setEnabled(true);
    }
 
    return true;

@@ -25,6 +25,7 @@
 #include "GraphicLayerImp.h"
 #include "GraphicLayerUndo.h"
 #include "GraphicObjectFactory.h"
+#include "SessionManager.h"
 #include "StringUtilities.h"
 #include "TextObject.h"
 #include "TextObjectImp.h"
@@ -217,11 +218,6 @@ void GraphicGroupImp::updateBoundingBox()
    double dMaxY = -1e30;
    double dMinY = 1e30;
 
-   if (mObjects.empty())
-   {
-      return;
-   }
-
    for (list<GraphicObject*>::iterator iter = mObjects.begin(); iter != mObjects.end(); ++iter)
    {
       GraphicObject* pObject = *iter;
@@ -275,8 +271,15 @@ void GraphicGroupImp::updateBoundingBox()
       }
    }
 
-   LocationType groupLlCorner(dMinX, dMinY);
-   LocationType groupUrCorner(dMaxX, dMaxY);
+   LocationType groupLlCorner;
+   LocationType groupUrCorner;
+   if (!mObjects.empty())
+   {
+      groupLlCorner.mX = dMinX;
+      groupLlCorner.mY = dMinY;
+      groupUrCorner.mX = dMaxX;
+      groupUrCorner.mY = dMaxY;
+   }
 
    setBoundingBox(groupLlCorner, groupUrCorner);
    updateHandles();
@@ -708,6 +711,7 @@ void GraphicGroupImp::removeAllObjects(bool bDelete)
       pLayer->completeInsertion();
       pLayer->deselectAllObjects();
 
+      // Use an undo group for improved performance on large graphic groups.
       if (bDelete == true)
       {
          pView = pLayer->getView();
@@ -720,25 +724,25 @@ void GraphicGroupImp::removeAllObjects(bool bDelete)
 
    for_each(mObjects.begin(), mObjects.end(), DisconnectObject(this));
 
-   for (list<GraphicObject*>::iterator iter = mObjects.begin(); iter != mObjects.end(); ++iter)
+   // Remove each object while iterating the loop to avoid stale pointers within mObjects.
+   // The stale pointers can cause crashes if code attached to GraphicGroup, ObjectRemoved calls methods on this class.
+   while (mObjects.empty() == false)
    {
-      notify(SIGNAL_NAME(GraphicGroup, ObjectRemoved), boost::any(*iter));
+      GraphicObject* pObject = mObjects.front();
+      mObjects.erase(mObjects.begin());
+      notify(SIGNAL_NAME(GraphicGroup, ObjectRemoved), boost::any(pObject));
       if (bDelete == true)
       {
          if (pView != NULL)
          {
-            pView->addUndoAction(new RemoveGraphicObject(dynamic_cast<GraphicGroup*>(this), *iter));
+            pView->addUndoAction(new RemoveGraphicObject(dynamic_cast<GraphicGroup*>(this), pObject));
          }
 
-         GraphicObjectImp* pObject = dynamic_cast<GraphicObjectImp*>(*iter);
-         if (pObject != NULL)
-         {
-            delete pObject;
-         }
+         // Need to cast to a GraphicObjectImp* to perform the deletion.
+         delete dynamic_cast<GraphicObjectImp*>(pObject);
       }
    }
 
-   mObjects.clear();
    delete pUndoGroup;
 
    updateBoundingBox();
@@ -911,7 +915,7 @@ bool GraphicGroupImp::toXml(XMLWriter* pXml) const
                      pParentWidget = dynamic_cast<ViewImp*>(pLayer->getView());
                   }
 
-                  int iReturn = QMessageBox::question(pParentWidget, APP_NAME, "An graphic object cannot be "
+                  int iReturn = QMessageBox::question(pParentWidget, APP_NAME, "A graphic object cannot be "
                      "saved.  Do you want to continue saving?", QMessageBox::Yes, QMessageBox::YesAll,
                      QMessageBox::No);
                   if (iReturn == QMessageBox::No)
@@ -993,7 +997,11 @@ bool GraphicGroupImp::fromXml(DOMNode* pDocument, unsigned int version)
                      }
                      else if (pView != NULL)
                      {
-                        pView->addUndoAction(new AddGraphicObject(dynamic_cast<GraphicGroup*>(this), pObject));
+                        Service<SessionManager> pManager;
+                        if (pManager->isSessionLoading() == false)
+                        {
+                           pView->addUndoAction(new AddGraphicObject(dynamic_cast<GraphicGroup*>(this), pObject));
+                        }
                      }
                   }
                   catch (XmlReader::DomParseException& exc)
@@ -1106,18 +1114,6 @@ void GraphicGroupImp::setLayer(GraphicLayer* pLayer)
       if (pImp != NULL)
       {
          pImp->setLayer(pLayer);
-      }
-   }
-}
-
-void GraphicGroupImp::temporaryGlContextChange()
-{
-   for (list<GraphicObject*>::const_iterator object = mObjects.begin(); object != mObjects.end(); ++object)
-   {
-      GraphicObjectImp* pObject = dynamic_cast<GraphicObjectImp*>(*object);
-      if (pObject != NULL)
-      {
-         pObject->temporaryGlContextChange();
       }
    }
 }

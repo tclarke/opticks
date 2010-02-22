@@ -30,7 +30,6 @@ class GraphicGroup;
 class GraphicLayer;
 class GraphicObject;
 class GraphicObjectImp;
-class GraphicProperty;
 class UndoLock;
 
 /**
@@ -206,8 +205,6 @@ public:
    void drawSymbols(const std::string &symbolName, const std::vector<LocationType> &points, 
                    double screenSize, double objectRotation);
 
-   virtual void temporaryGlContextChange();
-
 public slots:
    void setCurrentGraphicObjectType(GraphicObjectType type);
    void cleanUpBadObject(GraphicObject *pObj);
@@ -232,7 +229,6 @@ protected:
 
 protected slots:
    void deleteObject();
-   void updateHandles(GraphicProperty* pProperty);
 
 signals:
    void objectAdded(GraphicObject* pObject);
@@ -240,6 +236,7 @@ signals:
    void selectionChanged();
    void objectsSelected(std::list<GraphicObject*>& selectedObjects);
    void currentTypeChanged(GraphicObjectType newType);
+   void showLabelsChanged(bool showLabels);
 
 private:
    AttachmentPtr<SessionExplorer> mpExplorer;

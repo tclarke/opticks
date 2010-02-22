@@ -31,7 +31,6 @@
 #include "GraphicGroup.h"
 #include "GraphicObject.h"
 #include "GraphicObjectFactory.h"
-#include "Icons.h"
 #include "LayerList.h"
 #include "PixelObjectImp.h"
 #include "PolygonObject.h"
@@ -77,11 +76,7 @@ AoiLayerImp::AoiLayerImp(const string& id, const string& layerName, DataElement*
    addAcceptableGraphicType(ROW_OBJECT);
    addAcceptableGraphicType(COLUMN_OBJECT);
 
-   Icons* pIcons = Icons::instance();
-   if (pIcons != NULL)
-   {
-      setIcon(pIcons->mDrawPixel);
-   }
+   setIcon(QIcon(":/icons/DrawPixel"));
 
    mFont = QApplication::font();
    mFont.setBold(true);
@@ -345,8 +340,8 @@ void AoiLayerImp::reset()
 LocationType AoiLayerImp::correctCoordinate(const LocationType& coord) const
 {
    LocationType loc;
-   loc.mX = static_cast<int>(coord.mX) + 0.5;
-   loc.mY = static_cast<int>(coord.mY) + 0.5;
+   loc.mX = floor(coord.mX) + 0.5;
+   loc.mY = floor(coord.mY) + 0.5;
    return loc;
 }
 
@@ -512,15 +507,7 @@ void AoiLayerImp::draw()
 
 QCursor AoiLayerImp::getMouseCursor() const
 {
-   QCursor mouseCursor;
-
-   Icons* pIcons = Icons::instance();
-   if (pIcons != NULL)
-   {
-      mouseCursor = QCursor(pIcons->mAoiCursor, pIcons->mAoiMask, 1, 18);
-   }
-
-   return mouseCursor;
+   return QCursor(QPixmap(":/icons/AoiCursor"), 1, 18);
 }
 
 bool AoiLayerImp::processMousePress(const QPoint& screenCoord, Qt::MouseButton button, Qt::MouseButtons buttons,

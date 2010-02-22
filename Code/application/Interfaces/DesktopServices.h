@@ -205,7 +205,7 @@ public:
    virtual void getWindows(const std::string& windowType, std::vector<Window*>& windows) const = 0;
 
    /**
-    *  Retreives all available windows of all types.
+    *  Retrieves all available windows of all types.
     *
     *  @param   windows
     *           A reference to a vector that will be filled with pointers
@@ -1090,25 +1090,24 @@ public:
    /**
     *  Registers a callback to the core.
     *
-    *  Valid callback types are enumerated in TypesFile.h.
-    *  Currently, only callbacks signaling background processing
-    *  are supported.
+    *  Valid callback types are enumerated in TypesFile.h.  Currently, only
+    *  callbacks signaling background processing are supported.
     *
     *  @param   eType
     *           The type of callback to register.
-    *  @param   callback
-    *           The callback being registered.
-    *           The plug-in owns this pointer and should
-    *           delete it when finished with it.
+    *  @param   pCallback
+    *           The callback being registered.  The application assumes
+    *           ownership of the callback object and deletes it after executing
+    *           the callback.  The plug-in should not attempt to delete the
+    *           callback object itself.
     *
-    *  @return  TRUE if the callback was registered properly
-    *           FALSE if there was an error registering or if
-    *                an invalid callback type was specified
+    *  @return  Returns \c true if the callback was registered properly; returns
+    *           \c false if there was an error registering or if an invalid
+    *           callback type was specified.
     *
-    *  @see     PlugInCallbackType
-    *  @see     Executable::isBackground()
+    *  @see     PlugInCallbackType, Executable::isBackground()
     */
-   virtual bool registerCallback(PlugInCallbackType eType, PlugInCallback *callback) const = 0;
+   virtual bool registerCallback(PlugInCallbackType eType, PlugInCallback* pCallback) const = 0;
 
    /**
     *  Query the dock location of the specified DockWindow
@@ -1174,6 +1173,37 @@ protected:
     * need to destroy it.
     */
    virtual ~DesktopServices() {}
+};
+
+/**
+ * Extends capability of the DesktopServices interface.
+ *
+ * This class provides additional capability for the DesktopServices interface
+ * class.  A pointer to this class can be obtained by performing a dynamic cast
+ * on a pointer to DesktopServices.
+ *
+ * @warning A pointer to this class can only be used to call methods contained
+ *          in this extension class and cannot be used to call any methods in
+ *          DesktopServices.
+ */
+class DesktopServicesExt1
+{
+public:
+   /**
+    *  Deletes all windows.
+    *
+    *  WARNING: Windows or Toolbars provided by the application cannot
+    *  be deleted using this method; they will be cleaned up during
+    *  application close.
+    */
+   virtual void deleteAllWindows() = 0;
+
+protected:
+   /**
+    * This will be cleaned up during application close.  Plug-ins do not
+    * need to destroy it.
+    */
+   virtual ~DesktopServicesExt1() {}
 };
 
 #endif

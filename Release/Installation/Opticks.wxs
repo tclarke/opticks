@@ -20,11 +20,11 @@ are defined in Opticks-Version.wxi, so include that file now -->
    <?define ProductCode = $(var.ProductCode32BitGuid) ?>
    <?define 64Bit = "no" ?>
    <?define InstallFolder = "ProgramFilesFolder" ?>
-   <?define MsiPlatform = "Intel" ?>
+   <?define MsiPlatform = "x86" ?>
 <?endif?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:Util="http://schemas.microsoft.com/wix/UtilExtension" RequiredVersion="3.0.2925.0">
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:Util="http://schemas.microsoft.com/wix/UtilExtension" RequiredVersion="3.0.5419.0">
    <Product Id="$(var.ProductCode)" Name="Opticks $(var.PublicVersionNumber) $(var.UserPlatform)" Language="1033" Version="$(var.InternalVersionNumber)" Manufacturer="Ball Aerospace &amp; Technologies Corp." UpgradeCode="$(var.UpgradeCode)">
-      <Package InstallerVersion="200" Compressed="yes" Platforms="$(var.MsiPlatform)"
+      <Package InstallerVersion="200" Compressed="yes" Platform="$(var.MsiPlatform)"
                Description="Opticks"
                Comments="Opticks is an open-source application that enables the viewing, processing and annotating of imagery and video data."
                />
@@ -67,6 +67,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
             <Component Id="C__AppFiles" Guid="$(var.C__AppFilesGuid)" Win64="$(var.64Bit)">
                <File Name="Opticks.exe" Id="F__Opticks" DiskId="1" KeyPath="yes" Source="$(var.OpticksBinariesDir)\Bin\Opticks.exe" />
                <File Name="OpticksBatch.exe" Id="F__OpticksBatch"  DiskId="1"  Source="$(var.OpticksBinariesDir)\Bin\OpticksBatch.exe" />
+               <File Name="SimpleApiLib.dll" Id="F__SimpleApi"  DiskId="1"  Source="$(var.OpticksBinariesDir)\Bin\SimpleApiLib.dll" />
             </Component>
             <Component Id="C__avcodec_Dependency" Guid="$(var.C__avcodec_DependencyGuid)" Win64="$(var.64Bit)">
                <File Name="avcodec.dll" Id="F__avcodec_Dependency" DiskId="1" KeyPath="yes" />
@@ -175,6 +176,9 @@ are defined in Opticks-Version.wxi, so include that file now -->
             <Component Id="C__glut32_Dependency" Guid="$(var.C__glut32_DependencyGuid)" Win64="no">
                <File Name="glut32.dll" Id="F__glut32_Dependency" DiskId="1" KeyPath="yes" />
             </Component>
+            <Component Id="C__openjpeg_Dependency" Guid="$(var.C__openjpeg_DependencyGuid)" Win64="no">
+               <File Name="openjpeg.dll" Id="F__openjpeg_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
             <?endif?>
          </Directory>
          <Directory Id="D__DefaultSettings" Name="DefaultSettings" FileSource="$(var.OpticksCodeDir)\Release\DefaultSettings" DiskId="1">
@@ -227,9 +231,11 @@ are defined in Opticks-Version.wxi, so include that file now -->
                <File Name="BandMath.dll" Id="F__BandMathPlugIn" DiskId="1" />
                <File Name="ConvolutionFilter.dll" Id="F__ConvolutionFilterPlugIn" DiskId="1" />
                <File Name="CoreIo.dll" Id="F__CoreIoPlugIn" DiskId="1" />
+               <File Name="Covariance.dll" Id="F__CovariancePlugIn" DiskId="1" />
                <File Name="DataFusion.dll" Id="F__DataFusionPlugIn" DiskId="1" />
                <File Name="Dted.dll" Id="F__DtedPlugIn" DiskId="1" />
                <File Name="Envi.dll" Id="F__EnviPlugIn" DiskId="1" />
+               <File Name="Fits.dll" Id="F__FitsPlugIn" DiskId="1" />
                <File Name="GdalImporter.dll" Id="F__GdalImporterPlugIn" DiskId="1" />
                <File Name="Generic.dll" Id="F__GenericPlugIn" KeyPath="yes" DiskId="1" />
                <File Name="GeographicFeatures.dll" Id="F__GeographicFeaturesPlugIn" DiskId="1" />
@@ -469,6 +475,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
          <?ifdef Is32Bit ?>
          <ComponentRef Id="C__cgD3D8_Dependency" />
          <ComponentRef Id="C__glut32_Dependency" />
+         <ComponentRef Id="C__openjpeg_Dependency" />
          <?endif?>
 
          <Feature Id="FT__Shortcuts" Title="Start Menu Shortcuts" Level="1"

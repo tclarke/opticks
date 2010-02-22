@@ -34,6 +34,7 @@
 #include <limits>
 #include <list>
 #include <math.h>
+#include <memory>
 
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
@@ -98,10 +99,9 @@ GraphicObjectImp::GraphicObjectImp(const string& id, GraphicObjectType type, Gra
 
 GraphicObjectImp::~GraphicObjectImp()
 {
-   vector<GraphicProperty*>::iterator it;
-   for (it = mProperties.begin(); it != mProperties.end(); it++)
+   for (map<string, GraphicProperty*>::iterator iter = mProperties.begin(); iter != mProperties.end(); ++iter)
    {
-      delete *it;
+      delete iter->second;
    }
 }
 
@@ -128,7 +128,15 @@ bool GraphicObjectImp::replicateObject(const GraphicObject* pObject)
       setName(objectName);
 
       vector<GraphicProperty*> properties = pExistingObject->getProperties();
-      setProperties(properties);
+      for (vector<GraphicProperty*>::const_iterator iter = properties.begin(); iter != properties.end(); ++iter)
+      {
+         GraphicProperty* pProperty = *iter;
+         if (pProperty != NULL)
+         {
+            setProperty(pProperty);
+         }
+      }
+
       updateHandles();
    }
 
@@ -271,6 +279,10 @@ GraphicProperty* GraphicObjectImp::createProperty(const string& propertyName)
    {
       pProperty = new LineScaledProperty(GraphicLayer::getSettingLineScaled());
    }
+   else if (propertyName == "UnitSystem")
+   {
+      pProperty = new GraphicUnitsProperty(GraphicLayer::getSettingUnitSystem());
+   }
 
    return pProperty;
 }
@@ -311,12 +323,17 @@ bool GraphicObjectImp::addProperty(GraphicProperty* pProperty)
    }
 
    string propertyName = pProperty->getName();
+   if (propertyName.empty() == true)
+   {
+      return false;
+   }
+
    if (hasProperty(propertyName) == true)
    {
       return false;
    }
 
-   mProperties.push_back(pProperty);
+   mProperties[propertyName] = pProperty;
    return true;
 }
 
@@ -391,6 +408,10 @@ bool GraphicObjectImp::setProperty(const GraphicProperty* pProp)
 
       pOldProp->set(pProp);
       emit propertyModified(pOldProp);
+      if (propertyName == "BoundingBox")
+      {
+         emit extentsModified();
+      }
    }
 
    return true;
@@ -398,30 +419,33 @@ bool GraphicObjectImp::setProperty(const GraphicProperty* pProp)
 
 GraphicProperty* GraphicObjectImp::getProperty(const string& name) const
 {
-   vector<GraphicProperty*>::const_iterator it;
-   for (it = mProperties.begin(); it != mProperties.end(); ++it)
+   if (name.empty() == true)
    {
-      if ((*it)->getName() == name)
-      {
-         return *it;
-      }
+      return NULL;
+   }
+
+   map<string, GraphicProperty*>::const_iterator iter = mProperties.find(name);
+   if (iter != mProperties.end())
+   {
+      return iter->second;
    }
 
    return NULL;
 }
 
-void GraphicObjectImp::setProperties(const vector<GraphicProperty*>& properties)
+vector<GraphicProperty*> GraphicObjectImp::getProperties() const
 {
-   vector<GraphicProperty*>::const_iterator it;
-   for (it = properties.begin(); it != properties.end(); it++)
+   vector<GraphicProperty*> properties;
+   for (map<string, GraphicProperty*>::const_iterator iter = mProperties.begin(); iter != mProperties.end(); ++iter)
    {
-      setProperty(*it);
+      GraphicProperty* pProperty = iter->second;
+      if (pProperty != NULL)
+      {
+         properties.push_back(pProperty);
+      }
    }
-}
 
-const vector<GraphicProperty*>& GraphicObjectImp::getProperties() const
-{
-   return mProperties;
+   return properties;
 }
 
 void GraphicObjectImp::updateGeo()
@@ -1295,11 +1319,6 @@ bool GraphicObjectImp::toXml(XMLWriter* pXml) const
 
    pXml->addAttr("version", XmlBase::VERSION);
 
-   if (mProperties.size() == 0)
-   {
-      return true;
-   }
-
    // Name
    string objectName = getName();
    pXml->addAttr("name", objectName);
@@ -1311,26 +1330,20 @@ bool GraphicObjectImp::toXml(XMLWriter* pXml) const
 
    pXml->addAttr("type", objectType);
 
-   
    // Properties
-   pXml->setSingleChildInstance(true);
-
-   vector<GraphicProperty*>::const_iterator it;
-   for (it = mProperties.begin(); it != mProperties.end(); it++)
+   for (map<string, GraphicProperty*>::const_iterator iter = mProperties.begin(); iter != mProperties.end(); ++iter)
    {
-      if (*it == NULL)
+      if (iter->second == NULL)
       {
          continue;
       }
 
-      if (!(*it)->toXml(pXml))
+      if (!(iter->second)->toXml(pXml))
       {
-         pXml->setSingleChildInstance(false);
          return false;
       }
    }
 
-   pXml->setSingleChildInstance(false);
    return true;
 }
 
@@ -1341,7 +1354,7 @@ bool GraphicObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
       return false;
    }
 
-   DOMElement* pElement = static_cast<DOMElement*> (pDocument);
+   DOMElement* pElement = static_cast<DOMElement*>(pDocument);
    if (pElement != NULL)
    {
       // Check the object type
@@ -1371,21 +1384,12 @@ bool GraphicObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
    {
       string propertyName(A(pChild->getNodeName()));
 
-      GraphicProperty* pProperty = createProperty(propertyName);
-      if (pProperty != NULL)
+      auto_ptr<GraphicProperty> pProperty(createProperty(propertyName));
+      if (pProperty.get() != NULL)
       {
-         try
+         if (!pProperty->fromXml(pChild, version))
          {
-            if (!pProperty->fromXml(pChild, version))
-            {
-               delete pProperty;
-               throw XmlReader::DomParseException("Can't deserialize property", pChild);
-            }
-         }
-         catch (XmlReader::DomParseException& exc)
-         {
-            delete pProperty;
-            throw exc;
+            return false;
          }
 
          if (hasProperty(propertyName) == false)
@@ -1393,12 +1397,10 @@ bool GraphicObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
             addProperty(propertyName);
          }
 
-         if (setProperty(pProperty) == true)
+         if (setProperty(pProperty.get()) == true)
          {
             updateHandles();
          }
-
-         delete pProperty;
       }
    }
 
@@ -1715,6 +1717,31 @@ View* GraphicObjectImp::getObjectView() const
    }
 
    return NULL;
+}
+
+
+bool GraphicObjectImp::setUnitSystem(UnitSystem units)
+{
+   if (hasProperty("UnitSystem") == false)
+   {
+      return false;
+   }
+
+   GraphicUnitsProperty unitsProp(units);
+   return setProperty(&unitsProp);
+}
+
+UnitSystem GraphicObjectImp::getUnitSystem() const
+{
+   UnitSystem units;
+
+   GraphicUnitsProperty* pUnits = dynamic_cast<GraphicUnitsProperty*>(getProperty("UnitSystem"));
+   if (pUnits != NULL)
+   {
+      units = pUnits->getUnitSystem();
+   }
+
+   return units;
 }
 
 GraphicLayer* GraphicObjectImp::getLayer() const

@@ -14,6 +14,7 @@
 #include <QtCore/QUrl>
 #include <QtGui/QActionGroup>
 #include <QtGui/QApplication>
+#include <QtGui/QBitmap>
 #include <QtGui/QClipboard>
 #include <QtGui/QDialogButtonBox>
 #include <QtGui/QDragEnterEvent>
@@ -36,7 +37,6 @@
 #include "AnnotationToolBar.h"
 #include "AoiLayer.h"
 #include "AoiToolBar.h"
-#include "AppAssert.h"
 #include "AppConfig.h"
 #include "ApplicationServices.h"
 #include "ApplicationWindow.h"
@@ -76,7 +76,6 @@
 #include "GraphicObject.h"
 #include "GraphicObjectImp.h"
 #include "HistogramWindowAdapter.h"
-#include "Icons.h"
 #include "ImportDescriptor.h"
 #include "Importer.h"
 #include "InstallerServices.h"
@@ -169,7 +168,8 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    mpCurrentWnd(NULL),
    mpCurrentEditView(NULL),
    mpGcpEditor(NULL),
-   mpUndoGroup(new QUndoGroup(this))
+   mpUndoGroup(new QUndoGroup(this)),
+   mDropNewSession(false)
 {
    // make sure we have enough colors
    checkColorDepth(pSplash);
@@ -201,24 +201,21 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    // User Actions //
    //////////////////
 
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
-
    // File
-   m_pOpen_Action = new QAction(pIcons->mOpen, "&Import Data...", this);
+   m_pOpen_Action = new QAction(QIcon(":/icons/Open"), "&Import Data...", this);
    m_pOpen_Action->setAutoRepeat(false);
    m_pOpen_Action->setShortcut(QKeySequence("Ctrl+O"));
    m_pOpen_Action->setToolTip("Import Data");
    m_pOpen_Action->setStatusTip("Imports an existing data file into the current session");
    VERIFYNR(connect(m_pOpen_Action, SIGNAL(triggered()), this, SLOT(importFile())));
 
-   m_pClose_Action = new QAction(pIcons->mClose, "&Close", this);
+   m_pClose_Action = new QAction(QIcon(":/icons/Close"), "&Close", this);
    m_pClose_Action->setAutoRepeat(false);
    m_pClose_Action->setToolTip("Close");
    m_pClose_Action->setStatusTip("Closes the currently active data set");
    VERIFYNR(connect(m_pClose_Action, SIGNAL(triggered()), this, SLOT(closeWorkspaceWindow())));
 
-   m_pPrint_Setup_Action = new QAction(pIcons->mPrint, "&Print...", this);
+   m_pPrint_Setup_Action = new QAction(QIcon(":/icons/Print"), "&Print...", this);
    m_pPrint_Setup_Action->setAutoRepeat(false);
    m_pPrint_Setup_Action->setShortcut(QKeySequence("Ctrl+P"));
    m_pPrint_Setup_Action->setToolTip("Print Setup");
@@ -226,25 +223,25 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
       "currently active data set");
    VERIFYNR(connect(m_pPrint_Setup_Action, SIGNAL(triggered()), this, SLOT(printSetup())));
 
-   m_pPrint_Action = new QAction(pIcons->mPrint, "P&rint", this);
+   m_pPrint_Action = new QAction(QIcon(":/icons/Print"), "P&rint", this);
    m_pPrint_Action->setAutoRepeat(false);
    m_pPrint_Action->setToolTip("Print");
    m_pPrint_Action->setStatusTip("Prints the currently active data set");
    VERIFYNR(connect(m_pPrint_Action, SIGNAL(triggered()), this, SLOT(print())));
 
-   m_pNewSession_Action = new QAction(pIcons->mNew, "&New Session", this);
+   m_pNewSession_Action = new QAction(QIcon(":/icons/New"), "&New Session", this);
    m_pNewSession_Action->setAutoRepeat(false);
    m_pNewSession_Action->setToolTip("Create a new Session");
    m_pNewSession_Action->setStatusTip("Closes the current session and creates a new empty one");
    VERIFYNR(connect(m_pNewSession_Action, SIGNAL(triggered()), this, SLOT(newSession())));
 
-   m_pOpenSession_Action = new QAction(pIcons->mOpen, "&Open Session...", this);
+   m_pOpenSession_Action = new QAction(QIcon(":/icons/Open"), "&Open Session...", this);
    m_pOpenSession_Action->setAutoRepeat(false);
    m_pOpenSession_Action->setToolTip("Open Session");
    m_pOpenSession_Action->setStatusTip("Opens an existing session");
    VERIFYNR(connect(m_pOpenSession_Action, SIGNAL(triggered()), this, SLOT(openSession())));
 
-   m_pSaveSession_Action = new QAction(pIcons->mSave, "&Save Session", this);
+   m_pSaveSession_Action = new QAction(QIcon(":/icons/Save"), "&Save Session", this);
    m_pSaveSession_Action->setAutoRepeat(false);
    m_pSaveSession_Action->setToolTip("Save Session");
    m_pSaveSession_Action->setStatusTip("Saves the session");
@@ -256,7 +253,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    m_pSaveSessionAs_Action->setStatusTip("Saves the open session to a new file");
    VERIFYNR(connect(m_pSaveSessionAs_Action, SIGNAL(triggered()), this, SLOT(saveSessionAs())));
 
-   mpExportFileMenuAction = new QAction(pIcons->mSave, "&Export...", this);
+   mpExportFileMenuAction = new QAction(QIcon(":/icons/Save"), "&Export...", this);
    mpExportFileMenuAction->setAutoRepeat(false);
    mpExportFileMenuAction->setToolTip("Export");
    mpExportFileMenuAction->setStatusTip("Exports the current view");
@@ -266,21 +263,21 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    UndoButton* pUndoButton = new UndoButton(true, mpUndoGroup, this);
    UndoButton* pRedoButton = new UndoButton(false, mpUndoGroup, this);
 
-   m_pCut_Action = new QAction(pIcons->mCut, "Cu&t", this);
+   m_pCut_Action = new QAction(QIcon(":/icons/Cut"), "Cu&t", this);
    m_pCut_Action->setAutoRepeat(false);
    m_pCut_Action->setShortcut(QKeySequence("Ctrl+X"));
    m_pCut_Action->setToolTip("Cut");
    m_pCut_Action->setStatusTip("Cuts the current selection and moves it to the clipboard");
    VERIFYNR(connect(m_pCut_Action, SIGNAL(triggered()), this, SLOT(cut())));
 
-   m_pCopy_Action = new QAction(pIcons->mCopy, "&Copy", this);
+   m_pCopy_Action = new QAction(QIcon(":/icons/Copy"), "&Copy", this);
    m_pCopy_Action->setAutoRepeat(false);
    m_pCopy_Action->setShortcut(QKeySequence("Ctrl+C"));
    m_pCopy_Action->setToolTip("Copy");
    m_pCopy_Action->setStatusTip("Copies the current selection to the clipboard");
    VERIFYNR(connect(m_pCopy_Action, SIGNAL(triggered()), this, SLOT(copy())));
 
-   m_pPaste_Action = new QAction(pIcons->mPaste, "&Paste", this);
+   m_pPaste_Action = new QAction(QIcon(":/icons/Paste"), "&Paste", this);
    m_pPaste_Action->setAutoRepeat(false);
    m_pPaste_Action->setShortcut(QKeySequence("Ctrl+V"));
    m_pPaste_Action->setToolTip("Paste");
@@ -300,19 +297,19 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    m_pView_Mode_Group->setExclusive(true);
    VERIFYNR(connect(m_pView_Mode_Group, SIGNAL(triggered(QAction*)), this, SLOT(setMouseMode(QAction*))));
 
-   m_pNo_View_Mode_Action = m_pView_Mode_Group->addAction(pIcons->mEdit, "&Edit Mode Off");
+   m_pNo_View_Mode_Action = m_pView_Mode_Group->addAction(QIcon(":/icons/Edit"), "&Edit Mode Off");
    m_pNo_View_Mode_Action->setAutoRepeat(false);
    m_pNo_View_Mode_Action->setCheckable(true);
    m_pNo_View_Mode_Action->setToolTip("Edit Mode Off");
    m_pNo_View_Mode_Action->setStatusTip("Disables all mouse modes");
 
-   mpLayerEditAction = m_pView_Mode_Group->addAction(pIcons->mLayers, "&Layer Mode");
+   mpLayerEditAction = m_pView_Mode_Group->addAction(QIcon(":/icons/Layers"), "&Layer Mode");
    mpLayerEditAction->setAutoRepeat(false);
    mpLayerEditAction->setCheckable(true);
    mpLayerEditAction->setToolTip("Layer Edit Mode");
    mpLayerEditAction->setStatusTip("Toggles the edit mode for the active layer");
 
-   m_pMeasurement_Edit_Action = m_pView_Mode_Group->addAction(pIcons->mMeasurementMarker, "&Measurement Mode");
+   m_pMeasurement_Edit_Action = m_pView_Mode_Group->addAction(QIcon(":/icons/MeasurementMarker"), "&Measurement Mode");
    m_pMeasurement_Edit_Action->setAutoRepeat(false);
    m_pMeasurement_Edit_Action->setCheckable(true);
    m_pMeasurement_Edit_Action->setToolTip("Measurement Mode");
@@ -324,20 +321,20 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    mpCreateAnimationAction->setStatusTip("Creates an animation in the animation window for the current data set");
    VERIFYNR(connect(mpCreateAnimationAction, SIGNAL(triggered()), this, SLOT(createDataSetAnimation())));
 
-   m_pRefresh_Action = new QAction(pIcons->mRefresh, "&Refresh", this);
+   m_pRefresh_Action = new QAction(QIcon(":/icons/Refresh"), "&Refresh", this);
    m_pRefresh_Action->setAutoRepeat(false);
    m_pRefresh_Action->setShortcut(QKeySequence("Ctrl+R"));
    m_pRefresh_Action->setToolTip("Refresh");
    m_pRefresh_Action->setStatusTip("Redraws the data in the active spectral data window");
    VERIFYNR(connect(m_pRefresh_Action, SIGNAL(triggered()), this, SLOT(refresh())));
 
-   m_pDisplay_Mode_Action = new QAction(pIcons->mDisplayMode, "Toggle Display Mode", this);
+   m_pDisplay_Mode_Action = new QAction(QIcon(":/icons/DisplayMode"), "Toggle Display Mode", this);
    m_pDisplay_Mode_Action->setAutoRepeat(false);
    m_pDisplay_Mode_Action->setToolTip("Toggle Display Mode");
    m_pDisplay_Mode_Action->setStatusTip("Toggles the spectral data display between grayscale and RGB modes");
    VERIFYNR(connect(m_pDisplay_Mode_Action, SIGNAL(triggered()), this, SLOT(toggleDisplayMode())));
 
-   mpGenerateImageAction = new QAction(pIcons->mGenerate, "&Generate Full Image", this);
+   mpGenerateImageAction = new QAction(QIcon(":/icons/Generate"), "&Generate Full Image", this);
    mpGenerateImageAction->setAutoRepeat(false);
    mpGenerateImageAction->setToolTip("Generate Full Image");
    mpGenerateImageAction->setStatusTip("Prepares the full image for rendering");
@@ -350,7 +347,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    VERIFYNR(connect(mpClearMarkingsAction, SIGNAL(triggered()), this, SLOT(clearMarkings())));
 
    // Pan
-   m_pPan_Action = m_pView_Mode_Group->addAction(pIcons->mPan, "Pa&n");
+   m_pPan_Action = m_pView_Mode_Group->addAction(QIcon(":/icons/Pan"), "Pa&n");
    m_pPan_Action->setAutoRepeat(false);
    m_pPan_Action->setCheckable(true);
    m_pPan_Action->setToolTip("Pan");
@@ -373,43 +370,43 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    m_pPan_Instant_Action->setChecked(true);
 
    // Rotate
-   m_pRotate_Left_Action = new QAction(pIcons->mRotateLeft, "Rotate &Left 90 Degrees", this);
+   m_pRotate_Left_Action = new QAction(QIcon(":/icons/RotateLeft"), "Rotate &Left 90 Degrees", this);
    m_pRotate_Left_Action->setToolTip("Rotate Left 90 Degrees");
    m_pRotate_Left_Action->setStatusTip("Rotates the current data set 90 degrees counterclockwise");
    VERIFYNR(connect(m_pRotate_Left_Action, SIGNAL(triggered()), this, SLOT(rotateLeft())));
 
-   m_pRotate_Right_Action = new QAction(pIcons->mRotateRight, "Rotate &Right 90 Degrees", this);
+   m_pRotate_Right_Action = new QAction(QIcon(":/icons/RotateRight"), "Rotate &Right 90 Degrees", this);
    m_pRotate_Right_Action->setToolTip("Rotate Right 90 Degrees");
    m_pRotate_Right_Action->setStatusTip("Rotates the current data set 90 degrees clockwise");
    VERIFYNR(connect(m_pRotate_Right_Action, SIGNAL(triggered()), this, SLOT(rotateRight())));
 
-   m_pFlip_Horiz_Action = new QAction(pIcons->mFlipHoriz, "Flip &Horizontally", this);
+   m_pFlip_Horiz_Action = new QAction(QIcon(":/icons/FlipHorizontally"), "Flip &Horizontally", this);
    m_pFlip_Horiz_Action->setAutoRepeat(false);
    m_pFlip_Horiz_Action->setShortcut(QKeySequence(Qt::Key_H));
    m_pFlip_Horiz_Action->setToolTip("Flip Horizontally");
    m_pFlip_Horiz_Action->setStatusTip("Flips the data set from left to right");
    VERIFYNR(connect(m_pFlip_Horiz_Action, SIGNAL(triggered()), this, SLOT(flipHoriz())));
 
-   m_pFlip_Vert_Action = new QAction(pIcons->mFlipVert, "Flip &Vertically", this);
+   m_pFlip_Vert_Action = new QAction(QIcon(":/icons/FlipVertically"), "Flip &Vertically", this);
    m_pFlip_Vert_Action->setAutoRepeat(false);
    m_pFlip_Vert_Action->setShortcut(QKeySequence(Qt::Key_V));
    m_pFlip_Vert_Action->setToolTip("Flip Vertically");
    m_pFlip_Vert_Action->setStatusTip("Flips the data set from top to bottom");
    VERIFYNR(connect(m_pFlip_Vert_Action, SIGNAL(triggered()), this, SLOT(flipVert())));
 
-   m_pRotate_By_Action = new QAction(pIcons->mRotateBy, "Rotate &By", this);
+   m_pRotate_By_Action = new QAction(QIcon(":/icons/RotateBy"), "Rotate &By", this);
    m_pRotate_By_Action->setAutoRepeat(false);
    m_pRotate_By_Action->setToolTip("Rotate By");
    m_pRotate_By_Action->setStatusTip("Rotates the data set by a specified number of degrees");
    VERIFYNR(connect(m_pRotate_By_Action, SIGNAL(triggered()), this, SLOT(rotateBy())));
 
-   m_pFree_Rotate_Action = m_pView_Mode_Group->addAction(pIcons->mFreeRotate, "&Free Rotate");
+   m_pFree_Rotate_Action = m_pView_Mode_Group->addAction(QIcon(":/icons/FreeRotate"), "&Free Rotate");
    m_pFree_Rotate_Action->setAutoRepeat(false);
    m_pFree_Rotate_Action->setCheckable(true);
    m_pFree_Rotate_Action->setToolTip("Free Rotate");
    m_pFree_Rotate_Action->setStatusTip("Rotates the data set while clicking and dragging the mouse");
 
-   m_pReset_Action = new QAction(pIcons->mReset, "R&eset", this);
+   m_pReset_Action = new QAction(QIcon(":/icons/ResetOrientation"), "R&eset", this);
    m_pReset_Action->setAutoRepeat(false);
    m_pReset_Action->setShortcut(QKeySequence(Qt::Key_W));
    m_pReset_Action->setToolTip("Reset");
@@ -417,25 +414,25 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    VERIFYNR(connect(m_pReset_Action, SIGNAL(triggered()), this, SLOT(reset())));
 
    // Zoom
-   m_pZoom_In_Action = new QAction(pIcons->mZoomIn, "&In", this);
+   m_pZoom_In_Action = new QAction(QIcon(":/icons/ZoomIn"), "&In", this);
    m_pZoom_In_Action->setShortcut(QKeySequence(Qt::Key_Z));
    m_pZoom_In_Action->setToolTip("Zoom In");
    m_pZoom_In_Action->setStatusTip("Increases the zoom level in the active view about the window center");
    VERIFYNR(connect(m_pZoom_In_Action, SIGNAL(triggered()), this, SLOT(zoomIn())));
 
-   m_pZoom_Out_Action = new QAction(pIcons->mZoomOut, "&Out", this);
+   m_pZoom_Out_Action = new QAction(QIcon(":/icons/ZoomOut"), "&Out", this);
    m_pZoom_Out_Action->setShortcut(QKeySequence("Shift+Z"));
    m_pZoom_Out_Action->setToolTip("Zoom Out");
    m_pZoom_Out_Action->setStatusTip("Decreases the zoom level in the active view about the window center");
    VERIFYNR(connect(m_pZoom_Out_Action, SIGNAL(triggered()), this, SLOT(zoomOut())));
 
-   m_pZoom_Point_In_Action = m_pView_Mode_Group->addAction(pIcons->mZoomPointIn, "&In");
+   m_pZoom_Point_In_Action = m_pView_Mode_Group->addAction(QIcon(":/icons/ZoomPointIn"), "&In");
    m_pZoom_Point_In_Action->setAutoRepeat(false);
    m_pZoom_Point_In_Action->setCheckable(true);
    m_pZoom_Point_In_Action->setToolTip("Zoom In on Mouse");
    m_pZoom_Point_In_Action->setStatusTip("Increases the zoom level in the active view about a clicked point");
 
-   m_pZoom_Point_Out_Action = m_pView_Mode_Group->addAction(pIcons->mZoomPointOut, "&Out");
+   m_pZoom_Point_Out_Action = m_pView_Mode_Group->addAction(QIcon(":/icons/ZoomPointOut"), "&Out");
    m_pZoom_Point_Out_Action->setAutoRepeat(false);
    m_pZoom_Point_Out_Action->setCheckable(true);
    m_pZoom_Point_Out_Action->setToolTip("Zoom Out on Mouse");
@@ -489,27 +486,27 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    m_pZoom800_Action->setStatusTip("Zooms the active view to 800% of the data extents");
    VERIFYNR(connect(m_pZoom800_Action, SIGNAL(triggered()), this, SLOT(zoom800())));
 
-   m_pZoom_Rect_Action = m_pView_Mode_Group->addAction(pIcons->mZoomRect, "&Rectangle");
+   m_pZoom_Rect_Action = m_pView_Mode_Group->addAction(QIcon(":/icons/ZoomRect"), "&Rectangle");
    m_pZoom_Rect_Action->setAutoRepeat(false);
    m_pZoom_Rect_Action->setCheckable(true);
    m_pZoom_Rect_Action->setToolTip("Zoom Rectangle");
    m_pZoom_Rect_Action->setStatusTip("Zooms the active view to an area defined with the mouse");
 
-   m_pZoom_To_Fit_Action = new QAction(pIcons->mZoomToFit, "To &Fit", this);
+   m_pZoom_To_Fit_Action = new QAction(QIcon(":/icons/ZoomToFit"), "To &Fit", this);
    m_pZoom_To_Fit_Action->setAutoRepeat(false);
    m_pZoom_To_Fit_Action->setShortcut(QKeySequence(Qt::Key_E));
    m_pZoom_To_Fit_Action->setToolTip("Zoom to Fit");
    m_pZoom_To_Fit_Action->setStatusTip("Zooms the active view to the maximum extent of the data");
    VERIFYNR(connect(m_pZoom_To_Fit_Action, SIGNAL(triggered()), this, SLOT(zoomToFit())));
 
-   m_pZoom_And_Pan_To_Point_Action = new QAction(pIcons->mZoomAndPanToPoint, "Zoom and Pan To Point", this);
+   m_pZoom_And_Pan_To_Point_Action = new QAction(QIcon(":/icons/ZoomAndPanToPoint"), "Zoom and Pan To Point", this);
    m_pZoom_And_Pan_To_Point_Action->setAutoRepeat(false);
    m_pZoom_And_Pan_To_Point_Action->setToolTip("Zoom and Pan to Point");
    m_pZoom_And_Pan_To_Point_Action->setStatusTip("Zooms the active view to the point and zoom level specified");
    VERIFYNR(connect(m_pZoom_And_Pan_To_Point_Action, SIGNAL(triggered()), this, SLOT(showZapDlg())));
 
    // Properties
-   QAction* pPropertiesAction = new QAction(pIcons->mProperties, "&Properties...", this);
+   QAction* pPropertiesAction = new QAction(QIcon(":/icons/Properties"), "&Properties...", this);
    pPropertiesAction->setAutoRepeat(false);
    pPropertiesAction->setToolTip("Properties");
    pPropertiesAction->setStatusTip("Displays properties for application windows, plug-ins, and current "
@@ -553,68 +550,68 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    m_pPaperSize_Action = new QAction("Pape&r Size...", this);
    m_pPaperSize_Action->setAutoRepeat(false);
    m_pPaperSize_Action->setToolTip("Paper Size");
-   m_pPaperSize_Action->setStatusTip("Sets the paper size of of the current product");
+   m_pPaperSize_Action->setStatusTip("Sets the paper size of the current product");
    VERIFYNR(connect(m_pPaperSize_Action, SIGNAL(triggered()), this, SLOT(setPaperSize())));
 
    // Tools
-   mpSessionExplorerAction = new QAction(pIcons->mSessionExplorer, "Session E&xplorer", this);
+   mpSessionExplorerAction = new QAction(QIcon(":/icons/SessionExplorer"), "Session E&xplorer", this);
    mpSessionExplorerAction->setAutoRepeat(false);
    mpSessionExplorerAction->setCheckable(true);
    mpSessionExplorerAction->setToolTip("Session Explorer");
    mpSessionExplorerAction->setStatusTip("Toggles the display of the Session Explorer");
 
-   m_pHistogram_Wnd_Action = new QAction(pIcons->mHistogram, "&Histogram Window", this);
+   m_pHistogram_Wnd_Action = new QAction(QIcon(":/icons/HistogramWindow"), "&Histogram Window", this);
    m_pHistogram_Wnd_Action->setAutoRepeat(false);
    m_pHistogram_Wnd_Action->setCheckable(true);
    m_pHistogram_Wnd_Action->setToolTip("Histogram Window");
    m_pHistogram_Wnd_Action->setStatusTip("Toggles the display of the Histogram Window");
 
-   m_pMessage_Log_Wnd_Action = new QAction(pIcons->mMessageLog, "&Message Log Window", this);
+   m_pMessage_Log_Wnd_Action = new QAction(QIcon(":/icons/MessageLogWindow"), "&Message Log Window", this);
    m_pMessage_Log_Wnd_Action->setAutoRepeat(false);
    m_pMessage_Log_Wnd_Action->setCheckable(true);
    m_pMessage_Log_Wnd_Action->setToolTip("Message Log Window");
    m_pMessage_Log_Wnd_Action->setStatusTip("Toggles the display of the Message Log Window");
 
-   m_pBackground_Plugins_Wnd_Action = new QAction(pIcons->mBackgroundTask, "&Background Plugins Window", this);
+   m_pBackground_Plugins_Wnd_Action = new QAction(QIcon(":/icons/BackgroundTask"), "&Background Plugins Window", this);
    m_pBackground_Plugins_Wnd_Action->setAutoRepeat(false);
    m_pBackground_Plugins_Wnd_Action->setCheckable(true);
    m_pBackground_Plugins_Wnd_Action->setToolTip("Background Plug-Ins Window");
    m_pBackground_Plugins_Wnd_Action->setStatusTip("Toggles the display of the Background Plugin Window");
 
-   m_pScripting_Wnd_Action = new QAction(pIcons->mScript, "S&cripting Window", this);
+   m_pScripting_Wnd_Action = new QAction(QIcon(":/icons/Script"), "S&cripting Window", this);
    m_pScripting_Wnd_Action->setAutoRepeat(false);
    m_pScripting_Wnd_Action->setCheckable(true);
    m_pScripting_Wnd_Action->setToolTip("Scripting Window");
    m_pScripting_Wnd_Action->setStatusTip("Toggles the display of the Scripting Window");
 
-   m_pOverview_Wnd_Action = new QAction(pIcons->mOverview, "O&verview Window", this);
+   m_pOverview_Wnd_Action = new QAction(QIcon(":/icons/OverviewWindow"), "O&verview Window", this);
    m_pOverview_Wnd_Action->setAutoRepeat(false);
    m_pOverview_Wnd_Action->setCheckable(true);
    m_pOverview_Wnd_Action->setToolTip("Overview Window");
    m_pOverview_Wnd_Action->setStatusTip("Displays a small thumbnail of the active view");
    VERIFYNR(connect(m_pOverview_Wnd_Action, SIGNAL(toggled(bool)), this, SLOT(showOverviewWindow(bool))));
 
-   m_pChipping_Wnd_Action = new QAction(pIcons->mChipImage, "Image Chipping Window", this);
+   m_pChipping_Wnd_Action = new QAction(QIcon(":/icons/ChipImage"), "Image Chipping Window", this);
    m_pChipping_Wnd_Action->setAutoRepeat(false);
    m_pChipping_Wnd_Action->setToolTip("Image Chipping Window");
    m_pChipping_Wnd_Action->setStatusTip("Opens a thumbnail view of the active view for chipping a new image");
    VERIFYNR(connect(m_pChipping_Wnd_Action, SIGNAL(triggered()), this, SLOT(showChippingWindow())));
 
-   m_pGCP_Editor_Action = new QAction(pIcons->mGcpEditor, "&GCP Editor...", this);
+   m_pGCP_Editor_Action = new QAction(QIcon(":/icons/GcpEditor"), "&GCP Editor...", this);
    m_pGCP_Editor_Action->setAutoRepeat(false);
    m_pGCP_Editor_Action->setCheckable(true);
    m_pGCP_Editor_Action->setToolTip("GCP Editor");
    m_pGCP_Editor_Action->setStatusTip("Configures the GCPs in the current GCP list");
    VERIFYNR(connect(m_pGCP_Editor_Action, SIGNAL(toggled(bool)), this, SLOT(showGcpEditor(bool))));
 
-   m_pTiePoint_Editor_Action = new QAction(pIcons->mTiePointEditor, "&Tie Point Editor...", this);
+   m_pTiePoint_Editor_Action = new QAction(QIcon(":/icons/TiePointEditor"), "&Tie Point Editor...", this);
    m_pTiePoint_Editor_Action->setAutoRepeat(false);
    m_pTiePoint_Editor_Action->setCheckable(true);
    m_pTiePoint_Editor_Action->setToolTip("Tie Point Editor");
    m_pTiePoint_Editor_Action->setStatusTip("Configures the Tie Points in the current Tie Point list");
    VERIFYNR(connect(m_pTiePoint_Editor_Action, SIGNAL(toggled(bool)), this, SLOT(showTiePointEditor(bool))));
 
-   QAction* pWizard_Builder_Action = new QAction(pIcons->mWizard, "Wi&zard Builder...", this);
+   QAction* pWizard_Builder_Action = new QAction(QIcon(":/icons/WizardBuilder"), "Wi&zard Builder...", this);
    pWizard_Builder_Action->setAutoRepeat(false);
    pWizard_Builder_Action->setToolTip("Wizard Builder");
    pWizard_Builder_Action->setStatusTip("Invokes an editor to create and edit custom wizards");
@@ -626,7 +623,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    pBatch_Wizard_Editor_Action->setStatusTip("Invokes an editor to edit batch wizards");
    VERIFYNR(connect(pBatch_Wizard_Editor_Action, SIGNAL(triggered()), this, SLOT(showBatchEditor())));
 
-   m_pLink_Action = new QAction(pIcons->mLink, "Lin&k/Unlink...", this);
+   m_pLink_Action = new QAction(QIcon(":/icons/Link"), "Lin&k/Unlink...", this);
    m_pLink_Action->setAutoRepeat(false);
    m_pLink_Action->setToolTip("Link/Unlink");
    m_pLink_Action->setStatusTip("Connects layer and elements across multiple spectral data windows");
@@ -652,7 +649,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    VERIFYNR(connect(pOptions_Action, SIGNAL(triggered()), this, SLOT(invokeOptionsDlg())));
 
    // Window
-   mpCascadeAction = new QAction(pIcons->mCascade, "&Cascade", this);
+   mpCascadeAction = new QAction(QIcon(":/icons/Cascade"), "&Cascade", this);
    mpCascadeAction->setAutoRepeat(false);
    mpCascadeAction->setToolTip("Cascade");
    mpCascadeAction->setStatusTip("Arranges windows in an overlapping fashion");
@@ -661,17 +658,17 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    QActionGroup* pWinGroup = new QActionGroup(this);
    VERIFYNR(connect(pWinGroup, SIGNAL(triggered(QAction*)), this, SLOT(arrangeWorkspaceWindows(QAction*))));
 
-   mpTileAction = pWinGroup->addAction(pIcons->mTile, "Ti&le");
+   mpTileAction = pWinGroup->addAction(QIcon(":/icons/Tile"), "Ti&le");
    mpTileAction->setAutoRepeat(false);
    mpTileAction->setToolTip("Tile");
    mpTileAction->setStatusTip("Arranges windows as non-overlapping tiles");
 
-   mpTileHorizontalAction = pWinGroup->addAction(pIcons->mTileHoriz, "Tile Horizontally");
+   mpTileHorizontalAction = pWinGroup->addAction(QIcon(":/icons/TileHoriz"), "Tile Horizontally");
    mpTileHorizontalAction->setAutoRepeat(false);
    mpTileHorizontalAction->setToolTip("Tile horizontally");
    mpTileHorizontalAction->setStatusTip("Arranges windows as non-overlapping vertical tiles");
 
-   mpTileVerticalAction = pWinGroup->addAction(pIcons->mTileVert, "Tile Vertically");
+   mpTileVerticalAction = pWinGroup->addAction(QIcon(":/icons/TileVert"), "Tile Vertically");
    mpTileVerticalAction->setAutoRepeat(false);
    mpTileVerticalAction->setToolTip("Tile vertically");
    mpTileVerticalAction->setStatusTip("Arranges windows as non-overlapping horizontal tiles");
@@ -683,7 +680,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    VERIFYNR(connect(mpTileSelectedAction, SIGNAL(triggered()), this, SLOT(tileSelectedWindows())));
 
    // Help
-   QAction* pHelp_Topics_Action = new QAction(pIcons->mHelp, "Application &Help...", this);
+   QAction* pHelp_Topics_Action = new QAction(QIcon(":/icons/HelpTopics"), "Application &Help...", this);
    pHelp_Topics_Action->setAutoRepeat(false);
    pHelp_Topics_Action->setToolTip("Application Help");
    pHelp_Topics_Action->setStatusTip(QString("Lists available help topics for the %1 application").arg(APP_NAME));
@@ -695,20 +692,20 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    pExtensions_Action->setStatusTip(QString("Display information about extensions and check for updates."));
    VERIFYNR(connect(pExtensions_Action, SIGNAL(triggered()), this, SLOT(displayExtensions())));
 
-   QAction* pAbout_Action = new QAction(pIcons->mAbout, QString("&About %1...").arg(APP_NAME), this);
+   QAction* pAbout_Action = new QAction(QIcon(":/icons/About"), QString("&About %1...").arg(APP_NAME), this);
    pAbout_Action->setAutoRepeat(false);
    pAbout_Action->setToolTip(QString("About %1").arg(APP_NAME));
    pAbout_Action->setStatusTip(QString("Displays %1 application, version number, and copyright information").arg(APP_NAME));
    VERIFYNR(connect(pAbout_Action, SIGNAL(triggered()), this, SLOT(aboutApp())));
 
    // SessionItem context menu
-   mpExportContextMenuAction = new QAction(pIcons->mSave, "Export", this);
+   mpExportContextMenuAction = new QAction(QIcon(":/icons/Save"), "Export", this);
    mpExportContextMenuAction->setAutoRepeat(false);
    mpExportContextMenuAction->setToolTip("Export");
    mpExportContextMenuAction->setStatusTip("Export this session item");
    VERIFYNR(connect(mpExportContextMenuAction, SIGNAL(triggered()), this, SLOT(exportSessionItem())));
 
-   mpPropertiesAction = new QAction(QIcon(pIcons->mProperties), "Properties...", this);
+   mpPropertiesAction = new QAction(QIcon(QIcon(":/icons/Properties")), "Properties...", this);
    mpPropertiesAction->setAutoRepeat(false);
    mpPropertiesAction->setToolTip("Properties");
    mpPropertiesAction->setStatusTip("Displays the properties for the selected item");
@@ -750,6 +747,8 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    mpSessionExplorer->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &ApplicationWindow::windowRemoved));
    mpSessionExplorer->attach(SIGNAL_NAME(SessionExplorer, AboutToShowSessionItemContextMenu), 
       Slot(this, &ApplicationWindow::updateContextMenu));
+   SessionManagerImp::instance()->attach(SIGNAL_NAME(SessionManager, AboutToRestore),
+      Slot(this, &ApplicationWindow::sessionAboutToRestore));
    SessionManagerImp::instance()->attach(SIGNAL_NAME(SessionManager, SessionRestored),
       Slot(this, &ApplicationWindow::sessionLoaded));
 
@@ -1169,7 +1168,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
 
    Service<DesktopServices> pDesktop;
    string shortcutContext = "View/Snapshot";
-   mpClipboardSizedAction = new QAction(QIcon(pIcons->mCopy), "Copy snapshot...", this);
+   mpClipboardSizedAction = new QAction(QIcon(":/icons/Copy"), "Copy snapshot...", this);
    mpClipboardSizedAction->setStatusTip
       ("Presents the copy snapshot dialog and copies a snapshot of the current view into the clipboard");
    mpClipboardSizedAction->setToolTip("Copy Snapshot With Dialog");
@@ -1177,7 +1176,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    pDesktop->initializeAction(mpClipboardSizedAction, shortcutContext);
    addAction(mpClipboardSizedAction);
 
-   mpClipboardAction = new QAction(QIcon(pIcons->mCopy), "Copy snapshot", this);
+   mpClipboardAction = new QAction(QIcon(":/icons/Copy"), "Copy snapshot", this);
    mpClipboardAction->setShortcut(QKeySequence("Ctrl+Shift+C"));
    mpClipboardAction->setStatusTip
       ("Copies a snapshot of the current view using the default resolution into the clipboard");
@@ -2598,16 +2597,15 @@ bool ApplicationWindow::saveSession()
    {
       ProgressAdapter progress;
       Service<DesktopServices>()->createProgressDialog("Save Session", &progress);
-      pair<SessionManager::SerializationStatus,vector<pair<SessionItem*, string> > > status = pManager->serialize(mSessionFilename, &progress);
+      pair<SessionManager::SerializationStatus,vector<pair<SessionItem*, string> > > status =
+         pManager->serialize(mSessionFilename, &progress);
       if (status.first == SessionManager::FAILURE) 
       {
-         remove(mSessionFilename.c_str());
          progress.updateProgress("Session saving failed.", 0, ERRORS);
          return false;
       }
       else if (status.first == SessionManager::LOCKED)
       {
-         remove(mSessionFilename.c_str());
          progress.updateProgress("Session saving is temporarily locked.", 0, ERRORS);
          return false;
       }
@@ -2619,7 +2617,8 @@ bool ApplicationWindow::saveSession()
       }
       else if(pLog != NULL && status.first == SessionManager::PARTIAL_SUCCESS)
       {
-         pLog->createMessage("Session saved. Not all session items were successfully loaded: " + mSessionFilename,"app","C85E14F3-69B0-4495-AD91-F3E1B7013A8E");
+         pLog->createMessage("Session saved. Not all session items were successfully loaded: " +
+            mSessionFilename, "app", "C85E14F3-69B0-4495-AD91-F3E1B7013A8E");
       }
       return true;
    }
@@ -3511,9 +3510,6 @@ void ApplicationWindow::registerPlugIns()
 
    // Update the menus
    updatePlugInCommands();
-
-   // Update the scripting window interpreters
-   m_pScripting->updateInterpreters();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -4240,7 +4236,7 @@ void ApplicationWindow::setPaperSize()
 
 void ApplicationWindow::updateActiveWindow(QWidget* pWindow)
 {
-   // Check for the the currently active window
+   // Check for the currently active window
    WorkspaceWindowImp* pWorkspaceWindow = dynamic_cast<WorkspaceWindowImp*>(pWindow);
    if (pWorkspaceWindow == mpCurrentWnd)
    {
@@ -4369,6 +4365,7 @@ void ApplicationWindow::updateActiveWindow(QWidget* pWindow)
    Layer* pGcpLayer = NULL;
    Layer* pTiePointLayer = NULL;
    Layer* pMeasurementsLayer = NULL;
+   const MouseMode* pMouseMode = NULL;
 
    if (pWorkspaceWindow != NULL)
    {
@@ -4497,6 +4494,8 @@ void ApplicationWindow::updateActiveWindow(QWidget* pWindow)
          {
             pAnnotationLayer = ((ProductView*) pView)->getActiveLayer();
          }
+
+         pMouseMode = pView->getCurrentMouseMode();
       }
    }
    else
@@ -4515,6 +4514,7 @@ void ApplicationWindow::updateActiveWindow(QWidget* pWindow)
    mpTiePointToolBar->setTiePointLayer(pTiePointLayer);
    mpBrightnessToolbar->updateForNewView();
    mpMeasurementToolBar->setMeasurementsLayer(pMeasurementsLayer);
+   updateMouseAction(pMouseMode);
 
    // Update the current undo stack
    UndoStack* pUndoStack = NULL;
@@ -5147,7 +5147,6 @@ void ApplicationWindow::clearMarkings()
 
 void ApplicationWindow::forwardSnapshot()
 {
-
    ViewWindow* pViewWindow = getCurrentWorkspaceWindow();
    ViewImp* pView = dynamic_cast<ViewImp*>((pViewWindow == NULL) ? NULL : pViewWindow->getView());
    if (pView == NULL)
@@ -5205,9 +5204,18 @@ void ApplicationWindow::pregenerateTexture()
    }
 }
 
-void ApplicationWindow::dragEnterEvent(QDragEnterEvent *pEvent)
+void ApplicationWindow::dragEnterEvent(QDragEnterEvent* pEvent)
 {
-   vector<string> files;
+   if (pEvent == NULL)
+   {
+      return;
+   }
+
+   if ((pEvent->proposedAction() != Qt::CopyAction) && (pEvent->proposedAction() != Qt::MoveAction))
+   {
+      return;
+   }
+
    if (pEvent->mimeData()->hasUrls())
    {
       const QList<QUrl> urls = pEvent->mimeData()->urls();
@@ -5217,7 +5225,8 @@ void ApplicationWindow::dragEnterEvent(QDragEnterEvent *pEvent)
          string filename = url.toLocalFile().toStdString();
          if (filename.empty() == false)
          {
-            files.push_back(filename);
+            pEvent->acceptProposedAction();
+            return;
          }
       }
    }
@@ -5226,44 +5235,8 @@ void ApplicationWindow::dragEnterEvent(QDragEnterEvent *pEvent)
       QString filename = pEvent->mimeData()->text();
       if (filename.isEmpty() == false)
       {
-         QByteArray charArray = filename.toAscii();
-         for (int i=0; i<filename.length(); ++i)
-         {
-            if (charArray[i] == '\\')
-            {
-               charArray[i] = '/';
-            }
-            else if (charArray[i] == '\n' || charArray[i] == '\r')
-            {
-               charArray[i] = 0;
-               break;
-            }
-         }
-         files.push_back(charArray.data());
+         pEvent->acceptProposedAction();
       }
-   }
-   else
-   {
-      return;
-   }
-
-   if ((pEvent->proposedAction() == Qt::CopyAction) || (pEvent->proposedAction() == Qt::MoveAction))
-   {
-      if (files.size() > 1)
-      {
-         for (unsigned int i = 0; i < files.size(); ++i)
-         {
-            QFileInfo info(QString::fromStdString(files[i]));
-            QString currentSuffix = info.suffix();
-
-            if ((currentSuffix == "wiz") || (currentSuffix == "batchwiz") || (currentSuffix == "session"))
-            {
-               return;
-            }
-         }
-      }
-
-      pEvent->acceptProposedAction();
    }
 }
 
@@ -5279,7 +5252,8 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
       return;
    }
 
-   mDroppedFilesList.clear();
+   // Get the list of dropped files
+   mDropFiles.clear();
 
    if (pEvent->mimeData()->hasUrls())
    {
@@ -5290,7 +5264,7 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
          string filename = url.toLocalFile().toStdString();
          if (filename.empty() == false)
          {
-            mDroppedFilesList.push_back(filename);
+            mDropFiles.push_back(filename);
          }
       }
    }
@@ -5312,11 +5286,88 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
                break;
             }
          }
-         mDroppedFilesList.push_back(charArray.data());
+         mDropFiles.push_back(charArray.data());
       }
    }
 
-   pEvent->acceptProposedAction();
+   if (mDropFiles.empty() == true)
+   {
+      return;
+   }
+
+   // Get the type of files being dropped
+   mDropFilesType = DropFilesType();
+   for (vector<string>::iterator iter = mDropFiles.begin(); iter != mDropFiles.end(); ++iter)
+   {
+      QString strFilename = QString::fromStdString(*iter);
+      if (strFilename.isEmpty() == false)
+      {
+         QFileInfo info(strFilename);
+         if (info.suffix() == "aeb")            // One or more extension files
+         {
+            if ((mDropFilesType.isValid() == true) && (mDropFilesType != EXTENSION_FILE))
+            {
+               mDropFilesType = DropFilesType();
+               break;
+            }
+
+            mDropFilesType = EXTENSION_FILE;
+         }
+         else if (info.suffix() == "session")   // One session file
+         {
+            if (mDropFilesType.isValid() == true)
+            {
+               mDropFilesType = DropFilesType();
+               break;
+            }
+
+            mDropFilesType = SESSION_FILE;
+         }
+         else if (info.suffix() == "wiz")       // One wizard file
+         {
+            if (mDropFilesType.isValid() == true)
+            {
+               mDropFilesType = DropFilesType();
+               break;
+            }
+
+            mDropFilesType = WIZARD_FILE;
+         }
+         else if (info.suffix() == "batchwiz")  // One batch wizard file
+         {
+            if (mDropFilesType.isValid() == true)
+            {
+               mDropFilesType = DropFilesType();
+               break;
+            }
+
+            mDropFilesType = BATCH_WIZARD_FILE;
+         }
+         else                                   // One or more data sets
+         {
+            if ((mDropFilesType.isValid() == true) && (mDropFilesType != DATASET_FILE))
+            {
+               mDropFilesType = DropFilesType();
+               break;
+            }
+
+            mDropFilesType = DATASET_FILE;
+         }
+      }
+   }
+
+   if (mDropFilesType.isValid() == false)
+   {
+      QString msg = "Unable to load the dropped files.\n\nOnly one of the following may be dropped:\n"
+         "- One or more extension files (*.aeb)\n- One session file (*.session)\n- One wizard file (*.wiz)\n"
+         "- One batch wizard file (*.batchwiz)\n- One or more data set files (*)";
+      QMessageBox::warning(this, APP_NAME, msg);
+      return;
+   }
+
+   // Get context menu options
+   mDropEditType = ImportAgent::NEVER_EDIT;
+   mDropNewSession = false;
 
 #if defined(WIN_API)
    Qt::MouseButton contextMenuButton = Qt::RightButton;
@@ -5324,104 +5375,89 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
    Qt::MouseButton contextMenuButton = Qt::MidButton;
 #endif
 
-   if (mDroppedFilesList.size() == 1)
-   {
-      QString filename = QString::fromStdString(mDroppedFilesList.front());
-
-      QFileInfo info(filename);
-      if ((info.suffix() == "wiz") || (info.suffix() == "batchwiz"))
-      {
-         if (pEvent->mouseButtons() == contextMenuButton)
-         {
-            QMenu contextMenu(this);
-            QAction* pRunWizardAction = contextMenu.addAction("Run wizard in current session");
-            QAction* pRunWizardActionNewSession = contextMenu.addAction("Run wizard in new session");
-            contextMenu.addSeparator();
-            QAction *pCancel = contextMenu.addAction("Cancel");
-            contextMenu.setDefaultAction(pRunWizardAction);
-
-            QAction *pSelection = contextMenu.exec(mapToGlobal(pEvent->pos()));
-            if ((pSelection == pCancel) || (pSelection == NULL)) 
-            {
-               return;
-            }
-
-            if (pSelection == pRunWizardActionNewSession)
-            {
-               if (newSession() == false)
-               {
-                  return;
-               }
-            }
-         }
-
-         if (info.suffix() == "wiz")
-         {
-            runWizard(filename);
-         }
-         else if (info.suffix() == "batchwiz")
-         {
-            vector<string> batchFile;
-            batchFile.push_back(mDroppedFilesList.front());
-            WizardUtilities::runBatchFiles(batchFile, NULL);
-         }
-
-         return;
-      }
-      else if (info.suffix() == "session")
-      {
-         if (pEvent->mouseButtons() == contextMenuButton)
-         {
-            QMenu contextMenu(this);
-            QAction* pOpenSessionAction = contextMenu.addAction("Open session");
-            contextMenu.addSeparator();
-            contextMenu.addAction("Cancel");
-            contextMenu.setDefaultAction(pOpenSessionAction);
-
-            if (contextMenu.exec(mapToGlobal(pEvent->pos())) != pOpenSessionAction)
-            {
-               return;
-            }
-         }
-
-         openSession(filename);
-         return;
-      }
-   }
-
-   mDroppedFilesEditType = ImportAgent::NEVER_EDIT;
-
    if (pEvent->mouseButtons() == contextMenuButton)
    {
-      // Query the user for how to import the files
-      QMenu contextMenu(this);
-      QAction* pAlwaysAction = contextMenu.addAction("Import and show options dialog");
-      QAction* pAsNeededAction = contextMenu.addAction("Import and show options dialog only if needed");
-      QAction* pNeverAction = contextMenu.addAction("Import and do not show options dialog");
-      contextMenu.addSeparator();
-      contextMenu.addAction("Cancel");
-      contextMenu.setDefaultAction(pNeverAction);
+      if (mDropFilesType == EXTENSION_FILE)
+      {
+         QMenu contextMenu(this);
+         QAction* pInstallExtensionsAction = contextMenu.addAction("Install extensions");
+         contextMenu.addSeparator();
+         contextMenu.addAction("Cancel");
+         contextMenu.setDefaultAction(pInstallExtensionsAction);
 
-      QAction* pSelectedAction = contextMenu.exec(mapToGlobal(pEvent->pos()));
-      if (pSelectedAction == pAlwaysAction)
-      {
-         mDroppedFilesEditType = ImportAgent::ALWAYS_EDIT;
+         if (contextMenu.exec(mapToGlobal(pEvent->pos())) != pInstallExtensionsAction)
+         {
+            return;
+         }
       }
-      else if (pSelectedAction == pAsNeededAction)
+      else if (mDropFilesType == SESSION_FILE)
       {
-         mDroppedFilesEditType = ImportAgent::AS_NEEDED_EDIT;
+         QMenu contextMenu(this);
+         QAction* pOpenSessionAction = contextMenu.addAction("Open session");
+         contextMenu.addSeparator();
+         contextMenu.addAction("Cancel");
+         contextMenu.setDefaultAction(pOpenSessionAction);
+
+         if (contextMenu.exec(mapToGlobal(pEvent->pos())) != pOpenSessionAction)
+         {
+            return;
+         }
       }
-      else if (pSelectedAction == pNeverAction)
+      else if ((mDropFilesType == WIZARD_FILE) || (mDropFilesType == BATCH_WIZARD_FILE))
       {
-         mDroppedFilesEditType = ImportAgent::NEVER_EDIT;
+         QMenu contextMenu(this);
+         QAction* pRunWizardAction = contextMenu.addAction("Run wizard in current session");
+         QAction* pRunWizardNewSessionAction = contextMenu.addAction("Run wizard in new session");
+         contextMenu.addSeparator();
+         QAction* pCancelAction = contextMenu.addAction("Cancel");
+         contextMenu.setDefaultAction(pRunWizardAction);
+
+         QAction* pSelectedAction = contextMenu.exec(mapToGlobal(pEvent->pos()));
+         if ((pSelectedAction == pCancelAction) || (pSelectedAction == NULL))
+         {
+            return;
+         }
+
+         if (pSelectedAction == pRunWizardNewSessionAction)
+         {
+            mDropNewSession = true;
+         }
       }
-      else
+      else if (mDropFilesType == DATASET_FILE)
       {
-         return;
+         QMenu contextMenu(this);
+         QAction* pAlwaysAction = contextMenu.addAction("Import and show options dialog");
+         QAction* pAsNeededAction = contextMenu.addAction("Import and show options dialog only if needed");
+         QAction* pNeverAction = contextMenu.addAction("Import and do not show options dialog");
+         contextMenu.addSeparator();
+         contextMenu.addAction("Cancel");
+         contextMenu.setDefaultAction(pNeverAction);
+
+         QAction* pSelectedAction = contextMenu.exec(mapToGlobal(pEvent->pos()));
+         if (pSelectedAction == pAlwaysAction)
+         {
+            mDropEditType = ImportAgent::ALWAYS_EDIT;
+         }
+         else if (pSelectedAction == pAsNeededAction)
+         {
+            mDropEditType = ImportAgent::AS_NEEDED_EDIT;
+         }
+         else if (pSelectedAction == pNeverAction)
+         {
+            mDropEditType = ImportAgent::NEVER_EDIT;
+         }
+         else
+         {
+            return;
+         }
       }
    }
 
-   QTimer::singleShot(0, this, SLOT(importDroppedFiles()));
+   // Accept the drop action
+   pEvent->acceptProposedAction();
+
+   // Invoke an immediate timer so that any currently queued events are processed first
+   QTimer::singleShot(0, this, SLOT(processDropFiles()));
 }
 
 void ApplicationWindow::removeMenuCommands(const QList<QAction*>& commands)
@@ -5600,10 +5636,7 @@ void ApplicationWindow::updateContextMenu(Subject& subject, const string& signal
    // Delete element action
    if (dynamic_cast<DataElement*>(pItem) != NULL)
    {
-      Icons* pIcons = Icons::instance();
-      REQUIRE(pIcons != NULL);
-
-      QAction* pDeleteAction = new QAction(QIcon(pIcons->mDelete), "&Delete", pMenu->getActionParent());
+      QAction* pDeleteAction = new QAction(QIcon(":/icons/Delete"), "&Delete", pMenu->getActionParent());
       pDeleteAction->setAutoRepeat(false);
       pDeleteAction->setStatusTip("Destroys the selected data element");
       pDeleteAction->setData(QVariant::fromValue(pItem));
@@ -5666,6 +5699,11 @@ void ApplicationWindow::updateContextMenu(Subject& subject, const string& signal
    }
 }
 
+void ApplicationWindow::sessionAboutToRestore(Subject& subject, const string& signal, const boost::any& value)
+{
+   mPreviousSize = size();
+}
+
 void ApplicationWindow::sessionLoaded(Subject& subject, const string& signal, const boost::any& value)
 {
    // make sure that the zoom percentage toolbar item, etc. are properly connected to the window and view.
@@ -5675,6 +5713,8 @@ void ApplicationWindow::sessionLoaded(Subject& subject, const string& signal, co
       mpWorkspace->setActiveWindow(NULL);
    }
    setCurrentWorkspaceWindow(pCurrentWindow);
+   clearUndoStacks();
+   resize(mPreviousSize);
 }
 
 void ApplicationWindow::exportFileMenu()
@@ -5860,62 +5900,80 @@ bool ApplicationWindow::deserialize(SessionItemDeserializer &deserializer)
    return true;
 }
 
-void ApplicationWindow::importDroppedFiles()
+void ApplicationWindow::processDropFiles()
 {
-   // Separate the extension files from the other files
-   QList<Aeb*> extensions;
-   AebListResource extensionRes;
-   ProgressResource pProgress("Importing files...");
-   vector<string> droppedDataFiles;
-   for (vector<string>::iterator it = mDroppedFilesList.begin(); it != mDroppedFilesList.end(); ++it)
+   VERIFYNRV(mDropFiles.empty() == false);
+
+   if (mDropFilesType == EXTENSION_FILE)
    {
-      if ((*it).empty() == false)
+      QList<Aeb*> extensions;
+      AebListResource extensionRes;
+      ProgressResource pProgress(APP_NAME);
+
+      for (vector<string>::size_type i = 0; i < mDropFiles.size(); ++i)
       {
-         if (QFileInfo(QString::fromStdString(*it)).suffix() == "aeb")
+         string filename = mDropFiles[i];
+         if (filename.empty() == false)
          {
+            pProgress->updateProgress("Processing extension files...", i * 100 / mDropFiles.size(), NORMAL);
+
             extensionRes.push_back(new Aeb());
             AebIo deserializer(*extensionRes.back());
-            std::string errMsg;
-            if (!deserializer.fromFile(*it, errMsg))
+
+            string errorMessage;
+            if (deserializer.fromFile(filename, errorMessage) == false)
             {
-               if (pProgress.get() != NULL)
-               {
-                  pProgress->updateProgress("Invalid extension bundle " + *it + "\n" + errMsg, 0, WARNING);
-               }
+               pProgress->updateProgress("Invalid extension bundle: " + filename + "\n" + errorMessage, 0, WARNING);
             }
             else
             {
                extensions.push_back(extensionRes.back());
             }
-            continue;
          }
-
-         droppedDataFiles.push_back(*it);
       }
-   }
 
-   // Import the data files
-   if (droppedDataFiles.empty() == false)
-   {
-      ImporterResource importer("Auto Importer", droppedDataFiles, pProgress.get(), false);
-      importer->setEditType(mDroppedFilesEditType);
-      importer->updateMruFileList(true);
+      pProgress->updateProgress("Finished processing extension files", 100, NORMAL);
 
-      if ((importer->execute() == true) && (pProgress.get() != NULL))
+      if (extensions.empty() == false)
       {
-         pProgress->updateProgress("Finished importing", 100, NORMAL);
+         InstallWizard wiz(extensions, pProgress.get(), this);
+         wiz.exec();
       }
    }
-
-   // Load the extensions
-   if (!extensions.empty())
+   else if (mDropFilesType == SESSION_FILE)
    {
-      InstallWizard wiz(extensions, pProgress.get(), this);
-      wiz.exec();
+      VERIFYNRV(mDropFiles.size() == 1);
+      openSession(QString::fromStdString(mDropFiles.front()));
    }
+   else if ((mDropFilesType == WIZARD_FILE) || (mDropFilesType == BATCH_WIZARD_FILE))
+   {
+      VERIFYNRV(mDropFiles.size() == 1);
 
-   // Clear the dropped files list
-   mDroppedFilesList.clear();
+      if (mDropNewSession == true)
+      {
+         if (newSession() == false)
+         {
+            return;
+         }
+      }
+
+      if (mDropFilesType == WIZARD_FILE)
+      {
+         runWizard(QString::fromStdString(mDropFiles.front()));
+      }
+      else
+      {
+         WizardUtilities::runBatchFiles(mDropFiles, NULL);
+      }
+   }
+   else if (mDropFilesType == DATASET_FILE)
+   {
+      ImporterResource importer("Auto Importer", mDropFiles, NULL, false);
+      importer->setEditType(mDropEditType);
+      importer->createProgressDialog(true);
+      importer->updateMruFileList(true);
+      importer->execute();
+   }
 }
 
 void ApplicationWindow::showToolbarsMenu()
