@@ -337,6 +337,12 @@ bool DataDescriptorImp::toXml(XMLWriter* pXml) const
       pXml->popAddPoint();
    }
 
+   // Importer name
+   if (bSuccess == true)
+   {
+      pXml->addAttr("importerName", mImporterName);
+   }
+
    return bSuccess;
 }
 
@@ -407,6 +413,15 @@ bool DataDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version)
             throw XmlReader::DomParseException("Cannot deserialize file descriptor", pDocument);
          }
       }
+   }
+
+   if (pElement->hasAttribute(X("importerName")) == true)
+   {
+      mImporterName = A(pElement->getAttribute(X("importerName")));
+   }
+   else
+   {
+      mImporterName.clear();
    }
 
    notify(SIGNAL_NAME(Subject, Modified));

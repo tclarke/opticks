@@ -667,6 +667,8 @@ void DataVariantFactoryImp::initializeMaps()
    registerType<DataVariantDynamicObject>();
    registerType<DataVariantValue<char> >();
    registerType<DataVariantVectorValue<char> >();
+   registerType<DataVariantValue<signed char> >();
+   registerType<DataVariantVectorValue<signed char> >();
    registerType<DataVariantValue<unsigned char> >();
    registerType<DataVariantVectorValue<unsigned char> >();
    registerType<DataVariantValue<short> >();
@@ -731,6 +733,7 @@ void DataVariantFactoryImp::initializeMaps()
    registerType<DataVariantValue<SymbolType> >();
    registerType<DataVariantValue<Point::PointSymbolType> >();
    registerType<DataVariantValue<RegionUnits> >();
+   registerType<DataVariantValue<UnitSystem> >();
    registerType<DataVariantValue<UnitType> >();
    registerType<DataVariantValue<WindowSizeType> >();
    registerType<DataVariantValue<WindowType> >();

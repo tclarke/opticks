@@ -10,7 +10,6 @@
 #include "glCommon.h"
 #include "AnnotationElementAdapter.h"
 #include "AnnotationLayerAdapter.h"
-#include "AppAssert.h"
 #include "ApplicationWindow.h"
 #include "AppVerify.h"
 #include "AppVersion.h"
@@ -23,7 +22,6 @@
 #include "GraphicLayerUndo.h"
 #include "GraphicObject.h"
 #include "GraphicProperty.h"
-#include "Icons.h"
 #include "ModelServicesImp.h"
 #include "MouseModeImp.h"
 #include "ProductViewAdapter.h"
@@ -105,23 +103,22 @@ ProductViewImp::ProductViewImp(const string& id, const string& viewName, QGLCont
    addPropertiesPage(PropertiesProductView::getName());
    unblockUndo();
 
-   Icons* pIcons = NULL;
-   pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
    // Separator
    QAction* pPropertiesSeparatorAction = new QAction(this);
    pPropertiesSeparatorAction->setSeparator(true);
    addContextMenuAction(ContextMenuAction(pPropertiesSeparatorAction, APP_PRODUCTVIEW_PROPERTIES_SEPARATOR_ACTION));
-   setIcon(pIcons->mSpectralData);
-   setWindowIcon(pIcons->mSpectralData);
+   setIcon(QIcon(":/icons/SpectralData"));
+   setWindowIcon(QIcon(":/icons/SpectralData"));
    addMouseMode(new MouseModeImp("LayerMode", QCursor(Qt::ArrowCursor)));
    addMouseMode(new MouseModeImp("PanMode", QCursor(Qt::OpenHandCursor)));
-   addMouseMode(new MouseModeImp("ZoomInMode", QCursor(pIcons->mZoomInCursor, pIcons->mZoomInMask, 0, 0)));
-   addMouseMode(new MouseModeImp("ZoomOutMode", QCursor(pIcons->mZoomOutCursor, pIcons->mZoomOutMask, 0, 0)));
-   addMouseMode(new MouseModeImp("ZoomBoxMode", QCursor(pIcons->mZoomRectCursor, pIcons->mZoomRectMask, 0, 0)));
+   addMouseMode(new MouseModeImp("ZoomInMode", QCursor(QPixmap(":/icons/ZoomInCursor", 0, 0))));
+   addMouseMode(new MouseModeImp("ZoomOutMode", QCursor(QPixmap(":/icons/ZoomOutCursor", 0, 0))));
+   addMouseMode(new MouseModeImp("ZoomBoxMode", QCursor(QPixmap(":/icons/ZoomRectCursor", 0, 0))));
+   setMouseMode("LayerMode");
 
    // Connections
-   connect(this, SIGNAL(mouseModeChanged(const MouseMode*)), this, SLOT(updateMouseCursor(const MouseMode*)));
+   VERIFYNR(connect(this, SIGNAL(mouseModeChanged(const MouseMode*)), this, SLOT(updateMouseCursor(const MouseMode*))));
+   VERIFYNR(connect(mpLayoutLayer, SIGNAL(extentsModified()), this, SLOT(updateExtents())));
    connectLayers();
 }
 
@@ -618,6 +615,22 @@ void ProductViewImp::updateClassificationMarks(const QString &newClassification)
       strTopText.append("\n");
    }
    strTopText.append(QString::fromStdString(StringUtilities::toDisplayString(pConfigSettings->getReleaseType())));
+
+   ConfigurationSettingsExt1* pConfigSettingsExt1 = dynamic_cast<ConfigurationSettingsExt1*>(pConfigSettings.get());
+   if (pConfigSettingsExt1 != NULL)
+   {
+      QString strReleaseDescription = QString::fromStdString(pConfigSettingsExt1->getReleaseDescription());
+      if (!strReleaseDescription.isEmpty())
+      {
+         if (!strTopText.isEmpty())
+         {
+            strTopText.append("\n");
+         }
+
+         strTopText.append(strReleaseDescription);
+      }
+   }
+
    if (!pConfigSettings->isProductionRelease())
    {
       strBottomText.prepend("Not for Production Use\n");
@@ -679,15 +692,7 @@ void ProductViewImp::setPaperSize(double dWidth, double dHeight)
       updateClassificationLocation();
 
       // Update the view extents
-      double dMinX = 0.0;
-      double dMinY = 0.0;
-      double dMaxX = mPaperWidth * mDpi;
-      double dMaxY = mPaperHeight * mDpi;
-
-      double dMarginX = (dMaxX - dMinX) * 0.03;
-      double dMarginY = (dMaxY - dMinY) * 0.03;
-
-      setExtents(dMinX - dMarginX, dMinY - dMarginY, dMaxX + dMarginX, dMaxY + dMarginY);
+      updateExtents();
       zoomExtents();
 
       // Notify connected and attached objects
@@ -873,7 +878,8 @@ bool ProductViewImp::event(QEvent* pEvent)
 
    // Initialize the paper size in the Polish event instead of the constructor since
    // a virtual function is called in the classification layer's text objects
-   if (pEvent->type() == QEvent::Polish)
+   Service<SessionManager> pManager;
+   if ((pManager->isSessionLoading() == false) && (pEvent->type() == QEvent::Polish))
    {
       if ((mPaperWidth == 0.0) || (mPaperHeight == 0.0))
       {
@@ -1675,4 +1681,29 @@ bool ProductViewImp::fromXml(DOMNode* pDocument, unsigned int version)
    connectLayers();
    
    return true;
+}
+
+void ProductViewImp::updateExtents()
+{
+   double dPaperMinX = 0.0;
+   double dPaperMinY = 0.0;
+   double dPaperMaxX = mPaperWidth * mDpi;
+   double dPaperMaxY = mPaperHeight * mDpi;
+
+   double dLayerMinX = 0.0;
+   double dLayerMinY = 0.0;
+   double dLayerMaxX = 0.0;
+   double dLayerMaxY = 0.0;
+
+   mpLayoutLayer->getExtents(dLayerMinX, dLayerMinY, dLayerMaxX, dLayerMaxY);
+
+   double dMinX = min(dLayerMinX, dPaperMinX);
+   double dMinY = min(dLayerMinY, dPaperMinY);
+   double dMaxX = max(dLayerMaxX, dPaperMaxX);
+   double dMaxY = max(dLayerMaxY, dPaperMaxY);
+
+   double dMarginX = (dMaxX - dMinX) * 0.03;
+   double dMarginY = (dMaxY - dMinY) * 0.03;
+
+   setExtents(dMinX - dMarginX, dMinY - dMarginY, dMaxX + dMarginX, dMaxY + dMarginY);
 }

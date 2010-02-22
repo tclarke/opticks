@@ -21,16 +21,13 @@
 #include <QtGui/QMessageBox>
 
 #include "AnimationAdapter.h"
-#include "AnimationController.h"
 #include "AnimationControllerImp.h"
 #include "AnimationFrameSubsetWidget.h"
-#include "AnimationServices.h"
 #include "ApplicationServices.h"
 #include "AppVerify.h"
 #include "ContextMenuAction.h"
 #include "ContextMenuActions.h"
 #include "FileResource.h"
-#include "Icons.h"
 #include "SessionItemDeserializer.h"
 #include "SessionItemSerializer.h"
 #include "SessionManager.h"
@@ -39,6 +36,7 @@
 #include "xmlreader.h"
 #include "xmlwriter.h"
 
+#include <algorithm>
 #include <limits>
 #include <list>
 #include <fstream>
@@ -142,17 +140,13 @@ AnimationControllerImp::AnimationControllerImp(FrameType frameType, const string
    mpSeparator2Action->setSeparator(true);
 
    // Initialization
-   Icons* pIcons = Icons::instance();
-   if (pIcons != NULL)
-   {
-      mpPlayAction->setIcon(pIcons->mAnimationPlayForward);
-      mpPauseAction->setIcon(pIcons->mAnimationPause);
-      mpStopAction->setIcon(pIcons->mAnimationStop);
-      mpChangeDirectionAction->setIcon(pIcons->mAnimationChangeDirection);
-      mpStepBackwardAction->setIcon(pIcons->mAnimationAdvanceBackward);
-      mpStepForwardAction->setIcon(pIcons->mAnimationAdvanceForward);
-      setIcon(QIcon(pIcons->mAnimation));
-   }
+   mpPlayAction->setIcon(QIcon(":/icons/PlayForward"));
+   mpPauseAction->setIcon(QIcon(":/icons/Pause"));
+   mpStopAction->setIcon(QIcon(":/icons/Stop"));
+   mpChangeDirectionAction->setIcon(QIcon(":/icons/ChangeDirection"));
+   mpStepBackwardAction->setIcon(QIcon(":/icons/AdvanceBackward"));
+   mpStepForwardAction->setIcon(QIcon(":/icons/AdvanceForward"));
+   setIcon(QIcon(":/icons/Animation"));
 
    // Connections
    VERIFYNR(connect(mpPlayAction, SIGNAL(triggered()), this, SLOT(play())));
@@ -283,12 +277,11 @@ Animation* AnimationControllerImp::createAnimation(const QString& strName)
       string movieName = strName.toStdString();
       pAnimation->setName(movieName);
 
-      connect(pAnimation, SIGNAL(framesChanged(const std::vector<AnimationFrame>&)), this, SLOT(updateFrameData()));
-      connect(pAnimation, SIGNAL(objectDetached()), this, SLOT(destroyAnimation()));
-      mAnimations.push_back(pAnimation);
-      pAnimation->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &AnimationControllerImp::movieDeleted));
-      emit animationAdded(pAnimation);
-      notify(SIGNAL_NAME(AnimationController, AnimationAdded), boost::any(static_cast<Animation*>(pAnimation)));
+      if (insertAnimation(pAnimation) == false)
+      {
+         delete pAnimation;
+         pAnimation = NULL;
+      }
    }
 
    return pAnimation;
@@ -642,14 +635,23 @@ void AnimationControllerImp::stepBackward()
       return;
    }
 
-   const double currentFrame = getCurrentFrame();
+   double currentFrame = getCurrentFrame();
+
+   // If type is FRAME_ID, need to adjust value to actual frame number in case animation was paused
+   // and currentFrame is not a whole number. If we don't adjust, then first step back will just set
+   // frame to the whole number for the frame, e.g., value = 37.335 and step back will set it to 37
+   // and not 36. Don't have to do this for step forward since value of 37.335 will be set to 38.
+   if (getFrameType() == FRAME_ID)
+   {
+      currentFrame = floor(currentFrame);
+   }
+
    double prevValue = numeric_limits<double>::min();
    for (vector<Animation*>::const_iterator iter = mAnimations.begin();
       iter != mAnimations.end(); ++iter)
    {
       Animation* pAnimation = *iter;
       VERIFYNRV(pAnimation != NULL);
-
       const double startValue = pAnimation->getStartValue();
       const double stopValue = pAnimation->getStopValue();
       double animationPrev;
@@ -699,6 +701,38 @@ void AnimationControllerImp::fastRewind(double multiplier)
    setIntervalMultiplier(multiplier);
    setAnimationState(PLAY_BACKWARD);
    play();
+}
+
+bool AnimationControllerImp::insertAnimation(Animation* pAnimation)
+{
+   if (pAnimation == NULL)
+   {
+      return false;
+   }
+
+   if (find(mAnimations.begin(), mAnimations.end(), pAnimation) != mAnimations.end())
+   {
+      return false;
+   }
+
+   QString animationName = QString::fromStdString(pAnimation->getName());
+   if (hasAnimation(animationName) == true)
+   {
+      return false;
+   }
+
+   AnimationImp* pAnimationImp = dynamic_cast<AnimationImp*>(pAnimation);
+   VERIFY(pAnimationImp != NULL);
+
+   VERIFY(connect(pAnimationImp, SIGNAL(framesChanged(const std::vector<AnimationFrame>&)), this,
+      SLOT(updateFrameData())));
+   VERIFY(connect(pAnimationImp, SIGNAL(objectDetached()), this, SLOT(destroyAnimation())));
+   mAnimations.push_back(pAnimation);
+   pAnimation->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &AnimationControllerImp::movieDeleted));
+   emit animationAdded(pAnimation);
+   notify(SIGNAL_NAME(AnimationController, AnimationAdded), boost::any(pAnimation));
+
+   return true;
 }
 
 void AnimationControllerImp::removeAnimation(Animation* pAnimation)
@@ -1094,12 +1128,6 @@ bool AnimationControllerImp::serialize(SessionItemSerializer& serializer) const
    xml.addAttr("cycle", mCycle);
    xml.addAttr("dropframes", mCanDropFrames);
 
-   Service<AnimationServices> pServices;
-   if (dynamic_cast<const AnimationController*>(this) == pServices->getCurrentAnimationController())
-   {
-      xml.addAttr("selected", true);
-   }
-
    for (vector<Animation*>::const_iterator it = mAnimations.begin(); it != mAnimations.end(); ++it)
    {
       xml.addAttr("id", (*it)->getId(), xml.addElement("animation"));
@@ -1116,21 +1144,15 @@ bool AnimationControllerImp::deserialize(SessionItemDeserializer &deserializer)
    {
       return false;
    }
-   mFrameType = StringUtilities::fromXmlString<FrameType>(
-      A(pRoot->getAttribute(X("frametype"))));
-   mStartFrame = StringUtilities::fromXmlString<double>(
-      A(pRoot->getAttribute(X("startframe"))));
-   mStopFrame = StringUtilities::fromXmlString<double>(
-      A(pRoot->getAttribute(X("stopframe"))));
-   mCurrentFrame = StringUtilities::fromXmlString<double>(
-      A(pRoot->getAttribute(X("currentframe"))));
-   resetBumpers();  // initialize to start and stop frames
-   setStartBumper(StringUtilities::fromXmlString<double>(
-      A(pRoot->getAttribute(X("startbumper")))));
-   setStopBumper(StringUtilities::fromXmlString<double>(
-      A(pRoot->getAttribute(X("stopbumper")))));
-   setBumpersEnabled(StringUtilities::fromXmlString<bool>(
-      A(pRoot->getAttribute(X("bumpersenabled")))));
+
+   mFrameType = StringUtilities::fromXmlString<FrameType>(A(pRoot->getAttribute(X("frametype"))));
+   mStartFrame = StringUtilities::fromXmlString<double>(A(pRoot->getAttribute(X("startframe"))));
+   mStopFrame = StringUtilities::fromXmlString<double>(A(pRoot->getAttribute(X("stopframe"))));
+   mCurrentFrame = StringUtilities::fromXmlString<double>(A(pRoot->getAttribute(X("currentframe"))));
+   mStartBumper = StringUtilities::fromXmlString<double>(A(pRoot->getAttribute(X("startbumper"))));
+   mStopBumper = StringUtilities::fromXmlString<double>(A(pRoot->getAttribute(X("stopbumper"))));
+   mBumpersEnabled = StringUtilities::fromXmlString<bool>(A(pRoot->getAttribute(X("bumpersenabled"))));
+   mpBumpersEnabledAction->setChecked(mBumpersEnabled);
 
    if (mBumpersEnabled)
    {
@@ -1164,25 +1186,14 @@ bool AnimationControllerImp::deserialize(SessionItemDeserializer &deserializer)
       {
          DOMElement* pElement(static_cast<DOMElement*>(pNode));
          string id = A(pElement->getAttribute(X("id")));
-         AnimationImp* pAnimation = dynamic_cast<AnimationImp*>(Service<SessionManager>()->getSessionItem(id));
-         if (pAnimation == NULL)
+         Animation* pAnimation = dynamic_cast<Animation*>(Service<SessionManager>()->getSessionItem(id));
+         if ((pAnimation == NULL) || (insertAnimation(pAnimation) == false))
          {
             return false;
          }
-         connect(pAnimation, SIGNAL(framesChanged(const std::vector<AnimationFrame>&)), this, SLOT(updateFrameData()));
-         connect(pAnimation, SIGNAL(objectDetached()), this, SLOT(destroyAnimation()));
-         mAnimations.push_back(dynamic_cast<Animation*>(pAnimation));
-         pAnimation->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &AnimationControllerImp::movieDeleted));
       }
    }
-   setCurrentFrame(mCurrentFrame);
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Should this be moved into the tool bar? (mconsidine)")
-   if (pRoot->hasAttribute(X("selected")))
-   {
-      Service<AnimationServices> pServices;
-      pServices->setCurrentAnimationController(dynamic_cast<AnimationController*>(this));
-   }
    return true;
 }
 

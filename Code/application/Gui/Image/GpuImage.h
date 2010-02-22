@@ -82,12 +82,12 @@ protected:
       int& tileWidth, int& tileHeight) const;
 
    Tile* createTile() const;
-   void updateTiles(std::vector<Tile*>& tilesToUpdate, std::vector<int>& tileZoomIndices);
-   void drawTiles(const std::vector<Tile*>& tiles, GLint textureMode);
+   void updateTiles(std::vector<Tile*>& tilesToUpdate, std::vector<unsigned int>& tileZoomIndices);
+   void drawTiles(const std::vector<Tile*>& tiles, GLfloat textureMode);
    void setActiveTileSet(const ImageKey &key);
    unsigned int getMaxNumTileSets() const;
    std::vector<Tile*> getTilesToUpdate(const std::vector<Tile*>& tilesToDraw,
-      std::vector<int>& tileZoomIndices);
+      std::vector<unsigned int>& tileZoomIndices);
    void getTilesToRead(int xCoord, int yCoord, GLsizei width, GLsizei height, 
                        std::vector<Tile*> &tiles, std::vector<LocationType> &tileLocations);
    unsigned int readTile(Tile* pTile, const LocationType& tileLocation, int x1Coord, int y1Coord,
@@ -105,7 +105,7 @@ private:
 
    // Colormap display program
    CGprogram mColormapProgram;
-   GLuint mColormapTexture;
+   GlTextureResource mColormapTexture;
    ImageKey mColormapImageKey;
 
    // RGB display program

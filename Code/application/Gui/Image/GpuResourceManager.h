@@ -33,7 +33,7 @@ public:
    /**
     *  Returns a pointer to the PixelBufferObject.
     *
-    *  This method creates an PixelBufferObject from the specified parameters.
+    *  This method creates a PixelBufferObject from the specified parameters.
     *  The caller takes ownership of the PixelBufferObject.
     *
     *    @param   numBytes
@@ -100,12 +100,25 @@ public:
     */
    ImageBuffer *allocateImageBuffer();
 
+   /**
+    *  Returns scaling factor used by video driver.
+    *
+    *  This method returns the scaling factor used by the video driver when writing values to the frame buffer.
+    *  The value was 3.0 for ForceWare versions 94.22 and earlier. The value is 2.0 for more current versions (so far). 
+    *
+    *  @return  The value of the scaling factor.
+    */
+   float getGpuScalingFactor();
+
 private:
    GpuResourceManager();
    ~GpuResourceManager();
 
    friend class DesktopServicesImp;
    std::vector<GLuint> mTextures;
+   bool mGpuScalingFactorInitialized;
+   float mGpuScalingFactor;
+   bool determineScalingFactor(float& scalingFactor);
 };
 
 template<>

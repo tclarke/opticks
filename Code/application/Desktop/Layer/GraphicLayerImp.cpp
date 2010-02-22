@@ -17,13 +17,6 @@
 #define GETCWD getcwd
 #endif
 
-#include <math.h>
-
-#include <QtGui/QApplication>
-#include <QtGui/QFileDialog>
-#include <QtGui/QInputDialog>
-#include <QtGui/QMessageBox>
-
 #include "AnnotationLayerImp.h"
 #include "AppAssert.h"
 #include "AppVerify.h"
@@ -46,7 +39,6 @@
 #include "GraphicGroup.h"
 #include "GraphicGroupImp.h"
 #include "GuiFunctors.h"
-#include "Icons.h"
 #include "LatLonInsertObject.h"
 #include "MultiLineTextDialog.h"
 #include "OrthographicView.h"
@@ -65,9 +57,16 @@
 #include "WidgetImageObjectImp.h"
 #include "xmlreader.h"
 
+#include <QtGui/QApplication>
+#include <QtGui/QFileDialog>
+#include <QtGui/QInputDialog>
+#include <QtGui/QMessageBox>
+#include <QtOpenGL/QGLWidget>
+
 #include <algorithm>
 #include <functional>
 #include <list>
+#include <math.h>
 #include <vector>
 #include <boost/bind.hpp>
 using namespace std;
@@ -99,6 +98,7 @@ GraphicLayerImp::GraphicLayerImp(const string& id, const string& layerName, Data
       {
          pGroup->addProperty("PaperSize");
          VERIFYNR(connect(pGroup, SIGNAL(abortedAdd(GraphicObject*)), this, SLOT(cleanUpBadObject(GraphicObject*))));
+         VERIFYNR(connect(pGroup, SIGNAL(extentsModified()), this, SIGNAL(extentsModified())));
          VERIFYNR(connect(pGroup, SIGNAL(modified()), this, SIGNAL(modified())));
       }
    }
@@ -245,31 +245,6 @@ void GraphicLayerImp::draw()
       VERIFYNRV(pImpl != NULL);
 
       selectionNodes = pImpl->getHandles();
-      /*
-      try
-      {
-         selectionNodes = pImpl->getHandles();
-      }
-      catch (...)
-      {
-         // this stuff will move to a slot method that is connected to a Group's signal stating that something went wrong
-         mpGroup->removeObject(pObj, false);
-         mSelectedObjects.remove(pObj);
-         
-         spSelectedObject = NULL;
-         bSuccess = false;
-
-         // we are no longer adding an object - it is terminated!
-         sMultiplePointAdd = false;
-
-         sAnchor = LocationType(); // reset the anchor
-         sSelectedHandle = 0; // reset the selected handle
-         sButtonPressed = false;
-         sEditPending = false;
-         sHasMoved = false;
-      }
-      */
-
       for (i = 0; bSuccess && i < selectionNodes.size(); ++i)
       {
          if (selectionNodes[i].mX < p1.mX)
@@ -335,6 +310,7 @@ GraphicObject* GraphicLayerImp::addObject(const GraphicObjectType& objectType, L
       return NULL;
    }
 
+   GlContextSave contextSave(dynamic_cast<QGLWidget*>(getView()));
    GraphicObject* pObject = getGroup()->addObject(objectType, point);
    if (pObject == NULL)
    {
@@ -357,6 +333,7 @@ bool GraphicLayerImp::removeObject(GraphicObject* pObject, bool bDelete)
       return false;
    }
 
+   GlContextSave contextSave(dynamic_cast<QGLWidget*>(getView()));
    bool bSelected = isObjectSelected(pObject);
    if (bSelected == true)
    {
@@ -625,7 +602,6 @@ void GraphicLayerImp::deleteSelectedObjects()
          bool bSelected = isObjectSelected(pObject);
          if (bSelected == true)
          {
-            GlContextSave contextSave;
             removeObject(pObject, true);
          }
       }
@@ -1261,7 +1237,7 @@ void GraphicLayerImp::ungroupSelection()
          centerItem.mX = (llItemCorner.mX + urItemCorner.mX) / 2.0;
          centerItem.mY = (llItemCorner.mY + urItemCorner.mY) / 2.0;
 
-         double corC1x = centerItem.mX - centerGroup.mX; 
+         double corC1x = centerItem.mX - centerGroup.mX;
          double corC1y = centerItem.mY - centerGroup.mY;
          double angleGroupRad = (PI / 180.0) * angleGroup;
          double calcCos1 = cos(angleGroupRad) - 1;
@@ -1457,33 +1433,6 @@ void GraphicLayerImp::cleanUpBadObject(GraphicObject* pObj)
    // this stuff will move to a slot method that is connected to a Group's signal stating that something went wrong
    getGroup()->removeObject(pObj, false);
    mSelectedObjects.remove(pObj);
-}
-
-void GraphicLayerImp::updateHandles(GraphicProperty* pProperty)
-{
-   if (pProperty == NULL)
-   {
-      return;
-   }
-
-   if (getGroup() != NULL)
-   {
-      list<GraphicObject*> objects = getObjects();
-      for (list<GraphicObject*>::iterator iter = objects.begin(); iter != objects.end(); ++iter)
-      {
-         GraphicObjectImp* pObject = dynamic_cast<GraphicObjectImp*>(*iter);
-         if (pObject != NULL)
-         {
-            vector<GraphicProperty*> properties = pObject->getProperties();
-
-            vector<GraphicProperty*>::iterator propIter = find(properties.begin(), properties.end(), pProperty);
-            if (propIter != properties.end())
-            {
-               pObject->updateHandles();
-            }
-         }
-      }
-   }
 }
 
 void GraphicLayerImp::cloneSelection(GraphicLayer* pDest)
@@ -1854,7 +1803,11 @@ bool GraphicLayerImp::getShowLabels() const
 
 void GraphicLayerImp::setShowLabels(bool bShowLabels)
 {
-   mShowLabels = bShowLabels;
+   if (bShowLabels != mShowLabels)
+   {
+      mShowLabels = bShowLabels;
+      emit showLabelsChanged(mShowLabels);
+   }
 }
 
 bool GraphicLayerImp::canContainGraphicObjectType(GraphicObjectType type)
@@ -2039,7 +1992,7 @@ void GraphicLayerImp::drawSymbols(const string& symbolName, const vector<Locatio
    double zoomPercent = 100;
    double rotation = 0;
    double pitch = 90;
-  
+
    double xScale = getXScaleFactor();
    double yScale = getYScaleFactor();
 
@@ -2061,15 +2014,6 @@ void GraphicLayerImp::drawSymbols(const string& symbolName, const vector<Locatio
 
    pSymMgr->drawSymbols(symbolName, points, screenSize, zoomPercent / 100, rotation, pitch, xScale, yScale,
       objectRotation);
-}
-
-void GraphicLayerImp::temporaryGlContextChange()
-{
-   GraphicGroupImp* pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
-   if (pGroup != NULL)
-   {
-      pGroup->temporaryGlContextChange();
-   }
 }
 
 bool GraphicLayerImp::insertingObjectNull() const
@@ -2097,9 +2041,6 @@ void GraphicLayerImp::updateContextMenu(Subject& subject, const string& signal, 
 
    QObject* pParent = pMenu->getActionParent();
 
-   Icons* pIcons = Icons::instance();
-   VERIFYNRV(pIcons != NULL);
-
    vector<SessionItem*> items = pMenu->getSessionItems();
 
    unsigned int numItems = items.size();
@@ -2115,7 +2056,7 @@ void GraphicLayerImp::updateContextMenu(Subject& subject, const string& signal, 
             APP_SESSIONEXPLORER_RENAME_ACTION);
 
          // Delete
-         QAction* pDeleteAction = new QAction(pIcons->mDelete, "Delete", pParent);
+         QAction* pDeleteAction = new QAction(QIcon(":/icons/Delete"), "Delete", pParent);
          pDeleteAction->setAutoRepeat(false);
          pDeleteAction->setData(QVariant::fromValue(pObject));
          connect(pDeleteAction, SIGNAL(triggered()), this, SLOT(deleteObject()));
@@ -2145,7 +2086,7 @@ void GraphicLayerImp::updateContextMenu(Subject& subject, const string& signal, 
          }
 
          // Delete
-         QAction* pDeleteAction = new QAction(pIcons->mDelete, "Delete", pParent);
+         QAction* pDeleteAction = new QAction(QIcon(":/icons/Delete"), "Delete", pParent);
          pDeleteAction->setAutoRepeat(false);
          pDeleteAction->setData(QVariant(objectList));
          connect(pDeleteAction, SIGNAL(triggered()), this, SLOT(deleteObject()));

@@ -34,7 +34,7 @@ PostScriptExporter::PostScriptExporter() : mpOutFile(NULL), mWidth(72), mPos(0),
    setCopyright(APP_COPYRIGHT);
    setShortDescription("PostScript Exporter");
    setDescription("PostScript file format exporter");
-   setExtensions("PostScript Files (*.ps;*.eps)");
+   setExtensions("PostScript Files (*.ps *.eps)");
    setSubtype(TypeConverter::toString<View>());
    setDescriptorId("{E0FA4761-9FEB-4c77-A4F0-A449E1031C87}");
    allowMultipleInstances(true);
@@ -158,7 +158,7 @@ bool PostScriptExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutA
    writePostScriptFooter();
    if (pProgress != NULL)
    {
-      pProgress->updateProgress("Saving product...", 99, NORMAL);
+      pProgress->updateProgress("PostScript Exporter completed", 100, NORMAL);
    }
    mpOutFile = NULL;
 

@@ -652,10 +652,16 @@ typedef EnumWrapper<RegionUnitsEnum> RegionUnits;
 
 /**
  *  Application release configuration mode.
- *
- *  Used to specify the run mode: Normal, Demonstration, Training, Testing, and Prototype Product.
  */
-enum ReleaseTypeEnum { RT_NORMAL, RT_DEMO, RT_TRAINING, RT_TEST, RT_PROTO };
+enum ReleaseTypeEnum
+{
+   RT_NORMAL,     /**< The application is running in Normal mode. */
+   RT_DEMO,       /**< The application is running in Demo mode (Not for Production Use). */
+   RT_TRAINING,   /**< The application is running in Training mode (Not for Production Use). */
+   RT_TEST,       /**< The application is running in Test mode (Not for Production Use). */
+   RT_PROTO,      /**< The application is running in Prototype mode. */
+   RT_RD          /**< The application is running in R&D mode. */
+};
 
 /**
  * @EnumWrapper ::ReleaseTypeEnum.
@@ -755,6 +761,26 @@ enum TilingTypeEnum
  * @EnumWrapper ::TilingTypeEnum.
  */
 typedef EnumWrapper<TilingTypeEnum> TilingType;
+
+/**
+ *  %System of units to use.
+ *
+ *  The UnitSystem enumeration indicates the system of units to use when displaying values
+ *  to the user.
+ *
+ *  @see     Units
+ */
+enum UnitSystemEnum
+{
+   UNIT_KM = 100, /**< Use meters or kilometers as appropriate */
+   UNIT_KFT, /**< Use feet or kilofeet (1000 feet) as appropriate */
+   UNIT_MI /**< Use feet or miles as appropriate */
+};
+
+/**
+ * @EnumWrapper ::UnitTypeEnum.
+ */
+typedef EnumWrapper<UnitSystemEnum> UnitSystem;
 
 /**
  *  %Units of the values in a data set.
@@ -876,6 +902,7 @@ template <> class VariantTypeValidator<RegionUnits> {};
 template <> class VariantTypeValidator<ReleaseType> {};
 template <> class VariantTypeValidator<StretchType> {};
 template <> class VariantTypeValidator<SymbolType> {};
+template <> class VariantTypeValidator<UnitSystem> {};
 template <> class VariantTypeValidator<UnitType> {};
 template <> class VariantTypeValidator<WindowSizeType> {};
 template <> class VariantTypeValidator<WindowType> {};

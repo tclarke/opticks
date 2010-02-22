@@ -7,11 +7,14 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtGui/QIcon>
+
 #include "ModuleDescriptor.h"
 #include "PlugIn.h"
 #include "PlugInDescriptorImp.h"
 #include "PlugInManagerServicesImp.h"
 #include "PlugInModel.h"
+#include "PlugInRegistration.h"
 #include "Slot.h"
 
 using namespace std;
@@ -59,6 +62,29 @@ PlugInModel::~PlugInModel()
       }
    }
 }
+
+QVariant PlugInModel::data(const QModelIndex& index, int role) const
+{
+   QVariant value = SessionItemModel::data(index, role);
+   if (role == Qt::DecorationRole)
+   {
+      SessionItemWrapper* pWrapper = reinterpret_cast<SessionItemWrapper*>(index.internalPointer());
+      if (pWrapper != NULL)
+      {
+         if (dynamic_cast<PlugInDescriptor*>(pWrapper->getSessionItem()) != NULL)
+         {
+            QIcon plugInIcon = value.value<QIcon>();
+            if (plugInIcon.isNull() == true)
+            {
+               value = QIcon(":/icons/PlugIn");
+            }
+         }
+      }
+   }
+
+   return value;
+}
+
 void PlugInModel::addModule(Subject& subject, const string& signal, const boost::any& value)
 {
    ModuleDescriptor* pModule = boost::any_cast<ModuleDescriptor*>(value);
@@ -136,7 +162,7 @@ void PlugInModel::addModuleItem(ModuleDescriptor* pModule)
    SessionItemWrapper* pModuleWrapper = pRootWrapper->addChild(pModule);
    if (pModuleWrapper != NULL)
    {
-      if (pModule->getModuleVersion() == 1)
+      if (pModule->getModuleVersion() == MOD_ONE)
       {
          pModuleWrapper->setDisplayColor(Qt::blue);
       }

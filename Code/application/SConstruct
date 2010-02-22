@@ -29,6 +29,10 @@ if PLATFORM == "solaris-sparc":
    env.Tool("suncc", toolpath=[TOOLPATH])
    env.Tool("sunar", toolpath=[TOOLPATH])
    env.Tool("sunlink", toolpath=[TOOLPATH])
+else:
+   env.Tool("glew", toolpath=[TOOLPATH])
+   env.Tool("cg", toolpath=[TOOLPATH])
+
 if env['RELEASE']:
    MODE='release'
 else:
@@ -41,7 +45,7 @@ env["BUILDDIR"] = '%s/%s-%s' % (BUILDDIR,PLATFORM,MODE)
 
 
 Help(vars.GenerateHelpText(env))
-env["QT_MODULES"] = ["QtCore","QtGui","Qt3Support","QtOpenGL", "QtXml"]
+env["QT_MODULES"] = ["QtCore","QtGui","Qt3Support","QtOpenGL", "QtXml","QtSql","QtNetwork"]
 env.Qt4AddModules(env["QT_MODULES"])
 
 env['LINK'] = "$CXX"
@@ -76,13 +80,13 @@ libdirs = ["Desktop",
            "PlugInLib",
            "PlugInManager",
            "PlugInUtilities",
+           "SimpleApiLib",
            "Utilities",
            "Wizard"]
 
 incdirs = map(lambda x: "#/" + x, libdirs) + \
           ["#/Interfaces",
            "#/PlugInUtilities/pthreads-wrapper",
-           "#/PlugInUtilities/MathUtilities",
            "#/PlugInUtilities/Interfaces"]
 env.Append(CPPPATH=incdirs)
 if len(env["CACHEDIR"]) > 0:
@@ -102,6 +106,8 @@ for sub in libdirs:
    env.BuildDir(build_dir, src_dir, duplicate=0)
    libs.append(env.SConscript('%s/SConscript' % sub, exports='build_dir'))
    libInstallTargets.append(libs[-1])
+   if sub == "SimpleApiLib": # special case, build it but don't link to it
+      libs.pop(-1)
 
 ####
 # Build the solOpticks binary

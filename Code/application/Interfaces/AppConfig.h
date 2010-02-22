@@ -15,6 +15,7 @@
 
 #if defined(_MSC_VER)
    #define WIN_API
+   #define EXPORT_SYMBOL __declspec(dllexport)
 
    #define OPTICKS_BYTE_ORDER LITTLE_ENDIAN_BYTE_ORDER
    #define LONG_SIZE 4
@@ -31,6 +32,7 @@
       #define BROKEN_INLINE_HINT __declspec(noinline)
    #elif defined(_WIN32)
       #define PTR_SIZE 4
+      #define JPEG2000_SUPPORT
    #endif
 
    #define CG_SUPPORTED
@@ -53,6 +55,7 @@
 
    #define UNIX_API
    #define SOLARIS
+   #define EXPORT_SYMBOL 
 
    #ifdef _BIG_ENDIAN
       #define OPTICKS_BYTE_ORDER BIG_ENDIAN_BYTE_ORDER
@@ -97,6 +100,8 @@
    #include <endian.h>
    #define UNIX_API
    #define LINUX
+   #define CG_SUPPORTED
+   #define EXPORT_SYMBOL 
 
    #if __BYTE_ORDER == __LITTLE_ENDIAN
       #define OPTICKS_BYTE_ORDER LITTLE_ENDIAN_BYTE_ORDER

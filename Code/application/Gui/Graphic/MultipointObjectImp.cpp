@@ -103,7 +103,7 @@ void MultipointObjectImp::moveHandle(int handle, LocationType pixel, bool bMaint
    else
    {
       // Move the handle
-      if (static_cast<int>(mHandles.size()) <= handle)
+      if (handle >= static_cast<int>(mHandles.size()))
       {
          return;
       }
@@ -112,7 +112,7 @@ void MultipointObjectImp::moveHandle(int handle, LocationType pixel, bool bMaint
       mHandles[handle] = pixel;
 
       unsigned int vertexNum = handle - 8;
-      if (mVertices.size() <= vertexNum)
+      if (vertexNum >= mVertices.size())
       {
          return;
       }
@@ -121,8 +121,13 @@ void MultipointObjectImp::moveHandle(int handle, LocationType pixel, bool bMaint
       const RasterElement* pGeo = getGeoreferenceElement();
       if (pGeo != NULL)
       {
-         if (VERIFYNR(mVertices.size() == mGeoVertices.size()))
+         if (mGeoVertices.empty())
          {
+            enableGeo();
+         }
+         else
+         {
+            VERIFYNRV(mVertices.size() == mGeoVertices.size());
             mGeoVertices[vertexNum] = pGeo->convertPixelToGeocoord(pixel);
          }
       }
@@ -198,7 +203,7 @@ void MultipointObjectImp::drawPixels(double zoomFactor) const
    DrawUtil::PixelDrawer drawer(getPixelSymbol());
    for (unsigned int i = 0; i < mVertices.size(); ++i)
    {
-      drawer(mVertices[i].mX, mVertices[i].mY);
+      drawer(floor(mVertices[i].mX), floor(mVertices[i].mY));
    }
 }
 

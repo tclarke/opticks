@@ -10,7 +10,6 @@
 #include <limits>
 #include <math.h>
 
-#include "AppConfig.h"
 #include "AppVerify.h"
 #include "DataAccessorImpl.h"
 #include "DrawUtil.h"
@@ -397,7 +396,7 @@ void Image::createTiles()
    }
 }
 
-void Image::draw(GLint textureMode)
+void Image::draw(GLfloat textureMode)
 {
    setActiveTileSet(mInfo.mKey);
    VERIFYNRV(mpTiles != NULL);
@@ -407,7 +406,7 @@ void Image::draw(GLint textureMode)
       return;
    }
 
-   vector<int> tileZoomIndices;
+   vector<unsigned int> tileZoomIndices;
    vector<Tile*> tilesToDraw = getTilesToDraw();
    vector<Tile*> tilesToUpdate = getTilesToUpdate(tilesToDraw, tileZoomIndices);
 
@@ -446,7 +445,7 @@ void Image::draw(GLint textureMode)
 class SetTileTexture : public mta::ThreadCommand
 {
 public:
-   SetTileTexture(Tile *pTile, unsigned char *pData, int zoomIndex) :
+   SetTileTexture(Tile* pTile, unsigned char* pData, unsigned int zoomIndex) :
       mpTile(pTile), mpData(pData), mZoomIndex(zoomIndex) {}
    void run()
    {
@@ -459,52 +458,17 @@ public:
 private:
    Tile* mpTile;
    unsigned char* mpData;
-   int mZoomIndex;
-};
-
-class ComputeTextureFromTile : public mta::ThreadCommand
-{
-public:
-   ComputeTextureFromTile(Tile* pTile, unsigned char* pData, int zoomIndex) :
-      mpTile(pTile),
-      mpData(pData),
-      mZoomIndex(zoomIndex),
-      mSuccess(false)
-   {
-   }
-
-   void run()
-   {
-      if (mpTile != NULL)
-      {
-         mSuccess = mpTile->computeTexture(mZoomIndex, mpData);
-         if (mSuccess)
-         {
-            mpTile->setupTexture(mZoomIndex, mpData);
-         }
-      }
-   }
-
-   bool getSuccess()
-   {
-      return mSuccess;
-   }
-
-private:
-   Tile* mpTile;
-   unsigned char* mpData;
-   int mZoomIndex;
-   bool mSuccess;
+   unsigned int mZoomIndex;
 };
 
 class TileThread;
 class TileInput
 {
 public:
-   TileInput(vector<Tile*>& tiles, vector<int> &tileZoomIndices, Image::ImageData &info) :
+   TileInput(vector<Tile*>& tiles, vector<unsigned int>& tileZoomIndices, Image::ImageData& info) :
       mTiles(tiles), mTileZoomIndices(tileZoomIndices), mInfo(info) {}
    vector<Tile*>& mTiles;
-   vector<int>& mTileZoomIndices;
+   vector<unsigned int>& mTileZoomIndices;
    Image::ImageData& mInfo;
 };
 
@@ -533,7 +497,7 @@ public:
 
 private:
    vector<Tile*>& mTiles;
-   vector<int>& mTileZoomIndices;
+   vector<unsigned int>& mTileZoomIndices;
    Image::ImageData& mInfo;
    Range mTileRange;
 
@@ -573,16 +537,7 @@ private:
       for (int tileId = mTileRange.mFirst; tileId <= mTileRange.mLast; ++tileId)
       {
          Tile* pTile = mTiles[tileId];
-
-         bool isComputed = false;
-         if (pTile->hasHigherResTexture(mTileZoomIndices[tileId]))
-         {
-            ComputeTextureFromTile computer(pTile, &pTexData[0], mTileZoomIndices[tileId]);
-            runInMainThread(computer);
-            isComputed = computer.getSuccess();
-         }
-         
-         if (isComputed == false)
+         if (pTile->isTextureReady(mTileZoomIndices[tileId]) == false)
          {
             unsigned int posX = pTile->getPos().mX;
             unsigned int posY = pTile->getPos().mY;
@@ -712,16 +667,7 @@ private:
       for (int tileId = mTileRange.mFirst; tileId <= mTileRange.mLast; ++tileId)
       {
          Tile* pTile = mTiles[tileId];
-
-         bool isComputed = false;
-         if (pTile->hasHigherResTexture(mTileZoomIndices[tileId]))
-         {
-            ComputeTextureFromTile computer(pTile, &pTexData[0], mTileZoomIndices[tileId]);
-            runInMainThread(computer);
-            isComputed = computer.getSuccess();
-         }
-         
-         if (isComputed == false)
+         if (pTile->isTextureReady(mTileZoomIndices[tileId]) == false)
          {
             unsigned int posX = pTile->getPos().mX;
             unsigned int posY = pTile->getPos().mY;
@@ -895,16 +841,7 @@ private:
       for (int tileId = mTileRange.mFirst; tileId <= mTileRange.mLast; ++tileId)
       {
          Tile* pTile = mTiles[tileId];
-
-         bool isComputed = false;
-         if (pTile->hasHigherResTexture(mTileZoomIndices[tileId]))
-         {
-            ComputeTextureFromTile computer(pTile, &pTexData[0], mTileZoomIndices[tileId]);
-            runInMainThread(computer);
-            isComputed = computer.getSuccess();
-         }
-         
-         if (isComputed == false)
+         if (pTile->isTextureReady(mTileZoomIndices[tileId]) == false)
          {
             unsigned int posX = pTile->getPos().mX;
             unsigned int posY = pTile->getPos().mY;
@@ -1034,7 +971,7 @@ void TileThread::run()
    }
 }
 
-void Image::updateTiles(vector<Tile*> &tilesToUpdate, vector<int> &tileZoomIndices)
+void Image::updateTiles(vector<Tile*>& tilesToUpdate, vector<unsigned int>& tileZoomIndices)
 {
    TileInput tileInput(tilesToUpdate, tileZoomIndices, mInfo);
 
@@ -1046,14 +983,8 @@ void Image::updateTiles(vector<Tile*> &tilesToUpdate, vector<int> &tileZoomIndic
    {
       pReporter = &barReporter;
    }
-   unsigned int threadCount = ConfigurationSettings::getSettingThreadCount();
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Multi-threaded tile generation is not working on " \
-   "Solaris. This disables it until a real fix can be devised. (tclarke)")
-#if defined(SOLARIS)
-   threadCount = 1;
-#endif
    mta::MultiThreadedAlgorithm<TileInput, TileOutput, TileThread> tilingAlgorithm
-      (threadCount, tileInput, tileOutput, pReporter);
+      (ConfigurationSettings::getSettingThreadCount(), tileInput, tileOutput, pReporter);
    tilingAlgorithm.run();
 }
 
@@ -1330,7 +1261,7 @@ bool Image::generateFullResTexture()
    {
       vector<Tile*> tileToUpdate;
       tileToUpdate.push_back(pTile);
-      vector<int> zoomIndex;
+      vector<unsigned int> zoomIndex;
       zoomIndex.push_back(0);
       updateTiles(tileToUpdate, zoomIndex);
       return true;
@@ -1348,7 +1279,7 @@ void Image::generateAllFullResTextures()
 
    std::vector<Tile*>::const_iterator ppTile;
    vector<Tile*> tileToUpdate;
-   vector<int> zoomIndex;
+   vector<unsigned int> zoomIndex;
    for (ppTile = mpTiles->begin(); ppTile != mpTiles->end(); ++ppTile)
    {
       VERIFYNRV(*ppTile != NULL);
@@ -1376,7 +1307,12 @@ const vector<Tile*>* Image::getActiveTiles() const
    return mpTiles;
 }
 
-void Image::drawTiles(const vector<Tile*>& tiles, GLint textureMode)
+const map<ImageKey, Image::TileSet>& Image::getTileSets() const
+{
+   return mTileSets;
+}
+
+void Image::drawTiles(const vector<Tile*>& tiles, GLfloat textureMode)
 {
    if (tiles.empty() == true)
    {
@@ -1454,7 +1390,7 @@ vector<Tile*> Image::getTilesToDraw()
    return tilesToDraw;
 }
 
-vector<Tile*> Image::getTilesToUpdate(const vector<Tile*>& tilesToDraw, vector<int>& tileZoomIndices)
+vector<Tile*> Image::getTilesToUpdate(const vector<Tile*>& tilesToDraw, vector<unsigned int>& tileZoomIndices)
 {
    int numTiles = tilesToDraw.size();
 
@@ -1470,10 +1406,11 @@ vector<Tile*> Image::getTilesToUpdate(const vector<Tile*>& tilesToDraw, vector<i
       Tile* pTile = *iter;
       if (pTile != NULL)
       {
-         if (pTile->isTextureReady() == false)
+         const unsigned int index = pTile->getTextureIndex();
+         if (pTile->isTextureReady(index) == false)
          {
             tilesToUpdate.push_back(pTile);
-            tileZoomIndices.push_back(pTile->getTextureIndex());
+            tileZoomIndices.push_back(index);
          }
       }
    }

@@ -671,7 +671,7 @@ bool ImportAgentImp::execute()
       toVisit.pop();
       createdElements.remove(mpElement);
 
-      success = ExecutableAgentImp::executePlugIn();
+      bool plugInSuccess = ExecutableAgentImp::executePlugIn();
 
       DataDescriptor* pElementDescriptor = mpElement->getDataDescriptor();
       if (pElementDescriptor != NULL)
@@ -679,23 +679,29 @@ bool ImportAgentImp::execute()
          map<DataDescriptor*, ImportDescriptor*>::iterator iter = selectedDatasets.find(pElementDescriptor);
          if (iter != selectedDatasets.end())
          {
-            importedDescriptors[iter->second] = success;
+            importedDescriptors[iter->second] = plugInSuccess;
          }
       }
 
-      if (success == false)
+      if (plugInSuccess == false)
       {
          if (pProgress != NULL)
          {
-            // If there isn't already an error message, post one to progress
             string text;
             int percent;
             ReportingLevel gran;
             pProgress->getProgress(text, percent, gran);
-            if (gran != ABORT && gran != ERRORS)
+            if (gran != ABORT)
             {
-               string message = "The '" + mpElement->getName() + "' data set failed to load!";
-               pProgress->updateProgress(message, 0, ERRORS);
+               if (gran == NORMAL)
+               {
+                  // Set at least a warning to keep the message visible.
+                  // If ERRORS use that instead because changing it to WARNING will cause the dialog to not close.
+                  gran = WARNING;
+               }
+
+               string message = "The '" + mpElement->getName() + "' data set failed to load.";
+               pProgress->updateProgress(message, 0, gran);
             }
          }
          pModel->destroyElement(mpElement);
@@ -715,6 +721,8 @@ bool ImportAgentImp::execute()
                toVisit.push(*elmnt);
             }
          }
+
+         success = true;
       }
 
       mpElement = NULL;
@@ -723,6 +731,10 @@ bool ImportAgentImp::execute()
    if (success == true)
    {
       updateMruFileList(importedDescriptors);
+      if (pProgress != NULL)
+      {
+         pProgress->updateProgress("Finished importing", 100, NORMAL);
+      }
    }
 
    return success;
@@ -844,12 +856,12 @@ void ImportAgentImp::updateMruFileList(const map<ImportDescriptor*, bool>& impor
       ConfigurationSettingsImp* pSettings = ConfigurationSettingsImp::instance();
       pSettings->removeMruFile(filename.toStdString());
 
-      // Get the number of MRU files and subtract one to account for the file to add to the list
+      // Get the number of MRU files
       vector<MruFile> mruFiles = pSettings->getMruFiles();
-      unsigned int maxNumFiles = ConfigurationSettings::getSettingNumberOfMruFiles() - 1;
+      unsigned int maxNumFiles = ConfigurationSettings::getSettingNumberOfMruFiles();
       Service<ModelServices> pModel;
 
-      while (mruFiles.size() > maxNumFiles)
+      while ((mruFiles.size() >= maxNumFiles) && (mruFiles.empty() == false))
       {
          // Destroy the existing import descriptors in the MRU file
          MruFile mruFile = mruFiles.back();
@@ -870,55 +882,58 @@ void ImportAgentImp::updateMruFileList(const map<ImportDescriptor*, bool>& impor
       }
 
       // Add only the descriptors that are selected to import to the MRU file, regardless of the import success
-      vector<ImportDescriptor*> mruDescriptors;
-
-      for (vector<ImportDescriptor*>::iterator descriptorIter = fileDescriptors.begin();
-         descriptorIter != fileDescriptors.end();
-         ++descriptorIter)
+      if (maxNumFiles > 0)
       {
-         ImportDescriptor* pImportDescriptor = *descriptorIter;
-         if ((pImportDescriptor != NULL) && (pImportDescriptor->isImported() == true))
+         vector<ImportDescriptor*> mruDescriptors;
+
+         for (vector<ImportDescriptor*>::iterator descriptorIter = fileDescriptors.begin();
+            descriptorIter != fileDescriptors.end();
+            ++descriptorIter)
          {
-            // Copy the import descriptor to set in the MRU file since they are destroyed in the destructor
-            DataDescriptor* pDescriptor = pImportDescriptor->getDataDescriptor();
-            if (pDescriptor != NULL)
+            ImportDescriptor* pImportDescriptor = *descriptorIter;
+            if ((pImportDescriptor != NULL) && (pImportDescriptor->isImported() == true))
             {
-               DataDescriptor* pMruDescriptor = pDescriptor->copy();
-               if (pMruDescriptor != NULL)
+               // Copy the import descriptor to set in the MRU file since they are destroyed in the destructor
+               DataDescriptor* pDescriptor = pImportDescriptor->getDataDescriptor();
+               if (pDescriptor != NULL)
                {
-                  ImportDescriptor* pMruImportDescriptor = pModel->createImportDescriptor(pMruDescriptor, true);
-                  if (pMruImportDescriptor != NULL)
+                  DataDescriptor* pMruDescriptor = pDescriptor->copy();
+                  if (pMruDescriptor != NULL)
                   {
-                     mruDescriptors.push_back(pMruImportDescriptor);
+                     ImportDescriptor* pMruImportDescriptor = pModel->createImportDescriptor(pMruDescriptor, true);
+                     if (pMruImportDescriptor != NULL)
+                     {
+                        mruDescriptors.push_back(pMruImportDescriptor);
+                     }
                   }
                }
             }
          }
+
+         // Add the file to the MRU file vector
+         string importer;
+
+         const PlugIn* pPlugIn = getPlugIn();
+         if (pPlugIn != NULL)
+         {
+            importer = pPlugIn->getName();
+         }
+
+         FilenameImp filenameImp(filename.toStdString());
+         string filePath = filenameImp.getPath();
+         string baseFilename = filenameImp.getFileName();
+
+         DateTimeImp modificationTime;
+
+         FileFinderImp fileFinder;
+         fileFinder.findFile(filePath, baseFilename);
+         if (fileFinder.findNextFile() == true)
+         {
+            fileFinder.getLastModificationTime(modificationTime);
+         }
+
+         mruFiles.insert(mruFiles.begin(), MruFile(filename.toStdString(), importer, mruDescriptors, modificationTime));
       }
-
-      // Add the file to the MRU file vector
-      string importer;
-
-      const PlugIn* pPlugIn = getPlugIn();
-      if (pPlugIn != NULL)
-      {
-         importer = pPlugIn->getName();
-      }
-
-      FilenameImp filenameImp(filename.toStdString());
-      string filePath = filenameImp.getPath();
-      string baseFilename = filenameImp.getFileName();
-
-      DateTimeImp modificationTime;
-
-      FileFinderImp fileFinder;
-      fileFinder.findFile(filePath, baseFilename);
-      if (fileFinder.findNextFile() == true)
-      {
-         fileFinder.getLastModificationTime(modificationTime);
-      }
-
-      mruFiles.insert(mruFiles.begin(), MruFile(filename.toStdString(), importer, mruDescriptors, modificationTime));
 
       // Update the MRU file list in the configuration settings
       pSettings->setMruFiles(mruFiles);

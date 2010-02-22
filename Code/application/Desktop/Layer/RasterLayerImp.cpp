@@ -19,7 +19,6 @@
 #include "DataAccessorImpl.h"
 #include "DesktopServices.h"
 #include "glCommon.h"
-#include "Icons.h"
 #include "Image.h"
 #include "ImageFilterDescriptor.h"
 #include "ImageFilterDescriptorImp.h"
@@ -91,7 +90,6 @@ RasterLayerImp::RasterLayerImp(const string& id, const string& layerName, DataEl
    mpGrayscaleAction = pDisplayModeGroup->addAction("Grayscale");
    mpGrayscaleAction->setAutoRepeat(false);
    mpGrayscaleAction->setCheckable(true);
-   mpGrayscaleAction->setChecked(true);
    pDesktop->initializeAction(mpGrayscaleAction, displayModeContext);
 
    mpRgbAction = pDisplayModeGroup->addAction("RGB");
@@ -130,16 +128,11 @@ RasterLayerImp::RasterLayerImp(const string& id, const string& layerName, DataEl
    mpSeparatorAction = new QAction(this);
    mpSeparatorAction->setSeparator(true);
 
-   // Initialize the layer to the initial displayed bands and display mode
-   reset();
+   // Initialization
+   setIcon(QIcon(":/icons/RasterLayer"));
    addPropertiesPage(PropertiesRasterLayer::getName());
-
-   // Setting up the icon.
-   Icons* pIcons = Icons::instance();
-   if (pIcons != NULL)
-   {
-      setIcon(pIcons->mRasterLayer);
-   }
+   reset();
+   updateDisplayModeAction(meDisplayMode);      // The member display mode is set in reset()
 
    // Connections
    connect(this, SIGNAL(gpuImageEnabled(bool)), this, SIGNAL(modified()));
@@ -371,7 +364,7 @@ void RasterLayerImp::draw()
 
    if (mpImage != NULL)
    {
-      GLint textureMode = GL_NEAREST;
+      GLfloat textureMode = GL_NEAREST;
 
       SpatialDataView* pSpatialDataView = dynamic_cast<SpatialDataView*>(getView());
       if (pSpatialDataView != NULL)
@@ -1220,6 +1213,8 @@ bool RasterLayerImp::isBandDisplayed(RasterChannelType eColor, DimensionDescript
    return false;
 }
 
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : The setDisplayedBand() methods should return a bool " \
+   "when breaking binary compatibility. (dsulgrov)")
 void RasterLayerImp::setDisplayedBand(RasterChannelType eColor, DimensionDescriptor band)
 {
    setDisplayedBand(eColor, band, NULL);
@@ -1246,9 +1241,39 @@ void RasterLayerImp::setDisplayedBand(RasterChannelType eColor, DimensionDescrip
       return;
    }
 
-   DisplayMode eMode = GRAYSCALE_MODE;
+   // Make sure the given raster element has the same number of rows and columns as the layer's raster element
+   RasterElement* pLayerElement = dynamic_cast<RasterElement*>(getDataElement());
+   if ((pLayerElement != NULL) && (pRasterElement != NULL) && (pRasterElement != pLayerElement))
+   {
+      unsigned int layerRows = 0;
+      unsigned int layerColumns = 0;
 
-   //make sure band descriptor came from raster element
+      const RasterDataDescriptor* pLayerDescriptor =
+         dynamic_cast<const RasterDataDescriptor*>(pLayerElement->getDataDescriptor());
+      if (pLayerDescriptor != NULL)
+      {
+         layerRows = pLayerDescriptor->getRowCount();
+         layerColumns = pLayerDescriptor->getColumnCount();
+      }
+
+      unsigned int elementRows = 0;
+      unsigned int elementColumns = 0;
+
+      const RasterDataDescriptor* pElementDescriptor =
+         dynamic_cast<const RasterDataDescriptor*>(pRasterElement->getDataDescriptor());
+      if (pElementDescriptor != NULL)
+      {
+         elementRows = pElementDescriptor->getRowCount();
+         elementColumns = pElementDescriptor->getColumnCount();
+      }
+
+      if ((elementRows != layerRows) || (elementColumns != layerColumns))
+      {
+         return;
+      }
+   }
+
+   // Make sure band descriptor came from the given raster element
    if (pRasterElement != NULL)
    {
       const RasterDataDescriptor* pDescriptor =
@@ -1308,6 +1333,7 @@ void RasterLayerImp::setDisplayedBand(RasterChannelType eColor, DimensionDescrip
          }
       }
 
+      DisplayMode eMode = GRAYSCALE_MODE;
       switch (eColor)
       {
          case GRAY:
@@ -1770,8 +1796,7 @@ void RasterLayerImp::enableFilters(const vector<string>& filterNames)
 
             if ((pGpuImage != NULL) && (pViewImp != NULL))
             {
-               GlContextSave contextSave;
-               pViewImp->makeCurrent();
+               GlContextSave contextSave(pViewImp);
                pGpuImage->disableFilter(pDescriptor);
             }
 #endif
@@ -1846,8 +1871,7 @@ void RasterLayerImp::disableFilter(const string& filterName)
 
             if ((pGpuImage != NULL) && (pViewImp != NULL))
             {
-               GlContextSave contextSave;
-               pViewImp->makeCurrent();
+               GlContextSave contextSave(pViewImp);
                pGpuImage->disableFilter(pDescriptor);
             }
 #endif
@@ -1964,9 +1988,7 @@ void RasterLayerImp::resetFilter(const string& filterName)
 
          if ((pGpuImage != NULL) && (pViewImp != NULL))
          {
-            GlContextSave contextSave;
-            pViewImp->makeCurrent();
-
+            GlContextSave contextSave(pViewImp);
             pGpuImage->resetFilter(pDescriptor);
             mbRegenerate = true;
          }
@@ -2007,9 +2029,7 @@ void RasterLayerImp::freezeFilter(const string& filterName, bool toggle)
 
          if ((pGpuImage != NULL) && (pViewImp != NULL))
          {
-            GlContextSave contextSave;
-            pViewImp->makeCurrent();
-
+            GlContextSave contextSave(pViewImp);
             pGpuImage->freezeFilter(pDescriptor, toggle);
             mbRegenerate = true;
          }
@@ -2082,6 +2102,16 @@ void RasterLayerImp::enableGpuImage(bool bEnable)
       if (pView != NULL)
       {
          pView->addUndoAction(new SetRasterGpuImage(dynamic_cast<RasterLayer*>(this), mUseGpuImage, bEnable));
+      }
+
+      if (bEnable)
+      {
+         // Disable smoothing if a layer is using gpu images since it does not work on GL_FLOAT with NV extensions
+         SpatialDataView* pSpatialDataView = dynamic_cast<SpatialDataView*>(pView);
+         if (pSpatialDataView != NULL)
+         {
+            pSpatialDataView->setTextureMode(TEXTURE_NEAREST_NEIGHBOR);
+         }
       }
 
       mUseGpuImage = bEnable;
@@ -2843,8 +2873,7 @@ void RasterLayerImp::generateImage()
       ViewImp* pViewImp = dynamic_cast<ViewImp*>(getView());
       if (pViewImp != NULL)
       {
-         GlContextSave contextSave;
-         pViewImp->makeCurrent();
+         GlContextSave contextSave(pViewImp);
          pGpuImage->enableFilters(mEnabledFilters);
       }
    }
@@ -3264,8 +3293,10 @@ bool RasterLayerImp::canApplyFastContrastStretch() const
 RasterLayerImp::GlBlendSubtractProc RasterLayerImp::getGlBlendSubtractProc()
 {
    static GlBlendSubtractProc proc = NULL;
-#if defined(CG_SUPPORTED)
-   bool isInitialized = false;
+
+// requires a Windows only call...might work with glX but this hasn't been explored yet
+#if defined(WIN_API)
+   static bool isInitialized = false;
    if (!isInitialized)
    {
       proc = (GlBlendSubtractProc)wglGetProcAddress("glBlendEquationEXT");
@@ -3577,33 +3608,61 @@ void RasterLayerImp::movieUpdated(Subject& subject, const string& signal, const 
 
 void RasterLayerImp::updateFromMovie()
 {
-   if (mpAnimation != NULL)
+   if (mpAnimation == NULL)
    {
-      UndoLock lock(getView());
-      DimensionDescriptor bandDim;
+      return;
+   }
+   const AnimationFrame* pFrame = mpAnimation->getCurrentFrame();
+   if (pFrame == NULL)
+   {
+      setDisplayMode(GRAYSCALE_MODE);
+      setDisplayedBand(GRAY, DimensionDescriptor());
+      return;
+   }
+   UndoLock lock(getView());
 
-      const AnimationFrame* pFrame = mpAnimation->getCurrentFrame();
-      if (pFrame != NULL)
+   unsigned int frameNumber = pFrame->mFrameNumber;
+   if (getDisplayMode() == RGB_MODE)
+   {
+      const RasterDataDescriptor* pRedRasterDesc = mpRedRasterElement.get() == NULL ? NULL :
+         static_cast<const RasterDataDescriptor*>(mpRedRasterElement->getDataDescriptor());
+      const RasterDataDescriptor* pGreenRasterDesc = mpGreenRasterElement.get() == NULL ? NULL :
+         static_cast<const RasterDataDescriptor*>(mpGreenRasterElement->getDataDescriptor());
+      const RasterDataDescriptor* pBlueRasterDesc = mpBlueRasterElement.get() == NULL ? NULL :
+         static_cast<const RasterDataDescriptor*>(mpBlueRasterElement->getDataDescriptor());
+      if (pRedRasterDesc != NULL && frameNumber < pRedRasterDesc->getBandCount())
       {
-         // Ensure that grayscale mode is the current display mode
-         setDisplayMode(GRAYSCALE_MODE);
-
-         // Set the new displayed band
-         unsigned int frameNumber = pFrame->mFrameNumber;
-
-         DataElement* pElement = getDataElement();
-         if (pElement != NULL)
-         {
-            const RasterDataDescriptor* pDescriptor =
-               dynamic_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor());
-            if (pDescriptor != NULL)
-            {
-               bandDim = pDescriptor->getActiveBand(frameNumber);
-            }
-         }
+         setDisplayedBand(RED, pRedRasterDesc->getActiveBand(frameNumber), mpRedRasterElement.get());
       }
-
-      setDisplayedBand(GRAY, bandDim);
+      else
+      {
+         setDisplayedBand(RED, DimensionDescriptor(), mpRedRasterElement.get());
+      }
+      if (pGreenRasterDesc != NULL && frameNumber < pGreenRasterDesc->getBandCount())
+      {
+         setDisplayedBand(GREEN, pGreenRasterDesc->getActiveBand(frameNumber), mpGreenRasterElement.get());
+      }
+      else
+      {
+         setDisplayedBand(GREEN, DimensionDescriptor(), mpGreenRasterElement.get());
+      }
+      if (pBlueRasterDesc != NULL && frameNumber < pBlueRasterDesc->getBandCount())
+      {
+         setDisplayedBand(BLUE, pBlueRasterDesc->getActiveBand(frameNumber), mpBlueRasterElement.get());
+      }
+      else
+      {
+         setDisplayedBand(BLUE, DimensionDescriptor(), mpBlueRasterElement.get());
+      }
+   }
+   else
+   {
+      const RasterDataDescriptor* pDescriptor = getDataElement() == NULL ? NULL :
+         static_cast<const RasterDataDescriptor*>(getDataElement()->getDataDescriptor());
+      if (pDescriptor != NULL)
+      {
+         setDisplayedBand(GRAY, pDescriptor->getActiveBand(frameNumber));
+      }
    }
 }
 
@@ -3644,8 +3703,7 @@ unsigned int RasterLayerImp::readFilterBuffer(double xCoord, double yCoord, int 
    ViewImp* pViewImp = dynamic_cast<ViewImp*>(getView());
    if (pViewImp != NULL)
    {
-      GlContextSave contextSave;
-      pViewImp->makeCurrent();
+      GlContextSave contextSave(pViewImp);
 
       // make sure the image has been drawn before trying to read from it
       draw();

@@ -10,6 +10,7 @@
 #include "AebIo.h"
 #include "ConfigurationSettings.h"
 #include "InstallerServicesImp.h"
+#include "ObjectResource.h"
 #include "Progress.h"
 #include "Transaction.h"
 #include "TransactionLog.h"
@@ -106,6 +107,12 @@ InstallerServicesImp::~InstallerServicesImp()
    {
       delete iter->second;
    }
+   for (std::map<AebId, Aeb*>::const_iterator iter = mPendingInstall.begin();
+        iter != mPendingInstall.end();
+        ++iter)
+   {
+      delete iter->second;
+   }
 }
 
 bool InstallerServicesImp::installExtension(const std::string& aebFile, Progress* pProgress)
@@ -166,7 +173,16 @@ bool InstallerServicesImp::installExtension(const std::string& aebFile, Progress
    // perform the install   
    QDir extensionDir = getExtensionDir(*pExtension.get());
    TransactionLog log(pProgress);
-   const QList<const AebEntry*>& contentPaths = io.getContentPaths();
+   errMsg.clear();
+   const QList<const AebEntry*>& contentPaths = io.getContentPaths(errMsg);
+   if (!errMsg.empty())
+   {
+      if (pProgress != NULL)
+      {
+         pProgress->updateProgress(errMsg, 0, ERRORS);
+      }
+      return false;
+   }
    QList<QString> contentDests;
    pExtension->getContentDestinations(contentPaths, contentDests);
    if (contentDests.empty())
@@ -341,8 +357,8 @@ bool InstallerServicesImp::uninstallExtension(const std::string& extensionId, st
       {
          continue;
       }
-      const std::multimap<AebRequirement, AebRequirement>& reqs = checkAeb->second->getRequires();
-      for (std::multimap<AebRequirement, AebRequirement>::const_iterator req = reqs.begin(); req != reqs.end(); ++req)
+      const std::vector<std::pair<AebRequirement, AebRequirement> >& reqs = checkAeb->second->getRequires();
+      for (std::vector<std::pair<AebRequirement, AebRequirement> >::const_iterator req = reqs.begin(); req != reqs.end(); ++req)
       {
          if ((!req->first.isValid() || req->first.meets(AebVersion::appVersion()))
                && req->second.meets(pAeb->getVersion()))
@@ -448,6 +464,54 @@ bool InstallerServicesImp::performUninstall(const std::string& extensionId, Prog
       mExtensions.erase(extension);
    }
    return true;
+}
+
+void InstallerServicesImp::setPendingInstall(const std::vector<std::string>& aebFilenames)
+{
+   for (std::map<AebId, Aeb*>::const_iterator iter = mPendingInstall.begin();
+        iter != mPendingInstall.end();
+        ++iter)
+   {
+      delete iter->second;
+   }
+   mPendingInstall.clear();
+   for (std::vector<std::string>::const_iterator aebIter = aebFilenames.begin();
+        aebIter != aebFilenames.end();
+        ++aebIter)
+   {
+      Resource<Aeb> pExtension;
+      AebIo io(*pExtension.get());
+      std::string errMsg;
+      bool success = io.fromFile(*aebIter, errMsg);
+      if (success && pExtension->validate())
+      {
+         pExtension.release();
+         mPendingInstall.insert(std::make_pair(pExtension->getId(), pExtension.get()));
+      }
+   }
+}
+
+std::list<const Aeb*> InstallerServicesImp::getPendingInstall() const
+{
+   std::list<const Aeb*> aebs;
+   for (std::map<AebId, Aeb*>::const_iterator iter = mPendingInstall.begin();
+        iter != mPendingInstall.end();
+        ++iter)
+   {
+      aebs.push_back(iter->second);
+   }
+   return aebs;
+}
+
+const Aeb* InstallerServicesImp::getPendingAebInstall(const std::string& aebId) const
+{
+   AebId id(aebId);
+   std::map<AebId, Aeb*>::const_iterator iter = mPendingInstall.find(id);
+   if (iter == mPendingInstall.end())
+   {
+      return NULL;
+   }
+   return iter->second;
 }
 
 const Aeb* InstallerServicesImp::getAeb(const std::string& aebId) const

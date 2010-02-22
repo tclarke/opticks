@@ -39,47 +39,45 @@ class PCA : public AlgorithmShell
 {
 public:
    PCA();
-   ~PCA();
+   virtual ~PCA();
 
-   bool setBatch();
-   bool setInteractive();
-   bool hasAbort();
    bool getInputSpecification(PlugInArgList*& pArgList);
    bool getOutputSpecification(PlugInArgList*& pArgList);
    bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
    bool abort();
 
 protected:
-   void m_CalculateEigenValues();
+   void calculateEigenValues();
    bool extractInputArgs(const PlugInArgList* pArgList);
-   bool m_CreatePCACube();
-   bool m_ComputePCAwhole();
-   bool m_ComputePCAaoi();
-   bool m_CreatePCAView();
+   bool createPCACube();
+   bool computePCAwhole();
+   bool computePCAaoi();
+   bool createPCAView();
 
 private:
    ExecutableResource mpSecondMoment;
-   bool mbUseEigenValPlot;
-   int m_MaxScaleValue;
-   EncodingType m_OutputDataType;
+   ExecutableResource mpCovariance;
+   bool mUseEigenValPlot;
+   int mMaxScaleValue;
+   EncodingType mOutputDataType;
    std::string mMessage;
    AoiElement* getAoiElement(const std::string& aoiName);
-   bool m_WriteOutPCAtransform(QString filename);
-   bool m_ReadInPCAtransform(QString filename);
-   bool m_ComputeCovarianceMatrix(QString aoiName = "", int rowSkip = 1, int colSkip = 1);
-   bool m_ReadMatrixFromFile(QString filename, double **pData, int numBands, const std::string &caption);
-   bool m_WriteMatrixToFile(QString filename, const double **pData, int numBands, const std::string &caption);
-   bool m_GetStatistics(std::vector<std::string> aoiList);
-   BitMask* mp_AOIbitmask;
-   bool mb_UseAoi;
+   bool writeOutPCAtransform(QString filename);
+   bool readInPCAtransform(QString filename);
+   bool computeCovarianceMatrix(QString aoiName = "", int rowSkip = 1, int colSkip = 1);
+   bool readMatrixFromFile(QString filename, double **pData, int numBands, const std::string &caption);
+   bool writeMatrixToFile(QString filename, const double **pData, int numBands, const std::string &caption);
+   bool getStatistics(std::vector<std::string> aoiList);
+   BitMask* mpAoiBitMask;
+   bool mUseAoi;
    bool mDisplayResults;
 
-   unsigned int m_NumRows;
-   unsigned int m_NumColumns;
-   unsigned int m_NumBands;
-   double** mp_MatrixValues;
-   QString m_ROIname;
-   unsigned int m_NumComponentsToUse;
+   unsigned int mNumRows;
+   unsigned int mNumColumns;
+   unsigned int mNumBands;
+   double** mpMatrixValues;
+   QString mRoiName;
+   unsigned int mNumComponentsToUse;
    Service<PlugInManagerServices> mpPlugInMgr;
    Service<ModelServices> mpModel;
    Service<ObjectFactory> mpObjFact;
@@ -91,6 +89,7 @@ private:
    RasterElement* mpRaster;
    RasterElement* mpPCARaster;
    RasterElement* mpSecondMomentMatrix;
+   RasterElement* mpCovarianceMatrix;
    Step* mpStep;
 
    enum CalcMethodTypeEnum { SECONDMOMENT, COVARIANCE, CORRCOEF };
@@ -99,9 +98,7 @@ private:
     * @EnumWrapper PCA::CalcMethodTypeEnum.
     */
    typedef EnumWrapper<CalcMethodTypeEnum> CalcMethodType;
-   CalcMethodType m_CalcMethod;
-   bool mbInteractive;
-   bool mbAbort;
+   CalcMethodType mCalcMethod;
    std::vector<unsigned int> mSelectedBands;
 };
 

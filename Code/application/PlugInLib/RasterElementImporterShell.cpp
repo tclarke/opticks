@@ -212,6 +212,19 @@ bool RasterElementImporterShell::validateBasic(const DataDescriptor* pDescriptor
       return false;
    }
 
+   // Data type
+   const RasterDataDescriptorExt1* pRasterDescriptorExt1 =
+      dynamic_cast<const RasterDataDescriptorExt1*>(pRasterDescriptor);
+   if (pRasterDescriptorExt1 != NULL)
+   {
+      const std::vector<EncodingType>& validDataTypes = pRasterDescriptorExt1->getValidDataTypes();
+      if (find(validDataTypes.begin(), validDataTypes.end(), pRasterDescriptor->getDataType()) == validDataTypes.end())
+      {
+         errorMessage = "The data type is not valid for this data set.";
+         return false;
+      }
+   }
+
    // Invalid pre-band and post-band bytes
    unsigned int prebandBytes = pFileDescriptor->getPrebandBytes();
    unsigned int postbandBytes = pFileDescriptor->getPostbandBytes();
@@ -655,7 +668,7 @@ bool RasterElementImporterShell::performImport() const
 
    string message;
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Re-evalutate this code when plug-ins " \
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Re-evaluate this code when plug-ins " \
    "are being loaded into the global symbol space (tclarke)")
    // This was changed from a try/catch due to a problem with the exceptions 
    // not being caught and propagating up to QApplication::notify on solaris.

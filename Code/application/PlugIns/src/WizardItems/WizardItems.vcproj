@@ -374,6 +374,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GetSessionItem.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\GetView.cpp"
 				>
 			</File>
@@ -403,6 +407,10 @@
 			</File>
 			<File
 				RelativePath=".\PrintView.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\RunInterpreterCommands.cpp"
 				>
 			</File>
 			<File
@@ -487,6 +495,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GetSessionItem.h"
+				>
+			</File>
+			<File
 				RelativePath=".\GetView.h"
 				>
 			</File>
@@ -508,6 +520,10 @@
 			</File>
 			<File
 				RelativePath=".\PrintView.h"
+				>
+			</File>
+			<File
+				RelativePath=".\RunInterpreterCommands.h"
 				>
 			</File>
 			<File

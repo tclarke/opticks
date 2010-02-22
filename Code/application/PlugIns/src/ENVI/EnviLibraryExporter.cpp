@@ -41,7 +41,7 @@ EnviLibraryExporter::EnviLibraryExporter() :
    setCreator("Ball Aerospace & Technologies Corp.");
    setCopyright(APP_COPYRIGHT);
    setVersion(APP_VERSION_NUMBER);
-   setExtensions("ENVI Signature Library Files (*.sli)");
+   setExtensions("ENVI Signature Library Files (*.sli *.spl)");
    setSubtype(TypeConverter::toString<SignatureSet>());
    setDescriptorId("{FB8D86B6-BD5D-4657-91B0-5B2797060C8E}");
    allowMultipleInstances(true);
@@ -324,7 +324,7 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
    fprintf(pFp, "description = {\n");
    // TODO: get from metadata
    //fprintf(pFp, "    DESCRIPTION = %s\n", mpSignatureSet->getDescription().c_str());
-   fprintf(pFp, "    FILENAME = %s }\n", filename.c_str());
+   fprintf(pFp, "}\n");
    fprintf(pFp, "samples = %u\n", numValues);
    fprintf(pFp, "lines = %u\n", numSignatures);
    fprintf(pFp, "bands = 1\n");

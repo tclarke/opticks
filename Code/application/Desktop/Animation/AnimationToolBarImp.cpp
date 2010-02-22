@@ -23,17 +23,22 @@
 #include "AnimationImp.h"
 #include "AnimationToolBar.h"
 #include "AnimationToolBarImp.h"
-#include "AppAssert.h"
 #include "AppVerify.h"
 #include "DesktopServices.h"
-#include "Icons.h"
 #include "PixmapGrid.h"
+#include "SessionItemDeserializer.h"
+#include "SessionItemSerializer.h"
+#include "SessionManager.h"
 #include "StringUtilities.h"
+#include "xmlreader.h"
+#include "xmlwriter.h"
 
 #include <math.h>
 
 #include <boost/rational.hpp>
 #include <string>
+
+XERCES_CPP_NAMESPACE_USE
 
 AnimationToolBarImp::AnimationToolBarImp(const std::string& id, QWidget* parent) :
    ToolBarImp(id, "Animation", parent),
@@ -64,34 +69,31 @@ AnimationToolBarImp::AnimationToolBarImp(const std::string& id, QWidget* parent)
    std::string shortcutContext = windowTitle().toStdString();
 
    // Animation buttons
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
-
-   mpStopAction = addAction(pIcons->mAnimationStop, QString(), this, SLOT(stop()));
+   mpStopAction = addAction(QIcon(":/icons/Stop"), QString(), this, SLOT(stop()));
    mpStopAction->setAutoRepeat(false);
    mpStopAction->setToolTip("Stop");
    mpStopAction->setCheckable(true);
    pDesktop->initializeAction(mpStopAction, shortcutContext);
 
-   mpPlayPauseAction = addAction(pIcons->mAnimationPlayForward, QString(), this, SLOT(playPause()));
+   mpPlayPauseAction = addAction(QIcon(":/icons/PlayForward"), QString(), this, SLOT(playPause()));
    mpPlayPauseAction->setAutoRepeat(false);
    mpPlayPauseAction->setShortcut(QKeySequence(Qt::Key_Space));
    mpPlayPauseAction->setToolTip("Play//Pause");
    pDesktop->initializeAction(mpPlayPauseAction, shortcutContext);
 
-   mpStepBackwardAction = addAction(pIcons->mAnimationAdvanceBackward, QString(), this, SLOT(stepBackward()));
+   mpStepBackwardAction = addAction(QIcon(":/icons/AdvanceBackward"), QString(), this, SLOT(stepBackward()));
    mpStepBackwardAction->setAutoRepeat(true);
    mpStepBackwardAction->setToolTip("Step backward");
    pDesktop->initializeAction(mpStepBackwardAction, shortcutContext);
 
-   mpStepForwardAction = addAction(pIcons->mAnimationAdvanceForward, QString(), this, SLOT(stepForward()));
+   mpStepForwardAction = addAction(QIcon(":/icons/AdvanceForward"), QString(), this, SLOT(stepForward()));
    mpStepForwardAction->setAutoRepeat(true);
    mpStepForwardAction->setToolTip("Step forward");
    pDesktop->initializeAction(mpStepForwardAction, shortcutContext);
 
    addSeparator();
 
-   mpSlowDownAction = addAction(pIcons->mAnimationSlowDown, QString(), this, SLOT(slowDown()));
+   mpSlowDownAction = addAction(QIcon(":/icons/SlowDown"), QString(), this, SLOT(slowDown()));
    mpSlowDownAction->setAutoRepeat(false);
    mpSlowDownAction->setToolTip("Slow Down");
    pDesktop->initializeAction(mpSlowDownAction, shortcutContext);
@@ -123,14 +125,14 @@ AnimationToolBarImp::AnimationToolBarImp(const std::string& id, QWidget* parent)
 
    addWidget(mpFrameSpeedCombo);
 
-   mpSpeedUpAction = addAction(pIcons->mAnimationSpeedUp, QString(), this, SLOT(speedUp()));
+   mpSpeedUpAction = addAction(QIcon(":/icons/SpeedUp"), QString(), this, SLOT(speedUp()));
    mpSpeedUpAction->setAutoRepeat(false);
    mpSpeedUpAction->setToolTip("Speed Up");
    pDesktop->initializeAction(mpSpeedUpAction, shortcutContext);
 
    addSeparator();
 
-   mpChangeDirectionAction = addAction(pIcons->mAnimationForwardDirection, QString(), this, SLOT(changeDirection()));
+   mpChangeDirectionAction = addAction(QIcon(":/icons/DirectionForward"), QString(), this, SLOT(changeDirection()));
    mpChangeDirectionAction->setAutoRepeat(false);
    mpChangeDirectionAction->setToolTip("Change Direction");
    pDesktop->initializeAction(mpChangeDirectionAction, shortcutContext);
@@ -146,10 +148,10 @@ AnimationToolBarImp::AnimationToolBarImp(const std::string& id, QWidget* parent)
    // Animation Bumper button
    mpBumperButton = new QToolButton(this);
    mpBumperButton->setCheckable(true);
-   mpBumperButton->setIcon(pIcons->mAnimationBumpers);
+   mpBumperButton->setIcon(QIcon(":/icons/AnimationBumpers"));
    mpBumperButton->setPopupMode(QToolButton::MenuButtonPopup);
    addWidget(mpBumperButton);
-   QAction* pEnabled = new QAction(pIcons->mAnimationBumpers, "Bumpers Enabled", this);
+   QAction* pEnabled = new QAction(QIcon(":/icons/AnimationBumpers"), "Bumpers Enabled", this);
    pEnabled->setCheckable(true);
    pEnabled->setChecked(false);
    VERIFYNR(connect(pEnabled, SIGNAL(toggled(bool)), this, SLOT(bumpersEnabled(bool))));
@@ -203,7 +205,7 @@ AnimationToolBarImp::AnimationToolBarImp(const std::string& id, QWidget* parent)
    addSeparator();
 
    // Drop frames
-   mpDropFramesAction = addAction(pIcons->mClock, QString());
+   mpDropFramesAction = addAction(QIcon(":/icons/Clock"), QString());
    mpDropFramesAction->setAutoRepeat(false);
    mpDropFramesAction->setToolTip("Drop Frames");
    mpDropFramesAction->setCheckable(true);
@@ -235,6 +237,59 @@ bool AnimationToolBarImp::isKindOf(const std::string& className) const
    }
 
    return ToolBarImp::isKindOf(className);
+}
+
+bool AnimationToolBarImp::serialize(SessionItemSerializer& serializer) const
+{
+   XMLWriter xml("AnimationToolBar");
+   if (toXml(&xml) == false)
+   {
+      return false;
+   }
+
+   if (mpController != NULL)
+   {
+      xml.addAttr("controllerId", mpController->getId());
+   }
+
+   xml.addAttr("animationState", mPrevAnimationState);
+   xml.addAttr("hideTimestamp", mHideTimestamp);
+
+   if (mpFrameSlider->toXml(&xml) == false)
+   {
+      return false;
+   }
+
+   return serializer.serialize(xml);
+}
+
+bool AnimationToolBarImp::deserialize(SessionItemDeserializer& deserializer)
+{
+   XmlReader reader(NULL, false);
+
+   DOMElement* pRoot = deserializer.deserialize(reader, "AnimationToolBar");
+   if ((pRoot == NULL) || (fromXml(pRoot, XmlBase::VERSION) == false))
+   {
+      return false;
+   }
+
+   AnimationController* pController = NULL;
+   if (pRoot->hasAttribute(X("controllerId")))
+   {
+      Service<SessionManager> pManager;
+      pController = dynamic_cast<AnimationController*>(
+         pManager->getSessionItem(A(pRoot->getAttribute(X("controllerId")))));
+   }
+
+   // Restore the animation controller by calling setAnimationController() to perform all of the necessary
+   // connections.  This also resets the state of the slider, so the slider must be restored after this
+   // call in case the animation controller has not yet been restored.
+   setAnimationController(pController);
+
+   mPrevAnimationState = StringUtilities::fromXmlString<AnimationState>(A(pRoot->getAttribute(X("animationState"))));
+   mHideTimestamp = StringUtilities::fromXmlString<bool>(A(pRoot->getAttribute(X("hideTimestamp"))));
+
+   return mpFrameSlider->fromXml(pRoot, XmlBase::VERSION);
 }
 
 void AnimationToolBarImp::speedUp()
@@ -302,16 +357,14 @@ void AnimationToolBarImp::setPlayButtonState(AnimationState state)
 {
    if (mpController != NULL)
    {
-      Icons* pIcons = Icons::instance();
-      REQUIRE(pIcons != NULL);
       if (state == PLAY_FORWARD || state == PLAY_BACKWARD)
       {
-         mpPlayPauseAction->setIcon(pIcons->mAnimationPause);
+         mpPlayPauseAction->setIcon(QIcon(":/icons/Pause"));
          mpPlayPauseAction->setToolTip("Pause");
       }
       else
       {
-         mpPlayPauseAction->setIcon(pIcons->mAnimationPlayForward);
+         mpPlayPauseAction->setIcon(QIcon(":/icons/PlayForward"));
          mpPlayPauseAction->setToolTip("Play");
       }
 
@@ -325,23 +378,21 @@ void AnimationToolBarImp::setPlayButtonState(AnimationState state)
 
 void AnimationToolBarImp::setChangeDirectionButtonState(AnimationState state)
 {
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
    if (state == PLAY_FORWARD)
    {
-      mpChangeDirectionAction->setIcon(pIcons->mAnimationForwardDirection);
+      mpChangeDirectionAction->setIcon(QIcon(":/icons/DirectionForward"));
    }
    else if (state == PAUSE_FORWARD)
    {
-      mpChangeDirectionAction->setIcon(pIcons->mAnimationForwardDirection);
+      mpChangeDirectionAction->setIcon(QIcon(":/icons/DirectionForward"));
    } 
    else if (state == PLAY_BACKWARD)
    {
-      mpChangeDirectionAction->setIcon(pIcons->mAnimationBackwardDirection);
+      mpChangeDirectionAction->setIcon(QIcon(":/icons/DirectionBackward"));
    } 
    else if (state == PAUSE_BACKWARD)
    {
-      mpChangeDirectionAction->setIcon(pIcons->mAnimationBackwardDirection);
+      mpChangeDirectionAction->setIcon(QIcon(":/icons/DirectionBackward"));
    } 
 }
 
@@ -989,4 +1040,33 @@ void AnimationToolBarImp::WheelEventSlider::getPlaybackRange(int& start, int& st
       start = minimum();
       stop = maximum();
    }
+}
+
+bool AnimationToolBarImp::WheelEventSlider::toXml(XMLWriter* pXml) const
+{
+   if (pXml == NULL)
+   {
+      return false;
+   }
+
+   pXml->addAttr("bumpersEnabled", mBumpersEnabled);
+   pXml->addAttr("leftBumper", mLeftBumper);
+   pXml->addAttr("rightBumper", mRightBumper);
+
+   return true;
+}
+
+bool AnimationToolBarImp::WheelEventSlider::fromXml(DOMNode* pDocument, unsigned int version)
+{
+   if (pDocument == NULL)
+   {
+      return false;
+   }
+
+   DOMElement* pElement = static_cast<DOMElement*>(pDocument);
+   mBumpersEnabled = StringUtilities::fromXmlString<bool>(A(pElement->getAttribute(X("bumpersEnabled"))));
+   mLeftBumper = StringUtilities::fromXmlString<int>(A(pElement->getAttribute(X("leftBumper"))));
+   mRightBumper = StringUtilities::fromXmlString<int>(A(pElement->getAttribute(X("rightBumper"))));
+
+   return true;
 }

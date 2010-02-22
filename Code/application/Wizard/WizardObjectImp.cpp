@@ -47,7 +47,8 @@ WizardItem* WizardObjectImp::addPlugInItem(const string& itemName, const string&
       return NULL;
    }
 
-   WizardItem* pItem = new WizardItemImp(dynamic_cast<WizardObject*>(this), itemName, itemType);
+   WizardItemImp* pItem = new WizardItemImp(dynamic_cast<WizardObject*>(this), itemName, itemType);
+   pItem->setBatchMode(mbBatch);
    addItem(pItem);
 
    return pItem;
@@ -61,6 +62,9 @@ WizardItem* WizardObjectImp::addValueItem(const string& itemName, const DataVari
    }
 
    WizardItemImp* pItem = new WizardItemImp(dynamic_cast<WizardObject*>(this), itemName, value);
+   // default to batch otherwise user will be prompted to input every
+   // value item every time the wizard is executed
+   pItem->setBatchMode(true);
    addItem(pItem);
 
    return pItem;
@@ -79,8 +83,11 @@ void WizardObjectImp::addItem(WizardItem* pItem)
       return;
    }
 
-   // Set the initial batch mode based on the wizard batch mode
-   pItemImp->setBatchMode(mbBatch);
+   // Ensure that an interactive item is not added to a batch wizard
+   if ((mbBatch == true) && (pItemImp->getBatchMode() == false))
+   {
+      pItemImp->setBatchMode(true);
+   }
 
    // Add the item
    mItems.push_back(pItem);

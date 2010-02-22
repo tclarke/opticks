@@ -149,6 +149,7 @@ void ConfigurationSettingsImp::validateInitialization()
    }
 
    mReleaseType = getSettingReleaseType();
+   mReleaseDescription = getSettingReleaseDescription();
 
    // Set Internal Path -  Note that this only affects the environment
    // variable of the current process. 
@@ -500,7 +501,7 @@ bool ConfigurationSettingsImp::parseDeploymentFile(string& errorMessage, string&
    else
    {
       deploymentInfoMsg += QString("All of the settings were resolved using the "
-         "application defaults because the the /deployment: command-line argument "
+         "application defaults because the /deployment: command-line argument "
          "was not used and an opticks.dep file was not present in the same directory "
          "as the Opticks executable.\n");
    }
@@ -650,6 +651,11 @@ bool ConfigurationSettingsImp::isProductionRelease() const
 ReleaseType ConfigurationSettingsImp::getReleaseType() const
 {
    return mReleaseType;
+}
+
+string ConfigurationSettingsImp::getReleaseDescription() const
+{
+   return mReleaseDescription;
 }
 
 bool ConfigurationSettingsImp::isInitialized()
@@ -933,11 +939,18 @@ void ConfigurationSettingsImp::deserializeMruFiles()
          {
             if (XERCES_CPP_NAMESPACE_QUALIFIER XMLString::equals(pMruFileNode->getNodeName(), X("attribute")))
             {
-               vector<ImportDescriptor*> descriptors;
+               unsigned maxNumFiles = ConfigurationSettings::getSettingNumberOfMruFiles();
+               if (mMruFiles.size() == maxNumFiles)
+               {
+                  break;
+               }
+
                if (!static_cast<XERCES_CPP_NAMESPACE_QUALIFIER DOMElement*>(pMruFileNode)->hasAttribute(X("name")))
                {
                   continue;
                }
+
+               vector<ImportDescriptor*> descriptors;
                for (XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pDescriptorNode = pMruFileNode->getFirstChild();
                   pDescriptorNode != NULL;
                   pDescriptorNode = pDescriptorNode->getNextSibling())
@@ -1000,7 +1013,8 @@ void ConfigurationSettingsImp::applicationClosed(Subject& subject, const string&
    serialize();
 }
 
-string ConfigurationSettingsImp::getUserSettingsFileName() const
+string ConfigurationSettingsImp::getUserStorageFileName(const string& filePrefix,
+                                                        const string& fileExtension) const
 {
    string os = getOperatingSystemName();
    string arch = getArchitectureName();
@@ -1008,10 +1022,11 @@ string ConfigurationSettingsImp::getUserSettingsFileName() const
    #if defined(DEBUG)
       mode = "Debug";
    #endif
-   return "UserSettings-" + mVersion + "-" + os + "-" + arch + mode + ".cfg";
+   return filePrefix + "-" + mVersion + "-" + os + "-" + arch + mode + "." + fileExtension;
 }
 
-string ConfigurationSettingsImp::getUserSettingsFilePath() const
+string ConfigurationSettingsImp::getUserStorageFilePath(const string& filePrefix,
+                                                        const string& fileExtension) const
 {
    QDir configDirectory = QDir(QString::fromStdString(mUserConfigPath));
    if (!configDirectory.exists())
@@ -1019,8 +1034,19 @@ string ConfigurationSettingsImp::getUserSettingsFilePath() const
       return "";
    }
 
-   QString cfgFilePath = configDirectory.absoluteFilePath(QString::fromStdString(getUserSettingsFileName()));
+   QString cfgFilePath = configDirectory.absoluteFilePath(QString::fromStdString(getUserStorageFileName(filePrefix,
+      fileExtension)));
    return QDir::toNativeSeparators(cfgFilePath).toStdString();
+}
+
+string ConfigurationSettingsImp::getUserSettingsFileName() const
+{
+   return getUserStorageFileName("UserSettings", "cfg");
+}
+
+string ConfigurationSettingsImp::getUserSettingsFilePath() const
+{
+   return getUserStorageFilePath("UserSettings", "cfg");
 }
 
 string ConfigurationSettingsImp::locateUserDocs()
@@ -1234,7 +1260,8 @@ DynamicObject* ConfigurationSettingsImp::deserialize(const Filename* pFilename) 
 
 void ConfigurationSettingsImp::updateProductionStatus()
 {
-   if (mReleaseType != RT_NORMAL && mReleaseType != RT_PROTO)
+   if (mReleaseType.isValid() == false || mReleaseType == RT_DEMO ||
+      mReleaseType == RT_TRAINING || mReleaseType == RT_TEST)
    {
       mProductionRelease = false;
       return;

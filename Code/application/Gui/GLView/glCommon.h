@@ -27,10 +27,13 @@
 #if defined(CG_SUPPORTED)
 #include <Cg/cg.h>
 #include <Cg/cgGL.h>
+#if defined(WIN_API)
 #undef GL_GLEXT_PROTOTYPES
 #include <GL/wglew.h>
 #endif
+#endif
 
 #include "GlContextSave.h"
+#include "GlTextureResource.h"
 
 #endif
