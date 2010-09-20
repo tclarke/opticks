@@ -314,10 +314,14 @@ PlotWidget* PlotSetImp::getPlot(const QString& strPlotName) const
 
    for (int i = 0; i < count(); i++)
    {
-      QString strCurrentName = tabText(i);
-      if (strCurrentName == strPlotName)
+      PlotWidget* pPlotWidget = dynamic_cast<PlotWidget*>(widget(i));
+      if (pPlotWidget != NULL)
       {
-         return (dynamic_cast<PlotWidget*>(widget(i)));
+         QString strCurrentName = QString::fromStdString(pPlotWidget->getName());
+         if (strCurrentName == strPlotName)
+         {
+            return pPlotWidget;
+         }
       }
    }
 
