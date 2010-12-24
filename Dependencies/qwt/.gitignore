@@ -1,0 +1,6 @@
+/.sentinal
+/*.pyc
+/bin
+/include
+/lib
+/src
