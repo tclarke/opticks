@@ -1,0 +1,15 @@
+/Dependencies/source/src/v8
+/Dependencies/32
+/Dependencies/64
+/Code/Build
+/Code/Release/Temp
+/Code/application/PlugInUtilities/EventMessages.h
+/Code/application/PlugInUtilities/EventMessages.rc
+/Code/application/PlugInUtilities/Messages_ENU.bin
+/Code/application/Utilities/BuildRevision.h
+/Code/application/ipch
+*.swp
+*.user
+*.sdf
+*.suo
+*.pyc

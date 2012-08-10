@@ -20,12 +20,18 @@
     <ClCompile Include="WizardExecutor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="JSWizardExecutor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BatchWizardExecutor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WizardExecutor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JSWizardExecutor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
