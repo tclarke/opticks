@@ -23,6 +23,39 @@
 
 REGISTER_PLUGIN_BASIC(OpticksWizardExecutor, JSWizardExecutor);
 
+v8::Handle<v8::Value> ConsoleCallback(v8::Local<v8::String> property, const v8::AccessorInfo& info)
+{
+   v8::Local<v8::Object> self = info.Holder();
+   v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(self->GetInternalField(0));
+   Progress* pProgress = static_cast<Progress*>(wrap->Value());
+   /*v8::String::AsciiValue asciiValue(value);
+   if (property->Equals(v8::String::New("log")))
+   {
+      std::string text;
+      int percent;
+      ReportingLevel gran;
+      pProgress->getProgress(text, percent, gran);
+      pProgress->updateProgress
+   }
+   else if (property->Equals(v8::String::New("warn")))
+   {
+   }
+   else if (property->Equals(v8::String::New("error")))
+   {
+   }
+   return v8::String::New(text.c_str());*/
+   return v8::Null();
+}
+
+void SetProgress(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info)
+{
+   v8::Local<v8::Object> self = info.Holder();
+   v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(self->GetInternalField(0));
+   Progress* pProgress = static_cast<Progress*>(wrap->Value());
+   v8::String::AsciiValue asciiValue(value);
+   pProgress->updateProgress(std::string(*asciiValue), 10, NORMAL);
+}
+
 JSWizardExecutor::JSWizardExecutor() :
    mbInteractive(false),
    mbAbort(false),
@@ -85,13 +118,28 @@ bool JSWizardExecutor::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
    }
    QByteArray scriptBytes = file.readAll();
 
+
    // v8 code to execute the script
-   v8::HandleScope handle_scope;
+   v8::HandleScope hdlsc;
    v8::Persistent<v8::Context> context = v8::Context::New();
    v8::Context::Scope context_scope(context);
 
+   v8::Handle<v8::ObjectTemplate> console_templ = v8::ObjectTemplate::New();
+   console_templ->SetInternalFieldCount(1);
+
+   /*v8::Handle<v8::FunctionTemplate> logc = v8::FunctionTemplate::New(ConsoleCallback);
+   console_templ->Set(v8::String::New("log"), logc);
+   v8::Handle<v8::FunctionTemplate> warnc = v8::FunctionTemplate::New(ConsoleCallback);
+   console_templ->Set(v8::String::New("warn"), warnc);
+   v8::Handle<v8::FunctionTemplate> errorc = v8::FunctionTemplate::New(ConsoleCallback);
+   console_templ->Set(v8::String::New("error"), errorc);*/
+
+   v8::Local<v8::Object> console = console_templ->NewInstance();
+   console->SetInternalField(0, v8::External::New(pProgress));
+   context->Global()->Set(v8::String::New("console"), console);
+
    v8::Handle<v8::String> scriptSource = v8::String::New(scriptBytes.data(), scriptBytes.size());
-   v8::Handle<v8::Script> script = v8::Script::Compile(scriptSource);
+   v8::Handle<v8::Script> script = v8::Script::Compile(scriptSource, v8::String::New(pFilename->getFullPathAndName().c_str()));
    if (script.IsEmpty())
    {
       if (pProgress) pProgress->updateProgress("Unable to compile jswiz.", 0, ERRORS);
@@ -102,7 +150,7 @@ bool JSWizardExecutor::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
    // v8 cleanup code
    context.Dispose();
 
-   if (pProgress)
+   if (pProgress && !result.IsEmpty())
    {
       v8::String::AsciiValue asciiResult(result);
       pProgress->updateProgress(*asciiResult, 100, NORMAL);

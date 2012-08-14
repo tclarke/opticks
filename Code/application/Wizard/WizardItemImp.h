@@ -405,6 +405,9 @@ public:
     */
    static void setConnections(std::vector<WizardItem*>& items, const std::vector<WizardConnection>& connections);
 
+   virtual std::string getScriptText() const { return mScriptText; }
+   virtual void setScriptText(const std::string& val) { mScriptText = val; }
+
    // These methods are documented in the Serializable and TypeAwareObject class documentation
    bool toXml(XMLWriter* pXml) const;
    bool fromXml(DOMNode* pDocument, unsigned int version);
@@ -431,6 +434,9 @@ private:
    LocationType mCoord;
    std::vector<WizardNode*> mInputNodes;
    std::vector<WizardNode*> mOutputNodes;
+   std::string mScriptText;
+   std::string mScriptType;
+   std::string mScriptFile;
 };
 
 #endif

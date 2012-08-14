@@ -107,7 +107,7 @@ namespace WizardUtilities
     * application is running in Batch mode.
     *
     * @param valueItems
-    *        The WizardItem objects to edit. If the type of an item is not "Value" it will be silently ignored.
+    *        The WizardItem objects to edit. If the type of an item is not "Value" or "Script" it will be silently ignored.
     * @param pParent
     *        The parent widget of the dialog to be invoked.
     *

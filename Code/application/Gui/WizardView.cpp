@@ -12,6 +12,7 @@
 #include <QtGui/QApplication>
 #include <QtGui/QFileDialog>
 #include <QtGui/QGraphicsScene>
+#include <QtGui/QInputDialog>
 #include <QtGui/QMenu>
 #include <QtGui/QMessageBox>
 #include <QtGui/QPainter>
@@ -270,6 +271,10 @@ bool WizardView::isItemSelected(WizardItem* pItem) const
 bool WizardView::editItems()
 {
    std::vector<WizardItem*> selectedItems = getSelectedItems("Value");
+   std::vector<WizardItem*> scriptItems = getSelectedItems("Script");
+   selectedItems.reserve(selectedItems.size() + scriptItems.size());
+   selectedItems.insert(selectedItems.end(), scriptItems.begin(), scriptItems.end());
+   
    if (selectedItems.empty() == true)
    {
       QMessageBox::warning(this, "Error", "Please select one or more value items to edit.");
@@ -293,60 +298,69 @@ bool WizardView::editItem(WizardItem* pItem)
    }
 
    const std::string& itemType = pItem->getType();
-   if (itemType != "Value")
+   if (itemType == "Value")
    {
-      return false;
+      const std::vector<WizardNode*>& outputNodes = pItemImp->getOutputNodes();
+      VERIFY(outputNodes.empty() == false);
+
+      WizardNodeImp* pNode = static_cast<WizardNodeImp*>(outputNodes.front());
+      VERIFY(pNode != NULL);
+
+      const std::string& nodeName = pNode->getName();
+      const std::string& nodeType = pNode->getType();
+      void* pValue = pNode->getValue();
+
+      NameTypeValueDlg dlgValue(this);
+      dlgValue.setWindowTitle("Wizard Value Item");
+      dlgValue.setValue(QString::fromStdString(nodeName), DataVariant(nodeType, pValue));
+
+      if (dlgValue.exec() == QDialog::Accepted)
+      {
+         QString strName = dlgValue.getName();
+         QString strType = dlgValue.getType();
+         if ((strName.isEmpty() == true) || (strType.isEmpty() == true))
+         {
+            return false;
+         }
+
+         std::string newNodeName = strName.toStdString();
+         std::string newNodeType = strType.toStdString();
+         const DataVariant& newNodeValue = dlgValue.getValue();
+
+         if (newNodeName != nodeName)
+         {
+            pNode->setName(newNodeName);
+            pItemImp->setName(newNodeName);
+         }
+
+         if (newNodeType != nodeType)
+         {
+            std::vector<std::string> validTypes;
+            validTypes.push_back(newNodeType);
+
+            pNode->setOriginalType(newNodeType);
+            pNode->setType(newNodeType);
+            pNode->setValidTypes(validTypes);
+            pNode->clearConnectedNodes();
+         }
+
+         if (newNodeValue.getPointerToValueAsVoid() != pValue)
+         {
+            pNode->setValue(newNodeValue.getPointerToValueAsVoid());
+         }
+         return true;
+      }
    }
-
-   const std::vector<WizardNode*>& outputNodes = pItemImp->getOutputNodes();
-   VERIFY(outputNodes.empty() == false);
-
-   WizardNodeImp* pNode = static_cast<WizardNodeImp*>(outputNodes.front());
-   VERIFY(pNode != NULL);
-
-   const std::string& nodeName = pNode->getName();
-   const std::string& nodeType = pNode->getType();
-   void* pValue = pNode->getValue();
-
-   NameTypeValueDlg dlgValue(this);
-   dlgValue.setWindowTitle("Wizard Value Item");
-   dlgValue.setValue(QString::fromStdString(nodeName), DataVariant(nodeType, pValue));
-
-   if (dlgValue.exec() == QDialog::Accepted)
+   else if (itemType == "Script")
    {
-      QString strName = dlgValue.getName();
-      QString strType = dlgValue.getType();
-      if ((strName.isEmpty() == true) || (strType.isEmpty() == true))
+      QString txt = QString::fromStdString(pItem->getScriptText());
+      bool ok;
+      QString val = QInputDialog::getText(this, QString::fromStdString(pItem->getName()), QString(), QLineEdit::Normal, QString::fromStdString(pItem->getScriptText()), &ok);
+      if (ok && val != txt)
       {
-         return false;
+         pItem->setScriptText(val.toStdString());
       }
-
-      std::string newNodeName = strName.toStdString();
-      std::string newNodeType = strType.toStdString();
-      const DataVariant& newNodeValue = dlgValue.getValue();
-
-      if (newNodeName != nodeName)
-      {
-         pNode->setName(newNodeName);
-         pItemImp->setName(newNodeName);
-      }
-
-      if (newNodeType != nodeType)
-      {
-         std::vector<std::string> validTypes;
-         validTypes.push_back(newNodeType);
-
-         pNode->setOriginalType(newNodeType);
-         pNode->setType(newNodeType);
-         pNode->setValidTypes(validTypes);
-         pNode->clearConnectedNodes();
-      }
-
-      if (newNodeValue.getPointerToValueAsVoid() != pValue)
-      {
-         pNode->setValue(newNodeValue.getPointerToValueAsVoid());
-      }
-      return true;
+      return ok;
    }
    return false;
 }
@@ -1106,6 +1120,10 @@ void WizardView::mouseDoubleClickEvent(QMouseEvent* pEvent)
                      mpWizard->removeItem(pNewItem);
                   }
                }
+            }
+            else if (itemType == "Script")
+            {
+               editItem(pItem);
             }
             else
             {

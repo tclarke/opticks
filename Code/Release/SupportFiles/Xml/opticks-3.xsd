@@ -924,6 +924,7 @@ http://www.gnu.org/licenses/lgpl.html
          <xsd:element name="location" type="opticks:coordinateType" form="qualified" minOccurs="1" />
          <xsd:element name="input" type="opticks:wizardNode" minOccurs="0" maxOccurs="unbounded" form="qualified" />
          <xsd:element name="output" type="opticks:wizardNode" minOccurs="0" maxOccurs="unbounded" form="qualified" />
+         <xsd:element name="script" minOccurs="0" maxOccurs="1" form="qualified"/>
       </xsd:sequence>
       <xsd:attribute name="batch" type="xsd:boolean" default="false" />
       <xsd:attribute name="batchSupported" type="xsd:boolean" default="true" />

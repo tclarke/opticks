@@ -183,6 +183,9 @@ public:
     */
    virtual const WizardObject* getWizard() const = 0;
 
+   virtual std::string getScriptText() const = 0;
+   virtual void setScriptText(const std::string& val) = 0;
+
 protected:
    /**
     * A plug-in cannot create this object; it can only retrieve an already existing

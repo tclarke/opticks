@@ -104,7 +104,7 @@ BatchWizard* WizardUtilities::createBatchWizardFromWizard(WizardObject* pWizard,
    for (unsigned int i = 0; i < wizItems.size(); i++)
    {
       WizardItem* pItem = wizItems[i];
-      if ((pItem != NULL) && (pItem->getType() != "Value"))
+      if ((pItem != NULL) && (pItem->getType() != "Value") && (pItem->getType() != "Script"))
       {
          const string& itemName = pItem->getName();
 

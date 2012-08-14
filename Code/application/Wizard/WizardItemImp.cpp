@@ -148,7 +148,7 @@ void WizardItemImp::setBatchMode(bool bBatch)
    mbBatch = bBatch;
    mbModeSupported = true;
 
-   if (mType != "Value")
+   if (mType != "Value" && mType != "Script")
    {
       Service<PlugInManagerServices> pManager;
 
@@ -681,6 +681,25 @@ bool WizardItemImp::toXml(XMLWriter* pXml) const
       }
    }
 
+   if (mType == "Script")
+   {
+      pXml->pushAddPoint(pXml->addElement("script"));
+      if (!mScriptType.empty())
+      {
+         pXml->addAttr("type", mScriptType);
+      }
+      if (!mScriptFile.empty())
+      {
+         pXml->addAttr("src", mScriptFile);
+      }
+      if (!mScriptText.empty())
+      {
+         XERCES_CPP_NAMESPACE_QUALIFIER DOMCDATASection* pCdata = pXml->getDocument()->createCDATASection(X(mScriptText.c_str()));
+         pXml->peekAddPoint()->appendChild(pCdata);
+      }
+      pXml->popAddPoint();
+   }
+
    return true;
 }
 
@@ -701,6 +720,7 @@ bool WizardItemImp::fromXml(DOMNode* pDocument, unsigned int version)
 
    for (DOMNode* chld = pDocument->getFirstChild(); chld != NULL; chld = chld->getNextSibling())
    {
+      std::string foo(A(chld->getNodeName()));
       if (XMLString::equals(chld->getNodeName(), X("location")))
       {
          mCoord = StringUtilities::fromXmlString<LocationType>(A(chld->getTextContent()));
@@ -730,6 +750,22 @@ bool WizardItemImp::fromXml(DOMNode* pDocument, unsigned int version)
             delete dynamic_cast<WizardNodeImp*>(pNode);
             return false;
          }
+      }
+      else if (XMLString::equals(chld->getNodeName(), X("script")))
+      {
+         DOMElement* pChldElmnt = static_cast<DOMElement*>(chld);
+         mScriptType = "text/javascript";
+         mScriptFile = std::string();
+         mScriptText = std::string();
+         if (pChldElmnt->hasAttribute(X("type")))
+         {
+            mScriptType = A(pChldElmnt->getAttribute(X("type")));
+         }
+         if (pChldElmnt->hasAttribute(X("src")))
+         {
+            mScriptFile = A(pChldElmnt->getAttribute(X("src")));
+         }
+         mScriptText = A(pChldElmnt->getTextContent());
       }
    }
 

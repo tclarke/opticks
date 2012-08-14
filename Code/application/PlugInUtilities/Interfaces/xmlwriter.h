@@ -488,6 +488,13 @@ public:
     * @see XMLWriter
     */
    XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* peekAddPoint();
+
+   /**
+    * Access the underlying document object.
+    *
+    * @return The DOM document object.
+    */
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* getDocument();
    //@}
 
 private:

@@ -414,6 +414,11 @@ DOMNode* XMLWriter::peekAddPoint()
    return mpAddPoint.top();
 }
 
+DOMDocument* XMLWriter::getDocument()
+{
+   return mpDoc;
+}
+
 template<> bool XMLWriter::addAttr(const char* pName, std::string value)
 {
    return addAttr(pName, value, NULL);
