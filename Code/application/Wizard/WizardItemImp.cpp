@@ -33,6 +33,12 @@ WizardItemImp::WizardItemImp(WizardObject* pWizard, string name, string type) :
 {
    // Initialize the wizard nodes by setting interactive mode since most items will be added in interactive mode
    setBatchMode(false);
+
+   // Add the default Progress input
+   if (mType == "Script")
+   {
+      addNode("Progress", "Progress", string(), true);
+   }
 }
 
 WizardItemImp::WizardItemImp(WizardObject* pWizard, string name, const DataVariant& value) :
@@ -884,5 +890,50 @@ void WizardItemImp::clearNodes(bool inputNodes)
             delete pNodeImp;
          }
       }
+   }
+}
+
+void WizardItemImp::removeNode(WizardNode* pNode)
+{
+   bool inputNode = true;
+   std::vector<WizardNode*>::iterator iter = std::find(mInputNodes.begin(), mInputNodes.end(), pNode);
+   if (iter == mInputNodes.end())
+   {
+      inputNode = false;
+      iter = std::find(mOutputNodes.begin(), mOutputNodes.end(), pNode);
+      if (iter == mOutputNodes.end())
+      {
+         return;
+      }
+   }
+   bool bDelete = false;
+   if (mType == "Value")
+   {
+      bDelete = true;
+   }
+
+   if (inputNode)
+   {
+      mInputNodes.erase(iter);
+   }
+   else
+   {
+      mOutputNodes.erase(iter);
+   }
+   notify(SIGNAL_NAME(WizardItemImp, NodeRemoved), boost::any(pNode));
+
+   WizardNodeImp* pNodeImp = static_cast<WizardNodeImp*>(pNode);
+   if (pNodeImp != NULL)
+   {
+      pNodeImp->detach(SIGNAL_NAME(WizardNodeImp, NodeConnected), Slot(this, &WizardItemImp::nodeConnected));
+      pNodeImp->detach(SIGNAL_NAME(WizardNodeImp, NodeDisconnected),
+         Slot(this, &WizardItemImp::nodeDisconnected));
+
+      if (bDelete == true)
+      {
+         pNodeImp->deleteValue();
+      }
+
+      delete pNodeImp;
    }
 }

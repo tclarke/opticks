@@ -115,6 +115,7 @@ WizardGraphicsItem::WizardGraphicsItem(WizardItem* pItem, QGraphicsItem* pParent
    mpItem.addSignal(SIGNAL_NAME(WizardItemImp, PositionChanged), Slot(this, &WizardGraphicsItem::itemPositionChanged));
    mpItem.addSignal(SIGNAL_NAME(WizardItemImp, BatchModeChanged),
       Slot(this, &WizardGraphicsItem::itemBatchModeChanged));
+   mpItem.addSignal(SIGNAL_NAME(WizardItemImp, NodeAdded), Slot(this, &WizardGraphicsItem::refreshNodes));
 }
 
 WizardGraphicsItem::~WizardGraphicsItem()
@@ -439,6 +440,10 @@ QColor WizardGraphicsItem::getItemBackgroundColor(const QString& itemType)
    else if (itemTypeString == PlugInManagerServices::WizardType())
    {
       itemColor.setRgb(225, 175, 225);
+   }
+   else if (itemTypeString == "Script")
+   {
+      itemColor.setRgb(255, 100, 165);
    }
    else
    {
@@ -982,8 +987,66 @@ void WizardGraphicsItem::updateNodes()
          Slot(this, &WizardGraphicsItem::nodeTypeChanged)));
       VERIFYNR(pNodeImp->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &WizardGraphicsItem::nodeDeleted)));
 
+      
       mNodes[pNode] = pair<QGraphicsEllipseItem*, QGraphicsPixmapItem*>(pEllipse, pPixmap);
    }
+
+   // Update the item rectangle and text positions
+   updateGeometry();
+}
+
+void WizardGraphicsItem::refreshNodes(Subject& subject, const std::string& signal, const boost::any& data)
+{
+   WizardNode* pNode = boost::any_cast<WizardNode*>(data);
+   WizardNodeImp* pNodeImp = static_cast<WizardNodeImp*>(pNode);
+   VERIFYNRV(pNodeImp != NULL);
+
+   // Node item
+   QGraphicsEllipseItem* pEllipse = new QGraphicsEllipseItem(mpRect);
+   if (pEllipse != NULL)
+   {
+      // Pen
+      QColor nodeColor = getNodeColor(pNode);
+      QColor itemColor = mpRect->brush().color();
+
+      if ((nodeColor == itemColor) || (nodeColor == Qt::white))
+      {
+         pEllipse->setPen(QPen(Qt::black));
+      }
+      else
+      {
+         pEllipse->setPen(QPen(Qt::NoPen));
+      }
+
+      // Brush
+      pEllipse->setBrush(QBrush(nodeColor));
+
+      // Tool tip
+      QString tipText = getNodeToolTip(pNode);
+      pEllipse->setToolTip(tipText);
+   }
+
+   // Down button item
+   QGraphicsPixmapItem* pPixmap = NULL;
+
+   const vector<string>& validTypes = pNodeImp->getValidTypes();
+   if (validTypes.size() > 1)
+   {
+      pPixmap = new QGraphicsPixmapItem(mpRect);
+
+      // Pixmap
+      QPixmap pixButton = QPixmap::grabWidget(mpDownButton);
+      pPixmap->setPixmap(pixButton);
+   }
+
+   // Connections
+   VERIFYNR(pNodeImp->attach(SIGNAL_NAME(WizardNodeImp, Renamed), Slot(this, &WizardGraphicsItem::nodeRenamed)));
+   VERIFYNR(pNodeImp->attach(SIGNAL_NAME(WizardNodeImp, TypeChanged),
+      Slot(this, &WizardGraphicsItem::nodeTypeChanged)));
+   VERIFYNR(pNodeImp->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &WizardGraphicsItem::nodeDeleted)));
+
+      
+   mNodes[pNode] = pair<QGraphicsEllipseItem*, QGraphicsPixmapItem*>(pEllipse, pPixmap);
 
    // Update the item rectangle and text positions
    updateGeometry();

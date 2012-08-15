@@ -7,9 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QLayout>
-
 #include "AppVerify.h"
+#include "PlugInManagerServices.h"
 #include "WizardGraphicsItem.h"
 #include "WizardItemProperties.h"
 #include "WizardNodeImp.h"
@@ -17,6 +16,11 @@
 #include "WizardObjectImp.h"
 
 #include <vector>
+
+#include <QtGui/QAction>
+#include <QtGui/QInputDialog>
+#include <QtGui/QLayout>
+#include <QtGui/QMessageBox>
 
 WizardItemProperties::WizardItemProperties(QWidget* pParent) :
    QWidget(pParent),
@@ -70,9 +74,17 @@ WizardItemProperties::WizardItemProperties(QWidget* pParent) :
    mpItemInputsTree->setColumnCount(columnNames.count());
    mpItemInputsTree->setHeaderLabels(columnNames);
    mpItemInputsTree->setSortingEnabled(false);
-   mpItemInputsTree->setSelectionMode(QAbstractItemView::NoSelection);
+   mpItemInputsTree->setSelectionMode(QAbstractItemView::SingleSelection);
+   mpItemInputsTree->setSelectionBehavior(QAbstractItemView::SelectRows);
    mpItemInputsTree->setRootIsDecorated(false);
    mpItemInputsTree->setEnabled(false);
+   mpItemInputsTree->setContextMenuPolicy(Qt::ActionsContextMenu);
+   QAction* pNewInputAction = new QAction("&New Input", this);
+   VERIFYNR(connect(pNewInputAction, SIGNAL(triggered()), this, SLOT(newInput())));
+   QAction* pRemoveInputAction = new QAction("&Remove Input", this);
+   VERIFYNR(connect(pRemoveInputAction, SIGNAL(triggered()), this, SLOT(removeInput())));
+   mpItemInputsTree->addAction(pNewInputAction);
+   mpItemInputsTree->addAction(pRemoveInputAction);
 
    // Outputs
    QLabel* pItemOutputs = new QLabel("Outputs:", this);
@@ -80,9 +92,17 @@ WizardItemProperties::WizardItemProperties(QWidget* pParent) :
    mpItemOutputsTree->setColumnCount(columnNames.count());
    mpItemOutputsTree->setHeaderLabels(columnNames);
    mpItemOutputsTree->setSortingEnabled(false);
-   mpItemOutputsTree->setSelectionMode(QAbstractItemView::NoSelection);
+   mpItemOutputsTree->setSelectionMode(QAbstractItemView::SingleSelection);
+   mpItemOutputsTree->setSelectionBehavior(QAbstractItemView::SelectRows);
    mpItemOutputsTree->setRootIsDecorated(false);
    mpItemOutputsTree->setEnabled(false);
+   mpItemOutputsTree->setContextMenuPolicy(Qt::ActionsContextMenu);
+   QAction* pNewOutputAction = new QAction("&New Output", this);
+   VERIFYNR(connect(pNewOutputAction, SIGNAL(triggered()), this, SLOT(newOutput())));
+   QAction* pRemoveOutputAction = new QAction("&Remove Output", this);
+   VERIFYNR(connect(pRemoveOutputAction, SIGNAL(triggered()), this, SLOT(removeOutput())));
+   mpItemOutputsTree->addAction(pNewOutputAction);
+   mpItemOutputsTree->addAction(pRemoveOutputAction);
 
    // Layout
    QHBoxLayout* pButtonLayout = new QHBoxLayout();
@@ -517,4 +537,138 @@ void WizardItemProperties::setItemExecutionMode(int modeIndex)
          mpItem->setBatchMode(false);
       }
    }
+}
+
+void WizardItemProperties::newInput()
+{
+   if (mpItem->getType() != "Script")
+   {
+      QMessageBox::warning(this, "Warning", "Inputs can only be added to Script items.", QMessageBox::Ok, QMessageBox::NoButton);
+      return;
+   }
+   QStringList types = getAllValidTypes();
+   bool ok;
+   QString type = QInputDialog::getItem(this, "Input Type", "Enter a type for the input", types, 0, false, &ok);
+   if (!ok)
+   {
+      return;
+   }
+   QString name = QInputDialog::getText(this, "Input Name", "Enter a name for the input", QLineEdit::Normal, type, &ok);
+   if (!ok)
+   {
+      return;
+   }
+   QString desc = QInputDialog::getText(this, "Input Description", "Enter an optional description.", QLineEdit::Normal, QString(), &ok);
+   if (!ok)
+   {
+      return;
+   }
+   WizardNode* pNode = mpItem->addNode(name.toStdString(), type.toStdString(), desc.toStdString(), true);
+}
+
+void WizardItemProperties::removeInput()
+{
+   if (mpItem->getType() != "Script")
+   {
+      QMessageBox::warning(this, "Warning", "Inputs can only be removed from Script items.", QMessageBox::Ok, QMessageBox::NoButton);
+      return;
+   }
+   // Figure out what node is being removed
+   QList<QTreeWidgetItem*> items = mpItemInputsTree->selectedItems();
+   if (items.isEmpty())
+   {
+      return;
+   }
+   QTreeWidgetItem* pItem = items.front(); // single selection is on so we only need the front
+   WizardNodeImp* pNode = NULL;
+   QMapIterator<WizardNodeImp*, QTreeWidgetItem*> iter(mNodes);
+   while (iter.hasNext())
+   {
+      iter.next();
+      if (iter.value() == pItem)
+      {
+         pNode = iter.key();
+         break;
+      }
+   }
+   if (pNode == NULL)
+   {
+      return;
+   }
+   mpItemInputsTree->removeItemWidget(pItem, 0);
+   mpItem->removeNode(pNode);
+   mpItemInputsTree->setEnabled(!mpItem->getInputNodes().empty());
+}
+
+void WizardItemProperties::newOutput()
+{
+   if (mpItem->getType() != "Script")
+   {
+      QMessageBox::warning(this, "Warning", "Outputs can only be added to Script items.", QMessageBox::Ok, QMessageBox::NoButton);
+      return;
+   }
+   QStringList types = getAllValidTypes();
+   bool ok;
+   QString type = QInputDialog::getItem(this, "Output Type", "Enter a type for the output", types, 0, false, &ok);
+   if (!ok)
+   {
+      return;
+   }
+   QString name = QInputDialog::getText(this, "Output Name", "Enter a name for the output", QLineEdit::Normal, type, &ok);
+   if (!ok)
+   {
+      return;
+   }
+   QString desc = QInputDialog::getText(this, "Output Description", "Enter an optional description.", QLineEdit::Normal, QString(), &ok);
+   if (!ok)
+   {
+      return;
+   }
+   WizardNode* pNode = mpItem->addNode(name.toStdString(), type.toStdString(), desc.toStdString(), false);
+}
+
+void WizardItemProperties::removeOutput()
+{
+   if (mpItem->getType() != "Script")
+   {
+      QMessageBox::warning(this, "Warning", "Outputs can only be remove from Script items.", QMessageBox::Ok, QMessageBox::NoButton);
+      return;
+   }
+   // Figure out what node is being removed
+   QList<QTreeWidgetItem*> items = mpItemOutputsTree->selectedItems();
+   if (items.isEmpty())
+   {
+      return;
+   }
+   QTreeWidgetItem* pItem = items.front(); // single selection is on so we only need the front
+   WizardNodeImp* pNode = NULL;
+   QMapIterator<WizardNodeImp*, QTreeWidgetItem*> iter(mNodes);
+   while (iter.hasNext())
+   {
+      iter.next();
+      if (iter.value() == pItem)
+      {
+         pNode = iter.key();
+         break;
+      }
+   }
+   if (pNode == NULL)
+   {
+      return;
+   }
+   mpItemOutputsTree->removeItemWidget(pItem, 0);
+   mpItem->removeNode(pNode);
+   mpItemOutputsTree->setEnabled(!mpItem->getOutputNodes().empty());
+}
+
+QStringList WizardItemProperties::getAllValidTypes() const
+{
+   const std::vector<std::string>& types = Service<PlugInManagerServices>()->getArgTypes();
+   QStringList lst;
+   lst.reserve(types.size());
+   for (std::vector<std::string>::const_iterator it = types.begin(); it != types.end(); ++it)
+   {
+      lst.push_back(QString::fromStdString(*it));
+   }
+   return lst;
 }

@@ -27,6 +27,7 @@
 #include "DataVariantEditor.h"
 #include "DesktopServices.h"
 #include "FileResource.h"
+#include "jsedit.h"
 #include "NameTypeValueDlg.h"
 #include "ObjectResource.h"
 #include "PlugInArgList.h"
@@ -354,13 +355,20 @@ bool WizardView::editItem(WizardItem* pItem)
    else if (itemType == "Script")
    {
       QString txt = QString::fromStdString(pItem->getScriptText());
-      bool ok;
-      QString val = QInputDialog::getText(this, QString::fromStdString(pItem->getName()), QString(), QLineEdit::Normal, QString::fromStdString(pItem->getScriptText()), &ok);
-      if (ok && val != txt)
+      JSDialog editor(this);
+      editor.editor()->setWindowTitle(QString::fromStdString(pItem->getName()));
+      editor.editor()->setFrameShape(JSEdit::NoFrame);
+      editor.editor()->setWordWrapMode(QTextOption::NoWrap);
+      editor.editor()->setTabStopWidth(4);
+      editor.editor()->setPlainText(txt);
+      editor.editor()->setBracketsMatchingEnabled(true);
+      editor.editor()->setCodeFoldingEnabled(true);
+      if (editor.exec() == QDialog::Accepted)
       {
-         pItem->setScriptText(val.toStdString());
+         pItem->setScriptText(editor.editor()->toPlainText().toStdString());
+         return true;
       }
-      return ok;
+      return false;
    }
    return false;
 }

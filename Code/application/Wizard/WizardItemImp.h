@@ -421,6 +421,9 @@ protected:
    WizardNode* addNode(const std::string& name, const std::string& type, const std::string& description,
       bool inputNode);
    void clearNodes(bool inputNodes);
+   void removeNode(WizardNode* pNode);
+
+   friend class WizardItemProperties;
 
 private:
    WizardItemImp(const WizardItemImp& item);

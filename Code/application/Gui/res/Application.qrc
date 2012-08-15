@@ -244,6 +244,7 @@
    <file alias="WindowList">icons/WindowListIcon.png</file>
    <file alias="WizardBuilder">icons/WizardBuilderIcon.png</file>
    <file alias="WizardItem">icons/WizardItem.png</file>
+   <file alias="WizardScriptItem">icons/script_icon.png</file>
    <file alias="WorkbookMode">icons/WorkbookModeIcon.png</file>
    <file alias="ZoomAndPanToPoint">icons/ZoomAndPanToPointIcon.png</file>
    <file alias="ZoomInCursor">icons/ZoomInCursor.png</file>

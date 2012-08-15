@@ -129,6 +129,61 @@ WizardItemPalette::WizardItemPalette(QWidget* pParent) :
       }
    }
 
+   // Add script items
+   {
+      QPixmap tmpPixmap(":/icons/WizardScriptItem");
+      QPixmap iconPixmap(tmpPixmap.size());
+      QColor itemColor = WizardGraphicsItem::getItemBackgroundColor("Script");
+      iconPixmap.fill(itemColor);
+
+      QPainter painter(&iconPixmap);
+      painter.drawPixmap(0, 0, tmpPixmap);
+      painter.end();
+
+      QIcon itemIcon(iconPixmap);
+      // Add the script item to the palette containing all items
+      QListWidgetItem* pAllItem = new QListWidgetItem("Javascript", pAllPalette);
+      pAllItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsEnabled);
+      pAllItem->setIcon(itemIcon);
+      pAllItem->setData(Qt::UserRole, "Script");
+      pAllItem->setToolTip("Javascript Item");
+
+      // Add the script item to the plug-in type palette
+      WizardItemList* pPalette = NULL;
+      for (int i = 0; i < count(); ++i)
+      {
+         if (itemText(i) == "Script")
+         {
+            pPalette = dynamic_cast<WizardItemList*>(widget(i));
+            break;
+         }
+      }
+
+      if (pPalette == NULL)
+      {
+         pPalette = new WizardItemList(this);
+         addItem(pPalette, "Script");
+
+         if (displayMode == 0)
+         {
+            pPalette->enableListMode();
+         }
+         else if (displayMode == 1)
+         {
+            pPalette->enableIconMode();
+         }
+      }
+
+      if (pPalette != NULL)
+      {
+         QListWidgetItem* pItem = new QListWidgetItem("Javascript", pPalette);
+         pItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsEnabled);
+         pItem->setIcon(itemIcon);
+         pItem->setData(Qt::UserRole, "Script");
+         pItem->setToolTip("Javascript Item");
+      }
+   }
+
    // Add value items
    QPixmap tmpPixmap(":/icons/WizardItem");
    QPixmap iconPixmap(tmpPixmap.size());

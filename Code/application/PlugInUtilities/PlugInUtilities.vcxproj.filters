@@ -116,9 +116,6 @@
     <ClInclude Include="Interfaces\GlTextureResource.h">
       <Filter>Interfaces</Filter>
     </ClInclude>
-    <ClInclude Include="Interfaces\InterpolationComboBox.h">
-      <Filter>Interfaces</Filter>
-    </ClInclude>
     <ClInclude Include="Interfaces\InterpreterUtilities.h">
       <Filter>Interfaces</Filter>
     </ClInclude>
@@ -347,6 +344,9 @@
       <Filter>moc</Filter>
     </ClCompile>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_InterpolationComboBox.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_jsedit.cpp">
       <Filter>moc</Filter>
     </ClCompile>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_LabeledSection.cpp">
@@ -751,6 +751,9 @@
     <ClCompile Include="xmlwriter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="jsedit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="ArcRegionComboBox.h">
@@ -944,6 +947,12 @@
     </CustomBuild>
     <CustomBuild Include="EventMessages.mc">
       <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Interfaces\InterpolationComboBox.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Interfaces\jsedit.h">
+      <Filter>Interfaces</Filter>
     </CustomBuild>
   </ItemGroup>
 </Project>

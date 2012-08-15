@@ -65,6 +65,7 @@ protected:
    void nodeRenamed(Subject& subject, const std::string& signal, const boost::any& data);
    void nodeTypeChanged(Subject& subject, const std::string& signal, const boost::any& data);
    void nodeDeleted(Subject& subject, const std::string& signal, const boost::any& data);
+   void refreshNodes(Subject& subject, const std::string& signal, const boost::any& data);
 
    QRectF getNodeRect(WizardNode* pNode) const;
    QString getNodeToolTip(WizardNode* pNode) const;

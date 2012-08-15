@@ -53,8 +53,14 @@ protected slots:
    void increaseItemOrder();
    void decreaseItemOrder();
    void setItemExecutionMode(int modeIndex);
+   void newInput();
+   void removeInput();
+   void newOutput();
+   void removeOutput();
 
 private:
+   QStringList getAllValidTypes() const;
+
    WizardItemProperties(const WizardItemProperties& rhs);
    WizardItemProperties& operator=(const WizardItemProperties& rhs);
    QLabel* mpItemNameLabel;
