@@ -58,3 +58,20 @@ void InterpreterManagerShell::setFileExtensions(const std::string& extensions)
 {
    mExtensions = extensions;
 }
+
+const std::vector<std::string>& InterpreterManagerShell::getMimeTypes() const
+{
+   return mMimeTypes;
+}
+
+void InterpreterManagerShell::addMimeType(const std::string& mimeType)
+{
+   if (mimeType.empty())
+   {
+      return;
+   }
+   if (std::find(mMimeTypes.begin(), mMimeTypes.end(), mimeType) == mMimeTypes.end())
+   {
+      mMimeTypes.push_back(mimeType);
+   }
+}

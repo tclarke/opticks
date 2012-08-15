@@ -13,6 +13,7 @@
 #include "Subject.h"
 
 #include <string>
+#include <vector>
 
 class Interpreter;
 
@@ -157,6 +158,15 @@ public:
     *           and "Source Files (*.c*);;Header Files (*.h)".
     */
    virtual std::string getFileExtensions() const = 0;
+
+   /**
+    *  Returns the MIME type or types associaed with the interpreter.
+    *
+    *  @return Zero or more MIME types associated with scripts executed
+    *          by this interpreter. These types should be the same as the
+    *          types which would be used in an HTML <script> tag.
+    */
+   virtual const std::vector<std::string>& getMimeTypes() const = 0;
 
 protected:
    /**

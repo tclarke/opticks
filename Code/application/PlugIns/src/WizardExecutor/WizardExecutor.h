@@ -44,11 +44,14 @@ public:
 
 protected:
    bool extractInputArgs(PlugInArgList* pInArgList);
-   void populatePlugInArgList(PlugInArgList* pArgList, const WizardItem* pItem, bool bInArgs);
+   void populatePlugInArgList(PlugInArgList* pArgList, const WizardItem* pItem, bool bInArgs, bool addMissingArgs=false);
    bool launchPlugIn(WizardItem* pItem);
+   bool executeScriptItem(WizardItem* pItem);
    void setConnectedNodeValues(WizardItem* pItem, PlugInArgList* pOutArgList = NULL);
    void resetNodeValues(WizardItem* pItem);
    void resetAllNodeValues();
+
+   void displayScriptOutput(Subject& subject, const std::string& signal, const boost::any& v);
 
 private:
    bool mbInteractive;

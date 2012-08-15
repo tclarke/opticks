@@ -16,6 +16,8 @@
 #include "Executable.h"
 #include "FileDescriptor.h"
 #include "Filename.h"
+#include "Interpreter.h"
+#include "InterpreterUtilities.h"
 #include "Layer.h"
 #include "MessageLogResource.h"
 #include "ModelServices.h"
@@ -39,6 +41,8 @@
 
 #include <QtCore/QDir>
 #include <QtGui/QFileDialog>
+
+#include <boost/any.hpp>
 
 using namespace std;
 
@@ -207,6 +211,13 @@ bool WizardExecutor::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLi
             pStep->addMessage(mMessage, "app", "9FC4024E-00FA-42cd-8EC3-2AAE84843BA7", true);
             bSuccess = true;
             setConnectedNodeValues(*plIter);
+         }
+         else if ((*plIter)->getType() == "Script")
+         {
+            mMessage = "Executing Script Item: " + (*plIter)->getName();
+            pStep->addMessage(mMessage, "app", "2943CB5D-540B-449E-A62D-C7D30A10E81F", true);
+            bSuccess = executeScriptItem(*plIter);
+            resetNodeValues(*plIter);
          }
          else
          {
@@ -454,7 +465,7 @@ bool WizardExecutor::extractInputArgs(PlugInArgList* pInArgList)
    return true;
 }
 
-void WizardExecutor::populatePlugInArgList(PlugInArgList* pArgList, const WizardItem* pItem, bool bInArgs)
+void WizardExecutor::populatePlugInArgList(PlugInArgList* pArgList, const WizardItem* pItem, bool bInArgs, bool addMissingArgs)
 {
    if ((pArgList == NULL) || (pItem == NULL))
    {
@@ -462,15 +473,17 @@ void WizardExecutor::populatePlugInArgList(PlugInArgList* pArgList, const Wizard
    }
 
    // Get the wizard nodes
-   vector<WizardNode*> nodes;
+   list<WizardNode*> nodes;
 
    if (bInArgs)
    {
-      nodes = pItem->getInputNodes();
+      vector<WizardNode*> tmp = pItem->getInputNodes();
+      std::copy(tmp.begin(), tmp.end(), std::back_inserter(nodes));
    }
    else
    {
-      nodes = pItem->getOutputNodes();
+      vector<WizardNode*> tmp = pItem->getOutputNodes();
+      std::copy(tmp.begin(), tmp.end(), std::back_inserter(nodes));
    }
 
    // Set the plug-in arg actual values from the node values
@@ -483,7 +496,7 @@ void WizardExecutor::populatePlugInArgList(PlugInArgList* pArgList, const Wizard
          string argName = pArg->getName();
          string argType = pArg->getType();
 
-         vector<WizardNode*>::iterator iter;
+         list<WizardNode*>::iterator iter;
          for (iter = nodes.begin(); iter != nodes.end(); ++iter)
          {
             WizardNode* pNode = *iter;
@@ -508,7 +521,7 @@ void WizardExecutor::populatePlugInArgList(PlugInArgList* pArgList, const Wizard
                      // only for input args - bkg plugin must set output arg to its Progress arg
                      pArg->setActualValue(mpProgress);
                   }
-
+                  nodes.erase(iter);
                   break;
                }
             }
@@ -521,6 +534,28 @@ void WizardExecutor::populatePlugInArgList(PlugInArgList* pArgList, const Wizard
                pArg->setActualValue(mpProgress);
             }
          }
+      }
+   }
+   if (addMissingArgs && !nodes.empty())
+   {
+      for (std::list<WizardNode*>::iterator iter = nodes.begin(); iter != nodes.end(); ++iter)
+      {
+         WizardNode* pNode = *iter;
+         VERIFYNRV(pNode);
+         PlugInArg* pArg = Service<PlugInManagerServices>()->getPlugInArg();
+         pArg->setName(pNode->getName());
+         pArg->setType(pNode->getType());
+         void* pValue = pNode->getValue();
+         if (pValue != NULL)
+         {
+            pArg->setActualValue(pValue);
+         }
+         else if (pNode->getType() == TypeConverter::toString<Progress>() && bInArgs)
+         {
+            // only for input args - bkg plugin must set output arg to its Progress arg
+            pArg->setActualValue(mpProgress);
+         }
+         pArgList->addArg(*pArg);
       }
    }
 }
@@ -586,6 +621,67 @@ bool WizardExecutor::launchPlugIn(WizardItem* pItem)
    mpCurrentPlugIn = NULL;
 
    return pluginExecuteStatus;
+}
+
+bool WizardExecutor::executeScriptItem(WizardItem* pItem)
+{
+   VERIFY(pItem != NULL);
+
+   StepResource pStep("Executing " + pItem->getType() + " Item: " + pItem->getName(), "app",
+      "6A743B49-618B-44ed-9C5A-B4D67FB809D2");
+
+   bool scriptExecuteStatus = false;
+
+   /** TODO:Add code get an interpreter by mime type and match to the script type **/
+   Interpreter* pInterp = InterpreterUtilities::getInterpreter("Javascript");
+   if (pInterp == NULL)
+   {
+      std::string msg = "Unable to locate the Javascript interpreter.";
+      if (mpProgress != NULL) 
+      {
+         mpProgress->updateProgress(msg, 0, ERRORS);
+      }
+      pStep->finalize(Message::Failure, msg);
+      return false;
+   }
+
+   PlugInArgList* pInArgList = Service<PlugInManagerServices>()->getPlugInArgList();
+   PlugInArgList* pOutArgList = Service<PlugInManagerServices>()->getPlugInArgList();
+   try
+   {
+      VERIFY(pInArgList != NULL && pOutArgList != NULL);
+      populatePlugInArgList(pInArgList, pItem, true, true);
+      populatePlugInArgList(pOutArgList, pItem, false, true);
+
+      /** TODO:Add code to set plugin args **/
+      scriptExecuteStatus = pInterp->executeScopedCommand(pItem->getScriptText(),
+            Slot(this, &WizardExecutor::displayScriptOutput),
+            Slot(this, &WizardExecutor::displayScriptOutput),
+            mpProgress);
+
+      if (scriptExecuteStatus)
+      {
+         setConnectedNodeValues(pItem, pOutArgList);
+         pStep->finalize(Message::Success);
+      }
+      else
+      {
+         pStep->finalize(Message::Failure);
+      }
+   }
+   catch (AssertException exc)
+   {
+      if (mpProgress != NULL) 
+      {
+         mpProgress->updateProgress(exc.getText(), 0, ERRORS);
+      }
+      pStep->finalize(Message::Failure, exc.getText());
+      scriptExecuteStatus = false;
+   }
+   Service<PlugInManagerServices>()->destroyPlugInArgList(pInArgList);
+   Service<PlugInManagerServices>()->destroyPlugInArgList(pOutArgList);
+
+   return scriptExecuteStatus;
 }
 
 void WizardExecutor::setConnectedNodeValues(WizardItem* pItem, PlugInArgList* pOutArgList)
@@ -800,6 +896,26 @@ void WizardExecutor::resetAllNodeValues()
          {
             resetNodeValues(pItem);
          }
+      }
+   }
+}
+
+void WizardExecutor::displayScriptOutput(Subject& subject, const std::string& signal, const boost::any& v)
+{
+   std::string msg = boost::any_cast<std::string>(v);
+   if (mpProgress != NULL && !msg.empty())
+   {
+      if (signal == SIGNAL_NAME(Interpreter, ErrorText))
+      {
+         mpProgress->updateProgress(msg, 0, ERRORS);
+      }
+      else
+      {
+         std::string text;
+         int per;
+         ReportingLevel gran;         
+         mpProgress->getProgress(text, per, gran);
+         mpProgress->updateProgress(msg, (per + 1) % 100, NORMAL);
       }
    }
 }

@@ -91,6 +91,15 @@ public:
     */
    virtual std::string getFileExtensions() const;
 
+   /**
+    *  @copydoc InterpreterManager::getMimeTypes()
+    *
+    *  @default The default implementation returns the MIME types added
+    *           with addMimeType(). If addMimeType() has not yet been
+    *           called, an empty vector is returned.
+    */
+   virtual const std::vector<std::string>& getMimeTypes() const;
+
 protected:
    /**
     *  Sets the default scripting file extensions recognized by the interpreter.
@@ -106,6 +115,18 @@ protected:
    void setFileExtensions(const std::string& extensions);
 
    /**
+    *  Add a supported MIME type to the list recognizes by he interpreter.
+    *
+    *  @param   mimeType
+    *           A string indicating the registered or experimental (x- prefix)
+    *           MIME type recognized by the interpreter. These are the MIME types
+    *           that are used with the HTML <script> tag and similar context.
+    *           MIME types may be used by calling objects to determine if a script
+    *           is supported by this interpreter. For example: "text/javascript"
+    */
+   void addMimeType(const std::string& mimeType);
+
+   /**
     *  Sets the default interactive support for the interpreter.
     *
     *  @param enabled
@@ -119,6 +140,7 @@ protected:
 private:
    std::string mExtensions;
    bool mInteractiveEnabled;
+   std::vector<std::string> mMimeTypes;
 };
 
 #endif
