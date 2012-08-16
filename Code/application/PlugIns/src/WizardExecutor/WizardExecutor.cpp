@@ -496,6 +496,7 @@ void WizardExecutor::populatePlugInArgList(PlugInArgList* pArgList, const Wizard
          string argName = pArg->getName();
          string argType = pArg->getType();
 
+         bool found = false;
          list<WizardNode*>::iterator iter;
          for (iter = nodes.begin(); iter != nodes.end(); ++iter)
          {
@@ -522,12 +523,13 @@ void WizardExecutor::populatePlugInArgList(PlugInArgList* pArgList, const Wizard
                      pArg->setActualValue(mpProgress);
                   }
                   nodes.erase(iter);
+                  found = true;
                   break;
                }
             }
          }
 
-         if (iter == nodes.end())
+         if (!found)
          {
             if (argType == TypeConverter::toString<Progress>())
             {

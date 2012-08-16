@@ -10,25 +10,71 @@
 #ifndef JSWIZARDEXECUTOR_H
 #define JSWIZARDEXECUTOR_H
 
-#include "WizardShell.h"
+#include "Interpreter.h"
+#include "InterpreterManagerShell.h"
+#include "SubjectImp.h"
+#include <v8.h>
 
-class JSWizardExecutor : public WizardShell
+class JSInterpreter;
+
+class JSWizardExecutor : public InterpreterManagerShell, SubjectImp
 {
 public:
    JSWizardExecutor();
    virtual ~JSWizardExecutor();
 
-   bool setBatch();
-   bool setInteractive();
-   bool hasAbort();
-   bool getInputSpecification(PlugInArgList*& pArgList);
-   bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
-   bool abort();
+   virtual bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
+
+   virtual bool isStarted() const;
+   virtual bool start();
+   virtual std::string getStartupMessage() const;
+   virtual Interpreter* getInterpreter() const;
+
+   virtual const std::string& getObjectType() const;
+   virtual bool isKindOf(const std::string& className) const;
+
+   SUBJECTADAPTER_METHODS(SubjectImp)
 
 private:
-   bool mbInteractive;
-   bool mbAbort;
-   Executable* mpPlugIn;
+   JSInterpreter* mpInterpreter;
+};
+
+class JSInterpreter : public Interpreter, public SubjectImp
+{
+public:
+   JSInterpreter();
+   virtual ~JSInterpreter();
+
+   bool start();
+
+   virtual std::string getPrompt() const;
+   virtual bool executeCommand(const std::string& command);
+   virtual bool executeScopedCommand(const std::string& command, const Slot& output, const Slot& error, Progress* pProgress);
+   virtual bool isGlobalOutputShown() const;
+   virtual void showGlobalOutput(bool val);
+
+   virtual bool getLastResult() const;
+   void sendOutput(const std::string& text);
+   void sendError(const std::string& text);
+
+   virtual const std::string& getObjectType() const;
+   virtual bool isKindOf(const std::string& className) const;
+
+   SUBJECTADAPTER_METHODS(SubjectImp)
+
+private:
+   void createGlobals();
+   void sendOutput(const std::string& text, bool scoped);
+   void sendError(const std::string& text, bool scoped);
+
+   SIGNAL_METHOD(JSInterpreter, ScopedOutputText);
+   SIGNAL_METHOD(JSInterpreter, ScopedErrorText);
+
+   bool mGlobalOutputShown;
+   v8::Handle<v8::ObjectTemplate> mGlobalTemplate;
+   v8::Persistent<v8::Context> mMainContext;
+   bool mIsScoped;
+   bool mLastResult;
 };
 
 #endif

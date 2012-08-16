@@ -17,90 +17,334 @@
 #include "PlugInManagerServices.h"
 #include "PlugInRegistration.h"
 #include "Progress.h"
+#include "Subject.h"
 
 #include <v8.h>
 #include <QtCore/QFile>
 
 REGISTER_PLUGIN_BASIC(OpticksWizardExecutor, JSWizardExecutor);
 
-v8::Handle<v8::Value> ConsoleCallback(v8::Local<v8::String> property, const v8::AccessorInfo& info)
+namespace
 {
-   v8::Local<v8::Object> self = info.Holder();
-   v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(self->GetInternalField(0));
-   Progress* pProgress = static_cast<Progress*>(wrap->Value());
-   /*v8::String::AsciiValue asciiValue(value);
-   if (property->Equals(v8::String::New("log")))
+bool sFatalOccurred = false;
+std::string sFatalMessage;
+
+void handleFatalError(const char* pLocation, const char* pMessage)
+{
+   sFatalMessage = std::string(pMessage) + " at " + pLocation;
+   sFatalOccurred = true;
+}
+
+#define GET_INTERP(args_) static_cast<JSInterpreter*>(v8::Local<v8::External>::Cast(v8::Handle<v8::Object>::Cast(args_.Holder()->CreationContext()->Global()->GetPrototype())->GetInternalField(0))->Value())
+
+v8::Handle<v8::Value> send_out_callback(const v8::Arguments& args)
+{
+   JSInterpreter* pInterp = GET_INTERP(args);
+   if (pInterp == NULL || args.Length() == 0)
    {
-      std::string text;
-      int percent;
-      ReportingLevel gran;
-      pProgress->getProgress(text, percent, gran);
-      pProgress->updateProgress
+      return v8::Null();
    }
-   else if (property->Equals(v8::String::New("warn")))
+   std::string msg;
+   for (int i = 0; i < args.Length(); ++i)
    {
+      v8::String::AsciiValue asciiValue(args[i]);
+      if (!msg.empty())
+      {
+         msg += " ";
+      }
+      msg += *asciiValue;
    }
-   else if (property->Equals(v8::String::New("error")))
-   {
-   }
-   return v8::String::New(text.c_str());*/
+   pInterp->sendOutput(msg);
    return v8::Null();
 }
 
-void SetProgress(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info)
+v8::Handle<v8::Value> send_error_callback(const v8::Arguments& args)
 {
-   v8::Local<v8::Object> self = info.Holder();
-   v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(self->GetInternalField(0));
-   Progress* pProgress = static_cast<Progress*>(wrap->Value());
-   v8::String::AsciiValue asciiValue(value);
-   pProgress->updateProgress(std::string(*asciiValue), 10, NORMAL);
+   JSInterpreter* pInterp = GET_INTERP(args);
+   if (pInterp == NULL || args.Length() == 0)
+   {
+      return v8::Null();
+   }
+   std::string msg;
+   for (int i = 0; i < args.Length(); ++i)
+   {
+      v8::String::AsciiValue asciiValue(args[i]);
+      if (!msg.empty())
+      {
+         msg += " ";
+      }
+      msg += *asciiValue;
+   }
+   pInterp->sendError(msg);
+   return v8::Null();
+}
 }
 
-JSWizardExecutor::JSWizardExecutor() :
-   mbInteractive(false),
-   mbAbort(false),
-   mpPlugIn(NULL)
+JSWizardExecutor::JSWizardExecutor() : mpInterpreter(NULL)
 {
-   setName("JavaScript Wizard Executor");
+   setName("Javascript");
    setVersion(APP_VERSION_NUMBER);
    setCreator("Ball Aerospace & Technologies, Corp.");
    setCopyright(APP_COPYRIGHT);
-   setShortDescription("JavaScript Wizard Executor");
-   setDescription("JavaScript Wizard Executor based on the Google v8 engine.");
+   setShortDescription("Javascript interpreter manager.");
    setDescriptorId("{A7D78254-8564-40F2-8682-689958A58E17}");
-   allowMultipleInstances(true);
+   allowMultipleInstances(false);
    setProductionStatus(APP_IS_PRODUCTION_RELEASE);
+   setFileExtensions("Javascript Files (*.js)");
+   setWizardSupported(false);
+   setInteractiveEnabled(true);
+   addMimeType("text/javascript");
 }
 
 JSWizardExecutor::~JSWizardExecutor()
 {
 }
 
-bool JSWizardExecutor::setBatch()
+bool JSWizardExecutor::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
-   mbInteractive = false;
+   start();
    return true;
 }
 
-bool JSWizardExecutor::setInteractive()
+bool JSWizardExecutor::isStarted() const
 {
-   mbInteractive = true;
+   return mpInterpreter != NULL && !sFatalOccurred;
+}
+
+bool JSWizardExecutor::start()
+{
+   mpInterpreter = new JSInterpreter();
+   if (sFatalOccurred)
+   {
+      return false;
+   }
+   return mpInterpreter->start();
+}
+
+std::string JSWizardExecutor::getStartupMessage() const
+{
+   if (sFatalOccurred)
+   {
+      return sFatalMessage;
+   }
+   if (mpInterpreter == NULL)
+   {
+      return "v8 javascript engine could not be initialized";
+   }
+   return std::string("v8 javascript engine version ") + v8::V8::GetVersion();
+}
+
+Interpreter* JSWizardExecutor::getInterpreter() const
+{
+   return mpInterpreter;
+}
+
+const std::string& JSWizardExecutor::getObjectType() const
+{
+   static std::string sType("JSWizardExecutor");
+   return sType;
+}
+
+bool JSWizardExecutor::isKindOf(const std::string& className) const
+{
+   if (className == getObjectType())
+   {
+      return true;
+   }
+   return SubjectImp::isKindOf(className);
+}
+
+JSInterpreter::JSInterpreter() : mGlobalOutputShown(false), mIsScoped(false), mLastResult(false)
+{
+}
+
+JSInterpreter::~JSInterpreter()
+{
+   if (!mMainContext.IsEmpty())
+   {
+      mMainContext.Dispose();
+   }
+}
+
+bool JSInterpreter::start()
+{
+   v8::V8::SetFatalErrorHandler(handleFatalError);
+   v8::HandleScope hdlsc;
+   createGlobals();
+   mMainContext  = v8::Context::New(NULL, mGlobalTemplate);
+   v8::Context::Scope context_scope(mMainContext);
+   v8::Handle<v8::Object>::Cast(mMainContext->Global()->GetPrototype())->SetInternalField(0, v8::External::New(this));
    return true;
 }
 
-bool JSWizardExecutor::hasAbort()
+std::string JSInterpreter::getPrompt() const
 {
-   return (mpPlugIn == NULL) ? true : mpPlugIn->hasAbort();
+   return "> ";
 }
 
-bool JSWizardExecutor::getInputSpecification(PlugInArgList*& pArgList)
+bool JSInterpreter::executeCommand(const std::string& command)
 {
-   VERIFY((pArgList = Service<PlugInManagerServices>()->getPlugInArgList()) != NULL);
-   VERIFY(pArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription()));
-   VERIFY(pArgList->addArg<Filename>("Filename", ".jswiz file to be executed."));
-   return true;
+   v8::HandleScope hdlsc;
+   v8::Context::Scope context_scope(mMainContext);
+
+   v8::Handle<v8::String> scriptSource = v8::String::New(command.c_str());
+   v8::Handle<v8::Script> script = v8::Script::Compile(scriptSource);
+   if (script.IsEmpty())
+   {
+      return false;
+   }
+   bool rval = true;
+   v8::TryCatch trycatch;
+   v8::Handle<v8::Value> result = script->Run();
+   if (result.IsEmpty())
+   {
+      v8::Handle<v8::Value> exception = trycatch.Exception();
+      v8::String::AsciiValue exc_str(exception);
+      sendError(*exc_str, false);
+      rval = false;
+      mLastResult = false;
+   }
+   else
+   {
+      mLastResult = result->BooleanValue();
+   }
+   return rval;
 }
 
+bool JSInterpreter::executeScopedCommand(const std::string& command, const Slot& output, const Slot& error, Progress* pProgress)
+{
+   attach(SIGNAL_NAME(JSInterpreter, ScopedOutputText), output);
+   attach(SIGNAL_NAME(JSInterpreter, ScopedErrorText), error);
+   mIsScoped = true;
+
+   v8::HandleScope hdlsc;
+   v8::Persistent<v8::Context> context = v8::Context::New(NULL, mGlobalTemplate);
+   v8::Context::Scope context_scope(context);
+   context->Global()->SetInternalField(0, v8::External::New(this));
+
+   v8::Handle<v8::String> scriptSource = v8::String::New(command.c_str());
+   v8::Handle<v8::Script> script = v8::Script::Compile(scriptSource);
+   if (script.IsEmpty())
+   {
+      context.Dispose();
+      mIsScoped = false;
+      detach(SIGNAL_NAME(JSInterpreter, ScopedOutputText), output);
+      detach(SIGNAL_NAME(JSInterpreter, ScopedErrorText), error);
+      return false;
+   }
+   v8::TryCatch trycatch;
+   v8::Handle<v8::Value> result = script->Run();
+   bool rval = true;
+   if (result.IsEmpty())
+   {
+      v8::Handle<v8::Value> exception = trycatch.Exception();
+      v8::String::AsciiValue exc_str(exception);
+      sendError(*exc_str, true);
+      rval = false;
+      mLastResult = false;
+   }
+   else
+   {
+      mLastResult = result->BooleanValue();
+   }
+   context.Dispose();
+   mIsScoped = false;
+   detach(SIGNAL_NAME(JSInterpreter, ScopedOutputText), output);
+   detach(SIGNAL_NAME(JSInterpreter, ScopedErrorText), error);
+   return rval;
+}
+
+bool JSInterpreter::isGlobalOutputShown() const
+{
+   return mGlobalOutputShown;
+}
+
+void JSInterpreter::showGlobalOutput(bool val)
+{
+   mGlobalOutputShown = true;
+}
+
+bool JSInterpreter::getLastResult() const
+{
+   return mLastResult;
+}
+
+void JSInterpreter::sendOutput(const std::string& text)
+{
+   return sendOutput(text, mIsScoped);
+}
+
+void JSInterpreter::sendError(const std::string& text)
+{
+   return sendError(text, mIsScoped);
+}
+
+const std::string& JSInterpreter::getObjectType() const
+{
+   static std::string sType("JSInterpreter");
+   return sType;
+}
+
+bool JSInterpreter::isKindOf(const std::string& className) const
+{
+   if (className == getObjectType())
+   {
+      return true;
+   }
+   return SubjectImp::isKindOf(className);
+}
+
+void JSInterpreter::createGlobals()
+{
+   mGlobalTemplate = v8::ObjectTemplate::New();
+   // We'll set a single internal field to hold the JSInterpreter this pointer
+   // This needs to be set in each new context like this:
+   // context->Global()->SetInternalField(0, v8::External::New(this));
+   mGlobalTemplate->SetInternalFieldCount(1);
+
+   // todo: replace this with .js files from node.js
+   v8::Local<v8::ObjectTemplate> console_template = v8::ObjectTemplate::New();
+   console_template->Set("log", v8::FunctionTemplate::New(send_out_callback));
+   console_template->Set("debug", v8::FunctionTemplate::New(send_out_callback));
+   console_template->Set("info", v8::FunctionTemplate::New(send_out_callback));
+   console_template->Set("warn", v8::FunctionTemplate::New(send_out_callback));
+   console_template->Set("error", v8::FunctionTemplate::New(send_error_callback));
+   mGlobalTemplate->Set("console", console_template);
+}
+
+void JSInterpreter::sendOutput(const std::string& text, bool scoped)
+{
+   if (text.empty())
+   {
+      return;
+   }
+   if (scoped)
+   {
+      notify(SIGNAL_NAME(JSInterpreter, ScopedOutputText), text);
+   }
+   if (!scoped || mGlobalOutputShown)
+   {
+      notify(SIGNAL_NAME(Interpreter, OutputText), text);
+   }
+}
+
+void JSInterpreter::sendError(const std::string& text, bool scoped)
+{
+   if (text.empty())
+   {
+      return;
+   }
+   if (scoped)
+   {
+      notify(SIGNAL_NAME(JSInterpreter, ScopedErrorText), text);
+   }
+   if (!scoped || mGlobalOutputShown)
+   {
+      notify(SIGNAL_NAME(Interpreter, ErrorText), text);
+   }
+}
+
+#if 0
 bool JSWizardExecutor::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
    Progress* pProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
@@ -158,9 +402,4 @@ bool JSWizardExecutor::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
    
    return true;
 }
-
-bool JSWizardExecutor::abort()
-{
-   mbAbort = true;
-   return (mpPlugIn == NULL) ? true : mpPlugIn->abort();
-}
+#endif
