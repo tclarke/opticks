@@ -634,11 +634,14 @@ bool WizardExecutor::executeScriptItem(WizardItem* pItem)
 
    bool scriptExecuteStatus = false;
 
-   /** TODO:Add code get an interpreter by mime type and match to the script type **/
-   Interpreter* pInterp = InterpreterUtilities::getInterpreter("Javascript");
+   Interpreter* pInterp = InterpreterUtilities::getInterpreterForMimeType(pItem->getScriptType());
    if (pInterp == NULL)
    {
-      std::string msg = "Unable to locate the Javascript interpreter.";
+      pInterp = InterpreterUtilities::getInterpreter(pItem->getName());
+   }
+   if (pInterp == NULL)
+   {
+      std::string msg = std::string("Unable to locate a ") + pItem->getScriptType() + " interpreter.";
       if (mpProgress != NULL) 
       {
          mpProgress->updateProgress(msg, 0, ERRORS);

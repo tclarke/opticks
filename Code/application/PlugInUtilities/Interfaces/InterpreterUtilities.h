@@ -167,6 +167,24 @@ namespace InterpreterUtilities
     *          would return \c true, otherwise \c NULL is returned.
     */
    Interpreter* getInterpreter(const std::string& interpreterName);
+
+   /**
+    *  Returns an Interpreter instance for the given MIME that can
+    *  be used to execute commands.
+    *
+    *  This will search all available interpreters for one which supports
+    *  the specified MIME type. If multiple interpreters advertise the
+    *  same MIME type, the interpreter with the MIME type listed first in
+    *  its available MIME types list will be used. If multiple interpreters
+    *  have the same MIME type "priority" one will be arbitrarily chosen.
+    *
+    *  @param mimeType
+    *         The MIME type of the interpreter to execute commands with.
+    *
+    *  @return An Interpreter instance if isInterpreterAvailable()
+    *          would return \c true, otherwise \c NULL is returned.
+    */
+   Interpreter* getInterpreterForMimeType(const std::string& mimeType);
 };
 
 #endif

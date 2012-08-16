@@ -407,6 +407,7 @@ public:
 
    virtual std::string getScriptText() const { return mScriptText; }
    virtual void setScriptText(const std::string& val) { mScriptText = val; }
+   virtual std::string getScriptType() const { return mScriptType; }
 
    // These methods are documented in the Serializable and TypeAwareObject class documentation
    bool toXml(XMLWriter* pXml) const;

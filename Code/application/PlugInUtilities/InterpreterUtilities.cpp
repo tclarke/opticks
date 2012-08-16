@@ -103,3 +103,31 @@ Interpreter* InterpreterUtilities::getInterpreter(const std::string& interpreter
    }
    return pMgr->getInterpreter();
 }
+
+Interpreter* InterpreterUtilities::getInterpreterForMimeType(const std::string& mimeType)
+{
+   if (mimeType.empty())
+   {
+      return NULL;
+   }
+   std::vector<PlugIn*> plugins = Service<PlugInManagerServices>()->getPlugInInstances();
+   unsigned int priority = std::numeric_limits<unsigned int>().max();
+   InterpreterManager* pRval = NULL;
+   for (std::vector<PlugIn*>::const_iterator it = plugins.begin(); it != plugins.end(); ++it)
+   {
+      InterpreterManager* pMgr = dynamic_cast<InterpreterManager*>(*it);
+      if (pMgr != NULL && pMgr->isStarted())
+      {
+         const std::vector<std::string>& mimeTypes = pMgr->getMimeTypes();
+         for (std::vector<std::string>::size_type idx = 0; idx < mimeTypes.size(); ++idx)
+         {
+            if (mimeTypes[idx] == mimeType && idx < priority)
+            {
+               pRval = pMgr;
+               break; // mimeTypes index loop
+            }
+         }
+      }
+   }
+   return (pRval == NULL) ? NULL : pRval->getInterpreter();
+}

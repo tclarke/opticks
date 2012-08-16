@@ -186,6 +186,8 @@ public:
    virtual std::string getScriptText() const = 0;
    virtual void setScriptText(const std::string& val) = 0;
 
+   virtual std::string getScriptType() const = 0;
+
 protected:
    /**
     * A plug-in cannot create this object; it can only retrieve an already existing
