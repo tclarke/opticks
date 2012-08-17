@@ -57,6 +57,8 @@ public:
    void sendOutput(const std::string& text);
    void sendError(const std::string& text);
 
+   bool setArguments(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
+
    virtual const std::string& getObjectType() const;
    virtual bool isKindOf(const std::string& className) const;
 
@@ -75,6 +77,8 @@ private:
    v8::Persistent<v8::Context> mMainContext;
    bool mIsScoped;
    bool mLastResult;
+   PlugInArgList* mpInArgList;
+   PlugInArgList* mpOutArgList;
 };
 
 #endif

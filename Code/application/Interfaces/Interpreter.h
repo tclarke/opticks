@@ -14,6 +14,7 @@
 
 #include <string>
 
+class PlugInArgList;
 class Progress;
 class Slot;
 
@@ -136,6 +137,25 @@ public:
     */
    virtual bool executeScopedCommand(const std::string& command, const Slot& output,
       const Slot& error, Progress* pProgress) = 0;
+
+   /**
+    *  Set active input and output argument lists.
+    *
+    *  This can be used to set a pair out plugin argument lists for use in command execution.
+    *  The argument lists are used when executing interpreter code from within a wizard and
+    *  serve the same roll and semantics as in Executable::execute(). At a minimum, an interpreter
+    *  utilizing these lists should make them available during a subsequent call to executeScopedCommand().
+    *  These are borrowed references and a second call will be made to this method with both
+    *  parameters \c NULL before the lists are deleted.
+    *
+    *  @param pInArgList
+    *         The input argument list. May be \c NULL
+    *  @param pOutArgList
+    *         The output argument list. May be \c NULL
+    *  @return true if successfully set, false otherwise. The interpreter should return
+    *          trur if these arguments are not supported or otherwise ignored.
+    */
+   virtual bool setArguments(PlugInArgList* pInArgList, PlugInArgList* pOutArgList) = 0;
 
    /**
     *  Returns the last value provided to showGlobalOutput(). The default

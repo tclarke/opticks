@@ -659,6 +659,7 @@ bool WizardExecutor::executeScriptItem(WizardItem* pItem)
       populatePlugInArgList(pOutArgList, pItem, false, true);
 
       /** TODO:Add code to set plugin args **/
+      pInterp->setArguments(pInArgList, pOutArgList);
       scriptExecuteStatus = pInterp->executeScopedCommand(pItem->getScriptText(),
             Slot(this, &WizardExecutor::displayScriptOutput),
             Slot(this, &WizardExecutor::displayScriptOutput),

@@ -26,6 +26,7 @@ public:
       const Slot& error, Progress* pProgress);
    virtual bool isGlobalOutputShown() const;
    virtual void showGlobalOutput(bool newValue);
+   virtual bool setArguments(PlugInArgList* pInArgList, PlugInArgList* pOutArgList) { return true; }
 
    virtual const std::string& getObjectType() const;
    virtual bool isKindOf(const std::string& className) const;
