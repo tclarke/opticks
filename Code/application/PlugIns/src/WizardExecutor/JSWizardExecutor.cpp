@@ -19,12 +19,14 @@
 #include "PlugInDescriptor.h"
 #include "PlugInManagerServices.h"
 #include "PlugInRegistration.h"
+#include "PlugInResource.h"
 #include "Progress.h"
 #include "StringUtilities.h"
 #include "Subject.h"
 #include "UInt64.h"
 
 #include <v8.h>
+#include <QtCore/QDir>
 #include <QtCore/QFile>
 
 REGISTER_PLUGIN_BASIC(OpticksWizardExecutor, JSWizardExecutor);
@@ -43,13 +45,13 @@ void handleFatalError(const char* pLocation, const char* pMessage)
 template<typename T>
 inline T* unwrap(const v8::AccessorInfo& info, unsigned int f=0)
 {
-   return static_cast<T*>(v8::Local<v8::External>::Cast(info.Holder()->GetInternalField(f))->Value());
+   return static_cast<T*>(info.Holder()->GetPointerFromInternalField(f));
 }
 
 inline JSInterpreter* unwrap(const v8::Arguments& args, unsigned int f=0)
 {
-   return static_cast<JSInterpreter*>(v8::Local<v8::External>::Cast(v8::Handle<v8::Object>::Cast( \
-      args.Holder()->CreationContext()->Global()->GetPrototype())->GetInternalField(0))->Value());
+   return static_cast<JSInterpreter*>(v8::Handle<v8::Object>::Cast( \
+      args.Holder()->CreationContext()->Global()->GetPrototype())->GetPointerFromInternalField(0));
 }
 
 v8::Handle<v8::Value> send_out_callback(const v8::Arguments& args)
@@ -92,6 +94,69 @@ v8::Handle<v8::Value> send_error_callback(const v8::Arguments& args)
    }
    pInterp->sendError(msg);
    return v8::Null();
+}
+
+v8::Handle<v8::Value> require(const v8::Arguments& args)
+{
+   if (args.Length() != 1)
+   {
+      return v8::ThrowException(v8::Exception::Error(v8::String::New("Incorrect number of arguments. require('module_name')")));
+   }
+   v8::HandleScope sc;
+
+   v8::Local<v8::Value> cur = args.Holder()->Get(args[0]);
+   if (!cur->IsUndefined())
+   {
+      return sc.Close(cur);
+   }
+   QDir d(Service<ConfigurationSettings>()->getSettingSupportFilesPath()->getFullPathAndName().c_str());
+   d.cd("v8");
+   v8::String::AsciiValue ascii(args[0]);
+   QString fname = QString("%1.js").arg(*ascii);
+   // for security, we explicitly check the file entry list
+   // so someone can't do require('/bad/path/file')
+   if (!d.entryList(QDir::Files).contains(fname))
+   {
+      return v8::ThrowException(v8::Exception::Error(v8::String::New("Module not found. Modules must be in SupportFiles/v8.")));
+   }
+
+   QFile module(d.absoluteFilePath(fname));
+   if (!module.open(QFile::ReadOnly | QFile::Text))
+   {
+      return v8::ThrowException(v8::Exception::Error(v8::String::New("Unable to load module.")));
+   }
+   QByteArray bytes = module.readAll();
+
+   v8::Handle<v8::Object> exports = v8::Object::New();
+   exports->Set(v8::String::New("_name"), args[0]);
+   exports->Set(v8::String::New("_file"), v8::String::New(fname.toAscii().constData()));
+   v8::Local<v8::String> exports_name = v8::String::New("exports");
+   v8::Local<v8::Value> tmp_exports = args.Holder()->Get(exports_name);
+   args.Holder()->Set(exports_name, exports);
+
+   v8::Handle<v8::String> scriptSource = v8::String::New(bytes.constData());
+   v8::Handle<v8::Script> script = v8::Script::Compile(scriptSource, v8::String::New(fname.toAscii().constData()));
+   if (script.IsEmpty())
+   {
+      return v8::ThrowException(v8::Exception::Error(v8::String::New("Unable to load module.")));
+   }
+   v8::TryCatch trycatch;
+
+   v8::Handle<v8::Value> result = script->Run();
+   if (tmp_exports->IsUndefined())
+   {
+      args.Holder()->Delete(exports_name);
+   }
+   else
+   {
+      args.Holder()->Set(exports_name, tmp_exports);
+   }
+   if (result.IsEmpty())
+   {
+      v8::Handle<v8::Value> exception = trycatch.Exception();
+      return v8::ThrowException(exception);
+   }
+   return sc.Close(exports);
 }
 
 #define CVT(typ_, jsc_) if (arg.getType() == #typ_) return jsc_(*(arg.getPlugInArgValue<typ_>()));
@@ -359,6 +424,10 @@ bool plugInArgFromJs(PlugInArg& arg, PlugInArgList& argList, const std::string& 
 }
 v8::Handle<v8::Value> plugInArgListGetter(v8::Local<v8::String> name, const v8::AccessorInfo& info)
 {
+   if (name->Equals(v8::String::NewSymbol("inspect")))
+   {
+      return v8::Undefined();
+   }
    PlugInArgList* pPial = unwrap<PlugInArgList>(info);
    if (pPial == NULL)
    {
@@ -414,17 +483,98 @@ v8::Handle<v8::Array> plugInArgListEnumerator(const v8::AccessorInfo& info)
    return sc.Close(a);
 }
 
-v8::Handle<v8::Value> create_plugin(v8::Local<v8::String> name, const v8::AccessorInfo& info)
+void cleanup_plugin(v8::Persistent<v8::Value> obj, void* pInterpPtr)
 {
+   JSInterpreter* pInterp = static_cast<JSInterpreter*>(pInterpPtr);
+   VERIFYNRV(pInterp);
+   std::list<v8::Persistent<v8::Object> >::iterator it = std::find(pInterp->mTrackedObjects.begin(), pInterp->mTrackedObjects.end(), obj);
+   if (it != pInterp->mTrackedObjects.end())
+   {
+      pInterp->mTrackedObjects.erase(it);
+   }
+   delete static_cast<ExecutableResource*>(v8::Handle<v8::Object>::Cast(obj)->GetPointerFromInternalField(0));
+}
+
+v8::Handle<v8::Value> free_plugin(const v8::Arguments& args)
+{
+   ExecutableResource* pPlugIn = static_cast<ExecutableResource*>(args.This()->GetPointerFromInternalField(0));
+   if (pPlugIn == NULL)
+   {
+      return v8::ThrowException(v8::Exception::Error(v8::String::New("This plug-in has been forcibly freed and is no longer valid.")));
+   }
+   delete pPlugIn;
+   args.This()->SetPointerInInternalField(0, NULL);
+   v8::Local<v8::Object>::Cast(args.This()->Get(v8::String::New("input")))->SetPointerInInternalField(0, NULL);
+   v8::Local<v8::Object>::Cast(args.This()->Get(v8::String::New("output")))->SetPointerInInternalField(0, NULL);
+   args.This()->Delete(v8::String::New("input"));
+   args.This()->Delete(v8::String::New("output"));
+   return v8::Undefined();
+}
+
+v8::Handle<v8::Value> exec_plugin(const v8::Arguments& args)
+{
+   ExecutableResource* pPlugIn = static_cast<ExecutableResource*>(args.This()->GetPointerFromInternalField(0));
+   if (pPlugIn == NULL)
+   {
+      return v8::ThrowException(v8::Exception::Error(v8::String::New("This plug-in has been forcibly freed and is no longer valid.")));
+   }
+   return v8::Boolean::New((*pPlugIn)->execute());
+}
+
+v8::Handle<v8::Value> create_plugin(const v8::Arguments& args)
+{
+   JSInterpreter* pInterp = unwrap(args);
+   if (pInterp == NULL)
+   {
+      return v8::ThrowException(v8::String::New("Error accessing Javascript interpreter object."));
+   }
    v8::HandleScope sc;
-   v8::String::AsciiValue ascii(name);
-   PlugIn* pPlugIn = Service<PlugInManagerServices>()->createPlugIn(*ascii);
+   if (args.Length() < 1 || args.Length() > 2)
+   {
+      return v8::ThrowException(v8::Exception::Error(v8::String::New("Must specify the name of the plug-in to create and an optional bool indicating batch mode.")));
+   }
+   v8::String::AsciiValue plugin_name(args[0]);
+   bool batch = true;
+   if (args.Length() > 1)
+   {
+      batch = args[1]->BooleanValue();
+   }
+   Progress* pProgress = static_cast<Progress*>(v8::Handle<v8::Object>::Cast( \
+      args.Holder()->CreationContext()->Global()->GetPrototype())->GetPointerFromInternalField(1));
+
+   ExecutableResource* pPlugIn = new ExecutableResource(*plugin_name, std::string(), pProgress, batch);
+   if ((*pPlugIn)->getPlugIn() == NULL)
+   {
+      delete pPlugIn;
+      return v8::ThrowException(v8::Exception::Error(v8::String::New("Unable to create requested plugin.")));
+   }
+   (*pPlugIn)->setAutoArg(false);
+
    v8::Local<v8::ObjectTemplate> plugin_template = v8::ObjectTemplate::New();
    plugin_template->SetInternalFieldCount(1);
-   plugin_template->Set("name", name);
-   v8::Local<v8::Object> plugin = plugin_template->NewInstance();
-   plugin->SetPointerInInternalField(0, pPlugIn);
-   return sc.Close(plugin);
+   plugin_template->SetCallAsFunctionHandler(create_plugin);
+   v8::Local<v8::ObjectTemplate> pial_template = v8::ObjectTemplate::New();
+   pial_template->SetInternalFieldCount(1);
+   pial_template->SetNamedPropertyHandler(plugInArgListGetter, plugInArgListSetter, NULL, NULL, plugInArgListEnumerator);
+   plugin_template->Set("execute", v8::FunctionTemplate::New(exec_plugin));
+   plugin_template->Set("input", pial_template);
+   plugin_template->Set("output", pial_template);
+   plugin_template->Set("free", v8::FunctionTemplate::New(free_plugin));
+
+   v8::Local<v8::Object> obj = plugin_template->NewInstance();
+   obj->SetPointerInInternalField(0, pPlugIn);
+
+   obj->Set(v8::String::New("name"), args[0]);
+
+   v8::Local<v8::Object>::Cast(obj->Get(v8::String::New("input")))->SetPointerInInternalField(
+         0, &(*pPlugIn)->getInArgList());
+   v8::Local<v8::Object>::Cast(obj->Get(v8::String::New("output")))->SetPointerInInternalField(
+         0, &(*pPlugIn)->getOutArgList());
+
+   v8::Persistent<v8::Object> pers(obj);
+   pers.MakeWeak(pInterp, cleanup_plugin);
+   pInterp->mTrackedObjects.push_back(pers);
+   return sc.Close(obj);
 }
 
 v8::Handle<v8::Array> plugins_enumerator(const v8::AccessorInfo& info)
@@ -536,6 +686,11 @@ JSInterpreter::~JSInterpreter()
 {
    if (!mMainContext.IsEmpty())
    {
+      while (!mTrackedObjects.empty())
+      {
+         delete static_cast<ExecutableResource*>(mTrackedObjects.front()->GetPointerFromInternalField(0));
+         mTrackedObjects.pop_front();
+      }
       mMainContext.Dispose();
    }
 }
@@ -547,7 +702,39 @@ bool JSInterpreter::start()
    createGlobals();
    mMainContext  = v8::Context::New(NULL, mGlobalTemplate);
    v8::Context::Scope context_scope(mMainContext);
-   v8::Handle<v8::Object>::Cast(mMainContext->Global()->GetPrototype())->SetInternalField(0, v8::External::New(this));
+   v8::Handle<v8::Object>::Cast(mMainContext->Global()->GetPrototype())->SetPointerInInternalField(0, this);
+
+   /* load system level code */
+   QString fname((Service<ConfigurationSettings>()->getSettingSupportFilesPath()->getFullPathAndName() + "/v8/init.js").c_str());
+   QFile init(fname);
+   if (!init.open(QFile::ReadOnly | QFile::Text))
+   {
+      return false;
+   }
+   QByteArray bytes = init.readAll();
+   v8::Handle<v8::String> scriptSource = v8::String::New(bytes.constData());
+   v8::Handle<v8::Script> script = v8::Script::Compile(scriptSource, v8::String::New(fname.toAscii().constData()));
+   if (script.IsEmpty())
+   {
+      return false;
+   }
+   v8::TryCatch trycatch;
+   v8::Handle<v8::Value> result = script->Run();
+   if (result.IsEmpty())
+   {
+      v8::Handle<v8::Value> exception = trycatch.Exception();
+      v8::String::AsciiValue exc_str(exception);
+      std::string errMsg = *exc_str;
+      v8::Handle<v8::Message> msg = trycatch.Message();
+      if (!msg.IsEmpty())
+      {
+         errMsg = *v8::String::AsciiValue(msg->GetScriptResourceName());
+         errMsg += ":" + StringUtilities::toDisplayString(msg->GetLineNumber()) + ": ";
+         errMsg += *exc_str;
+      }
+      sendError(errMsg, false);
+      return false;
+   }
    return true;
 }
 
@@ -600,6 +787,7 @@ bool JSInterpreter::executeScopedCommand(const std::string& command, const Slot&
    //v8::Persistent<v8::Context> context = v8::Context::New(NULL, mGlobalTemplate);
    //v8::Context::Scope context_scope(context);
    v8::Context::Scope context_scope(mMainContext);
+   v8::Handle<v8::Object>::Cast(mMainContext->Global()->GetPrototype())->SetPointerInInternalField(1, pProgress);
    //context->Global()->SetInternalField(0, v8::External::New(this));
 
    // set in/out arguments
@@ -609,13 +797,13 @@ bool JSInterpreter::executeScopedCommand(const std::string& command, const Slot&
    if (mpInArgList != NULL)
    {
       v8::Local<v8::Object> pial_in = pial_template->NewInstance();
-      pial_in->SetInternalField(0, v8::External::New(mpInArgList));
+      pial_in->SetPointerInInternalField(0, mpInArgList);
       mMainContext->Global()->Set(v8::String::New("input"), pial_in);
    }
    if (mpOutArgList != NULL)
    {
       v8::Local<v8::Object> pial_out = pial_template->NewInstance();
-      pial_out->SetInternalField(0, v8::External::New(mpOutArgList));
+      pial_out->SetPointerInInternalField(0, mpOutArgList);
       mMainContext->Global()->Set(v8::String::New("output"), pial_out);
    }
 
@@ -624,6 +812,7 @@ bool JSInterpreter::executeScopedCommand(const std::string& command, const Slot&
    if (script.IsEmpty())
    {
       //context.Dispose();
+      v8::Handle<v8::Object>::Cast(mMainContext->Global()->GetPrototype())->SetPointerInInternalField(1, NULL);
       mIsScoped = false;
       detach(SIGNAL_NAME(JSInterpreter, ScopedOutputText), output);
       detach(SIGNAL_NAME(JSInterpreter, ScopedErrorText), error);
@@ -645,6 +834,7 @@ bool JSInterpreter::executeScopedCommand(const std::string& command, const Slot&
       mLastResult = result->BooleanValue();
    }
    //context.Dispose();
+   v8::Handle<v8::Object>::Cast(mMainContext->Global()->GetPrototype())->SetPointerInInternalField(1, NULL);
    mIsScoped = false;
    detach(SIGNAL_NAME(JSInterpreter, ScopedOutputText), output);
    detach(SIGNAL_NAME(JSInterpreter, ScopedErrorText), error);
@@ -701,24 +891,19 @@ bool JSInterpreter::isKindOf(const std::string& className) const
 void JSInterpreter::createGlobals()
 {
    mGlobalTemplate = v8::ObjectTemplate::New();
-   // We'll set a single internal field to hold the JSInterpreter this pointer
-   // This needs to be set in each new context like this:
-   // context->Global()->SetInternalField(0, v8::External::New(this));
-   mGlobalTemplate->SetInternalFieldCount(1);
+   // We'll set internal field to hold various Opticks pointers
+   // Internal field 0 = the JSInterpreter this pointer
+   // Internal field 1 = the current Progress pointer or NULL
+   mGlobalTemplate->SetInternalFieldCount(2);
 
-   // console
-   // todo: replace this with .js files from node.js
-   v8::Local<v8::ObjectTemplate> console_template = v8::ObjectTemplate::New();
-   console_template->Set("log", v8::FunctionTemplate::New(send_out_callback));
-   console_template->Set("debug", v8::FunctionTemplate::New(send_out_callback));
-   console_template->Set("info", v8::FunctionTemplate::New(send_out_callback));
-   console_template->Set("warn", v8::FunctionTemplate::New(send_out_callback));
-   console_template->Set("error", v8::FunctionTemplate::New(send_error_callback));
-   mGlobalTemplate->Set("console", console_template);
+   v8::Local<v8::ObjectTemplate> system_template = v8::ObjectTemplate::New();
+   system_template->Set("write_stdout", v8::FunctionTemplate::New(send_out_callback));
+   system_template->Set("write_stderr", v8::FunctionTemplate::New(send_error_callback));
+   mGlobalTemplate->Set(v8::String::NewSymbol("system"), system_template, v8::PropertyAttribute(v8::ReadOnly | v8::DontDelete));
 
-   v8::Local<v8::ObjectTemplate> plugin_template = v8::ObjectTemplate::New();
-   plugin_template->SetNamedPropertyHandler(create_plugin, NULL, NULL, NULL, plugins_enumerator);
-   mGlobalTemplate->Set("plugin", plugin_template);
+   mGlobalTemplate->Set(v8::String::NewSymbol("require"), v8::FunctionTemplate::New(require), v8::PropertyAttribute(v8::ReadOnly | v8::DontEnum));
+
+   mGlobalTemplate->Set(v8::String::NewSymbol("PlugIn"), v8::FunctionTemplate::New(create_plugin), v8::ReadOnly);
 }
 
 void JSInterpreter::sendOutput(const std::string& text, bool scoped)

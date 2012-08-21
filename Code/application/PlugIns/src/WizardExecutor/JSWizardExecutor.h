@@ -13,6 +13,7 @@
 #include "Interpreter.h"
 #include "InterpreterManagerShell.h"
 #include "SubjectImp.h"
+#include <list>
 #include <v8.h>
 
 class JSInterpreter;
@@ -63,6 +64,8 @@ public:
    virtual bool isKindOf(const std::string& className) const;
 
    SUBJECTADAPTER_METHODS(SubjectImp)
+
+   std::list<v8::Persistent<v8::Object> > mTrackedObjects;
 
 private:
    void createGlobals();
