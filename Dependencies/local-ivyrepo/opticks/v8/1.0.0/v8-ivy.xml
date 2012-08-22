@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivy-module version="2.0">
+   <info organisation="opticks" module="v8" revision="1.0.0" status="release" publication="20120822104110">
+      <description>libtiff 3.9.4</description>
+   </info>          
+   <configurations>
+      <conf name="common" visibility="private"/>
+      <conf name="win32-common" extends="common" visibility="private"/>
+      <conf name="win64-common" extends="common" visibility="private"/>
+      <conf name="win32" extends="win32-common"/>
+      <conf name="win32-debug" extends="win32-common"/>
+      <conf name="win32-debug-pdbs" extends="win32-debug"/>
+      <conf name="win64" extends="win64-common"/>
+      <conf name="win64-debug" extends="win64-common"/>
+      <conf name="win64-debug-pdbs" extends="win64-debug"/>
+      <conf name="solaris-sparc64" extends="common"/>
+      <conf name="linux64" extends="common"/>
+      <conf name="source"/>
+   </configurations>
+   <publications>
+      <artifact name="v8-common" type="tar.bz2" conf="common"/>
+      <artifact name="v8-win32-release" type="tar.bz2" conf="win32-common"/>
+      <artifact name="v8-win32-debug" type="tar.bz2" conf="win32-debug"/>
+      <artifact name="v8-source" type="tar.bz2" conf="source"/>
+   </publications>
+</ivy-module>

@@ -1,6 +1,0 @@
-/.sentinal *.pyc bin include lib src
-/.sentinal
-/bin
-/include
-/lib
-/src

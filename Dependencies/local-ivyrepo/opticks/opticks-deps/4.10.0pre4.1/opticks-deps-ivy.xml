@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivy-module version="2.0">
+   <info organisation="opticks" module="opticks-deps" revision="4.10.0pre4.1" status="release" publication="20120822104155">
+      <description>All third-party dependencies for Opticks</description>
+   </info>
+   <configurations>
+      <conf name="win32"/>
+      <conf name="win32-debug"/>
+      <conf name="win32-debug-pdbs" extends="win32-debug"/>
+      <conf name="win64"/>
+      <conf name="win64-debug"/>
+      <conf name="win64-debug-pdbs" extends="win64-debug"/>
+      <conf name="solaris-sparc64"/>
+      <conf name="linux64"/>
+      <conf name="source"/>
+   </configurations>
+   <publications/>
+   <dependencies defaultconfmapping="*->@">
+      <dependency org="opticks" name="boost" rev="1.0.1"/>
+      <dependency org="opticks" name="cfitsio" rev="1.0.0"/>
+      <dependency org="opticks" name="cg" rev="1.0.0"/>
+      <dependency org="opticks" name="curl" rev="1.0.1"/>
+      <dependency org="opticks" name="doxygen" rev="1.0.0"/>
+      <dependency org="opticks" name="ehs" rev="1.0.2"/>
+      <dependency org="opticks" name="expat" rev="1.0.0"/>
+      <dependency org="opticks" name="ffmpeg" rev="1.0.3"/>
+      <dependency org="opticks" name="gdal" rev="1.0.1"/>
+      <dependency org="opticks" name="glew" rev="1.0.0"/>
+      <dependency org="opticks" name="graphviz" rev="1.0.1"/>
+      <dependency org="opticks" name="hdf4" rev="1.0.1"/>
+      <dependency org="opticks" name="hdf5" rev="1.0.1"/>
+      <dependency org="opticks" name="jpeg" rev="1.0.0"/>
+      <dependency org="opticks" name="libgeotiff" rev="1.0.1"/>
+      <dependency org="opticks" name="libproj" rev="1.0.1"/>
+      <dependency org="opticks" name="libtiff" rev="1.0.1"/>
+      <dependency org="opticks" name="minizip" rev="1.0.1"/>
+      <dependency org="opticks" name="opencollada" rev="1.0.3"/>
+      <dependency org="opticks" name="opencv" rev="1.0.1"/>
+      <dependency org="opticks" name="openjpeg" rev="1.0.2"/>
+      <dependency org="opticks" name="ossim" rev="1.0.4"/>
+      <dependency org="opticks" name="pcre" rev="1.0.2"/>
+      <dependency org="opticks" name="pme" rev="1.0.1"/>
+      <dependency org="opticks" name="pthreads" rev="1.0.0"/>
+      <dependency org="opticks" name="qt" rev="1.0.2"/>
+      <dependency org="opticks" name="qwt" rev="1.0.2"/>
+      <dependency org="opticks" name="raptor" rev="1.0.1"/>
+      <dependency org="opticks" name="shapelib" rev="1.0.1"/>
+      <dependency org="opticks" name="szip" rev="1.0.1"/>
+      <dependency org="opticks" name="tbb" rev="1.0.1"/>
+      <dependency org="opticks" name="v8" rev="1.0.0"/>
+      <dependency org="opticks" name="xerces" rev="1.0.1"/>
+      <dependency org="opticks" name="xqilla" rev="1.0.2"/>
+      <dependency org="opticks" name="yaml-cpp" rev="1.0.0"/>
+      <dependency org="opticks" name="zlib" rev="1.0.0"/>
+   </dependencies>
+</ivy-module>
