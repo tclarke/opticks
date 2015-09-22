@@ -1090,7 +1090,7 @@ bool SessionManagerImp::open(const string &filename, Progress *pProgress)
          pAppWindow->registerPlugIns();
          pAppWindow->updateWizardCommands();
          IndexFileItem ifi(ModelServicesImp::instance());
-         restoreSessionItem(ifi);
+         restoreSessionItem(ifi, false);
          createSessionItems(items, pProgress);
          populateItemMap(items);
          restoreSessionItems(items, pProgress);
@@ -1211,6 +1211,14 @@ vector<SessionManagerImp::IndexFileItem> SessionManagerImp::readIndexFile(const 
 
 void SessionManagerImp::restoreSessionItems(vector<IndexFileItem> &items, Progress *pProgress)
 {
+   int totalNumItems = items.size();
+   restoreSessionItemsRecursively(items, pProgress, totalNumItems);
+}
+
+void SessionManagerImp::restoreSessionItemsRecursively(vector<IndexFileItem> &items, Progress *pProgress, int totalNumItems)
+{
+   vector<IndexFileItem> skippedItems;
+
    int count = items.size();
    int i = 0;
    vector<IndexFileItem>::iterator pItem;
@@ -1218,24 +1226,50 @@ void SessionManagerImp::restoreSessionItems(vector<IndexFileItem> &items, Progre
    {
       if (pProgress)
       {
-         pProgress->updateProgress("Restoring session items...", 100*i/count, NORMAL);
+         int percentageComplete = 100 * (i + ( totalNumItems - count)) / totalNumItems;
+         pProgress->updateProgress("Restoring session items...", percentageComplete, NORMAL);
       }
+
       if (pItem->mpItem)
       {
-         if (!restoreSessionItem(*pItem))
+         if (!restoreSessionItem(*pItem, true))
          {
             if (pProgress != NULL)
             {
-               string message = "Error restoring:\n  " + pItem->mType + "\n";
-               message += "Named:\n  " +pItem->mName;
-               pProgress->updateProgress(message, 100 * i / count, WARNING);
+               skippedItems.push_back(*pItem);
             }
          }
       }
    }
+
+   if (skippedItems.empty()){
+      //All plugins loaded. Return.
+      return;
+   } else if (skippedItems.size() == items.size()){
+      //Could not load any more plugins during this iteration. Generate the error message.
+      string message = "";
+      for (int j = 0; j < skippedItems.size(); j++)
+      {
+         message += "Error restoring:\n  " + skippedItems[j].mType + "\n";
+         message += "Named:\n  " + skippedItems[j].mName + "\n";
+      }
+      //Destroy the failed session items.
+      for (int j = skippedItems.size() - 1; j >= 0; j--)
+      {
+         destroyFailedSessionItem(skippedItems[j].mType, skippedItems[j].mpItem); 
+         skippedItems[j].mpItem = NULL;
+      }
+      //Show the error message.
+      int percentageComplete = 100 * (totalNumItems - 1) / totalNumItems;
+      pProgress->updateProgress(message, percentageComplete, WARNING);
+      return;
+   } else {
+      //One or more plugins (but not all) were loaded during this iteration. Perform the recursion again.
+      restoreSessionItemsRecursively(skippedItems, pProgress, totalNumItems);
+   }
 }
 
-bool SessionManagerImp::restoreSessionItem(IndexFileItem &item)
+bool SessionManagerImp::restoreSessionItem(IndexFileItem &item, bool restoreSessionItemsRecursively)
 {
    SessionItem* pSessionItem = item.mpItem;
    VERIFY_MSG(pSessionItem!=NULL, 
@@ -1244,9 +1278,13 @@ bool SessionManagerImp::restoreSessionItem(IndexFileItem &item)
    SessionItemDeserializerImp deserializer(mRestoreSessionPath + "/" + filename(item), item.mBlockSizes);
    if (pSessionItem->deserialize(deserializer) == false)
    {
-      destroyFailedSessionItem(item.mType, pSessionItem);
-      item.mpItem = NULL;
-      return false;
+      if (restoreSessionItemsRecursively == false){
+         destroyFailedSessionItem(item.mType, pSessionItem);
+         item.mpItem = NULL;
+         return false;
+      } else {
+         return false;
+      }
    }
    return true;
 }

@@ -268,6 +268,22 @@ void SubjectImpPrivate::removeEmptySlots(const string& recursion, list<SafeSlot>
    }
 }
 
+void SubjectImpPrivate::clearSlots(const std::string& signal)
+{
+   if (count(mRecursions.begin(), mRecursions.end(), signal) == 0)
+   {
+      MapType::iterator pSlotVec = mSlots.find(signal);
+      if (pSlotVec != mSlots.end())
+      {
+         list<SafeSlot>& slotVec = pSlotVec->second;
+         for (list<SafeSlot>::iterator pSlot = slotVec.begin(); pSlot != slotVec.end(); )
+         {
+            pSlot = slotVec.erase(pSlot);
+         }
+      }
+   }
+}
+
 void SubjectImpPrivate::enableSignals(bool enabled)
 {
    mSignalsEnabled = enabled;

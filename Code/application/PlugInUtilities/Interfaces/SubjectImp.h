@@ -86,6 +86,8 @@ protected:
     */
    void enableSignals(bool enabled);
 
+   void clearSlots(const std::string& signal);
+
    SubjectImpPrivate* mpImpPrivate;
 };
 

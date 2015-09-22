@@ -35,6 +35,7 @@
 #include "SignatureFileDescriptorAdapter.h"
 #include "SignatureLibraryAdapter.h"
 #include "SignatureSetAdapter.h"
+#include "SubjectImpPrivate.h"
 #include "switchOnEncoding.h"
 #include "TiePointListAdapter.h"
 #include "UtilityServicesImp.h"
@@ -798,6 +799,9 @@ void ModelServicesImp::clear()
    }
 
    mElements.clear();
+
+   string name = SIGNAL_NAME(ModelServices, ElementCreated);
+   clearSlots(name);
 }
 
 char* ModelServicesImp::getMemoryBlock(size_t size)

@@ -130,3 +130,9 @@ bool SubjectImp::signalsEnabled() const
 
    return mpImpPrivate->signalsEnabled();
 }
+
+
+void SubjectImp::clearSlots(const std::string& signal)
+{
+   mpImpPrivate->clearSlots(signal);
+}

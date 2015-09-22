@@ -35,6 +35,7 @@ public:
       const boost::any& data = boost::any());
    const std::list<SafeSlot>& getSlots(const std::string& signal);
    void removeEmptySlots(const std::string& recursion, std::list<SafeSlot>& slotVec);
+   void clearSlots(const std::string& signal);
    void enableSignals(bool enabled);
    bool signalsEnabled() const;
 

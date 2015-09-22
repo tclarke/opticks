@@ -154,8 +154,9 @@ private:
    void getSessionItemsWindow(std::vector<IndexFileItem> &items) const;
    void populateItemMap(const std::vector<IndexFileItem> &items);
    std::vector<IndexFileItem> readIndexFile(const std::string &filename);
-   bool restoreSessionItem(IndexFileItem &item);
+   bool restoreSessionItem(IndexFileItem &item, bool restoreSessionItemsRecursively);
    void restoreSessionItems(std::vector<IndexFileItem> &items, Progress *pProgress);
+   void restoreSessionItemsRecursively(std::vector<IndexFileItem> &items, Progress *pProgress, int totalNumItems);
    bool writeIndexFile(const std::string &filename, const std::vector<IndexFileItem> &items);
 
    static SessionManagerImp* spInstance;
